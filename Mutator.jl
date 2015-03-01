@@ -2,6 +2,7 @@
 # TODO: description...
 # TODO: public methods
 # TODO: usage...
+# TODO: amount of add,delete and change mutations depend on script size
 #
 module Mutator
   export init
@@ -27,7 +28,7 @@ module Mutator
       return false
     end
 
-
+    
 
     true
   end
@@ -77,6 +78,11 @@ module Mutator
   end
   function _delLibCall()
   end
+  #
+  # Generates new variable
+  #
+  function _genVar()
+  end
 
   #
   # {Expr} Reference to organism's script
@@ -87,11 +93,14 @@ module Mutator
   #
   _inited = false
   #
+  # {ASCIIString} Name of current variable. Name of variable will be 
+  #               changed every time when new variable will be produced.
+  #
+  _curVar = "v0"
+  #
   # TODO:
   #
-  _mutations = [
-    _addVar,    _addFor,    _addIf,    _addFunc,    _addFuncCall,    _addLibCall,
-    _changeVar, _changeFor, _changeIf, _changeFunc, _changeFuncCall, _changeLibCall,
-    _delVar,    _delFor,    _delIf,    _delFunc,    _delFuncCall,    _delLibCall,
-    ]
+  _add    = [_addVar,    _addFor,    _addIf,    _addFunc,    _addFuncCall,    _addLibCall   ]
+  _change = [_changeVar, _changeFor, _changeIf, _changeFunc, _changeFuncCall, _changeLibCall]
+  _del    = [_delVar,    _delFor,    _delIf,    _delFunc,    _delFuncCall,    _delLibCall   ]
 end
