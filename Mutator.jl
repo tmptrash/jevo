@@ -89,9 +89,7 @@ module Mutator
   #
   # TODO:
   #
-  _mutations = [
-    _addVar,    _addFor,    _addIf,    _addFunc,    _addFuncCall,    _addLibCall,
-    _changeVar, _changeFor, _changeIf, _changeFunc, _changeFuncCall, _changeLibCall,
-    _delVar,    _delFor,    _delIf,    _delFunc,    _delFuncCall,    _delLibCall,
-    ]
+  _add    = [_addVar,    _addFor,    _addIf,    _addFunc,    _addFuncCall,    _addLibCall   ]
+  _change = [_changeVar, _changeFor, _changeIf, _changeFunc, _changeFuncCall, _changeLibCall]
+  _del    = [_delVar,    _delFor,    _delIf,    _delFunc,    _delFuncCall,    _delLibCall   ]
 end
