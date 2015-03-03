@@ -34,9 +34,10 @@ module Mutator
   end
 
   #
-  #
+  # Adds variable into the random block within the script
   #
   function _addVar()
+    push!(_getRandExpr().args, :($"var$_genVar()"))
   end
   function _addFor()
   end
@@ -82,21 +83,38 @@ module Mutator
   # Generates new variable
   #
   function _genVar()
+    "var$_varIndex"
+  end
+  #
+  # Returns random index within custom array of expressions
+  # @param  {Array{Any}} Array of expressions. Must be with minimum 1 element
+  # @return {Int}
+  #
+  function _getRandExpr(arr)
+    return arr[rand(1:length(arr))]
   end
 
   #
-  # {Expr} Reference to organism's script
+  # {Expr} Reference to organism's default script. It contains task
+  # function and infinite loop inside. Organism lives in this loop
+  # during it has an energy.
   #
-  _script = :()
+  _script = :(function t();while(true);produce("start");end;end)
+  #
+  # {Array} Array of available script blocks. For example: for, while,
+  # function contain blocks inside. By default it contains one main block
+  # of root while within t() function. See _script field for details.
+  #
+  _blocks = [_script.args[2].args[2].args[2]]
   #
   # {Bool} Will be set to true after call init()
   #
   _inited = false
   #
-  # {ASCIIString} Name of current variable. Name of variable will be 
-  #               changed every time when new variable will be produced.
+  # {Int} Name of current variable. Name of variable will be 
+  #       changed every time when new variable will be produced.
   #
-  _curVar = "v0"
+  _varIndex = 1
   #
   # TODO:
   #
