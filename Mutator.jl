@@ -34,10 +34,15 @@ module Mutator
   end
 
   #
-  # Adds variable into the random block within the script
+  # Adds variable into the random block within the script. General form:
+  # var = [sign]{const|var} [op [sign]{const|var}]
   #
   function _addVar()
-    push!(_getRandExpr().args, :($"var$_genVar()"))
+    ex = _getVarOrNum()
+    if (_randTrue())
+      ex = Expr(:call, _op[rand(1:length(_op))], ex, _getVarOrNum())
+    end
+    push!(_blocks[rand(1:length(_blocks))].args, Expr(:(=), _genVar(), ex))
   end
   function _addFor()
   end
@@ -81,17 +86,28 @@ module Mutator
   end
   #
   # Generates new variable
+  # {symbol}
   #
   function _genVar()
-    "var$_varIndex"
+    _varIndex = _varIndex + 1
+    symbol("var$(_varIndex)")
+  end
+  function _randTrue()
+    rand(1:2) === 2
   end
   #
-  # Returns random index within custom array of expressions
-  # @param  {Array{Any}} Array of expressions. Must be with minimum 1 element
-  # @return {Int}
+  # Returns an expresion for variable or a number in format: [sign]{var|const}
+  # @return {Expr} 
   #
-  function _getRandExpr(arr)
-    return arr[rand(1:length(arr))]
+  function _getVarOrNum()
+    _randTrue() ? Expr(:call, _sign[rand(1:length(_sign))], _genVar()) : _getNum()
+  end
+  #
+  # Returns expression for number in format: [sign]const
+  # @return {Expr}
+  #
+  function _getNum()
+    Expr(:call, _sign[rand(1:length(_sign))], rand(0:typemax(Int)))
   end
 
   #
@@ -99,22 +115,30 @@ module Mutator
   # function and infinite loop inside. Organism lives in this loop
   # during it has an energy.
   #
-  _script = :(function t();while(true);produce("start");end;end)
+  _script   = :(function t();while(true);produce("start");end;end)
   #
   # {Array} Array of available script blocks. For example: for, while,
   # function contain blocks inside. By default it contains one main block
   # of root while within t() function. See _script field for details.
   #
-  _blocks = [_script.args[2].args[2].args[2]]
+  _blocks   = [_script.args[2].args[2].args[2]]
   #
   # {Bool} Will be set to true after call init()
   #
-  _inited = false
+  _inited   = false
   #
   # {Int} Name of current variable. Name of variable will be 
   #       changed every time when new variable will be produced.
   #
-  _varIndex = 1
+  _varIndex = 0
+  #
+  # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y
+  #
+  _sign     = [+, -, ~]
+  #
+  # {Array} Available operators. Is used between numeric variables and constants
+  #
+  _op       = [+, -, \, *, $, |, &, ^, %, >>>, >>, <<]
   #
   # TODO:
   #
