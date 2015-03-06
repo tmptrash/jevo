@@ -42,7 +42,7 @@ module Mutator
     if (_randTrue())
       ex = Expr(:call, _op[rand(1:length(_op))], ex, _getVarOrNum())
     end
-    push!(_blocks[rand(1:length(_blocks))].args, Expr(:(=), _genVar(), ex))
+    push!(_blocks[rand(1:length(_blocks))].args, Expr(:(=), _getNewVar(), ex))
   end
   function _addFor()
   end
@@ -84,11 +84,17 @@ module Mutator
   end
   function _delLibCall()
   end
+
+  #
+  # TODO: should return variable avaialble in current block
+  #
+  function _getVar()
+  end
   #
   # Generates new variable
   # {symbol}
   #
-  function _genVar()
+  function _getNewVar()
     _varIndex = _varIndex + 1
     symbol("var$(_varIndex)")
   end
@@ -100,7 +106,7 @@ module Mutator
   # @return {Expr} 
   #
   function _getVarOrNum()
-    _randTrue() ? Expr(:call, _sign[rand(1:length(_sign))], _genVar()) : _getNum()
+    _randTrue() ? Expr(:call, _sign[rand(1:length(_sign))], _getVar()) : _getNum()
   end
   #
   # Returns expression for number in format: [sign]const
