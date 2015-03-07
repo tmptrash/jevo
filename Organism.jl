@@ -1,3 +1,3 @@
 module Organism
-  script = :(mol = 42)
+  import Mutator
 end

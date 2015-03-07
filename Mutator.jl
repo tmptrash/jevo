@@ -7,6 +7,7 @@
 module Mutator
   export init
   export mutate
+  using Debug
 
   #
   # This method should be called first. before mutate
@@ -20,7 +21,7 @@ module Mutator
   #
   # Do one mutation of script
   # TODO: describe what is mutation. It's typed (add, delete, change)
-  # @return {Bool} true means, that mutation was done, false - some mistake 
+  # @return {Bool} true means, that mutation was done, false - some mistake
   #
   function mutate()
     if !_inited
@@ -28,7 +29,7 @@ module Mutator
       return false
     end
 
-    
+
 
     true
   end
@@ -38,11 +39,16 @@ module Mutator
   # var = [sign]{const|var} [op [sign]{const|var}]
   #
   function _addVar()
-    ex = _getVarOrNum()
+    block  = _blocks[rand(1:length(_blocks))]
+    vars   = block["vars"]
+    ex     = _getVarOrNum(vars)
+    newVar = _getNewVar()
+
     if (_randTrue())
-      ex = Expr(:call, _op[rand(1:length(_op))], ex, _getVarOrNum())
+      ex = Expr(:call, _op[rand(1:length(_op))], ex, _getVarOrNum(vars))
     end
-    push!(_blocks[rand(1:length(_blocks))].args, Expr(:(=), _getNewVar(), ex))
+    push!(vars, newVar)
+    push!(block["block"].args, Expr(:(=), newVar, ex))
   end
   function _addFor()
   end
@@ -85,28 +91,29 @@ module Mutator
   function _delLibCall()
   end
 
+  function _randTrue()
+    rand(1:2) === 2
+  end
   #
   # TODO: should return variable avaialble in current block
   #
-  function _getVar()
+  function _getVar(vars)
+    vars[rand(1:length(vars))]
   end
   #
   # Generates new variable
   # {symbol}
   #
   function _getNewVar()
-    _varIndex = _varIndex + 1
-    symbol("var$(_varIndex)")
-  end
-  function _randTrue()
-    rand(1:2) === 2
+    symbol("var$(_vars.index = _vars.index + 1)")
   end
   #
   # Returns an expresion for variable or a number in format: [sign]{var|const}
-  # @return {Expr} 
+  # @param  {Expr} vars Variables array in current block
+  # @return {Expr}
   #
-  function _getVarOrNum()
-    _randTrue() ? Expr(:call, _sign[rand(1:length(_sign))], _getVar()) : _getNum()
+  function _getVarOrNum(vars)
+    _randTrue() ? Expr(:call, _sign[rand(1:length(_sign))], _getVar(vars)) : _getNum()
   end
   #
   # Returns expression for number in format: [sign]const
@@ -117,26 +124,37 @@ module Mutator
   end
 
   #
-  # {Expr} Reference to organism's default script. It contains task
-  # function and infinite loop inside. Organism lives in this loop
-  # during it has an energy.
+  # Contains all variable related data
   #
-  _script   = :(function t();while(true);produce("start");end;end)
-  #
-  # {Array} Array of available script blocks. For example: for, while,
-  # function contain blocks inside. By default it contains one main block
-  # of root while within t() function. See _script field for details.
-  #
-  _blocks   = [_script.args[2].args[2].args[2]]
+  type Vars
+    #
+    # {Int} Current index of new variable in format var<index>
+    #
+    index::Int
+  end
+
   #
   # {Bool} Will be set to true after call init()
   #
   _inited   = false
   #
-  # {Int} Name of current variable. Name of variable will be 
+  # {Expr} Reference to organism's default script. It contains task
+  # function and infinite loop inside. Organism lives in this loop
+  # during it has an energy.
+  #
+  _script   = :(function t();while(true);var0=0;produce("start");end;end)
+  #
+  # TODO: fix this comment
+  # {Array} Array of available script blocks. For example: for, while,
+  # function contain blocks inside. By default it contains one main block
+  # of root while within t() function. See _script field for details.
+  #
+  _blocks   = [["vars"=>[:(var0)], "block"=>_script.args[2].args[2].args[2]]]
+  #
+  # {Int} Name of current variable. Name of variable will be
   #       changed every time when new variable will be produced.
   #
-  _varIndex = 0
+  _vars     = Vars(0)
   #
   # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y
   #
