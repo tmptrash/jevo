@@ -13,7 +13,7 @@ module Mutator
   #
   # This method should be called first. before mutate
   # and any other public method of this module...
-  # @param {Expr} script Scriptwe have to mutate
+  # @param {Expr} script Script we have to mutate
   #
   function init(script)
     _script = script
@@ -43,7 +43,7 @@ module Mutator
   # Examples:
   #   var1 = 3
   #   var2 = ~var1
-  #   var3 = -var2 * 34
+  #   var3 = -var2 * ~34
   #
   function _addVar()
     block  = _blocks[rand(1:length(_blocks))]
@@ -136,9 +136,9 @@ module Mutator
   #
   type Fields
     #
-    # {UInt} Current index of new variable. Should be 0 by default.
+    # {Uint} Current index of new variable. Should be 0 by default.
     #
-    index ::UInt
+    index ::Uint
     #
     # {Bool} Will be set to true after call init(). false by default.
     #
