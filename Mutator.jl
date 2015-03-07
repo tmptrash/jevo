@@ -36,7 +36,11 @@ module Mutator
 
   #
   # Adds variable into the random block within the script. General form:
-  # var = [sign]{const|var} [op [sign]{const|var}]
+  #   var = [sign]{const|var} [op [sign]{const|var}]
+  # Examples:
+  #   var1 = 3
+  #   var2 = ~var1
+  #   var3 = -var2 * 34
   #
   function _addVar()
     block  = _blocks[rand(1:length(_blocks))]
