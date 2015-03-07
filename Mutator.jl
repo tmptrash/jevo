@@ -3,11 +3,12 @@
 # TODO: public methods
 # TODO: usage...
 # TODO: amount of add,delete and change mutations depend on script size
+# TODO: describe _script and _blocks
+# TODO: describe [], {|}, var, op, sign, const keywords
 #
 module Mutator
   export init
   export mutate
-  using Debug
 
   #
   # This method should be called first. before mutate
@@ -16,7 +17,7 @@ module Mutator
   #
   function init(script)
     _script = script
-    _inited = true
+    _fields.inited = true
   end
   #
   # Do one mutation of script
@@ -24,7 +25,7 @@ module Mutator
   # @return {Bool} true means, that mutation was done, false - some mistake
   #
   function mutate()
-    if !_inited
+    if (!_fields.inited)
       warn("Module Mutator wasn't inited. Default parameters will be used.")
       return false
     end
@@ -35,8 +36,10 @@ module Mutator
   end
 
   #
-  # Adds variable into the random block within the script. General form:
+  # Adds variable into the random block within the script. Format:
   #   var = [sign]{const|var} [op [sign]{const|var}]
+  # Added variable will be added to _blocks[xxx]["vars"] array. _blocks
+  # field must contain at least one block.
   # Examples:
   #   var1 = 3
   #   var2 = ~var1
@@ -95,21 +98,20 @@ module Mutator
   function _delLibCall()
   end
 
+  #
+  # Chooses (returns) true or false randomly. Is used to choose between two
+  # variants of something. For example + or - sign.
+  # @return {Bool}
+  #
   function _randTrue()
-    rand(1:2) === 2
+    rand(1:2) === 1
   end
   #
-  # TODO: should return variable avaialble in current block
-  #
-  function _getVar(vars)
-    vars[rand(1:length(vars))]
-  end
-  #
-  # Generates new variable
-  # {symbol}
+  # Generates new variable symbol.
+  # {symbol} New symbol in format: "varXXX", where XXX - Int
   #
   function _getNewVar()
-    symbol("var$(_vars.index = _vars.index + 1)")
+    symbol("var$(_fields.index = _fields.index + 1)")
   end
   #
   # Returns an expresion for variable or a number in format: [sign]{var|const}
@@ -117,7 +119,7 @@ module Mutator
   # @return {Expr}
   #
   function _getVarOrNum(vars)
-    _randTrue() ? Expr(:call, _sign[rand(1:length(_sign))], _getVar(vars)) : _getNum()
+    _randTrue() ? Expr(:call, _sign[rand(1:length(_sign))], vars[rand(1:length(vars))]) : _getNum()
   end
   #
   # Returns expression for number in format: [sign]const
@@ -128,39 +130,43 @@ module Mutator
   end
 
   #
-  # Contains all variable related data
+  # Contains all variable related data. We have to use type for simple
+  # fields (e.g. Int, Bool), because Julia can't store these fields in
+  # module. Only complex types of fields (Array, Type, Dict) are supported
   #
-  type Vars
+  type Fields
     #
-    # {Int} Current index of new variable in format var<index>
+    # {UInt} Current index of new variable. Should be 0 by default.
     #
-    index::Int
+    index ::UInt
+    #
+    # {Bool} Will be set to true after call init(). false by default.
+    #
+    inited::Bool
   end
 
-  #
-  # {Bool} Will be set to true after call init()
-  #
-  _inited   = false
-  #
-  # {Expr} Reference to organism's default script. It contains task
-  # function and infinite loop inside. Organism lives in this loop
-  # during it has an energy.
-  #
-  _script   = :(function t();while(true);var0=0;produce("start");end;end)
-  #
-  # TODO: fix this comment
-  # {Array} Array of available script blocks. For example: for, while,
-  # function contain blocks inside. By default it contains one main block
-  # of root while within t() function. See _script field for details.
-  #
-  _blocks   = [["vars"=>[:(var0)], "block"=>_script.args[2].args[2].args[2]]]
   #
   # {Int} Name of current variable. Name of variable will be
   #       changed every time when new variable will be produced.
   #
-  _vars     = Vars(0)
+  _fields   = Fields(0, false)
   #
-  # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y
+  # {Expr} Reference to organism's default script. It contains task
+  # function t() and infinite loop (block) with one variable. Organism
+  # lives in this loop while it has energy.
+  #
+  _script   = :(function t();while(true);var0=0;produce("start");end;end)
+  #
+  # {Array} Array of available maps of script blocks. For example: for, while,
+  # function contain blocks inside. By default it contains one main block
+  # of root while within t() function. See _script field for details. Every
+  # block is a map of two elements: "vars"=>Array of expressions of block and
+  # "block"=>Array of block inner expressions.
+  #
+  _blocks   = [["vars"=>[:(var0)], "block"=>_script.args[2].args[2].args[2]]]
+  #
+  # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y.
+  # ! operator should be here.
   #
   _sign     = [+, -, ~]
   #
