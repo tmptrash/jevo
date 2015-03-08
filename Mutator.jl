@@ -3,20 +3,24 @@
 # TODO: public methods
 # TODO: usage...
 # TODO: amount of add,delete and change mutations depend on script size
-# TODO: describe _script and _blocks
+# TODO: describe _script and _blocks. in blocks describe vars and block fields
 # TODO: describe [], {|}, var, op, sign, const keywords
 #
 module Mutator
   export init
   export mutate
+  using Debug
 
   #
   # This method should be called first. before mutate
   # and any other public method of this module...
   # @param {Expr} script Script we have to mutate
+  # @param {Dict} blocks Linear maps of blocks according to script. See
+  # default values of _script and _blocks fields for details.
   #
-  function init(script)
+  function init(script, blocks)
     _script = script
+    _blocks = blocks
     _fields.inited = true
   end
   #
@@ -57,7 +61,20 @@ module Mutator
     push!(vars, newVar)
     push!(block["block"].args, Expr(:(=), newVar, ex))
   end
+  #
+  # Adds new "for" keyword into the random block within the script. Format:
+  #   for var = 1:{var|const};end
+  # Examples:
+  #   for i = 1:3;end
+  #   for i = 1:k;end
+  #
   function _addFor()
+    block    = _blocks[rand(1:length(_blocks))]
+    newVar   = _getNewVar()
+    newBlock = Expr(:for, Expr(:(=), newVar, Expr(:(:), 1, _getVarOrNum(block["vars"], true))), Expr(:block,))
+
+    push!(block["block"].args, newBlock)
+    push!(_blocks, ["perent"=>block, "vars"=>[newVar], "block"=>newBlock]);
   end
   function _addIf()
   end
@@ -115,18 +132,22 @@ module Mutator
   end
   #
   # Returns an expresion for variable or a number in format: [sign]{var|const}
-  # @param  {Expr} vars Variables array in current block
+  # @param  {Expr} vars   Variables array in current block
+  # @param  {Bool} simple true if method should return only {var|const} without sign
   # @return {Expr}
   #
-  function _getVarOrNum(vars)
-    _randTrue() ? Expr(:call, _sign[rand(1:length(_sign))], vars[rand(1:length(vars))]) : _getNum()
+  function _getVarOrNum(vars, simple=false)
+    v = vars[rand(1:length(vars))]
+    _randTrue() ? (simple ? v : Expr(:call, _sign[rand(1:length(_sign))], v)) : _getNum(simple)
   end
   #
   # Returns expression for number in format: [sign]const
+  # @param  {Bool} true if it should return only const without sign
   # @return {Expr}
   #
-  function _getNum()
-    Expr(:call, _sign[rand(1:length(_sign))], rand(0:typemax(Int)))
+  function _getNum(simple=false)
+    num = rand(0:typemax(Int))
+    simple ? num : Expr(:call, _sign[rand(1:length(_sign))], num)
   end
 
   #
@@ -160,10 +181,18 @@ module Mutator
   # {Array} Array of available maps of script blocks. For example: for, while,
   # function contain blocks inside. By default it contains one main block
   # of root while within t() function. See _script field for details. Every
-  # block is a map of two elements: "vars"=>Array of expressions of block and
-  # "block"=>Array of block inner expressions.
+  # block is a map of three elements: "parent"=>Parent block, "vars"=>Array of
+  # expressions of block and "block"=>Array of block's inner expressions.
   #
-  _blocks   = [["vars"=>[:(var0)], "block"=>_script.args[2].args[2].args[2]]]
+  _blocks   = [[                                    # while(true) block
+      "vars"  => [:(var0)],
+      "block" => _script.args[2].args[2].args[2],
+      "parent"=> [                                  # function's t() block
+          "vars"  => [],
+          "block" => _script.args[2],
+          "parent"=> nothing
+      ],
+  ]]
   #
   # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y.
   # ! operator should be here.
