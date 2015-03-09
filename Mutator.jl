@@ -9,6 +9,7 @@
 module Mutator
   export init
   export mutate
+  # TODO: remove this module
   using Debug
 
   #
@@ -64,19 +65,43 @@ module Mutator
   #
   # Adds new "for" keyword into the random block within the script. Format:
   #   for var = 1:{var|const};end
+  # "for" operator adds new block into existing one. This block is between 
+  # "for" and "end" operators. Also, this block contains it's variables scope.
   # Examples:
   #   for i = 1:3;end
   #   for i = 1:k;end
   #
   function _addFor()
-    block    = _blocks[rand(1:length(_blocks))]
-    newVar   = _getNewVar()
-    newBlock = Expr(:for, Expr(:(=), newVar, Expr(:(:), 1, _getVarOrNum(block["vars"], true))), Expr(:block,))
+    block  = _blocks[rand(1:length(_blocks))]
+    newVar = _getNewVar()
+    newFor = Expr(:for, Expr(:(=), newVar, Expr(:(:), 1, _getVarOrNum(block["vars"], true))), Expr(:block,))
 
-    push!(block["block"].args, newBlock)
-    push!(_blocks, ["perent"=>block, "vars"=>[newVar], "block"=>newBlock]);
+    push!(block["block"].args, newFor)
+    push!(_blocks, ["perent"=>block, "vars"=>[newVar], "block"=>newFor]);
   end
-  function _addIf()
+  #
+  # Adds new if operator into random block within a script. Format:
+  #   if {var|const} Cond {var|const};else;end
+  # "if" operator adds new block into existing one. But, this block doesn't
+  # contain variables scope. It uses parent's scope.
+  # Examples:
+  #   if 1<2;end
+  #   if i<3;else;end
+  #   if i>k;end
+  #
+  @debug function _addIf()
+    block    = _blocks[rand(1:length(_blocks))]
+    vars     = block["vars"]
+    @bp
+    ifParams = [:if, Expr(:comparison, _getVarOrNum(vars, true), _cond[rand(1:length(_cond))], _getVarOrNum(vars, true)), Expr(:block,)]
+
+    if _randTrue()
+      push!(ifParams, Expr(:block,))
+      push!(_blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[4]])
+    end
+
+    push!(block["block"].args, apply(Expr, ifParams))
+    push!(_blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[3]])
   end
   function _addFunc()
   end
@@ -198,6 +223,10 @@ module Mutator
   # ! operator should be here.
   #
   _sign     = [+, -, ~]
+  #
+  #
+  #
+  _cond     = [:<, :>, :(==), :(!==), :<=, :>=]
   #
   # {Array} Available operators. Is used between numeric variables and constants
   #
