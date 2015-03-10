@@ -111,11 +111,11 @@ module Mutator
   #   function func1();end
   #
   function _addFunc()
-    block    = _blocks[rand(1:length(_blocks))]
+    block    = _script.args[2]
     newBlock = Expr(:block,)
 
-    Expr(:function, Expr(:call, :f), newBlock)
-    push!(_blocks, ["parent"=>block, "vars"=>])
+    push!(block.args, Expr(:function, Expr(:call, _getNewFunc()), newBlock))
+    push!(_blocks, ["parent"=>block, "vars"=>[], "block"=>newBlock])
   end
   function _addFuncCall()
   end
@@ -162,10 +162,17 @@ module Mutator
   end
   #
   # Generates new variable symbol.
-  # {symbol} New symbol in format: "varXXX", where XXX - Int
+  # {symbol} New symbol in format: "varXXX", where XXX - Uint
   #
   function _getNewVar()
-    symbol("var$(_fields.index = _fields.index + 1)")
+    symbol("var$(_fields.vIndex = _fields.vIndex + 1)")
+  end
+  #
+  # Generates new function symbol.
+  # {symbol} New symbol in format: "funcXXX", where XXX - Uint
+  #
+  function _getNewFunc()
+    symbol("func$(_fields.fIndex = _fields.fIndex + 1)")
   end
   #
   # Returns an expresion for variable or a number in format: [sign]{var|const}
@@ -196,7 +203,11 @@ module Mutator
     #
     # {Uint} Current index of new variable. Should be 0 by default.
     #
-    index ::Uint
+    vIndex::Uint
+    #
+    # {Uint} Current index of new function. Should be 0 by default.
+    #
+    fIndex::Uint
     #
     # {Bool} Will be set to true after call init(). false by default.
     #
@@ -207,7 +218,7 @@ module Mutator
   # {Int} Name of current variable. Name of variable will be
   #       changed every time when new variable will be produced.
   #
-  _fields   = Fields(0, false)
+  _fields   = Fields(0, 0, false)
   #
   # {Expr} Reference to organism's default script. It contains task
   # function t() and infinite loop (block) with one variable. Organism
