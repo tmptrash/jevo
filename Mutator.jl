@@ -89,10 +89,9 @@ module Mutator
   #   if i<3;else;end
   #   if i>k;end
   #
-  @debug function _addIf()
+  function _addIf()
     block    = _blocks[rand(1:length(_blocks))]
     vars     = block["vars"]
-    @bp
     ifParams = [:if, Expr(:comparison, _getVarOrNum(vars, true), _cond[rand(1:length(_cond))], _getVarOrNum(vars, true)), Expr(:block,)]
 
     if _randTrue()
@@ -103,7 +102,20 @@ module Mutator
     push!(block["block"].args, apply(Expr, ifParams))
     push!(_blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[3]])
   end
+  #
+  # Adds new named function into the random block within script. Format:
+  #   function XXX();end
+  # "function" operator adds new block into existing one. This block is in a 
+  # body of the function. Also, this block contains it's own variables scope.
+  # Example:
+  #   function func1();end
+  #
   function _addFunc()
+    block    = _blocks[rand(1:length(_blocks))]
+    newBlock = Expr(:block,)
+
+    Expr(:function, Expr(:call, :f), newBlock)
+    push!(_blocks, ["parent"=>block, "vars"=>])
   end
   function _addFuncCall()
   end
