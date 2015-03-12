@@ -19,10 +19,11 @@ module Mutator
   # @param {Dict} blocks Linear maps of blocks according to script. See
   # default values of _script and _blocks fields for details.
   #
-  function init(script, blocks)
+  function init(script, blocks, funcMaxParams = 10)
     _script = script
     _blocks = blocks
     _fields.inited = true
+    _fields.funcMaxParams = funcMaxParams
   end
   #
   # Do one mutation of script
@@ -103,19 +104,33 @@ module Mutator
     push!(_blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[3]])
   end
   #
-  # Adds new named function into the random block within script. Format:
+  # Adds new named function into the main block within script. Format:
   #   function XXX();end
   # "function" operator adds new block into existing one. This block is in a 
   # body of the function. Also, this block contains it's own variables scope.
+  # It's important, that all functions will leave in main block only.
   # Example:
   #   function func1();end
   #
   function _addFunc()
-    block    = _script.args[2]
-    newBlock = Expr(:block,)
+    block     = _script.args[2]
+    funcs     = _blocks[1]["parent"]["funcs"]
+    newBlock  = Expr(:block,)
+    newFunc   = _getNewFunc()
+    func      = [:call, newFunc]
+    maxParams = rand(0:_fields.funcMaxParams)
+    funcArgs  = (Dict{ASCIIString, Any})[]
+    vars      = (Symbol)[]
 
-    push!(block.args, Expr(:function, Expr(:call, _getNewFunc()), newBlock))
-    push!(_blocks, ["parent"=>block, "vars"=>[], "block"=>newBlock])
+    for i = 1:maxParams
+      arg = _getNewVar()
+      push!(funcArgs, ["name"=>string(arg), "type"=>Int])
+      push!(func, arg)
+      push!(vars, arg)
+    end
+    push!(funcs, ["name"=>string(newFunc), "args"=>funcArgs])
+    push!(block.args, Expr(:function, apply(Expr, func), newBlock))
+    push!(_blocks, ["parent"=>block, "vars"=>vars, "block"=>newBlock])
   end
   function _addFuncCall()
   end
@@ -209,6 +224,10 @@ module Mutator
     #
     fIndex::Uint
     #
+    # {Uint8} Maximum amount of parameters for function
+    #
+    funcMaxParams::Uint8
+    #
     # {Bool} Will be set to true after call init(). false by default.
     #
     inited::Bool
@@ -218,7 +237,7 @@ module Mutator
   # {Int} Name of current variable. Name of variable will be
   #       changed every time when new variable will be produced.
   #
-  _fields   = Fields(0, 0, false)
+  _fields   = Fields(0, 0, 10, false)
   #
   # {Expr} Reference to organism's default script. It contains task
   # function t() and infinite loop (block) with one variable. Organism
@@ -238,7 +257,8 @@ module Mutator
       "parent"=> [                                  # function's t() block
           "vars"  => [],
           "block" => _script.args[2],
-          "parent"=> nothing
+          "parent"=> nothing,
+          "funcs" => (Dict{ASCIIString, Any})[]     # functions available only in main block
       ],
   ]]
   #
