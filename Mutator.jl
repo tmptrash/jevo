@@ -265,19 +265,19 @@ module Mutator
   # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y.
   # ! operator should be here.
   #
-  _sign     = [+, -, ~]
+  const _sign     = [+, -, ~]
   #
   #
   #
-  _cond     = [:<, :>, :(==), :(!==), :<=, :>=]
+  const _cond     = [:<, :>, :(==), :(!==), :<=, :>=]
   #
   # {Array} Available operators. Is used between numeric variables and constants
   #
-  _op       = [+, -, \, *, $, |, &, ^, %, >>>, >>, <<]
+  const _op       = [+, -, \, *, $, |, &, ^, %, >>>, >>, <<]
   #
   # TODO:
   #
-  _add    = [_addVar,    _addFor,    _addIf,    _addFunc,    _addFuncCall,    _addLibCall   ]
-  _change = [_changeVar, _changeFor, _changeIf, _changeFunc, _changeFuncCall, _changeLibCall]
-  _del    = [_delVar,    _delFor,    _delIf,    _delFunc,    _delFuncCall,    _delLibCall   ]
+  const _add    = [_addVar,    _addFor,    _addIf,    _addFunc,    _addFuncCall,    _addLibCall   ]
+  const _change = [_changeVar, _changeFor, _changeIf, _changeFunc, _changeFuncCall, _changeLibCall]
+  const _del    = [_delVar,    _delFor,    _delIf,    _delFunc,    _delFuncCall,    _delLibCall   ]
 end
