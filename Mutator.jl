@@ -28,18 +28,15 @@ module Mutator
     _fields.funcMaxParams = funcMaxParams
   end
   #
-  # Do one mutation of script
+  # Do one random mutation of script
   # TODO: describe what is mutation. It's typed (add, delete, change)
-  # @return {Bool} true means, that mutation was done, false - some mistake
+  # @param  {Script.Code} Organism's script we have to mutate
+  # @return {Bool} true means, that mutation has done, false - some mistake
   #
   function mutate(code::Script.Code)
-    if (!_fields.inited)
-      warn("Module Mutator wasn't inited. Default parameters will be used.")
-      return false
-    end
-
-
-
+    _code = code
+    # TODO: here we should choose add, remove or change operation according
+    # TODO: to percentage (e.g. add:remove:change=60%:10%:30%)
     true
   end
 
@@ -212,29 +209,10 @@ module Mutator
   end
 
   #
-  # Contains all variable related data. We have to use type for simple
-  # fields (e.g. Int, Bool), because Julia can't store these fields in
-  # module. Only complex types of fields (Array, Type, Dict) are supported
+  # {Script.Code} Current reference to the organism's code we have to mutate.
+  # It will be changed every time some public method will be called (e.g. mutate()).
   #
-  type Fields
-    #
-    # {Uint} Current index of new variable. Should be 0 by default.
-    #
-    vIndex::Uint
-    #
-    # {Uint} Current index of new function. Should be 0 by default.
-    #
-    fIndex::Uint
-    #
-    # {Uint8} Maximum amount of parameters for function
-    #
-    funcMaxParams::Uint8
-    #
-    # {Bool} Will be set to true after call init(). false by default.
-    #
-    inited::Bool
-  end
-
+  _code = Script.Code(Script.Fields(0,0,1), :((=)()), [Dict{ASCIIString, Any}()])
   #
   # {Int} Name of current variable. Name of variable will be
   #       changed every time when new variable will be produced.
