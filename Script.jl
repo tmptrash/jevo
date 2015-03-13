@@ -17,10 +17,6 @@
     # {Uint8} Maximum amount of parameters for function
     #
     funcMaxParams::Uint8
-    #
-    # {Bool} Will be set to true after call init(). false by default.
-    #
-    inited::Bool
   end
   #
   # Represents code of script
@@ -44,6 +40,6 @@
     # block is a map of three elements: "parent"=>Parent block, "vars"=>Array of
     # expressions of block and "block"=>Array of block's inner expressions.
     #
-    blocks::(Dict{ASCIIString, Any})[]
+    blocks::Array{Dict{ASCIIString, Any}}
   end
 end

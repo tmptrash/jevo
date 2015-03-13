@@ -7,10 +7,12 @@
 # TODO: describe [], {|}, var, op, sign, const keywords
 #
 module Mutator
+  # TODO: remove this export 
   export init
   export mutate
   # TODO: remove this module
-  using Debug
+  using  Debug
+  import Script
 
   #
   # This method should be called first. before mutate
@@ -18,7 +20,7 @@ module Mutator
   # @param {Expr} script Script we have to mutate
   # @param {Dict} blocks Linear maps of blocks according to script. See
   # default values of _script and _blocks fields for details.
-  #
+  # TODO: remove this method
   function init(script, blocks, funcMaxParams = 10)
     _script = script
     _blocks = blocks
@@ -30,7 +32,7 @@ module Mutator
   # TODO: describe what is mutation. It's typed (add, delete, change)
   # @return {Bool} true means, that mutation was done, false - some mistake
   #
-  function mutate()
+  function mutate(code::Script.Code)
     if (!_fields.inited)
       warn("Module Mutator wasn't inited. Default parameters will be used.")
       return false
@@ -103,9 +105,9 @@ module Mutator
     push!(block["block"].args, apply(Expr, ifParams))
     push!(_blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[3]])
   end
-  #
+  # TODO: describe function creation details
   # Adds new named function into the main block within script. Format:
-  #   function XXX();end
+  #   function XXX(args);end
   # "function" operator adds new block into existing one. This block is in a 
   # body of the function. Also, this block contains it's own variables scope.
   # It's important, that all functions will leave in main block only.
