@@ -7,6 +7,13 @@ module Organism
   import Config
 
   #
+  # TODO: temporary method
+  #
+  function mutate()
+  	Mutator.mutate(_code);
+  end
+
+  #
   # {Script.Code} Default code of the organism. It will be changed 
   # soon throught mutations
   #
