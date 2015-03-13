@@ -1,10 +1,8 @@
- module Script 
+ module Script
   #
-  # Contains all variable related data. We have to use type for simple
-  # fields (e.g. Int, Bool), because Julia can't store these fields in
-  # module. Only complex types of fields (Array, Type, Dict) are supported
+  # Represents code of script
   #
-  type Fields
+  type Code
     #
     # {Uint} Current index of new variable. Should be 0 by default.
     #
@@ -17,11 +15,6 @@
     # {Uint8} Maximum amount of parameters for function
     #
     funcMaxParams::Uint8
-  end
-  #
-  # Represents code of script
-  #
-  type Code
     #
     # {Int} Name of current variable. Name of variable will be
     #       changed every time when new variable will be produced.

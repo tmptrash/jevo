@@ -3,7 +3,7 @@
 # TODO: public methods
 # TODO: usage...
 # TODO: amount of add,delete and change mutations depend on script size
-# TODO: describe _script and _blocks. in blocks describe vars and block fields
+# TODO: describe _code. Code structure should be described in Script.Code type
 # TODO: describe [], {|}, var, op, sign, const keywords
 #
 module Mutator
@@ -15,25 +15,17 @@ module Mutator
   import Script
 
   #
-  # This method should be called first. before mutate
-  # and any other public method of this module...
-  # @param {Expr} script Script we have to mutate
-  # @param {Dict} blocks Linear maps of blocks according to script. See
-  # default values of _script and _blocks fields for details.
-  # TODO: remove this method
-  function init(script, blocks, funcMaxParams = 10)
-    _script = script
-    _blocks = blocks
-    _fields.inited = true
-    _fields.funcMaxParams = funcMaxParams
-  end
-  #
   # Do one random mutation of script
   # TODO: describe what is mutation. It's typed (add, delete, change)
   # @param  {Script.Code} Organism's script we have to mutate
   # @return {Bool} true means, that mutation has done, false - some mistake
   #
   function mutate(code::Script.Code)
+    #
+    # _code field will be used in current and all other private methods
+    # which are called from here. This is analog of private field. In other
+    # case we have to pass this variable in all private methods.
+    #
     _code = code
     # TODO: here we should choose add, remove or change operation according
     # TODO: to percentage (e.g. add:remove:change=60%:10%:30%)
@@ -51,7 +43,7 @@ module Mutator
   #   var3 = -var2 * ~34
   #
   function _addVar()
-    block  = _blocks[rand(1:length(_blocks))]
+    block  = _code.blocks[rand(1:length(_code.blocks))]
     vars   = block["vars"]
     ex     = _getVarOrNum(vars)
     newVar = _getNewVar()
@@ -72,12 +64,12 @@ module Mutator
   #   for i = 1:k;end
   #
   function _addFor()
-    block  = _blocks[rand(1:length(_blocks))]
+    block  = _code.blocks[rand(1:length(_code.blocks))]
     newVar = _getNewVar()
     newFor = Expr(:for, Expr(:(=), newVar, Expr(:(:), 1, _getVarOrNum(block["vars"], true))), Expr(:block,))
 
     push!(block["block"].args, newFor)
-    push!(_blocks, ["perent"=>block, "vars"=>[newVar], "block"=>newFor]);
+    push!(_code.blocks, ["perent"=>block, "vars"=>[newVar], "block"=>newFor]);
   end
   #
   # Adds new if operator into random block within a script. Format:
@@ -90,17 +82,17 @@ module Mutator
   #   if i>k;end
   #
   function _addIf()
-    block    = _blocks[rand(1:length(_blocks))]
+    block    = _code.blocks[rand(1:length(_code.blocks))]
     vars     = block["vars"]
     ifParams = [:if, Expr(:comparison, _getVarOrNum(vars, true), _cond[rand(1:length(_cond))], _getVarOrNum(vars, true)), Expr(:block,)]
 
     if _randTrue()
       push!(ifParams, Expr(:block,))
-      push!(_blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[4]])
+      push!(_code.blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[4]])
     end
 
     push!(block["block"].args, apply(Expr, ifParams))
-    push!(_blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[3]])
+    push!(_code.blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[3]])
   end
   # TODO: describe function creation details
   # Adds new named function into the main block within script. Format:
@@ -112,12 +104,12 @@ module Mutator
   #   function func1();end
   #
   function _addFunc()
-    block     = _script.args[2]
-    funcs     = _blocks[1]["parent"]["funcs"]
+    block     = _code.code.args[2]
+    funcs     = _code.blocks[1]["parent"]["funcs"]
     newBlock  = Expr(:block,)
     newFunc   = _getNewFunc()
     func      = [:call, newFunc]
-    maxParams = rand(0:_fields.funcMaxParams)
+    maxParams = rand(0:_code.funcMaxParams)
     funcArgs  = (Dict{ASCIIString, Any})[]
     vars      = (Symbol)[]
 
@@ -129,7 +121,7 @@ module Mutator
     end
     push!(funcs, ["name"=>string(newFunc), "args"=>funcArgs])
     push!(block.args, Expr(:function, apply(Expr, func), newBlock))
-    push!(_blocks, ["parent"=>block, "vars"=>vars, "block"=>newBlock])
+    push!(_code.blocks, ["parent"=>block, "vars"=>vars, "block"=>newBlock])
   end
   function _addFuncCall()
   end
@@ -179,14 +171,14 @@ module Mutator
   # {symbol} New symbol in format: "varXXX", where XXX - Uint
   #
   function _getNewVar()
-    symbol("var$(_fields.vIndex = _fields.vIndex + 1)")
+    symbol("var$(_code.vIndex = _code.vIndex + 1)")
   end
   #
   # Generates new function symbol.
   # {symbol} New symbol in format: "funcXXX", where XXX - Uint
   #
   function _getNewFunc()
-    symbol("func$(_fields.fIndex = _fields.fIndex + 1)")
+    symbol("func$(_code.fIndex = _code.fIndex + 1)")
   end
   #
   # Returns an expresion for variable or a number in format: [sign]{var|const}
@@ -212,35 +204,7 @@ module Mutator
   # {Script.Code} Current reference to the organism's code we have to mutate.
   # It will be changed every time some public method will be called (e.g. mutate()).
   #
-  _code = Script.Code(Script.Fields(0,0,1), :((=)()), [Dict{ASCIIString, Any}()])
-  #
-  # {Int} Name of current variable. Name of variable will be
-  #       changed every time when new variable will be produced.
-  #
-  _fields   = Fields(0, 0, 10, false)
-  #
-  # {Expr} Reference to organism's default script. It contains task
-  # function t() and infinite loop (block) with one variable. Organism
-  # lives in this loop while it has energy.
-  #
-  _script   = :(function t();while(true);var0=0;produce("start");end;end)
-  #
-  # {Array} Array of available maps of script blocks. For example: for, while,
-  # function contain blocks inside. By default it contains one main block
-  # of root while within t() function. See _script field for details. Every
-  # block is a map of three elements: "parent"=>Parent block, "vars"=>Array of
-  # expressions of block and "block"=>Array of block's inner expressions.
-  #
-  _blocks   = [[                                    # while(true) block
-      "vars"  => [:(var0)],
-      "block" => _script.args[2].args[2].args[2],
-      "parent"=> [                                  # function's t() block
-          "vars"  => [],
-          "block" => _script.args[2],
-          "parent"=> nothing,
-          "funcs" => (Dict{ASCIIString, Any})[]     # functions available only in main block
-      ],
-  ]]
+  _code = Script.Code(0,0,1, :((=)()), [Dict{ASCIIString, Any}()])
   #
   # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y.
   # ! operator should be here.
