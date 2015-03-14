@@ -204,7 +204,7 @@ module Mutator
   # {Script.Code} Current reference to the organism's code we have to mutate.
   # It will be changed every time some public method will be called (e.g. mutate()).
   #
-  _code = Script.Code(0,0,1, :((=)()), [Dict{ASCIIString, Any}()])
+  _code = Script.Code(0,0,1, Expr(:call, :(=)), [[]])
   #
   # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y.
   # ! operator should be here.

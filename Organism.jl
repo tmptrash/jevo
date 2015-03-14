@@ -10,33 +10,37 @@ module Organism
   # TODO: temporary method
   #
   function mutate()
-  	Mutator.mutate(_code);
+  	Mutator.mutate(_script);
   end
 
   #
-  # {Script.Code} Default code of the organism. It will be changed 
-  # soon throught mutations
+  # {Expr} Native organism's code on Julia
   #
-  _code = Script.Code(
+  _code = :(function t();while(true);var0=0;produce("start");end;end)
+  #
+  # {Script.Code} Default code of the organism. It will be changed 
+  # soon throught mutations.
+  #
+  _script = Script.Code(
   	#
   	# {Script.Fields} Code variables and functions related fields
   	#
-  	0,0,Config.mutator["funcMaxParams"]),
+  	0,0,Config.mutator["funcMaxParams"],
     #
   	# {Expr} Initial organism's script. Will be mutated soon. Related to 
   	# blocks field below. See Script.Code.code for details.
   	#
-  	:(function t();while(true);var0=0;produce("start");end;end),
+  	_code,
   	#
   	# {Array{Dict{ASCIIString, Any}}} Blocks structure. Describes 
   	# default code above. See Script.Code.blocks for details.
   	#
   	[[                                              # while(true) block
       "vars"  => [:(var0)],
-      "block" => _script.args[2].args[2].args[2],
+      "block" => _code.args[2].args[2].args[2],
       "parent"=> [                                  # function's t() block
           "vars"  => [],
-          "block" => _script.args[2],
+          "block" => _code.args[2],
           "parent"=> nothing,
           "funcs" => (Dict{ASCIIString, Any})[]     # functions available only in main block
       ],

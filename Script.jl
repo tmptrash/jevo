@@ -1,4 +1,9 @@
+ #
+ # TODO: describe this type
+ #
  module Script
+  export Code
+  
   #
   # Represents code of script
   #
@@ -15,11 +20,6 @@
     # {Uint8} Maximum amount of parameters for function
     #
     funcMaxParams::Uint8
-    #
-    # {Int} Name of current variable. Name of variable will be
-    #       changed every time when new variable will be produced.
-    #
-    fields::Fields
     #
     # {Expr} Reference to organism's default script. It contains task
     # function t() and infinite loop (block) with one variable. Organism
