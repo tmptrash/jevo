@@ -10,8 +10,6 @@ module Mutator
   # TODO: remove this export 
   export init
   export mutate
-  # TODO: remove this module
-  using  Debug
   import Script
 
   #

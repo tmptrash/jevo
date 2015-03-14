@@ -5,11 +5,14 @@ module Organism
   import Mutator
   import Script
   import Config
+  # TODO: remove this module
+  using  Debug
 
   #
   # TODO: temporary method
   #
-  function mutate()
+  @debug function mutate()
+    @bp
   	Mutator.mutate(_script);
   end
 
