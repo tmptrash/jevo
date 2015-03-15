@@ -11,22 +11,21 @@ module Mutator
   export init
   export mutate
   import Script
+  # TODO: remove this module
+  using  Debug
 
   #
-  # Do one random mutation of script
+  # Do one random mutation of script.
   # TODO: describe what is mutation. It's typed (add, delete, change)
   # @param  {Script.Code} Organism's script we have to mutate
   # @return {Bool} true means, that mutation has done, false - some mistake
   #
   function mutate(code::Script.Code)
-    #
-    # _code field will be used in current and all other private methods
-    # which are called from here. This is analog of private field. In other
-    # case we have to pass this variable in all private methods.
-    #
-    _code = code
     # TODO: here we should choose add, remove or change operation according
     # TODO: to percentage (e.g. add:remove:change=60%:10%:30%)
+
+
+
     true
   end
 
@@ -35,16 +34,18 @@ module Mutator
   #   var = [sign]{const|var} [op [sign]{const|var}]
   # Added variable will be added to _blocks[xxx]["vars"] array. _blocks
   # field must contain at least one block.
+  # @param {Script.Code} code Script of some particular organism, we 
+  # have to mutate (ad new variable).
   # Examples:
   #   var1 = 3
   #   var2 = ~var1
   #   var3 = -var2 * ~34
   #
-  function _addVar()
-    block  = _code.blocks[rand(1:length(_code.blocks))]
+  function _addVar(code::Script.Code)
+    block  = code.blocks[rand(1:length(code.blocks))]
     vars   = block["vars"]
     ex     = _getVarOrNum(vars)
-    newVar = _getNewVar()
+    newVar = _getNewVar(code)
 
     if (_randTrue())
       ex = Expr(:call, _op[rand(1:length(_op))], ex, _getVarOrNum(vars))
@@ -57,40 +58,46 @@ module Mutator
   #   for var = 1:{var|const};end
   # "for" operator adds new block into existing one. This block is between 
   # "for" and "end" operators. Also, this block contains it's variables scope.
+  # @param {Script.Code} code Script of particular organism we have to mutate
+  # (add new for operator).
   # Examples:
   #   for i = 1:3;end
   #   for i = 1:k;end
   #
-  function _addFor()
-    block  = _code.blocks[rand(1:length(_code.blocks))]
-    newVar = _getNewVar()
-    newFor = Expr(:for, Expr(:(=), newVar, Expr(:(:), 1, _getVarOrNum(block["vars"], true))), Expr(:block,))
+  @debug function _addFor(code::Script.Code)
+  @bp
+    block   = code.blocks[rand(1:length(code.blocks))]
+    newVar  = _getNewVar(code)
+    newBody = Expr(:block,)
+    newFor  = Expr(:for, Expr(:(=), newVar, Expr(:(:), 1, _getVarOrNum(block["vars"], true))), newBody)
 
     push!(block["block"].args, newFor)
-    push!(_code.blocks, ["perent"=>block, "vars"=>[newVar], "block"=>newFor]);
+    push!(code.blocks, ["perent"=>block, "vars"=>[newVar], "block"=>newBody]);
   end
   #
   # Adds new if operator into random block within a script. Format:
   #   if {var|const} Cond {var|const};else;end
   # "if" operator adds new block into existing one. But, this block doesn't
   # contain variables scope. It uses parent's scope.
+  # @param {Script.Code} code Script of particulat organism, we have to mutate
+  # (add new if operator).
   # Examples:
   #   if 1<2;end
   #   if i<3;else;end
   #   if i>k;end
   #
-  function _addIf()
-    block    = _code.blocks[rand(1:length(_code.blocks))]
+  function _addIf(code::Script.Code)
+    block    = code.blocks[rand(1:length(code.blocks))]
     vars     = block["vars"]
     ifParams = [:if, Expr(:comparison, _getVarOrNum(vars, true), _cond[rand(1:length(_cond))], _getVarOrNum(vars, true)), Expr(:block,)]
 
     if _randTrue()
       push!(ifParams, Expr(:block,))
-      push!(_code.blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[4]])
+      push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[4]])
     end
 
     push!(block["block"].args, apply(Expr, ifParams))
-    push!(_code.blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[3]])
+    push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[3]])
   end
   # TODO: describe function creation details
   # Adds new named function into the main block within script. Format:
@@ -98,16 +105,18 @@ module Mutator
   # "function" operator adds new block into existing one. This block is in a 
   # body of the function. Also, this block contains it's own variables scope.
   # It's important, that all functions will leave in main block only.
+  # @param {Script.Code} code Script of particular organism we have to mutate
+  # (add new function).
   # Example:
   #   function func1();end
   #
-  function _addFunc()
-    block     = _code.code.args[2]
-    funcs     = _code.blocks[1]["parent"]["funcs"]
+  function _addFunc(code::Script.Code)
+    block     = code.code.args[2]
+    funcs     = code.blocks[1]["parent"]["funcs"]
     newBlock  = Expr(:block,)
     newFunc   = _getNewFunc()
     func      = [:call, newFunc]
-    maxParams = rand(0:_code.funcMaxParams)
+    maxParams = rand(0:code.funcMaxParams)
     funcArgs  = (Dict{ASCIIString, Any})[]
     vars      = (Symbol)[]
 
@@ -119,7 +128,7 @@ module Mutator
     end
     push!(funcs, ["name"=>string(newFunc), "args"=>funcArgs])
     push!(block.args, Expr(:function, apply(Expr, func), newBlock))
-    push!(_code.blocks, ["parent"=>block, "vars"=>vars, "block"=>newBlock])
+    push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>newBlock])
   end
   function _addFuncCall()
   end
@@ -166,17 +175,19 @@ module Mutator
   end
   #
   # Generates new variable symbol.
-  # {symbol} New symbol in format: "varXXX", where XXX - Uint
+  # @param  {Script.Code} code Script of current organism.
+  # @return {Symbol} New symbol in format: "varXXX", where XXX - Uint
   #
-  function _getNewVar()
-    symbol("var$(_code.vIndex = _code.vIndex + 1)")
+  function _getNewVar(code::Script.Code)
+    symbol("var$(code.vIndex = code.vIndex + 1)")
   end
   #
   # Generates new function symbol.
-  # {symbol} New symbol in format: "funcXXX", where XXX - Uint
+  # @param  {Script.Code} code Script of current organism.
+  # @return {Symbol} New symbol in format: "funcXXX", where XXX - Uint
   #
-  function _getNewFunc()
-    symbol("func$(_code.fIndex = _code.fIndex + 1)")
+  function _getNewFunc(code::Script.Code)
+    symbol("func$(code.fIndex = code.fIndex + 1)")
   end
   #
   # Returns an expresion for variable or a number in format: [sign]{var|const}
@@ -198,11 +209,6 @@ module Mutator
     simple ? num : Expr(:call, _sign[rand(1:length(_sign))], num)
   end
 
-  #
-  # {Script.Code} Current reference to the organism's code we have to mutate.
-  # It will be changed every time some public method will be called (e.g. mutate()).
-  #
-  _code = Script.Code(0,0,1, Expr(:call, :(=)), [[]])
   #
   # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y.
   # ! operator should be here.
