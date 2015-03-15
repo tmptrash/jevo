@@ -113,14 +113,14 @@ module Mutator
     block     = code.code.args[2]
     funcs     = code.blocks[1]["parent"]["funcs"]
     newBlock  = Expr(:block,)
-    newFunc   = _getNewFunc()
+    newFunc   = _getNewFunc(code)
     func      = [:call, newFunc]
     maxParams = rand(0:code.funcMaxParams)
     funcArgs  = (Dict{ASCIIString, Any})[]
     vars      = (Symbol)[]
 
     for i = 1:maxParams
-      arg = _getNewVar()
+      arg = _getNewVar(code)
       push!(funcArgs, ["name"=>string(arg), "type"=>Int])
       push!(func, arg)
       push!(vars, arg)
