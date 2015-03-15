@@ -11,8 +11,7 @@ module Organism
   #
   # TODO: temporary method
   #
-  @debug function mutate()
-    @bp
+  function mutate()
   	Mutator.mutate(_script);
   end
 

@@ -64,8 +64,7 @@ module Mutator
   #   for i = 1:3;end
   #   for i = 1:k;end
   #
-  @debug function _addFor(code::Script.Code)
-  @bp
+  function _addFor(code::Script.Code)
     block   = code.blocks[rand(1:length(code.blocks))]
     newVar  = _getNewVar(code)
     newBody = Expr(:block,)
