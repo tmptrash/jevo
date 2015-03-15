@@ -9,16 +9,9 @@ module Organism
   using  Debug
 
   #
-  # TODO: temporary method
-  #
-  function mutate()
-  	Mutator.mutate(_script);
-  end
-
-  #
   # {Expr} Native organism's code on Julia
   #
-  _code = :(function t();while(true);var0=0;produce("start");end;end)
+  _code = :(function t();while(true);produce("start");end;end)
   #
   # {Script.Code} Default code of the organism. It will be changed 
   # soon throught mutations.
@@ -38,7 +31,7 @@ module Organism
   	# default code above. See Script.Code.blocks for details.
   	#
   	[[                                              # while(true) block
-      "vars"  => [:(var0)],
+      "vars"  => Symbol[],
       "block" => _code.args[2].args[2].args[2],
       "parent"=> [                                  # function's t() block
           "vars"  => [],

@@ -7,9 +7,8 @@
 # TODO: describe [], {|}, var, op, sign, const keywords
 #
 module Mutator
-  # TODO: remove this export 
-  export init
   export mutate
+
   import Script
   # TODO: remove this module
   using  Debug
@@ -41,7 +40,8 @@ module Mutator
   #   var2 = ~var1
   #   var3 = -var2 * ~34
   #
-  function _addVar(code::Script.Code)
+  @debug function _addVar(code::Script.Code)
+    @bp
     block  = code.blocks[rand(1:length(code.blocks))]
     vars   = block["vars"]
     ex     = _getVarOrNum(vars)
@@ -195,6 +195,7 @@ module Mutator
   # @return {Expr}
   #
   function _getVarOrNum(vars, simple=false)
+    if (length(vars) === 0) return _getNum(simple) end
     v = vars[rand(1:length(vars))]
     _randTrue() ? (simple ? v : Expr(:call, _sign[rand(1:length(_sign))], v)) : _getNum(simple)
   end

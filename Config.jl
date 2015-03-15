@@ -3,6 +3,8 @@
 # TODO:
 #
 module Config
+  export mutator
+
   mutator = {
     #
     # {Int} Probabilities with with mutator decides what to do: add new,
