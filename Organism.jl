@@ -17,20 +17,20 @@ module Organism
   # soon throught mutations.
   #
   _script = Script.Code(
-  	#
-  	# {Script.Fields} Code variables and functions related fields
-  	#
-  	0,0,Config.mutator["funcMaxArgs"],
     #
-  	# {Expr} Initial organism's script. Will be mutated soon. Related to 
-  	# blocks field below. See Script.Code.code for details.
-  	#
-  	_code,
-  	#
-  	# {Array{Dict{ASCIIString, Any}}} Blocks structure. Describes 
-  	# default code above. See Script.Code.blocks for details.
-  	#
-  	[[                                              # while(true) block
+    # {Script.Fields} Code variables and functions related fields
+    #
+    0,0,Config.mutator["funcMaxArgs"],
+    #
+    # {Expr} Initial organism's script. Will be mutated soon. Related to 
+    # blocks field below. See Script.Code.code for details.
+    #
+    _code,
+    #
+    # {Array{Dict{ASCIIString, Any}}} Blocks structure. Describes 
+    # default code above. See Script.Code.blocks for details.
+    #
+    [[                                              # while(true) block
       "vars"  => Symbol[],
       "block" => _code.args[2].args[2].args[2],
       "parent"=> [                                  # function's t() block
