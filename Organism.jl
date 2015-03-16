@@ -20,7 +20,7 @@ module Organism
   	#
   	# {Script.Fields} Code variables and functions related fields
   	#
-  	0,0,Config.mutator["funcMaxParams"],
+  	0,0,Config.mutator["funcMaxArgs"],
     #
   	# {Expr} Initial organism's script. Will be mutated soon. Related to 
   	# blocks field below. See Script.Code.code for details.

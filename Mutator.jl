@@ -5,6 +5,7 @@
 # TODO: amount of add,delete and change mutations depend on script size
 # TODO: describe _code. Code structure should be described in Script.Code type
 # TODO: describe [], {|}, var, op, sign, const keywords
+# TODO: add types to increase the speed
 #
 module Mutator
   export mutate
@@ -40,8 +41,7 @@ module Mutator
   #   var2 = ~var1
   #   var3 = -var2 * ~34
   #
-  @debug function _addVar(code::Script.Code)
-    @bp
+  function _addVar(code::Script.Code)
     block  = code.blocks[rand(1:length(code.blocks))]
     vars   = block["vars"]
     ex     = _getVarOrNum(vars)
@@ -56,7 +56,7 @@ module Mutator
   #
   # Adds new "for" keyword into the random block within the script. Format:
   #   for var = 1:{var|const};end
-  # "for" operator adds new block into existing one. This block is between 
+  # "for" operator adds new block into existing one. This block is between
   # "for" and "end" operators. Also, this block contains it's variables scope.
   # @param {Script.Code} code Script of particular organism we have to mutate
   # (add new for operator).
@@ -115,7 +115,7 @@ module Mutator
     newBlock  = Expr(:block,)
     newFunc   = _getNewFunc(code)
     func      = [:call, newFunc]
-    maxParams = rand(0:code.funcMaxParams)
+    maxParams = rand(0:code.funcMaxArgs)
     funcArgs  = (Dict{ASCIIString, Any})[]
     vars      = (Symbol)[]
 
