@@ -40,8 +40,7 @@ module Mutator
   #   var2 = ~var1
   #   var3 = -var2 * ~34
   #
-  @debug function _addVar(code::Script.Code)
-    @bp
+  function _addVar(code::Script.Code)
     block  = code.blocks[rand(1:length(code.blocks))]
     vars   = block["vars"]
     ex     = _getVarOrNum(vars)
