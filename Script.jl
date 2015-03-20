@@ -46,7 +46,7 @@
     # 
     #     [[
     #       "vars"  => Symbol[],      # no variables in t()
-    #       "block" => _code.args[2], # block of t() function
+    #       "block" => code.args[2],  # block of t() function
     #       "parent"=> [              # there is no parent for t() function
     #         "vars"  => [],          
     #         "block" => nothing,
@@ -55,7 +55,7 @@
     #
     # For this example code should be:
     #
-    #     :(function t();end)
+    #     code = :(function t();end)
     #
     # This map was created for fast access to the random code block. For example
     # Mutator uses this to make a change or add something new to the code. It's
