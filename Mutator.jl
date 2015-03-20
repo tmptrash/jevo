@@ -130,6 +130,7 @@ module Mutator
     push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>newBlock])
   end
   function _addFuncCall()
+    
   end
   function _addLibCall()
   end

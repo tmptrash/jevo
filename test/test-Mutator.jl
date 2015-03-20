@@ -15,6 +15,6 @@ facts("test tests") do
   script = Script.Code(0,0,10,code,blocks)
   Mutator._addVar(script)
 
-  @fact length(code.args[2].args) => 1
+  @fact length(code.args[2].args)    => 1
   @fact code.args[2].args[1].args[1] => :(var1)
 end
