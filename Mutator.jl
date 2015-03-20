@@ -144,8 +144,7 @@ module Mutator
   # TODO:
   # @param {Script.Code} code Script of particular organism we have to mutate
   #
-  @debug function _addFuncCall(code::Script.Code)
-    @bp
+  function _addFuncCall(code::Script.Code)
     block = code.blocks[rand(1:length(code.blocks))]
     vars  = block["vars"]
     func  = code.funcs[rand(1:length(code.funcs))]
@@ -221,8 +220,7 @@ module Mutator
   # @param  {Bool} simple true if method should return only {var|const} without sign
   # @return {Expr}
   #
-  @debug function _getVarOrNum(vars, simple=false)
-    @bp
+  function _getVarOrNum(vars, simple=false)
     if (length(vars) === 0) return _getNum(simple) end
     v = vars[rand(1:length(vars))]
     if _randTrue() 
