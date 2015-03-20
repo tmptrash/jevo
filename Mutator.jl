@@ -31,12 +31,15 @@ module Mutator
 
   #
   # Adds variable into the random block within the script. Format:
+  #
   #   var = [sign]{const|var} [op [sign]{const|var}]
+  #
   # Added variable will be added to _blocks[xxx]["vars"] array. _blocks
   # field must contain at least one block.
   # @param {Script.Code} code Script of some particular organism, we 
   # have to mutate (ad new variable).
   # Examples:
+  #
   #   var1 = 3
   #   var2 = ~var1
   #   var3 = -var2 * ~34
@@ -55,12 +58,15 @@ module Mutator
   end
   #
   # Adds new "for" keyword into the random block within the script. Format:
+  #
   #   for var = 1:{var|const};end
+  #
   # "for" operator adds new block into existing one. This block is between
   # "for" and "end" operators. Also, this block contains it's variables scope.
   # @param {Script.Code} code Script of particular organism we have to mutate
   # (add new for operator).
   # Examples:
+  #
   #   for i = 1:3;end
   #   for i = 1:k;end
   #
@@ -75,12 +81,15 @@ module Mutator
   end
   #
   # Adds new if operator into random block within a script. Format:
+  #
   #   if {var|const} Cond {var|const};else;end
+  #
   # "if" operator adds new block into existing one. But, this block doesn't
   # contain variables scope. It uses parent's scope.
   # @param {Script.Code} code Script of particulat organism, we have to mutate
   # (add new if operator).
   # Examples:
+  #
   #   if 1<2;end
   #   if i<3;else;end
   #   if i>k;end
@@ -100,18 +109,20 @@ module Mutator
   end
   # TODO: describe function creation details
   # Adds new named function into the main block within script. Format:
+  #
   #   function XXX(args);end
+  #
   # "function" operator adds new block into existing one. This block is in a 
   # body of the function. Also, this block contains it's own variables scope.
   # It's important, that all functions will leave in main block only.
   # @param {Script.Code} code Script of particular organism we have to mutate
   # (add new function).
   # Example:
+  #
   #   function func1();end
   #
   function _addFunc(code::Script.Code)
     block     = code.code.args[2]
-    funcs     = code.blocks[1]["parent"]["funcs"]
     newBlock  = Expr(:block,)
     newFunc   = _getNewFunc(code)
     func      = [:call, newFunc]
@@ -125,17 +136,32 @@ module Mutator
       push!(func, arg)
       push!(vars, arg)
     end
-    push!(funcs, ["name"=>string(newFunc), "args"=>funcArgs])
+    push!(code.funcs, ["name"=>string(newFunc), "args"=>funcArgs])
     push!(block.args, Expr(:function, apply(Expr, func), newBlock))
     push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>newBlock])
   end
-  function _addFuncCall()
-    
+  #
+  # TODO:
+  # @param {Script.Code} code Script of particular organism we have to mutate
+  #
+  @debug function _addFuncCall(code::Script.Code)
+    @bp
+    block = code.blocks[rand(1:length(code.blocks))]
+    vars  = block["vars"]
+    func  = code.funcs[rand(1:length(code.funcs))]
+    args  = Any[:call, symbol(func["name"])]
+
+    for i = 1:length(func["args"])
+        # TODO: possible problem here. we don't check var type
+      v = _getVarOrNum(vars, true)
+      push!(args, v)
+    end
+    push!(block["block"].args, apply(Expr, args))
   end
   function _addLibCall()
   end
   #
-  #
+  # 
   #
   function _changeVar()
   end
@@ -195,10 +221,19 @@ module Mutator
   # @param  {Bool} simple true if method should return only {var|const} without sign
   # @return {Expr}
   #
-  function _getVarOrNum(vars, simple=false)
+  @debug function _getVarOrNum(vars, simple=false)
+    @bp
     if (length(vars) === 0) return _getNum(simple) end
     v = vars[rand(1:length(vars))]
-    _randTrue() ? (simple ? v : Expr(:call, _sign[rand(1:length(_sign))], v)) : _getNum(simple)
+    if _randTrue() 
+      if simple 
+        v
+      else
+        Expr(:call, _sign[rand(1:length(_sign))], v)
+      end
+    else
+      _getNum(simple)
+    end
   end
   #
   # Returns expression for number in format: [sign]const

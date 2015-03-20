@@ -38,11 +38,12 @@
     #
     code::Expr
     #
-    # {Array} This is an array of Julia's blocks. Block or quote is a section
-    # in a code, which creates it's own scope. For example these operators create
-    # it's own scope: function, for, try... Every block is a map of three elements: 
-    # "parent"=>Reference to parent block, "vars"=>Array of vars symbols in current
-    # block and "block"=>Array of all block's inner expressions. Example:
+    # {Array{Dict{ASCIIString, Any}}} This is an array of Julia's blocks. Block or 
+    # quote is a section in a code, which creates it's own scope. For example these 
+    # operators create it's own scope: function, for, try... Every block is a map 
+    # of three elements: "parent"=>Reference to parent block, "vars"=>Array of vars 
+    # symbols in current block and "block"=>Array of all block's inner expressions. 
+    # Example:
     # 
     #     [[
     #       "vars"  => Symbol[],      # no variables in t()
@@ -63,7 +64,12 @@
     #
     blocks::Array{Dict{ASCIIString, Any}}
     #
-    # 
+    # {Array{Dict{ASCIIString, Any}}} Map of the functions with parameters 
+    # available to call in script' code. All functions live on one level.
+    # It's impossible to have inner function in other function. Example: 
+    #  
+    #     ["name"=>"func1", "args"=>[["name"=>"var1", "type"=>Int], ...]]
+    #
     #
     funcs::Array{Dict{ASCIIString, Any}}
   end

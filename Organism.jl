@@ -36,9 +36,13 @@ module Organism
       "parent"=> [                                  # function's t() block
           "vars"  => [],
           "block" => _code.args[2],
-          "parent"=> nothing,
-          "funcs" => (Dict{ASCIIString, Any})[]     # functions available only in main block
+          "parent"=> nothing
       ],
-    ]]
+    ]],
+    #
+    # {Array{Dict{ASCIIString, Any}}} All functions in a script. See
+    # Script.Code.funcs for details.
+    #
+    (Dict{ASCIIString, Any})[]
   )
 end
