@@ -62,5 +62,9 @@
     # important, that this map is one dimention, because real code is a tree.
     #
     blocks::Array{Dict{ASCIIString, Any}}
+    #
+    # 
+    #
+    funcs::Array{Dict{ASCIIString, Any}}
   end
 end
