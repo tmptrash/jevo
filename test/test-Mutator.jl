@@ -1,7 +1,7 @@
 using FactCheck
 using Mutator
 
-facts("test tests") do
+facts("Mutator module") do
   code   = :(function t();end)
   blocks = [[
     "vars"  => Symbol[],
