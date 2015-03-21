@@ -6,6 +6,7 @@
 # TODO: describe _code. Code structure should be described in Script.Code type
 # TODO: describe [], {|}, var, op, sign, const keywords
 # TODO: add types to increase the speed
+# TODO: main while() loop musn't be removed
 #
 module Mutator
   export mutate
@@ -145,19 +146,19 @@ module Mutator
   # @param {Script.Code} code Script of particular organism we have to mutate
   #
   function _addFuncCall(code::Script.Code)
-    block = code.blocks[rand(1:length(code.blocks))]
-    vars  = block["vars"]
-    func  = code.funcs[rand(1:length(code.funcs))]
-    args  = Any[:call, symbol(func["name"])]
+    block  = code.blocks[rand(1:length(code.blocks))]
+    vars   = block["vars"]
+    func   = code.funcs[rand(1:length(code.funcs))]
+    args   = Any[:call, symbol(func["name"])]
+    varLen = length(vars)
 
-    for i = 1:length(func["args"])
-        # TODO: possible problem here. we don't check var type
-      v = _getVarOrNum(vars, true)
-      push!(args, v)
-    end
-    push!(block["block"].args, apply(Expr, args))
-  end
-  function _addLibCall()
+    # TODO: possible problem here. we don't check var type.
+    # TODO: we assume, that all vars are Int
+    for i = 1:length(func["args"]) push!(args, _getVarOrNum(vars, true)) end
+    #
+    # If no variables in current block, just call the function and ignore return
+    #
+    push!(block["block"].args, varLen > 0 ? Expr(:(=), vars[rand(1:varLen)], apply(Expr, args)) : apply(Expr, args))
   end
   #
   # 
@@ -172,8 +173,6 @@ module Mutator
   end
   function _changeFuncCall()
   end
-  function _changeLibCall()
-  end
   #
   #
   #
@@ -186,8 +185,6 @@ module Mutator
   function _delFunc()
   end
   function _delFuncCall()
-  end
-  function _delLibCall()
   end
 
   #
@@ -259,7 +256,7 @@ module Mutator
   #
   # TODO:
   #
-  const _add    = [_addVar,    _addFor,    _addIf,    _addFunc,    _addFuncCall,    _addLibCall   ]
-  const _change = [_changeVar, _changeFor, _changeIf, _changeFunc, _changeFuncCall, _changeLibCall]
-  const _del    = [_delVar,    _delFor,    _delIf,    _delFunc,    _delFuncCall,    _delLibCall   ]
+  const _add    = [_addVar,    _addFor,    _addIf,    _addFunc,    _addFuncCall   ]
+  const _change = [_changeVar, _changeFor, _changeIf, _changeFunc, _changeFuncCall]
+  const _del    = [_delVar,    _delFor,    _delIf,    _delFunc,    _delFuncCall   ]
 end
