@@ -36,14 +36,14 @@ module Mutator
   #   var = [sign]{const|var} [op [sign]{const|var}]
   #
   # Added variable will be added to _blocks[xxx]["vars"] array. _blocks
-  # field must contain at least one block.
-  # @param {Script.Code} code Script of some particular organism, we 
-  # have to mutate (ad new variable).
-  # Examples:
+  # field must contain at least one block. Examples:
   #
   #   var1 = 3
   #   var2 = ~var1
   #   var3 = -var2 * ~34
+  #
+  # @param {Script.Code} code Script of some particular organism, we 
+  # have to mutate (ad new variable).
   #
   function _addVar(code::Script.Code)
     block  = code.blocks[rand(1:length(code.blocks))]
@@ -64,12 +64,13 @@ module Mutator
   #
   # "for" operator adds new block into existing one. This block is between
   # "for" and "end" operators. Also, this block contains it's variables scope.
-  # @param {Script.Code} code Script of particular organism we have to mutate
-  # (add new for operator).
   # Examples:
   #
   #   for i = 1:3;end
   #   for i = 1:k;end
+  #
+  # @param {Script.Code} code Script of particular organism we have to mutate
+  # (add new for operator).
   #
   function _addFor(code::Script.Code)
     block   = code.blocks[rand(1:length(code.blocks))]
@@ -87,13 +88,14 @@ module Mutator
   #
   # "if" operator adds new block into existing one. But, this block doesn't
   # contain variables scope. It uses parent's scope.
-  # @param {Script.Code} code Script of particulat organism, we have to mutate
-  # (add new if operator).
   # Examples:
   #
   #   if 1<2;end
   #   if i<3;else;end
   #   if i>k;end
+  #
+  # @param {Script.Code} code Script of particulat organism, we have to mutate
+  # (add new if operator).
   #
   function _addIf(code::Script.Code)
     block    = code.blocks[rand(1:length(code.blocks))]
@@ -116,11 +118,12 @@ module Mutator
   # "function" operator adds new block into existing one. This block is in a 
   # body of the function. Also, this block contains it's own variables scope.
   # It's important, that all functions will leave in main block only.
-  # @param {Script.Code} code Script of particular organism we have to mutate
-  # (add new function).
   # Example:
   #
   #   function func1();end
+  #
+  # @param {Script.Code} code Script of particular organism we have to mutate
+  # (add new function).
   #
   function _addFunc(code::Script.Code)
     block     = code.code.args[2].args[2]
@@ -149,12 +152,13 @@ module Mutator
   # This call doesn't add new code block. It may return a value. So, if 
   # current block contains variables one of them will be set into funcation
   # return value. There is no difference between embedded and generated
-  # functions. So it's possible to call clone() or funcXXX().
-  # @param {Script.Code} code Script of particular organism we have to mutate
-  # Example:
+  # functions. So it's possible to call clone() or funcXXX(). Example:
+  #
   #     var3 = func1(var1, 12)
   #     clone()
   #     var1 = grabEnergyLeft(var2)
+  #
+  # @param {Script.Code} code Script of particular organism we have to mutate
   #
   function _addFuncCall(code::Script.Code)
     block  = code.blocks[rand(1:length(code.blocks))]
@@ -172,17 +176,40 @@ module Mutator
     push!(block["block"].args, varLen > 0 ? Expr(:(=), vars[rand(1:varLen)], apply(Expr, args)) : apply(Expr, args))
   end
   #
-  # 
+  # General change function. It calls special function (like _changeVar() or
+  # _changeIf()) inside depending on current operator. First, it find random
+  # block. Second - it find random line in this block. Depending of line type
+  # (e.g. var assignment, if operator, function call,...) it calls special
+  # change function.
+  # @param {Script.Code} code Script of particular organism we have to mutate
   #
-  function _changeVar()
+  function _changeLine(code::Script.Code)
+    #
+    # We can't change code, because there is no code at the moment.
+    #
+    if length(code.blocks) === 0 || length(code.blocks) === 1 && length(code.blocks[1].args) === 0 return nothing end
+    block  = code.blocks[rand(1:length(code.blocks))]
+    if length(block.args) === 0 return nothing end
+    line   = rand(1:length(block.args))
+
+    #
+    # Possible operations: funcXXX(args)
+    #
+    if line.head === :call
+      _changeFuncCall(line)
+    elseif line.head === :(=)
+      if 
+    end
   end
-  function _changeFor()
+  function _changeVar(line)
   end
-  function _changeIf()
+  function _changeFor(line)
   end
-  function _changeFunc()
+  function _changeIf(line)
   end
-  function _changeFuncCall()
+  function _changeFunc(line)
+  end
+  function _changeFuncCall(line)
   end
   #
   #
