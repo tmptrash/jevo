@@ -123,7 +123,7 @@ module Mutator
   #   function func1();end
   #
   function _addFunc(code::Script.Code)
-    block     = code.code.args[2]
+    block     = code.code.args[2].args[2]
     newBlock  = Expr(:block,)
     newFunc   = _getNewFunc(code)
     func      = [:call, newFunc]
