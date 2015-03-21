@@ -151,6 +151,10 @@ module Mutator
   # return value. There is no difference between embedded and generated
   # functions. So it's possible to call clone() or funcXXX().
   # @param {Script.Code} code Script of particular organism we have to mutate
+  # Example:
+  #     var3 = func1(var1, 12)
+  #     clone()
+  #     var1 = grabEnergyLeft(var2)
   #
   function _addFuncCall(code::Script.Code)
     block  = code.blocks[rand(1:length(code.blocks))]
