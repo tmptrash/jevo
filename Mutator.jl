@@ -142,7 +142,14 @@ module Mutator
     push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>newBlock])
   end
   #
-  # TODO:
+  # Adds new function call into the random block within script. Format:
+  #
+  #   [var=]funcXXX([args])
+  #
+  # This call doesn't add new code block. It may return a value. So, if 
+  # current block contains variables one of them will be set into funcation
+  # return value. There is no difference between embedded and generated
+  # functions. So it's possible to call clone() or funcXXX().
   # @param {Script.Code} code Script of particular organism we have to mutate
   #
   function _addFuncCall(code::Script.Code)
