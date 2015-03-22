@@ -7,6 +7,7 @@
 # TODO: describe [], {|}, var, op, sign, const keywords
 # TODO: add types to increase the speed
 # TODO: main while() loop musn't be removed
+# TODO: think about functions copy (like gene copy)
 #
 module Mutator
   export mutate
@@ -214,7 +215,22 @@ module Mutator
       _changeIf(line)
     end
   end
-  function _changeVar(line)
+  #
+  # TODO: describe how changer works. it desn't increate/decrease
+  # TODO: length of line, just change var/number in one place
+  # TODO: possible problem with only one supported type Int
+  # @param {Expr} line Line with variables to change
+  #
+  function _changeVar(line::Expr)
+    #
+    # map of variables and numbers for changing
+    #
+    vars = Dict{ASCIIString, Any}[]
+    #
+    # First name is always a variable 
+    #
+    push!(vars, ["expr"=>line, "index"=>1])
+    _parseVars(vars, line, 2)
   end
   function _changeFor(line)
   end
@@ -236,6 +252,33 @@ module Mutator
   function _delFuncCall()
   end
 
+  #
+  # Parses expression recursively and collects all variables and numbers
+  # into "vars" map. Every varible or number is a record in vars. Example:
+  #
+  #     ["expr"=>expr, "index"=>1]
+  #
+  # This line means that expr.args[1] contains variable or number
+  # @params {Array} vars Container for variables: [["expr"=>Expr, "index"=>Number],...]
+  # TODO:
+  # TODO:
+  #
+  @debug function _parseVars(vars::Array{Dict{ASCIIString, Any}}, parent::Expr, index)
+    @bp
+    expr = parent.args[index]
+
+    if typeof(expr) !== Expr
+      push!(vars, ["expr"=>parent, "index"=>index])
+      return nothing
+    end
+    for i = 2:length(expr.args)
+      if typeof(expr.args[i]) === Expr
+        _parseVars(vars, expr, i)
+      else
+        push!(vars, ["expr"=>expr, "index"=>i])
+      end
+    end
+  end
   #
   # Chooses (returns) true or false randomly. Is used to choose between two
   # variants of something. For example + or - sign.
