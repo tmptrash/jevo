@@ -193,12 +193,25 @@ module Mutator
     line   = rand(1:length(block.args))
 
     #
-    # Possible operations: funcXXX(args)
+    # Possible operations: funcXXX(args), varXXX = funcXXX(args)
     #
-    if line.head === :call
+    if line.head === :call || (line.head === :(=) && typeof(line.args[2]) === Expr && typeof(eval(line.args[2].args[1])) === Function)
       _changeFuncCall(line)
+    #
+    # Possible operations: varXXX = {varXXX|number}[ op {varXXX|number}]
+    #
     elseif line.head === :(=)
-      if 
+      _changeVar(line)
+    #
+    # Possible operations: for varXXX = 1:XXX...end
+    #
+    elseif line.head == :for
+      _changeFor(line)
+    #
+    # Possible operations: if...end
+    #
+    elseif line.head == :if
+      _changeIf(line)
     end
   end
   function _changeVar(line)
@@ -206,8 +219,6 @@ module Mutator
   function _changeFor(line)
   end
   function _changeIf(line)
-  end
-  function _changeFunc(line)
   end
   function _changeFuncCall(line)
   end
@@ -295,6 +306,6 @@ module Mutator
   # TODO:
   #
   const _add    = [_addVar,    _addFor,    _addIf,    _addFunc,    _addFuncCall   ]
-  const _change = [_changeVar, _changeFor, _changeIf, _changeFunc, _changeFuncCall]
+  const _change = [_changeVar, _changeFor, _changeIf,              _changeFuncCall]
   const _del    = [_delVar,    _delFor,    _delIf,    _delFunc,    _delFuncCall   ]
 end

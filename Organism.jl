@@ -17,7 +17,7 @@ module Organism
   # {Expr} Native organism's code on Julia. First oranisms start them living
   # with this default code. Later, Mutator module will change it.
   #
-  _code = :(function t()
+  _code = :(function life()
     begin
       #
       # ----------------------------------------------------------------------
@@ -129,7 +129,7 @@ module Organism
     [[                                              # while(true) block
       "vars"  => Symbol[],
       "block" => _code.args[2].args[4].args[2],
-      "parent"=> [                                  # function's t() block
+      "parent"=> [                                  # function's life() block
           "vars"  => [],
           "block" => _code.args[2],
           "parent"=> nothing
