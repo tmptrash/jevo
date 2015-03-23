@@ -229,7 +229,7 @@ module Mutator
     #
     # First name is always a variable 
     #
-    push!(vars, ["expr"=>line, "index"=>1])
+    push!(vars, ["expr"=>line, "index"=>1, "var"=>true])
     _parseVars(vars, line, 2)
   end
   function _changeFor(line)
@@ -268,14 +268,16 @@ module Mutator
     expr = parent.args[index]
 
     if typeof(expr) !== Expr
-      push!(vars, ["expr"=>parent, "index"=>index])
+      push!(vars, ["expr"=>parent, "index"=>index, "var"=>true])
       return nothing
     end
-    for i = 2:length(expr.args)
+    for i = 1:length(expr.args)
       if typeof(expr.args[i]) === Expr
         _parseVars(vars, expr, i)
+      elseif typeof(expr.args[i]) === Symbol
+        push!(vars, ["expr"=>expr, "index"=>i, "var"=>i!==1])
       else
-        push!(vars, ["expr"=>expr, "index"=>i])
+        push!(vars, ["expr"=>expr, "index"=>i, "var"=>true])
       end
     end
   end
