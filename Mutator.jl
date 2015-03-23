@@ -202,7 +202,7 @@ module Mutator
     # Possible operations: varXXX = {varXXX|number}[ op {varXXX|number}]
     #
     elseif line.head === :(=)
-      _changeVar(line)
+      _changeVar(block, line)
     #
     # Possible operations: for varXXX = 1:XXX...end
     #
@@ -219,11 +219,12 @@ module Mutator
   # TODO: describe how changer works. it desn't increate/decrease
   # TODO: length of line, just change var/number in one place
   # TODO: possible problem with only one supported type Int
-  # @param {Expr} line Line with variables to change
+  # @param {Dict} block Current block of code 
+  # @param {Expr} line  Line with variables to change
   #
-  function _changeVar(line::Expr)
+  function _changeVar(block, line::Expr)
     #
-    # map of variables and numbers for changing
+    # map of variables, numbers and operations for changing
     #
     vars = Dict{ASCIIString, Any}[]
     #
@@ -231,6 +232,17 @@ module Mutator
     #
     push!(vars, ["expr"=>line, "index"=>1, "var"=>true])
     _parseVars(vars, line, 2)
+    #
+    # There are three types of change: 
+    #
+    v = vars[rand(1:length(vars))]
+    if (v["var"])
+      v["expr"].args[v["index"]] = _getVarOrNum(block["vars"], true)
+    elseif findfirst(_sign, v["expr"].args[v["index"]]) > 0
+      v["expr"].args[v["index"]] = _sign[rand(1:length(_sign))]
+    else
+      v["expr"].args[v["index"]] = _op[rand(1:length(_op))]
+    end
   end
   function _changeFor(line)
   end
@@ -263,8 +275,7 @@ module Mutator
   # TODO:
   # TODO:
   #
-  @debug function _parseVars(vars::Array{Dict{ASCIIString, Any}}, parent::Expr, index)
-    @bp
+  function _parseVars(vars::Array{Dict{ASCIIString, Any}}, parent::Expr, index)
     expr = parent.args[index]
 
     if typeof(expr) !== Expr
@@ -338,7 +349,7 @@ module Mutator
   # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y.
   # ! operator should be here.
   #
-  const _sign     = [+, -, ~]
+  const _sign     = [:+, :-, :~]
   #
   #
   #
