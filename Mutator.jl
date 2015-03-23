@@ -222,8 +222,7 @@ module Mutator
   # @param {Dict} block Current block of code 
   # @param {Expr} line  Line with variables to change
   #
-  @debug function _changeVar(block, line::Expr)
-    @bp
+  function _changeVar(block, line::Expr)
     #
     # map of variables, numbers and operations for changing
     #
