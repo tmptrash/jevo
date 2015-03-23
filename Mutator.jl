@@ -222,7 +222,8 @@ module Mutator
   # @param {Dict} block Current block of code 
   # @param {Expr} line  Line with variables to change
   #
-  function _changeVar(block, line::Expr)
+  @debug function _changeVar(block, line::Expr)
+    @bp
     #
     # map of variables, numbers and operations for changing
     #
@@ -233,11 +234,16 @@ module Mutator
     push!(vars, ["expr"=>line, "index"=>1, "var"=>true])
     _parseVars(vars, line, 2)
     #
-    # There are three types of change: 
+    # There are three types of change: var, number, operation
+    # TODO: describe these ifs
     #
     v = vars[rand(1:length(vars))]
     if (v["var"])
-      v["expr"].args[v["index"]] = _getVarOrNum(block["vars"], true)
+      if v["expr"] === line && v["index"] === 1
+        v["expr"].args[1] = block["vars"][rand(1:length(block["vars"]))]
+      else
+        v["expr"].args[v["index"]] = _getVarOrNum(block["vars"], true)
+      end
     elseif findfirst(_sign, v["expr"].args[v["index"]]) > 0
       v["expr"].args[v["index"]] = _sign[rand(1:length(_sign))]
     else
