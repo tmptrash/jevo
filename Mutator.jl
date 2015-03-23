@@ -80,7 +80,7 @@ module Mutator
     newFor  = Expr(:for, Expr(:(=), newVar, Expr(:(:), 1, _getVarOrNum(block["vars"], true))), newBody)
 
     push!(block["block"].args, newFor)
-    push!(code.blocks, ["perent"=>block, "vars"=>[newVar], "block"=>newBody]);
+    push!(code.blocks, ["parent"=>block, "vars"=>[newVar], "block"=>newBody]);
   end
   #
   # Adds new if operator into random block within a script. Format:
