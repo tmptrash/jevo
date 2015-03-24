@@ -1,6 +1,19 @@
 #
-# TODO: description...
-# TODO: public methods
+# This module changes organism's script. Every change or mutation is a small
+# add, change or remove operation on script. Mutation does by Julia language 
+# rules. It's impossible to mutate the script with syntax error. But it's 
+# possible to create logical errors. For example it's possible to have 
+# stack overflow. This is normal situation. An exception in this case will
+# occure and organism will lost some energy. Main method here is called
+# mutate(). It makes one change/add/remove operation with script. It works
+# in a simple way:
+#
+#   1. Finds random block of code in Script.Code.blocks array
+#   2. Choose one operation (add,remove,change)
+#   3. apply operation
+#
+# TODO: every peivate method should have standart description of operation it
+# TODO: works with. e.g.: if {var|const} op {var|const} end
 # TODO: usage...
 # TODO: amount of add,delete and change mutations depend on script size
 # TODO: describe _code. Code structure should be described in Script.Code type
@@ -17,8 +30,7 @@ module Mutator
   using  Debug
 
   #
-  # Do one random mutation of script.
-  # TODO: describe what is mutation. It's typed (add, delete, change)
+  # Do one random mutation of script. It may be add, remove or change.
   # @param  {Script.Code} Organism's script we have to mutate
   # @return {Bool} true means, that mutation has done, false - some mistake
   #
@@ -103,7 +115,9 @@ module Mutator
     block    = code.blocks[rand(1:length(code.blocks))]
     vars     = block["vars"]
     ifParams = [:if, Expr(:comparison, _getVarOrNum(vars, true), _cond[rand(1:length(_cond))], _getVarOrNum(vars, true)), Expr(:block,)]
-
+    #
+    # else block is optional
+    #
     if _randTrue()
       push!(ifParams, Expr(:block,))
       push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[4]])
@@ -217,7 +231,7 @@ module Mutator
     end
   end
   #
-  # TODO: describe how changer works. it desn't increate/decrease
+  # TODO: describe how changer works. it desn't increase/decrease
   # TODO: length of line, just change var/number in one place
   # TODO: possible problem with only one supported type Int
   # @param {Dict} block Current block of code 
@@ -253,7 +267,7 @@ module Mutator
   #
   # Changes for operator. It's possible to change min or max expression.
   # It's impossible to change variable. For example, we can't change "i"
-  # in this for:
+  # in this loop:
   #
   #     for i = 1:k;end
   #
@@ -265,7 +279,18 @@ module Mutator
     v = _getVarOrNum(block["vars"], true)
     line.args[1].args[2].args[_randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? _getNum(true) : v)
   end
-  function _changeIf(line)
+  #
+  # TODO:
+  # @param {Dict} block Current block of code 
+  # @param {Expr} line  Line with for operator to change
+  #
+  @debug function _changeIf(block, line::Expr)
+    @bp
+    #
+    # 2 - condition, 1,3 - variables or numbers
+    #
+    index = _randTrue() ? 2 : (_randTrue() ? 1: 3)
+    line.args[1].args[index] = (index === 2 ? _cond[rand(1:length(_cond))] : _getVarOrNum(block["vars"], true))
   end
   function _changeFuncCall(line)
   end
