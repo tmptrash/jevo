@@ -284,8 +284,7 @@ module Mutator
   # @param {Dict} block Current block of code 
   # @param {Expr} line  Line with for operator to change
   #
-  @debug function _changeIf(block, line::Expr)
-    @bp
+  function _changeIf(block, line::Expr)
     #
     # 2 - condition, 1,3 - variables or numbers
     #
