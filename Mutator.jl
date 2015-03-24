@@ -61,14 +61,15 @@ module Mutator
   #
   # Adds new "for" keyword into the random block within the script. Format:
   #
-  #   for var = 1:{var|const};end
+  #   for var = {var|const}:{var|const};end
   #
   # "for" operator adds new block into existing one. This block is between
   # "for" and "end" operators. Also, this block contains it's variables scope.
   # Examples:
   #
-  #   for i = 1:3;end
-  #   for i = 1:k;end
+  #   for i = 2:3;end
+  #   for i = 7:k;end
+  #   for i = m:k;end
   #
   # @param {Script.Code} code Script of particular organism we have to mutate
   # (add new for operator).
@@ -77,7 +78,7 @@ module Mutator
     block   = code.blocks[rand(1:length(code.blocks))]
     newVar  = _getNewVar(code)
     newBody = Expr(:block,)
-    newFor  = Expr(:for, Expr(:(=), newVar, Expr(:(:), 1, _getVarOrNum(block["vars"], true))), newBody)
+    newFor  = Expr(:for, Expr(:(=), newVar, Expr(:(:), _getVarOrNum(block["vars"], true), _getVarOrNum(block["vars"], true))), newBody)
 
     push!(block["block"].args, newFor)
     push!(code.blocks, ["parent"=>block, "vars"=>[newVar], "block"=>newBody]);
@@ -249,7 +250,20 @@ module Mutator
       v["expr"].args[v["index"]] = _op[rand(1:length(_op))]
     end
   end
-  function _changeFor(line)
+  #
+  # Changes for operator. It's possible to change min or max expression.
+  # It's impossible to change variable. For example, we can't change "i"
+  # in this for:
+  #
+  #     for i = 1:k;end
+  #
+  # It changes only one variable|number per one call.
+  # @param {Dict} block Current block of code 
+  # @param {Expr} line  Line with for operator to change
+  #
+  function _changeFor(block, line::Expr)
+    v = _getVarOrNum(block["vars"], true)
+    line.args[1].args[2].args[_randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? _getNum(true) : v)
   end
   function _changeIf(line)
   end
