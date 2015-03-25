@@ -291,7 +291,7 @@ module Mutator
     index = _randTrue() ? 2 : (_randTrue() ? 1: 3)
     line.args[1].args[index] = (index === 2 ? _cond[rand(1:length(_cond))] : _getVarOrNum(block["vars"], true))
   end
-  function _changeFuncCall(line)
+  function _changeFuncCall(block, line::Expr)
   end
   #
   #
