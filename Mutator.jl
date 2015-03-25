@@ -189,7 +189,7 @@ module Mutator
     #
     # If no variables in current block, just call the function and ignore return
     #
-    push!(block["block"].args, varLen > 0 ? Expr(:(=), vars[rand(1:varLen)], apply(Expr, args)) : apply(Expr, args))
+    push!(block["block"].args, varLen === 0 || _randTrue() ? apply(Expr, args) : Expr(:(=), vars[rand(1:varLen)], apply(Expr, args)))
   end
   #
   # General change function. It calls special function (like _changeVar() or
@@ -280,7 +280,11 @@ module Mutator
     line.args[1].args[2].args[_randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? _getNum(true) : v)
   end
   #
-  # TODO:
+  # Change in this case means, changing of operator or 
+  # variables. For example we may change "<", "v1" or "v2":
+  #
+  #     if v1 < v2...else...end
+  #
   # @param {Dict} block Current block of code 
   # @param {Expr} line  Line with for operator to change
   #
@@ -291,7 +295,20 @@ module Mutator
     index = _randTrue() ? 2 : (_randTrue() ? 1: 3)
     line.args[1].args[index] = (index === 2 ? _cond[rand(1:length(_cond))] : _getVarOrNum(block["vars"], true))
   end
+  #
+  # Change in this case means changing one function argument.
+  # We can't change function name, because in this case we have
+  # to change all arguments too.
+  # @param {Dict} block Current block of code 
+  # @param {Expr} line  Line with for operator to change
+  #
   function _changeFuncCall(block, line::Expr)
+    v = _getVarOrNum(block["vars"], true)
+    if line.head === :(=)
+      line.args[2].args[rand(2:length(line.args[2].args))] = v
+    else
+      line.args[rand(2:length(line.args))] = v
+    end
   end
   #
   #
