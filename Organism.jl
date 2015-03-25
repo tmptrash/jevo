@@ -5,6 +5,7 @@
 #
 # TODO: think about energy limit for organism. add new library
 # TODO: function: fullOfEnergy():Bool
+# TODO: add memory operations: mem_read(index):Int, mem_write(index, Int)
 #
 module Organism
   import Mutator

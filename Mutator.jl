@@ -21,6 +21,8 @@
 # TODO: add types to increase the speed
 # TODO: main while() loop musn't be removed
 # TODO: think about functions copy (like gene copy)
+# TODO: It's better to use Types instead of Array{Dict{ASCIIString, Any}} and so on
+# TODO: This is how we may remove Dictionaries like this: d["xxx"]...
 #
 module Mutator
   export mutate
@@ -53,7 +55,7 @@ module Mutator
   #
   #   var1 = 3
   #   var2 = ~var1
-  #   var3 = -var2 * ~34
+  #   var2 = -var2 * ~34
   #
   # @param {Script.Code} code Script of some particular organism, we 
   # have to mutate (ad new variable).
@@ -62,7 +64,7 @@ module Mutator
     block  = code.blocks[rand(1:length(code.blocks))]
     vars   = block["vars"]
     ex     = _getVarOrNum(vars)
-    newVar = _getNewVar(code)
+    newVar = (_randTrue() && length(vars) > 0 ? vars[rand(1:length(vars))] : _getNewVar(code))
 
     if (_randTrue())
       ex = Expr(:call, _op[rand(1:length(_op))], ex, _getVarOrNum(vars))
@@ -192,42 +194,56 @@ module Mutator
     push!(block["block"].args, varLen === 0 || _randTrue() ? apply(Expr, args) : Expr(:(=), vars[rand(1:varLen)], apply(Expr, args)))
   end
   #
-  # General change function. It calls special function (like _changeVar() or
-  # _changeIf()) inside depending on current operator. First, it find random
-  # block. Second - it find random line in this block. Depending of line type
-  # (e.g. var assignment, if operator, function call,...) it calls special
-  # change function.
-  # @param {Script.Code} code Script of particular organism we have to mutate
+  # Works in two steps: first, it finds random block. Second - it finds random 
+  # line in this block. Depending of line type (e.g. var assignment, if operator, 
+  # function call,...) it calls special callback function. Callback functions
+  # should be in this order:
   #
-  function _changeLine(code::Script.Code)
+  #     [cbVar, cbFor, cbIf, cbFunc, cbFuncCall]
+  #
+  # Every callback function will be called with two arguments: 
+  #
+  #     block::Array{Dict{ASCIIString, Any}}, line::Expr
+  #
+  # @param {Script.Code} code Script of particular organism we have to mutate
+  # @param {Array{Function}} cbs Callback functions for every type of operator
+  #
+  function _processLine(code::Script.Code, cbs::Array{Function})
     #
     # We can't change code, because there is no code at the moment.
     #
     if length(code.blocks) === 0 || length(code.blocks) === 1 && length(code.blocks[1].args) === 0 return nothing end
     block  = code.blocks[rand(1:length(code.blocks))]
     if length(block.args) === 0 return nothing end
-    line   = rand(1:length(block.args))
+    index  = uint(rand(1:length(block.args)))
+    line   = block["block"][index]
+    head   = line.head
 
     #
     # Possible operations: funcXXX(args), varXXX = funcXXX(args)
     #
-    if line.head === :call || (line.head === :(=) && typeof(line.args[2]) === Expr && typeof(eval(line.args[2].args[1])) === Function)
-      _changeFuncCall(line)
+    if head === :call || (head === :(=) && typeof(line.args[2]) === Expr && typeof(eval(line.args[2].args[1])) === Function)
+      cbs[5](block, line, index)
     #
-    # Possible operations: varXXX = {varXXX|number}[ op {varXXX|number}]
+    # Possible operations: function funcXXX(args)...end
     #
-    elseif line.head === :(=)
-      _changeVar(block, line)
-    #
-    # Possible operations: for varXXX = 1:XXX...end
-    #
-    elseif line.head == :for
-      _changeFor(line)
+    elseif head === :function
+      cbs[4](block, line, index)
     #
     # Possible operations: if...end
     #
-    elseif line.head == :if
-      _changeIf(line)
+    elseif head == :if
+      cbs[3](block, line, index)
+    #
+    # Possible operations: for varXXX = 1:XXX...end
+    #
+    elseif head == :for
+      cbs[2](block, line, index)
+    #
+    # Possible operations: varXXX = {varXXX|number}[ op {varXXX|number}]
+    #
+    elseif head === :(=)
+      cbs[1](block, line, index)
     end
   end
   #
@@ -236,8 +252,9 @@ module Mutator
   # TODO: possible problem with only one supported type Int
   # @param {Dict} block Current block of code 
   # @param {Expr} line  Line with variables to change
+  # @param {Uint} index Index of "line" in "block"
   #
-  function _changeVar(block, line::Expr)
+  function _changeVar(block, line::Expr, index::Uint)
     #
     # map of variables, numbers and operations for changing
     #
@@ -274,8 +291,9 @@ module Mutator
   # It changes only one variable|number per one call.
   # @param {Dict} block Current block of code 
   # @param {Expr} line  Line with for operator to change
+  # @param {Uint} index Index of "line" in "block"
   #
-  function _changeFor(block, line::Expr)
+  function _changeFor(block, line::Expr, index::Uint)
     v = _getVarOrNum(block["vars"], true)
     line.args[1].args[2].args[_randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? _getNum(true) : v)
   end
@@ -287,8 +305,9 @@ module Mutator
   #
   # @param {Dict} block Current block of code 
   # @param {Expr} line  Line with for operator to change
+  # @param {Uint} index Index of "line" in "block"
   #
-  function _changeIf(block, line::Expr)
+  function _changeIf(block, line::Expr, index::Uint)
     #
     # 2 - condition, 1,3 - variables or numbers
     #
@@ -298,11 +317,13 @@ module Mutator
   #
   # Change in this case means changing one function argument.
   # We can't change function name, because in this case we have
-  # to change all arguments too.
+  # to change all arguments too, but they related to function's
+  # body code.
   # @param {Dict} block Current block of code 
   # @param {Expr} line  Line with for operator to change
+  # @param {Uint} index Index of "line" in "block"
   #
-  function _changeFuncCall(block, line::Expr)
+  function _changeFuncCall(block, line::Expr, index::Uint)
     v = _getVarOrNum(block["vars"], true)
     if line.head === :(=)
       line.args[2].args[rand(2:length(line.args[2].args))] = v
@@ -311,17 +332,13 @@ module Mutator
     end
   end
   #
+  # Removes one line of code with index in specified block.
+  # @param {Dict} block Current block of code 
+  # @param {Expr} line  Line with variables to change
+  # @param {Uint} index Index of "line" in "block"
   #
-  #
-  function _delVar()
-  end
-  function _delFor()
-  end
-  function _delIf()
-  end
-  function _delFunc()
-  end
-  function _delFuncCall()
+  function _delLine(block, line::Expr, index::Uint)
+    splice!(block["block"].args, index)
   end
 
   #
@@ -422,6 +439,6 @@ module Mutator
   # TODO:
   #
   const _add    = [_addVar,    _addFor,    _addIf,    _addFunc,    _addFuncCall   ]
-  const _change = [_changeVar, _changeFor, _changeIf,              _changeFuncCall]
-  const _del    = [_delVar,    _delFor,    _delIf,    _delFunc,    _delFuncCall   ]
+  const _change = [_changeVar, _changeFor, _changeIf, ()->nothing, _changeFuncCall]
+  const _del    = [_delLine,   _delLine,   _delLine,   _delLine,   _delLine       ]
 end
