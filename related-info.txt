@@ -9,3 +9,4 @@ https://github.com/devosoft/avida/wiki                                        Av
 http://life.ou.edu/tierra/                                                    Tierra homepage
 https://www.youtube.com/watch?v=Wl5rRGVD0QI                                   Tierra demo and description
 http://devolab.msu.edu/                                                       Digital evelution laboratory
+http://svaksha.github.io/Julia.jl/                                            Julia packages list
