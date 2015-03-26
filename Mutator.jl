@@ -33,7 +33,9 @@ module Mutator
   using  Debug
 
   #
-  # Do one random mutation of script. It may be add, remove or change.
+  # Do one random mutation of script. It may be: add, remove or change.
+  # Depending on probability (prob argument) it makes a desicion about
+  # type of operation (add,del,change).
   # @param  {Script.Code} code Organism's script we have to mutate
   # @param  {Array{Int}}  prob Strategy of mutating. See 
   # Config.mutator["addDelChange"] for details.
@@ -47,15 +49,15 @@ module Mutator
     # [add, remove, change] operation. 1 - add, 2 - remove, 3 - change
     #
     for i = 1:3
-      s = s + prob[i]
+      s += prob[i]
       if num <= s index = i; break end
     end
 
-    if index === 1 
-      _addCb[rand(1:length(_addCb))]()
-    elseif
-      index === 2 _processLine(code, _changeCb)
-    else
+    if index === 1      # add
+      _addCb[rand(1:length(_addCb))](code)
+    elseif index === 2  # change
+      _processLine(code, _changeCb)
+    else                # delete
       _processLine(code, _delCb)
     end
   end
@@ -227,17 +229,17 @@ module Mutator
     #
     # We can't change code, because there is no code at the moment.
     #
-    if length(code.blocks) === 0 || length(code.blocks) === 1 && length(code.blocks[1].args) === 0 return nothing end
+    if length(code.blocks) === 0 || length(code.blocks) === 1 && length(code.blocks[1]["block"].args) === 0 return nothing end
     block  = code.blocks[rand(1:length(code.blocks))]
-    if length(block.args) === 0 return nothing end
-    index  = uint(rand(1:length(block.args)))
-    line   = block["block"][index]
+    if length(block["block"].args) === 0 return nothing end
+    index  = uint(rand(1:length(block["block"].args)))
+    line   = block["block"].args[index]
     head   = line.head
 
     #
     # Possible operations: funcXXX(args), varXXX = funcXXX(args)
     #
-    if head === :call || (head === :(=) && typeof(line.args[2]) === Expr && typeof(eval(line.args[2].args[1])) === Function)
+    if head === :call || (head === :(=) && line.args[2].head === :call)
       cbs[5](block, line, index)
     #
     # Possible operations: function funcXXX(args)...end
@@ -341,9 +343,9 @@ module Mutator
   function _changeFuncCall(block, line::Expr, index::Uint)
     v = _getVarOrNum(block["vars"], true)
     if line.head === :(=)
-      line.args[2].args[rand(2:length(line.args[2].args))] = v
+      if length(line.args[2].args) > 1 line.args[2].args[rand(2:length(line.args[2].args))] = v end
     else
-      line.args[rand(2:length(line.args))] = v
+      if length(line.args) > 1 line.args[rand(2:length(line.args))] = v end
     end
   end
   #
