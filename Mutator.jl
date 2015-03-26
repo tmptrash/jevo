@@ -23,6 +23,7 @@
 # TODO: think about functions copy (like gene copy)
 # TODO: It's better to use Types instead of Array{Dict{ASCIIString, Any}} and so on
 # TODO: This is how we may remove Dictionaries like this: d["xxx"]...
+# TODO: Check if we can move some constants to global Config module
 #
 module Mutator
   export mutate
@@ -33,16 +34,30 @@ module Mutator
 
   #
   # Do one random mutation of script. It may be add, remove or change.
-  # @param  {Script.Code} Organism's script we have to mutate
-  # @return {Bool} true means, that mutation has done, false - some mistake
+  # @param  {Script.Code} code Organism's script we have to mutate
+  # @param  {Array{Int}}  prob Strategy of mutating. See 
+  # Config.mutator["addDelChange"] for details.
   #
-  function mutate(code::Script.Code)
-    # TODO: here we should choose add, remove or change operation according
-    # TODO: to percentage (e.g. add:remove:change=60%:10%:30%)
+  function mutate(code::Script.Code, prob::Array{Int})
+    num   = rand(1:sum(prob))
+    s     = 0
+    index = 1
+    #
+    # This code calculates index. This index is used for choosing between 
+    # [add, remove, change] operation. 1 - add, 2 - remove, 3 - change
+    #
+    for i = 1:3
+      s = s + prob[i]
+      if num <= s index = i; break end
+    end
 
-
-
-    true
+    if index === 1 
+      _addCb[rand(1:length(_addCb))]()
+    elseif
+      index === 2 _processLine(code, _changeCb)
+    else
+      _processLine(code, _delCb)
+    end
   end
 
   #
@@ -436,9 +451,10 @@ module Mutator
   #
   const _op       = [+, -, \, *, $, |, &, ^, %, >>>, >>, <<]
   #
-  # TODO:
+  # {Array{Array{Function}}} Available operation for script lines. This is:
+  # adding, removing and changing lines.
   #
-  const _add    = [_addVar,    _addFor,    _addIf,    _addFunc,    _addFuncCall   ]
-  const _change = [_changeVar, _changeFor, _changeIf, ()->nothing, _changeFuncCall]
-  const _del    = [_delLine,   _delLine,   _delLine,   _delLine,   _delLine       ]
+  const _addCb    = [_addVar,    _addFor,    _addIf,    _addFunc,    _addFuncCall   ]
+  const _changeCb = [_changeVar, _changeFor, _changeIf, ()->nothing, _changeFuncCall]
+  const _delCb    = [_delLine,   _delLine,   _delLine,   _delLine,   _delLine       ]
 end

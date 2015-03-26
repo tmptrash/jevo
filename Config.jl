@@ -12,13 +12,15 @@ module Config
   #
   mutator = {
     #
-    # {Int} Probabilities with with mutator decides what to do: add new,
-    #       delete or change existing construction of the script.
-    # TODO: describe the formula of probability
+    # {Array} Probabilities with wich mutator decides what to do: add,
+    #         delete or change existing construction of the script. 
+    #         Depending on this values, organism may have different
+    #         strategies of living. For example: if add value is bigger 
+    #         then del and change, then it will be grow up all the time. 
+    #         If del value is bigger then other, then it will be decreased
+    #         to one line code and will die.
     #
-    "addProbability"   =>100,
-    "delProbability"   =>20,
-    "changeProbability"=>50,
+    "addDelChange"     =>[1,1,1],
     #
     # {Uint8} Maximum amount of function parameters in orgamism's script.
     # It's used in Mutator during new function creation. Example:
