@@ -111,6 +111,7 @@ module Mutator
     newBody = Expr(:block,)
     newFor  = Expr(:for, Expr(:(=), newVar, Expr(:(:), _getVarOrNum(block["vars"], true), _getVarOrNum(block["vars"], true))), newBody)
 
+    push!(newBody.args, Expr(:call, :produce))
     push!(block["block"].args, newFor)
     push!(code.blocks, ["parent"=>block, "vars"=>[newVar], "block"=>newBody]);
   end
@@ -138,11 +139,14 @@ module Mutator
     # else block is optional
     #
     if _randTrue()
-      push!(ifParams, Expr(:block,))
-      push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[4]])
+      body = Expr(:block,)
+      push!(ifParams, body)
+      push!(body.args, Expr(:call, :produce))
+      push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>body])
     end
 
     push!(block["block"].args, apply(Expr, ifParams))
+    push!(ifParams[3].args, Expr(:call, :produce))
     push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[3]])
   end
   # TODO: describe function creation details
@@ -177,6 +181,7 @@ module Mutator
     end
     push!(code.funcs, ["name"=>string(newFunc), "args"=>funcArgs])
     push!(block.args, Expr(:function, apply(Expr, func), newBlock))
+    push!(newBlock.args, Expr(:call, :produce))
     push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>newBlock])
   end
   #
@@ -234,12 +239,18 @@ module Mutator
     if length(block["block"].args) === 0 return nothing end
     index  = uint(rand(1:length(block["block"].args)))
     line   = block["block"].args[index]
+    #println(line)
     head   = line.head
 
     #
+    # We have to skip produce() calls
+    #
+    if head === :call && line.args[1] === :produce
+      return nothing
+    #
     # Possible operations: funcXXX(args), varXXX = funcXXX(args)
     #
-    if head === :call || (head === :(=) && line.args[2].head === :call)
+    elseif head === :call || (head === :(=) && line.args[2].head === :call)
       cbs[5](block, line, index)
     #
     # Possible operations: function funcXXX(args)...end

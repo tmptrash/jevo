@@ -107,6 +107,7 @@ module Organism
     # in Mutator module. This loop must be after ambedded functions.
     #
     while true
+      produce()
     end
   end)
   #
