@@ -154,6 +154,10 @@ module Organism
       ["name"=>"stepUp",          "args"=>[]                                                           ]
       ["name"=>"stepDown",        "args"=>[]                                                           ]
       ["name"=>"clone",           "args"=>[]                                                           ]
-    ]
+    ],
+    #
+    # {Expr} Block for functions. See Script.Code.fnBlock for details.
+    #
+    _code.args[2].args[2]
   )
 end

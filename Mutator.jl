@@ -24,11 +24,13 @@
 # TODO: It's better to use Types instead of Array{Dict{ASCIIString, Any}} and so on
 # TODO: This is how we may remove Dictionaries like this: d["xxx"]...
 # TODO: Check if we can move some constants to global Config module
+# TODO: describe, that every block contains one produce() call
 #
 module Mutator
   export mutate
 
   import Script
+  import Exceptions
   # TODO: remove this module
   using  Debug
 
@@ -41,18 +43,11 @@ module Mutator
   # Config.mutator["addDelChange"] for details.
   #
   function mutate(code::Script.Code, prob::Array{Int})
-    num   = rand(1:sum(prob))
-    s     = 0
-    index = 1
     #
     # This code calculates index. This index is used for choosing between 
     # [add, remove, change] operation. 1 - add, 2 - remove, 3 - change
     #
-    for i = 1:3
-      s += prob[i]
-      if num <= s index = i; break end
-    end
-
+    index = _getProbIndex(prob)
     if index === 1      # add
       _addCb[rand(1:length(_addCb))](code)
     elseif index === 2  # change
@@ -165,7 +160,6 @@ module Mutator
   # (add new function).
   #
   function _addFunc(code::Script.Code)
-    block     = code.code.args[2].args[2]
     newBlock  = Expr(:block,)
     newFunc   = _getNewFunc(code)
     func      = [:call, newFunc]
@@ -180,9 +174,9 @@ module Mutator
       push!(vars, arg)
     end
     push!(code.funcs, ["name"=>string(newFunc), "args"=>funcArgs])
-    push!(block.args, Expr(:function, apply(Expr, func), newBlock))
+    push!(code.fnBlock.args, Expr(:function, apply(Expr, func), newBlock))
     push!(newBlock.args, Expr(:call, :produce))
-    push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>newBlock])
+    push!(code.blocks, ["parent"=>code.fnBlock, "vars"=>vars, "block"=>newBlock])
   end
   #
   # Adds new function call into the random block within script. Format:
@@ -239,11 +233,11 @@ module Mutator
     if length(block["block"].args) === 0 return nothing end
     index  = uint(rand(1:length(block["block"].args)))
     line   = block["block"].args[index]
-    #println(line)
+    if typeof(line) !== Expr return nothing end # empty lines
     head   = line.head
 
     #
-    # We have to skip produce() calls
+    # We have to skip produce() calls all the time.
     #
     if head === :call && line.args[1] === :produce
       return nothing
@@ -369,6 +363,29 @@ module Mutator
     splice!(block["block"].args, index)
   end
 
+  #
+  # It calculates probability index from variable amount of components.
+  # Let's imagine we have three actions: one, two and three. We want 
+  # these actions to be called randomly, but with different probabilities.
+  # For example it may be [3,2,1]. It means that one should be called
+  # in half cases, two in 1/3 cases and three in 1/6 cases. Probabilities
+  # should be greated then -1.
+  # @param {Array{Int}} prob Probabilities array. e.g.: [3,2,1] or [1,3]
+  # @return {Int}
+  #
+  function _getProbIndex(prob::Array{Int})
+    if length(prob) < 1 throw(UserException("Invalid parameter prob: $prob. Array with at least one element expected.")) end
+
+    num = rand(1:sum(prob))
+    s   = 0
+    i   = 1
+
+    for i = 1:length(prob)
+      if num <= (s += prob[i]) break end
+    end
+
+    i
+  end
   #
   # Parses expression recursively and collects all variables and numbers
   # into "vars" map. Every varible or number is a record in vars. Example:

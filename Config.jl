@@ -20,7 +20,7 @@ module Config
     #         If del value is bigger then other, then it will be decreased
     #         to one line code and will die.
     #
-    "addDelChange"     =>[1,1,1],
+    "addDelChange"     =>[3,2,1],
     #
     # {Uint8} Maximum amount of function parameters in orgamism's script.
     # It's used in Mutator during new function creation. Example:
