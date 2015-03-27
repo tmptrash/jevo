@@ -10,4 +10,4 @@ http://life.ou.edu/tierra/                                                    Ti
 https://www.youtube.com/watch?v=Wl5rRGVD0QI                                   Tierra demo and description
 http://devolab.msu.edu/                                                       Digital evelution laboratory
 http://svaksha.github.io/Julia.jl/                                            Julia packages list
-https://play.google.com/books                                                 Julia book
+http://it-ebooks.info/book/4852/                                              Julia book
