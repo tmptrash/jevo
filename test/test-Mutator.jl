@@ -3,6 +3,7 @@ module TestMutator
   using Mutator
   using Script
   using Config
+  # TODO: remove this
   using Debug
 
   facts("Testing 'add' logic of Mutator.mutate()...") do
@@ -40,7 +41,7 @@ module TestMutator
   end
 
   facts("Testing 'change' logic of Mutator.mutate()...") do
-    context("change variables") do
+    context("Testing var = num") do
       code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, 1.2))) #:(function t() var1 = 1.2 end)
       blocks = [[
         "vars"  => [:var1],
@@ -59,11 +60,34 @@ module TestMutator
       #
       @fact code.args[2].args[1].args[1] === :var1  => true
       #
-      # Change should update expression for line: var1 = 1, so
-      # new expression shouln't be equal to old one. We have to
-      # use !== instead of != to check same Expr addresses.
+      # Change should update value 1.2 only
       #
       @fact code.args[2].args[1].args[2] !== 1.2    => true
+    end
+
+    context("Testing var = num op num") do
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :+, 1, 2)))) #:(function t() var1 = 1 + 2 end)
+      blocks = [[
+        "vars"  => [:var1],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,1,0])
+      #
+      # In this particular test var1 should't be changed, because it's only one 
+      # variable in a block.
+      #
+      @fact code.args[2].args[1].args[1] === :var1  => true
+      #
+      # Change should update 1, + or 2
+      #
+      args = code.args[2].args[1].args[2].args
+      @fact args[1] !== :+ || args[2] !== 1 || args[3] !==2 => true
     end
   end
 
