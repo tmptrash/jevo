@@ -30,6 +30,6 @@ module Config
     # In example above there are two arguments. This amount of arguments
     # must be less then funcMaxArgs
     #
-    "funcMaxArgs"      =>10
+    "funcMaxArgs"      =>uint8(10)
   }
 end

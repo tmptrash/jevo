@@ -2,22 +2,69 @@ module TestMutator
   using FactCheck
   using Mutator
   using Script
+  using Config
+  using Debug
 
-  facts("Testing Mutator.mutate()...") do
-    code   = :(function t() end)
-    blocks = [[
-      "vars"  => Symbol[],
-      "block" => code.args[2],
-      "parent"=> [
-        "vars"  => [],          
-        "block" => nothing,
-        "parent"=> nothing
-      ]
-    ]]
-    script = Script.Code(0,0,10,code,blocks,[],code.args[2])
-    Mutator.mutate(script, [1,0,0])
+  facts("Testing 'add' logic of Mutator.mutate()...") do
+    #
+    # Because of randomness, we have to be sure that all variants of
+    # possible addings will be applied. So we use 1000 times here... 
+    #
+    for i = 1:1000
+      #
+      # Every time we have to start with default script
+      #
+      code   = :(function t() function f() end end)
+      blocks = [[
+        "vars"  => Symbol[],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      #
+      # We need to have at least one function, because in case of call _addFuncCall()
+      # there will be nothing to call and @fact will fail. Second important issue,
+      # that this function should in the same block with other code (function t()...end)
+      #
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[["name"=>"f", "args"=>[]]],code.args[2])
+      Mutator.mutate(script, [1,0,0])
+      #
+      # > 1, because this block already has function t() and our new code,
+      # added in Mutator.mutate() function. See code for details.
+      #
+      @fact length(code.args[2].args) > 1 => true
+    end
+  end
 
-    @fact length(code.args[2].args) => 1
+  facts("Testing 'change' logic of Mutator.mutate()...") do
+    context("change variables") do
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, 1.2))) #:(function t() var1 = 1.2 end)
+      blocks = [[
+        "vars"  => [:var1],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,1,0])
+      #
+      # In this particular test var1 should't be changed, because it's only one 
+      # variable in a block.
+      #
+      @fact code.args[2].args[1].args[1] === :var1  => true
+      #
+      # Change should update expression for line: var1 = 1, so
+      # new expression shouln't be equal to old one. We have to
+      # use !== instead of != to check same Expr addresses.
+      #
+      @fact code.args[2].args[1].args[2] !== 1.2    => true
+    end
   end
 
   #

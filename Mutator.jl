@@ -197,6 +197,7 @@ module Mutator
   function _addFuncCall(code::Script.Code)
     block  = code.blocks[rand(1:length(code.blocks))]
     vars   = block["vars"]
+    if (length(code.funcs) < 1) return nothing end
     func   = code.funcs[rand(1:length(code.funcs))]
     args   = Any[:call, symbol(func["name"])]
     varLen = length(vars)
@@ -224,7 +225,8 @@ module Mutator
   # @param {Script.Code} code Script of particular organism we have to mutate
   # @param {Array{Function}} cbs Callback functions for every type of operator
   #
-  function _processLine(code::Script.Code, cbs::Array{Function})
+  @debug function _processLine(code::Script.Code, cbs::Array{Function})
+    @bp
     #
     # We can't change code, because there is no code at the moment.
     #
@@ -244,7 +246,7 @@ module Mutator
     #
     # Possible operations: funcXXX(args), varXXX = funcXXX(args)
     #
-    elseif head === :call || (head === :(=) && line.args[2].head === :call)
+    elseif head === :call || (head === :(=) && typeof(line.args[2]) === Expr && line.args[2].head === :call)
       cbs[5](block, line, index)
     #
     # Possible operations: function funcXXX(args)...end
@@ -272,33 +274,41 @@ module Mutator
   # TODO: describe how changer works. it desn't increase/decrease
   # TODO: length of line, just change var/number in one place
   # TODO: possible problem with only one supported type Int
-  # @param {Dict} block Current block of code 
+  # @param {Dict} block Current block of code
   # @param {Expr} line  Line with variables to change
   # @param {Uint} index Index of "line" in "block"
   #
-  function _changeVar(block, line::Expr, index::Uint)
+  @debug function _changeVar(block, line::Expr, index::Uint)
+  @bp
     #
     # map of variables, numbers and operations for changing
     #
     vars = Dict{ASCIIString, Any}[]
     #
-    # First name is always a variable 
+    # We can't change first variable, because it may cause an errors.
+    # This variable me be used later in code, so we can't remove it.
+    # 2 means - skip first variable: varXXX = ...
     #
-    push!(vars, ["expr"=>line, "index"=>1, "var"=>true])
     _parseVars(vars, line, 2)
     #
-    # There are three types of change: var, number, operation
+    # There are three types of change: var, number, operation.
+    #We can't change first variable: varXXX = ...
     # TODO: describe these ifs
     #
     v = vars[rand(1:length(vars))]
+    #
+    # This is a variable. We may change it to another variable or number
+    #
     if (v["var"])
-      if v["expr"] === line && v["index"] === 1
-        v["expr"].args[1] = block["vars"][rand(1:length(block["vars"]))]
-      else
-        v["expr"].args[v["index"]] = _getVarOrNum(block["vars"], true)
-      end
+      v["expr"].args[v["index"]] = _getVarOrNum(block["vars"], true)
+    #
+    # This is a sign (+, -, ~)
+    #
     elseif findfirst(_sign, v["expr"].args[v["index"]]) > 0
       v["expr"].args[v["index"]] = _sign[rand(1:length(_sign))]
+    #
+    # This is an operator (+,-,/,$,^,...)
+    #
     else
       v["expr"].args[v["index"]] = _op[rand(1:length(_op))]
     end
@@ -397,9 +407,12 @@ module Mutator
   # TODO:
   # TODO:
   #
-  function _parseVars(vars::Array{Dict{ASCIIString, Any}}, parent::Expr, index)
+  @debug function _parseVars(vars::Array{Dict{ASCIIString, Any}}, parent::Expr, index)
+    @bp
     expr = parent.args[index]
-
+    #
+    # "var"=>true means that current operand is a variable or a number const
+    #
     if typeof(expr) !== Expr
       push!(vars, ["expr"=>parent, "index"=>index, "var"=>true])
       return nothing
