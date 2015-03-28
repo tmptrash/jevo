@@ -42,6 +42,11 @@ module TestMutator
 
   facts("Testing 'change' logic of Mutator.mutate()...") do
     context("Testing var = num") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float.
+      #
       code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, 1.2))) #:(function t() var1 = 1.2 end)
       blocks = [[
         "vars"  => [:var1],
@@ -66,7 +71,12 @@ module TestMutator
     end
 
     context("Testing var = num op num") do
-      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :+, 1, 2)))) #:(function t() var1 = 1 + 2 end)
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :+, 1.1, 2.2)))) #:(function t() var1 = 1.1 + 2.2 end)
       blocks = [[
         "vars"  => [:var1],
         "block" => code.args[2],
@@ -87,16 +97,45 @@ module TestMutator
       # Change should update 1, + or 2
       #
       args = code.args[2].args[1].args[2].args
-      @fact args[1] !== :+ || args[2] !== 1 || args[3] !==2 => true
+      @fact args[1] !== :+ || args[2] !== 1.1 || args[3] !==2.2 => true
+    end
+
+    context("Testing var = var") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, :var2))) #:(function t() var1 = var2 end)
+      blocks = [[
+        "vars"  => [],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,1,0])
+      #
+      # In this particular test var1 should't be changed, because it's only one 
+      # variable in a block.
+      #
+      @fact code.args[2].args[1].args[1] === :var1 => true
+      #
+      # Change should update var2 only
+      #
+      @fact typeof(code.args[2].args[1].args[2]) !== Symbol => true
     end
   end
 
-  #
-  # We have to do these tests many times, because they 
-  # contain randomness. So it's possible, that one test
-  # will be passed, but 1000 less possible.
-  #
   facts("Testing Mutator._getProbIndex()...") do
+    #
+    # We have to do these tests many times, because they 
+    # contain randomness. So it's possible, that one test
+    # will be passed, but 1000 less possible.
+    #
     for i = 1:1000
       @fact Mutator._getProbIndex([1])     => 1
       @fact Mutator._getProbIndex([1,2])   => anyof(1,2)
