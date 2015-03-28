@@ -225,8 +225,7 @@ module Mutator
   # @param {Script.Code} code Script of particular organism we have to mutate
   # @param {Array{Function}} cbs Callback functions for every type of operator
   #
-  @debug function _processLine(code::Script.Code, cbs::Array{Function})
-    @bp
+  function _processLine(code::Script.Code, cbs::Array{Function})
     #
     # We can't change code, because there is no code at the moment.
     #
@@ -278,8 +277,7 @@ module Mutator
   # @param {Expr} line  Line with variables to change
   # @param {Uint} index Index of "line" in "block"
   #
-  @debug function _changeVar(block, line::Expr, index::Uint)
-  @bp
+  function _changeVar(block, line::Expr, index::Uint)
     #
     # map of variables, numbers and operations for changing
     #
@@ -407,8 +405,7 @@ module Mutator
   # TODO:
   # TODO:
   #
-  @debug function _parseVars(vars::Array{Dict{ASCIIString, Any}}, parent::Expr, index)
-    @bp
+  function _parseVars(vars::Array{Dict{ASCIIString, Any}}, parent::Expr, index)
     expr = parent.args[index]
     #
     # "var"=>true means that current operand is a variable or a number const
