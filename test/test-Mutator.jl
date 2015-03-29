@@ -272,6 +272,29 @@ module TestMutator
       args = code.args[2].args[1].args[1].args[2].args
       @fact args[1] !== 1.1 || args[2] !== 2.2 => true
     end
+
+    context("Testing if var cond var end") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:if, Expr(:comparison, 1.1, :≥, 2.2), Expr(:block,)))) #:(function t() if 1.1 ≥ 2.2 end end)
+      blocks = [[
+        "vars"  => [:var2],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,1,0])
+      
+      args = code.args[2].args[1].args[1].args 
+      @fact args[1] !== 1.1 || [2] !== :≥ || args[3] !== 2.2 => true
+    end
   end
 
   facts("Testing Mutator._getProbIndex()...") do
