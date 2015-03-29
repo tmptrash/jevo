@@ -76,7 +76,7 @@ module TestMutator
       # We have to do so, because they will be changed by some integer or variable,
       # but not float.
       #
-      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :/, 1.1, 2.2)))) #:(function t() var1 = 1.1 + 2.2 end)
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :/, 1.1, 2.2)))) #:(function t() var1 = 1.1 / 2.2 end)
       blocks = [[
         "vars"  => [:var1],
         "block" => code.args[2],
@@ -135,7 +135,7 @@ module TestMutator
       # We have to do so, because they will be changed by some integer or variable,
       # but not float.
       #
-      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :/, :var2, :var3)))) #:(function t() var1 = 1.1 + 2.2 end)
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :/, :var2, :var3)))) #:(function t() var1 = var2 / var3 end)
       blocks = [[
         "vars"  => [:var4],
         "block" => code.args[2],
