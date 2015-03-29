@@ -45,7 +45,7 @@ module TestMutator
       #
       # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
       # We have to do so, because they will be changed by some integer or variable,
-      # but not float.
+      # but not float. The same about / (right divide). We don't support it.
       #
       code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, 1.2))) #:(function t() var1 = 1.2 end)
       blocks = [[
@@ -69,12 +69,11 @@ module TestMutator
       #
       @fact code.args[2].args[1].args[2] !== 1.2    => true
     end
-
     context("Testing var = num op num") do
       #
       # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
       # We have to do so, because they will be changed by some integer or variable,
-      # but not float.
+      # but not float. The same about / (right divide). We don't support it.
       #
       code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :/, 1.1, 2.2)))) #:(function t() var1 = 1.1 / 2.2 end)
       blocks = [[
@@ -99,12 +98,11 @@ module TestMutator
       args = code.args[2].args[1].args[2].args
       @fact args[1] !== :/ || args[2] !== 1.1 || args[3] !== 2.2 => true
     end
-
     context("Testing var = var") do
       #
       # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
       # We have to do so, because they will be changed by some integer or variable,
-      # but not float.
+      # but not float. The same about / (right divide). We don't support it.
       #
       code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, :var2))) #:(function t() var1 = var2 end)
       blocks = [[
@@ -128,12 +126,11 @@ module TestMutator
       #
       @fact typeof(code.args[2].args[1].args[2]) !== Symbol => true
     end
-
     context("Testing var = var op var") do
       #
       # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
       # We have to do so, because they will be changed by some integer or variable,
-      # but not float.
+      # but not float. The same about / (right divide). We don't support it.
       #
       code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :/, :var2, :var3)))) #:(function t() var1 = var2 / var3 end)
       blocks = [[
@@ -156,7 +153,124 @@ module TestMutator
       # Change should update 1, + or 2
       #
       args = code.args[2].args[1].args[2].args
-      @fact args[1] !== :/ || args[2] !== :var1 || args[3] !== :var3 => true
+      @fact args[1] !== :/ || args[2] !== :var2 || args[3] !== :var3 => true
+    end
+    context("Testing var = var op num") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float. The same about / (right divide). We don't support it.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :/, :var2, 2.2)))) #:(function t() var1 = var2 / 2.2 end)
+      blocks = [[
+        "vars"  => [:var4],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,1,0])
+      #
+      # In this particular test var1 should't be changed, because it's only one 
+      # variable in a block.
+      #
+      @fact code.args[2].args[1].args[1] === :var1  => true
+      #
+      # Change should update 1, + or 2
+      #
+      args = code.args[2].args[1].args[2].args
+      @fact args[1] !== :/ || args[2] !== :var2 || args[3] !== 2.2 => true
+    end
+    context("Testing var = num op var") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float. The same about / (right divide). We don't support it.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :/, 2.2, :var2)))) #:(function t() var1 = var2 / 2.2 end)
+      blocks = [[
+        "vars"  => [:var4],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,1,0])
+      #
+      # In this particular test var1 should't be changed, because it's only one 
+      # variable in a block.
+      #
+      @fact code.args[2].args[1].args[1] === :var1  => true
+      #
+      # Change should update 1, + or 2
+      #
+      args = code.args[2].args[1].args[2].args
+      @fact args[1] !== :/ || args[2] !== 2.2 || args[3] !== :var2 => true
+    end
+    context("Testing var = sign var") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float. The same about / (right divide). We don't support it.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :-, :var2)))) #:(function t() var1 = -var2 end)
+      blocks = [[
+        "vars"  => [:var3],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,1,0])
+      #
+      # In this particular test var1 should't be changed, because it's only one 
+      # variable in a block.
+      #
+      @fact code.args[2].args[1].args[1] === :var1 => true
+      #
+      # Change should update var2 only
+      #
+      args = code.args[2].args[1].args[2].args
+      @fact args[1] !== :- || args[2] !== :var2 => true
+    end
+
+    context("Testing for var={var|num}:{var|num} end") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float. The same about / (right divide). We don't support it.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:for, Expr(:(=), :var1, Expr(:(:), 1.1, 2.2)), Expr(:block,)))) #:(function t() for var1=1.1:2.2 end end)
+      blocks = [[
+        "vars"  => [:var2],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,1,0])
+      #
+      # In this particular test var1 should't be changed, because it's only one 
+      # variable in a block.
+      #
+      @fact code.args[2].args[1].args[1].args[1] === :var1 => true
+      #
+      # Change should update var2 only
+      #
+      args = code.args[2].args[1].args[1].args[2].args
+      @fact args[1] !== 1.1 || args[2] !== 2.2 => true
     end
   end
 
