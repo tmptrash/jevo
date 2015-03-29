@@ -325,6 +325,93 @@ module TestMutator
     end
   end
 
+  facts("Testing 'del' logic of Mutator.mutate()...") do
+    context("Testing variable delete...") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float. The same about / (right divide). We don't support it.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, 1))) #:(function t() var1 = 1 end)
+      blocks = [[
+        "vars"  => [],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,0,1])
+
+      @fact length(code.args[2].args) => 0
+    end
+    context("Testing for operator delete...") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float. The same about / (right divide). We don't support it.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:for, Expr(:(=), :var1, Expr(:(:), 1.1, 2.2)), Expr(:block,)))) #:(function t() for var1=1.1:2.2 end end)
+      blocks = [[
+        "vars"  => [],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,0,1])
+
+      @fact length(code.args[2].args) => 0
+    end
+    context("Testing if operator delete...") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float. The same about / (right divide). We don't support it.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:if, Expr(:comparison, 1.1, :≥, 2.2), Expr(:block,)))) #:(function t() if 1.1 ≥ 2.2 end end)
+      blocks = [[
+        "vars"  => [],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,0,1])
+
+      @fact length(code.args[2].args) => 0
+    end
+    context("Testing custom function delete...") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float. The same about / (right divide). We don't support it.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:function, Expr(:call, :m), Expr(:block,)))) #:(function t() function m() end end)
+      blocks = [[
+        "vars"  => [],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,0,1])
+
+      @fact length(code.args[2].args) => 0
+    end
+  end
+
   facts("Testing Mutator._getProbIndex()...") do
     #
     # We have to do these tests many times, because they 
