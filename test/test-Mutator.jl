@@ -291,9 +291,37 @@ module TestMutator
       ]]
       script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
       Mutator.mutate(script, [0,1,0])
-      
+      #
+      # In case of if operator only left, right operands and comparison operation may be changed
+      #
       args = code.args[2].args[1].args[1].args 
       @fact args[1] !== 1.1 || [2] !== :≥ || args[3] !== 2.2 => true
+    end
+
+    context("Testing func(args)") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:call, :f, :var1, :var2))) #:(function t() f(var1, var2) end)
+      blocks = [[
+        "vars"  => [:var3],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,1,0])
+      
+      args = code.args[2].args[1].args
+      #
+      # In case of function call only arguments may be changed
+      #
+      @fact args[1] === :f && args[2] !== :var1 || args[3] !== :var2 => true
     end
   end
 
