@@ -1,7 +1,6 @@
 #
 # TODO: code should be wrapped by try...catch, because different 
-# TODO: exceptions are possible. every exception should decrease
-# TODO: energy of organism.
+# TODO: exceptions are possible.
 #
 # TODO: think about energy limit for organism. add new library
 # TODO: function: fullOfEnergy():Bool
