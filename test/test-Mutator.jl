@@ -76,7 +76,7 @@ module TestMutator
       # We have to do so, because they will be changed by some integer or variable,
       # but not float.
       #
-      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :+, 1.1, 2.2)))) #:(function t() var1 = 1.1 + 2.2 end)
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :/, 1.1, 2.2)))) #:(function t() var1 = 1.1 + 2.2 end)
       blocks = [[
         "vars"  => [:var1],
         "block" => code.args[2],
@@ -97,7 +97,7 @@ module TestMutator
       # Change should update 1, + or 2
       #
       args = code.args[2].args[1].args[2].args
-      @fact args[1] !== :+ || args[2] !== 1.1 || args[3] !==2.2 => true
+      @fact args[1] !== :/ || args[2] !== 1.1 || args[3] !== 2.2 => true
     end
 
     context("Testing var = var") do
@@ -127,6 +127,36 @@ module TestMutator
       # Change should update var2 only
       #
       @fact typeof(code.args[2].args[1].args[2]) !== Symbol => true
+    end
+
+    context("Testing var = var op var") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:(=), :var1, Expr(:call, :/, :var2, :var3)))) #:(function t() var1 = 1.1 + 2.2 end)
+      blocks = [[
+        "vars"  => [:var4],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,1,0])
+      #
+      # In this particular test var1 should't be changed, because it's only one 
+      # variable in a block.
+      #
+      @fact code.args[2].args[1].args[1] === :var1  => true
+      #
+      # Change should update 1, + or 2
+      #
+      args = code.args[2].args[1].args[2].args
+      @fact args[1] !== :/ || args[2] !== :var1 || args[3] !== :var3 => true
     end
   end
 
