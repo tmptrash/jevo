@@ -196,7 +196,12 @@ module Organism
   end
 
   #
-  # Clones an organism. Adds some amount of mutations and fires "clone" event
+  # Clones an organism. It does many things:
+  # - fires "beforeclone" to ask parent object about possibility to clone
+  # - if ok, creates new default organism
+  # - sets energy and position (from parent object)
+  # - adds mutations to new organism
+  # - fires "clone" event
   # @param {Creature} creature Instance of parent organism.
   #
   function _clone(creature)
