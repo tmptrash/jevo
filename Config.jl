@@ -20,7 +20,7 @@ module Config
     #         If del value is bigger then other, then it will be decreased
     #         to one line code and will die.
     #
-    "addDelChange"     =>[3,2,1],
+    "addDelChange"        => [3,2,1],
     #
     # {Uint8} Maximum amount of function parameters in orgamism's script.
     # It's used in Mutator during new function creation. Example:
@@ -30,6 +30,17 @@ module Config
     # In example above there are two arguments. This amount of arguments
     # must be less then funcMaxArgs
     #
-    "funcMaxArgs"      =>uint8(10)
+    "funcMaxArgs"         => uint8(10),
+    #
+    # {Uint} Amount of energy for first organisms. They are like Adam and 
+    # Eve. It means that these organism were created by operator and not
+    # by evolution.
+    #
+    "organismStartEnergy" => uint(100),
+    #
+    # {Uint} Amount of mutations, which will be applied to arganism after
+    # clonning.
+    #
+    "mutationsOnClone"    => uint(100)
   }
 end
