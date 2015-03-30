@@ -410,6 +410,28 @@ module TestMutator
 
       @fact length(code.args[2].args) => 0
     end
+    context("Testing function call delete...") do
+      #
+      # It's a little bit hack, because we set unsupported values like 1.1 or 2.2.
+      # We have to do so, because they will be changed by some integer or variable,
+      # but not float. The same about / (right divide). We don't support it.
+      #
+      code   = Expr(:function, Expr(:call, :t), Expr(:block, Expr(:call, :m, :var1))) #:(function t() m(var1) end end)
+
+      blocks = [[
+        "vars"  => [],
+        "block" => code.args[2],
+        "parent"=> [
+          "vars"  => [],
+          "block" => nothing,
+          "parent"=> nothing
+        ]
+      ]]
+      script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+      Mutator.mutate(script, [0,0,1])
+
+      @fact length(code.args[2].args) => 0
+    end
   end
 
   facts("Testing Mutator._getProbIndex()...") do
