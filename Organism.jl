@@ -15,6 +15,7 @@ module Organism
 
   #
   # Organism related data
+  # TODO: describe events. e.g.: beforeclone, clone
   #
   type Creature
     #
