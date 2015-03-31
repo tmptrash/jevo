@@ -1,30 +1,60 @@
 #
-# This module changes organism's script. Every change or mutation is a small
-# add, change or remove operation on script. Mutation does by Julia language 
-# rules. It's impossible to mutate the script with syntax error. But it's 
-# possible to create logical errors. For example it's possible to have 
-# stack overflow. This is normal situation. An exception in this case will
-# occure and organism will lost some energy. Main method here is called
-# mutate(). It makes one change/add/remove operation with script. It works
-# in a simple way:
+# The purpose of this module is in mutation process. In real nature,
+# organisms have DNA inside all cells. This DNA may be mutated during copy.
+# In most cases mutations add errors and garbage to DNA. But in very small
+# cases, they add new abilities... In our case DNA is a organism's script
+# on Julia language. Like with DNA, it changes this script. Every change or 
+# mutation is a small add, change or remove operation on script line. It's 
+# impossible to mutate the script with syntax error. But it's possible to 
+# create logical errors. For example it's possible to have stack overflow. 
+# This is normal situation. An exception in this case will occure and 
+# organism will lost some energy. Main method here is called mutate(). It 
+# makes one change/add/remove operation with script. It works in a simple 
+# way:
 #
 #   1. Finds random block of code in Script.Code.blocks array
-#   2. Choose one operation (add,remove,change)
-#   3. apply operation
+#   2. Finds one line in block
+#   2. Chooses one operation (add, remove, change)
+#   3. apply operation to this line
 #
-# TODO: every peivate method should have standart description of operation it
+# So, all you need to do is call mutate(script, probabilities). Second 
+# argument is a probabilities array. It sets probabilities for add, remove,
+# and change operations. For example: [3,2,1] means that mutator will add(3)
+# new operand more often, then delete(1) or change(2).
+#
+# There are many organisms in our virtual world. So, we have to have an
+# ability to switch between them. For this, Mutator adds produce() calls
+# in every block. In our case: for, if, else, function.
+# This module uses special expression for describing operands. For example:
+#     
+#    var = [sign]{const|var} [op [sign]{const|var}]
+#
+# It means:
+#    
+#     var   - Variable
+#     sign  - One of possible signs. See _sign for details
+#     const - constant. e.g.: 34 or 0
+#     op    - operator. e.g.: +,-,^ and so on
+#     []    - optional expression
+#     {|}   - one value should be choosed
+#
+# Usage:
+#     creature = Organism.create()
+#     Mutator.mutate(creature.script, [3,2,1])
+#
+# @author DeadbraiN
+#
+# TODO: every private method should have standart description of operation it
 # TODO: works with. e.g.: if {var|const} op {var|const} end
 # TODO: usage...
-# TODO: amount of add,delete and change mutations depend on script size
-# TODO: describe _code. Code structure should be described in Script.Code type
 # TODO: describe [], {|}, var, op, sign, const keywords
-# TODO: add types to increase the speed
-# TODO: main while() loop musn't be removed
 # TODO: think about functions copy (like gene copy)
-# TODO: It's better to use Types instead of Array{Dict{ASCIIString, Any}} and so on
-# TODO: This is how we may remove Dictionaries like this: d["xxx"]...
 # TODO: Check if we can move some constants to global Config module
 # TODO: describe, that every block contains one produce() call
+#
+# OPT : add speed tests before and after optimization
+# OPT : Replace Dictionaries to typed arrays
+# OPT : add types to increase the speed
 #
 module Mutator
   export mutate
@@ -37,7 +67,8 @@ module Mutator
   #
   # Do one random mutation of script. It may be: add, remove or change.
   # Depending on probability (prob argument) it makes a desicion about
-  # type of operation (add,del,change).
+  # type of operation (add, del, change) and modifies script (code
+  # parameter).
   # @param  {Script.Code} code Organism's script we have to mutate
   # @param  {Array{Int}}  prob Strategy of mutating. See 
   # Config.mutator["addDelChange"] for details.
@@ -58,7 +89,8 @@ module Mutator
   end
 
   #
-  # Adds variable into the random block within the script. Format:
+  # Adds variable into the random block within the script. Possible
+  # variants:
   #
   #   var = [sign]{const|var} [op [sign]{const|var}]
   #
@@ -70,7 +102,7 @@ module Mutator
   #   var2 = -var2 * ~34
   #
   # @param {Script.Code} code Script of some particular organism, we 
-  # have to mutate (ad new variable).
+  # have to mutate (in this case, add new variable).
   #
   function _addVar(code::Script.Code)
     block  = code.blocks[rand(1:length(code.blocks))]
@@ -85,7 +117,8 @@ module Mutator
     push!(block["block"].args, Expr(:(=), newVar, ex))
   end
   #
-  # Adds new "for" keyword into the random block within the script. Format:
+  # Adds new "for" keyword into the random block within the script. Possible
+  # variants:
   #
   #   for var = {var|const}:{var|const};end
   #
