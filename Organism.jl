@@ -219,8 +219,7 @@ module Organism
   # - fires "clone" event
   # @param {Creature} creature Instance of parent organism.
   #
-  @debug function _clone(creature)
-    @bp
+  function _clone(creature)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key contains permission to continue the

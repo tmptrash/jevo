@@ -49,8 +49,7 @@ module Event
   # @return {Bool} true means that object, which fired an event
   # may continue it's work. false - otherwise.
   #
-  @debug function fire(obs::Observer, event::ASCIIString, args...)
-    @bp
+  function fire(obs::Observer, event::ASCIIString, args...)
     if !haskey(obs.events, event) return nothing end
     fns = obs.events[event]
     for i in fns

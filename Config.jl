@@ -16,7 +16,7 @@ module Config
     #         delete or change existing construction of the script. 
     #         Depending on this values, organism may have different
     #         strategies of living. For example: if add value is bigger 
-    #         then del and change, then it will be grow up all the time. 
+    #         then del and change, then it will be grow up all the time.
     #         If del value is bigger then other, then it will be decreased
     #         to one line code and will die.
     #

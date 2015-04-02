@@ -31,10 +31,18 @@
   #
   type Block
     #
-    # 
+    # Array of variables(Symbols) in current block. Block may not contain
+    # variables. For example if it's empty.
     #
     vars::Array{Symbol}
+    #
+    # Reference to the block of Julia code. We use this code to add, remove
+    # or change it.
+    #
     block::Expr
+    #
+    # Reference to parent block. Root block is empty(nothing). 
+    #
     parent::Block
   end
   #

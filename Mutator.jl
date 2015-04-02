@@ -110,14 +110,14 @@ module Mutator
     ex     = _getVarOrNum(vars)
     newVar = _getNewOrLocalVar(vars, code)
     #
-    # If true, then "ex" obtains full form: 
+    # If true, then "ex" obtains full form:
     # var = [sign]{const|var} [op [sign]{const|var}]
     #
     if (_randTrue())
       ex = Expr(:call, _getOperation(), ex, _getVarOrNum(vars))
     end
-    push!(vars, newVar)
-    push!(block["block"].args, Expr(:(=), newVar, ex))
+    _addVar(block, newVar)
+    _addExpr(block, Expr(:(=), newVar, ex))
   end
   #
   # Adds new "for" keyword into the random block within the script. Possible
@@ -164,7 +164,7 @@ module Mutator
   # (add new if operator).
   #
   function _addIf(code::Script.Code)
-    block    = code.blocks[rand(1:length(code.blocks))]
+    block    = _getRandBlock(code)
     vars     = block["vars"]
     ifParams = [:if, Expr(:comparison, _getVarOrNum(vars, true), _cond[rand(1:length(_cond))], _getVarOrNum(vars, true)), Expr(:block,)]
     #
@@ -232,7 +232,7 @@ module Mutator
   # @param {Script.Code} code Script of particular organism we have to mutate
   #
   function _addFuncCall(code::Script.Code)
-    block  = code.blocks[rand(1:length(code.blocks))]
+    block  = _getRandBlock(code)
     vars   = block["vars"]
     if (length(code.funcs) < 1) return nothing end
     func   = code.funcs[rand(1:length(code.funcs))]
@@ -544,6 +544,22 @@ module Mutator
   #
   function _getOperation()
     _op[rand(1:length(_op))]
+  end
+  #
+  # Adds expression into the block
+  # @param block Block we insert to
+  # @param expr Expression to insert
+  #
+  function _addExpr(block::Block, expr::Expr)
+    push!(block.block.args, expr)
+  end
+  #
+  # Adds variable "var" into the block "block".
+  # @param block Block
+  # @param var Variable we have to insert
+  #
+  function _addVar(block::Block, var::Symbol)
+    push!(block.vars, newVar)
   end
   #
   # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y.
