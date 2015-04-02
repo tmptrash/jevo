@@ -106,17 +106,16 @@ module Mutator
   #
   function _addVar(code::Script.Code)
     block  = _getRandBlock(code)
-    vars   = block["vars"]
-    ex     = _getVarOrNum(vars)
-    newVar = _getNewOrLocalVar(vars, code)
+    ex     = _getVarOrNum(block)
+    newVar = _getNewOrLocalVar(block, code)
     #
     # If true, then "ex" obtains full form:
     # var = [sign]{const|var} [op [sign]{const|var}]
     #
     if (_randTrue())
-      ex = Expr(:call, _getOperation(), ex, _getVarOrNum(vars))
+      ex = Expr(:call, _getOperation(), ex, _getVarOrNum(block))
     end
-    _addVar(block, newVar)
+    _addScopeVar(block, newVar)
     _addExpr(block, Expr(:(=), newVar, ex))
   end
   #
@@ -138,14 +137,15 @@ module Mutator
   # (add new for operator).
   #
   function _addFor(code::Script.Code)
-    block   = _getRandBlock(code)
-    newVar  = _getNewVar(code)
-    newBody = Expr(:block,)
-    newFor  = Expr(:for, Expr(:(=), newVar, Expr(:(:), _getVarOrNum(block["vars"], true), _getVarOrNum(block["vars"], true))), newBody)
+    block    = _getRandBlock(code)
+    newVar   = _getNewVar(code)
+    newBody  = Expr(:block,)
+    newFor   = Expr(:for, Expr(:(=), newVar, Expr(:(:), _getVarOrNum(block, true), _getVarOrNum(block, true))), newBody)
+    newBlock = _addBlock(code, block, newBody)
 
-    push!(newBody.args, Expr(:call, :produce))
-    push!(block["block"].args, newFor)
-    push!(code.blocks, ["parent"=>block, "vars"=>[newVar], "block"=>newBody]);
+    _addExpr(newBlock, Expr(:call, :produce))
+    _addExpr(block, newFor)
+    _addScopeVar(newBlock, newVar)
   end
   #
   # Adds new if operator into random block within a script. Format:
@@ -166,7 +166,7 @@ module Mutator
   function _addIf(code::Script.Code)
     block    = _getRandBlock(code)
     vars     = block["vars"]
-    ifParams = [:if, Expr(:comparison, _getVarOrNum(vars, true), _cond[rand(1:length(_cond))], _getVarOrNum(vars, true)), Expr(:block,)]
+    ifParams = [:if, Expr(:comparison, _getVarOrNum(block, true), _cond[rand(1:length(_cond))], _getVarOrNum(block, true)), Expr(:block,)]
     #
     # else block is optional
     #
@@ -241,7 +241,7 @@ module Mutator
 
     # TODO: possible problem here. we don't check var type.
     # TODO: we assume, that all vars are Int
-    for i = 1:length(func["args"]) push!(args, _getVarOrNum(vars, true)) end
+    for i = 1:length(func["args"]) push!(args, _getVarOrNum(block, true)) end
     #
     # If no variables in current block, just call the function and ignore return
     #
@@ -336,7 +336,7 @@ module Mutator
     # This is a variable. We may change it to another variable or number
     #
     if (v["var"])
-      v["expr"].args[v["index"]] = _getVarOrNum(block["vars"], true)
+      v["expr"].args[v["index"]] = _getVarOrNum(block, true)
     #
     # This is a sign (+, -, ~)
     #
@@ -362,7 +362,7 @@ module Mutator
   # @param {Uint} index Index of "line" in "block"
   #
   function _changeFor(block, line::Expr, index::Uint)
-    v = _getVarOrNum(block["vars"], true)
+    v = _getVarOrNum(block, true)
     line.args[1].args[2].args[_randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? _getNum(true) : v)
   end
   #
@@ -392,7 +392,7 @@ module Mutator
   # @param {Uint} index Index of "line" in "block"
   #
   function _changeFuncCall(block, line::Expr, index::Uint)
-    v = _getVarOrNum(block["vars"], true)
+    v = _getVarOrNum(block, true)
     if line.head === :(=)
       if length(line.args[2].args) > 1 line.args[2].args[rand(2:length(line.args[2].args))] = v end
     else
@@ -488,11 +488,12 @@ module Mutator
   end
   #
   # Returns an expresion for variable or a number in format: [sign]{var|const}
-  # @param  {Expr} vars   Variables array in current block
-  # @param  {Bool} simple true if method should return only {var|const} without sign
+  # @param  block  Block, with variables array
+  # @param  simple true if method should return only {var|const} without sign
   # @return {Expr}
   #
-  function _getVarOrNum(vars, simple=false)
+  function _getVarOrNum(block::Block, simple=false)
+    vars = block.vars
     if (length(vars) === 0) return _getNum(simple) end
     v = vars[rand(1:length(vars))]
     if _randTrue() 
@@ -524,11 +525,12 @@ module Mutator
   #
   # Returns new or existing variable is specified vars scope. Returns 
   # new variable in case when _randTrue() returns true.
-  # @param vars All available variables in current scope
+  # @param block Block with all available variables
   # @param code Code of specified organism
   # @return {Symbol}
   #
-  function _getNewOrLocalVar(vars::Array{Symbol}, code::Script.Code)
+  function _getNewOrLocalVar(block::Block, code::Script.Code)
+    vars = block.vars
     if _randTrue() && length(vars) > 0 
       return vars[rand(1:length(vars))]
     end
@@ -558,8 +560,20 @@ module Mutator
   # @param block Block
   # @param var Variable we have to insert
   #
-  function _addVar(block::Block, var::Symbol)
+  function _addScopeVar(block::Block, var::Symbol)
     push!(block.vars, newVar)
+  end
+  #
+  # Adds new block into blocks array
+  # @param code Source code, where new block will be added
+  # @param parent Parent block
+  # @param body Reference to Julia block(quote)
+  # @return {Block}
+  #
+  function _addBlock(code::Script.Code, parent::Block, body::Expr)
+    Block(parent, Symbol[], body)
+    push!(code.blocks, block)
+    block
   end
   #
   # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y.
