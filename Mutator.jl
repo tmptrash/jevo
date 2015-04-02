@@ -69,9 +69,9 @@ module Mutator
   # Depending on probability (prob argument) it makes a desicion about
   # type of operation (add, del, change) and modifies script (code
   # parameter).
-  # @param  {Script.Code} code Organism's script we have to mutate
-  # @param  {Array{Int}}  prob Strategy of mutating. See 
-  # Config.mutator["addDelChange"] for details.
+  # @param code Organism's script we have to mutate
+  # @param prob Strategy of mutating. See Config.mutator["addDelChange"] 
+  # for details.
   #
   function mutate(code::Script.Code, prob::Array{Int})
     #
@@ -87,15 +87,15 @@ module Mutator
       _processLine(code, _delCb)
     end
   end
-
   #
   # Adds variable into the random block within the script. Possible
   # variants:
   #
   #   var = [sign]{const|var} [op [sign]{const|var}]
   #
-  # Added variable will be added to _blocks[xxx]["vars"] array. _blocks
-  # field must contain at least one block. Examples:
+  # First(new) variable will be added to code.blocks[xxx]["vars"] array. 
+  # code.blocks field must contain at least one block. Details about
+  # code.blocks see in description of Script.Code.blocks field. Examples:
   #
   #   var1 = 3
   #   var2 = ~var1
@@ -105,13 +105,16 @@ module Mutator
   # have to mutate (in this case, add new variable).
   #
   function _addVar(code::Script.Code)
-    block  = code.blocks[rand(1:length(code.blocks))]
+    block  = _getRandBlock(code)
     vars   = block["vars"]
     ex     = _getVarOrNum(vars)
-    newVar = (_randTrue() && length(vars) > 0 ? vars[rand(1:length(vars))] : _getNewVar(code))
-
+    newVar = _getNewOrLocalVar(vars, code)
+    #
+    # If true, then "ex" obtains full form: 
+    # var = [sign]{const|var} [op [sign]{const|var}]
+    #
     if (_randTrue())
-      ex = Expr(:call, _op[rand(1:length(_op))], ex, _getVarOrNum(vars))
+      ex = Expr(:call, _getOperation(), ex, _getVarOrNum(vars))
     end
     push!(vars, newVar)
     push!(block["block"].args, Expr(:(=), newVar, ex))
@@ -124,6 +127,7 @@ module Mutator
   #
   # "for" operator adds new block into existing one. This block is between
   # "for" and "end" operators. Also, this block contains it's variables scope.
+  # "var" (loop variable) will be first in this scope.
   # Examples:
   #
   #   for i = 2:3;end
@@ -134,7 +138,7 @@ module Mutator
   # (add new for operator).
   #
   function _addFor(code::Script.Code)
-    block   = code.blocks[rand(1:length(code.blocks))]
+    block   = _getRandBlock(code)
     newVar  = _getNewVar(code)
     newBody = Expr(:block,)
     newFor  = Expr(:for, Expr(:(=), newVar, Expr(:(:), _getVarOrNum(block["vars"], true), _getVarOrNum(block["vars"], true))), newBody)
@@ -241,6 +245,7 @@ module Mutator
     #
     # If no variables in current block, just call the function and ignore return
     #
+    # TODO: we should use new or existing var, but not only existing
     push!(block["block"].args, varLen === 0 || _randTrue() ? apply(Expr, args) : Expr(:(=), vars[rand(1:varLen)], apply(Expr, args)))
   end
   #
@@ -341,7 +346,7 @@ module Mutator
     # This is an operator (+,-,/,$,^,...)
     #
     else
-      v["expr"].args[v["index"]] = _op[rand(1:length(_op))]
+      v["expr"].args[v["index"]] = _getOperation()
     end
   end
   #
@@ -509,7 +514,37 @@ module Mutator
     num = rand(0:typemax(Int))
     simple ? num : Expr(:call, _sign[rand(1:length(_sign))], num)
   end
-
+  #
+  # Returns random block from all available
+  # @return {Dict{ASCIIString, Any}}
+  #
+  function _getRandBlock(code::Script.Code)
+    code.blocks[rand(1:length(code.blocks))]
+  end
+  #
+  # Returns new or existing variable is specified vars scope. Returns 
+  # new variable in case when _randTrue() returns true.
+  # @param vars All available variables in current scope
+  # @param code Code of specified organism
+  # @return {Symbol}
+  #
+  function _getNewOrLocalVar(vars::Array{Symbol}, code::Script.Code)
+    if _randTrue() && length(vars) > 0 
+      return vars[rand(1:length(vars))]
+    end
+    _getNewVar(code))
+  end
+  #
+  # Returns random operation. See "_op" for details. For example:
+  #
+  #     var = var + var
+  #
+  # In this example "+" is an operation
+  # @return {Function}
+  #
+  function _getOperation()
+    _op[rand(1:length(_op))]
+  end
   #
   # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y.
   # ! operator should be here.

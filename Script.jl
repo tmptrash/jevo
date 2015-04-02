@@ -7,6 +7,37 @@
   export Code
   
   #
+  # One code block. By block i mean code quote, which may contain it's
+  # own variables. For example for, while, try and so on contain they
+  # own variables scopes. Every block is a map 
+  # of three elements: "parent"=>Reference to parent block, "vars"=>Array 
+  # of vars symbols in current block and "block"=>Array of all block's 
+  # inner expressions. Example:
+  # 
+  #     [[
+  #       "vars"  => Symbol[],      # no variables in t()
+  #       "block" => code.args[2],  # block of t() function
+  #       "parent"=> [              # there is no parent for t() function
+  #         "vars"  => [],          
+  #         "block" => nothing,
+  #         "parent"=> nothing
+  #     ]]
+  #
+  # For this example code should be:
+  #
+  #     code = :(function t();end)
+  #
+  # For more details see Script.Code.blocks field's description.
+  #
+  type Block
+    #
+    # 
+    #
+    vars::Array{Symbol}
+    block::Expr
+    parent::Block
+  end
+  #
   # Represents code of script. In real it's Julia code based on Expressions.
   # See Expr type for details. Use this link:
   # (http://docs.julialang.org/en/latest/manual/metaprogramming)
