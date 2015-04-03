@@ -226,20 +226,19 @@ module Mutator
   #
   function _addFuncCall(code::Script.Code)
     block  = _getRandBlock(code)
-    vars   = block["vars"]
+    vars   = block.vars
     if (length(code.funcs) < 1) return nothing end
-    func   = code.funcs[rand(1:length(code.funcs))]
-    args   = Any[:call, symbol(func["name"])]
+    func   = _getFunc()
+    args   = Any[:call, symbol(func.name)]
     varLen = length(vars)
 
     # TODO: possible problem here. we don't check var type.
     # TODO: we assume, that all vars are Int
-    for i = 1:length(func["args"]) push!(args, _getVarOrNum(block)) end
+    for i = 1:length(func.args) push!(args, _getVarOrNum(block)) end
     #
     # If no variables in current block, just call the function and ignore return
     #
-    # TODO: we should use new or existing var, but not only existing
-    push!(block["block"].args, varLen === 0 || Helper.randTrue() ? apply(Expr, args) : Expr(:(=), vars[rand(1:varLen)], apply(Expr, args)))
+    _addExpr(block, varLen === 0 || Helper.randTrue() ? apply(Expr, args) : Expr(:(=), _getNewOrLocalVar(block, code), apply(Expr, args)))
   end
   #
   # Works in two steps: first, it finds random block. Second - it finds random 
@@ -398,6 +397,8 @@ module Mutator
   # @param {Expr} line  Line with variables to change
   # @param {Uint} index Index of "line" in "block"
   #
+  # TODO: We have to check the type of deleted line, because we have to 
+  # TODO: remove functions and variables from block's maps.
   function _delLine(block, line::Expr, index::Uint)
     splice!(block["block"].args, index)
   end
@@ -525,6 +526,13 @@ module Mutator
     newVar
   end
   #
+  # Returns random function from all avaialble
+  # @return {Script.Func}
+  #
+  function _getFunc()
+    code.funcs[rand(1:length(code.funcs))]
+  end
+  #
   # Returns random operation. See "_op" for details. For example:
   #
   #     var = var + var
@@ -558,7 +566,7 @@ module Mutator
   # Adds new cusom function into the functions map
   #
   function _addFunc(code::Script.Code, name::ASCIIString, args::Array{Arg})
-    push!(code.funcs, Func(name, args))
+    push!(code.funcs, Script.Func(name, args))
   end
   #
   # Adds expression into another expression
