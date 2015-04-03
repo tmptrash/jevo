@@ -5,6 +5,9 @@
  #
  module Script
   export Code
+  export Block
+  export Func
+  export Arg
   
   #
   # One code block. By block i mean code quote, which may contain it's
@@ -44,6 +47,33 @@
     # Reference to parent block. Root block is empty(nothing). 
     #
     parent::Block
+  end
+  #
+  # Describes Julia function with or without arguments. Is used for 
+  # generating functions and they call.
+  #
+  type Func
+    #
+    # Name of the function
+    #
+    name::ASCIIString
+    #
+    # Array of function arguments
+    #
+    args::Array{Arg}
+  end
+  #
+  # Describes one function argument
+  #
+  type Arg
+    #
+    # Name of the argument
+    #
+    name::ASCIIString
+    #
+    # Type of the argument
+    #
+    typ::DataType
   end
   #
   # Represents code of script. In real it's Julia code based on Expressions.
@@ -101,7 +131,7 @@
     # Mutator uses this to make a change or add something new to the code. It's
     # important, that this map is one dimention, because real code is a tree.
     #
-    blocks::Array{Dict{ASCIIString, Any}}
+    blocks::Array{Block}
     #
     # {Array{Dict{ASCIIString, Any}}} Map of the functions with parameters 
     # available to call in script' code. All functions live on one level.
@@ -115,8 +145,9 @@
     # itself (e.g. by Mutator module). These functions may be changed, added and
     # removed (again by Mutator). And don't forget, that funcs and blocks must
     # be synchronized.
-    #
-    funcs::Array{Dict{ASCIIString, Any}}
+    # TODO: optimize this to type instead of Dict
+    # 
+    funcs::Array{Func}
     #
     # Quote (container) for organism's functions. All functions must be in one
     # block. We are not support inline functions.

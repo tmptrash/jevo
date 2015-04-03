@@ -106,16 +106,13 @@ module Mutator
   #
   function _addVar(code::Script.Code)
     block  = _getRandBlock(code)
-    ex     = _getVarOrNum(block)
+    ex     = _getVarOrNum(block, false)
     newVar = _getNewOrLocalVar(block, code)
     #
     # If true, then "ex" obtains full form:
     # var = [sign]{const|var} [op [sign]{const|var}]
     #
-    if (_randTrue())
-      ex = Expr(:call, _getOperation(), ex, _getVarOrNum(block))
-    end
-    _addScopeVar(block, newVar)
+    if Helper.randTrue() ex = Expr(:call, _getOperation(), ex, _getVarOrNum(block, false)) end
     _addExpr(block, Expr(:(=), newVar, ex))
   end
   #
@@ -140,12 +137,10 @@ module Mutator
     block    = _getRandBlock(code)
     newVar   = _getNewVar(code)
     newBody  = Expr(:block,)
-    newFor   = Expr(:for, Expr(:(=), newVar, Expr(:(:), _getVarOrNum(block, true), _getVarOrNum(block, true))), newBody)
-    newBlock = _addBlock(code, block, newBody)
+    newFor   = Expr(:for, Expr(:(=), newVar, Expr(:(:), _getVarOrNum(block), _getVarOrNum(block))), newBody)
+    newBlock = _createBlock(code, block, newBody, [newVar])
 
-    _addExpr(newBlock, Expr(:call, :produce))
     _addExpr(block, newFor)
-    _addScopeVar(newBlock, newVar)
   end
   #
   # Adds new if operator into random block within a script. Format:
@@ -165,55 +160,53 @@ module Mutator
   #
   function _addIf(code::Script.Code)
     block    = _getRandBlock(code)
-    vars     = block["vars"]
-    ifParams = [:if, Expr(:comparison, _getVarOrNum(block, true), _cond[rand(1:length(_cond))], _getVarOrNum(block, true)), Expr(:block,)]
+    vars     = block.vars
+    ifParams = [:if, Expr(:comparison, _getVarOrNum(block), _getCondition(), _getVarOrNum(block)), Expr(:block,)]
     #
     # else block is optional
     #
-    if _randTrue()
+    if Helper.randTrue()
       body = Expr(:block,)
       push!(ifParams, body)
-      push!(body.args, Expr(:call, :produce))
-      push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>body])
+      _createBlock(code, block, body, vars)
     end
 
-    push!(block["block"].args, apply(Expr, ifParams))
-    push!(ifParams[3].args, Expr(:call, :produce))
-    push!(code.blocks, ["parent"=>block, "vars"=>vars, "block"=>ifParams[3]])
+    _createBlock(code, block, ifParams[3], vars)
+    _addExpr(block, apply(Expr, ifParams))
   end
-  # TODO: describe function creation details
-  # Adds new named function into the main block within script. Format:
+  # 
+  # Adds new named function into the function block within script. Format:
   #
-  #   function XXX(args);end
+  #   function XXX([args]);end
   #
   # "function" operator adds new block into existing one. This block is in a 
   # body of the function. Also, this block contains it's own variables scope.
-  # It's important, that all functions will leave in main block only.
+  # It's important, that all functions leave in special separate block.
   # Example:
   #
   #   function func1();end
+  #   function func2()
   #
   # @param {Script.Code} code Script of particular organism we have to mutate
-  # (add new function).
+  # (add new custom function).
   #
   function _addFunc(code::Script.Code)
     newBlock  = Expr(:block,)
     newFunc   = _getNewFunc(code)
     func      = [:call, newFunc]
-    maxParams = rand(0:code.funcMaxArgs)
-    funcArgs  = (Dict{ASCIIString, Any})[]
+    params    = rand(0:code.funcMaxArgs)
+    funcArgs  = Arg[]
     vars      = (Symbol)[]
 
-    for i = 1:maxParams
+    for p = 1:params
       arg = _getNewVar(code)
-      push!(funcArgs, ["name"=>string(arg), "type"=>Int])
+      push!(funcArgs, Arg(string(arg), Int))
       push!(func, arg)
       push!(vars, arg)
     end
-    push!(code.funcs, ["name"=>string(newFunc), "args"=>funcArgs])
-    push!(code.fnBlock.args, Expr(:function, apply(Expr, func), newBlock))
-    push!(newBlock.args, Expr(:call, :produce))
-    push!(code.blocks, ["parent"=>code.fnBlock, "vars"=>vars, "block"=>newBlock])
+    _addFunc(code, string(newFunc), funcArgs)
+    _addExpr(code.fnBlock, Expr(:function, apply(Expr, func), newBlock))
+    _createBlock(code, code.fnBlock, newBlock, vars)
   end
   #
   # Adds new function call into the random block within script. Format:
@@ -241,12 +234,12 @@ module Mutator
 
     # TODO: possible problem here. we don't check var type.
     # TODO: we assume, that all vars are Int
-    for i = 1:length(func["args"]) push!(args, _getVarOrNum(block, true)) end
+    for i = 1:length(func["args"]) push!(args, _getVarOrNum(block)) end
     #
     # If no variables in current block, just call the function and ignore return
     #
     # TODO: we should use new or existing var, but not only existing
-    push!(block["block"].args, varLen === 0 || _randTrue() ? apply(Expr, args) : Expr(:(=), vars[rand(1:varLen)], apply(Expr, args)))
+    push!(block["block"].args, varLen === 0 || Helper.randTrue() ? apply(Expr, args) : Expr(:(=), vars[rand(1:varLen)], apply(Expr, args)))
   end
   #
   # Works in two steps: first, it finds random block. Second - it finds random 
@@ -336,7 +329,7 @@ module Mutator
     # This is a variable. We may change it to another variable or number
     #
     if (v["var"])
-      v["expr"].args[v["index"]] = _getVarOrNum(block, true)
+      v["expr"].args[v["index"]] = _getVarOrNum(block)
     #
     # This is a sign (+, -, ~)
     #
@@ -362,8 +355,8 @@ module Mutator
   # @param {Uint} index Index of "line" in "block"
   #
   function _changeFor(block, line::Expr, index::Uint)
-    v = _getVarOrNum(block, true)
-    line.args[1].args[2].args[_randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? _getNum(true) : v)
+    v = _getVarOrNum(block)
+    line.args[1].args[2].args[Helper.randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? _getNum(true) : v)
   end
   #
   # Change in this case means, changing of operator or 
@@ -379,8 +372,8 @@ module Mutator
     #
     # 2 - condition, 1,3 - variables or numbers
     #
-    index = _randTrue() ? 2 : (_randTrue() ? 1: 3)
-    line.args[1].args[index] = (index === 2 ? _cond[rand(1:length(_cond))] : _getVarOrNum(block["vars"], true))
+    index = Helper.randTrue() ? 2 : (Helper.randTrue() ? 1: 3)
+    line.args[1].args[index] = (index === 2 ? _getCondition() : _getVarOrNum(block))
   end
   #
   # Change in this case means changing one function argument.
@@ -392,7 +385,7 @@ module Mutator
   # @param {Uint} index Index of "line" in "block"
   #
   function _changeFuncCall(block, line::Expr, index::Uint)
-    v = _getVarOrNum(block, true)
+    v = _getVarOrNum(block)
     if line.head === :(=)
       if length(line.args[2].args) > 1 line.args[2].args[rand(2:length(line.args[2].args))] = v end
     else
@@ -463,14 +456,6 @@ module Mutator
     end
   end
   #
-  # Chooses (returns) true or false randomly. Is used to choose between two
-  # variants of something. For example + or - sign.
-  # @return {Bool}
-  #
-  function _randTrue()
-    rand(1:2) === 1
-  end
-  #
   # Generates new variable symbol.
   # @param  {Script.Code} code Script of current organism.
   # @return {Symbol} New symbol in format: "varXXX", where XXX - Uint
@@ -492,11 +477,11 @@ module Mutator
   # @param  simple true if method should return only {var|const} without sign
   # @return {Expr}
   #
-  function _getVarOrNum(block::Block, simple=false)
+  function _getVarOrNum(block::Block, simple=true)
     vars = block.vars
     if (length(vars) === 0) return _getNum(simple) end
     v = vars[rand(1:length(vars))]
-    if _randTrue() 
+    if Helper.randTrue() 
       if simple 
         v
       else
@@ -524,17 +509,20 @@ module Mutator
   end
   #
   # Returns new or existing variable is specified vars scope. Returns 
-  # new variable in case when _randTrue() returns true.
+  # new variable in case when Helper.randTrue() returns true. In case
+  # of new variable adds it into the block.
   # @param block Block with all available variables
   # @param code Code of specified organism
   # @return {Symbol}
   #
   function _getNewOrLocalVar(block::Block, code::Script.Code)
     vars = block.vars
-    if _randTrue() && length(vars) > 0 
+    if Helper.randTrue() && length(vars) > 0 
       return vars[rand(1:length(vars))]
     end
-    _getNewVar(code))
+    newVar = _getNewVar(code)
+    _addScopeVar(block, newVar)
+    newVar
   end
   #
   # Returns random operation. See "_op" for details. For example:
@@ -548,12 +536,37 @@ module Mutator
     _op[rand(1:length(_op))]
   end
   #
+  # Returns random condition. See "_cond" for details. For example:
+  #
+  #     if var < var
+  #
+  # In this example "<" is a condition
+  # @return {Function}
+  #
+  function _getCondition()
+    _cond[rand(1:length(_cond))
+  end
+  #
   # Adds expression into the block
   # @param block Block we insert to
   # @param expr Expression to insert
   #
   function _addExpr(block::Block, expr::Expr)
     push!(block.block.args, expr)
+  end
+  #
+  # Adds new cusom function into the functions map
+  #
+  function _addFunc(code::Script.Code, name::ASCIIString, args::Array{Arg})
+    push!(code.funcs, Func(name, args))
+  end
+  #
+  # Adds expression into another expression
+  # @param dest Destination expression
+  # @param src  Source expression
+  #
+  function _addExpr(dest::Expr, src::Expr)
+    push!(dest.args, expr)
   end
   #
   # Adds variable "var" into the block "block".
@@ -564,15 +577,16 @@ module Mutator
     push!(block.vars, newVar)
   end
   #
-  # Adds new block into blocks array
+  # Creates new block and adds it into blocks array.
   # @param code Source code, where new block will be added
   # @param parent Parent block
   # @param body Reference to Julia block(quote)
-  # @return {Block}
+  # @return {Block} New block
   #
-  function _addBlock(code::Script.Code, parent::Block, body::Expr)
-    Block(parent, Symbol[], body)
+  function _createBlock(code::Script.Code, parent::Block, body::Expr, vars::Array{Symbol})
+    block = Block(parent, vars, body)
     push!(code.blocks, block)
+    _addExpr(block, Expr(:call, :produce))
     block
   end
   #
