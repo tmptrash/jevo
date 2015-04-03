@@ -226,11 +226,9 @@ module Mutator
   #
   function _addFuncCall(code::Script.Code)
     block  = _getRandBlock(code)
-    vars   = block.vars
     if (length(code.funcs) < 1) return nothing end
     func   = _getFunc()
     args   = Any[:call, symbol(func.name)]
-    varLen = length(vars)
 
     # TODO: possible problem here. we don't check var type.
     # TODO: we assume, that all vars are Int
@@ -238,7 +236,11 @@ module Mutator
     #
     # If no variables in current block, just call the function and ignore return
     #
-    _addExpr(block, varLen === 0 || Helper.randTrue() ? apply(Expr, args) : Expr(:(=), _getNewOrLocalVar(block, code), apply(Expr, args)))
+    if length(block.vars) === 0 || Helper.randTrue()
+      _addExpr(block, apply(Expr, args))
+    else
+      _addExpr(block, Expr(:(=), _getNewOrLocalVar(block, code), apply(Expr, args)))
+    end
   end
   #
   # Works in two steps: first, it finds random block. Second - it finds random 
@@ -259,11 +261,11 @@ module Mutator
     #
     # We can't change code, because there is no code at the moment.
     #
-    if length(code.blocks) === 0 || length(code.blocks) === 1 && length(code.blocks[1]["block"].args) === 0 return nothing end
+    if length(code.blocks) === 0 || length(code.blocks) === 1 && length(code.blocks[1].block.args) === 0 return nothing end
     block  = code.blocks[rand(1:length(code.blocks))]
-    if length(block["block"].args) === 0 return nothing end
-    index  = uint(rand(1:length(block["block"].args)))
-    line   = block["block"].args[index]
+    if length(block.block.args) === 0 return nothing end
+    index  = uint(rand(1:length(block.block.args)))
+    line   = block.block.args[index]
     if typeof(line) !== Expr return nothing end # empty lines
     head   = line.head
 
