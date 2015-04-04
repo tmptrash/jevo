@@ -150,7 +150,7 @@
     funcs::Array{Func}
     #
     # Quote (container) for organism's functions. All functions must be in one
-    # block. We are not support inline functions.
+    # (this) block. We are not support inline functions. 
     #
     fnBlock::Expr
   end

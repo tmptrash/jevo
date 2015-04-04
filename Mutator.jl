@@ -175,17 +175,19 @@ module Mutator
     _addExpr(block, apply(Expr, ifParams))
   end
   # 
-  # Adds new named function into the function block within script. Format:
+  # Adds new named function into the functions block within script. See
+  # Script.Block.fnBlock for details. Format:
   #
   #   function XXX([args]);end
   #
   # "function" operator adds new block into existing one. This block is in a 
   # body of the function. Also, this block contains it's own variables scope.
-  # It's important, that all functions leave in special separate block.
-  # Example:
+  # It's important, that all functions leave in special separate block. All
+  # function's arguments will be used as local(scope) variables. Amount of
+  # arguments is specified in Config.mutator["funcMaxArgs"] parameter. Example:
   #
-  #   function func1();end
-  #   function func2()
+  #   function func1() end
+  #   function func2(var1) end
   #
   # @param {Script.Code} code Script of particular organism we have to mutate
   # (add new custom function).
