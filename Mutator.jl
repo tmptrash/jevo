@@ -64,14 +64,10 @@
 # TODO: every private method should have standart description of operation it
 # TODO: works with. e.g.: if {var|const} op {var|const} end
 # TODO: usage...
-# TODO: describe [], {|}, var, op, sign, const keywords
 # TODO: think about functions copy (like gene copy)
 # TODO: Check if we can move some constants to global Config module
-# TODO: describe, that every block contains one produce() call
 #
 # OPT : add speed tests before and after optimization
-# OPT : Replace Dictionaries to typed arrays
-# OPT : add types to increase the speed
 #
 module Mutator
   export mutate
@@ -80,6 +76,24 @@ module Mutator
   import Exceptions
   # TODO: remove this module
   using  Debug
+
+  #
+  # Record for variable or number. Is used in _findVars() function
+  #
+  type VarOrNum
+    #
+    # Expression where variable or number was found
+    #
+    expr::Expr
+    #
+    # Index of variable or number within expression
+    #
+    index::Uint
+    #
+    # true - var, false - num
+    #
+    var::Bool
+  end
 
   #
   # Do one random mutation of script. It may be: add, remove or change.
@@ -307,89 +321,61 @@ module Mutator
   # @param {Array{Function}} cbs Callback functions for every type of operator
   #
   function _processLine(code::Script.Code, cbs::Array{Function})
-    #
-    # We can't change code, because there is no code at the moment.
-    #
-    if length(code.blocks) === 0 || length(code.blocks) === 1 && length(code.blocks[1].block.args) === 0 return nothing end
-    block  = code.blocks[rand(1:length(code.blocks))]
-    if length(block.block.args) === 0 return nothing end
-    index  = uint(rand(1:length(block.block.args)))
-    line   = block.block.args[index]
-    if typeof(line) !== Expr return nothing end # empty lines
-    head   = line.head
+    if _isEmpty(code) return nothing end  # No code
+    block = _getRandBlock(code)
+    if _isEmpty(block) return nothing end # No lines in block
+    line, index = _getRandLine(block)
+    if _isEmpty(line) return nothing end  # Empty line
+    head = line.head
 
-    #
-    # We have to skip produce() calls all the time.
-    #
     if head === :call && line.args[1] === :produce
-      return nothing
-    #
-    # Possible operations: funcXXX(args), varXXX = funcXXX(args)
-    #
+      return nothing             # skip produce() call
     elseif head === :call || (head === :(=) && typeof(line.args[2]) === Expr && line.args[2].head === :call)
-      cbs[5](block, line, index)
-    #
-    # Possible operations: function funcXXX(args)...end
-    #
+      cbs[5](block, line, index) # funcXXX(args), varXXX = funcXXX(args)
     elseif head === :function
-      cbs[4](block, line, index)
-    #
-    # Possible operations: if...end
-    #
+      cbs[4](block, line, index) # function funcXXX(args)...end
     elseif head == :if
-      cbs[3](block, line, index)
-    #
-    # Possible operations: for varXXX = 1:XXX...end
-    #
+      cbs[3](block, line, index) # if...end
     elseif head == :for
-      cbs[2](block, line, index)
-    #
-    # Possible operations: varXXX = {varXXX|number}[ op {varXXX|number}]
-    #
+      cbs[2](block, line, index) # for varXXX = 1:XXX...end
     elseif head === :(=)
-      cbs[1](block, line, index)
+      cbs[1](block, line, index) # varXXX = {varXXX|number}[ op {varXXX|number}]
     end
   end
   #
-  # TODO: describe how changer works. it desn't increase/decrease
-  # TODO: length of line, just change var/number in one place
-  # TODO: possible problem with only one supported type Int
+  # This function changes code line with variable assignment:
+  # 
+  #   var = [sign]{const|var} [op [sign]{const|var}]
+  # 
+  # Expression format:
+  #
+  #   Expr: (:(=), :var1, (:call, :+, (:call, :-, :var2), (:call, :~, 123)))
+  #   Real: var1 = -var2 + ~123
+  #
+  # There are three elements we may to change here: three vars,
+  # one var and two numbers or two vars and one number,... This
+  # function just change one of these elements. It also may change
+  # "sign" or "op".
   # @param {Dict} block Current block of code
   # @param {Expr} line  Line with variables to change
   # @param {Uint} index Index of "line" in "block"
   #
   function _changeVar(block, line::Expr, index::Uint)
-    #
-    # map of variables, numbers and operations for changing
-    #
-    vars = Dict{ASCIIString, Any}[]
+    vars = VarOrNum[]
     #
     # We can't change first variable, because it may cause an errors.
     # This variable me be used later in code, so we can't remove it.
     # 2 means - skip first variable: varXXX = ...
     #
-    _parseVars(vars, line, 2)
-    #
-    # There are three types of change: var, number, operation.
-    #We can't change first variable: varXXX = ...
-    # TODO: describe these ifs
-    #
+    _findVars(vars, line, 2)
+    
     v = vars[rand(1:length(vars))]
-    #
-    # This is a variable. We may change it to another variable or number
-    #
-    if (v["var"])
-      v["expr"].args[v["index"]] = _getVarOrNum(block)
-    #
-    # This is a sign (+, -, ~)
-    #
-    elseif findfirst(_sign, v["expr"].args[v["index"]]) > 0
-      v["expr"].args[v["index"]] = _sign[rand(1:length(_sign))]
-    #
-    # This is an operator (+,-,/,$,^,...)
-    #
-    else
-      v["expr"].args[v["index"]] = _getOperation()
+    if (v.var)                                        # We may change it to variable or number
+      v.expr.args[v.index] = _getVarOrNum(block)
+    elseif findfirst(_sign, v.expr.args[v.index]) > 0 # This is a sign (+, -, ~)
+      v.expr.args[v.index] = _sign[rand(1:length(_sign))]
+    else                                              # This is an operator (+,-,/,$,^,...)
+      v.expr.args[v.index] = _getOperation()
     end
   end
   #
@@ -479,31 +465,32 @@ module Mutator
   end
   #
   # Parses expression recursively and collects all variables and numbers
-  # into "vars" map. Every varible or number is a record in vars. Example:
+  # into "vars" map. Every variable or number is a record in vars argument.
+  # Example:
   #
-  #     ["expr"=>expr, "index"=>1]
+  #     VarOrNum(expr, 1, true)
   #
-  # This line means that expr.args[1] contains variable or number
-  # @params {Array} vars Container for variables: [["expr"=>Expr, "index"=>Number],...]
-  # TODO:
-  # TODO:
+  # This line means that expr.args[1] contains variable in expr.args[1].
+  # @param vars Container for variables: [VarOrNum(expr, 1, true),...]
+  # @param parent Expression where we should search for variables/numbers
+  # @param index Index of operand in expr, where we should start search
   #
-  function _parseVars(vars::Array{Dict{ASCIIString, Any}}, parent::Expr, index)
+  function _findVars(vars::Array{VarOrNum}, parent::Expr, index::Int)
     expr = parent.args[index]
     #
     # "var"=>true means that current operand is a variable or a number const
     #
     if typeof(expr) !== Expr
-      push!(vars, ["expr"=>parent, "index"=>index, "var"=>true])
+      push!(vars, VarOrNum(parent, index, true)
       return nothing
     end
     for i = 1:length(expr.args)
       if typeof(expr.args[i]) === Expr
-        _parseVars(vars, expr, i)
+        _findVars(vars, expr, i)
       elseif typeof(expr.args[i]) === Symbol
-        push!(vars, ["expr"=>expr, "index"=>i, "var"=>i!==1])
+        push!(vars, VarOrNum(expr, i, i!==1))
       else
-        push!(vars, ["expr"=>expr, "index"=>i, "var"=>true])
+        push!(vars, VarOrNum(expr, i, true))
       end
     end
   end
@@ -647,6 +634,40 @@ module Mutator
     push!(code.blocks, block)
     _addExpr(block, Expr(:call, :produce))
     block
+  end
+  #
+  # Returns true if code is empty. Empty means, no code
+  # blocks or one code block, but without lines inside.
+  # @param code Code to check
+  # @return {Bool}
+  #
+  function _isEmpty(code::Script.Code)
+    length(code.blocks) === 0 || length(code.blocks) === 1 && length(code.blocks[1].block.args) === 0
+  end
+  #
+  # Checks if code block has no lines inside
+  # @param block Code block to check
+  # @return {Bool}
+  #
+  function _isEmpty(block::Script.Block)
+    length(block.block.args) === 0
+  end
+  #
+  # Returns true if code line is empty. Empty means
+  # code line without operator. For example, comment.
+  # @param line Line to check
+  # @return {Bool}
+  #
+  function _isEmpty(line::Expr)
+    typeof(line) !== Expr
+  end
+  #
+  # Returns random line and it's index within block
+  # @return {(Expr, Uint)}
+  #
+  function _getRandLine(block::Script.Block)
+    index = uint(rand(1:length(block.block.args)))
+    (block.block.args[index], index)
   end
   #
   # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y.
