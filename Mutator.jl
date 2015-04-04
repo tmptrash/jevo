@@ -140,7 +140,7 @@ module Mutator
   #   var2 = ~var1        # mid form
   #   var2 = -var2 * ~34  # full form
   #
-  # @param {Script.Code} code Script of some particular organism, we 
+  # @param code Script of some particular organism, we 
   # have to mutate (in this case, add new variable).
   #
   function _addVar(code::Script.Code)
@@ -172,7 +172,7 @@ module Mutator
   #   for i = 7:k end
   #   for i = m:k end
   #
-  # @param {Script.Code} code Script of particular organism we have to mutate
+  # @param code Script of particular organism we have to mutate
   # (add new for operator).
   #
   function _addFor(code::Script.Code)
@@ -202,7 +202,7 @@ module Mutator
   #   if i<3 else end
   #   if i>k end
   #
-  # @param {Script.Code} code Script of particulat organism, we have to mutate
+  # @param code Script of particulat organism, we have to mutate
   # (add new if operator).
   #
   function _addIf(code::Script.Code)
@@ -241,7 +241,7 @@ module Mutator
   #   function func1() end
   #   function func2(var1) end
   #
-  # @param {Script.Code} code Script of particular organism we have to mutate
+  # @param code Script of particular organism we have to mutate
   # (add new custom function).
   #
   function _addFunc(code::Script.Code)
@@ -285,7 +285,7 @@ module Mutator
   #     var1 = grabEnergyLeft()
   #     var3 = func1(var1, 12)
   #
-  # @param {Script.Code} code Script of particular organism we have to mutate
+  # @param code Script of particular organism we have to mutate
   #
   function _addFuncCall(code::Script.Code)
     block  = _getRandBlock(code)
@@ -317,8 +317,8 @@ module Mutator
   #
   #     block::Array{Dict{ASCIIString, Any}}, line::Expr
   #
-  # @param {Script.Code} code Script of particular organism we have to mutate
-  # @param {Array{Function}} cbs Callback functions for every type of operator
+  # @param code Script of particular organism we have to mutate
+  # @param cbs Callback functions for every type of operator
   #
   function _processLine(code::Script.Code, cbs::Array{Function})
     if _isEmpty(code) return nothing end  # No code
@@ -355,10 +355,12 @@ module Mutator
   # There are three elements we may to change here: three vars,
   # one var and two numbers or two vars and one number,... This
   # function just change one of these elements. It also may change
-  # "sign" or "op".
-  # @param {Dict} block Current block of code
-  # @param {Expr} line  Line with variables to change
-  # @param {Uint} index Index of "line" in "block"
+  # "sign" or "op". One call of this function will change only one
+  # variable/number/operator/sign.
+  #
+  # @param block Current block of code
+  # @param line  Line with variables to change
+  # @param index Index of "line" in "block"
   #
   function _changeVar(block, line::Expr, index::Uint)
     vars = VarOrNum[]
@@ -367,7 +369,7 @@ module Mutator
     # This variable me be used later in code, so we can't remove it.
     # 2 means - skip first variable: varXXX = ...
     #
-    _findVars(vars, line, 2)
+    _findVars(vars, line, uint(2))
     
     v = vars[rand(1:length(vars))]
     if (v.var)                                        # We may change it to variable or number
@@ -379,16 +381,27 @@ module Mutator
     end
   end
   #
-  # Changes for operator. It's possible to change min or max expression.
-  # It's impossible to change variable. For example, we can't change "i"
-  # in this loop:
+  # Changes "for" operator. It's possible to change only min or max 
+  # expression. It's impossible to change variable. For example, we 
+  # can't change "i" in this loop:
   #
-  #     for i = 1:k;end
+  #   for i = 1:k end
+  # 
+  # Because it impacts to all code inside the "for" operator. So,
+  # only "1" and "k" may be changed. General syntax: 
   #
-  # It changes only one variable|number per one call.
-  # @param {Dict} block Current block of code 
-  # @param {Expr} line  Line with for operator to change
-  # @param {Uint} index Index of "line" in "block"
+  #   for var = {var|const}:{var|const} end
+  #
+  # Expression format:
+  #
+  #   Expr: (:for, (:(=), :var1, (:(:), :var2, 123)), (:block,))
+  #   Real: for var1 = var2:123 end
+  #
+  # One call of this function will change only one variable/number.
+  #
+  # @param block Current block of code 
+  # @param line  Line with for operator to change
+  # @param index Index of "line" in "block"
   #
   function _changeFor(block, line::Expr, index::Uint)
     v = _getVarOrNum(block)
@@ -396,29 +409,51 @@ module Mutator
   end
   #
   # Change in this case means, changing of operator or 
-  # variables. For example we may change "<", "v1" or "v2":
+  # variables. For example we may change "<", "v1" or "v2"
+  # in this line:
   #
   #     if v1 < v2...else...end
   #
-  # @param {Dict} block Current block of code 
-  # @param {Expr} line  Line with for operator to change
-  # @param {Uint} index Index of "line" in "block"
+  # General syntax: 
+  #
+  #   for var = {var|const}:{var|const} end
+  #
+  # Expression format:
+  #
+  #   Expr: (:for, (:(=), :var1, (:(:), :var2, 123)), (:block,))
+  #   Real: for var1 = var2:123 end
+  #
+  # One call of this function makes only one change. It's
+  # possible that after mutation line will be the same. Because
+  # it may change, for example, condition or var to similar one.
+  # @param block Current block of code 
+  # @param line  Line with for operator to change
+  # @param index Index of "line" in "block"
   #
   function _changeIf(block, line::Expr, index::Uint)
     #
     # 2 - condition, 1,3 - variables or numbers
     #
-    index = Helper.randTrue() ? 2 : (Helper.randTrue() ? 1: 3)
-    line.args[1].args[index] = (index === 2 ? _getCondition() : _getVarOrNum(block))
+    idx = rand(1:3)
+    line.args[1].args[idx] = (idx === 2 ? _getCondition() : _getVarOrNum(block))
   end
   #
   # Change in this case means changing one function argument.
   # We can't change function name, because in this case we have
   # to change all arguments too, but they related to function's
-  # body code.
-  # @param {Dict} block Current block of code 
-  # @param {Expr} line  Line with for operator to change
-  # @param {Uint} index Index of "line" in "block"
+  # body code. General syntax:
+  #
+  #   [var=]funcXXX([args])
+  #
+  # Two forms are possible: short (without variable assign) and full (with
+  # variable assign). Expression format:
+  #
+  #   Expr: (:(=), :var1, (:call, :func1, :var2))
+  #   Real: var1 = func1(var2)
+  #
+  # @param block Current block of code 
+  # @param line  Line with for operator to change
+  # @param index Index of "line" in "block"
   #
   function _changeFuncCall(block, line::Expr, index::Uint)
     v = _getVarOrNum(block)
@@ -475,7 +510,7 @@ module Mutator
   # @param parent Expression where we should search for variables/numbers
   # @param index Index of operand in expr, where we should start search
   #
-  function _findVars(vars::Array{VarOrNum}, parent::Expr, index::Int)
+  function _findVars(vars::Array{VarOrNum}, parent::Expr, index::Uint)
     expr = parent.args[index]
     #
     # "var"=>true means that current operand is a variable or a number const
