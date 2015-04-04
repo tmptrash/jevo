@@ -38,6 +38,23 @@
 #     []    - optional expression
 #     {|}   - one value should be choosed
 #
+# Mutator does it's modifications throught expressions. See this link for 
+# details: http://julia.readthedocs.org/en/latest/manual/metaprogramming/
+# Julia has special type for this. It's called Expr(). Descriptions in this
+# module use short syntax for expressions. For example:
+#
+#     Expr: (:(=), :var1, (:call, :func1))
+#     Real: var1 = func1()
+#  
+# Short, because we don't use Expr before every (...) block. Real (full)
+# expression in this case should be:
+#
+#     ex = Expr(:(=), :var1, Expr(:call, :func1))
+#
+# This expression may be run in Julia by calling eval(). Like this:
+#
+#     eval(ex)
+# 
 # Usage:
 #     creature = Organism.create()
 #     Mutator.mutate(creature.script, [3,2,1])
@@ -88,18 +105,26 @@ module Mutator
     end
   end
   #
-  # Adds variable into the random block within the script. Possible
-  # variants:
+  # Adds variable into the random block within the script. General syntax:
   #
   #   var = [sign]{const|var} [op [sign]{const|var}]
   #
+  # This syntax contains three avaialble types of assign: short, mid and long.
+  # See examples below for details. Let's analyze real example:
+  #
+  #   Expr: (:(=), :var1, (:call, :+, (:call, :-, :var2), (:call, :~, 123)))
+  #   Real: var1 = -var2 + ~123
+  #
+  # First and second lines are the same, but in different forms. First one
+  # is a final expression we have to obtain in _addVar() function. Second is
+  # a same expression, but in Julia language.
   # First(new) variable will be added to code.blocks[xxx]["vars"] array. 
   # code.blocks field must contain at least one block. Details about
   # code.blocks see in description of Script.Code.blocks field. Examples:
   #
-  #   var1 = 3
-  #   var2 = ~var1
-  #   var2 = -var2 * ~34
+  #   var1 = 3            # short form
+  #   var2 = ~var1        # mid form
+  #   var2 = -var2 * ~34  # full form
   #
   # @param {Script.Code} code Script of some particular organism, we 
   # have to mutate (in this case, add new variable).
@@ -116,19 +141,22 @@ module Mutator
     _addExpr(block, Expr(:(=), newVar, ex))
   end
   #
-  # Adds new "for" keyword into the random block within the script. Possible
-  # variants:
+  # Adds "for" keyword into the random block within the script. General syntax:
   #
-  #   for var = {var|const}:{var|const};end
+  #   for var = {var|const}:{var|const} end
+  #
+  # Expression format:
+  #
+  #   Expr: (:for, (:(=), :var1, (:(:), :var2, 123)), (:block,))
+  #   Real: for var1 = var2:123 end
   #
   # "for" operator adds new block into existing one. This block is between
   # "for" and "end" operators. Also, this block contains it's variables scope.
-  # "var" (loop variable) will be first in this scope.
-  # Examples:
+  # "var" (loop variable) will be first in this scope. Examples:
   #
-  #   for i = 2:3;end
-  #   for i = 7:k;end
-  #   for i = m:k;end
+  #   for i = 2:3 end
+  #   for i = 7:k end
+  #   for i = m:k end
   #
   # @param {Script.Code} code Script of particular organism we have to mutate
   # (add new for operator).
@@ -143,17 +171,22 @@ module Mutator
     _addExpr(block, newFor)
   end
   #
-  # Adds new if operator into random block within a script. Format:
+  # Adds new if operator into random block within a script. General syntax:
   #
-  #   if {var|const} Cond {var|const};else;end
+  #   if {var|const} cond {var|const} else end
+  #
+  # This syntax contains two available states: short and full. Short version
+  # doesn't contain else block. Here is an expression format:
+  # 
+  #   Expr: (:if, (:comparison, :i, :<, 3), (:block,), (:block,))
+  #   Real: if i < 3 else end
   #
   # "if" operator adds new block into existing one. But, this block doesn't
-  # contain variables scope. It uses parent's scope.
-  # Examples:
+  # contain variables scope. It uses parent's scope. Examples:
   #
-  #   if 1<2;end
-  #   if i<3;else;end
-  #   if i>k;end
+  #   if 1<2 end
+  #   if i<3 else end
+  #   if i>k end
   #
   # @param {Script.Code} code Script of particulat organism, we have to mutate
   # (add new if operator).
@@ -176,9 +209,14 @@ module Mutator
   end
   # 
   # Adds new named function into the functions block within script. See
-  # Script.Block.fnBlock for details. Format:
+  # Script.Block.fnBlock for details. General syntax:
   #
-  #   function XXX([args]);end
+  #   function XXX([args]) end
+  #
+  # Expression format:
+  #
+  #   Expr: (:function, (:call, :func1, :var1), (:block,))
+  #   Real: function func1(var1) end
   #
   # "function" operator adds new block into existing one. This block is in a 
   # body of the function. Also, this block contains it's own variables scope.
@@ -199,7 +237,9 @@ module Mutator
     params    = rand(0:code.funcMaxArgs)
     funcArgs  = Arg[]
     vars      = (Symbol)[]
-
+    #
+    # Here we obtain function raguments list
+    #
     for p = 1:params
       arg = _getNewVar(code)
       push!(funcArgs, Arg(string(arg), Int))
@@ -211,18 +251,25 @@ module Mutator
     _createBlock(code, code.fnBlock, newBlock, vars)
   end
   #
-  # Adds new function call into the random block within script. Format:
+  # Adds new function call into the random block within script. General
+  # syntax:
   #
   #   [var=]funcXXX([args])
+  #
+  # Two forms are possible: short (without variable assign) and full (with
+  # variable assign). Expression format:
+  #
+  #   Expr: (:(=), :var1, (:call, :func1, :var2))
+  #   Real: var1 = func1(var2)
   #
   # This call doesn't add new code block. It may return a value. So, if 
   # current block contains variables one of them will be set into funcation
   # return value. There is no difference between embedded and generated
   # functions. So it's possible to call clone() or funcXXX(). Example:
   #
-  #     var3 = func1(var1, 12)
   #     clone()
-  #     var1 = grabEnergyLeft(var2)
+  #     var1 = grabEnergyLeft()
+  #     var3 = func1(var1, 12)
   #
   # @param {Script.Code} code Script of particular organism we have to mutate
   #
