@@ -301,7 +301,7 @@ module Mutator
   #
   # Every callback function will be called with two arguments: 
   #
-  #     block::Array{Dict{ASCIIString, Any}}, line::Expr
+  #     block::Script.Block, line::Expr, index::Uint
   #
   # @param {Script.Code} code Script of particular organism we have to mutate
   # @param {Array{Function}} cbs Callback functions for every type of operator
@@ -311,7 +311,7 @@ module Mutator
     # We can't change code, because there is no code at the moment.
     #
     if length(code.blocks) === 0 || length(code.blocks) === 1 && length(code.blocks[1].block.args) === 0 return nothing end
-    block  = code.blocks[rand(1:length(code.blocks))]
+    block  = _getRandBlock(code)
     if length(block.block.args) === 0 return nothing end
     index  = uint(rand(1:length(block.block.args)))
     line   = block.block.args[index]
