@@ -362,7 +362,7 @@ module Mutator
   # @param line  Line with variables to change
   # @param index Index of "line" in "block"
   #
-  function _changeVar(block, line::Expr, index::Uint)
+  function _changeVar(block::Script.Block, line::Expr, index::Uint)
     vars = VarOrNum[]
     #
     # We can't change first variable, because it may cause an errors.
@@ -403,7 +403,7 @@ module Mutator
   # @param line  Line with for operator to change
   # @param index Index of "line" in "block"
   #
-  function _changeFor(block, line::Expr, index::Uint)
+  function _changeFor(block::Script.Block, line::Expr, index::Uint)
     v = _getVarOrNum(block)
     line.args[1].args[2].args[Helper.randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? _getNum(true) : v)
   end
@@ -430,7 +430,7 @@ module Mutator
   # @param line  Line with for operator to change
   # @param index Index of "line" in "block"
   #
-  function _changeIf(block, line::Expr, index::Uint)
+  function _changeIf(block::Script.Block, line::Expr, index::Uint)
     #
     # 2 - condition, 1,3 - variables or numbers
     #
@@ -455,7 +455,7 @@ module Mutator
   # @param line  Line with for operator to change
   # @param index Index of "line" in "block"
   #
-  function _changeFuncCall(block, line::Expr, index::Uint)
+  function _changeFuncCall(block::Script.Block, line::Expr, index::Uint)
     v = _getVarOrNum(block)
     if line.head === :(=)
       if length(line.args[2].args) > 1 line.args[2].args[rand(2:length(line.args[2].args))] = v end
@@ -471,7 +471,7 @@ module Mutator
   #
   # TODO: We have to check the type of deleted line, because we have to 
   # TODO: remove functions and variables from block's maps.
-  function _delLine(block, line::Expr, index::Uint)
+  function _delLine(block::Script.Block, line::Expr, index::Uint)
     splice!(block["block"].args, index)
   end
 
