@@ -68,6 +68,8 @@
 # TODO: Check if we can move some constants to global Config module
 #
 # OPT : add speed tests before and after optimization
+# OPT : think about moving block related and func related function in separate
+# OPT : modules
 #
 module Mutator
   export mutate
