@@ -123,7 +123,7 @@ module Mutator
   #
   # Adds variable into the random block within the script. General syntax:
   #
-  #   var = [sign]{const|var} [op [sign]{const|var}]
+  #   var = {[sign]{const|var}|funcXXX([args])} [op [sign]{const|var}]
   #
   # This syntax contains three avaialble types of assign: short, mid and long.
   # See examples below for details. Let's analyze real example:
@@ -258,14 +258,14 @@ module Mutator
     newFunc   = _getNewFunc(code)
     func      = [:call, newFunc]
     params    = rand(0:code.funcMaxArgs)
-    funcArgs  = Arg[]
+    funcArgs  = Var[]
     vars      = (Symbol)[]
     #
     # Here we obtain function raguments list
     #
     for p = 1:params
       arg = _getNewVar(code)
-      push!(funcArgs, Arg(string(arg), Int))
+      push!(funcArgs, Var(string(arg), Int))
       push!(func, arg)
       push!(vars, arg)
     end
@@ -341,7 +341,7 @@ module Mutator
     v = vars[rand(1:length(vars))]
     if (v.var)                                        # We may change it to variable or number
       #
-      # If true and linw has simple forms like: var = num|var, 
+      # If true and line has simple forms like: var = num|var, 
       # then line will be changed to: var = funcXXX(args)
       #
       if Helper.randTrue() && typeof(line.args[2]) !== Expr
@@ -452,9 +452,36 @@ module Mutator
   # TODO: if it's var assign or full func call, then we have to 
   #
   function _delLine(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
-    splice!(block["block"].args, index)
+    #splice!(block["block"].args, index)
   end
-
+  #
+  # Removes variable assigment line in format:
+  #
+  #   var = {[sign]{const|var}|funcXXX([args])} [op [sign]{const|var}]
+  # 
+  # It's possible to obtain an error after remove, because removed var
+  # may be used somewhere in code below or above. It's normal, because 
+  # sometimes change operation may fix this error.
+  #
+  # @param code  Organism's code
+  # @param {Dict} block Current block of code 
+  # @param {Expr} line  Line with variables to change
+  # @param {Uint} index Index of "line" in "block"
+  #
+  function _delVar(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
+    _removeVar(block, block.block.args[index].args[1])
+    splice!(block.block.args, index)
+  end
+  #
+  # @param code  Organism's code
+  # @param {Dict} block Current block of code 
+  # @param {Expr} line  Line with variables to change
+  # @param {Uint} index Index of "line" in "block"
+  #
+  function _delFor(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
+    splice!(block.block.args, index)
+    _removeBlock(code, block)
+  end
   #
   # It calculates probability index from variable amount of components.
   # Let's imagine we have three actions: one, two and three. We want 
@@ -508,6 +535,22 @@ module Mutator
         push!(vars, VarOrNum(expr, i, true))
       end
     end
+  end
+  #
+  # Removes variable "v" from block "block".
+  # @param block Current code block
+  # @param v Variable to remove
+  #
+  function _removeVar(block::Script.Block, v::Symbol)
+    splice!(block.vars, findfirst(block.vars, v))
+  end
+  #
+  # Removes block "block" from code "code".
+  # @param code Code
+  # @param block Block to remove
+  #
+  function _removeBlock(code::Script.Code, block::Script.Block)
+    splice!(code.blocks, findfirst(code.blocks, block))
   end
   #
   # Generates new variable symbol.
@@ -618,7 +661,7 @@ module Mutator
   #
   # Adds new cusom function into the functions map
   #
-  function _addFunc(code::Script.Code, name::ASCIIString, args::Array{Arg})
+  function _addFunc(code::Script.Code, name::ASCIIString, args::Array{Var})
     push!(code.funcs, Script.Func(name, args))
   end
   #
@@ -724,5 +767,5 @@ module Mutator
   #
   const _addCb    = [_addVar,    _addFor,    _addIf,    _addFunc,  ]
   const _changeCb = [_changeVar, _changeFor, _changeIf, ()->nothing]
-  const _delCb    = [_delLine,   _delLine,   _delLine,   _delLine, ]
+  const _delCb    = [_delVar,    _delFor,    _delLine,   _delLine, ]
 end

@@ -7,7 +7,7 @@
   export Code
   export Block
   export Func
-  export Arg
+  export Var
   
   #
   # One code block. By block i mean code quote, which may contain it's
@@ -49,6 +49,19 @@
     parent::Block
   end
   #
+  # Describes one function argument
+  #
+  type Var
+    #
+    # Name of the argument
+    #
+    name::ASCIIString
+    #
+    # Type of the argument
+    #
+    typ::DataType
+  end
+  #
   # Describes Julia function with or without arguments. Is used for 
   # generating functions and they call.
   #
@@ -60,20 +73,13 @@
     #
     # Array of function arguments
     #
-    args::Array{Arg}
-  end
-  #
-  # Describes one function argument
-  #
-  type Arg
+    args::Array{Var}
     #
-    # Name of the argument
+    # Amount of function calls in a code. This parameter is used for
+    # tracking an ability to remove this function. If it doesn't contain
+    # references (calls) in a code, then Mutator may remove it.
     #
-    name::ASCIIString
-    #
-    # Type of the argument
-    #
-    typ::DataType
+    refs::Uint
   end
   #
   # Represents code of script. In real it's Julia code based on Expressions.
