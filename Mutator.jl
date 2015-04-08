@@ -79,24 +79,6 @@ module Mutator
   using  Debug
 
   #
-  # Record for variable or number. Is used in _findVars() function
-  #
-  type VarOrNum
-    #
-    # Expression where variable or number was found
-    #
-    expr::Expr
-    #
-    # Index of variable or number within expression
-    #
-    index::Uint
-    #
-    # true - var, false - num
-    #
-    var::Bool
-  end
-
-  #
   # Do one random mutation of script. It may be: add or change.
   # Depending on probability (prob argument) it makes a desicion about
   # type of operation (add, change) and modifies script (code
@@ -110,11 +92,11 @@ module Mutator
     # This code calculates index. This index is used for choosing between 
     # [add, change] operation. 1 - add, 2 - change
     #
-    index = _getProbIndex(prob)
+    index = Helper.getProbIndex(prob)
     if index === 1      # add
       _addCb[rand(1:length(_addCb))](code)
     elseif index === 2  # change
-      _processLine(code, _changeCb)
+      _change(code)
     end
   end
   #
@@ -143,22 +125,22 @@ module Mutator
   # have to mutate (in this case, add new variable).
   #
   function _addVar(code::Script.Code)
-    block  = _getRandBlock(code)
-    ex     = _getVarOrNum(block, false)
-    newVar = _getNewOrLocalVar(block, code)
+    block  = Script.getRandBlock(code)
+    ex     = Script.getVarOrNum(block, false)
+    newVar = Script.getNewOrLocalVar(block, code)
     #
     # If true, then "ex" obtains full form:
     # var = [sign]{const|var} [op [sign]{const|var}]
     #
     if Helper.randTrue()
-      ex = Expr(:call, _getOperation(), ex, _getVarOrNum(block, false))
+      ex = Expr(:call, Script.getOperation(), ex, Script.getVarOrNum(block, false))
     #
     # If true, then "ex" obtains this form: var = funcXXX(args)
     #
     elseif Helper.randTrue() && length(code.funcs) > 0
-      ex = _createFuncCall(code, block)
+      ex = Script.createFuncCall(code, block)
     end
-    _addExpr(block, Expr(:(=), newVar, ex))
+    Script.addExpr(block, Expr(:(=), newVar, ex))
   end
   #
   # Adds "for" keyword into the random block within the script. General syntax:
@@ -182,13 +164,13 @@ module Mutator
   # (add new for operator).
   #
   function _addFor(code::Script.Code)
-    block    = _getRandBlock(code)
-    newVar   = _getNewVar(code)
+    block    = Script.getRandBlock(code)
+    newVar   = Script.getNewVar(code)
     newBody  = Expr(:block,)
-    newFor   = Expr(:for, Expr(:(=), newVar, Expr(:(:), _getVarOrNum(block), _getVarOrNum(block))), newBody)
-    newBlock = _createBlock(code, block, newBody, [newVar])
+    newFor   = Expr(:for, Expr(:(=), newVar, Expr(:(:), Script.getVarOrNum(block), Script.getVarOrNum(block))), newBody)
+    newBlock = Script.createBlock(code, block, newBody, [newVar])
 
-    _addExpr(block, newFor)
+    Script.addExpr(block, newFor)
   end
   #
   # Adds new if operator into random block within a script. General syntax:
@@ -212,20 +194,20 @@ module Mutator
   # (add new if operator).
   #
   function _addIf(code::Script.Code)
-    block    = _getRandBlock(code)
+    block    = Script.getRandBlock(code)
     vars     = block.vars
-    ifParams = [:if, Expr(:comparison, _getVarOrNum(block), _getCondition(), _getVarOrNum(block)), Expr(:block,)]
+    ifParams = [:if, Expr(:comparison, Script.getVarOrNum(block), Script.getCondition(), Script.getVarOrNum(block)), Expr(:block,)]
     #
     # else block is optional
     #
     if Helper.randTrue()
       body = Expr(:block,)
       push!(ifParams, body)
-      _createBlock(code, block, body, vars)
+      Script.createBlock(code, block, body, vars)
     end
 
-    _createBlock(code, block, ifParams[3], vars)
-    _addExpr(block, apply(Expr, ifParams))
+    Script.createBlock(code, block, ifParams[3], vars)
+    Script.addExpr(block, apply(Expr, ifParams))
   end
   # 
   # Adds new named function into the functions block within script. See
@@ -261,48 +243,40 @@ module Mutator
     # Here we obtain function raguments list
     #
     for p = 1:params
-      arg = _getNewVar(code)
+      arg = Script.getNewVar(code)
       push!(funcArgs, Var(string(arg), Int))
       push!(func, arg)
       push!(vars, arg)
     end
     _addFunc(code, string(newFunc), funcArgs)
-    _addExpr(code.fnBlock, Expr(:function, apply(Expr, func), newBlock))
-    _createBlock(code, code.fnBlock, newBlock, vars)
+    Script.addExpr(code.fnBlock, Expr(:function, apply(Expr, func), newBlock))
+    Script.createBlock(code, code.fnBlock, newBlock, vars)
   end
   #
   # Works in two steps: first, it finds random block. Second - it finds random 
   # line in this block. Depending of line type (e.g. var assignment, if operator, 
-  # function call,...) it calls special callback function. Callback functions
-  # should be in this order:
-  #
-  #     [cbVar, cbFor, cbIf, cbFunc, cbFuncCall]
-  #
+  # function call,...) it calls special callback function. 
   # Every callback function will be called with two arguments: 
   #
   #     block::Script.Block, line::Expr, index::Uint
   #
   # @param code Script of particular organism we have to mutate
-  # @param cbs Callback functions for every type of operator
   #
-  function _processLine(code::Script.Code, cbs::Array{Function})
-    if _isEmpty(code) return nothing end  # No code
-    block = _getRandBlock(code)
-    if _isEmpty(block) return nothing end # No lines in block
+  function _change(code::Script.Code)
+    if Script.isEmpty(code) return nothing end   # No code
+    block = Script.getRandBlock(code)
+    if Script.isEmpty(block) return nothing end  # No lines in block
     line, index = _getRandLine(block)
-    if _isEmpty(line) return nothing end  # Empty line
+    if Script.isEmpty(line) return nothing end   # Empty line
+    if if line.args[1] === :produce return nothing end
     head = line.head
 
-    if head === :call && line.args[1] === :produce
-      return nothing                   # skip produce() call
-    elseif head === :function
-      cbs[4](code, block, line, index) # function funcXXX(args)...end
-    elseif head == :if
-      cbs[3](code, block, line, index) # if...end
+    if head == :if
+      _changeIf(code, block, line, index)        # if...end
     elseif head == :for
-      cbs[2](code, block, line, index) # for varXXX = 1:XXX...end
+      _changeFor(code, block, line, index)       # for varXXX = 1:XXX...end
     elseif head === :(=)
-      cbs[1](code, block, line, index) # varXXX = {varXXX|number|funcXXX([args])}[ op {varXXX|number}]
+      _changeVar(code, block, line, index)       # varXXX = {varXXX|number|funcXXX([args])}[ op {varXXX|number}]
     end
   end
   #
@@ -325,15 +299,15 @@ module Mutator
   # @param block Current block of code
   # @param line  Line with variables to change
   # @param index Index of "line" in "block"
-  #
+  # TODO: refactore this method
   function _changeVar(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
-    vars = VarOrNum[]
+    vars = Helper.VarOrNum[]
     #
     # We can't change first variable, because it may cause an errors.
     # This variable me be used later in code, so we can't remove it.
     # 2 means - skip first variable: varXXX = ...
     #
-    _findVars(vars, line, uint(2))
+    Helper.findVars(vars, line, uint(2))
     
     v = vars[rand(1:length(vars))]
     if (v.var)                                        # We may change it to variable or number
@@ -346,9 +320,9 @@ module Mutator
         # var = var|num -> var = funcXXX([args])
         #
         if Helper.randTrue()
-          v.expr.args[v.index] = _createFuncCall(code, block)
+          v.expr.args[v.index] = Script.createFuncCall(code, block)
         else
-          v.expr.args[v.index] = _getVarOrNum(block)
+          v.expr.args[v.index] = Script.getVarOrNum(block)
         end
       else
         #
@@ -359,21 +333,21 @@ module Mutator
           # Changes one function argument
           #
           if length(line.args[2].args) > 1
-            line.args[2].args[rand(2:length(line.args[2].args))] = _getVarOrNum(block)
+            line.args[2].args[rand(2:length(line.args[2].args))] = Script.getVarOrNum(block)
           #
           # function without arguments. Changes function name
           #
           else
-           v.expr.args[v.index] = _createFuncCall(code, block)
+           v.expr.args[v.index] = Script.createFuncCall(code, block)
           end
         else
-          v.expr.args[v.index] = _getVarOrNum(block)
+          v.expr.args[v.index] = Script.getVarOrNum(block)
         end
       end
-    elseif findfirst(_sign, v.expr.args[v.index]) > 0 # This is a sign (+, -, ~)
-      v.expr.args[v.index] = _sign[rand(1:length(_sign))]
+    elseif Script.isSign(v.expr.args[v.index]) > 0    # This is a sign (+, -, ~)
+      v.expr.args[v.index] = Script.getRandSign()
     else                                              # This is an operator (+,-,/,$,^,...)
-      v.expr.args[v.index] = _getOperation()
+      v.expr.args[v.index] = Script.getOperation()
     end
   end
   #
@@ -401,8 +375,8 @@ module Mutator
   # @param index Index of "line" in "block"
   #
   function _changeFor(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
-    v = _getVarOrNum(block)
-    line.args[1].args[2].args[Helper.randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? _getNum(true) : v)
+    v = Script.getVarOrNum(block)
+    line.args[1].args[2].args[Helper.randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? getNum(true) : v)
   end
   #
   # Change in this case means, changing of operator or 
@@ -433,275 +407,12 @@ module Mutator
     # 2 - condition, 1,3 - variables or numbers
     #
     idx = rand(1:3)
-    line.args[1].args[idx] = (idx === 2 ? _getCondition() : _getVarOrNum(block))
+    line.args[1].args[idx] = (idx === 2 ? Script.getCondition() : Script.getVarOrNum(block))
   end
-  #
-  # It calculates probability index from variable amount of components.
-  # Let's imagine we have three actions: one, two and three. We want 
-  # these actions to be called randomly, but with different probabilities.
-  # For example it may be [3,2,1]. It means that one should be called
-  # in half cases, two in 1/3 cases and three in 1/6 cases. Probabilities
-  # should be greated then -1.
-  # @param {Array{Int}} prob Probabilities array. e.g.: [3,2,1] or [1,3]
-  # @return {Int}
-  #
-  function _getProbIndex(prob::Array{Int})
-    if length(prob) < 1 throw(UserException("Invalid parameter prob: $prob. Array with at least one element expected.")) end
 
-    num = rand(1:sum(prob))
-    s   = 0
-    i   = 1
-
-    for i = 1:length(prob)
-      if num <= (s += prob[i]) break end
-    end
-
-    i
-  end
-  #
-  # Parses expression recursively and collects all variables and numbers
-  # into "vars" map. Every variable or number is a record in vars argument.
-  # Example:
-  #
-  #     VarOrNum(expr, 1, true)
-  #
-  # This line means that expr.args[1] contains variable in expr.args[1].
-  # @param vars Container for variables: [VarOrNum(expr, 1, true),...]
-  # @param parent Expression where we should search for variables/numbers
-  # @param index Index of operand in expr, where we should start search
-  #
-  function _findVars(vars::Array{VarOrNum}, parent::Expr, index::Uint)
-    expr = parent.args[index]
-    #
-    # "var"=>true means that current operand is a variable or a number const
-    #
-    if typeof(expr) !== Expr
-      push!(vars, VarOrNum(parent, index, true)
-      return nothing
-    end
-    for i = 1:length(expr.args)
-      if typeof(expr.args[i]) === Expr
-        _findVars(vars, expr, i)
-      elseif typeof(expr.args[i]) === Symbol
-        push!(vars, VarOrNum(expr, i, i!==1))
-      else
-        push!(vars, VarOrNum(expr, i, true))
-      end
-    end
-  end
-  #
-  # Generates new variable symbol.
-  # @param  {Script.Code} code Script of current organism.
-  # @return {Symbol} New symbol in format: "varXXX", where XXX - Uint
-  #
-  function _getNewVar(code::Script.Code)
-    symbol("var$(code.vIndex = code.vIndex + 1)")
-  end
-  #
-  # Generates new function symbol.
-  # @param  {Script.Code} code Script of current organism.
-  # @return {Symbol} New symbol in format: "funcXXX", where XXX - Uint
-  #
-  function _getNewFunc(code::Script.Code)
-    symbol("func$(code.fIndex = code.fIndex + 1)")
-  end
-  #
-  # Returns an expresion for variable or a number in format: [sign]{var|const}
-  # @param  block  Block, with variables array
-  # @param  simple true if method should return only {var|const} without sign
-  # @return {Expr}
-  #
-  function _getVarOrNum(block::Block, simple=true)
-    vars = block.vars
-    if (length(vars) === 0) return _getNum(simple) end
-    v = vars[rand(1:length(vars))]
-    if Helper.randTrue() 
-      if simple 
-        v
-      else
-        Expr(:call, _sign[rand(1:length(_sign))], v)
-      end
-    else
-      _getNum(simple)
-    end
-  end
-  #
-  # Returns expression for number in format: [sign]const
-  # @param  {Bool} true if it should return only const without sign
-  # @return {Expr}
-  #
-  function _getNum(simple=false)
-    num = rand(0:typemax(Int))
-    simple ? num : Expr(:call, _sign[rand(1:length(_sign))], num)
-  end
-  #
-  # Returns random block from all available
-  # @return {Dict{ASCIIString, Any}}
-  #
-  function _getRandBlock(code::Script.Code)
-    code.blocks[rand(1:length(code.blocks))]
-  end
-  #
-  # Returns new or existing variable is specified vars scope. Returns 
-  # new variable in case when Helper.randTrue() returns true. In case
-  # of new variable adds it into the block.
-  # @param block Block with all available variables
-  # @param code Code of specified organism
-  # @return {Symbol}
-  #
-  function _getNewOrLocalVar(block::Block, code::Script.Code)
-    vars = block.vars
-    if Helper.randTrue() && length(vars) > 0 
-      return vars[rand(1:length(vars))]
-    end
-    newVar = _getNewVar(code)
-    _addScopeVar(block, newVar)
-    newVar
-  end
-  #
-  # Returns random function from all avaialble
-  # @return {Script.Func}
-  #
-  function _getFunc()
-    code.funcs[rand(1:length(code.funcs))]
-  end
-  #
-  # Returns random operation. See "_op" for details. For example:
-  #
-  #     var = var + var
-  #
-  # In this example "+" is an operation
-  # @return {Function}
-  #
-  function _getOperation()
-    _op[rand(1:length(_op))]
-  end
-  #
-  # Returns random condition. See "_cond" for details. For example:
-  #
-  #     if var < var
-  #
-  # In this example "<" is a condition
-  # @return {Function}
-  #
-  function _getCondition()
-    _cond[rand(1:length(_cond))
-  end
-  #
-  # Adds expression into the block
-  # @param block Block we insert to
-  # @param expr Expression to insert
-  #
-  function _addExpr(block::Block, expr::Expr)
-    push!(block.block.args, expr)
-  end
-  #
-  # Adds new cusom function into the functions map
-  #
-  function _addFunc(code::Script.Code, name::ASCIIString, args::Array{Var})
-    push!(code.funcs, Script.Func(name, args))
-  end
-  #
-  # Adds expression into another expression
-  # @param dest Destination expression
-  # @param src  Source expression
-  #
-  function _addExpr(dest::Expr, src::Expr)
-    push!(dest.args, expr)
-  end
-  #
-  # Adds variable "var" into the block "block".
-  # @param block Block
-  # @param var Variable we have to insert
-  #
-  function _addScopeVar(block::Block, var::Symbol)
-    push!(block.vars, newVar)
-  end
-  #
-  # Creates new block and adds it into blocks array.
-  # @param code Source code, where new block will be added
-  # @param parent Parent block
-  # @param body Reference to Julia block(quote)
-  # @return {Block} New block
-  #
-  function _createBlock(code::Script.Code, parent::Block, body::Expr, vars::Array{Symbol})
-    block = Block(parent, vars, body)
-    push!(code.blocks, block)
-    _addExpr(block, Expr(:call, :produce))
-    block
-  end
-  #
-  # Creates function call without variable assign at the beginning and
-  # returns it. It choose one functions from available list (Script.Code.funcs)
-  # and creates random argument values/variables. Example:
-  #
-  #   funcXXX([args])
-  #
-  # @param code Organism's code
-  # @param block Current code block
-  # @return {Expr}
-  #
-  function _createFuncCall(code::Script.Code, block::Script.Block)
-    if (length(code.funcs) < 1) return nothing end
-    func = _getFunc()
-    args = Any[:call, symbol(func.name)]
-    # TODO: possible problem here. we don't check var type.
-    # TODO: we assume, that all vars are Int
-    for i = 1:length(func.args) push!(args, _getVarOrNum(block)) end
-
-    apply(Expr, args)
-  end
-  #
-  # Returns true if code is empty. Empty means, no code
-  # blocks or one code block, but without lines inside.
-  # @param code Code to check
-  # @return {Bool}
-  #
-  function _isEmpty(code::Script.Code)
-    length(code.blocks) === 0 || length(code.blocks) === 1 && length(code.blocks[1].block.args) === 0
-  end
-  #
-  # Checks if code block has no lines inside
-  # @param block Code block to check
-  # @return {Bool}
-  #
-  function _isEmpty(block::Script.Block)
-    length(block.block.args) === 0
-  end
-  #
-  # Returns true if code line is empty. Empty means
-  # code line without operator. For example, comment.
-  # @param line Line to check
-  # @return {Bool}
-  #
-  function _isEmpty(line::Expr)
-    typeof(line) !== Expr
-  end
-  #
-  # Returns random line and it's index within block
-  # @return {(Expr, Uint)}
-  #
-  function _getRandLine(block::Script.Block)
-    index = uint(rand(1:length(block.block.args)))
-    (block.block.args[index], index)
-  end
-  #
-  # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y.
-  # ! operator should be here.
-  #
-  const _sign     = [:+, :-, :~]
-  #
-  #
-  #
-  const _cond     = [:<, :>, :(==), :(!==), :<=, :>=]
-  #
-  # {Array} Available operators. Is used between numeric variables and constants
-  #
-  const _op       = [+, -, \, *, $, |, &, ^, %, >>>, >>, <<]
   #
   # {Array{Array{Function}}} Available operation for script lines. This is:
   # adding, removing and changing lines.
   #
-  const _addCb    = [_addVar,    _addFor,    _addIf,    _addFunc,  ]
-  const _changeCb = [_changeVar, _changeFor, _changeIf, ()->nothing]
+  const _addCb = [_addVar, _addFor, _addIf, _addFunc]
 end

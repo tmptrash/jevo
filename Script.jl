@@ -30,7 +30,7 @@
   #
   #     code = :(function t();end)
   #
-  # For more details see Script.Code.blocks field's description.
+  # For more details see Code.blocks field's description.
   #
   type Block
     #
@@ -160,4 +160,239 @@
     #
     fnBlock::Expr
   end
+
+
+  #
+  # Checks if "sign" is an available sign (a sign from _sign array)
+  # @param sign Sign we have to check
+  # @return {Bool}
+  #
+  function isSign(sign)
+    findfirst(_sign, sign) > 0
+  end
+  #
+  # Generates new variable symbol.
+  # @param  {Code} code Script of current organism.
+  # @return {Symbol} New symbol in format: "varXXX", where XXX - Uint
+  #
+  function getNewVar(code::Code)
+    symbol("var$(code.vIndex = code.vIndex + 1)")
+  end
+  #
+  # Returns an expresion for variable or a number in format: [sign]{var|const}
+  # @param  block  Block, with variables array
+  # @param  simple true if method should return only {var|const} without sign
+  # @return {Expr}
+  #
+  function getVarOrNum(block::Block, simple=true)
+    vars = block.vars
+    if (length(vars) === 0) return getNum(simple) end
+    if Helper.randTrue() 
+      if simple 
+        _getRandVar(vars)
+      else
+        Expr(:call, getRandSign(), _getRandVar(vars))
+      end
+    else
+      getNum(simple)
+    end
+  end
+  #
+  # Returns expression for number in format: [sign]const
+  # @param  {Bool} true if it should return only const without sign
+  # @return {Expr}
+  #
+  function getNum(simple=false)
+    num = rand(0:typemax(Int))
+    simple ? num : Expr(:call, getRandSign(), num)
+  end
+  #
+  # Returns random block from all available
+  # @return {Dict{ASCIIString, Any}}
+  #
+  function getRandBlock(code::Code)
+    code.blocks[rand(1:length(code.blocks))]
+  end
+  #
+  # Returns random sign from the list (_sign) of availableю
+  # @return {Function}
+  #
+  function getRandSign()
+    _sign[rand(1:length(_sign))]
+  end
+  #
+  # Returns new or existing variable is specified vars scope. Returns 
+  # new variable in case when Helper.randTrue() returns true. In case
+  # of new variable adds it into the block.
+  # @param block Block with all available variables
+  # @param code Code of specified organism
+  # @return {Symbol}
+  #
+  function getNewOrLocalVar(block::Block, code::Code)
+    vars = block.vars
+    if Helper.randTrue() && length(vars) > 0 
+      return _getRandVar(vars)
+    end
+    newVar = getNewVar(code)
+    _addScopeVar(block, newVar)
+    newVar
+  end
+  #
+  # Returns random operation. See "_op" for details. For example:
+  #
+  #     var = var + var
+  #
+  # In this example "+" is an operation
+  # @return {Function}
+  #
+  function getOperation()
+    _op[rand(1:length(_op))]
+  end
+  #
+  # Returns random condition. See "_cond" for details. For example:
+  #
+  #     if var < var
+  #
+  # In this example "<" is a condition
+  # @return {Function}
+  #
+  function getCondition()
+    _cond[rand(1:length(_cond))
+  end
+  #
+  # Adds expression into the block
+  # @param block Block we insert to
+  # @param expr Expression to insert
+  #
+  function addExpr(block::Block, expr::Expr)
+    push!(block.block.args, expr)
+  end
+  #
+  # Adds new cusom function into the functions map
+  #
+  function addFunc(code::Code, name::ASCIIString, args::Array{Var})
+    push!(code.funcs, Script.Func(name, args))
+  end
+  #
+  # Adds expression into another expression
+  # @param dest Destination expression
+  # @param src  Source expression
+  #
+  function addExpr(dest::Expr, src::Expr)
+    push!(dest.args, expr)
+  end
+  #
+  # Returns true if code is empty. Empty means, no code
+  # blocks or one code block, but without lines inside.
+  # @param code Code to check
+  # @return {Bool}
+  #
+  function isEmpty(code::Code)
+    length(code.blocks) === 0 || length(code.blocks) === 1 && length(code.blocks[1].block.args) === 0
+  end
+  #
+  # Checks if code block has no lines inside
+  # @param block Code block to check
+  # @return {Bool}
+  #
+  function isEmpty(block::Script.Block)
+    length(block.block.args) === 0
+  end
+  #
+  # Returns true if code line is empty. Empty means
+  # code line without operator. For example, comment.
+  # @param line Line to check
+  # @return {Bool}
+  #
+  function isEmpty(line::Expr)
+    typeof(line) !== Expr
+  end
+  #
+  # Creates new block and adds it into blocks array.
+  # @param code Source code, where new block will be added
+  # @param parent Parent block
+  # @param body Reference to Julia block(quote)
+  # @return {Block} New block
+  #
+  function createBlock(code::Code, parent::Block, body::Expr, vars::Array{Symbol})
+    block = Block(parent, vars, body)
+    push!(code.blocks, block)
+    addExpr(block, Expr(:call, :produce))
+    block
+  end
+  #
+  # Creates function call without variable assign at the beginning and
+  # returns it. It choose one functions from available list (Code.funcs)
+  # and creates random argument values/variables. Example:
+  #
+  #   funcXXX([args])
+  #
+  # @param code Organism's code
+  # @param block Current code block
+  # @return {Expr}
+  #
+  function createFuncCall(code::Code, block::Script.Block)
+    if (length(code.funcs) < 1) return nothing end
+    func = _getFunc()
+    args = Any[:call, symbol(func.name)]
+    # TODO: possible problem here. we don't check var type.
+    # TODO: we assume, that all vars are Int
+    for i = 1:length(func.args) push!(args, _getVarOrNum(block)) end
+
+    apply(Expr, args)
+  end
+
+  #
+  # Adds variable "var" into the block "block".
+  # @param block Block
+  # @param var Variable we have to insert
+  #
+  function _addScopeVar(block::Block, var::Symbol)
+    push!(block.vars, newVar)
+  end
+    #
+  # Returns random function from all avaialble
+  # @return {Script.Func}
+  #
+  function _getFunc()
+    code.funcs[rand(1:length(code.funcs))]
+  end
+    #
+  # Generates new function symbol.
+  # @param  code Script of current organism.
+  # @return {Symbol} New symbol in format: "funcXXX", where XXX - Uint
+  #
+  function _getNewFunc(code::Code)
+    symbol("func$(code.fIndex = code.fIndex + 1)")
+  end
+  #
+  # Returns random line and it's index within block
+  # @return {(Expr, Uint)}
+  #
+  function _getRandLine(block::Script.Block)
+    index = uint(rand(1:length(block.block.args)))
+    (block.block.args[index], index)
+  end
+  #
+  # Returns random variable from list
+  # @return {Symbol}
+  #
+  function _getRandVar(vars::Array{Symbol})
+    vars[rand(1:length(vars))]
+  end
+
+
+  #
+  # {Array} Available signs. Is used before numeric variables. e.g.: -x or ~y.
+  # ! operator should be here.
+  #
+  const _sign     = [:+, :-, :~]
+  #
+  # Available conditions. Are used with "if" operator.
+  #
+  const _cond     = [:<, :>, :(==), :(!==), :<=, :>=]
+  #
+  # {Array} Available operators. Is used between numeric variables and constants
+  #
+  const _op       = [+, -, \, *, $, |, &, ^, %, >>>, >>, <<]
 end
