@@ -4,23 +4,22 @@
 # In most cases mutations add errors and garbage to DNA. But in very small
 # cases, they add new abilities... In our case DNA is a organism's script
 # on Julia language. Like with DNA, it changes this script. Every change or 
-# mutation is a small add, change or remove operation on script line. It's 
+# mutation is a small add or change operation on script line. It's 
 # impossible to mutate the script with syntax error. But it's possible to 
 # create logical errors. For example it's possible to have stack overflow. 
 # This is normal situation. An exception in this case will occure and 
 # organism will lost some energy. Main method here is called mutate(). It 
-# makes one change/add/remove operation with script. It works in a simple 
-# way:
+# makes one change/add operation with script. It works in a simple way:
 #
 #   1. Finds random block of code in Script.Code.blocks array
 #   2. Finds one line in block
-#   2. Chooses one operation (add, remove, change)
+#   2. Chooses one operation (add, change)
 #   3. apply operation to this line
 #
 # So, all you need to do is call mutate(script, probabilities). Second 
-# argument is a probabilities array. It sets probabilities for add, remove,
-# and change operations. For example: [3,2,1] means that mutator will add(3)
-# new operand more often, then delete(1) or change(2).
+# argument is a probabilities array. It sets probabilities for add, 
+# and change operations. For example: [3,2] means that mutator will add(3)
+# new operand more often, then change(2).
 #
 # There are many organisms in our virtual world. So, we have to have an
 # ability to switch between them. For this, Mutator adds produce() calls
@@ -98,26 +97,24 @@ module Mutator
   end
 
   #
-  # Do one random mutation of script. It may be: add, remove or change.
+  # Do one random mutation of script. It may be: add or change.
   # Depending on probability (prob argument) it makes a desicion about
-  # type of operation (add, del, change) and modifies script (code
+  # type of operation (add, change) and modifies script (code
   # parameter).
   # @param code Organism's script we have to mutate
-  # @param prob Strategy of mutating. See Config.mutator["addDelChange"] 
+  # @param prob Strategy of mutating. See Config.mutator["addChange"] 
   # for details.
   #
   function mutate(code::Script.Code, prob::Array{Int})
     #
     # This code calculates index. This index is used for choosing between 
-    # [add, remove, change] operation. 1 - add, 2 - remove, 3 - change
+    # [add, change] operation. 1 - add, 2 - change
     #
     index = _getProbIndex(prob)
     if index === 1      # add
       _addCb[rand(1:length(_addCb))](code)
     elseif index === 2  # change
       _processLine(code, _changeCb)
-    else                # delete
-      _processLine(code, _delCb)
     end
   end
   #
@@ -125,7 +122,7 @@ module Mutator
   #
   #   var = {[sign]{const|var}|funcXXX([args])} [op [sign]{const|var}]
   #
-  # This syntax contains three avaialble types of assign: short, mid and long.
+  # This syntax contains two avaialble types of assign: short, mid and long.
   # See examples below for details. Let's analyze real example:
   #
   #   Expr: (:(=), :var1, (:call, :+, (:call, :-, :var2), (:call, :~, 123)))
@@ -439,50 +436,6 @@ module Mutator
     line.args[1].args[idx] = (idx === 2 ? _getCondition() : _getVarOrNum(block))
   end
   #
-  # Removes one line of code with index in specified block.
-  # @param code  Organism's code
-  # @param {Dict} block Current block of code 
-  # @param {Expr} line  Line with variables to change
-  # @param {Uint} index Index of "line" in "block"
-  #
-  # TODO: We have to check if current var/func has no dependencies,
-  # TODO: only in this case we may remove it.
-  # TODO: We may remove line if it:
-  # TODO:   if, for, short funccall
-  # TODO: if it's var assign or full func call, then we have to 
-  #
-  function _delLine(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
-    #splice!(block["block"].args, index)
-  end
-  #
-  # Removes variable assigment line in format:
-  #
-  #   var = {[sign]{const|var}|funcXXX([args])} [op [sign]{const|var}]
-  # 
-  # It's possible to obtain an error after remove, because removed var
-  # may be used somewhere in code below or above. It's normal, because 
-  # sometimes change operation may fix this error.
-  #
-  # @param code  Organism's code
-  # @param {Dict} block Current block of code 
-  # @param {Expr} line  Line with variables to change
-  # @param {Uint} index Index of "line" in "block"
-  #
-  function _delVar(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
-    _removeVar(block, block.block.args[index].args[1])
-    splice!(block.block.args, index)
-  end
-  #
-  # @param code  Organism's code
-  # @param {Dict} block Current block of code 
-  # @param {Expr} line  Line with variables to change
-  # @param {Uint} index Index of "line" in "block"
-  #
-  function _delFor(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
-    splice!(block.block.args, index)
-    _removeBlock(code, block)
-  end
-  #
   # It calculates probability index from variable amount of components.
   # Let's imagine we have three actions: one, two and three. We want 
   # these actions to be called randomly, but with different probabilities.
@@ -535,22 +488,6 @@ module Mutator
         push!(vars, VarOrNum(expr, i, true))
       end
     end
-  end
-  #
-  # Removes variable "v" from block "block".
-  # @param block Current code block
-  # @param v Variable to remove
-  #
-  function _removeVar(block::Script.Block, v::Symbol)
-    splice!(block.vars, findfirst(block.vars, v))
-  end
-  #
-  # Removes block "block" from code "code".
-  # @param code Code
-  # @param block Block to remove
-  #
-  function _removeBlock(code::Script.Code, block::Script.Block)
-    splice!(code.blocks, findfirst(code.blocks, block))
   end
   #
   # Generates new variable symbol.
@@ -767,5 +704,4 @@ module Mutator
   #
   const _addCb    = [_addVar,    _addFor,    _addIf,    _addFunc,  ]
   const _changeCb = [_changeVar, _changeFor, _changeIf, ()->nothing]
-  const _delCb    = [_delVar,    _delFor,    _delLine,   _delLine, ]
 end
