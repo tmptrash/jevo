@@ -70,7 +70,7 @@ module Helper
     # "var"=>true means that current operand is a variable or a number const
     #
     if typeof(expr) !== Expr
-      push!(vars, VarOrNum(parent, index, true)
+      push!(vars, VarOrNum(parent, index, true))
       return nothing
     end
     for i = 1:length(expr.args)

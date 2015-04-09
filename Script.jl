@@ -8,6 +8,8 @@
   export Block
   export Func
   export Var
+
+  import Helper
   
   #
   # One code block. By block i mean code quote, which may contain it's
@@ -257,7 +259,7 @@
   # @return {Function}
   #
   function getCondition()
-    _cond[rand(1:length(_cond))
+    _cond[rand(1:length(_cond))]
   end
   #
   # Adds expression into the block

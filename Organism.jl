@@ -209,7 +209,6 @@ module Organism
     #
     Creature(Config.mutator["organismStartEnergy"], [0, 0], script, Event.Observer(Dict{ASCIIString, Array{Function}}()))
   end
-
   #
   # Clones an organism. It does many things:
   # - fires "beforeclone" to ask parent object about possibility to clone

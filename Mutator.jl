@@ -75,6 +75,7 @@ module Mutator
 
   import Script
   import Exceptions
+  import Helper
   # TODO: remove this module
   using  Debug
 
@@ -268,7 +269,7 @@ module Mutator
     if Script.isEmpty(block) return nothing end  # No lines in block
     line, index = _getRandLine(block)
     if Script.isEmpty(line) return nothing end   # Empty line
-    if if line.args[1] === :produce return nothing end
+    if line.args[1] === :produce return nothing end
     head = line.head
 
     if head == :if
@@ -350,69 +351,69 @@ module Mutator
       v.expr.args[v.index] = Script.getOperation()
     end
   end
-  #
-  # Changes "for" operator. It's possible to change only min or max 
-  # expression. It's impossible to change variable. For example, we 
-  # can't change "i" in this loop:
-  #
-  #   for i = 1:k end
-  # 
-  # Because it impacts to all code inside the "for" operator. So,
-  # only "1" and "k" may be changed. General syntax: 
-  #
-  #   for var = {var|const}:{var|const} end
-  #
-  # Expression format:
-  #
-  #   Expr: (:for, (:(=), :var1, (:(:), :var2, 123)), (:block,))
-  #   Real: for var1 = var2:123 end
-  #
-  # One call of this function will change only one variable/number.
-  #
-  # @param code  Organism's code
-  # @param block Current block of code 
-  # @param line  Line with for operator to change
-  # @param index Index of "line" in "block"
-  #
-  function _changeFor(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
-    v = Script.getVarOrNum(block)
-    line.args[1].args[2].args[Helper.randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? getNum(true) : v)
-  end
-  #
-  # Change in this case means, changing of operator or 
-  # variables. For example we may change "<", "v1" or "v2"
-  # in this line:
-  #
-  #     if v1 < v2...else...end
-  #
-  # General syntax: 
-  #
-  #   for var = {var|const}:{var|const} end
-  #
-  # Expression format:
-  #
-  #   Expr: (:for, (:(=), :var1, (:(:), :var2, 123)), (:block,))
-  #   Real: for var1 = var2:123 end
-  #
-  # One call of this function makes only one change. It's
-  # possible that after mutation line will be the same. Because
-  # it may change, for example, condition or var to similar one.
-  # @param code  Organism's code
-  # @param block Current block of code 
-  # @param line  Line with for operator to change
-  # @param index Index of "line" in "block"
-  #
-  function _changeIf(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
-    #
-    # 2 - condition, 1,3 - variables or numbers
-    #
-    idx = rand(1:3)
-    line.args[1].args[idx] = (idx === 2 ? Script.getCondition() : Script.getVarOrNum(block))
-  end
+  # #
+  # # Changes "for" operator. It's possible to change only min or max 
+  # # expression. It's impossible to change variable. For example, we 
+  # # can't change "i" in this loop:
+  # #
+  # #   for i = 1:k end
+  # # 
+  # # Because it impacts to all code inside the "for" operator. So,
+  # # only "1" and "k" may be changed. General syntax: 
+  # #
+  # #   for var = {var|const}:{var|const} end
+  # #
+  # # Expression format:
+  # #
+  # #   Expr: (:for, (:(=), :var1, (:(:), :var2, 123)), (:block,))
+  # #   Real: for var1 = var2:123 end
+  # #
+  # # One call of this function will change only one variable/number.
+  # #
+  # # @param code  Organism's code
+  # # @param block Current block of code 
+  # # @param line  Line with for operator to change
+  # # @param index Index of "line" in "block"
+  # #
+  # function _changeFor(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
+  #   v = Script.getVarOrNum(block)
+  #   line.args[1].args[2].args[Helper.randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? getNum(true) : v)
+  # end
+  # #
+  # # Change in this case means, changing of operator or 
+  # # variables. For example we may change "<", "v1" or "v2"
+  # # in this line:
+  # #
+  # #     if v1 < v2...else...end
+  # #
+  # # General syntax: 
+  # #
+  # #   for var = {var|const}:{var|const} end
+  # #
+  # # Expression format:
+  # #
+  # #   Expr: (:for, (:(=), :var1, (:(:), :var2, 123)), (:block,))
+  # #   Real: for var1 = var2:123 end
+  # #
+  # # One call of this function makes only one change. It's
+  # # possible that after mutation line will be the same. Because
+  # # it may change, for example, condition or var to similar one.
+  # # @param code  Organism's code
+  # # @param block Current block of code 
+  # # @param line  Line with for operator to change
+  # # @param index Index of "line" in "block"
+  # #
+  # function _changeIf(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
+  #   #
+  #   # 2 - condition, 1,3 - variables or numbers
+  #   #
+  #   idx = rand(1:3)
+  #   line.args[1].args[idx] = (idx === 2 ? Script.getCondition() : Script.getVarOrNum(block))
+  # end
 
-  #
-  # {Array{Array{Function}}} Available operation for script lines. This is:
-  # adding, removing and changing lines.
-  #
-  const _addCb = [_addVar, _addFor, _addIf, _addFunc]
+  # #
+  # # Array{Function}} Available operation for script lines. This is:
+  # # adding, removing and changing lines.
+  # #
+  # const _addCb = [_addVar, _addFor, _addIf, _addFunc]
 end

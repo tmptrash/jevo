@@ -13,11 +13,11 @@ module Event
   # Contains events and they handlers
   #
   type Observer
-      #
-      # {Dict{ASCIIString, Array{Function}}} array of events and they handlers.
-      # For example: {"event"=>[fn1, fn2,...],...}
-      # 
-      events::Dict{ASCIIString, Array{Function}}
+    #
+    # {Dict{ASCIIString, Array{Function}}} array of events and they handlers.
+    # For example: {"event"=>[fn1, fn2,...],...}
+    # 
+    events::Dict{ASCIIString, Array{Function}}
   end
 
   #
