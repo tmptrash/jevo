@@ -49,6 +49,11 @@
     # Reference to parent block. Root block is empty(nothing). 
     #
     parent::Block
+    #
+    # This is how we incomplete the type. Read about incomplete here:
+    # https://github.com/JuliaLang/julia/blob/master/doc/manual/constructors.rst#incomplete-initialization
+    #
+    Block(v, b) = new(v, b)
   end
   #
   # Describes one function argument
@@ -76,12 +81,6 @@
     # Array of function arguments
     #
     args::Array{Var}
-    #
-    # Amount of function calls in a code. This parameter is used for
-    # tracking an ability to remove this function. If it doesn't contain
-    # references (calls) in a code, then Mutator may remove it.
-    #
-    refs::Uint
   end
   #
   # Represents code of script. In real it's Julia code based on Expressions.
@@ -90,37 +89,35 @@
   #
   type Code
     #
-    # {Uint} Current index of new variable. Should be 0 by default.
-    # It represents total amount (created and removed) of variables.
-    # In real, it uses for creation of unique variables, like: varXXX,
-    # where XXX - is a vIndex number.
+    # Current index of new variable. Should be 0 by default. It represents 
+    # total amount (created and removed) of variables. In real, it uses for 
+    # creation of unique variables, like: varXXX, where XXX - is a vIndex 
+    # number.
     #
     vIndex::Uint
     #
-    # {Uint} Current index of new function. Should be 0 by default.
-    # The same like variables, but in format: funcXXX, where XXX is
-    # a fIndex number.
+    # Current index of new function. Should be 0 by default. The same like 
+    # variables, but in format: funcXXX, where XXX is a fIndex number.
     #
     fIndex::Uint
     #
-    # {Uint8} Maximum amount of parameters for function. See 
-    # Config.mutator.funcMaxArgs parameter for details.
+    # Maximum amount of parameters for function. See Config.mutator.funcMaxArgs 
+    # parameter for details.
     #
     funcMaxArgs::Uint8
     #
-    # {Expr} Reference to organism's script's code. It's changed by Mutator.
-    # This is native Julia code, represented by Expressions. See this link
-    # for details: http://docs.julialang.org/en/latest/manual/metaprogramming.
+    # Reference to organism's script's code. It's changed by Mutator. This 
+    # is native Julia code, represented by Expressions. See this link for 
+    # details: http://docs.julialang.org/en/latest/manual/metaprogramming.
     # This parameter is related to blocks. blocks should descript this code.
     #
     code::Expr
     #
-    # {Array{Dict{ASCIIString, Any}}} This is an array of Julia's blocks. Block or 
-    # quote is a section in a code, which creates it's own scope. For example these 
-    # operators create it's own scope: function, for, try... Every block is a map 
-    # of three elements: "parent"=>Reference to parent block, "vars"=>Array of vars 
-    # symbols in current block and "block"=>Array of all block's inner expressions. 
-    # Example:
+    # This is an array of Julia's blocks. Block or quote is a section in a code, 
+    # which creates it's own scope. For example these operators create it's own 
+    # scope: function, for, try... Every block is a map of three elements: 
+    # "parent"=>Reference to parent block, "vars"=>Array of vars symbols in 
+    # current block and "block"=>Array of all block's inner expressions. Example:
     # 
     #     [[
     #       "vars"  => Symbol[],      # no variables in t()
@@ -141,9 +138,9 @@
     #
     blocks::Array{Block}
     #
-    # {Array{Dict{ASCIIString, Any}}} Map of the functions with parameters 
-    # available to call in script' code. All functions live on one level.
-    # It's impossible to have inner function in other function. Example: 
+    # Map of the functions with parameters available to call in script' code. 
+    # All functions live on one level. It's impossible to have inner function 
+    # in other function. Example: 
     #  
     #     ["name"=>"func1", "args"=>[["name"=>"var1", "type"=>Int], ...]]
     #

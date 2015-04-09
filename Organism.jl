@@ -168,18 +168,18 @@ module Organism
       #
       code,
       #
-      # {Array{Dict{ASCIIString, Any}}} Blocks structure. Describes 
-      # default code above. See Script.Code.blocks for details.
+      # {Array{Block} Blocks structure. Describes default code above. See 
+      # Script.Code.blocks for details.
       #
-      [[                                              # while(true) block
-        "vars"  => Symbol[],
-        "block" => code.args[2].args[10].args[2],
-        "parent"=> [                                  # function's life() block
-            "vars"  => [],
-            "block" => code.args[2],
-            "parent"=> nothing
-        ],
-      ]],
+      [Script.Block(                                  # while(true) block
+        Symbol[],
+        code.args[2].args[10].args[2],
+        Script.Block(                                 # function's life() block
+            [],
+            code.args[2],
+            nothing
+        ),
+      )],
       #
       # {Array{Dict{ASCIIString, Any}}} All functions in a script. See
       # Script.Code.funcs for details. This section contains two type
