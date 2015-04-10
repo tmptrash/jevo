@@ -177,7 +177,7 @@ module Organism
         Script.Block(                                 # parent, function's life() block
           Symbol[],
           code.args[2]
-        ),
+        )
       )],
       #
       # {Array{Dict{ASCIIString, Any}}} All functions in a script. See
@@ -186,16 +186,16 @@ module Organism
       # Embedded functions can't be changed by enyone. Generated may be.
       #
       [
-        Func("checkEnergy",     [Var("x",      Int), Var("y", Int)])
-        ["name"=>"grabEnergyLeft",  "args"=>[["name"=>"amount", "type"=>Int]]                            ]
-        ["name"=>"grabEnergyRight", "args"=>[["name"=>"amount", "type"=>Int]]                            ]
-        ["name"=>"grabEnergyUp",    "args"=>[["name"=>"amount", "type"=>Int]]                            ]
-        ["name"=>"grabEnergyDown",  "args"=>[["name"=>"amount", "type"=>Int]]                            ]
-        ["name"=>"stepLeft",        "args"=>[]                                                           ]
-        ["name"=>"stepRight",       "args"=>[]                                                           ]
-        ["name"=>"stepUp",          "args"=>[]                                                           ]
-        ["name"=>"stepDown",        "args"=>[]                                                           ]
-        ["name"=>"clone",           "args"=>[]                                                           ]
+        Script.Func("checkEnergy",     [Script.Var("x",      Int), Script.Var("y", Int)])
+        Script.Func("grabEnergyLeft",  [Script.Var("amount", Int)                      ])
+        Script.Func("grabEnergyRight", [Script.Var("amount", Int)                      ])
+        Script.Func("grabEnergyUp",    [Script.Var("amount", Int)                      ])
+        Script.Func("grabEnergyDown",  [Script.Var("amount", Int)                      ])
+        Script.Func("stepLeft",        [                                               ])
+        Script.Func("stepRight",       [                                               ])
+        Script.Func("stepUp",          [                                               ])
+        Script.Func("stepDown",        [                                               ])
+        Script.Func("clone",           [                                               ])
       ],
       #
       # {Expr} Block for functions. See Script.Code.fnBlock for details.
@@ -205,7 +205,7 @@ module Organism
     #
     # @return {Creature}
     # New organism with default parameters
-    #
+    # TODO: position should be set from outside
     Creature(Config.mutator["organismStartEnergy"], [0, 0], script, Event.Observer(Dict{ASCIIString, Array{Function}}()))
   end
   #

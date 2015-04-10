@@ -53,7 +53,7 @@
     # This is how we incomplete the type. Read about incomplete here:
     # https://github.com/JuliaLang/julia/blob/master/doc/manual/constructors.rst#incomplete-initialization
     #
-    Block(v, b) = new(v, b)
+    Block(v::Array{Symbol}, b::Expr, p = nothing) = (x = new(v, b); p === nothing ? x : x.parent = p)
   end
   #
   # Describes one function argument
