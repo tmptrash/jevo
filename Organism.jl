@@ -180,7 +180,7 @@ module Organism
         )
       )],
       #
-      # {Array{Dict{ASCIIString, Any}}} All functions in a script. See
+      # {Array{Script.Func}} All functions in a script. See
       # Script.Code.funcs for details. This section contains two type
       # of functions: embedded (checkEnergy()...clone()) and generated.
       # Embedded functions can't be changed by enyone. Generated may be.
