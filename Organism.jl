@@ -174,10 +174,9 @@ module Organism
       [Script.Block(                                  # while(true) block
         Symbol[],
         code.args[2].args[10].args[2],
-        Script.Block(                                 # function's life() block
-            [],
-            code.args[2],
-            nothing
+        Script.Block(                                 # parent, function's life() block
+          Symbol[],
+          code.args[2]
         ),
       )],
       #
@@ -187,7 +186,7 @@ module Organism
       # Embedded functions can't be changed by enyone. Generated may be.
       #
       [
-        ["name"=>"checkEnergy",     "args"=>[["name"=>"x",      "type"=>Int], ["name"=>"y", "type"=>Int]]]
+        Func("checkEnergy",     [Var("x",      Int), Var("y", Int)])
         ["name"=>"grabEnergyLeft",  "args"=>[["name"=>"amount", "type"=>Int]]                            ]
         ["name"=>"grabEnergyRight", "args"=>[["name"=>"amount", "type"=>Int]]                            ]
         ["name"=>"grabEnergyUp",    "args"=>[["name"=>"amount", "type"=>Int]]                            ]
