@@ -8,8 +8,11 @@
   export Block
   export Func
   export Var
+  export getNewOrLocalVar
 
   import Helper
+  # TODO Remove this
+  using  Debug
   
   #
   # One code block. By block i mean code quote, which may contain it's
@@ -53,7 +56,7 @@
     # This is how we incomplete the type. Read about incomplete here:
     # https://github.com/JuliaLang/julia/blob/master/doc/manual/constructors.rst#incomplete-initialization
     #
-    Block(v::Array{Symbol}, b::Expr, p = nothing) = (x = new(v, b); p === nothing ? x : x.parent = p)
+    Block(v::Array{Symbol}, b::Expr, p = nothing) = (x = new(v, b); p === nothing ? x : (x.parent = p;x))
   end
   #
   # Describes one function argument
@@ -213,7 +216,7 @@
     code.blocks[rand(1:length(code.blocks))]
   end
   #
-  # Returns random sign from the list (_sign) of availableю
+  # Returns random sign from the list (_sign) of available.
   # @return {Function}
   #
   function getRandSign()
@@ -227,7 +230,8 @@
   # @param code Code of specified organism
   # @return {Symbol}
   #
-  function getNewOrLocalVar(block::Block, code::Code)
+  @debug function getNewOrLocalVar(block::Block, code::Code)
+  @bp
     vars = block.vars
     if Helper.randTrue() && length(vars) > 0 
       return _getRandVar(vars)
@@ -332,7 +336,7 @@
   #
   function createFuncCall(code::Code, block::Script.Block)
     if (length(code.funcs) < 1) return nothing end
-    func = _getFunc()
+    func = _getFunc(code)
     args = Any[:call, symbol(func.name)]
     # TODO: possible problem here. we don't check var type.
     # TODO: we assume, that all vars are Int
@@ -344,16 +348,16 @@
   #
   # Adds variable "var" into the block "block".
   # @param block Block
-  # @param var Variable we have to insert
+  # @param v Variable we have to insert
   #
-  function _addScopeVar(block::Block, var::Symbol)
-    push!(block.vars, newVar)
+  function _addScopeVar(block::Block, v::Symbol)
+    push!(block.vars, v)
   end
     #
   # Returns random function from all avaialble
   # @return {Script.Func}
   #
-  function _getFunc()
+  function _getFunc(code::Code)
     code.funcs[rand(1:length(code.funcs))]
   end
     #

@@ -118,14 +118,16 @@ module Mutator
   # code.blocks field must contain at least one block. Details about
   # code.blocks see in description of Script.Code.blocks field. Examples:
   #
-  #   var1 = 3            # short form
-  #   var2 = ~var1        # mid form
-  #   var2 = -var2 * ~34  # full form
+  #   var1 = 3               # short form
+  #   var1 = funcXXX([args]) # short form
+  #   var2 = ~var1           # mid form
+  #   var2 = -var2 * ~34     # full form
   #
   # @param code Script of some particular organism, we 
   # have to mutate (in this case, add new variable).
   #
-  function _addVar(code::Script.Code)
+  @debug function _addVar(code::Script.Code)
+  @bp
     block  = Script.getRandBlock(code)
     ex     = Script.getVarOrNum(block, false)
     newVar = Script.getNewOrLocalVar(block, code)
