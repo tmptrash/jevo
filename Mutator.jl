@@ -126,8 +126,7 @@ module Mutator
   # @param code Script of some particular organism, we 
   # have to mutate (in this case, add new variable).
   #
-  @debug function _addVar(code::Script.Code)
-  @bp
+  function _addVar(code::Script.Code)
     block  = Script.getRandBlock(code)
     ex     = Script.getVarOrNum(block, false)
     newVar = Script.getNewOrLocalVar(block, code)

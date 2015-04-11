@@ -24,9 +24,11 @@ module TestMutator
       code.args[2]
     )
     Mutator._addVar(script)
-
-    #@fact length(code.args[2].args)    => 1
-    #@fact code.args[2].args[1].args[1] => :(var1)
+    #
+    # After adding a line it might be only one
+    #
+    @fact length(code.args[2].args)    => 1
+    @fact code.args[2].args[1].args[1] => :(var1)
   end
 
   # facts("Testing 'add' logic of Mutator.mutate()...") do

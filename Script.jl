@@ -230,8 +230,7 @@
   # @param code Code of specified organism
   # @return {Symbol}
   #
-  @debug function getNewOrLocalVar(block::Block, code::Code)
-  @bp
+  function getNewOrLocalVar(block::Block, code::Code)
     vars = block.vars
     if Helper.randTrue() && length(vars) > 0 
       return _getRandVar(vars)
