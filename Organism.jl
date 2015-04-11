@@ -43,8 +43,7 @@ module Organism
   # Creates new organism with default settings.
   # @return {Organism}
   #
-  @debug function create()
-  @bp
+  function create()
     #
     # {Expr} Native organism's code on Julia. First oranisms start them living
     # with this default code. Later, Mutator module will change it.

@@ -25,10 +25,15 @@ module TestMutator
     )
     Mutator._addVar(script)
     #
-    # After adding a line it might be only one
+    # After adding a var assign line it might be only one in block
     #
     @fact length(code.args[2].args)    => 1
+    #
+    # Before adding there is no variables in current block,
+    # so first variable will be "var1"
+    #
     @fact code.args[2].args[1].args[1] => :(var1)
+    @fact code.args[2]
   end
 
   # facts("Testing 'add' logic of Mutator.mutate()...") do

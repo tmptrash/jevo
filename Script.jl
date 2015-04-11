@@ -339,7 +339,7 @@
     args = Any[:call, symbol(func.name)]
     # TODO: possible problem here. we don't check var type.
     # TODO: we assume, that all vars are Int
-    for i = 1:length(func.args) push!(args, _getVarOrNum(block)) end
+    for i = 1:length(func.args) push!(args, getVarOrNum(block)) end
 
     apply(Expr, args)
   end
