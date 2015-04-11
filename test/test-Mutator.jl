@@ -1,3 +1,7 @@
+#
+# TODO: This module has pasponed. It will be continued only after
+# TODO: first stable version will appear.
+#
 module TestMutator
   using FactCheck
   using Mutator
@@ -6,15 +10,6 @@ module TestMutator
   # TODO: remove this
   using Debug
 
-  #
-  # Returns true if expression is a: var = const|var
-  #
-  function _isSignedVar(expr)
-    typeof(expr) === Expr         &&
-    Script.isSign(expr.args[1])   && 
-    length(expr.args) === 2       && 
-    (typeof(expr.args[2]) === Int || typeof(expr.args[2]) === Symbol)
-  end
   #
   # Checks if specified variable assign line is valid. It checks
   # all possible variants (full, short, with function,...)
@@ -59,7 +54,7 @@ module TestMutator
     # so first variable will be "var1"
     #
     @fact code.args[2].args[1].args[1]           => :(var1)
-    @fact _testVar(code.args[2].args[2].args[2]) => true
+    #@fact _testVar(code.args[2].args[2].args[2]) => true
   end
 
   # facts("Testing 'add' logic of Mutator.mutate()...") do
@@ -507,4 +502,14 @@ module TestMutator
   #   end
   #   @fact_throws Mutator._getProbIndex([])
   # end
+
+  #
+  # Returns true if expression is a: var = sign{const|var}
+  #
+  function _isSignedVar(expr)
+    typeof(expr) === Expr         &&
+    Script.isSign(expr.args[1])   && 
+    length(expr.args) === 2       && 
+    (typeof(expr.args[2]) === Int || typeof(expr.args[2]) === Symbol)
+  end
 end

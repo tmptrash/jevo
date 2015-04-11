@@ -235,9 +235,7 @@
     if Helper.randTrue() && length(vars) > 0 
       return _getRandVar(vars)
     end
-    newVar = getNewVar(code)
-    _addScopeVar(block, newVar)
-    newVar
+    getNewVar(code)
   end
   #
   # Returns random operation. See "_op" for details. For example:
@@ -316,8 +314,9 @@
   # @param body Reference to Julia block(quote)
   # @return {Block} New block
   #
-  function createBlock(code::Code, parent::Block, body::Expr, vars::Array{Symbol})
-    block = Block(parent, vars, body)
+  @debug function createBlock(code::Code, parent::Block, body::Expr, vars::Array{Symbol})
+  @bp
+    block = Block(vars, body, parent)
     push!(code.blocks, block)
     addExpr(block, Expr(:call, :produce))
     block
@@ -349,7 +348,7 @@
   # @param block Block
   # @param v Variable we have to insert
   #
-  function _addScopeVar(block::Block, v::Symbol)
+  function addVar(block::Block, v::Symbol)
     push!(block.vars, v)
   end
     #
@@ -396,5 +395,5 @@
   #
   # {Array} Available operators. Is used between numeric variables and constants
   #
-  const _op       = [+, -, \, *, $, |, &, ^, %, >>>, >>, <<]
+  const _op       = [+, -, /, *, $, |, &, ^, %, >>>, >>, <<]
 end
