@@ -8,7 +8,23 @@
   export Block
   export Func
   export Var
+
+  export isSign
+  export getNewVar
+  export getVarOrNum
+  export getNum
+  export getRandBlock
+  export getRandSign
   export getNewOrLocalVar
+  export getOperation
+  export getCondition
+  export addExpr
+  export addFunc
+  export isEmpty
+  export createBlock
+  export createFuncCall
+  export addVar
+  export getNewFunc
 
   import Helper
   # TODO Remove this
@@ -157,10 +173,11 @@
     # 
     funcs::Array{Func}
     #
-    # Quote (container) for organism's functions. All functions must be in one
-    # (this) block. We are not support inline functions. 
+    # Code block of organism's functions. All functions must be in one
+    # (this) block. We are not support inline functions (functions within
+    # other functions).
     #
-    fnBlock::Expr
+    fnBlock::Block
   end
 
 
@@ -268,18 +285,18 @@
     push!(block.block.args, expr)
   end
   #
-  # Adds new cusom function into the functions map
-  #
-  function addFunc(code::Code, name::ASCIIString, args::Array{Var})
-    push!(code.funcs, Script.Func(name, args))
-  end
-  #
   # Adds expression into another expression
   # @param dest Destination expression
   # @param src  Source expression
   #
   function addExpr(dest::Expr, src::Expr)
-    push!(dest.args, expr)
+    push!(dest.args, src)
+  end
+  #
+  # Adds new cusom function into the functions map
+  #
+  function addFunc(code::Code, name::ASCIIString, args::Array{Var})
+    push!(code.funcs, Script.Func(name, args))
   end
   #
   # Returns true if code is empty. Empty means, no code
@@ -312,10 +329,10 @@
   # @param code Source code, where new block will be added
   # @param parent Parent block
   # @param body Reference to Julia block(quote)
+  # @param vars Variables of the block
   # @return {Block} New block
   #
-  @debug function createBlock(code::Code, parent::Block, body::Expr, vars::Array{Symbol})
-  @bp
+  function createBlock(code::Code, parent::Block, body::Expr, vars::Array{Symbol})
     block = Block(vars, body, parent)
     push!(code.blocks, block)
     addExpr(block, Expr(:call, :produce))
@@ -363,7 +380,7 @@
   # @param  code Script of current organism.
   # @return {Symbol} New symbol in format: "funcXXX", where XXX - Uint
   #
-  function _getNewFunc(code::Code)
+  function getNewFunc(code::Code)
     symbol("func$(code.fIndex = code.fIndex + 1)")
   end
   #

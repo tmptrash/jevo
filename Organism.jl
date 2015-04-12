@@ -154,6 +154,22 @@ module Organism
       end
     end)
     #
+    # Code blocks for current application (see code var)
+    #
+    blocks = [
+      Script.Block(                    # while(true) block
+        Symbol[],
+        code.args[2].args[10].args[2],
+        Script.Block(                  # parent, function's life() block
+          Symbol[],
+          code.args[2]
+        )
+      ), Script.Block(                 # all functions block (begin...end)         
+        Symbol[],
+        code.args[2].args[8]
+      )
+    ]
+    #
     # {Script.Code} Default code of the organism. It will be changed 
     # soon throught mutations.
     #
@@ -171,14 +187,7 @@ module Organism
       # {Array{Block} Blocks structure. Describes default code above. See 
       # Script.Code.blocks for details.
       #
-      [Script.Block(                                  # while(true) block
-        Symbol[],
-        code.args[2].args[10].args[2],
-        Script.Block(                                 # parent, function's life() block
-          Symbol[],
-          code.args[2]
-        )
-      )],
+      blocks,
       #
       # {Array{Script.Func}} All functions in a script. See
       # Script.Code.funcs for details. This section contains two type
@@ -200,7 +209,7 @@ module Organism
       #
       # {Expr} Block for functions. See Script.Code.fnBlock for details.
       #
-      code.args[2].args[8]
+      blocks[2]
     )
     #
     # @return {Creature}

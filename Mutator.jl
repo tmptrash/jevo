@@ -171,8 +171,7 @@ module Mutator
   # @param code Script of particular organism we have to mutate
   # (add new for operator).
   #
-  @debug function _addFor(code::Script.Code)
-  @bp
+  function _addFor(code::Script.Code)
     block    = Script.getRandBlock(code)
     newVar   = Script.getNewVar(code)
     newBody  = Expr(:block,)
@@ -243,22 +242,22 @@ module Mutator
   #
   function _addFunc(code::Script.Code)
     newBlock  = Expr(:block,)
-    newFunc   = _getNewFunc(code)
+    newFunc   = Script.getNewFunc(code)
     func      = [:call, newFunc]
     params    = rand(0:code.funcMaxArgs)
-    funcArgs  = Var[]
+    funcArgs  = Script.Var[]
     vars      = (Symbol)[]
     #
     # Here we obtain function raguments list
     #
     for p = 1:params
       arg = Script.getNewVar(code)
-      push!(funcArgs, Var(string(arg), Int))
+      push!(funcArgs, Script.Var(string(arg), Int))
       push!(func, arg)
       push!(vars, arg)
     end
-    _addFunc(code, string(newFunc), funcArgs)
-    Script.addExpr(code.fnBlock, Expr(:function, apply(Expr, func), newBlock))
+    Script.addFunc(code, string(newFunc), funcArgs)
+    Script.addExpr(code.fnBlock.block, Expr(:function, apply(Expr, func), newBlock))
     Script.createBlock(code, code.fnBlock, newBlock, vars)
   end
   #
