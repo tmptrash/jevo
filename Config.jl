@@ -10,7 +10,7 @@ module Config
   #
   # Mutator related configuration
   #
-  mutator = {
+  const mutator = {
     #
     # {Array} Probabilities with wich mutator decides what to do: add,
     #         or change existing construction of the script. 
@@ -42,5 +42,15 @@ module Config
     # clonning.
     #
     "mutationsOnClone"    => uint(100)
+  }
+  #
+  # Script related settings
+  #
+  const script = {
+    #
+    # It's possible to skip some reserved blocks of code in Script.Code.blocks 
+    # property. For example, functions block.
+    #
+    "blocksStartIndex"    => 2
   }
 end

@@ -27,6 +27,7 @@
   export getNewFunc
 
   import Helper
+  import Config
   # TODO Remove this
   using  Debug
   
@@ -175,7 +176,8 @@
     #
     # Code block of organism's functions. All functions must be in one
     # (this) block. We are not support inline functions (functions within
-    # other functions).
+    # other functions). Only function should leave in this block. For 
+    # example, there is not variables, if or for lines there.
     #
     fnBlock::Block
   end
@@ -230,7 +232,7 @@
   # @return {Dict{ASCIIString, Any}}
   #
   function getRandBlock(code::Code)
-    code.blocks[rand(1:length(code.blocks))]
+    code.blocks[rand(Config.script["blocksStartIndex"]:length(code.blocks))]
   end
   #
   # Returns random sign from the list (_sign) of available.

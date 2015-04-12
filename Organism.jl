@@ -157,6 +157,10 @@ module Organism
     # Code blocks for current application (see code var)
     #
     blocks = [
+      Script.Block(                    # all functions block (begin...end)         
+        Symbol[],
+        code.args[2].args[8]
+      ),
       Script.Block(                    # while(true) block
         Symbol[],
         code.args[2].args[10].args[2],
@@ -164,9 +168,6 @@ module Organism
           Symbol[],
           code.args[2]
         )
-      ), Script.Block(                 # all functions block (begin...end)         
-        Symbol[],
-        code.args[2].args[8]
       )
     ]
     #
@@ -209,7 +210,7 @@ module Organism
       #
       # {Expr} Block for functions. See Script.Code.fnBlock for details.
       #
-      blocks[2]
+      blocks[1]
     )
     #
     # @return {Creature}

@@ -3,6 +3,8 @@ module Helper
 
   import Exceptions
 
+  using Debug
+
   #
   # Record for variable or number. Is used in findVars() function.
   #
@@ -74,11 +76,14 @@ module Helper
       return nothing
     end
     for i = 1:length(expr.args)
-      if typeof(expr.args[i]) === Expr
-        _findVars(vars, expr, i)
-      elseif typeof(expr.args[i]) === Symbol
+      typ = typeof(expr.args[i])
+      if typ === Expr                          # expression
+        findVars(vars, expr, uint(i))
+      elseif typ === Symbol                    # variable
         push!(vars, VarOrNum(expr, i, i!==1))
-      else
+      elseif typ === Function                  # operation (-,+,~,\...)
+      	push!(vars, VarOrNum(expr, i, false))
+      else                                     # Int const
         push!(vars, VarOrNum(expr, i, true))
       end
     end

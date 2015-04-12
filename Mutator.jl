@@ -308,7 +308,8 @@ module Mutator
   # @param line  Line with variables to change
   # @param index Index of "line" in "block"
   # TODO: refactore this method
-  function _changeVar(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
+  @debug function _changeVar(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
+  @bp
     vars = Helper.VarOrNum[]
     #
     # We can't change first variable, because it may cause an errors.
