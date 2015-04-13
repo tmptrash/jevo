@@ -76,6 +76,7 @@ module Mutator
   import Script
   import Exceptions
   import Helper
+  import Config
   # TODO: remove this module
   using  Debug
 
@@ -335,9 +336,10 @@ module Mutator
         end
       else
         #
-        # This is function call like this: var = funcXXX([args])
+        # This is function call like this: var = funcXXX([args]). It's small
+        # hack. "3" means length of function name is greater then "3"
         #
-        if typeof(line.args[2]) === Expr && findfirst(block.vars, line.args[2].args[1]) === 0
+        if typeof(line.args[2]) === Expr && typeof(line.args[2].args[2]) !== Expr && length(string(line.args[2].args[2])) > 3 && !beginswith(string(line.args[2].args[2]), Config.script["varPrefix"])
           #
           # Changes one function argument
           #
@@ -353,10 +355,10 @@ module Mutator
           v.expr.args[v.index] = Script.getVarOrNum(block)
         end
       end
-    elseif Script.isSign(v.expr.args[v.index]) > 0    # This is a sign (+, -, ~)
-      v.expr.args[v.index] = Script.getRandSign()
-    else                                              # This is an operator (+,-,/,$,^,...)
-      v.expr.args[v.index] = Script.getOperation()
+    elseif Script.isSign(v.expr.args[v.index]) > 0 &&  length(v.expr.args) === 2
+      v.expr.args[v.index] = Script.getRandSign()     # This is a sign (+, -, ~) before var/num
+    else
+      v.expr.args[v.index] = Script.getOperation()    # This is an operator (+,-,/,$,^,...)
     end
   end
   #

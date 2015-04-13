@@ -383,7 +383,7 @@
   # @return {Symbol} New symbol in format: "funcXXX", where XXX - Uint
   #
   function getNewFunc(code::Code)
-    symbol("func$(code.fIndex = code.fIndex + 1)")
+    symbol("$(Config.script["funcPrefix"])$(code.fIndex = code.fIndex + 1)")
   end
   #
   # Returns random line and it's index within block

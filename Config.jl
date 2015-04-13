@@ -51,6 +51,14 @@ module Config
     # It's possible to skip some reserved blocks of code in Script.Code.blocks 
     # property. For example, functions block.
     #
-    "blocksStartIndex"    => 2
+    "blocksStartIndex"    => 2,
+    #
+    # Prefix for all custom functions. Final name of the function will be: func[num]
+    #
+    "funcPrefix"          => "func",
+    #
+    # Prefix for all variables. Final name of the function will be: var[num]
+    #
+    "varPrefix"           => "var"
   }
 end
