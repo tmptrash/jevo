@@ -26,6 +26,7 @@
   export addVar
   export getNewFunc
   export findVars
+  export getRandLine
 
   import Helper
   import Config
@@ -345,7 +346,7 @@
   # @param line Line to check
   # @return {Bool}
   #
-  function isEmpty(line::Expr)
+  function isEmpty(line)
     typeof(line) !== Expr
   end
   #
@@ -452,7 +453,7 @@
   # Returns random line and it's index within block
   # @return {(Expr, Uint)}
   #
-  function _getRandLine(block::Script.Block)
+  function getRandLine(block::Script.Block)
     index = uint(rand(1:length(block.block.args)))
     (block.block.args[index], index)
   end

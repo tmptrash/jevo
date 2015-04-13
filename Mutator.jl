@@ -278,7 +278,7 @@ module Mutator
     if Script.isEmpty(code) return nothing end   # No code
     block = Script.getRandBlock(code)
     if Script.isEmpty(block) return nothing end  # No lines in block
-    line, index = _getRandLine(block)
+    line, index = Script.getRandLine(block)
     if Script.isEmpty(line) return nothing end   # Empty line
     if line.args[1] === :produce return nothing end
     head = line.head
