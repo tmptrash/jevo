@@ -77,7 +77,7 @@ module Organism
         # @param  {Int} y Y coordinate
         # @return {Int} Energy value
         #
-        function checkEnergy(x::Int, y::Int)
+        function funcCheckEnergy(x::Int, y::Int)
           # TODO:
         end
         #
@@ -85,52 +85,52 @@ module Organism
         # and increase it at organism.
         # @param {Int} amount Amount of energy to grab
         #
-        function grabEnergyLeft(amount::Int)
+        function funcGrabEnergyLeft(amount::Int)
           # TODO:
         end
         #
         # Grabs energy from the right point.
         # @param {Int} amount Amount of energy to grab
         #
-        function grabEnergyRight(amount::Int)
+        function funcGrabEnergyRight(amount::Int)
           # TODO:
         end
         #
         # Grabs energy from the up point.
         # @param {Int} amount Amount of energy to grab
         #
-        function grabEnergyUp(amount::Int)
+        function funcGrabEnergyUp(amount::Int)
           # TODO:
         end
         #
         # Grabs energy from the down point.
         # @param {Int} amount Amount of energy to grab
         #
-        function grabEnergyDown(amount::Int)
+        function funcGrabEnergyDown(amount::Int)
           # TODO:
         end
         #
         # Makes one step left. It decreases organism's x coodinate by 1.
         #
-        function stepLeft()
+        function funcStepLeft()
           # TODO:
         end
         #
         # Makes one step right. It increases organism's x coodinate by 1.
         #
-        function stepRight()
+        function funcStepRight()
           # TODO:
         end
         #
         # Makes one step up. It decrease organism's y coodinate by 1.
         #
-        function stepUp()
+        function funcStepUp()
           # TODO:
         end
         #
         # Makes one step down. It increase organism's y coodinate by 1.
         #
-        function stepDown()
+        function funcStepDown()
           # TODO:
         end
         #
@@ -139,7 +139,7 @@ module Organism
         # function should find "free" place for new organism around it.
         # If there is no "free" place, then cloning will be declined.
         #
-        function clone()
+        function funcClone()
           Organism._clone(creature)
         end
       end
@@ -196,16 +196,16 @@ module Organism
       # Embedded functions can't be changed by enyone. Generated may be.
       #
       [
-        Script.Func("checkEnergy",     [Script.Var("x",      Int), Script.Var("y", Int)])
-        Script.Func("grabEnergyLeft",  [Script.Var("amount", Int)                      ])
-        Script.Func("grabEnergyRight", [Script.Var("amount", Int)                      ])
-        Script.Func("grabEnergyUp",    [Script.Var("amount", Int)                      ])
-        Script.Func("grabEnergyDown",  [Script.Var("amount", Int)                      ])
-        Script.Func("stepLeft",        [                                               ])
-        Script.Func("stepRight",       [                                               ])
-        Script.Func("stepUp",          [                                               ])
-        Script.Func("stepDown",        [                                               ])
-        Script.Func("clone",           [                                               ])
+        Script.Func("funcCheckEnergy",     [Script.Var("x",      Int), Script.Var("y", Int)])
+        Script.Func("funcGrabEnergyLeft",  [Script.Var("amount", Int)                      ])
+        Script.Func("funcGrabEnergyRight", [Script.Var("amount", Int)                      ])
+        Script.Func("funcGrabEnergyUp",    [Script.Var("amount", Int)                      ])
+        Script.Func("funcGrabEnergyDown",  [Script.Var("amount", Int)                      ])
+        Script.Func("funcStepLeft",        [                                               ])
+        Script.Func("funcStepRight",       [                                               ])
+        Script.Func("funcStepUp",          [                                               ])
+        Script.Func("funcStepDown",        [                                               ])
+        Script.Func("funcClone",           [                                               ])
       ],
       #
       # {Expr} Block for functions. See Script.Code.fnBlock for details.

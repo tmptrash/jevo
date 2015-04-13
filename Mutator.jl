@@ -26,7 +26,7 @@
 # in every block. In our case: for, if, else, function.
 # This module uses special expression for describing operands. For example:
 #     
-#    var = [sign]{const|var} [op [sign]{const|var}]
+#    var = {[sign]{const|var} [op [sign]{const|var}]|func([args])}
 #
 # It means:
 #    
@@ -36,6 +36,7 @@
 #     op    - operator. e.g.: +,-,^ and so on
 #     []    - optional expression
 #     {|}   - one value should be choosed
+#     func  - custom function
 #
 # Mutator does it's modifications throught expressions. See this link for 
 # details: http://julia.readthedocs.org/en/latest/manual/metaprogramming/
@@ -101,10 +102,12 @@ module Mutator
       _change(code)
     end
   end
+  # TODO: Check if it's possible to obtain something different from number
+  # TODO: on function return. It's possible to get an error in this case.
   #
   # Adds variable into the random block within the script. General syntax:
   #
-  #   var = {[sign]{const|var}|funcXXX([args])} [op [sign]{const|var}]
+  #   var = {[sign]{const|var} [op [sign]{const|var}]|func([args])}
   #
   # This syntax contains two avaialble types of assign: short, mid and long.
   # See examples below for details. Let's analyze real example:
@@ -148,7 +151,7 @@ module Mutator
     # New variable must be added only after new expression will be added,
     # because this new var may be added in this expression. This will cause
     # an error. e.g.: var1 = var1 # var1 is undefined at the moment
-    #
+    # TODO: it's possible to add already added var
     Script.addVar(block, newVar)
   end
   #
@@ -291,7 +294,7 @@ module Mutator
   #
   # This function changes code line with variable assignment:
   # 
-  #   var = [sign]{const|var} [op [sign]{const|var}]
+  #   var = {[sign]{const|var} [op [sign]{const|var}]|func([args])}
   # 
   # Expression format:
   #
@@ -308,57 +311,27 @@ module Mutator
   # @param block Current block of code
   # @param line  Line with variables to change
   # @param index Index of "line" in "block"
-  # TODO: refactore this method
-  @debug function _changeVar(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
-  @bp
-    vars = Helper.VarOrNum[]
+  # 
+  function _changeVar(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
+    vars = Script.VarOrNum[]
     #
     # We can't change first variable, because it may cause an errors.
     # This variable me be used later in code, so we can't remove it.
     # 2 means - skip first variable: varXXX = ...
     #
-    Helper.findVars(vars, line, uint(2))
-    
+    Script.findVars(vars, line, uint(2))
+    #
+    # We should use == instead === to cast Uint(v.typ) to Int(0,1,...)
+    #
     v = vars[rand(1:length(vars))]
-    if (v.var)                                        # We may change it to variable or number
-      #
-      # If true and line has simple forms like: var = num|var, 
-      # then line will be changed to: var = funcXXX(args)
-      #
-      if Helper.randTrue() && typeof(line.args[2]) !== Expr
-        #
-        # var = var|num -> var = funcXXX([args])
-        #
-        if Helper.randTrue()
-          v.expr.args[v.index] = Script.createFuncCall(code, block)
-        else
-          v.expr.args[v.index] = Script.getVarOrNum(block)
-        end
-      else
-        #
-        # This is function call like this: var = funcXXX([args]). It's small
-        # hack. "3" means length of function name is greater then "3"
-        #
-        if typeof(line.args[2]) === Expr && typeof(line.args[2].args[2]) !== Expr && length(string(line.args[2].args[2])) > 3 && !beginswith(string(line.args[2].args[2]), Config.script["varPrefix"])
-          #
-          # Changes one function argument
-          #
-          if length(line.args[2].args) > 1
-            line.args[2].args[rand(2:length(line.args[2].args))] = Script.getVarOrNum(block)
-          #
-          # function without arguments. Changes function name
-          #
-          else
-           v.expr.args[v.index] = Script.createFuncCall(code, block)
-          end
-        else
-          v.expr.args[v.index] = Script.getVarOrNum(block)
-        end
-      end
-    elseif Script.isSign(v.expr.args[v.index]) > 0 &&  length(v.expr.args) === 2
-      v.expr.args[v.index] = Script.getRandSign()     # This is a sign (+, -, ~) before var/num
-    else
-      v.expr.args[v.index] = Script.getOperation()    # This is an operator (+,-,/,$,^,...)
+    if v.typ == 0                                    # We may change it to variable or number
+      v.expr.args[v.index] = Script.getVarOrNum(block)
+    elseif v.typ == 1                                # This is an operator (+,-,/,$,^,...)
+      v.expr.args[v.index] = Script.getOperation()
+    elseif v.typ == 2                                # This is a sign (+, -, ~) before var/num
+      v.expr.args[v.index] = Script.getRandSign()
+    elseif v.typ == 3                                # Function
+      v.expr.args[v.index] = Script.createFuncCall(code, block)
     end
   end
   #
