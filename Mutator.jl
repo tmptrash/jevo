@@ -133,7 +133,7 @@ module Mutator
   function _addVar(code::Script.Code)
     block  = Script.getRandBlock(code)
     ex     = Script.getVarOrNum(block, false)
-    newVar = Script.getNewOrLocalVar(block, code)
+    newVar, isNew = Script.getNewOrLocalVar(block, code)
     #
     # If true, then "ex" obtains full form:
     # var = [sign]{const|var} [op [sign]{const|var}]
@@ -151,8 +151,8 @@ module Mutator
     # New variable must be added only after new expression will be added,
     # because this new var may be added in this expression. This will cause
     # an error. e.g.: var1 = var1 # var1 is undefined at the moment
-    # TODO: it's possible to add already added var
-    Script.addVar(block, newVar)
+    # 
+    if isNew Script.addVar(block, newVar) end
   end
   #
   # Adds "for" keyword into the random block within the script. General syntax:
@@ -358,7 +358,8 @@ module Mutator
   # @param line  Line with for operator to change
   # @param index Index of "line" in "block"
   #
-  function _changeFor(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
+  @debug function _changeFor(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
+  @bp
     v = Script.getVarOrNum(block)
     line.args[1].args[2].args[Helper.randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? getNum(true) : v)
   end

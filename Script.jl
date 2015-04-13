@@ -265,14 +265,18 @@
   # of new variable adds it into the block.
   # @param block Block with all available variables
   # @param code Code of specified organism
-  # @return {Symbol}
+  # @return {(Symbol, Bool)}
   #
   function getNewOrLocalVar(block::Block, code::Code)
     vars = block.vars
     if Helper.randTrue() && length(vars) > 0 
-      return _getRandVar(vars)
+      v     = _getRandVar(vars)
+      isNew = false
+    else
+      v     = getNewVar(code)
+      isNew = true
     end
-    getNewVar(code)
+    (v, isNew)
   end
   #
   # Returns random operation. See "_op" for details. For example:
