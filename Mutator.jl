@@ -358,8 +358,7 @@ module Mutator
   # @param line  Line with for operator to change
   # @param index Index of "line" in "block"
   #
-  @debug function _changeFor(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
-  @bp
+  function _changeFor(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
     v = Script.getVarOrNum(block)
     line.args[1].args[2].args[Helper.randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? getNum(true) : v)
   end
