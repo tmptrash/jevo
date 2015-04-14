@@ -1,27 +1,10 @@
 module Helper
+  export VarOrNum
+
   export randTrue
+  export getProbIndex
 
   import Exceptions
-
-  using Debug
-
-  #
-  # Record for variable or number. Is used in findVars() function.
-  #
-  type VarOrNum
-    #
-    # Expression where variable or number was found
-    #
-    expr::Expr
-    #
-    # Index of variable or number within expression
-    #
-    index::Uint
-    #
-    # true - var, false - num
-    #
-    var::Bool
-  end
 
   #
   # Chooses (returns) true or false randomly. Is used to choose between two
@@ -53,39 +36,5 @@ module Helper
     end
 
     i
-  end
-  #
-  # Parses expression recursively and collects all variables and numbers
-  # into "vars" map. Every variable or number is a record in vars argument.
-  # Example:
-  #
-  #     VarOrNum(expr, 1, true)
-  #
-  # This line means that expr.args[1] contains variable in expr.args[1].
-  # @param vars Container for variables: [VarOrNum(expr, 1, true),...]
-  # @param parent Expression where we should search for variables/numbers
-  # @param index Index of operand in expr, where we should start search
-  #
-  function findVars(vars::Array{VarOrNum}, parent::Expr, index::Uint)
-    expr = parent.args[index]
-    #
-    # "var"=>true means that current operand is a variable or a number const
-    #
-    if typeof(expr) !== Expr
-      push!(vars, VarOrNum(parent, index, true))
-      return nothing
-    end
-    for i = 1:length(expr.args)
-      typ = typeof(expr.args[i])
-      if typ === Expr                          # expression
-        findVars(vars, expr, uint(i))
-      elseif typ === Symbol                    # variable
-        push!(vars, VarOrNum(expr, i, i!==1))
-      elseif typ === Function                  # operation (-,+,~,\...)
-      	push!(vars, VarOrNum(expr, i, false))
-      else                                     # Int const
-        push!(vars, VarOrNum(expr, i, true))
-      end
-    end
   end
 end

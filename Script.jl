@@ -25,12 +25,31 @@
   export createFuncCall
   export addVar
   export getNewFunc
+  export findVars
+  export getRandLine
 
   import Helper
   import Config
   # TODO Remove this
   using  Debug
   
+  #
+  # Record for variable or number. Is used in findVars() function.
+  #
+  type VarOrNum
+    #
+    # Expression where variable or number was found
+    #
+    expr::Expr
+    #
+    # Index of variable or number within expression
+    #
+    index::Uint
+    #
+    # 0 - var|num, 1 - operation, 2 - sign, 3 - func
+    #
+    typ::Uint8
+  end
   #
   # One code block. By block i mean code quote, which may contain it's
   # own variables. For example for, while, try and so on contain they
@@ -247,14 +266,18 @@
   # of new variable adds it into the block.
   # @param block Block with all available variables
   # @param code Code of specified organism
-  # @return {Symbol}
+  # @return {(Symbol, Bool)}
   #
   function getNewOrLocalVar(block::Block, code::Code)
     vars = block.vars
     if Helper.randTrue() && length(vars) > 0 
-      return _getRandVar(vars)
+      v     = _getRandVar(vars)
+      isNew = false
+    else
+      v     = getNewVar(code)
+      isNew = true
     end
-    getNewVar(code)
+    (v, isNew)
   end
   #
   # Returns random operation. See "_op" for details. For example:
@@ -323,7 +346,7 @@
   # @param line Line to check
   # @return {Bool}
   #
-  function isEmpty(line::Expr)
+  function isEmpty(line)
     typeof(line) !== Expr
   end
   #
@@ -361,6 +384,47 @@
 
     apply(Expr, args)
   end
+  #
+  # Parses expression recursively and collects all variables and numbers
+  # into "vars" map. Every variable or number is a record in vars argument.
+  # Example:
+  #
+  #     VarOrNum(expr, 1, 0)
+  #
+  # Available types:
+  #
+  #     0 - var|num
+  #     1 - operation
+  #     2 - sign
+  #     3 - func
+  #
+  # This line means that expr.args[1] contains variable in expr.args[1].
+  # @param vars Container for variables: [VarOrNum(expr, 1, true),...]
+  # @param parent Expression where we should search for variables/numbers
+  # @param index Index of operand in expr, where we should start search
+  #
+  function findVars(vars::Array{VarOrNum}, parent::Expr, index::Uint)
+    expr = parent.args[index]
+    if typeof(expr) !== Expr                   
+      push!(vars, VarOrNum(parent, index, 0))  # var or num
+      return nothing
+    end
+    for i = 1:length(expr.args)
+      item = expr.args[i]
+      if typeof(item) === Expr                          
+        findVars(vars, expr, uint(i))          # expression, go deepper
+      elseif isSign(item) && length(expr.args) === 2
+          push!(vars, VarOrNum(expr, i, 2))    # sign (-,+,~)
+      elseif beginswith(string(item), Config.script["funcPrefix"])
+        push!(vars, VarOrNum(parent, 2, 3))    # function
+      elseif beginswith(string(item), Config.script["varPrefix"]) || typeof(item) === Int
+        push!(vars, VarOrNum(expr, i, 0))      # var or num
+      else
+        push!(vars, VarOrNum(expr, i, 1))      # operation (-,+,/,$,...)
+      end
+    end
+  end
+
 
   #
   # Adds variable "var" into the block "block".
@@ -389,7 +453,7 @@
   # Returns random line and it's index within block
   # @return {(Expr, Uint)}
   #
-  function _getRandLine(block::Script.Block)
+  function getRandLine(block::Script.Block)
     index = uint(rand(1:length(block.block.args)))
     (block.block.args[index], index)
   end
