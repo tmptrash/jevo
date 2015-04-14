@@ -56,8 +56,8 @@
 #     eval(ex)
 # 
 # Usage:
-#     creature = Organism.create()
-#     Mutator.mutate(creature.script, [3,2,1])
+#     creature = Organism.create()            # creates new organism
+#     Mutator.mutate(creature.script, [3,2])  # ads one mutation to his code
 #
 # @author DeadbraiN
 #
@@ -68,8 +68,6 @@
 # TODO: Check if we can move some constants to global Config module
 #
 # OPT : add speed tests before and after optimization
-# OPT : think about moving block related and func related function in separate
-# OPT : modules
 #
 module Mutator
   export mutate
