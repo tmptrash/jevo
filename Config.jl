@@ -32,12 +32,6 @@ module Config
     #
     "funcMaxArgs"         => uint8(10),
     #
-    # {Uint} Amount of energy for first organisms. They are like Adam and 
-    # Eve. It means that these organism were created by operator and not
-    # by evolution.
-    #
-    "organismStartEnergy" => uint(100),
-    #
     # {Uint} Amount of mutations, which will be applied to arganism after
     # clonning.
     #
@@ -60,5 +54,20 @@ module Config
     # Prefix for all variables. Final name of the function will be: var[num]
     #
     "varPrefix"           => "var"
+  }
+  #
+  # Organism related configs
+  #
+  const organism = {
+    #
+    # {Uint} Amount of energy for first organisms. They are like Adam and 
+    # Eve. It means that these organism were created by operator and not
+    # by evolution.
+    #
+    "startEnergy"         => uint(100),
+    #
+    # Maximum amount of energy, which one organism may contains
+    #
+    "maxEnergy"           => uint(100000)
   }
 end
