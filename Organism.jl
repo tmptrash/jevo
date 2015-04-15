@@ -5,11 +5,33 @@
 #                                        is used for returning value from handlers.
 #   clone      {Creature, Creature}      Fires after cloning the organism. First arg
 #                                        is an original organism, second - clonned.
-#   getenergy  {Creature, Point, {ret=>Any}} Fires to check if specified point
+#   getenergy  {Creature, Point, {ret=>Num}} Fires to check if specified point
 #                                        in world contains an energy. Returns amount
 #                                        of energy in "ret" property.
-#   grableft   {Point, Uint, {ret=>Any}} Fires to obtain energy from the left side of
-#                                        current organism.
+#   grableft   {Point, Uint, {ret=>Num}} Fires to obtain energy from the left side of
+#                                        current organism. Second parameter is an 
+#                                        amount of energy to grab. "ret" will contain
+#                                        new organism's position.
+#   grabright  {Point, Uint, {ret=>Num}} Fires to obtain energy from the right side of
+#                                        current organism. Second parameter is an 
+#                                        amount of energy to grab. "ret" will contain
+#                                        new organism's position.
+#   grabup     {Point, Uint, {ret=>Num}} Fires to obtain energy from the up side of
+#                                        current organism. Second parameter is an 
+#                                        amount of energy to grab. "ret" will contain
+#                                        new organism's position.
+#   grabdown   {Point, Uint, {ret=>Num}} Fires to obtain energy from the right side of
+#                                        current organism. Second parameter is an 
+#                                        amount of energy to grab. "ret" will contain
+#                                        new organism's position.
+#   stepleft   {Point, {ret=>Point}}     Fires to make a step left. "ret" will contain
+#                                        new organism's position.
+#   stepright  {Point, {ret=>Point}}     Fires to make a step right. "ret" will contain
+#                                        new organism's position.
+#   stepup     {Point, {ret=>Point}}     Fires to make a step up. "ret" will contain
+#                                        new organism's position.
+#   stepdown   {Point, {ret=>Point}}     Fires to make a step down. "ret" will contain
+#                                        new organism's position.
 #
 # TODO: code should be wrapped by try...catch, because different 
 # TODO: exceptions are possible.
@@ -132,25 +154,25 @@ module Organism
         # Makes one step left. It decreases organism's x coodinate by 1.
         #
         function funcStepLeft()
-          # TODO:
+          Organism._step(creature, "left")
         end
         #
         # Makes one step right. It increases organism's x coodinate by 1.
         #
         function funcStepRight()
-          # TODO:
+          Organism._step(creature, "right")
         end
         #
         # Makes one step up. It decrease organism's y coodinate by 1.
         #
         function funcStepUp()
-          # TODO:
+          Organism._step(creature, "up")
         end
         #
         # Makes one step down. It increase organism's y coodinate by 1.
         #
         function funcStepDown()
-          # TODO:
+          Organism._step(creature, "down")
         end
         #
         # Makes organism clone. During cloning new organism will get few
@@ -312,5 +334,22 @@ module Organism
     #
     Event.fire(creature.observer, "grab$dir", creature.pos, amount, retObj)
     creature.energy += retObj.ret
+  end
+  #
+  # Makes one step with specified direction
+  # @param creature Organism to move
+  # @param dir Direction ("left", "right", "up", "down")
+  #
+  function _step(creature::Creature, dir::ASCIIString)
+    #
+    # This map will be used for communication between this organism and
+    # some outside object. "ret" key will be contained amount of grabbed energy.
+    #
+    retObj = {"ret" => nothing}
+    #
+    # Listener of "step$dir" should set new position in retObj["ret"]
+    #
+    Event.fire(creature.observer, "step$dir", creature.pos, retObj)
+    creature.pos = retObj.pos
   end
 end
