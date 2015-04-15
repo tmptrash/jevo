@@ -1,13 +1,15 @@
 #
 # Events:
-#   beforeclone{Creature, {ret=>Any}} Fires before cloning. Handlers may decline
-#                                     cloning by returning false. Second argument
-#                                     is used for returning value from handlers.
-#   clone      {Creature, Creature}   Fires after cloning the organism. First arg
-#                                     is an original organism, second - clonned.
-#   getenergy  {Creature, Int, Int, {ret=>Any}} Fires to check if specified point
-#                                     in world contains an energy. Returns amount
-#                                     of energy in "ret" property.
+#   beforeclone{Creature, {ret=>Any}}    Fires before cloning. Handlers may decline
+#                                        cloning by returning false. Second argument
+#                                        is used for returning value from handlers.
+#   clone      {Creature, Creature}      Fires after cloning the organism. First arg
+#                                        is an original organism, second - clonned.
+#   getenergy  {Creature, Point, {ret=>Any}} Fires to check if specified point
+#                                        in world contains an energy. Returns amount
+#                                        of energy in "ret" property.
+#   grableft   {Point, Uint, {ret=>Any}} Fires to obtain energy from the left side of
+#                                        current organism.
 #
 # TODO: code should be wrapped by try...catch, because different 
 # TODO: exceptions are possible.
@@ -27,6 +29,13 @@ module Organism
   using  Debug
 
   #
+  # One point in the world. Is described by two coordinates.
+  #
+  type Point
+    x::Int
+    y::Int
+  end
+  #
   # Organism related data
   # TODO: describe events. e.g.: beforeclone, clone
   #
@@ -38,7 +47,7 @@ module Organism
     #
     # {Array{Int}} Organism's position in a world
     #
-    pos::Array{Int}
+    pos::Point
     #
     # {Script.Code} Code of organism
     #
@@ -83,8 +92,8 @@ module Organism
         #
         # Checks if specified point with (x,y) coordinates has an energy value.
         # Possible values [0:typemax(Int)]. 0 means no energy.
-        # @param  x X coordinate
-        # @param  y Y coordinate
+        # @param x X coordinate
+        # @param y Y coordinate
         # @return {Int} Energy value
         #
         function funcGetEnergy(x::Int, y::Int)
@@ -96,28 +105,28 @@ module Organism
         # @param amount Amount of energy to grab
         #
         function funcGrabEnergyLeft(amount::Uint)
-          Organism._grabEnergyLeft(creature, amount)
+          Organism._grabEnergy(creature, "left", amount)
         end
         #
         # Grabs energy from the right point.
-        # @param {Int} amount Amount of energy to grab
+        # @param amount Amount of energy to grab
         #
         function funcGrabEnergyRight(amount::Int)
-          # TODO:
+          Organism._grabEnergy(creature, "right", amount)
         end
         #
         # Grabs energy from the up point.
-        # @param {Int} amount Amount of energy to grab
+        # @param amount Amount of energy to grab
         #
         function funcGrabEnergyUp(amount::Int)
-          # TODO:
+          Organism._grabEnergy(creature, "up", amount)
         end
         #
         # Grabs energy from the down point.
-        # @param {Int} amount Amount of energy to grab
+        # @param amount Amount of energy to grab
         #
         function funcGrabEnergyDown(amount::Int)
-          # TODO:
+          Organism._grabEnergy(creature, "down", amount)
         end
         #
         # Makes one step left. It decreases organism's x coodinate by 1.
@@ -278,29 +287,30 @@ module Organism
     # Listener of "getenergy" should set amount of energy in retObj["ret"]
     # Possible values [0...typemax(Int)]
     #
-    Event.fire(creature.observer, "getenergy", creature, x, y, retObj)
+    Event.fire(creature.observer, "getenergy", creature, Point(x, y), retObj)
     #
     # Return value
     #
     retObj.ret
   end
   #
-  # Grabs energy from the point, which is on the left. Grabbed energy will be
-  # added to "creature" organism, by amount of "amount".
+  # Universal method for grabbing energy from the world. It grabs at
+  # the position up, left, bottom or right from current organism.
   # @param creature Current organism
+  # @param dir      Direction ("left", "right", "up", "down")
   # @param amount   Amount of energy to grab
   #
-  function _grabEnergyLeft(creature::Creature, amount::Uint)
+  function _grabEnergy(creature::Creature, dir::ASCIIString, amount::Uint)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
     #
     retObj = {"ret" => nothing}
     #
-    # Listener of "grabenergyleft" should set amount of energy in retObj["ret"]
+    # Listener of "grab$dir" should set amount of energy in retObj["ret"]
     # Possible values [0...amount]
     #
-    Event.fire(creature.observer, "grabenergyleft", creature.pos[1], creature.pos[2], amount, retObj)
+    Event.fire(creature.observer, "grab$dir", creature.pos, amount, retObj)
     creature.energy += retObj.ret
   end
 end
