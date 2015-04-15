@@ -424,8 +424,6 @@
       end
     end
   end
-
-
   #
   # Adds variable "var" into the block "block".
   # @param block Block
