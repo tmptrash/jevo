@@ -45,18 +45,14 @@ module Organism
   import Script
   import Config
   import Event
+  import Organism
+  import Helper
 
   export Creature
+  export create
   # TODO: remove this module
   using  Debug
 
-  #
-  # One point in the world. Is described by two coordinates.
-  #
-  type Point
-    x::Int
-    y::Int
-  end
   #
   # Organism related data
   # TODO: describe events. e.g.: beforeclone, clone
@@ -69,7 +65,7 @@ module Organism
     #
     # {Array{Int}} Organism's position in a world
     #
-    pos::Point
+    pos::Helper.Point
     #
     # {Script.Code} Code of organism
     #

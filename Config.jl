@@ -70,4 +70,14 @@ module Config
     #
     "maxEnergy"           => uint(100000)
   }
+  const world = {
+    #
+    # World width
+    #
+    "width"               => uint(100),
+    #
+    # World height
+    #
+    "height"              => uint(100)
+  }
 end

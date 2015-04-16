@@ -7,6 +7,14 @@ module Helper
   import Exceptions
 
   #
+  # One point in the world. Is described by two coordinates.
+  #
+  type Point
+    x::Int
+    y::Int
+  end
+  
+  #
   # Chooses (returns) true or false randomly. Is used to choose between two
   # variants of something. For example + or - sign.
   # @return {Bool}
