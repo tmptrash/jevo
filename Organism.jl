@@ -80,7 +80,7 @@ module Organism
   # Creates new organism with default settings.
   # @return {Organism}
   #
-  function create()
+  function create(pos::Helper.Point = Helper.Point(0, 0))
     #
     # Native organism's code on Julia. First oranisms start them living
     # with this default code. Later, Mutator module will change it.
@@ -253,7 +253,7 @@ module Organism
     # @return {Creature}
     # New organism with default parameters
     # TODO: position should be set from outside
-    Creature(Config.organism["startEnergy"], [0, 0], script, Event.Observer(Dict{ASCIIString, Array{Function}}()))
+    Creature(Config.organism["startEnergy"], pos, script, Event.Observer(Dict{ASCIIString, Array{Function}}()))
   end
   #
   # Clones an organism. It does many things:

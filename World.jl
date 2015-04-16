@@ -4,6 +4,7 @@
 module World
   import Organism
   import Helper
+  import Config
 
   export create
   export addEnergy
@@ -15,7 +16,7 @@ module World
   	#
   	# Array of pixels (RGB+8b)
   	#
-    data::Array{Uint32, 2}
+    data::Array{Uint16, 2}
   end
 
   #
@@ -23,8 +24,8 @@ module World
   # @param width World width
   # @param height World height
   #
-  function create(width::Uint, height::Uint)
-  	Plane(fill(uint32(0), (int(width), int(height))))
+  function create(width::Uint = Config.world["width"], height::Uint = Config.world["height"])
+  	Plane(fill(uint16(0), (int(width), int(height))))
   end
   #
   # Adds energy point by specified coordinates
@@ -32,7 +33,7 @@ module World
   # @param pos Position of the energy point
   # @param energy Amount of energy to add
   #
-  function addEnergy(plane::Plane, pos::Helper.Point, energy::Uint)
-  	plane[pos.y, pos.x] = energy
+  function addEnergy(plane::Plane, pos::Helper.Point, energy::Uint16)
+  	plane.data[pos.y, pos.x] = energy
   end
 end

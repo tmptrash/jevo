@@ -15,5 +15,5 @@ module Manager
   #
   # Instance of the world
   #
-  _world = World.create(Config.world["width"], Config.world["height"])
+  _world = World.create()
 end
