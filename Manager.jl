@@ -167,11 +167,15 @@ module Manager
   # @param retObj Special object for return value
   #
   function _onGrabLeft(creature::Organism.Creature, amount::Uint, retObj::Organism.RetObj)
-    # TODO: i'm here!!!
     pos        = creature.pos
-    retObj.ret = World.grabEnergy(_world, creature.pos, amount)
-    org        = _posMap[pos.y * _world.width + pos.x]
-
+    pos.x     -= 1
+    retObj.ret = World.grabEnergy(_world, pos, amount)
+    id         = pos.y * _world.width + pos.x
+    #
+    # If other organism is on the left, then grab energy from him
+    #
+    if haskey(_posMap[id]) _posMap[id].energy -= retObj.ret
+    pos.x     += 1 # we have to revert the position
 
   end
 
