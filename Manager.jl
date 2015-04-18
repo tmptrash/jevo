@@ -97,6 +97,9 @@ module Manager
     Event.on(organism.observer, "clone", _onClone)
     Event.on(organism.observer, "getenergy", _onGetEnergy)
     Event.on(organism.observer, "grableft", _onGrabLeft)
+    Event.on(organism.observer, "grabright", _onGrabRight)
+    Event.on(organism.observer, "grabup", _onGrabUp)
+    Event.on(organism.observer, "grabdown", _onGrabDown)
 
     organism
   end
@@ -167,16 +170,52 @@ module Manager
   # @param retObj Special object for return value
   #
   function _onGrabLeft(creature::Organism.Creature, amount::Uint, retObj::Organism.RetObj)
-    pos        = creature.pos
-    pos.x     -= 1
+    _onGrab(creature, amount, Helper.Point(creature.pos.x - 1, creature.pos.y), retObj)
+  end
+  #
+  # Grabs energy on the right side of the organism
+  # @param creature Parent organism
+  # @param amount Amount of energy we want to grab
+  # @param retObj Special object for return value
+  #
+  function _onGrabRight(creature::Organism.Creature, amount::Uint, retObj::Organism.RetObj)
+    _onGrab(creature, amount, Helper.Point(creature.pos.x + 1, creature.pos.y), retObj)
+  end
+  #
+  # Grabs energy on the up side of the organism
+  # @param creature Parent organism
+  # @param amount Amount of energy we want to grab
+  # @param retObj Special object for return value
+  #
+  function _onGrabUp(creature::Organism.Creature, amount::Uint, retObj::Organism.RetObj)
+    _onGrab(creature, amount, Helper.Point(creature.pos.x, creature.pos.y - 1), retObj)
+  end
+  #
+  # Grabs energy on the down side of the organism
+  # @param creature Parent organism
+  # @param amount Amount of energy we want to grab
+  # @param retObj Special object for return value
+  #
+  function _onGrabDown(creature::Organism.Creature, amount::Uint, retObj::Organism.RetObj)
+    _onGrab(creature, amount, Helper.Point(creature.pos.x, creature.pos.y + 1), retObj)
+  end
+  #
+  # Grabs energy on specified point. It grabs the energy and 
+  # checks if other organism was at that position. If so, then 
+  # it decrease an energy of this other organism.
+  # @param creature Organism hwo grabs
+  # @param amount Amount of energy he wants to grab
+  # @param pos Point where we should check the energy
+  # @param retObj Special object for return value
+  #
+  function _onGrab(creature::Organism.Creature, amount::Uint, pos::Helper.Point, retObj::Organism.RetObj)
     retObj.ret = World.grabEnergy(_world, pos, amount)
     id         = pos.y * _world.width + pos.x
     #
-    # If other organism is on the left, then grab energy from him
+    # If other organism at the position of the check, 
+    # then grab energy from him
     #
-    if haskey(_posMap[id]) _posMap[id].energy -= retObj.ret
-    pos.x     += 1 # we have to revert the position
-
+    if haskey(_posMap, id) _posMap[id].energy -= retObj.ret end
   end
 
   #
