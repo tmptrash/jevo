@@ -10,6 +10,8 @@ module World
   export setEnergy
   export getEnergy
   export getFreePos
+  export grabEnergy
+  export getNearPos
 
   #
   # 2D plane for living
@@ -86,5 +88,22 @@ module World
     energy = energy > amount ? amount : energy
     plane.data[pos.y * plane.width + pos.x] -= energy
     energy
+  end
+  #
+  # Returns position near specified. It checks up, down, left and right
+  # sides of "pos". If every sides are full, then returns false
+  # @return {Helper.Point|Bool}
+  #
+  function getNearPos(pos::Helper.Point)
+    pos.x += 1
+    if World.getEnergy(_world, pos) === 0 return pos end
+    pos.x -= 2;
+    if World.getEnergy(_world, pos) === 0 return pos end
+    pos.x += 1; pos.y -= 1
+    if World.getEnergy(_world, pos) === 0 return pos end
+    pos.y += 2
+    if World.getEnergy(_world, pos) === 0 return pos end
+
+    false
   end
 end

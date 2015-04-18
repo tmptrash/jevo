@@ -115,23 +115,6 @@ module Manager
     _posMap[pos.y * _world.width + pos.x] = organism
     organism.pos = pos
   end
-  #
-  # Returns position near specified. It checks up, down, left and right
-  # sides of "pos". If every sides are full, then returns false
-  # @return {Helper.Point|Bool}
-  #
-  function _getNearPos(pos::Helper.Point)
-    pos.x += 1
-    if World.getEnergy(_world, pos) === 0 return pos end
-    pos.x -= 2;
-    if World.getEnergy(_world, pos) === 0 return pos end
-    pos.x += 1; pos.y -= 1
-    if World.getEnergy(_world, pos) === 0 return pos end
-    pos.y += 2
-    if World.getEnergy(_world, pos) === 0 return pos end
-
-    false
-  end
 
   #
   # Handles "beforeclone" event. Finds free point for new organism
@@ -144,7 +127,7 @@ module Manager
     #
     # First, we have to find free point near the organism
     #
-    pos = _getNearPos(creature.pos)
+    pos = World.getNearPos(creature.pos)
     if pos === false return nothing end
     #
     # Creates new organism and applies mutations to him.
