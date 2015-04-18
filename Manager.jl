@@ -1,7 +1,8 @@
 #
 # Manages organisms and they world
 # @singleton
-# TODO:
+# TODO: describe that manager is a mediator between all other objects
+# TODO: like mutator, world, terminal and so on.
 #
 module Manager
   import Organism
@@ -63,6 +64,14 @@ module Manager
     # Inits available organisms by Tasks
     #
     for i = 1:Config.organism["startAmount"]
+      _createTask()
+    end
+  end
+  #
+  # Creates one task and organism inside this task. Created
+  # task will be added to _tasks array.
+  #
+  function _createTask()
       org  = _createOrganism()
       task = Task(eval(org.script.code))
       push!(_tasks, CreatureTask(task, org))
@@ -72,40 +81,75 @@ module Manager
       obj = consume(task)
       push!(obj, org)
       consume(task)
-    end
+      task
   end
   #
   # Creates new organism and binds event handlers to him. It also
   # finds free point in a world, where organism will start living.
+  # @param pos Optional. Position of organism.
   # @return {Organism.Creature}
   #
-  function _createOrganism()
-    organism = Organism.create(World.getFreePos())
-    Event.on(organism.observer, "beforeclone", _onBeforeClone)
+  function _createOrganism(pos = nothing)
+    pos      = pos === nothing ? World.getFreePos() : pos
+    organism = Organism.create(pos)
+    _moveOrganism(pos, organism)
+
+    Event.on(organism.observer, "clone", _onClone)
     Event.on(organism.observer, "getenergy", _onGetEnergy)
+    Event.on(organism.observer, "grableft", _onGrabLeft)
+
     organism
   end
+  #
+  # Moves organism to specified position. Updates organism's 
+  # position and set new one into the _posMap. Removes organism's
+  # previous position from _posMap.
+  # @param pos New position
+  # @param organism Organism to move
+  #
+  function _moveOrganism(pos::Helper.Point, organism::Organism.Creature)
+    delete!(_posMap, organism.pos.y * _world.width + organism.pos.x)
+    _posMap[pos.y * _world.width + pos.x] = organism
+    organism.pos = pos
+  end
+  #
+  # Returns position near specified. It checks up, down, left and right
+  # sides of "pos". If every sides are full, then returns false
+  # @return {Helper.Point|Bool}
+  #
+  function _getNearPos(pos::Helper.Point)
+    pos.x += 1
+    if World.getEnergy(_world, pos) === 0 return pos end
+    pos.x -= 2;
+    if World.getEnergy(_world, pos) === 0 return pos end
+    pos.x += 1; pos.y -= 1
+    if World.getEnergy(_world, pos) === 0 return pos end
+    pos.y += 2
+    if World.getEnergy(_world, pos) === 0 return pos end
+
+    false
+  end
+
   #
   # Handles "beforeclone" event. Finds free point for new organism
   # and returns these coordinates. If no free space, then returns false.
   # It checks four (4) places around current organism's position: up,
   # down, left and right.
   # @param creature Parent organism
-  # @param retObj Special object for return value
   #
-  function _onBeforeClone(creature::Organism.Creature, retObj::Organism.RetObj)
-    retObj.ret = true
-    pos = creature.pos
-    pos.x += 1
-    if World.getEnergy(_world, pos) === 0 retObj.ret = pos; return nothing end
-    pos.x -= 2;
-    if World.getEnergy(_world, pos) === 0 retObj.ret = pos; return nothing end
-    pos.x += 1; pos.y -= 1
-    if World.getEnergy(_world, pos) === 0 retObj.ret = pos; return nothing end
-    pos.y += 2
-    if World.getEnergy(_world, pos) === 0 retObj.ret = pos; return nothing end
-
-    retObj.ret = false
+  function _onClone(creature::Organism.Creature)
+    #
+    # First, we have to find free point near the organism
+    #
+    pos = _getNearPos(creature.pos)
+    if pos === false return nothing end
+    #
+    # Creates new organism and applies mutations to him.
+    #
+    task = _createTask()
+    for i = 1:Config.mutator["mutationsOnClone"]
+      Mutator.mutate(task.organism.script, Config.mutator["addDelChange"])
+    end
   end
   #
   # Returns an energy amount in specified point in a world.
@@ -116,6 +160,20 @@ module Manager
   function _onGetEnergy(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
     retObj.ret = World.getEnergy(_world, pos)
   end
+  #
+  # Grabs energy on the left side of the organism
+  # @param creature Parent organism
+  # @param amount Amount of energy we want to grab
+  # @param retObj Special object for return value
+  #
+  function _onGrabLeft(creature::Organism.Creature, amount::Uint, retObj::Organism.RetObj)
+    # TODO: i'm here!!!
+    pos        = creature.pos
+    retObj.ret = World.grabEnergy(_world, creature.pos, amount)
+    org        = _posMap[pos.y * _world.width + pos.x]
+
+
+  end
 
   #
   # All available organism's tasks
@@ -125,4 +183,9 @@ module Manager
   # Instance of the world
   #
   _world = World.create()
+  #
+  # Positions map, which stores positions of all organisms. Is used
+  # for fast access to the organism by it's coordinates.
+  #
+  _posMap = Dict{Uint, Organism.Creature}()
 end

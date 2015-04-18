@@ -1,36 +1,32 @@
 #
 # Events:
-#   beforeclone{Creature, {ret=>Any}}    Fires before cloning. Handlers may decline
-#                                        cloning by returning false. Second argument
-#                                        is used for returning value from handlers.
-#   clone      {Creature, Creature}      Fires after cloning the organism. First arg
-#                                        is an original organism, second - clonned.
+#   clone      {Creature}                Fires if script is called "clone" command.
 #   getenergy  {Creature, Point, {ret=>Num}} Fires to check if specified point
 #                                        in world contains an energy. Returns amount
 #                                        of energy in "ret" property.
-#   grableft   {Point, Uint, {ret=>Num}} Fires to obtain energy from the left side of
+#   grableft   {Creature, Uint, {ret=>Num}} Fires to obtain energy from the left side of
 #                                        current organism. Second parameter is an 
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
-#   grabright  {Point, Uint, {ret=>Num}} Fires to obtain energy from the right side of
+#   grabright  {Creature, Uint, {ret=>Num}} Fires to obtain energy from the right side of
 #                                        current organism. Second parameter is an 
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
-#   grabup     {Point, Uint, {ret=>Num}} Fires to obtain energy from the up side of
+#   grabup     {Creature, Uint, {ret=>Num}} Fires to obtain energy from the up side of
 #                                        current organism. Second parameter is an 
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
-#   grabdown   {Point, Uint, {ret=>Num}} Fires to obtain energy from the right side of
+#   grabdown   {Creature, Uint, {ret=>Num}} Fires to obtain energy from the right side of
 #                                        current organism. Second parameter is an 
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
-#   stepleft   {Point, {ret=>Point}}     Fires to make a step left. "ret" will contain
+#   stepleft   {Creature, {ret=>Point}}  Fires to make a step left. "ret" will contain
 #                                        new organism's position.
-#   stepright  {Point, {ret=>Point}}     Fires to make a step right. "ret" will contain
+#   stepright  {Creature, {ret=>Point}}  Fires to make a step right. "ret" will contain
 #                                        new organism's position.
-#   stepup     {Point, {ret=>Point}}     Fires to make a step up. "ret" will contain
+#   stepup     {Creature, {ret=>Point}}  Fires to make a step up. "ret" will contain
 #                                        new organism's position.
-#   stepdown   {Point, {ret=>Point}}     Fires to make a step down. "ret" will contain
+#   stepdown   {Creature, {ret=>Point}}  Fires to make a step down. "ret" will contain
 #                                        new organism's position.
 #
 # TODO: code should be wrapped by try...catch, because different 
@@ -50,7 +46,7 @@ module Organism
 
   export Creature
   export RetObj
-  
+
   export create
   # TODO: remove this module
   using  Debug
@@ -275,7 +271,7 @@ module Organism
     # TODO: position should be set from outside
     Creature(Config.organism["startEnergy"], pos, script, Event.Observer(Dict{ASCIIString, Array{Function}}()))
   end
-  #
+  # TODO:!!
   # Clones an organism. It does many things:
   # - fires "beforeclone" to ask parent object about possibility to clone
   # - if ok, creates new default organism
@@ -285,30 +281,7 @@ module Organism
   # @param {Creature} creature Instance of parent organism.
   #
   function _clone(creature::Creature)
-    #
-    # This map will be used for communication between this organism and
-    # some outside object. "ret" key will be contained permission to 
-    # continue the clonning. "pos" means new organism's coordinates.
-    #
-    retObj = RetObj()
-    #
-    # Any listener of "beforeclone" event may cancel cloning. For example, 
-    # it may be Organism's manager, which knows that all points around
-    # current organism aren't empty and it's impossible to clone here.
-    #
-    if !Event.fire(creature.observer, "beforeclone", creature, retObj) return nothing end
-    if !retObj.ret return nothing end
-
-    newCreature = create()
-    # TODO: need to think about this amount of energy. I think parent 
-    # TODO: organism should loose some energy after clonning.
-    newCreature.energy = creature.energy
-    newCreature.pos    = retObj.pos
-    for i = 1:Config.mutator["mutationsOnClone"]
-      Mutator.mutate(creature.script, Config.mutator["addDelChange"])
-    end
-
-    Event.fire(creature.observer, "clone", creature, newCreature)
+    Event.fire(creature.observer, "clone", creature)
   end
   #
   # Checks amount of organism's energy in {x,y} point
@@ -348,7 +321,7 @@ module Organism
     # Listener of "grab$dir" should set amount of energy in retObj.ret
     # Possible values [0...amount]
     #
-    Event.fire(creature.observer, "grab$dir", creature.pos, amount, retObj)
+    Event.fire(creature.observer, "grab$dir", creature, amount, retObj)
     creature.energy += retObj.ret
   end
   #
@@ -365,7 +338,7 @@ module Organism
     #
     # Listener of "step$dir" should set new position in retObj.ret
     #
-    Event.fire(creature.observer, "step$dir", creature.pos, retObj)
+    Event.fire(creature.observer, "step$dir", creature, retObj)
     creature.pos = retObj.pos
   end
 end

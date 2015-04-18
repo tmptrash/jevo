@@ -72,4 +72,19 @@ module World
     end
     pos
   end
+  #
+  # Grabs energy in specified point in a world. If this point 
+  # has no energy, 0 value will be returned. If point has less
+  # energy, then "amount", then all point energy will be returned.
+  # @param plane Plane
+  # @param pos Position to grab
+  # @param amount Amount of energy we want to grab
+  # @return {Uint} amount of grabbed energy
+  #
+  function grabEnergy(plane::Plane, pos::Helper.Point, amount:Uint)
+    energy = getEnergy(plane, pos)
+    energy = energy > amount ? amount : energy
+    plane.data[pos.y * plane.width + pos.x] -= energy
+    energy
+  end
 end
