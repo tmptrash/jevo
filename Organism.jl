@@ -49,6 +49,8 @@ module Organism
   import Helper
 
   export Creature
+  export RetObj
+  
   export create
   # TODO: remove this module
   using  Debug
@@ -74,6 +76,24 @@ module Organism
     # {Event.Observer} Adds events listening/firing logic to the organism.
     #
     observer::Event.Observer
+  end
+  #
+  # Universal structure for returning a value from event handlers.
+  # See "beforeclone", "getenergy" and other events for details.
+  #
+  type RetObj
+    #
+    # Return value
+    #
+    ret::Any
+    #
+    # Position in a world
+    #
+    pos::Helper.Point
+    #
+    # ctor
+    #
+    RetObj(r = nothing, p = nothing) = (x = new(r); p === nothing ? x : (x.pos = p;x))
   end
 
   #
@@ -270,20 +290,20 @@ module Organism
     # some outside object. "ret" key will be contained permission to 
     # continue the clonning. "pos" means new organism's coordinates.
     #
-    retObj = {"ret" => nothing}
+    retObj = RetObj()
     #
     # Any listener of "beforeclone" event may cancel cloning. For example, 
     # it may be Organism's manager, which knows that all points around
     # current organism aren't empty and it's impossible to clone here.
     #
     if !Event.fire(creature.observer, "beforeclone", creature, retObj) return nothing end
-    if !retObj["ret"] return nothing end
+    if !retObj.ret return nothing end
 
     newCreature = create()
     # TODO: need to think about this amount of energy. I think parent 
     # TODO: organism should loose some energy after clonning.
     newCreature.energy = creature.energy
-    newCreature.pos    = retObj["pos"]
+    newCreature.pos    = retObj.pos
     for i = 1:Config.mutator["mutationsOnClone"]
       Mutator.mutate(creature.script, Config.mutator["addDelChange"])
     end
@@ -300,9 +320,9 @@ module Organism
     # This map will be used for communication between this organism and
     # some outside object. "ret" will be contained amount of energy.
     #
-    retObj = {"ret" => nothing}
+    retObj = RetObj()
     #
-    # Listener of "getenergy" should set amount of energy in retObj["ret"]
+    # Listener of "getenergy" should set amount of energy in retObj.ret
     # Possible values [0...typemax(Int)]
     #
     Event.fire(creature.observer, "getenergy", creature, Point(x, y), retObj)
@@ -323,9 +343,9 @@ module Organism
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
     #
-    retObj = {"ret" => nothing}
+    retObj = RetObj()
     #
-    # Listener of "grab$dir" should set amount of energy in retObj["ret"]
+    # Listener of "grab$dir" should set amount of energy in retObj.ret
     # Possible values [0...amount]
     #
     Event.fire(creature.observer, "grab$dir", creature.pos, amount, retObj)
@@ -341,9 +361,9 @@ module Organism
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
     #
-    retObj = {"ret" => nothing}
+    retObj = RetObj()
     #
-    # Listener of "step$dir" should set new position in retObj["ret"]
+    # Listener of "step$dir" should set new position in retObj.ret
     #
     Event.fire(creature.observer, "step$dir", creature.pos, retObj)
     creature.pos = retObj.pos

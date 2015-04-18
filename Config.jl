@@ -60,15 +60,24 @@ module Config
   #
   const organism = {
     #
+    # Amount of organisms on program start
+    #
+    "startAmount"         => uint(10),
+    #
     # {Uint} Amount of energy for first organisms. They are like Adam and 
     # Eve. It means that these organism were created by operator and not
     # by evolution.
     #
-    "startEnergy"         => uint(100),
+    "startEnergy"         => uint(1000),
     #
     # Maximum amount of energy, which one organism may contains
     #
-    "maxEnergy"           => uint(100000)
+    "maxEnergy"           => uint(100000),
+    #
+    # Amount of iterations within organism's life loop, after that we decrease
+    # amount of energy ono 1 point.
+    #
+    "decreaseAfterTimes"  => uint(100)
   }
   const world = {
     #
