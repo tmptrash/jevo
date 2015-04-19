@@ -94,12 +94,16 @@ module Manager
     organism = Organism.create(pos)
     _moveOrganism(pos, organism)
 
-    Event.on(organism.observer, "clone", _onClone)
+    Event.on(organism.observer, "clone",     _onClone    )
     Event.on(organism.observer, "getenergy", _onGetEnergy)
-    Event.on(organism.observer, "grableft", _onGrabLeft)
+    Event.on(organism.observer, "grableft",  _onGrabLeft )
     Event.on(organism.observer, "grabright", _onGrabRight)
-    Event.on(organism.observer, "grabup", _onGrabUp)
-    Event.on(organism.observer, "grabdown", _onGrabDown)
+    Event.on(organism.observer, "grabup",    _onGrabUp   )
+    Event.on(organism.observer, "grabdown",  _onGrabDown )
+    Event.on(organism.observer, "stepleft",  _onStepLeft )
+    Event.on(organism.observer, "stepright", _onStepRight)
+    Event.on(organism.observer, "stepup",    _onStepUp   )
+    Event.on(organism.observer, "stepdown",  _onStepDown )
 
     organism
   end
@@ -183,6 +187,42 @@ module Manager
     _onGrab(creature, amount, Helper.Point(creature.pos.x, creature.pos.y + 1), retObj)
   end
   #
+  # Handler of "stepleft" event. Checks a possibility to step left.
+  # New position will be set to "retObj.pos" property.
+  # @param creature Parent organism
+  # @param retObj Special object for return value
+  #
+  function _onStepLeft(creature::Organism.Creature, retObj::Organism.RetObj)
+    _onStep(creature, Helper.Point(creature.pos.x - 1, creature.pos.y), retObj)
+  end
+  #
+  # Handler of "stepright" event. Checks a possibility to step right.
+  # New position will be set to "retObj.pos" property.
+  # @param creature Parent organism
+  # @param retObj Special object for return value
+  #
+  function _onStepRight(creature::Organism.Creature, retObj::Organism.RetObj)
+    _onStep(creature, Helper.Point(creature.pos.x + 1, creature.pos.y), retObj)
+  end
+  #
+  # Handler of "stepup" event. Checks a possibility to step up.
+  # New position will be set to "retObj.pos" property.
+  # @param creature Parent organism
+  # @param retObj Special object for return value
+  #
+  function _onStepUp(creature::Organism.Creature, retObj::Organism.RetObj)
+    _onStep(creature, Helper.Point(creature.pos.x, creature.pos.y - 1), retObj)
+  end
+  #
+  # Handler of "stepdown" event. Checks a possibility to step down.
+  # New position will be set to "retObj.pos" property.
+  # @param creature Parent organism
+  # @param retObj Special object for return value
+  #
+  function _onStepDown(creature::Organism.Creature, retObj::Organism.RetObj)
+    _onStep(creature, Helper.Point(creature.pos.x, creature.pos.y + 1), retObj)
+  end
+  #
   # Grabs energy on specified point. It grabs the energy and 
   # checks if other organism was at that position. If so, then 
   # it decrease an energy of this other organism.
@@ -199,6 +239,17 @@ module Manager
     # then grab energy from him
     #
     if haskey(_posMap, id) _posMap[id].energy -= retObj.ret end
+  end
+  #
+  # Checks if specified position ("pos") has no energy and we may
+  # move the organism there. If this position has an energy, then
+  # the same position will be set to "retObj.pos".
+  # @param creature Organism hwo grabs
+  # @param pos Point where we should check the energy
+  # @param retObj Special object for return value
+  #
+  function _onStep(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
+    retObj.pos = (World.getEnergy(_world, pos) === uint(0) ? pos : creature.pos)
   end
 
   #
