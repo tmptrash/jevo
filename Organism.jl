@@ -138,29 +138,29 @@ module Organism
         # and increase it at organism.
         # @param amount Amount of energy to grab
         #
-        function funcGrabEnergyLeft(amount::Uint)
-          Organism._grabEnergy(creature, "left", amount)
+        function funcGrabEnergyLeft(amount::Int)
+          Organism._grabEnergy(creature, "left", uint(amount))
         end
         #
         # Grabs energy from the right point.
         # @param amount Amount of energy to grab
         #
         function funcGrabEnergyRight(amount::Int)
-          Organism._grabEnergy(creature, "right", amount)
+          Organism._grabEnergy(creature, "right", uint(amount))
         end
         #
         # Grabs energy from the up point.
         # @param amount Amount of energy to grab
         #
         function funcGrabEnergyUp(amount::Int)
-          Organism._grabEnergy(creature, "up", amount)
+          Organism._grabEnergy(creature, "up", uint(amount))
         end
         #
         # Grabs energy from the down point.
         # @param amount Amount of energy to grab
         #
         function funcGrabEnergyDown(amount::Int)
-          Organism._grabEnergy(creature, "down", amount)
+          Organism._grabEnergy(creature, "down", uint(amount))
         end
         #
         # Makes one step left. It decreases organism's x coodinate by 1.
@@ -204,6 +204,16 @@ module Organism
       #
       while true
         produce()
+        funcClone()
+        funcGetEnergy(1,2)
+        funcGrabEnergyLeft(5)
+        funcGrabEnergyRight(5)
+        funcGrabEnergyUp(5)
+        funcGrabEnergyDown(5)
+        funcStepLeft()
+        funcStepRight()
+        funcStepUp()
+        funcStepDown()
       end
     end)
     #
@@ -271,16 +281,13 @@ module Organism
     # TODO: position should be set from outside
     Creature(Config.organism["startEnergy"], pos, script, Event.Observer(Dict{ASCIIString, Array{Function}}()))
   end
-  # TODO:!!
-  # Clones an organism. It does many things:
-  # - fires "beforeclone" to ask parent object about possibility to clone
-  # - if ok, creates new default organism
-  # - sets energy and position (from parent object)
-  # - adds mutations to new organism
-  # - fires "clone" event
+  #
+  # Clones an organism. It only fires an event. Clonning will be
+  # processes in a Manager module. See it for details.
   # @param {Creature} creature Instance of parent organism.
   #
-  function _clone(creature::Creature)
+  @debug function _clone(creature::Creature)
+  @bp
     Event.fire(creature.observer, "clone", creature)
   end
   #
@@ -288,7 +295,8 @@ module Organism
   # @param x X coordinate
   # @param y Y coordinate
   #
-  function _getEnergy(creature::Creature, x::Int, y::Int)
+  @debug function _getEnergy(creature::Creature, x::Int, y::Int)
+  @bp
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" will be contained amount of energy.
@@ -298,7 +306,7 @@ module Organism
     # Listener of "getenergy" should set amount of energy in retObj.ret
     # Possible values [0...typemax(Int)]
     #
-    Event.fire(creature.observer, "getenergy", creature, Point(x, y), retObj)
+    Event.fire(creature.observer, "getenergy", creature, Helper.Point(x, y), retObj)
     #
     # Return value
     #
@@ -311,7 +319,8 @@ module Organism
   # @param dir      Direction ("left", "right", "up", "down")
   # @param amount   Amount of energy to grab
   #
-  function _grabEnergy(creature::Creature, dir::ASCIIString, amount::Uint)
+  @debug function _grabEnergy(creature::Creature, dir::ASCIIString, amount::Uint)
+  @bp
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
@@ -329,7 +338,8 @@ module Organism
   # @param creature Organism to move
   # @param dir Direction ("left", "right", "up", "down")
   #
-  function _step(creature::Creature, dir::ASCIIString)
+  @debug function _step(creature::Creature, dir::ASCIIString)
+  @bp
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.

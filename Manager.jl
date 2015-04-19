@@ -43,7 +43,7 @@ module Manager
       times += 1
       for i = 1:len
         try
-          consume(_tasks[i])
+          consume(_tasks[i].task)
         end
         if times === decTimes
           _tasks[i].organism.energy -= 1
@@ -58,8 +58,7 @@ module Manager
   # Creates tasks and organisms according to Config. All tasks
   # will be in _tasks field.
   #
-  @debug function _createTasks()
-  @bp
+  function _createTasks()
     #
     # Inits available organisms by Tasks
     #
@@ -90,7 +89,7 @@ module Manager
   # @return {Organism.Creature}
   #
   function _createOrganism(pos = nothing)
-    pos      = pos === nothing ? World.getFreePos() : pos
+    pos      = pos === nothing ? World.getFreePos(_world) : pos
     organism = Organism.create(pos)
     _moveOrganism(pos, organism)
 
@@ -117,6 +116,12 @@ module Manager
   function _moveOrganism(pos::Helper.Point, organism::Organism.Creature)
     delete!(_posMap, organism.pos.y * _world.width + organism.pos.x)
     _posMap[pos.y * _world.width + pos.x] = organism
+    #
+    # pos - new organism position
+    # organism.pos - old organism position
+    #
+    World.setEnergy(_world, pos, uint16(organism.energy))
+    World.setEnergy(_world, organism.pos, uint16(0))
     organism.pos = pos
   end
 
@@ -127,11 +132,12 @@ module Manager
   # down, left and right.
   # @param creature Parent organism
   #
-  function _onClone(creature::Organism.Creature)
+  @debug function _onClone(creature::Organism.Creature)
+  @bp
     #
     # First, we have to find free point near the organism
     #
-    pos = World.getNearPos(creature.pos)
+    pos = World.getNearPos(_world, creature.pos)
     if pos === false return nothing end
     #
     # Creates new organism and applies mutations to him.
@@ -147,7 +153,8 @@ module Manager
   # @param pos Position to check
   # @param retObj Special object for return value
   #
-  function _onGetEnergy(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
+  @debug function _onGetEnergy(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
+  @bp
     retObj.ret = World.getEnergy(_world, pos)
   end
   #
@@ -231,7 +238,8 @@ module Manager
   # @param pos Point where we should check the energy
   # @param retObj Special object for return value
   #
-  function _onGrab(creature::Organism.Creature, amount::Uint, pos::Helper.Point, retObj::Organism.RetObj)
+  @debug function _onGrab(creature::Organism.Creature, amount::Uint, pos::Helper.Point, retObj::Organism.RetObj)
+  @bp
     retObj.ret = World.grabEnergy(_world, pos, amount)
     id         = pos.y * _world.width + pos.x
     #
@@ -248,7 +256,8 @@ module Manager
   # @param pos Point where we should check the energy
   # @param retObj Special object for return value
   #
-  function _onStep(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
+  @debug function _onStep(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
+  @bp
     retObj.pos = (World.getEnergy(_world, pos) === uint(0) ? pos : creature.pos)
   end
 

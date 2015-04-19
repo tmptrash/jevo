@@ -69,8 +69,8 @@ module World
   function getFreePos(plane::Plane)
     pos = Helper.Point(int(plane.width / 2), int(plane.height / 2))
     while World.getEnergy(plane, pos) > uint(0)
-      pox.x = rand(1:plane.width)
-      pox.y = rand(1:plane.height)
+      pos.x = rand(1:plane.width)
+      pos.y = rand(1:plane.height)
     end
     pos
   end
@@ -83,7 +83,7 @@ module World
   # @param amount Amount of energy we want to grab
   # @return {Uint} amount of grabbed energy
   #
-  function grabEnergy(plane::Plane, pos::Helper.Point, amount:Uint)
+  function grabEnergy(plane::Plane, pos::Helper.Point, amount::Uint)
     energy = getEnergy(plane, pos)
     energy = energy > amount ? amount : energy
     plane.data[pos.y * plane.width + pos.x] -= energy
@@ -92,17 +92,19 @@ module World
   #
   # Returns position near specified. It checks up, down, left and right
   # sides of "pos". If every sides are full, then returns false
+  # @param plane Plane
+  # @param pos Start position
   # @return {Helper.Point|Bool}
   #
-  function getNearPos(pos::Helper.Point)
+  function getNearPos(plane::Plane, pos::Helper.Point)
     pos.x += 1
-    if World.getEnergy(_world, pos) === 0 return pos end
+    if World.getEnergy(plane, pos) === 0 return pos end
     pos.x -= 2;
-    if World.getEnergy(_world, pos) === 0 return pos end
+    if World.getEnergy(plane, pos) === 0 return pos end
     pos.x += 1; pos.y -= 1
-    if World.getEnergy(_world, pos) === 0 return pos end
+    if World.getEnergy(plane, pos) === 0 return pos end
     pos.y += 2
-    if World.getEnergy(_world, pos) === 0 return pos end
+    if World.getEnergy(plane, pos) === 0 return pos end
 
     false
   end

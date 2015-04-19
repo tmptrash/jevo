@@ -62,7 +62,7 @@ module Config
     #
     # Amount of organisms on program start
     #
-    "startAmount"         => uint(10),
+    "startAmount"         => uint(1),
     #
     # {Uint} Amount of energy for first organisms. They are like Adam and 
     # Eve. It means that these organism were created by operator and not
@@ -83,10 +83,10 @@ module Config
     #
     # World width
     #
-    "width"               => uint(100),
+    "width"               => uint(10),
     #
     # World height
     #
-    "height"              => uint(100)
+    "height"              => uint(10)
   }
 end
