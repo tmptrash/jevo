@@ -70,7 +70,8 @@ module Manager
   # Creates one task and organism inside this task. Created
   # task will be added to _tasks array.
   #
-  function _createTask()
+  @debug function _createTask()
+  @bp
       org  = _createOrganism()
       task = Task(eval(org.script.code))
       push!(_tasks, CreatureTask(task, org))
@@ -88,7 +89,8 @@ module Manager
   # @param pos Optional. Position of organism.
   # @return {Organism.Creature}
   #
-  function _createOrganism(pos = nothing)
+  @debug function _createOrganism(pos = nothing)
+  @bp
     pos      = pos === nothing ? World.getFreePos(_world) : pos
     organism = Organism.create(pos)
     _moveOrganism(pos, organism)
@@ -113,15 +115,16 @@ module Manager
   # @param pos New position
   # @param organism Organism to move
   #
-  function _moveOrganism(pos::Helper.Point, organism::Organism.Creature)
+  @debug function _moveOrganism(pos::Helper.Point, organism::Organism.Creature)
+  @bp
     delete!(_posMap, organism.pos.y * _world.width + organism.pos.x)
     _posMap[pos.y * _world.width + pos.x] = organism
     #
     # pos - new organism position
     # organism.pos - old organism position
     #
-    World.setEnergy(_world, pos, uint16(organism.energy))
     World.setEnergy(_world, organism.pos, uint16(0))
+    World.setEnergy(_world, pos, uint16(organism.energy))
     organism.pos = pos
   end
 

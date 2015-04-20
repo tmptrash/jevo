@@ -83,10 +83,10 @@ module Config
     #
     # World width
     #
-    "width"               => uint(10),
+    "width"               => uint(3),
     #
     # World height
     #
-    "height"              => uint(10)
+    "height"              => uint(3)
   }
 end
