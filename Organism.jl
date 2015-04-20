@@ -286,8 +286,7 @@ module Organism
   # processes in a Manager module. See it for details.
   # @param {Creature} creature Instance of parent organism.
   #
-  @debug function _clone(creature::Creature)
-  @bp
+  function _clone(creature::Creature)
     Event.fire(creature.observer, "clone", creature)
   end
   #
