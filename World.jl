@@ -99,8 +99,7 @@ module World
   # @param pos Start position
   # @return {Helper.Point|Bool}
   #
-  @debug function getNearFreePos(plane::Plane, pos::Helper.Point)
-  @bp
+  function getNearFreePos(plane::Plane, pos::Helper.Point)
     pos = Helper.Point(pos.x, pos.y)
 
     pos.x += 1

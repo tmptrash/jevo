@@ -10,6 +10,7 @@ module Manager
   import Config
   import Helper
   import Event
+  import Mutator
   # TODO: remove this
   using Debug
   
@@ -148,7 +149,7 @@ module Manager
     #
     crTask = _createTask(pos)
     for i = 1:Config.mutator["mutationsOnClone"]
-      Mutator.mutate(crTask.organism.script, Config.mutator["addDelChange"])
+      Mutator.mutate(crTask.organism.script, Config.mutator["addChange"])
     end
   end
   #

@@ -88,7 +88,8 @@ module Mutator
   # @param prob Strategy of mutating. See Config.mutator["addChange"] 
   # for details.
   #
-  function mutate(code::Script.Code, prob::Array{Int})
+  @debug function mutate(code::Script.Code, prob::Array{Int})
+  @bp
     #
     # This code calculates index. This index is used for choosing between 
     # [add, change] operation. 1 - add, 2 - change
