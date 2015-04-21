@@ -204,16 +204,6 @@ module Organism
       #
       while true
         produce()
-        #funcClone()
-        #funcGetEnergy(1,2)
-        #funcGrabEnergyLeft(5)
-        #funcGrabEnergyRight(5)
-        #funcGrabEnergyUp(5)
-        #funcGrabEnergyDown(5)
-        funcStepLeft()
-        funcStepRight()
-        funcStepUp()
-        funcStepDown()
       end
     end)
     #
