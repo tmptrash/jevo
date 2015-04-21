@@ -30,27 +30,33 @@ module Manager
   #
   # Runs everything
   #
-  @debug function run()
-  @bp
+  function run()
     _createTasks()
     #
     # main loop
     #
-    times    = 0
+    times    = uint(0)
     decTimes = Config.organism["decreaseAfterTimes"]
     probs    = Config.mutator["addChange"]
-    while true
+    #while true
+    for lp = 1:100000
       len   = length(_tasks)
       times += 1
       for i = 1:len
         try
           consume(_tasks[i].task)
+          # TODO: think about exceptions in organisms. maybe log somewhere?
         end
-        if times === decTimes
-          _tasks[i].organism.energy -= 1
-          Mutator.mutate(_tasks[i].organism.script, probs)
-          times = 0
+      end
+
+      if times === decTimes
+        for i = 1:len
+          org = _tasks[i].organism
+          org.energy -= 1
+          _moveOrganism(org.pos, org)
+          Mutator.mutate(org.script, probs)
         end
+        times = 0
       end
     end
   end
@@ -143,8 +149,7 @@ module Manager
   # down, left and right.
   # @param creature Parent organism
   #
-  @debug function _onClone(creature::Organism.Creature)
-  @bp
+  function _onClone(creature::Organism.Creature)
     #
     # First, we have to find free point near the organism
     #
@@ -164,8 +169,7 @@ module Manager
   # @param pos Position to check
   # @param retObj Special object for return value
   #
-  @debug function _onGetEnergy(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
-  @bp
+  function _onGetEnergy(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
     retObj.ret = World.getEnergy(_world, pos)
   end
   #
@@ -249,8 +253,7 @@ module Manager
   # @param pos Point where we should check the energy
   # @param retObj Special object for return value
   #
-  @debug function _onGrab(creature::Organism.Creature, amount::Uint, pos::Helper.Point, retObj::Organism.RetObj)
-  @bp
+  function _onGrab(creature::Organism.Creature, amount::Uint, pos::Helper.Point, retObj::Organism.RetObj)
     retObj.ret = World.grabEnergy(_world, pos, amount)
     id         = _getOrganismId(pos)
     #
@@ -267,8 +270,7 @@ module Manager
   # @param pos Point where we should check the energy
   # @param retObj Special object for return value
   #
-  @debug function _onStep(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
-  @bp
+  function _onStep(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
     if World.getEnergy(_world, pos) == 0
       retObj.pos = pos
       _moveOrganism(pos, creature)

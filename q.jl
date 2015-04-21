@@ -1,13 +1,12 @@
 include("Manager.jl")
-width  = Config.world["width"]
-height = Config.world["height"]
-#for i = 1:width * height / 2
-  World.setEnergy(Manager._world, Helper.Point(1, 1), uint16(0xFF))
-  World.setEnergy(Manager._world, Helper.Point(2, 1), uint16(0xFF))
-  World.setEnergy(Manager._world, Helper.Point(3, 1), uint16(0xFF))
-  
-  World.setEnergy(Manager._world, Helper.Point(1, 3), uint16(0xFF))
-  World.setEnergy(Manager._world, Helper.Point(2, 3), uint16(0xFF))
-  World.setEnergy(Manager._world, Helper.Point(3, 3), uint16(0xFF))
-#end
-Manager.run()
+
+function run()
+	width  = Config.world["width"]
+	height = Config.world["height"]
+	for i = 1:int(width * height / 4)
+	  World.setEnergy(Manager._world, Helper.Point(rand(1:width), rand(1:height)), uint16(0xFF))
+	end
+	Manager.run()
+end
+
+run()

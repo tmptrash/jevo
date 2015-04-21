@@ -40,7 +40,7 @@ module World
   # @param height World height
   #
   function create(width::Uint = Config.world["width"], height::Uint = Config.world["height"])
-    Plane(width, height, fill(uint16(0), (int(width), int(height))))
+    Plane(width, height, fill(uint16(0), (int(height), int(width))))
   end
   #
   # Adds energy point by specified coordinates
@@ -72,8 +72,8 @@ module World
   function getFreePos(plane::Plane)
     pos = Helper.Point(int(plane.width / 2), int(plane.height / 2))
     while World.getEnergy(plane, pos) > uint(0)
-      pos.x = rand(1:plane.width)
-      pos.y = rand(1:plane.height)
+      pos.x = int(rand(1:plane.width))
+      pos.y = int(rand(1:plane.height))
     end
     pos
   end

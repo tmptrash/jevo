@@ -284,8 +284,7 @@ module Organism
   # @param x X coordinate
   # @param y Y coordinate
   #
-  @debug function _getEnergy(creature::Creature, x::Int, y::Int)
-  @bp
+  function _getEnergy(creature::Creature, x::Int, y::Int)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" will be contained amount of energy.
@@ -308,8 +307,7 @@ module Organism
   # @param dir      Direction ("left", "right", "up", "down")
   # @param amount   Amount of energy to grab
   #
-  @debug function _grabEnergy(creature::Creature, dir::ASCIIString, amount::Uint)
-  @bp
+  function _grabEnergy(creature::Creature, dir::ASCIIString, amount::Uint)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
@@ -327,8 +325,7 @@ module Organism
   # @param creature Organism to move
   # @param dir Direction ("left", "right", "up", "down")
   #
-  @debug function _step(creature::Creature, dir::ASCIIString)
-  @bp
+  function _step(creature::Creature, dir::ASCIIString)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
