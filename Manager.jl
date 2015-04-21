@@ -119,8 +119,8 @@ module Manager
   # @param organism Organism to move
   #
   function _moveOrganism(pos::Helper.Point, organism::Organism.Creature)
-    delete!(_posMap, organism.pos.y * _world.width + organism.pos.x)
-    _posMap[pos.y * _world.width + pos.x] = organism
+    delete!(_posMap, _getOrganismId(organism.pos))
+    _posMap[_getOrganismId(pos)] = organism
     #
     # pos - new organism position
     # organism.pos - old organism position
@@ -129,7 +129,13 @@ module Manager
     World.setEnergy(_world, pos, uint16(organism.energy))
     organism.pos = pos
   end
-
+  #
+  # Converts coodinates to the unique uint id
+  # @return {Uint}
+  #
+  function _getOrganismId(pos::Helper.Point)
+    pos.y * _world.width + pos.x
+  end
   #
   # Handles "beforeclone" event. Finds free point for new organism
   # and returns these coordinates. If no free space, then returns false.
@@ -246,7 +252,7 @@ module Manager
   @debug function _onGrab(creature::Organism.Creature, amount::Uint, pos::Helper.Point, retObj::Organism.RetObj)
   @bp
     retObj.ret = World.grabEnergy(_world, pos, amount)
-    id         = pos.y * _world.width + pos.x
+    id         = _getOrganismId(pos)
     #
     # If other organism at the position of the check, 
     # then grab energy from him
@@ -263,7 +269,12 @@ module Manager
   #
   @debug function _onStep(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
   @bp
-    retObj.pos = (World.getEnergy(_world, pos) === uint(0) ? pos : creature.pos)
+    if World.getEnergy(_world, pos) == 0
+      retObj.pos = pos
+      _moveOrganism(pos, creature)
+    else
+      retObj.pos = creature.pos 
+    end
   end
 
   #
