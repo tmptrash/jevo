@@ -68,19 +68,23 @@ module Manager
   end
   #
   # Creates one task and organism inside this task. Created
-  # task will be added to _tasks array.
+  # task will be added to _tasks array. Position may be set
+  # or random free position will be used.
+  # @param pos Position|nothing Position of the organism
+  # @return {CreatureTask}
   #
-  function _createTask()
-      org  = _createOrganism()
+  function _createTask(pos = nothing)
+      org  = _createOrganism(pos)
       task = Task(eval(org.script.code))
-      push!(_tasks, CreatureTask(task, org))
+      cr   = CreatureTask(task, org)
+      push!(_tasks, cr)
       #
       # initializes the organism with it's instance
       #
       obj = consume(task)
       push!(obj, org)
       consume(task)
-      task
+      cr
   end
   #
   # Creates new organism and binds event handlers to him. It also
@@ -137,14 +141,14 @@ module Manager
     #
     # First, we have to find free point near the organism
     #
-    pos = World.getNearPos(_world, creature.pos)
+    pos = World.getNearFreePos(_world, creature.pos)
     if pos === false return nothing end
     #
     # Creates new organism and applies mutations to him.
     #
-    task = _createTask()
+    crTask = _createTask(pos)
     for i = 1:Config.mutator["mutationsOnClone"]
-      Mutator.mutate(task.organism.script, Config.mutator["addDelChange"])
+      Mutator.mutate(crTask.organism.script, Config.mutator["addDelChange"])
     end
   end
   #

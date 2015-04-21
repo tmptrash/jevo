@@ -11,7 +11,10 @@ module World
   export getEnergy
   export getFreePos
   export grabEnergy
-  export getNearPos
+  export getNearFreePos
+
+  # TODO: remove this
+  using Debug
 
   #
   # 2D plane for living
@@ -56,7 +59,7 @@ module World
   # @return {Uint} Amount of energy
   #
   function getEnergy(plane::Plane, pos::Helper.Point)
-    plane.data[pos.y * plane.width + pos.x]
+    plane.data[pos.y, pos.x]
   end
   #
   # Returns free position in the world. Free means, the point
@@ -86,7 +89,7 @@ module World
   function grabEnergy(plane::Plane, pos::Helper.Point, amount::Uint)
     energy = getEnergy(plane, pos)
     energy = energy > amount ? amount : energy
-    plane.data[pos.y * plane.width + pos.x] -= energy
+    plane.data[pos.y, pos.x] -= energy
     energy
   end
   #
@@ -96,15 +99,18 @@ module World
   # @param pos Start position
   # @return {Helper.Point|Bool}
   #
-  function getNearPos(plane::Plane, pos::Helper.Point)
+  @debug function getNearFreePos(plane::Plane, pos::Helper.Point)
+  @bp
+    pos = Helper.Point(pos.x, pos.y)
+
     pos.x += 1
-    if World.getEnergy(plane, pos) === 0 return pos end
+    if World.getEnergy(plane, pos) == 0 return pos end
     pos.x -= 2;
-    if World.getEnergy(plane, pos) === 0 return pos end
+    if World.getEnergy(plane, pos) == 0 return pos end
     pos.x += 1; pos.y -= 1
-    if World.getEnergy(plane, pos) === 0 return pos end
+    if World.getEnergy(plane, pos) == 0 return pos end
     pos.y += 2
-    if World.getEnergy(plane, pos) === 0 return pos end
+    if World.getEnergy(plane, pos) == 0 return pos end
 
     false
   end
