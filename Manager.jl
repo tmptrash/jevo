@@ -1,6 +1,5 @@
 #
 # Manages organisms and they world
-# @singleton
 # TODO: describe that manager is a mediator between all other objects
 # TODO: like mutator, world, terminal and so on.
 #
@@ -28,32 +27,61 @@ module Manager
     organism::Organism.Creature
   end
   #
-  # Runs everything
+  # Describes an area, which is represented by World, Organisms in it,
+  # Organisms related Tasks and the Manager. create() function returns
+  # this type.
   #
-  function run()
-    _createTasks()
+  type Area
     #
-    # main loop
+    # All available organism's tasks
     #
+    tasks::Array{CreatureTask}
+    #
+    # Instance of the world
+    #
+    world::World.Plane
+    #
+    # Positions map, which stores positions of all organisms. Is used
+    # for fast access to the organism by it's coordinates. It's also 
+    # used for checking collisions between organisms.
+    #
+    posMap::Dict{Uint, Organism.Creature}
+  end
+
+  #
+  # Creates new manager instance
+  # @return {Area}
+  #
+  function create()
+    Area(CreatureTask[], World.create(), Dict{Uint, Organism.Creature}())
+  end
+  #
+  # Runs everything
+  # @param area Area for current CPU
+  #
+  function run(area::Area)
+    _createTasks(area)
     times    = uint(0)
     decTimes = Config.organism["decreaseAfterTimes"]
     probs    = Config.mutator["addChange"]
-    #while true
-    for lp = 1:100000
-      len   = length(_tasks)
+    #
+    # main loop
+    #
+    while true
+      len   = length(area.tasks)
       times += 1
       for i = 1:len
         try
-          consume(_tasks[i].task)
+          consume(area.tasks[i].task)
           # TODO: think about exceptions in organisms. maybe log somewhere?
         end
       end
 
       if times === decTimes
         for i = 1:len
-          org = _tasks[i].organism
+          org = area.tasks[i].organism
           org.energy -= 1
-          _moveOrganism(org.pos, org)
+          World.setEnergy(area.world, org.pos, uint16(org.energy))
           Mutator.mutate(org.script, probs)
         end
         times = 0
@@ -63,28 +91,26 @@ module Manager
 
   #
   # Creates tasks and organisms according to Config. All tasks
-  # will be in _tasks field.
+  # will be in area.tasks field.
   #
-  function _createTasks()
+  function _createTasks(area::Area)
     #
     # Inits available organisms by Tasks
     #
-    for i = 1:Config.organism["startAmount"]
-      _createTask()
-    end
+    for i = 1:Config.organism["startAmount"] _createTask(area) end
   end
   #
   # Creates one task and organism inside this task. Created
-  # task will be added to _tasks array. Position may be set
+  # task will be added to area.tasks array. Position may be set
   # or random free position will be used.
   # @param pos Position|nothing Position of the organism
   # @return {CreatureTask}
   #
-  function _createTask(pos = nothing)
-      org  = _createOrganism(pos)
+  function _createTask(area::Area, pos = nothing)
+      org  = _createOrganism(area, pos)
       task = Task(eval(org.script.code))
       cr   = CreatureTask(task, org)
-      push!(_tasks, cr)
+      push!(area.tasks, cr)
       #
       # initializes the organism with it's instance
       #
@@ -99,48 +125,48 @@ module Manager
   # @param pos Optional. Position of organism.
   # @return {Organism.Creature}
   #
-  function _createOrganism(pos = nothing)
-    pos      = pos === nothing ? World.getFreePos(_world) : pos
+  function _createOrganism(area::Area, pos = nothing)
+    pos      = pos === nothing ? World.getFreePos(area.world) : pos
     organism = Organism.create(pos)
     _moveOrganism(pos, organism)
 
-    Event.on(organism.observer, "clone",     _onClone    )
-    Event.on(organism.observer, "getenergy", _onGetEnergy)
-    Event.on(organism.observer, "grableft",  _onGrabLeft )
-    Event.on(organism.observer, "grabright", _onGrabRight)
-    Event.on(organism.observer, "grabup",    _onGrabUp   )
-    Event.on(organism.observer, "grabdown",  _onGrabDown )
-    Event.on(organism.observer, "stepleft",  _onStepLeft )
-    Event.on(organism.observer, "stepright", _onStepRight)
-    Event.on(organism.observer, "stepup",    _onStepUp   )
-    Event.on(organism.observer, "stepdown",  _onStepDown )
+    Event.on(organism.observer, "clone",     _onClone,     area)
+    Event.on(organism.observer, "getenergy", _onGetEnergy, area)
+    Event.on(organism.observer, "grableft",  _onGrabLeft,  area)
+    Event.on(organism.observer, "grabright", _onGrabRight, area)
+    Event.on(organism.observer, "grabup",    _onGrabUp,    area)
+    Event.on(organism.observer, "grabdown",  _onGrabDown,  area)
+    Event.on(organism.observer, "stepleft",  _onStepLeft,  area)
+    Event.on(organism.observer, "stepright", _onStepRight, area)
+    Event.on(organism.observer, "stepup",    _onStepUp,    area)
+    Event.on(organism.observer, "stepdown",  _onStepDown,  area)
 
     organism
   end
   #
   # Moves organism to specified position. Updates organism's 
-  # position and set new one into the _posMap. Removes organism's
-  # previous position from _posMap.
+  # position and set new one into the area.posMap. Removes organism's
+  # previous position from area.posMap.
   # @param pos New position
   # @param organism Organism to move
   #
-  function _moveOrganism(pos::Helper.Point, organism::Organism.Creature)
-    delete!(_posMap, _getOrganismId(organism.pos))
-    _posMap[_getOrganismId(pos)] = organism
+  function _moveOrganism(area::Area, pos::Helper.Point, organism::Organism.Creature)
+    delete!(area.posMap, _getOrganismId(organism.pos))
+    area.posMap[_getOrganismId(pos)] = organism
     #
     # pos - new organism position
     # organism.pos - old organism position
     #
-    World.setEnergy(_world, organism.pos, uint16(0))
-    World.setEnergy(_world, pos, uint16(organism.energy))
+    World.setEnergy(area.world, organism.pos, uint16(0))
+    World.setEnergy(area.world, pos, uint16(organism.energy))
     organism.pos = pos
   end
   #
   # Converts coodinates to the unique uint id
   # @return {Uint}
   #
-  function _getOrganismId(pos::Helper.Point)
-    pos.y * _world.width + pos.x
+  function _getOrganismId(area::Area, pos::Helper.Point)
+    pos.y * area.world.width + pos.x
   end
   #
   # Handles "beforeclone" event. Finds free point for new organism
@@ -149,11 +175,11 @@ module Manager
   # down, left and right.
   # @param creature Parent organism
   #
-  function _onClone(creature::Organism.Creature)
+  function _onClone(area::Area, creature::Organism.Creature)
     #
     # First, we have to find free point near the organism
     #
-    pos = World.getNearFreePos(_world, creature.pos)
+    pos = World.getNearFreePos(area.world, creature.pos)
     if pos === false return nothing end
     #
     # Creates new organism and applies mutations to him.
@@ -169,8 +195,8 @@ module Manager
   # @param pos Position to check
   # @param retObj Special object for return value
   #
-  function _onGetEnergy(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
-    retObj.ret = World.getEnergy(_world, pos)
+  function _onGetEnergy(area::Area, creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
+    retObj.ret = World.getEnergy(area.world, pos)
   end
   #
   # Grabs energy on the left side of the organism
@@ -253,14 +279,14 @@ module Manager
   # @param pos Point where we should check the energy
   # @param retObj Special object for return value
   #
-  function _onGrab(creature::Organism.Creature, amount::Uint, pos::Helper.Point, retObj::Organism.RetObj)
-    retObj.ret = World.grabEnergy(_world, pos, amount)
+  function _onGrab(area::Area, creature::Organism.Creature, amount::Uint, pos::Helper.Point, retObj::Organism.RetObj)
+    retObj.ret = World.grabEnergy(area.world, pos, amount)
     id         = _getOrganismId(pos)
     #
     # If other organism at the position of the check, 
     # then grab energy from him
     #
-    if haskey(_posMap, id) _posMap[id].energy -= retObj.ret end
+    if haskey(area.posMap, id) area.posMap[id].energy -= retObj.ret end
   end
   #
   # Checks if specified position ("pos") has no energy and we may
@@ -270,26 +296,12 @@ module Manager
   # @param pos Point where we should check the energy
   # @param retObj Special object for return value
   #
-  function _onStep(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
-    if World.getEnergy(_world, pos) == 0
+  function _onStep(area::Area, creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
+    if World.getEnergy(area.world, pos) == 0
       retObj.pos = pos
-      _moveOrganism(pos, creature)
+      _moveOrganism(area, pos, creature)
     else
       retObj.pos = creature.pos 
     end
   end
-
-  #
-  # All available organism's tasks
-  #
-  _tasks = CreatureTask[]
-  #
-  # Instance of the world
-  #
-  _world = World.create()
-  #
-  # Positions map, which stores positions of all organisms. Is used
-  # for fast access to the organism by it's coordinates.
-  #
-  _posMap = Dict{Uint, Organism.Creature}()
 end
