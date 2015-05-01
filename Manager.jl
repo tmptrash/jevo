@@ -38,8 +38,7 @@ module Manager
     times    = uint(0)
     decTimes = Config.organism["decreaseAfterTimes"]
     probs    = Config.mutator["addChange"]
-    #while true
-    for lp = 1:100000
+    while true
       len   = length(_tasks)
       times += 1
       for i = 1:len
