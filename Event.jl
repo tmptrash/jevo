@@ -10,19 +10,6 @@ module Event
   using Debug
 
   #
-  # Type for the callback function
-  #
-  type Func
-    #
-    # Function to call
-    #
-    func::Function
-    #
-    # Arguments, which will be added at the beginning of the function
-    #
-    args::Array{Any}
-  end
-  #
   # Contains events and they handlers
   #
   type Observer
@@ -30,28 +17,27 @@ module Event
     # {Dict{ASCIIString, Array{Function}}} array of events and they handlers.
     # For example: {"event"=>[fn1, fn2,...],...}
     # 
-    events::Dict{ASCIIString, Array{Func}}
+    events::Dict{ASCIIString, Array{Function}}
   end
 
   #
   # Adds a handler for specified event
-  # @param obs   Events container
-  # @param event Event name. All in lowercase
-  # @param fn    Event handler
-  # @param args  Array of arguments. They will be added at the beginning of function
+  # @param {Observer}    obs   Events container
+  # @param {ASCIIString} event Event name. All in lowercase
+  # @param {Function}    fn    Event handler
   #
-  function on(obs::Observer, event::ASCIIString, fn::Function, args::Array{Any}=[])
-    if !haskey(obs.events, event) obs.events[event] = Func[] end
-    push!(obs.events[event], Func(fn, args))
+  function on(obs::Observer, event::ASCIIString, fn::Function)
+    if !haskey(obs.events, event) obs.events[event] = Function[] end
+    push!(obs.events[event], fn)
   end
   #
   # Removed a handler from handlers list for appropriate event
-  # @param obs   Events container
-  # @param event Event name. All in lowercase
-  # @param fn    Event handler
+  # @param {Observer}    obs   Events container
+  # @param {ASCIIString} event Event name. All in lowercase
+  # @param {Function}    fn    Event handler
   #
   function off(obs::Observer, event::ASCIIString, fn::Function)
-    index = findfirst(x -> x.func === fn, obs.events[event])
+    index = findfirst(obs.events[event], fn)
     if index > 0 deleteat!(obs.events[event], index) end
   end
   #
@@ -67,7 +53,7 @@ module Event
     if !haskey(obs.events, event) return nothing end
     fns = obs.events[event]
     for i in fns
-      apply(i.func, vcat(i.args, [x for x in args]))
+      apply(i, args)
     end
   end
 end
