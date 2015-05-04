@@ -5,7 +5,7 @@ module Connection
   export runCommand
   export createTask
 
-  #
+  # TODO: rewrite all it with serialize/deserialize functions
   # Type of one command. One command consists of total lenght, command
   # string and custom arguments. Arguments may be any type. Every argument
   # consists of type and value. For example, take a look on run command
