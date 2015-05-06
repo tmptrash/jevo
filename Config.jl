@@ -89,4 +89,17 @@ module Config
     #
     "height"              => uint(20)
   }
+  #
+  # Configuration of the TCP connection
+  #
+  const connection = {
+    #
+    # This command means that current connection should be stopped and closed
+    #
+    stopCmp               => "stop",
+    #
+    # Starting number for TCP/IP listening
+    #
+    startPort             => 2000
+  }
 end

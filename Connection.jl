@@ -1,27 +1,24 @@
+#
+# TODO: description
+# TODO: Events
+#
 module Connection
   import Config
+  import Event
 
-  export readCommand
+  export Command
+
   export runCommand
   export createTask
 
-  # TODO: rewrite all it with serialize/deserialize functions
-  # Type of one command. One command consists of total lenght, command
-  # string and custom arguments. Arguments may be any type. Every argument
-  # consists of type and value. For example, take a look on run command
-  # with two arguments ("param"::ASCIIString, 123::Uint32):
   #
-  #   data : 00000010 03  72756E 00  05  706172616D 01   0000007B
-  #   name : total    len cmd    str len arg1       ui32 arg2
-  #   value: 16       3   "run"  0   5   "param"    1    123
+  # Type of one command. One command consists of command and custom
+  # arguments. Arguments may be any type. Will be serialized within
+  # TCP/IP protocol.
   #
   type Command
     #
-    # Total command length (cmd+args) 4b
-    #
-    total::Uint32
-    #
-    # Name of the command
+    # Name of the command in lower case
     #
     cmd::ASCIIString
     #
@@ -29,26 +26,30 @@ module Connection
     #
     args::Array{Any}
   end
+  #
+  # Command's return value. Is used in pair with Command type. Will
+  # be serialized within TCP/IP protocol.
+  #
+  type CommandAnswer
+    #
+    # Name of the command
+    #
+    cmd::ASCIIString
+    #
+    # Custom answer
+    #
+    data::Any
+  end
 
   #
-  # Reads one command from socket and return commands data. Every command
-  # consists of length(4bytes) and data(length bytes) -> llllddddddddd....
-  # For example: 0000000401020304 -> means 4 bytes of data (01020304)
-  # @param socket Socket to read
-  # @return {Command} Array of data bytes
-  #
-  function readCommand(socket)
-    total = readbytes(socket, sizeof(Uint32))
-    data  = readbytes(socket, total) 
-    Command(total, data)
-  end
-  #
   # Runs one command obtained from remote terminal
-  # @param cmd Raw string command
+  # @param cmd Parsed Command type
   # @param socket Socket
   #
-  function runCommand(cmd::ASCIIString, socket)
-    write(socket, string(eval(parse(cmd))))
+  function runCommand(cmd::Command, socket)
+    result = CommandAnswer(cmd.cmd, nothing)
+    Event.fire("command", cmd, result)
+    serialize(socket, result.data)
   end
   #
   # It creates separate task for remote terminal. It waits a connection
@@ -61,7 +62,9 @@ module Connection
   #
   function createTask()
     @async begin
-      server = listen(2000) # TODO: port should be get from config
+      # TODO: port should may be different on different instances on
+      # TODO: the same machine (with same IP address)
+      server = listen(Config.connection["startPort"])
       #
       # In this loop we are waiting for terminal connection.
       # We have to wait all the time.
@@ -73,17 +76,16 @@ module Connection
         #
         while isopen(socket)
           try
-            cmp = readCommand(socket) #readavailable(socket)
+            cmd = deserialize(socket)
             # TODO: remove this line
-            println(val)
-            val = convert(ASCIIString, cmd.data)
+            println(cmd)
             #
             # This is how we drops the connection to terminal
             # TODO: stop command should be get from global config
             # TODO: remove produce from here.
             #
-            if val == "stop" produce("stop"); break end
-            runCommand(val, socket)
+            if cmd.cmd == Config.connection["stopCmd"] break end
+            runCommand(cmd, socket)
           catch e
             # TODO: may be log somewhere?
             break
