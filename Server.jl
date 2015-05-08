@@ -38,8 +38,7 @@ module Server
   # and other tasks like organisms scripts run.
   # @return {ServerTask}
   #
-  @debug function create()
-  @bp
+  function create()
     #
     # This Observer will be used for event based communication between
     # this server and it's listeners (like Manager mosule)
@@ -49,7 +48,7 @@ module Server
     # This task is used for parallel work between this server's socket
     # and other synchronous objects like Organism code or other sockets.
     #
-    task = begin
+    task = @async begin
       # TODO: port should may be different on different instances on
       # TODO: the same machine (with same IP address)
       server = listen(Config.connection["startPort"])
