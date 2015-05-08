@@ -96,10 +96,10 @@ module Config
     #
     # This command means that current connection should be stopped and closed
     #
-    stopCmp               => "stop",
+    "stopCmd"             => "stop",
     #
     # Starting number for TCP/IP listening
     #
-    startPort             => 2000
+    "startPort"           => 2000
   }
 end

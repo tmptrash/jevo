@@ -1,5 +1,7 @@
 #
 # TODO: description
+# TODO: describe that returned task is fully autonomyc. It's not needed
+# TODO: to call it by consume() method.
 # TODO: Events
 #
 module Server
@@ -7,13 +9,16 @@ module Server
   import Event
   import Connection
 
+  export ServerTask
+
   export create
 
+  using Debug
   #
   # Contains observer and the task for parallel work of this server's
   # socket and other synchronous objects.
   #
-  type Server
+  type ServerTask
     #
     # The Task, which is used for parallel work
     #
@@ -24,16 +29,17 @@ module Server
     observer::Event.Observer
   end
 
-  #
+  # TODO: update comments
   # It creates separate task for remote terminal. It waits a connection
   # from remote terminal on specified port by TCP/IP protocol. After 
   # terminal is connected, we wait for commands. After stop command
   # accures, we returns to the waiting loop. It Returns Task type 
   # instance, so we may parallel terminal connection and communication 
   # and other tasks like organisms scripts run.
-  # @return {Server}
+  # @return {ServerTask}
   #
-  function create()
+  @debug function create()
+  @bp
     #
     # This Observer will be used for event based communication between
     # this server and it's listeners (like Manager mosule)
@@ -43,11 +49,7 @@ module Server
     # This task is used for parallel work between this server's socket
     # and other synchronous objects like Organism code or other sockets.
     #
-    task = @async begin
-      #
-      # Type instance for retrieving answers from client
-      #
-      result = CommandAnswer(cmd.cmd, nothing)
+    task = begin
       # TODO: port should may be different on different instances on
       # TODO: the same machine (with same IP address)
       server = listen(Config.connection["startPort"])
@@ -70,11 +72,12 @@ module Server
             # TODO: stop command should be get from global config
             # TODO: remove produce from here.
             #
-            if cmd.cmd == Config.connection["stopCmd"] break end
+            if cmd.cmd == Config.connection["stopCmd"] produce(cmd.cmd); break end
             #
             # This is remote command, some listener (handler) should run it
+            # Type instance for retrieving answers from client
             #
-            result.cmd = cmd.cmd
+            result = Connection.CommandAnswer(cmd.cmd, nothing)
             Event.fire(observer, "command", cmd, result)
             serialize(socket, result)
           catch e
@@ -91,7 +94,7 @@ module Server
     #
     # This is function return
     #
-    Server(task, observer)
+    ServerTask(Task(rand), observer)
   end
 
   #
