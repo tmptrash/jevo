@@ -11,9 +11,8 @@ module Server
 
   export ServerTask
 
-  export create
+  export creates
 
-  using Debug
   #
   # Contains observer and the task for parallel work of this server's
   # socket and other synchronous objects.
@@ -30,6 +29,7 @@ module Server
   end
 
   # TODO: update comments
+  # TODO: @param ...
   # It creates separate task for remote terminal. It waits a connection
   # from remote terminal on specified port by TCP/IP protocol. After 
   # terminal is connected, we wait for commands. After stop command
@@ -38,7 +38,7 @@ module Server
   # and other tasks like organisms scripts run.
   # @return {ServerTask}
   #
-  function create()
+  function create(port::Uint16)
     #
     # This Observer will be used for event based communication between
     # this server and it's listeners (like Manager mosule)
@@ -51,7 +51,7 @@ module Server
     task = @async begin
       # TODO: port should may be different on different instances on
       # TODO: the same machine (with same IP address)
-      server = listen(Config.connection["startPort"])
+      server = listen(port)
       #
       # In this loop we are waiting for terminal connection.
       # We have to wait all the time.
@@ -95,10 +95,4 @@ module Server
     #
     ServerTask(Task(rand), observer)
   end
-
-  #
-  # This is how we are paralleling green threads
-  #
-  # termTask = createTask()
-  # while consume(termTask) != "stop" end
 end
