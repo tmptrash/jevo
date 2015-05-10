@@ -1,8 +1,44 @@
 #
-# TODO: description
-# TODO: describe that returned task is fully autonomyc. It's not needed
-# TODO: to call it by consume() method.
-# TODO: Events
+# This module is a part of general and simple RPC-like logic. It's used for
+# calling custom functions on server, by calling special Client function
+# on Client side. It works above TCP\IP protocol.
+# This module implements only Server logic. It's very simple. You need only 
+# call Server.create() to create the server and provide port number for 
+# listening for incoming Clients connections. After this call asynchronous 
+# listener will be created. Every connection and later, imcoming commands,
+# will be processed automatically. Running of the command it's not a server
+# resposibility. If command occures, this module sends a "command" event.
+# Client code (for "command" event) should run this command inside it's 
+# behavior and put the result into CommandAnswer.data field. Read more in
+# Client module...
+# I have to note, that you don't need to call consume() for ServerTask.task,
+# because Server uses @async macros, based on asynchronous event machine.
+# It's possible to stop the server remotely by calling Client.runCmd() with
+# Command(Config.connection["stopCmd"], []) parameter.
+# 
+# Usage:
+#     using Server
+#     #
+#     # start to listen port 2000 on localhost
+#     #
+#     st = Server.create(uint16(2000))
+#     #
+#     # Will be calledif command comes from client
+#     #
+#     function f(cmd::Connection.Command, res::Connection.CommandAnswer)
+#       #
+#       # This is how we runs the command with arguments
+#       # and saves the result to special result type
+#       #
+#       res.data = apply(eval(symbol(cmd.cmd)), cmd.args)
+#     end
+#     #
+#     # Our code starts to listen "command" event
+#     #
+#     Event.on(st.observer, "command", f)
+#
+# Events:
+#     command Is fires if new command comes from client.
 #
 module Server
   import Config
@@ -11,7 +47,7 @@ module Server
 
   export ServerTask
 
-  export creates
+  export create
 
   #
   # Contains observer and the task for parallel work of this server's
@@ -19,23 +55,23 @@ module Server
   #
   type ServerTask
     #
-    # The Task, which is used for parallel work
+    # The Task, which is used for asynchronous server.
     #
     task::Task
     #
     # Observer instance, which is used for event based communication
+    # between this server and other listeners, when command occures.
     #
     observer::Event.Observer
   end
 
-  # TODO: update comments
-  # TODO: @param ...
-  # It creates separate task for remote terminal. It waits a connection
-  # from remote terminal on specified port by TCP/IP protocol. After 
-  # terminal is connected, we wait for commands. After stop command
-  # accures, we returns to the waiting loop. It Returns Task type 
-  # instance, so we may parallel terminal connection and communication 
-  # and other tasks like organisms scripts run.
+  #
+  # It creates new TCP\IP server, waits a connection from clients on 
+  # specified port. After client is connected, it waits for command. 
+  # After stop command occures, we returns to the connection waiting 
+  # loop. It Returns ServerTask type instance, so we may parallel 
+  # server listening and other tasks like organisms scripts run.
+  # @param port Port number for incoming connection listening
   # @return {ServerTask}
   #
   function create(port::Uint16)
@@ -71,7 +107,7 @@ module Server
             # TODO: stop command should be get from global config
             # TODO: remove produce from here.
             #
-            if cmd.cmd == Config.connection["stopCmd"] produce(cmd.cmd); break end
+            if cmd.cmd == Config.connection["stopCmd"] break end
             #
             # This is remote command, some listener (handler) should run it
             # Type instance for retrieving answers from client
