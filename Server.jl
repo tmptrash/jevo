@@ -85,8 +85,6 @@ module Server
     # and other synchronous objects like Organism code or other sockets.
     #
     task = @async begin
-      # TODO: port should may be different on different instances on
-      # TODO: the same machine (with same IP address)
       server = listen(port)
       #
       # In this loop we are waiting for terminal connection.
@@ -100,12 +98,8 @@ module Server
         while isopen(socket)
           try
             cmd = deserialize(socket)
-            # TODO: remove this line
-            println(cmd)
             #
-            # This is how we drops the connection to terminal
-            # TODO: stop command should be get from global config
-            # TODO: remove produce from here.
+            # This is how we drops the connection
             #
             if cmd.cmd == Config.connection["stopCmd"] break end
             #
