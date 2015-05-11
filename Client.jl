@@ -7,36 +7,37 @@ module Client
   import Config
 
   export create
+  export runCmd
 
   #
   # TODO: description
   #
   function create(port::Uint16)
-    sock = nothing
+    socket = nothing
     #
     # TODO:
     #
-    observer = Event.Observer(Dict{ASCIIString, Array{Function}}())
+    observer = Event.create()
     try
-      sock = Base.connect(port)
+      socket = Base.connect(port)
     catch e
       # TODO: what to do with e?
-      close(sock)
+      close(socket)
     end
 
-    Connection.ConnectionObj(sock, observer)
+    Connection.ConnectionObj(socket, observer)
   end
   #
   # TODO:
   #
-  function runCmd(ct::Connection.ConnectionObj, cmd::ASCIIString, args...)
+  function runCmd(co::Connection.ConnectionObj, cmd::ASCIIString, args...)
     command = Connection.Command(cmd, [i for i in args])
     ans     = nothing
     @async begin
-      serialize(ct.socket, command)
+      serialize(co.socket, command)
       try
-        ans = deserialize(ct.socket)
-        Event.fire(ct.observer, "command", ct, ans)
+        ans = deserialize(co.socket)
+        Event.fire(co.observer, "command", co, ans)
       catch e
         # TODO: what to do with e?
       end

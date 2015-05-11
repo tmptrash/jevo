@@ -61,7 +61,7 @@ module Server
     # This Observer will be used for event based communication between
     # this server and it's listeners (like Manager mosule)
     #
-    observer = Event.Observer(Dict{ASCIIString, Array{Function}}())
+    observer = Event.create()
     #
     # This task is used for parallel work between this server's socket
     # and other synchronous objects like Organism code or other sockets.

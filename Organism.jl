@@ -269,7 +269,7 @@ module Organism
     # @return {Creature}
     # New organism with default parameters
     # TODO: position should be set from outside
-    Creature(Config.organism["startEnergy"], pos, script, Event.Observer(Dict{ASCIIString, Array{Function}}()))
+    Creature(Config.organism["startEnergy"], pos, script, Event.create())
   end
   #
   # Clones an organism. It only fires an event. Clonning will be

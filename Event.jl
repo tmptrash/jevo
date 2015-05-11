@@ -21,6 +21,13 @@ module Event
   end
 
   #
+  # Creates new observer instance. It's used in functions like on(), fire(),...
+  # @return {Observer}
+  #
+  function create()
+    Observer(Dict{ASCIIString, Array{Function}}())
+  end
+  #
   # Adds a handler for specified event
   # @param {Observer}    obs   Events container
   # @param {ASCIIString} event Event name. All in lowercase
