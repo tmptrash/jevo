@@ -9,15 +9,6 @@ module Client
   export create
 
   #
-  # The same like ServerTask, but for client. Contains observer instance
-  # for communications between client and other classes, like Manager.
-  #
-  type ClientTask
-    socket
-    observer::Event.Observer
-  end
-
-  #
   # TODO: description
   #
   function create(port::Uint16)
@@ -33,12 +24,12 @@ module Client
       close(sock)
     end
 
-    ClientTask(sock, observer)
+    Connection.ConnectionObj(sock, observer)
   end
   #
   # TODO:
   #
-  function runCmd(ct::ClientTask, cmd::ASCIIString, args...)
+  function runCmd(ct::Connection.ConnectionObj, cmd::ASCIIString, args...)
     command = Connection.Command(cmd, [i for i in args])
     ans     = nothing
     @async begin

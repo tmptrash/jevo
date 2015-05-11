@@ -35,4 +35,19 @@ module Connection
     #
     data::Any
   end
+  #
+  # Object, which is used for connecion between client/server or
+  # server/client. Contains observer instance for communications 
+  # with other modules, like Manager.
+  #
+  type ConnectionObj
+    # TODO: what type?
+    # Tcp socket
+    #
+    socket
+    #
+    # Is used for listening of "Command" event, which is server's answer
+    #
+    observer::Event.Observer
+  end
 end

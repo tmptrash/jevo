@@ -11,7 +11,7 @@
 # Client code (for "command" event) should run this command inside it's 
 # behavior and put the result into CommandAnswer.data field. Read more in
 # Client module...
-# I have to note, that you don't need to call consume() for ServerTask.task,
+# I have to note, that you don't need to call consume() for ConnectionObj.task,
 # because Server uses @async macros, based on asynchronous event machine.
 # It's possible to stop the server remotely by calling Client.runCmd() with
 # Command(Config.connection["stopCmd"], []) parameter.
@@ -45,34 +45,16 @@ module Server
   import Event
   import Connection
 
-  export ServerTask
-
   export create
-
-  #
-  # Contains observer and the task for parallel work of this server's
-  # socket and other synchronous objects.
-  #
-  type ServerTask
-    #
-    # The Task, which is used for asynchronous server.
-    #
-    task::Task
-    #
-    # Observer instance, which is used for event based communication
-    # between this server and other listeners, when command occures.
-    #
-    observer::Event.Observer
-  end
 
   #
   # It creates new TCP\IP server, waits a connection from clients on 
   # specified port. After client is connected, it waits for command. 
   # After stop command occures, we returns to the connection waiting 
-  # loop. It Returns ServerTask type instance, so we may parallel 
+  # loop. It Returns ConnectionObj type instance, so we may parallel 
   # server listening and other tasks like organisms scripts run.
   # @param port Port number for incoming connection listening
-  # @return {ServerTask}
+  # @return {Connection.ConnectionObj}
   #
   function create(port::Uint16)
     #
@@ -84,7 +66,7 @@ module Server
     # This task is used for parallel work between this server's socket
     # and other synchronous objects like Organism code or other sockets.
     #
-    task = @async begin
+    @async begin
       server = listen(port)
       #
       # In this loop we are waiting for terminal connection.
@@ -123,6 +105,6 @@ module Server
     #
     # This is function return
     #
-    ServerTask(Task(rand), observer)
+    Connection.ConnectionObj(socket, observer)
   end
 end
