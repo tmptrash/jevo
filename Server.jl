@@ -63,6 +63,10 @@ module Server
     #
     observer = Event.create()
     #
+    # Server's secket. Is used for data transfer/receive
+    #
+    socket   = nothing
+    #
     # This task is used for parallel work between this server's socket
     # and other synchronous objects like Organism code or other sockets.
     #

@@ -3,6 +3,8 @@
 # for sending command and retrieving answers in custom format.
 #
 module Connection
+  import Event
+  
   export Command
   export CommandAnswer
 
@@ -13,9 +15,10 @@ module Connection
   #
   type Command
     #
-    # Name of the command in lower case
+    # Command function, which will be run on remote side. The answer
+    # will be sent by CommandAnswer type (see it below).
     #
-    cmd::ASCIIString
+    cmd::Function
     #
     # Command arguments
     #
@@ -27,9 +30,9 @@ module Connection
   #
   type CommandAnswer
     #
-    # Name of the command
+    # The same like Command.cmd
     #
-    cmd::ASCIIString
+    cmd::Function
     #
     # Custom answer
     #

@@ -28,9 +28,9 @@ module Client
     Connection.ConnectionObj(socket, observer)
   end
   #
-  # TODO:
+  # TODO: description
   #
-  function runCmd(co::Connection.ConnectionObj, cmd::ASCIIString, args...)
+  function runCmd(co::Connection.ConnectionObj, cmd::Function, args...)
     command = Connection.Command(cmd, [i for i in args])
     ans     = nothing
     @async begin

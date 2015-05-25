@@ -5,4 +5,4 @@ function f(ct, ans)
   println(ans)
 end
 Event.on(ct.observer, "command", f)
-Client.runCmd(ct, "rand", 2,3)
+Client.runCmd(ct, rand, 2,3)
