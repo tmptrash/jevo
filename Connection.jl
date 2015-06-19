@@ -1,5 +1,5 @@
 #
-# Implements shared for Server/Client typed. These types are used
+# Implements shared for Server/Client types. These types are used
 # for sending command and retrieving answers in custom format.
 #
 module Connection
@@ -7,6 +7,7 @@ module Connection
   
   export Command
   export CommandAnswer
+  export ConnectionObj
 
   #
   # Type of one command. One command consists of command and custom

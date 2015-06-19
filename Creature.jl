@@ -1,32 +1,32 @@
 #
 # Events:
-#   clone      {Creature}                Fires if script is called "clone" command.
-#   getenergy  {Creature, Point, {ret=>Num}} Fires to check if specified point
+#   clone      {Organism}                Fires if script is called "clone" command.
+#   getenergy  {Organism, Point, {ret=>Num}} Fires to check if specified point
 #                                        in world contains an energy. Returns amount
 #                                        of energy in "ret" property.
-#   grableft   {Creature, Uint, {ret=>Num}} Fires to obtain energy from the left side of
+#   grableft   {Organism, Uint, {ret=>Num}} Fires to obtain energy from the left side of
 #                                        current organism. Second parameter is an 
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
-#   grabright  {Creature, Uint, {ret=>Num}} Fires to obtain energy from the right side of
+#   grabright  {Organism, Uint, {ret=>Num}} Fires to obtain energy from the right side of
 #                                        current organism. Second parameter is an 
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
-#   grabup     {Creature, Uint, {ret=>Num}} Fires to obtain energy from the up side of
+#   grabup     {Organism, Uint, {ret=>Num}} Fires to obtain energy from the up side of
 #                                        current organism. Second parameter is an 
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
-#   grabdown   {Creature, Uint, {ret=>Num}} Fires to obtain energy from the right side of
+#   grabdown   {Organism, Uint, {ret=>Num}} Fires to obtain energy from the right side of
 #                                        current organism. Second parameter is an 
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
-#   stepleft   {Creature, {ret=>Point}}  Fires to make a step left. "ret" will contain
+#   stepleft   {Organism, {ret=>Point}}  Fires to make a step left. "ret" will contain
 #                                        new organism's position.
-#   stepright  {Creature, {ret=>Point}}  Fires to make a step right. "ret" will contain
+#   stepright  {Organism, {ret=>Point}}  Fires to make a step right. "ret" will contain
 #                                        new organism's position.
-#   stepup     {Creature, {ret=>Point}}  Fires to make a step up. "ret" will contain
+#   stepup     {Organism, {ret=>Point}}  Fires to make a step up. "ret" will contain
 #                                        new organism's position.
-#   stepdown   {Creature, {ret=>Point}}  Fires to make a step down. "ret" will contain
+#   stepdown   {Organism, {ret=>Point}}  Fires to make a step down. "ret" will contain
 #                                        new organism's position.
 #
 # TODO: code should be wrapped by try...catch, because different 
@@ -36,15 +36,14 @@
 # TODO: function: fullOfEnergy():Bool
 # TODO: add memory operations: mem_read(index):Int, mem_write(index, Int)
 #
-module Organism
+module Creature
   import Mutator
   import Script
   import Config
   import Event
-  import Organism
   import Helper
 
-  export Creature
+  export Organism
   export RetObj
 
   export create
@@ -55,7 +54,7 @@ module Organism
   # Organism related data
   # TODO: describe events. e.g.: beforeclone, clone
   #
-  type Creature
+  type Organism
     #
     # {Uint} Amount of energy for current organism
     #
@@ -94,7 +93,7 @@ module Organism
 
   #
   # Creates new organism with default settings.
-  # @return {Organism}
+  # @return {Creature}
   #
   function create(pos::Helper.Point = Helper.Point(0, 0))
     #
@@ -102,7 +101,7 @@ module Organism
     # with this default code. Later, Mutator module will change it.
     #
     code = :(function life()
-      creature = Organism.Creature[]
+      creature = Creature.Organism[]
       #
       # It should be first produce() call. This is how we obtain creature
       # instance from outside. We need it for embedded functions like clone().
@@ -111,7 +110,7 @@ module Organism
       #
       produce(creature)
       #
-      # {Creature} creature Instance of code related creature. This instance
+      # {Organism} creature Instance of code related creature. This instance
       # will be used in organism's script during events fire.
       #
       creature = creature[1]
@@ -131,7 +130,7 @@ module Organism
         # @return {Int} Energy value
         #
         function funcGetEnergy(x::Int, y::Int)
-          Organism._getEnergy(creature, x, y)
+          Creature._getEnergy(creature, x, y)
         end
         #
         # Grabs energy from the left point. Grabbibg means decrease energy at point
@@ -139,52 +138,52 @@ module Organism
         # @param amount Amount of energy to grab
         #
         function funcGrabEnergyLeft(amount::Int)
-          Organism._grabEnergy(creature, "left", uint(amount))
+          Creature._grabEnergy(creature, "left", uint(amount))
         end
         #
         # Grabs energy from the right point.
         # @param amount Amount of energy to grab
         #
         function funcGrabEnergyRight(amount::Int)
-          Organism._grabEnergy(creature, "right", uint(amount))
+          Creature._grabEnergy(creature, "right", uint(amount))
         end
         #
         # Grabs energy from the up point.
         # @param amount Amount of energy to grab
         #
         function funcGrabEnergyUp(amount::Int)
-          Organism._grabEnergy(creature, "up", uint(amount))
+          Creature._grabEnergy(creature, "up", uint(amount))
         end
         #
         # Grabs energy from the down point.
         # @param amount Amount of energy to grab
         #
         function funcGrabEnergyDown(amount::Int)
-          Organism._grabEnergy(creature, "down", uint(amount))
+          Creature._grabEnergy(creature, "down", uint(amount))
         end
         #
         # Makes one step left. It decreases organism's x coodinate by 1.
         #
         function funcStepLeft()
-          Organism._step(creature, "left")
+          Creature._step(creature, "left")
         end
         #
         # Makes one step right. It increases organism's x coodinate by 1.
         #
         function funcStepRight()
-          Organism._step(creature, "right")
+          Creature._step(creature, "right")
         end
         #
         # Makes one step up. It decrease organism's y coodinate by 1.
         #
         function funcStepUp()
-          Organism._step(creature, "up")
+          Creature._step(creature, "up")
         end
         #
         # Makes one step down. It increase organism's y coodinate by 1.
         #
         function funcStepDown()
-          Organism._step(creature, "down")
+          Creature._step(creature, "down")
         end
         #
         # Makes organism clone. During cloning new organism will get few
@@ -193,7 +192,7 @@ module Organism
         # If there is no "free" place, then cloning will be declined.
         #
         function funcClone()
-          Organism._clone(creature)
+          Creature._clone(creature)
         end
       end
 
@@ -266,17 +265,17 @@ module Organism
       blocks[1]
     )
     #
-    # @return {Creature}
+    # @return {Organism}
     # New organism with default parameters
     # TODO: position should be set from outside
-    Creature(Config.organism["startEnergy"], pos, script, Event.create())
+    Organism(Config.organism["startEnergy"], pos, script, Event.create())
   end
   #
   # Clones an organism. It only fires an event. Clonning will be
   # processes in a Manager module. See it for details.
-  # @param {Creature} creature Instance of parent organism.
+  # @param {Organism} creature Instance of parent organism.
   #
-  function _clone(creature::Creature)
+  function _clone(creature::Organism)
     Event.fire(creature.observer, "clone", creature)
   end
   #
@@ -284,7 +283,7 @@ module Organism
   # @param x X coordinate
   # @param y Y coordinate
   #
-  function _getEnergy(creature::Creature, x::Int, y::Int)
+  function _getEnergy(creature::Organism, x::Int, y::Int)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" will be contained amount of energy.
@@ -307,7 +306,7 @@ module Organism
   # @param dir      Direction ("left", "right", "up", "down")
   # @param amount   Amount of energy to grab
   #
-  function _grabEnergy(creature::Creature, dir::ASCIIString, amount::Uint)
+  function _grabEnergy(creature::Organism, dir::ASCIIString, amount::Uint)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
@@ -325,7 +324,7 @@ module Organism
   # @param creature Organism to move
   # @param dir Direction ("left", "right", "up", "down")
   #
-  function _step(creature::Creature, dir::ASCIIString)
+  function _step(creature::Organism, dir::ASCIIString)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.

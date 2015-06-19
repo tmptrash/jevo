@@ -2,7 +2,7 @@
 # 2D space, where all organisms are live.
 #
 module World
-  import Organism
+  import Creature
   import Helper
   import Config
 

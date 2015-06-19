@@ -5,7 +5,7 @@
 # TODO: like mutator, world, terminal and so on.
 #
 module Manager
-  import Organism
+  import Creature
   import World
   import Config
   import Helper
@@ -17,7 +17,7 @@ module Manager
   #
   # One task related to one organism
   #
-  type CreatureTask
+  type OrganismTask
     #
     # Task object. With it we may use green
     #
@@ -25,7 +25,7 @@ module Manager
     #
     # One organism
     #
-    organism::Organism.Creature
+    organism::Creature.Organism
   end
   #
   # Runs everything
@@ -77,12 +77,12 @@ module Manager
   # task will be added to _tasks array. Position may be set
   # or random free position will be used.
   # @param pos Position|nothing Position of the organism
-  # @return {CreatureTask}
+  # @return {OrganismTask}
   #
   function _createTask(pos = nothing)
       org  = _createOrganism(pos)
       task = Task(eval(org.script.code))
-      cr   = CreatureTask(task, org)
+      cr   = OrganismTask(task, org)
       push!(_tasks, cr)
       #
       # initializes the organism with it's instance
@@ -96,11 +96,11 @@ module Manager
   # Creates new organism and binds event handlers to him. It also
   # finds free point in a world, where organism will start living.
   # @param pos Optional. Position of organism.
-  # @return {Organism.Creature}
+  # @return {Creature.Organism}
   #
   function _createOrganism(pos = nothing)
     pos      = pos === nothing ? World.getFreePos(_world) : pos
-    organism = Organism.create(pos)
+    organism = Creature.create(pos)
     _moveOrganism(pos, organism)
 
     Event.on(organism.observer, "clone",     _onClone    )
@@ -123,7 +123,7 @@ module Manager
   # @param pos New position
   # @param organism Organism to move
   #
-  function _moveOrganism(pos::Helper.Point, organism::Organism.Creature)
+  function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
     delete!(_posMap, _getOrganismId(organism.pos))
     _posMap[_getOrganismId(pos)] = organism
     #
@@ -146,13 +146,13 @@ module Manager
   # and returns these coordinates. If no free space, then returns false.
   # It checks four (4) places around current organism's position: up,
   # down, left and right.
-  # @param creature Parent organism
+  # @param organism Parent organism
   #
-  function _onClone(creature::Organism.Creature)
+  function _onClone(organism::Creature.Organism)
     #
     # First, we have to find free point near the organism
     #
-    pos = World.getNearFreePos(_world, creature.pos)
+    pos = World.getNearFreePos(_world, organism.pos)
     if pos === false return nothing end
     #
     # Creates new organism and applies mutations to him.
@@ -164,95 +164,95 @@ module Manager
   end
   #
   # Returns an energy amount in specified point in a world.
-  # @param creature Parent organism
+  # @param organism Parent organism
   # @param pos Position to check
   # @param retObj Special object for return value
   #
-  function _onGetEnergy(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
+  function _onGetEnergy(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
     retObj.ret = World.getEnergy(_world, pos)
   end
   #
   # Grabs energy on the left side of the organism
-  # @param creature Parent organism
+  # @param organism Parent organism
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  function _onGrabLeft(creature::Organism.Creature, amount::Uint, retObj::Organism.RetObj)
-    _onGrab(creature, amount, Helper.Point(creature.pos.x - 1, creature.pos.y), retObj)
+  function _onGrabLeft(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+    _onGrab(organism, amount, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
   end
   #
   # Grabs energy on the right side of the organism
-  # @param creature Parent organism
+  # @param organism Parent organism
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  function _onGrabRight(creature::Organism.Creature, amount::Uint, retObj::Organism.RetObj)
-    _onGrab(creature, amount, Helper.Point(creature.pos.x + 1, creature.pos.y), retObj)
+  function _onGrabRight(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+    _onGrab(organism, amount, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
   end
   #
   # Grabs energy on the up side of the organism
-  # @param creature Parent organism
+  # @param organism Parent organism
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  function _onGrabUp(creature::Organism.Creature, amount::Uint, retObj::Organism.RetObj)
-    _onGrab(creature, amount, Helper.Point(creature.pos.x, creature.pos.y - 1), retObj)
+  function _onGrabUp(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+    _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
   end
   #
   # Grabs energy on the down side of the organism
-  # @param creature Parent organism
+  # @param organism Parent organism
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  function _onGrabDown(creature::Organism.Creature, amount::Uint, retObj::Organism.RetObj)
-    _onGrab(creature, amount, Helper.Point(creature.pos.x, creature.pos.y + 1), retObj)
+  function _onGrabDown(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+    _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
   end
   #
   # Handler of "stepleft" event. Checks a possibility to step left.
   # New position will be set to "retObj.pos" property.
-  # @param creature Parent organism
+  # @param organism Parent organism
   # @param retObj Special object for return value
   #
-  function _onStepLeft(creature::Organism.Creature, retObj::Organism.RetObj)
-    _onStep(creature, Helper.Point(creature.pos.x - 1, creature.pos.y), retObj)
+  function _onStepLeft(organism::Creature.Organism, retObj::Creature.RetObj)
+    _onStep(organism, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
   end
   #
   # Handler of "stepright" event. Checks a possibility to step right.
   # New position will be set to "retObj.pos" property.
-  # @param creature Parent organism
+  # @param organism Parent organism
   # @param retObj Special object for return value
   #
-  function _onStepRight(creature::Organism.Creature, retObj::Organism.RetObj)
-    _onStep(creature, Helper.Point(creature.pos.x + 1, creature.pos.y), retObj)
+  function _onStepRight(organism::Creature.Organism, retObj::Creature.RetObj)
+    _onStep(organism, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
   end
   #
   # Handler of "stepup" event. Checks a possibility to step up.
   # New position will be set to "retObj.pos" property.
-  # @param creature Parent organism
+  # @param organism Parent organism
   # @param retObj Special object for return value
   #
-  function _onStepUp(creature::Organism.Creature, retObj::Organism.RetObj)
-    _onStep(creature, Helper.Point(creature.pos.x, creature.pos.y - 1), retObj)
+  function _onStepUp(organism::Creature.Organism, retObj::Creature.RetObj)
+    _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
   end
   #
   # Handler of "stepdown" event. Checks a possibility to step down.
   # New position will be set to "retObj.pos" property.
-  # @param creature Parent organism
+  # @param organism Parent organism
   # @param retObj Special object for return value
   #
-  function _onStepDown(creature::Organism.Creature, retObj::Organism.RetObj)
-    _onStep(creature, Helper.Point(creature.pos.x, creature.pos.y + 1), retObj)
+  function _onStepDown(organism::Creature.Organism, retObj::Creature.RetObj)
+    _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
   end
   #
   # Grabs energy on specified point. It grabs the energy and 
   # checks if other organism was at that position. If so, then 
   # it decrease an energy of this other organism.
-  # @param creature Organism hwo grabs
+  # @param organism Organism who grabs
   # @param amount Amount of energy he wants to grab
   # @param pos Point where we should check the energy
   # @param retObj Special object for return value
   #
-  function _onGrab(creature::Organism.Creature, amount::Uint, pos::Helper.Point, retObj::Organism.RetObj)
+  function _onGrab(organism::Creature.Organism, amount::Uint, pos::Helper.Point, retObj::Creature.RetObj)
     retObj.ret = World.grabEnergy(_world, pos, amount)
     id         = _getOrganismId(pos)
     #
@@ -265,23 +265,26 @@ module Manager
   # Checks if specified position ("pos") has no energy and we may
   # move the organism there. If this position has an energy, then
   # the same position will be set to "retObj.pos".
-  # @param creature Organism hwo grabs
+  # @param organism Organism hwo grabs
   # @param pos Point where we should check the energy
   # @param retObj Special object for return value
   #
-  function _onStep(creature::Organism.Creature, pos::Helper.Point, retObj::Organism.RetObj)
+  function _onStep(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
     if World.getEnergy(_world, pos) == 0
       retObj.pos = pos
-      _moveOrganism(pos, creature)
+      _moveOrganism(pos, organism)
     else
-      retObj.pos = creature.pos 
+      retObj.pos = organism.pos 
     end
   end
 
+  # TODO: All these three fields should be assembled in one type Data
+  # TODO: We don't need to set them as statics. I think it's quite possible to use
+  # TODO: this module for different objects (instances)
   #
   # All available organism's tasks
   #
-  _tasks = CreatureTask[]
+  _tasks = OrganismTask[]
   #
   # Instance of the world
   #
@@ -290,5 +293,5 @@ module Manager
   # Positions map, which stores positions of all organisms. Is used
   # for fast access to the organism by it's coordinates.
   #
-  _posMap = Dict{Uint, Organism.Creature}()
+  _posMap = Dict{Uint, Creature.Organism}()
 end

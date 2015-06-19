@@ -56,8 +56,8 @@
 #     eval(ex)
 # 
 # Usage:
-#     creature = Organism.create()            # creates new organism
-#     Mutator.mutate(creature.script, [3,2])  # ads one mutation to his code
+#     organism = Creature.create()            # creates new organism
+#     Mutator.mutate(organism.script, [3,2])  # ads one mutation to his code
 #
 # @author DeadbraiN
 #
