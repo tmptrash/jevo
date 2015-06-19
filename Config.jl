@@ -83,11 +83,11 @@ module Config
     #
     # World width
     #
-    "width"               => uint(17),
+    "width"               => uint(3),
     #
     # World height
     #
-    "height"              => uint(20)
+    "height"              => uint(3)
   }
   #
   # Configuration of the TCP connection
