@@ -109,7 +109,6 @@ module Manager
     organism = Creature.create(pos)
     _moveOrganism(pos, organism)
 
-    Event.on(organism.observer, "clone",     _onClone    )
     Event.on(organism.observer, "getenergy", _onGetEnergy)
     Event.on(organism.observer, "grableft",  _onGrabLeft )
     Event.on(organism.observer, "grabright", _onGrabRight)
@@ -119,6 +118,7 @@ module Manager
     Event.on(organism.observer, "stepright", _onStepRight)
     Event.on(organism.observer, "stepup",    _onStepUp   )
     Event.on(organism.observer, "stepdown",  _onStepDown )
+    Event.on(organism.observer, "clone",     _onClone    )
 
     organism
   end
@@ -277,7 +277,7 @@ module Manager
     # then grab energy from him
     #
     if haskey(_posMap, id) _posMap[id].energy -= retObj.ret end
-      
+
     retObj.ret
   end
   #

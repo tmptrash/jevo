@@ -115,17 +115,16 @@ module Creature
       #
       creature = creature[1]
       #
-      # This produce() tells outside code, that organism was cought.
+      # This produce() tells outside code, that organism's instance was stored
       #
       produce()
+      #
+      # Library functions section. This functions are embedded for Organism.
+      # These functions shouldn't be in a Script.Code.blocks array, because 
+      # we can't change them (e.g. in Mutator). But they should be in 
+      # "Script.Code.funcs" array.
+      #
       begin
-        #
-        # ----------------------------------------------------------------------
-        # Library functions section. This functions are embedded for Organism.
-        # These functions shouldn't be in a Script.Code.blocks array, because 
-        # we can't change them (e.g. in Mutator). But they should be in 
-        # "Script.Code.funcs" array.
-        #
         #
         # Checks if specified point with (x,y) coordinates has an energy value.
         # Possible values [0:typemax(Int)]. 0 means no energy.
@@ -210,12 +209,6 @@ module Creature
       # in Mutator module. This loop must be after ambedded functions.
       #
       while true
-        # TODO: remove all these calls
-        energy = funcGrabEnergyLeft(5)
-        println("Grabbed 1,2 energy: $energy")
-        energy = funcGetEnergy(1, 2) # should be FF
-        println("Energy 1,2: $energy")
-
         produce()
       end
     end)
@@ -332,7 +325,7 @@ module Creature
     #
     Event.fire(creature.observer, "grab$dir", creature, amount, retObj)
     creature.energy += retObj.ret
-    
+
     retObj.ret
   end
   #
