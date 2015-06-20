@@ -140,6 +140,7 @@ module Creature
         # Grabs energy from the left point. Grabbibg means decrease energy at point
         # and increase it at organism.
         # @param amount Amount of energy to grab
+        # @return {Int} Amount of grabbed energy
         #
         function funcGrabEnergyLeft(amount::Int)
           Creature._grabEnergy(creature, "left", uint(amount))
@@ -147,6 +148,7 @@ module Creature
         #
         # Grabs energy from the right point.
         # @param amount Amount of energy to grab
+        # @return {Int} Amount of grabbed energy
         #
         function funcGrabEnergyRight(amount::Int)
           Creature._grabEnergy(creature, "right", uint(amount))
@@ -154,6 +156,7 @@ module Creature
         #
         # Grabs energy from the up point.
         # @param amount Amount of energy to grab
+        # @return {Int} Amount of grabbed energy
         #
         function funcGrabEnergyUp(amount::Int)
           Creature._grabEnergy(creature, "up", uint(amount))
@@ -161,6 +164,7 @@ module Creature
         #
         # Grabs energy from the down point.
         # @param amount Amount of energy to grab
+        # @return {Int} Amount of grabbed energy
         #
         function funcGrabEnergyDown(amount::Int)
           Creature._grabEnergy(creature, "down", uint(amount))
@@ -207,8 +211,10 @@ module Creature
       #
       while true
         # TODO: remove all these calls
-        energy = funcGetEnergy(2, 2) # should be FF
-        println(energy)
+        energy = funcGrabEnergyLeft(5)
+        println("Grabbed 1,2 energy: $energy")
+        energy = funcGetEnergy(1, 2) # should be FF
+        println("Energy 1,2: $energy")
 
         produce()
       end
@@ -326,6 +332,8 @@ module Creature
     #
     Event.fire(creature.observer, "grab$dir", creature, amount, retObj)
     creature.energy += retObj.ret
+    
+    retObj.ret
   end
   #
   # Makes one step with specified direction

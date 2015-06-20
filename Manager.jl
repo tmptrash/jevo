@@ -277,6 +277,8 @@ module Manager
     # then grab energy from him
     #
     if haskey(_posMap, id) _posMap[id].energy -= retObj.ret end
+      
+    retObj.ret
   end
   #
   # Checks if specified position ("pos") has no energy and we may
