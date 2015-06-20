@@ -114,6 +114,10 @@ module Creature
       # will be used in organism's script during events fire.
       #
       creature = creature[1]
+      #
+      # This produce() tells outside code, that organism was cought.
+      #
+      produce()
       begin
         #
         # ----------------------------------------------------------------------
@@ -202,6 +206,10 @@ module Creature
       # in Mutator module. This loop must be after ambedded functions.
       #
       while true
+        # TODO: remove all these calls
+        energy = funcGetEnergy(2, 2) # should be FF
+        println(energy)
+
         produce()
       end
     end)
@@ -211,11 +219,11 @@ module Creature
     blocks = [
       Script.Block(                    # all functions block (begin...end)         
         Symbol[],
-        code.args[2].args[8]
+        code.args[2].args[10]
       ),
       Script.Block(                    # while(true) block
         Symbol[],
-        code.args[2].args[10].args[2],
+        code.args[2].args[12].args[2],
         Script.Block(                  # parent, function's life() block
           Symbol[],
           code.args[2]

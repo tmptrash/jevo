@@ -40,6 +40,9 @@ module Manager
     decTimes = Config.organism["decreaseAfterTimes"]
     probs    = Config.mutator["addChange"]
     while true
+      #
+      # This block runs one iteration for all available organisms
+      #
       len   = length(_tasks)
       times += 1
       for i = 1:len
@@ -48,13 +51,15 @@ module Manager
           # TODO: think about exceptions in organisms. maybe log somewhere?
         end
       end
-
+      #
+      # This block decreases energy from organisms, because they spend it while leaving
+      #
       if times === decTimes
         for i = 1:len
           org = _tasks[i].organism
           org.energy -= 1
           _moveOrganism(org.pos, org)
-          Mutator.mutate(org.script, probs)
+          #Mutator.mutate(org.script, probs)
         end
         times = 0
       end
@@ -149,7 +154,8 @@ module Manager
   # down, left and right.
   # @param organism Parent organism
   #
-  function _onClone(organism::Creature.Organism)
+  @debug function _onClone(organism::Creature.Organism)
+  @bp
     #
     # First, we have to find free point near the organism
     #
@@ -169,7 +175,8 @@ module Manager
   # @param pos Position to check
   # @param retObj Special object for return value
   #
-  function _onGetEnergy(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
+  @debug function _onGetEnergy(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
+  @bp
     retObj.ret = World.getEnergy(_world, pos)
   end
   #
@@ -178,7 +185,8 @@ module Manager
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  function _onGrabLeft(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+  @debug function _onGrabLeft(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+  @bp
     _onGrab(organism, amount, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
   end
   #
@@ -187,7 +195,8 @@ module Manager
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  function _onGrabRight(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+  @debug function _onGrabRight(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+  @bp
     _onGrab(organism, amount, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
   end
   #
@@ -196,7 +205,8 @@ module Manager
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  function _onGrabUp(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+  @debug function _onGrabUp(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+  @bp
     _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
   end
   #
@@ -205,7 +215,8 @@ module Manager
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  function _onGrabDown(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+  @debug function _onGrabDown(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+  @bp
     _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
   end
   #
@@ -214,7 +225,8 @@ module Manager
   # @param organism Parent organism
   # @param retObj Special object for return value
   #
-  function _onStepLeft(organism::Creature.Organism, retObj::Creature.RetObj)
+  @debug function _onStepLeft(organism::Creature.Organism, retObj::Creature.RetObj)
+  @bp
     _onStep(organism, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
   end
   #
@@ -223,7 +235,8 @@ module Manager
   # @param organism Parent organism
   # @param retObj Special object for return value
   #
-  function _onStepRight(organism::Creature.Organism, retObj::Creature.RetObj)
+  @debug function _onStepRight(organism::Creature.Organism, retObj::Creature.RetObj)
+  @bp
     _onStep(organism, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
   end
   #
@@ -232,7 +245,8 @@ module Manager
   # @param organism Parent organism
   # @param retObj Special object for return value
   #
-  function _onStepUp(organism::Creature.Organism, retObj::Creature.RetObj)
+  @debug function _onStepUp(organism::Creature.Organism, retObj::Creature.RetObj)
+  @bp
     _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
   end
   #
@@ -241,7 +255,8 @@ module Manager
   # @param organism Parent organism
   # @param retObj Special object for return value
   #
-  function _onStepDown(organism::Creature.Organism, retObj::Creature.RetObj)
+  @debug function _onStepDown(organism::Creature.Organism, retObj::Creature.RetObj)
+  @bp
     _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
   end
   #
@@ -253,7 +268,8 @@ module Manager
   # @param pos Point where we should check the energy
   # @param retObj Special object for return value
   #
-  function _onGrab(organism::Creature.Organism, amount::Uint, pos::Helper.Point, retObj::Creature.RetObj)
+  @debug function _onGrab(organism::Creature.Organism, amount::Uint, pos::Helper.Point, retObj::Creature.RetObj)
+  @bp
     retObj.ret = World.grabEnergy(_world, pos, amount)
     id         = _getOrganismId(pos)
     #
@@ -270,7 +286,8 @@ module Manager
   # @param pos Point where we should check the energy
   # @param retObj Special object for return value
   #
-  function _onStep(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
+  @debug function _onStep(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
+  @bp
     if World.getEnergy(_world, pos) == 0
       retObj.pos = pos
       _moveOrganism(pos, organism)
