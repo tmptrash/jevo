@@ -7,38 +7,79 @@
 # circles in OpenGL canvas.
 #
 module WorldWindow
+  import Base.Graphics
+  import Cairo
+  import Tk
+
+  export Window
+  export create
+  export dot
+  export update
+
+  #
+  # Data type, which contain one window related data: Canvas, Context,...
+  #
   type Window
     #
 	# TODO:
 	#
-    win::Tk_Toplevel,
+    win::Tk_Toplevel
 	#
 	# TODO:
 	#
-	canvas::Canvas,
+	canvas::Canvas
 	#
 	# TODO:
 	#
 	context::CairoContext
   end
   
-  function create()
-    win = Toplevel("Test", 400, 200)
-	c = Canvas(win)
+  #
+  # Creates window and shows iton the screen
+  # @param width Window width in pixels
+  # @param height Window height in pixels
+  # @return Window object
+  #
+  function create(width::Uint, height::Uint)
+    win = Toplevel("Organism's world", width, height)
+	c   = Canvas(win)
 	pack(c, expand=true, fill="both")
 	ctx = getgc(c)
 
-	set_coords(ctx, 0, 0, 400, 200, 0, 399, 0, 199)
+	#set_coords(ctx, 0, 0, 400, 200, 0, 399, 0, 199)
 	set_antialias(ctx, 1)
 	set_line_width(ctx, 1)
-	set_source_rgb(ctx, 1, 1, 1)
+	#
+	# TODO: background color should be taken from config
+	#
+	set_source_rgb(ctx, 0, 0, 0)
 	paint(ctx)
+	
+	Window(win, c, ctx)
   end
-
-  function dot(ctx::CairoContext, x::Int, y::Int, r::Int, g::Int, b::Int)
-	set_source_rgb(ctx, r, g, b)
-	move_to(ctx, x, y)
-	line_to(ctx, x+1, y)
-	stroke(ctx)
+  #
+  # Draws one dot (point) on the canvas with specified color
+  # @param win Windows type
+  # @param x X coordinate of the point
+  # @param y Y coordinate of the point
+  # @param r Red part of RGB
+  # @param g Green part of RGB
+  # @param b Blue part of RGB
+  #
+  function dot(win::Window, x::Int, y::Int, r::Int, g::Int, b::Int)
+	set_source_rgb(win.context, r, g, b)
+	move_to(win.context, x, y)
+	line_to(win.context, x+1, y)
+	stroke(win.context)
+  end
+  #
+  # Updates the canvas. It's not nessesary to update it after
+  # every new dot. It's better to update it after several dots
+  # are drown.
+  # @param win Current window
+  #
+  function update(win::Window)
+    reveal(win.context)
+    Tk.update()
   end
 end
