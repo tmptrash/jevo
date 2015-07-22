@@ -5,6 +5,7 @@
 # moves in the World. We have to use separate module to have an ability to
 # change the output. For example, it's possible to show organisms like a 
 # circles in OpenGL canvas.
+# TODO: write about tcp/ip connection to the server (this window is a client)
 #
 module WorldWindow
   import Base.Graphics
@@ -35,7 +36,7 @@ module WorldWindow
   end
   
   #
-  # Creates window and shows iton the screen
+  # Creates window and shows it on the screen
   # @param width Window width in pixels
   # @param height Window height in pixels
   # @return Window object
@@ -46,6 +47,9 @@ module WorldWindow
 	pack(c, expand=true, fill="both")
 	ctx = getgc(c)
 
+    #
+    # TODO: check if we need this line
+    #
 	#set_coords(ctx, 0, 0, 400, 200, 0, 399, 0, 199)
 	set_antialias(ctx, 1)
 	set_line_width(ctx, 1)
