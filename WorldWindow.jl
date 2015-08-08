@@ -89,7 +89,7 @@ module WorldWindow
     Tk.reveal(win.canvas)
     Tk.update()
   end
-  #
+  # TODO: i have to check if i need to destroy context and canvas
   # Destroys specified windows
   # @param win Windows to destroy
   #
