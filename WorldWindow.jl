@@ -12,6 +12,8 @@ module WorldWindow
   import Cairo
   import Tk
 
+  using Debug
+
   export Window
   export create
   export dot
@@ -24,15 +26,15 @@ module WorldWindow
     #
 	# TODO:
 	#
-    win::Tk_Toplevel
+    win::Tk.Tk_Toplevel
 	#
 	# TODO:
 	#
-	canvas::Canvas
+	canvas::Tk.Canvas
 	#
 	# TODO:
 	#
-	context::CairoContext
+	context::Cairo.CairoContext
   end
   
   #
@@ -41,23 +43,24 @@ module WorldWindow
   # @param height Window height in pixels
   # @return Window object
   #
-  function create(width::Uint, height::Uint)
-    win = Toplevel("Organism's world", width, height)
-	c   = Canvas(win)
-	pack(c, expand=true, fill="both")
-	ctx = getgc(c)
+  @debug function create(width::Uint, height::Uint)
+  @bp
+    win = Tk.Toplevel("Organism's world", width, height)
+	c   = Tk.Canvas(win)
+	Tk.pack(c, expand=true, fill="both")
+	ctx = Base.Graphics.getgc(c)
 
     #
     # TODO: check if we need this line
     #
 	#set_coords(ctx, 0, 0, 400, 200, 0, 399, 0, 199)
-	set_antialias(ctx, 1)
-	set_line_width(ctx, 1)
+	Tk.set_antialias(ctx, 1)
+	Tk.set_line_width(ctx, 1)
 	#
 	# TODO: background color should be taken from config
 	#
-	set_source_rgb(ctx, 0, 0, 0)
-	paint(ctx)
+	Tk.set_source_rgb(ctx, 0, 0, 0)
+	Tk.paint(ctx)
 	
 	Window(win, c, ctx)
   end
@@ -71,10 +74,10 @@ module WorldWindow
   # @param b Blue part of RGB
   #
   function dot(win::Window, x::Int, y::Int, r::Int, g::Int, b::Int)
-	set_source_rgb(win.context, r, g, b)
-	move_to(win.context, x, y)
-	line_to(win.context, x+1, y)
-	stroke(win.context)
+	Tk.set_source_rgb(win.context, r, g, b)
+	Tk.move_to(win.context, x, y)
+	Tk.line_to(win.context, x+1, y)
+	Tk.stroke(win.context)
   end
   #
   # Updates the canvas. It's not nessesary to update it after
@@ -83,7 +86,14 @@ module WorldWindow
   # @param win Current window
   #
   function update(win::Window)
-    reveal(win.context)
+    Tk.reveal(win.canvas)
     Tk.update()
+  end
+  #
+  # Destroys specified windows
+  # @param win Windows to destroy
+  #
+  function destroy(win::Window)
+  	Tk.destroy(win.win)
   end
 end
