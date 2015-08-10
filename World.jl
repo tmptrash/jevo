@@ -1,10 +1,12 @@
 #
 # 2D space, where all organisms are live.
+# TODO: describe update event
 #
 module World
   import Creature
   import Helper
   import Config
+  import Event
 
   export create
   export setEnergy
@@ -32,6 +34,10 @@ module World
     # Array of pixels (RGB+8b)
     #
     data::Array{Uint16, 2}
+    #
+    # {Event.Observer} Adds events listening/firing logic to the World.
+    #
+    observer::Event.Observer
   end
 
   #
@@ -50,6 +56,7 @@ module World
   #
   function setEnergy(plane::Plane, pos::Helper.Point, energy::Uint16)
     plane.data[pos.y, pos.x] = energy
+    Event.fire(plane.observer, "update", pos.x, pos.y, energy, plane)
   end
   #
   # Returns amount of energy in a point with
@@ -90,6 +97,7 @@ module World
     energy = getEnergy(plane, pos)
     energy = energy > amount ? amount : energy
     plane.data[pos.y, pos.x] -= energy
+    Event.fire(plane.observer, "update", pos.x, pos.y, plane.data[pos.y, pos.x], plane)
     energy
   end
   #
