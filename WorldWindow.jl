@@ -12,8 +12,6 @@ module WorldWindow
   import Cairo
   import Tk
 
-  using Debug
-
   export Window
   export create
   export dot
@@ -43,8 +41,7 @@ module WorldWindow
   # @param height Window height in pixels
   # @return Window object
   #
-  @debug function create(width::Uint, height::Uint)
-  @bp
+  function create(width::Uint, height::Uint)
     win = Tk.Toplevel("Organism's world", width, height)
 	c   = Tk.Canvas(win)
 	Tk.pack(c, expand=true, fill="both")
