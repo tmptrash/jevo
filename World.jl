@@ -46,7 +46,7 @@ module World
   # @param height World height
   #
   function create(width::Uint = Config.world["width"], height::Uint = Config.world["height"])
-    Plane(width, height, fill(uint16(0), (int(height), int(width))))
+    Plane(width, height, fill(uint16(0), (int(height), int(width))), Event.create())
   end
   #
   # Adds energy point by specified coordinates

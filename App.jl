@@ -29,9 +29,11 @@ function runTest()
     World.setEnergy(Manager._world, Helper.Point(3, 3), uint16(0xFF))
 
     #
-    # this is s hack. We override configs for tests
+    # this is s hack. We override configs for tests,
+    # to prevent creation of organisms inside Manager.run().
     #
-    Config.organism["startAmount"] = 0
+    Config.organism["startAmount"] = uint(0)
+    Config.organism["decreaseAfterTimes"] = uint(100)
 
     Manager._createTask(Helper.Point(2, 2))
     Manager.run()

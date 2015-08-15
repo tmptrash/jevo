@@ -31,7 +31,8 @@ module Manager
   #
   # Runs everything
   #
-  function run()
+  @debug function run()
+  @bp
     _createTasks()
     #
     # main loop
@@ -39,6 +40,9 @@ module Manager
     times    = uint(0)
     decTimes = Config.organism["decreaseAfterTimes"]
     probs    = Config.mutator["addChange"]
+    #
+    # TODO: what about case if all organisms will die
+    #
     while true
       #
       # This block runs one iteration for all available organisms
@@ -55,13 +59,14 @@ module Manager
       # This block decreases energy from organisms, because they spend it while leaving
       #
       if times === decTimes
+        @bp
         for i = 1:len
           org = _tasks[i].organism
-          org.energy -= 1
+          org.energy -= uint(1)
           _moveOrganism(org.pos, org)
-          #Mutator.mutate(org.script, probs)
+          Mutator.mutate(org.script, probs)
         end
-        times = 0
+        times = uint(0)
       end
     end
   end
