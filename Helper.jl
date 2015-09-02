@@ -1,6 +1,4 @@
 module Helper
-  export VarOrNum
-
   export randTrue
   export getProbIndex
 

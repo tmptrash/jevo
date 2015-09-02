@@ -48,7 +48,7 @@ module Connection
     # TODO: what type?
     # Tcp socket
     #
-    socket
+    socket::Base.TcpSocket
     #
     # Is used for listening of "Command" event, which is server's answer
     #
