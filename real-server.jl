@@ -16,8 +16,11 @@ end
 
 function updateSockets()
 	#consume(task)
-	for t = 1:length(tasks)
-	    if !isopen(socks[t])
+	t = 1
+	while t <= length(tasks)
+	    if isopen(socks[t])
+	    	t += 1
+	    else
 	    	deleteat!(tasks, t)
 	    	deleteat!(socks, t)
 	    end
