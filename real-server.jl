@@ -11,26 +11,18 @@ task = @async begin
 	    push!(tasks, @async while isopen(socks[index])
 			write(socks[index], readline(socks[index]))
 	    end)
-	    if !isopen(socks[index])
-	    	deleteat!(tasks, index)
-	    	deleteat!(socks, index)
-	    end
 	end
 end
 
-for i = 1:10
-	consume(task)
+function updateSockets()
+	#consume(task)
 	for t = 1:length(tasks)
-		index = t
-		consume(tasks[t])
+	    if !isopen(socks[t])
+	    	deleteat!(tasks, t)
+	    	deleteat!(socks, t)
+	    end
+
+	    #index = t
+		#consume(tasks[t])
 	end
 end
-
-
-
-# Client
-clientside=connect(2001)
-@async while true
-	write(STDOUT,readline(clientside))
-end
-println(clientside, "Hello World from the Echo Server")
