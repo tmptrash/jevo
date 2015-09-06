@@ -1,18 +1,22 @@
+# TODO: provide an example of "main" code with yield() call
 module RealServer
   import Event
+  import Connection
 
-  type Con
+  # TODO:
+  type Connection
     tasks   ::Array{Task}
     socks   ::Array{Base.TcpSocket}
     server  ::Base.TcpServer
     observer::Event.Observer
   end
-  type Ans
+  # TODO:
+  type Answer
     data::Any
   end
 
+  # TODO:
   function create(port)
-    i      = 1
     tasks  = Task[]
     socks  = Base.TcpSocket[]
     server = listen(port)
@@ -21,15 +25,15 @@ module RealServer
     @async begin
       while true
         push!(socks, accept(server))
-        println(i)
-        i = length(socks)
-        push!(tasks, @async while isopen(socks[i])
-          _runCmd(socks, i, obs)
+        sock = socks[length(socks)]
+        push!(tasks, @async while isopen(sock)
+          #_runCmd(socks, i, obs)
+          write(sock, readline(sock))
         end)
       end
     end
 
-    Con(tasks, socks, server, obs)
+    Connection(tasks, socks, server, obs)
   end
 
   #
@@ -37,21 +41,21 @@ module RealServer
   # sockets (connections) between clients and this server and tasks
   # (coroutines).
   #
-  function update(con::Con)
+  function update(con::Connection)
     t::Int = 1
 
     while t <= length(con.tasks)
       if isopen(con.socks[t])
        	t += 1
       else
-       	deleteat!(con.tasks, t)
-       	deleteat!(con.socks, t)
+        deleteat!(con.tasks, t)
+        deleteat!(con.socks, t)
       end
     end
   end
-
+  # TODO:
   function _runCmd(socks::Array{Base.TcpSocket}, i::Int, obs::Event.Observer)
-    ans = Ans(null)
+    ans = Answer(null)
     cmd = deserialize(socks[i])
 
     Event.fire(obs, "command", cmd, ans)
