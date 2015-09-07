@@ -12,12 +12,12 @@ module RealConnection
     observer::Event.Observer
   end
   # TODO:
-  type Answer
-    data::Any
-  end
-  # TODO:
   type Command
     cmd::Function
     args::Array{Any}
+  end
+  # TODO:
+  type Answer
+    data::Any
   end
 end
