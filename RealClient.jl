@@ -1,5 +1,7 @@
 # TODO:
 module RealClient
+  import RealConnection
+
   #
   # TODO:
   #
@@ -22,6 +24,6 @@ module RealClient
   end
 end
 
-#socket=connect(2001)
-#@async while true write(STDOUT,readline(socket)) end
-#println(socket,"message")
+# socket=connect(2001)
+# @async while true write(STDOUT,readline(socket)) end
+# println(socket,"message")

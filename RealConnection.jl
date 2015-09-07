@@ -1,5 +1,7 @@
 # TODO:
 module RealConnection
+  import Event
+  
   export Connection
   export Answer
   export Command

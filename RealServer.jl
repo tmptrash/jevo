@@ -13,7 +13,10 @@ module RealServer
   import Event
   import RealConnection
 
+  using Debug
+
   # TODO:
+  # TODO: we have to add run() method to take an ability to bind events before running
   function create(port)
     tasks  = Task[]
     socks  = Base.TcpSocket[]
@@ -53,7 +56,7 @@ module RealServer
   # @param sock Client's socket
   # @param obs Observer for firing an event to "parent" code
   #
-  function _answer(socks::Base.TcpSocket, obs::Event.Observer)
+  function _answer(sock::Base.TcpSocket, obs::Event.Observer)
     ans = RealConnection.Answer(null)
     Event.fire(obs, "command", deserialize(sock), ans)
     serialize(sock, ans)
