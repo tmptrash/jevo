@@ -17,21 +17,24 @@ module RealServer
 
   # TODO:
   # TODO: we have to add run() method to take an ability to bind events before running
-  function create(port)
-    tasks  = Task[]
-    socks  = Base.TcpSocket[]
-    server = listen(port)
-    obs    = Event.create()
-
+  function create(host::Base.IpAddr, port::Integer)
+    RealConnection.Connection(Task[], Base.TcpSocket[], listen(host, port), Event.create())
+  end
+  #
+  # Runs the server. Starts listening clients connections
+  # and starts answering on requests. This method implements
+  # main asynchronous client-server communication logic. Here
+  # all green threads are used
+  # @param con Server data object
+  #
+  function run(con::RealConnection.Connection)
     @async begin
       while true
-        push!(socks, accept(server))
-        sock = socks[length(socks)]
-        push!(tasks, @async while isopen(sock) _answer(sock, obs) end)
+        push!(con.socks, accept(con.server))
+        sock = con.socks[length(con.socks)]
+        push!(con.tasks, @async while isopen(sock) _answer(sock, con.obs) end)
       end
     end
-
-    RealConnection.Connection(tasks, socks, server, obs)
   end
   #
   # This method should be called in main server's loop for updating
