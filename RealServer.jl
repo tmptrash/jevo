@@ -1,5 +1,5 @@
 #
-# Multi connection server implementation. Works through TCP/IP
+# Multi connection server implementation. Works through TCP
 # protocol for connection with clients. Fully asynchronous and
 # one threaded. Uses green threads (or coroutines) inside. See
 # http://julia.readthedocs.org/en/latest/manual/control-flow/#man-tasks
