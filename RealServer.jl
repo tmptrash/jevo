@@ -22,15 +22,20 @@ module RealServer
   # Runs the server. Starts listening clients connections
   # and starts answering on requests. This method implements
   # main asynchronous client-server communication logic. Here
-  # all green threads are used
-  # @param con Server data object
+  # all green threads are used. See this link:
+  # http://julia.readthedocs.org/en/latest/manual/control-flow/#man-tasks
+  # for details.
+  # @param con Server connection object returned by RealServer.create()
+  # TODO: describe run() and update() methods simbiose
   #
   function run(con::RealConnection.ServerConnection)
     @async begin
       while true
+        print("waiting for connection...")
         push!(con.socks, accept(con.server))
         sock = con.socks[length(con.socks)]
-        push!(con.tasks, @async while isopen(sock) _answer(sock, con.obs) end)
+        println("connection", sock)
+        push!(con.tasks, @async while isopen(sock) _answer(sock, con.observer) end)
       end
     end
   end
@@ -59,7 +64,9 @@ module RealServer
   #
   function _answer(sock::Base.TcpSocket, obs::Event.Observer)
     ans = RealConnection.Answer(null)
+    print("waiting for request...")
     Event.fire(obs, "command", deserialize(sock), ans)
+    println("request", ans)
     serialize(sock, ans)
   end
 end
