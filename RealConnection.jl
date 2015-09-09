@@ -7,11 +7,16 @@ module RealConnection
   export Command
 
   # TODO:
-  type Connection
+  type ServerConnection
     tasks   ::Array{Task}
     socks   ::Array{Base.TcpSocket}
     server  ::Base.TcpServer
     observer::Event.Observer
+  end
+  # TODO:
+  type ClientConnection
+  	sock    ::Base.TcpSocket
+  	observer::Event.Observer
   end
   # TODO:
   type Command

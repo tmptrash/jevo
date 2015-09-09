@@ -13,12 +13,10 @@ module RealServer
   import Event
   import RealConnection
 
-  using Debug
-
   # TODO:
   # TODO: we have to add run() method to take an ability to bind events before running
   function create(host::Base.IpAddr, port::Integer)
-    RealConnection.Connection(Task[], Base.TcpSocket[], listen(host, port), Event.create())
+    RealConnection.ServerConnection(Task[], Base.TcpSocket[], listen(host, port), Event.create())
   end
   #
   # Runs the server. Starts listening clients connections
@@ -27,7 +25,7 @@ module RealServer
   # all green threads are used
   # @param con Server data object
   #
-  function run(con::RealConnection.Connection)
+  function run(con::RealConnection.ServerConnection)
     @async begin
       while true
         push!(con.socks, accept(con.server))
@@ -40,7 +38,7 @@ module RealServer
   # This method should be called in main server's loop for updating
   # sockets (connections) between clients and this server.
   #
-  function update(con::RealConnection.Connection)
+  function update(con::RealConnection.ServerConnection)
     i::Int = 1
 
     while i <= length(con.socks)
