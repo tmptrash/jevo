@@ -31,10 +31,8 @@ module RealServer
   function run(con::RealConnection.ServerConnection)
     @async begin
       while true
-        print("waiting for connection...")
         push!(con.socks, accept(con.server))
         sock = con.socks[length(con.socks)]
-        println("connection", sock)
         push!(con.tasks, @async while isopen(sock) _answer(sock, con.observer) end)
       end
     end
@@ -64,9 +62,7 @@ module RealServer
   #
   function _answer(sock::Base.TcpSocket, obs::Event.Observer)
     ans = RealConnection.Answer(null)
-    print("waiting for request...")
     Event.fire(obs, "command", deserialize(sock), ans)
-    println("request", ans)
     serialize(sock, ans)
   end
 end
