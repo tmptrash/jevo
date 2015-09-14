@@ -46,15 +46,24 @@ module RealClient
   #
   function create(host::Base.IpAddr, port::Integer)
     local sock::Base.TcpSocket
+    local obs = Event.create()
 
     try
       sock = Base.connect(host, port)
+      #
+      # All "magic" occures here. This is how we start answers
+      # handling. It listens clients responses all the time
+      # using green thread (Task).
+      #
+      @async while true
+        Event.fire(obs, "answer", deserialize(sock))
+      end
     catch e
       # TODO: what to do with e?
       close(sock)
     end
 
-    RealConnection.ClientConnection(sock, Event.create())
+    RealConnection.ClientConnection(sock, obs)
   end
   #
   # TODO: describe asynchronous logic of this method
@@ -62,21 +71,27 @@ module RealClient
   #
   function request(con::RealConnection.ClientConnection, fn::Function, args...)
     if !isopen(con.sock) return false end
-
+    #
+    # This line is non blocking one
+    #
+    serialize(con.sock, RealConnection.Command(fn, [i for i in args]))
     #
     # TODO: i don't really know if julia GC removes this tasks
     # TODO: after closing the connection. Need to check this...
     #
-    @async begin
-      serialize(con.sock, RealConnection.Command(fn, [i for i in args]))
-      Event.fire(con.observer, "answer", deserialize(con.sock))
-    end
+    # @async begin
+    #   serialize(con.sock, RealConnection.Command(fn, [i for i in args]))
+    #   Event.fire(con.observer, "answer", deserialize(con.sock))
+    # end
 
     return true
   end
   #
-  # TODO:
+  # Closes client's socket. After this call, we have to call create()
+  # method again, if we want to send another request...
+  # @param con Client's connection object, returned by create()
   #
   function stop(con::RealConnection.ClientConnection)
+    close(con.sock)
   end
 end
