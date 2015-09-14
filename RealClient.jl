@@ -41,8 +41,17 @@ module RealClient
   import RealConnection
   import Event
 
+  export create
+  export request
+  export stop
+
   #
-  # TODO: describe possibility to throw an exeption
+  # Creates client and it's possibility to send requests to server.
+  # In case of connection errors connection object will be created
+  # in any case. You have to check this calling isopen() function.
+  # @param host Host we are connecting to
+  # @param port Port number we are connecting to
+  # @return Client connection object
   #
   function create(host::Base.IpAddr, port::Integer)
     local sock::Base.TcpSocket
@@ -66,7 +75,13 @@ module RealClient
     RealConnection.ClientConnection(sock, obs)
   end
   #
-  # TODO: describe asynchronous logic of this method
+  # Makes request to server. This method is not blocking. It returns
+  # just after the call. Answer will be obtained in create() method
+  # async loop.
+  # @param con Connection object returned by create() method
+  # @param fn Callback function, which will be called if answer
+  #           will be obtained from server.
+  # @param args Custom fn arguments
   # @return true - request was sent, false wasn't
   #
   function request(con::RealConnection.ClientConnection, fn::Function, args...)
@@ -75,14 +90,6 @@ module RealClient
     # This line is non blocking one
     #
     serialize(con.sock, RealConnection.Command(fn, [i for i in args]))
-    #
-    # TODO: i don't really know if julia GC removes this tasks
-    # TODO: after closing the connection. Need to check this...
-    #
-    # @async begin
-    #   serialize(con.sock, RealConnection.Command(fn, [i for i in args]))
-    #   Event.fire(con.observer, "answer", deserialize(con.sock))
-    # end
 
     return true
   end
@@ -92,6 +99,11 @@ module RealClient
   # @param con Client's connection object, returned by create()
   #
   function stop(con::RealConnection.ClientConnection)
+    #
+    # TODO: i don't really know if julia GC removes our task
+    # TODO: created inside create() method after closing 
+    # TODO: connection. Need to check this...
+    #
     close(con.sock)
   end
 end

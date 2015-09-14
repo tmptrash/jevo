@@ -69,6 +69,11 @@
 module RealServer
   import Event
   import RealConnection
+
+  export create
+  export run
+  export stop
+  export update
   # 
   # Creates a server. Returns special server's data object, which identifies
   # this server and takes an ability to listen it events. It also contains
