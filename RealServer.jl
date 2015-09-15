@@ -43,9 +43,6 @@
 #       # This call is used for switching between Tasks (green threads),
 #       # to prevent server blocking if you have many Tasks
 #       yield()
-#       # This call clears unused server Tasks and sockets.
-#       # It's needed, because of green threads are used...
-#       RealServer.update(connection)
 #     end
 #     ...
 #     # This is how we stop our server
@@ -55,8 +52,7 @@
 # a loop (like in example above) or your code may wait for 
 # connection in background (without blocking loop). For example,
 # you may run this example in a REPL without infinite loop at the
-# end. In this case, you have to call RealServer.update(connection)
-# manually.
+# end. In this case, you have to call yield() manually.
 # 
 # Events:
 #     command{RealConnection.Command, RealConnection.Answer} Fires
@@ -93,9 +89,9 @@ module RealServer
   # main asynchronous client-server communication logic. Here
   # all green threads are used. See this link for details:
   # http://julia.readthedocs.org/en/latest/manual/control-flow/#man-tasks
-  # Don't remember to call RealServer.update(connection) in 
-  # your main code (or loop) to remove all unused tasks and
-  # sockets.
+  # Don't remember to call yield() in your main code (or loop).
+  # It also calls _update() for removing closed connections
+  # ans failed tasks.
   # @param con Server connection object returned by RealServer.create()
   #
   function run(con::RealConnection.ServerConnection)
@@ -103,7 +99,10 @@ module RealServer
       while true
         push!(con.socks, accept(con.server))
         sock = con.socks[length(con.socks)]
-        push!(con.tasks, @async while isopen(sock) _answer(sock, con.observer) end)
+        push!(con.tasks, @async while isopen(sock) 
+          _answer(sock, con.observer)
+          _update(con)
+        end)
       end
     end
   end
@@ -122,7 +121,7 @@ module RealServer
   # for details.
   # @param con Connection object returned by create() method
   #
-  function update(con::RealConnection.ServerConnection)
+  function _update(con::RealConnection.ServerConnection)
     i::Int = 1
 
     while i <= length(con.socks)
