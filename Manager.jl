@@ -29,21 +29,40 @@ module Manager
   end
 
   #
-  # Runs everything
+  # Runs everything. Blocking function.
   #
   @debug function run()
   @bp
+    # TODO: this call should be removed, we have to run it from remote
     _createTasks()
     #
     # main loop
+    # TODO: add remote functions for changing decTimes and probs
     #
-    times    = uint(0)
-    decTimes = Config.organism["decreaseAfterTimes"]
-    probs    = Config.mutator["addChange"]
+    local times    = uint(0)
+    local decTimes = Config.organism["decreaseAfterTimes"]
+    local probs    = Config.mutator["addChange"]
     #
-    # TODO: what about case if all organisms will die
+    # This is main infinite loop. It manages input connections
+    # and organism's tasks switching.
     #
     while true
+      #
+      # This call runs all organism related tasks one by one
+      #
+      updateOrganisms(times, decTimes, probs)
+      #
+      # This call switches between all non blocking asynchronous
+      # functions (see @async macro). For example, it handles all
+      # input connections for current server.
+      #
+      yield()
+    end
+  end
+  #
+  # Updates organisms existance
+  #
+  function updateOrganisms(times::Uint, decTimes::Uint, probs::Array{Int, 1})
       #
       # This block runs one iteration for all available organisms
       #
@@ -68,12 +87,14 @@ module Manager
         end
         times = uint(0)
       end
-    end
+
+      times
   end
 
   #
   # Creates tasks and organisms according to Config. All tasks
   # will be in _tasks field.
+  # TODO: this functions should be removed
   #
   function _createTasks()
     #
@@ -89,6 +110,7 @@ module Manager
   # or random free position will be used.
   # @param pos Position|nothing Position of the organism
   # @return {OrganismTask}
+  # TODO: should be public with ability to call from remote
   #
   function _createTask(pos = nothing)
       org  = _createOrganism(pos)
