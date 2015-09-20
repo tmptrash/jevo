@@ -3,6 +3,8 @@
 # @singleton
 # TODO: describe that manager is a mediator between all other objects
 # TODO: like mutator, world, terminal and so on.
+# TODO: add support of serverPort cmd line argument
+# TODO: add remote functions for changing period and probs
 #
 module Manager
   import Creature
@@ -11,8 +13,18 @@ module Manager
   import Helper
   import Event
   import Mutator
+  import Server
+  import Connection
+  import CommandLine
   # TODO: remove this
   using Debug
+  #
+  # This manager is also a server for all other remote managers. These
+  # remote managers are clients for current and may use "Client" module
+  # to send commands and obtain results. So, this port will be used for
+  # current manager(server) for listening clients.
+  #
+  const PARAM_SERVER_PORT = "serverPort"
   
   #
   # One task related to one organism
@@ -33,15 +45,12 @@ module Manager
   #
   @debug function run()
   @bp
-    # TODO: this call should be removed, we have to run it from remote
-    _createTasks()
-    #
-    # main loop
-    # TODO: add remote functions for changing decTimes and probs
-    #
-    local times    = uint(0)
-    local decTimes = Config.organism["decreaseAfterTimes"]
-    local probs    = Config.mutator["addChange"]
+    counter  = uint(0)
+    period   = Config.organism["decreaseAfterTimes"]
+    probs    = Config.mutator["addChange"]
+    server   = _createServer()
+
+    Server.run(server)
     #
     # This is main infinite loop. It manages input connections
     # and organism's tasks switching.
@@ -50,7 +59,7 @@ module Manager
       #
       # This call runs all organism related tasks one by one
       #
-      updateOrganisms(times, decTimes, probs)
+      updateOrganisms(counter, period, probs)
       #
       # This call switches between all non blocking asynchronous
       # functions (see @async macro). For example, it handles all
@@ -60,14 +69,15 @@ module Manager
     end
   end
   #
-  # Updates organisms existance
+  # Updates organisms existance. We have to call this function to
+  # update organisms life in memory world...
   #
-  function updateOrganisms(times::Uint, decTimes::Uint, probs::Array{Int, 1})
+  function updateOrganisms(counter::Uint, period::Uint, probs::Array{Int, 1})
       #
       # This block runs one iteration for all available organisms
       #
-      len   = length(_tasks)
-      times += 1
+      len      = length(_tasks)
+      counter += 1
       for i = 1:len
         try
           consume(_tasks[i].task)
@@ -77,31 +87,29 @@ module Manager
       #
       # This block decreases energy from organisms, because they spend it while leaving
       #
-      if times === decTimes
-        @bp
+      if counter == period
         for i = 1:len
           org = _tasks[i].organism
           org.energy -= uint(1)
           _moveOrganism(org.pos, org)
           Mutator.mutate(org.script, probs)
         end
-        times = uint(0)
+        counter = uint(0)
       end
 
-      times
+      counter
   end
 
   #
   # Creates tasks and organisms according to Config. All tasks
   # will be in _tasks field.
-  # TODO: this functions should be removed
   #
-  function _createTasks()
+  function createOrganisms()
     #
     # Inits available organisms by Tasks
     #
     for i = 1:Config.organism["startAmount"]
-      _createTask()
+      createTask()
     end
   end
   #
@@ -110,9 +118,8 @@ module Manager
   # or random free position will be used.
   # @param pos Position|nothing Position of the organism
   # @return {OrganismTask}
-  # TODO: should be public with ability to call from remote
   #
-  function _createTask(pos = nothing)
+  function createOrganism(pos = nothing)
       org  = _createOrganism(pos)
       task = Task(eval(org.script.code))
       cr   = OrganismTask(task, org)
@@ -126,13 +133,23 @@ module Manager
       cr
   end
   #
+  # TODO:
+  #
+  @debug function _createServer()
+  @bp
+    port       = CommandLine.getValue(_params, PARAM_SERVER_PORT)
+    connection = Server.create(ip"127.0.0.1", port == "" ? Config.connection["serverPort"] : int(port))
+    Event.on(connection.observer, "command", _onRemoteCommand)
+    connection
+  end
+  #
   # Creates new organism and binds event handlers to him. It also
   # finds free point in a world, where organism will start living.
   # @param pos Optional. Position of organism.
   # @return {Creature.Organism}
   #
   function _createOrganism(pos = nothing)
-    pos      = pos === nothing ? World.getFreePos(_world) : pos
+    pos      = pos == nothing ? World.getFreePos(_world) : pos
     organism = Creature.create(pos)
     _moveOrganism(pos, organism)
 
@@ -175,23 +192,28 @@ module Manager
     pos.y * _world.width + pos.x
   end
   #
+  # Handler for commands obtained from all connected clients
+  #
+  function _onRemoteCommand(cmd::Connection.Command, ans::Connection.Answer)
+    # TODO:
+  end
+  #
   # Handles "beforeclone" event. Finds free point for new organism
   # and returns these coordinates. If no free space, then returns false.
   # It checks four (4) places around current organism's position: up,
   # down, left and right.
   # @param organism Parent organism
   #
-  @debug function _onClone(organism::Creature.Organism)
-  @bp
+  function _onClone(organism::Creature.Organism)
     #
     # First, we have to find free point near the organism
     #
     pos = World.getNearFreePos(_world, organism.pos)
-    if pos === false return nothing end
+    if pos == false return nothing end
     #
     # Creates new organism and applies mutations to him.
     #
-    crTask = _createTask(pos)
+    crTask = createOrganism(pos)
     for i = 1:Config.mutator["mutationsOnClone"]
       Mutator.mutate(crTask.organism.script, Config.mutator["addChange"])
     end
@@ -202,8 +224,7 @@ module Manager
   # @param pos Position to check
   # @param retObj Special object for return value
   #
-  @debug function _onGetEnergy(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
-  @bp
+  function _onGetEnergy(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
     retObj.ret = World.getEnergy(_world, pos)
   end
   #
@@ -212,8 +233,7 @@ module Manager
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  @debug function _onGrabLeft(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
-  @bp
+  function _onGrabLeft(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
     _onGrab(organism, amount, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
   end
   #
@@ -222,8 +242,7 @@ module Manager
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  @debug function _onGrabRight(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
-  @bp
+  function _onGrabRight(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
     _onGrab(organism, amount, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
   end
   #
@@ -232,8 +251,7 @@ module Manager
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  @debug function _onGrabUp(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
-  @bp
+  function _onGrabUp(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
     _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
   end
   #
@@ -242,8 +260,7 @@ module Manager
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  @debug function _onGrabDown(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
-  @bp
+  function _onGrabDown(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
     _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
   end
   #
@@ -252,8 +269,7 @@ module Manager
   # @param organism Parent organism
   # @param retObj Special object for return value
   #
-  @debug function _onStepLeft(organism::Creature.Organism, retObj::Creature.RetObj)
-  @bp
+  function _onStepLeft(organism::Creature.Organism, retObj::Creature.RetObj)
     _onStep(organism, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
   end
   #
@@ -262,8 +278,7 @@ module Manager
   # @param organism Parent organism
   # @param retObj Special object for return value
   #
-  @debug function _onStepRight(organism::Creature.Organism, retObj::Creature.RetObj)
-  @bp
+  function _onStepRight(organism::Creature.Organism, retObj::Creature.RetObj)
     _onStep(organism, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
   end
   #
@@ -272,8 +287,7 @@ module Manager
   # @param organism Parent organism
   # @param retObj Special object for return value
   #
-  @debug function _onStepUp(organism::Creature.Organism, retObj::Creature.RetObj)
-  @bp
+  function _onStepUp(organism::Creature.Organism, retObj::Creature.RetObj)
     _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
   end
   #
@@ -282,8 +296,7 @@ module Manager
   # @param organism Parent organism
   # @param retObj Special object for return value
   #
-  @debug function _onStepDown(organism::Creature.Organism, retObj::Creature.RetObj)
-  @bp
+  function _onStepDown(organism::Creature.Organism, retObj::Creature.RetObj)
     _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
   end
   #
@@ -295,8 +308,7 @@ module Manager
   # @param pos Point where we should check the energy
   # @param retObj Special object for return value
   #
-  @debug function _onGrab(organism::Creature.Organism, amount::Uint, pos::Helper.Point, retObj::Creature.RetObj)
-  @bp
+  function _onGrab(organism::Creature.Organism, amount::Uint, pos::Helper.Point, retObj::Creature.RetObj)
     retObj.ret = World.grabEnergy(_world, pos, amount)
     id         = _getOrganismId(pos)
     #
@@ -315,8 +327,7 @@ module Manager
   # @param pos Point where we should check the energy
   # @param retObj Special object for return value
   #
-  @debug function _onStep(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
-  @bp
+  function _onStep(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
     if World.getEnergy(_world, pos) == 0
       retObj.pos = pos
       _moveOrganism(pos, organism)
@@ -341,4 +352,14 @@ module Manager
   # for fast access to the organism by it's coordinates.
   #
   _posMap = Dict{Uint, Creature.Organism}()
+  #
+  # An API for remove clients. This manager will be a server for them.
+  # Only these functions may be called by clients. For calling them,
+  # you have to use "Client" module.
+  #
+  _api = [createOrganisms, createOrganism]
+  #
+  # Parameters passed through command line
+  #
+  _params = CommandLine.parse()
 end

@@ -94,12 +94,8 @@ module Config
   #
   const connection = {
     #
-    # This command means that current connection should be stopped and closed
-    #
-    "stopCmd"             => "stop",
-    #
     # Starting number for TCP/IP listening
     #
-    "startPort"           => 2000
+    "serverPort"          => 2000
   }
 end
