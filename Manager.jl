@@ -133,10 +133,12 @@ module Manager
       cr
   end
   #
-  # TODO:
+  # Creates server and returns it's ServerConnection type. It 
+  # uses porn number provided by "serverPort" command line
+  # argument or default one from Config module.
+  # @return Connection object
   #
-  @debug function _createServer()
-  @bp
+  function _createServer()
     port       = CommandLine.getValue(_params, PARAM_SERVER_PORT)
     connection = Server.create(ip"127.0.0.1", port == "" ? Config.connection["serverPort"] : int(port))
     Event.on(connection.observer, "command", _onRemoteCommand)
