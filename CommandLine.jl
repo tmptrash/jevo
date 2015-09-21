@@ -44,7 +44,7 @@ module CommandLine
   # doesn't exist, then returns empty string
   # @param 
   #
-  function getValue(args::Dict{ASCIIString, ASCIIString}, arg::ASCIIString)
+  function value(args::Dict{ASCIIString, ASCIIString}, arg::ASCIIString)
     haskey(args, arg) ? args[arg] : ""
   end
 end

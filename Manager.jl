@@ -139,7 +139,7 @@ module Manager
   # @return Connection object
   #
   function _createServer()
-    port       = CommandLine.getValue(_params, PARAM_SERVER_PORT)
+    port       = CommandLine.value(_params, PARAM_SERVER_PORT)
     connection = Server.create(ip"127.0.0.1", port == "" ? Config.connection["serverPort"] : int(port))
     Event.on(connection.observer, "command", _onRemoteCommand)
     connection
@@ -197,7 +197,11 @@ module Manager
   # Handler for commands obtained from all connected clients
   #
   function _onRemoteCommand(cmd::Connection.Command, ans::Connection.Answer)
-    # TODO:
+    if haskey(_api, cmd.cmd)
+      ans.data = cmd.cmd()
+    else
+      ans.data
+    end
   end
   #
   # Handles "beforeclone" event. Finds free point for new organism

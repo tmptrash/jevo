@@ -2,7 +2,8 @@
 module Connection
   import Event
   
-  export Connection
+  export ServerConnection
+  export ClientConnection
   export Answer
   export Command
 
