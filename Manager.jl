@@ -39,17 +39,26 @@ module Manager
     #
     organism::Creature.Organism
   end
+  #
+  # Manager's options, which may be changed by remote calls
+  #
+  type Options
+    period::Uint
+    probs::Array{Int, 1}
+  end
 
   #
   # Runs everything. Blocking function.
   #
   @debug function run()
   @bp
-    counter  = uint(0)
-    period   = Config.organism["decreaseAfterTimes"]
-    probs    = Config.mutator["addChange"]
-    server   = _createServer()
-
+    counter = uint(0)
+    server  = _createServer()
+    #
+    # This server is listening for all other managers and remote
+    # terminal. It runs obtained commands and send answers back.
+    # In other words, it works like RPC mechanism...
+    #
     Server.run(server)
     #
     # This is main infinite loop. It manages input connections
@@ -59,7 +68,7 @@ module Manager
       #
       # This call runs all organism related tasks one by one
       #
-      updateOrganisms(counter, period, probs)
+      counter = updateOrganisms(counter)
       #
       # This call switches between all non blocking asynchronous
       # functions (see @async macro). For example, it handles all
@@ -72,7 +81,7 @@ module Manager
   # Updates organisms existance. We have to call this function to
   # update organisms life in memory world...
   #
-  function updateOrganisms(counter::Uint, period::Uint, probs::Array{Int, 1})
+  function updateOrganisms(counter::Uint)
       #
       # This block runs one iteration for all available organisms
       #
@@ -87,12 +96,12 @@ module Manager
       #
       # This block decreases energy from organisms, because they spend it while leaving
       #
-      if counter == period
+      if counter == _options.period
         for i = 1:len
           org = _tasks[i].organism
           org.energy -= uint(1)
           _moveOrganism(org.pos, org)
-          Mutator.mutate(org.script, probs)
+          Mutator.mutate(org.script, _options.probs)
         end
         counter = uint(0)
       end
@@ -131,6 +140,15 @@ module Manager
       push!(obj, org)
       consume(task)
       cr
+  end
+  #
+  # Energy decrease period setter. This method may be called
+  # from remote for changing this perion. It affects on speed
+  # of organism's energy spending.
+  # @param period Period we want to set
+  #
+  function setPeriod(period::Uint)
+    _options.period = period
   end
   #
   # Creates server and returns it's ServerConnection type. It 
@@ -194,14 +212,12 @@ module Manager
     pos.y * _world.width + pos.x
   end
   #
-  # Handler for commands obtained from all connected clients
+  # Handler for commands obtained from all connected clients. All supported
+  # commands are in _api dictionary. If current command is undefinedin _api
+  # then, false will be returned.
   #
   function _onRemoteCommand(cmd::Connection.Command, ans::Connection.Answer)
-    if haskey(_api, cmd.cmd)
-      ans.data = cmd.cmd()
-    else
-      ans.data
-    end
+    ans.data = _api[cmd.cmd]) ? cmd.cmd() : false
   end
   #
   # Handles "beforeclone" event. Finds free point for new organism
@@ -359,13 +375,26 @@ module Manager
   #
   _posMap = Dict{Uint, Creature.Organism}()
   #
+  # Parameters passed through command line
+  #
+  _params = CommandLine.parse()
+  #
+  # Global manager's options like: energy decrease period, add/change
+  # operation probability and so on. This options may be changed by
+  # remote calls. See _api for details.
+  #
+  _options = Options(
+    Config.organism["decreaseAfterTimes"],
+    Config.mutator["addChange"]
+  )
+  #
   # An API for remove clients. This manager will be a server for them.
   # Only these functions may be called by clients. For calling them,
   # you have to use "Client" module.
   #
-  _api = [createOrganisms, createOrganism]
-  #
-  # Parameters passed through command line
-  #
-  _params = CommandLine.parse()
+  _api = Dict{Function, Bool}([
+    createOrganisms => true,
+    createOrganism  => true,
+    setPeriod       => true
+  ])
 end
