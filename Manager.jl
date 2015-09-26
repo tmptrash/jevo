@@ -49,8 +49,7 @@ module Manager
   #
   # Runs everything. Blocking function.
   #
-  @debug function run()
-  @bp
+  function run()
     counter    = uint(0)
     server     = _createServer()
     #
@@ -86,7 +85,7 @@ module Manager
     # Inits available organisms by Tasks
     #
     for i = 1:Config.organism["startAmount"]
-      createTask()
+      createOrganism()
     end
   end
   #
@@ -230,7 +229,7 @@ module Manager
   #
   @debug function _onRemoteCommand(cmd::Connection.Command, ans::Connection.Answer)
   @bp
-    ans.data = _api[cmd.cmd] ? cmd.cmd() : false
+    ans.data = haskey(_api, cmd.cmd) ? apply(cmd.cmd, cmd.args) : false
   end
   #
   # Handles "beforeclone" event. Finds free point for new organism
@@ -409,6 +408,6 @@ module Manager
     createOrganisms  => true,
     createOrganism   => true,
     setPeriod        => true,
-    setProbabilities =>true
+    setProbabilities => true
   ])
 end
