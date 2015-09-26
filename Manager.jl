@@ -19,6 +19,10 @@ module Manager
   # TODO: remove this
   using Debug
   #
+  # Includes Manager module parts
+  #
+  include("ManagerRpc.jl")
+  #
   # This manager is also a server for all other remote managers. These
   # remote managers are clients for current and may use "Client" module
   # to send commands and obtain results. So, this port will be used for
@@ -74,60 +78,6 @@ module Manager
       #
       yield()
     end
-  end
-  #
-  # @rpc
-  # Creates tasks and organisms according to Config. All tasks
-  # will be in _tasks field.
-  #
-  function createOrganisms()
-    #
-    # Inits available organisms by Tasks
-    #
-    for i = 1:Config.organism["startAmount"]
-      createOrganism()
-    end
-  end
-  #
-  # @rpc
-  # Creates one task and organism inside this task. Created
-  # task will be added to _tasks array. Position may be set
-  # or random free position will be used.
-  # @param pos Position|nothing Position of the organism
-  # @return {OrganismTask}
-  #
-  function createOrganism(pos = nothing)
-      org  = _createOrganism(pos)
-      task = Task(eval(org.script.code))
-      cr   = OrganismTask(task, org)
-      push!(_tasks, cr)
-      #
-      # initializes the organism with it's instance
-      #
-      obj = consume(task)
-      push!(obj, org)
-      consume(task)
-      cr
-  end
-  #
-  # @rpc
-  # Energy decrease period setter. This method may be called
-  # from remote for changing this perion. It affects on speed
-  # of organism's energy spending.
-  # @param period Period we want to set
-  #
-  @debug function setPeriod(period::Uint)
-  @bp
-    _options.period = period
-  end
-  #
-  # @rpc
-  # Mutator's change/add probability array. This is a probability
-  # for mutator, which affects more changes or additions in 
-  # organism's source code.
-  #
-  function setProbabilities(probs::Array{Int})
-    _options.probs = probs
   end
   
   #
@@ -221,15 +171,6 @@ module Manager
   #
   function _getOrganismId(pos::Helper.Point)
     pos.y * _world.width + pos.x
-  end
-  #
-  # Handler for commands obtained from all connected clients. All supported
-  # commands are in _api dictionary. If current command is undefinedin _api
-  # then, false will be returned.
-  #
-  @debug function _onRemoteCommand(cmd::Connection.Command, ans::Connection.Answer)
-  @bp
-    ans.data = haskey(_api, cmd.cmd) ? apply(cmd.cmd, cmd.args) : false
   end
   #
   # Handles "beforeclone" event. Finds free point for new organism
@@ -393,21 +334,10 @@ module Manager
   #
   # Global manager's options like: energy decrease period, add/change
   # operation probability and so on. This options may be changed by
-  # remote calls. See _api for details.
+  # remote calls. See _rpcApi for details.
   #
   _options = Options(
     Config.organism["decreaseAfterTimes"],
     Config.mutator["addChange"]
   )
-  #
-  # An API for remove clients. This manager will be a server for them.
-  # Only these functions may be called by clients. For calling them,
-  # you have to use "Client" module.
-  #
-  _api = Dict{Function, Bool}([
-    createOrganisms  => true,
-    createOrganism   => true,
-    setPeriod        => true,
-    setProbabilities => true
-  ])
 end
