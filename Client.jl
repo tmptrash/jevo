@@ -2,7 +2,7 @@
 # TCP Client implementation. It works in pair with Server 
 # module. It also works in asynchronous way (like a server) 
 # and implements simple RPC-like logic. All you need to do is
-# create a client, add listeners to "answer" event if needed 
+# create a client, add listeners to EVENT_ANSWER event if needed 
 # and call request() method as many times as needed. The answer 
 # will be obtained through onAnswer() callback. 
 # 
@@ -25,8 +25,8 @@
 #
 #     # Creates the client and connects to server
 #     connection = Client.create(ip"127.0.0.1", 2001)
-#     # Starts to listen "answer" event
-#     Event.on(connection.observer, "answer", onAnswer)
+#     # Starts to listen EVENT_ANSWER event
+#     Event.on(connection.observer, EVENT_ANSWER, onAnswer)
 #     # Makes a request to the server. An answer will
 #     # be obtained in onAnswer() callback.
 #     Client.request(connection, rand, 2, 3)
@@ -44,7 +44,12 @@ module Client
   export create
   export request
   export stop
-
+  export EVENT_ANSWER
+  #
+  # Name of the event, which is fired if answer from client's 
+  # request is obtained.
+  #
+  const EVENT_ANSWER = "answer"
   #
   # Creates client and it's possibility to send requests to server.
   # In case of connection errors connection object will be created
@@ -65,7 +70,7 @@ module Client
       # using green thread (Task).
       #
       @async while true
-        Event.fire(obs, "answer", deserialize(sock))
+        Event.fire(obs, EVENT_ANSWER, deserialize(sock))
       end
     catch e
       # TODO: what to do with e?

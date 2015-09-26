@@ -6,7 +6,6 @@
 #
 module Config
   export mutator
-
   #
   # Mutator related configuration
   #

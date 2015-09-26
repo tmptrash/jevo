@@ -24,8 +24,7 @@ module Manager
   # to send commands and obtain results. So, this port will be used for
   # current manager(server) for listening clients.
   #
-  const PARAM_SERVER_PORT = "serverPort"
-  
+  const PARAM_SERVER_PORT = "serverPort"  
   #
   # One task related to one organism
   #
@@ -52,8 +51,8 @@ module Manager
   #
   @debug function run()
   @bp
-    counter = uint(0)
-    server  = _createServer()
+    counter    = uint(0)
+    server     = _createServer()
     #
     # This server is listening for all other managers and remote
     # terminal. It runs obtained commands and send answers back.
@@ -68,7 +67,7 @@ module Manager
       #
       # This call runs all organism related tasks one by one
       #
-      counter = updateOrganisms(counter)
+      counter = _updateOrganisms(counter)
       #
       # This call switches between all non blocking asynchronous
       # functions (see @async macro). For example, it handles all
@@ -78,10 +77,65 @@ module Manager
     end
   end
   #
+  # @rpc
+  # Creates tasks and organisms according to Config. All tasks
+  # will be in _tasks field.
+  #
+  function createOrganisms()
+    #
+    # Inits available organisms by Tasks
+    #
+    for i = 1:Config.organism["startAmount"]
+      createTask()
+    end
+  end
+  #
+  # @rpc
+  # Creates one task and organism inside this task. Created
+  # task will be added to _tasks array. Position may be set
+  # or random free position will be used.
+  # @param pos Position|nothing Position of the organism
+  # @return {OrganismTask}
+  #
+  function createOrganism(pos = nothing)
+      org  = _createOrganism(pos)
+      task = Task(eval(org.script.code))
+      cr   = OrganismTask(task, org)
+      push!(_tasks, cr)
+      #
+      # initializes the organism with it's instance
+      #
+      obj = consume(task)
+      push!(obj, org)
+      consume(task)
+      cr
+  end
+  #
+  # @rpc
+  # Energy decrease period setter. This method may be called
+  # from remote for changing this perion. It affects on speed
+  # of organism's energy spending.
+  # @param period Period we want to set
+  #
+  @debug function setPeriod(period::Uint)
+  @bp
+    _options.period = period
+  end
+  #
+  # @rpc
+  # Mutator's change/add probability array. This is a probability
+  # for mutator, which affects more changes or additions in 
+  # organism's source code.
+  #
+  function setProbabilities(probs::Array{Int})
+    _options.probs = probs
+  end
+  
+  #
   # Updates organisms existance. We have to call this function to
   # update organisms life in memory world...
   #
-  function updateOrganisms(counter::Uint)
+  function _updateOrganisms(counter::Uint)
       #
       # This block runs one iteration for all available organisms
       #
@@ -108,48 +162,6 @@ module Manager
 
       counter
   end
-
-  #
-  # Creates tasks and organisms according to Config. All tasks
-  # will be in _tasks field.
-  #
-  function createOrganisms()
-    #
-    # Inits available organisms by Tasks
-    #
-    for i = 1:Config.organism["startAmount"]
-      createTask()
-    end
-  end
-  #
-  # Creates one task and organism inside this task. Created
-  # task will be added to _tasks array. Position may be set
-  # or random free position will be used.
-  # @param pos Position|nothing Position of the organism
-  # @return {OrganismTask}
-  #
-  function createOrganism(pos = nothing)
-      org  = _createOrganism(pos)
-      task = Task(eval(org.script.code))
-      cr   = OrganismTask(task, org)
-      push!(_tasks, cr)
-      #
-      # initializes the organism with it's instance
-      #
-      obj = consume(task)
-      push!(obj, org)
-      consume(task)
-      cr
-  end
-  #
-  # Energy decrease period setter. This method may be called
-  # from remote for changing this perion. It affects on speed
-  # of organism's energy spending.
-  # @param period Period we want to set
-  #
-  function setPeriod(period::Uint)
-    _options.period = period
-  end
   #
   # Creates server and returns it's ServerConnection type. It 
   # uses porn number provided by "serverPort" command line
@@ -159,7 +171,7 @@ module Manager
   function _createServer()
     port       = CommandLine.value(_params, PARAM_SERVER_PORT)
     connection = Server.create(ip"127.0.0.1", port == "" ? Config.connection["serverPort"] : int(port))
-    Event.on(connection.observer, "command", _onRemoteCommand)
+    Event.on(connection.observer, Server.EVENT_COMMAND, _onRemoteCommand)
     connection
   end
   #
@@ -216,8 +228,9 @@ module Manager
   # commands are in _api dictionary. If current command is undefinedin _api
   # then, false will be returned.
   #
-  function _onRemoteCommand(cmd::Connection.Command, ans::Connection.Answer)
-    ans.data = _api[cmd.cmd]) ? cmd.cmd() : false
+  @debug function _onRemoteCommand(cmd::Connection.Command, ans::Connection.Answer)
+  @bp
+    ans.data = _api[cmd.cmd] ? cmd.cmd() : false
   end
   #
   # Handles "beforeclone" event. Finds free point for new organism
@@ -393,8 +406,9 @@ module Manager
   # you have to use "Client" module.
   #
   _api = Dict{Function, Bool}([
-    createOrganisms => true,
-    createOrganism  => true,
-    setPeriod       => true
+    createOrganisms  => true,
+    createOrganism   => true,
+    setPeriod        => true,
+    setProbabilities =>true
   ])
 end

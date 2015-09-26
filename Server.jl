@@ -30,7 +30,7 @@
 #     # Creation of server doesn't run it
 #     connection = Server.create(ip"127.0.0.1", 2001)
 #     # Before running we have to bind command event listeners
-#     Event.on(connection.observer, "command", onCommand)
+#     Event.on(connection.observer, EVENT_COMMAND, onCommand)
 #     # This is how our server run itself
 #     Server.run(connection)
 #
@@ -69,6 +69,13 @@ module Server
   export create
   export run
   export stop
+  export EVENT_COMMAND
+  #
+  # Name of the event, which is used for our RPC like TCP protocol. If
+  # this command fires, then specified command should be runned here, on
+  # server side.
+  #
+  const EVENT_COMMAND = "command"
   # 
   # Creates a server. Returns special server's data object, which identifies
   # this server and takes an ability to listen it events. It also contains
@@ -142,7 +149,7 @@ module Server
   #
   function _answer(sock::Base.TcpSocket, obs::Event.Observer)
     ans = Connection.Answer(null)
-    Event.fire(obs, "command", deserialize(sock), ans)
+    Event.fire(obs, EVENT_COMMAND, deserialize(sock), ans)
     serialize(sock, ans)
   end
 end
