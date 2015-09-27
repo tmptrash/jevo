@@ -26,19 +26,7 @@ end
 # @return {OrganismTask}
 #
 function createOrganism(pos = nothing)
-  # TODO: this code should be moved to _createOrganism() function
-  # TODO: because this file should has dependencies to other files
-    org  = _createOrganism(pos)
-    task = Task(eval(org.script.code))
-    cr   = OrganismTask(task, org)
-    push!(_tasks, cr)
-    #
-    # initializes the organism with it's instance
-    #
-    obj = consume(task)
-    push!(obj, org)
-    consume(task)
-    cr
+    Manager._createOrganism(pos)
 end
 #
 # @rpc
@@ -49,7 +37,7 @@ end
 #
 @debug function setPeriod(period::Uint)
 @bp
-  _options.period = period
+  Manager._options.period = period
 end
 #
 # @rpc
@@ -58,7 +46,7 @@ end
 # organism's source code.
 #
 function setProbabilities(probs::Array{Int})
-  _options.probs = probs
+  Manager._options.probs = probs
 end
 
 #

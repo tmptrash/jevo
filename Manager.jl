@@ -127,25 +127,36 @@ module Manager
   # Creates new organism and binds event handlers to him. It also
   # finds free point in a world, where organism will start living.
   # @param pos Optional. Position of organism.
-  # @return {Creature.Organism}
+  # @return {OrganismTask}
   #
   function _createOrganism(pos = nothing)
-    pos      = pos == nothing ? World.getFreePos(_world) : pos
-    organism = Creature.create(pos)
-    _moveOrganism(pos, organism)
+    pos  = pos == nothing ? World.getFreePos(_world) : pos
+    org  = Creature.create(pos)
+    task = Task(eval(org.script.code))
 
-    Event.on(organism.observer, "getenergy", _onGetEnergy)
-    Event.on(organism.observer, "grableft",  _onGrabLeft )
-    Event.on(organism.observer, "grabright", _onGrabRight)
-    Event.on(organism.observer, "grabup",    _onGrabUp   )
-    Event.on(organism.observer, "grabdown",  _onGrabDown )
-    Event.on(organism.observer, "stepleft",  _onStepLeft )
-    Event.on(organism.observer, "stepright", _onStepRight)
-    Event.on(organism.observer, "stepup",    _onStepUp   )
-    Event.on(organism.observer, "stepdown",  _onStepDown )
-    Event.on(organism.observer, "clone",     _onClone    )
+    Event.on(org.observer, "getenergy", _onGetEnergy)
+    Event.on(org.observer, "grableft",  _onGrabLeft )
+    Event.on(org.observer, "grabright", _onGrabRight)
+    Event.on(org.observer, "grabup",    _onGrabUp   )
+    Event.on(org.observer, "grabdown",  _onGrabDown )
+    Event.on(org.observer, "stepleft",  _onStepLeft )
+    Event.on(org.observer, "stepright", _onStepRight)
+    Event.on(org.observer, "stepup",    _onStepUp   )
+    Event.on(org.observer, "stepdown",  _onStepDown )
+    Event.on(org.observer, "clone",     _onClone    )
+    #
+    # Shows organism
+    #
+    _moveOrganism(pos, org)
+    #
+    # Initializes the organism with it's instance
+    #
+    obj = consume(task)
+    push!(obj, org)
+    consume(task)
 
-    organism
+    push!(_tasks, oTask = OrganismTask(task, org))
+    oTask
   end
   #
   # Moves organism to specified position. Updates organism's 
