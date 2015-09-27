@@ -5,6 +5,19 @@
 #
 
 #
+# Creates server and returns it's ServerConnection type. It 
+# uses porn number provided by "serverPort" command line
+# argument or default one from Config module.
+# @return Connection object
+#
+function _createServer()
+  port = CommandLine.value(_params, Manager.PARAM_SERVER_PORT)
+  port = port == "" ? Config.connection["serverPort"] : int(port)
+  con  = Server.create(ip"127.0.0.1", port)
+  Event.on(con.observer, Server.EVENT_COMMAND, _onRemoteCommand)
+  con
+end
+#
 # @rpc
 # Creates tasks and organisms according to Config. All tasks
 # will be in _tasks field.
@@ -35,8 +48,7 @@ end
 # of organism's energy spending.
 # @param period Period we want to set
 #
-@debug function setPeriod(period::Uint)
-@bp
+function setPeriod(period::Uint)
   Manager._options.period = period
 end
 #
@@ -55,7 +67,7 @@ end
 # then, false will be returned.
 #
 function _onRemoteCommand(cmd::Connection.Command, ans::Connection.Answer)
-  ans.data = haskey(_rpcApi, cmd.cmd) ? apply(cmd.cmd, cmd.args) : false
+  ans.data = haskey(Manager._rpcApi, cmd.cmd) ? apply(cmd.cmd, cmd.args) : false
 end
 #
 # An API for remove clients. This manager will be a server for them.
