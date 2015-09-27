@@ -48,7 +48,8 @@
   # @param pos Optional. Position of organism.
   # @return {OrganismTask}
   #
-  function _createOrganism(pos = nothing)
+  @debug function _createOrganism(pos = nothing)
+  @bp
     pos  = pos == nothing ? World.getFreePos(Manager._world) : pos
     org  = Creature.create(pos)
     task = Task(eval(org.script.code))
@@ -73,8 +74,12 @@
     obj = consume(task)
     push!(obj, org)
     consume(task)
-
-    push!(_tasks, oTask = OrganismTask(task, org))
+    #
+    # Adds organism to organisms pool
+    #
+    oTask = OrganismTask(task, org)
+    push!(_tasks, oTask)
+    consume(task)
     oTask
   end
   #
