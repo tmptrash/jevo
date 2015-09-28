@@ -76,7 +76,7 @@ module Config
     # Amount of iterations within organism's life loop, after that we decrease
     # amount of energy ono 1 point.
     #
-    "decreaseAfterTimes"  => uint(10)
+    "decreaseAfterTimes"  => uint(1000)
   }
   const world = {
     #

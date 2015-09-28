@@ -47,7 +47,7 @@ module Manager
   #
   function run()
     counter    = uint(0)
-    server     = _createServer()
+    server     = _createServer() 
     #
     # This server is listening for all other managers and remote
     # terminal. It runs obtained commands and send answers back.
@@ -62,13 +62,15 @@ module Manager
       #
       # This call runs all organism related tasks one by one
       #
-      counter = _updateOrganisms(counter)
+      counter = _updateOrganisms(counter) + 0x01
       #
       # This call switches between all non blocking asynchronous
       # functions (see @async macro). For example, it handles all
       # input connections for current server.
       #
       yield()
+      #TODO: remove this...
+      if counter % 5000000 == 0 print('*') end
     end
   end
 
