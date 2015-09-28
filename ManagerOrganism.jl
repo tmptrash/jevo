@@ -79,7 +79,6 @@
     #
     oTask = OrganismTask(task, org)
     push!(_tasks, oTask)
-    consume(task)
     oTask
   end
   #
