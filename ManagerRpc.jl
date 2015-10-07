@@ -12,8 +12,11 @@
 # @param width Width. 0 means all width
 # @param height Height. 0 means all height
 #
-function getRegion(x::Integer = 0, y::Integer = 0, width::Integer = 0, height::Integer = 0)
-  _world
+function getRegion(x::Integer = 1, y::Integer = 1, width::Integer = 0, height::Integer = 0)
+  if width  === 0 width  = size(_world.data)[2]
+  if height === 0 height = size(_world.data)[1]
+  # TODO: add range check
+  _world[y:x, y + height:x + width]
 end
 #
 # @rpc
