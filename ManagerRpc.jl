@@ -5,17 +5,15 @@
 #
 
 #
-# Creates server and returns it's ServerConnection type. It 
-# uses porn number provided by "serverPort" command line
-# argument or default one from Config module.
-# @return Connection object
+# @rpc
+# Grabs world's rectangle region and returns it
+# @param x Start X coordinate of region
+# @param y Start Y coordinate of region
+# @param width Width. 0 means all width
+# @param height Height. 0 means all height
 #
-function _createServer()
-  port = CommandLine.value(_params, Manager.PARAM_SERVER_PORT)
-  port = port == "" ? Config.connection["serverPort"] : int(port)
-  con  = Server.create(ip"127.0.0.1", port)
-  Event.on(con.observer, Server.EVENT_COMMAND, _onRemoteCommand)
-  con
+function getRegion(x::Integer = 0, y::Integer = 0, width::Integer = 0, height::Integer = 0)
+  _world
 end
 #
 # @rpc
@@ -61,6 +59,19 @@ function setProbabilities(probs::Array{Int})
   Manager._options.probs = probs
 end
 
+#
+# Creates server and returns it's ServerConnection type. It 
+# uses porn number provided by "serverPort" command line
+# argument or default one from Config module.
+# @return Connection object
+#
+function _createServer()
+  port = CommandLine.value(_params, Manager.PARAM_SERVER_PORT)
+  port = port == "" ? Config.connection["serverPort"] : int(port)
+  con  = Server.create(ip"127.0.0.1", port)
+  Event.on(con.observer, Server.EVENT_COMMAND, _onRemoteCommand)
+  con
+end
 #
 # Handler for commands obtained from all connected clients. All supported
 # commands are in _rpcApi dictionary. If current command is undefinedin _rpcApi
