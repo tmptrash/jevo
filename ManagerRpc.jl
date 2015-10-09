@@ -13,9 +13,12 @@
 # @param height Height. 0 means all height
 #
 function getRegion(x::Integer = 1, y::Integer = 1, width::Integer = 0, height::Integer = 0)
-  if width  === 0 width  = size(_world.data)[2]
-  if height === 0 height = size(_world.data)[1]
-  # TODO: add range check
+  maxWidth  = size(_world.data)[2]
+  maxHeight = size(_world.data)[1]
+
+  if (width  === 0 || width  > maxWidth)  width  = maxWidth  end
+  if (height === 0 || height > maxHeight) height = maxHeight end
+  
   _world[y:x, y + height:x + width]
 end
 #
