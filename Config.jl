@@ -86,7 +86,12 @@ module Config
     #
     # World height
     #
-    "height"              => uint(3)
+    "height"              => uint(3),
+    #
+    # Delay between requests for obtaining remote world region.
+    # This parameter affects frames per second in a window canvas
+    #
+    "frameDelay"          => 5
   }
   #
   # Configuration of the TCP connection

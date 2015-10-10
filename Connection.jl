@@ -21,7 +21,7 @@ module Connection
   end
   # TODO:
   type Command
-    cmd::Function
+    fn::Integer
     args::Array{Any}
   end
   # TODO:

@@ -84,12 +84,12 @@ module Client
   # just after the call. Answer will be obtained in create() method
   # async loop.
   # @param con Connection object returned by create() method
-  # @param fn Callback function, which will be called if answer
+  # @param fn Callback function id, which will be called if answer
   #           will be obtained from server.
   # @param args Custom fn arguments
   # @return true - request was sent, false wasn't
   #
-  function request(con::Connection.ClientConnection, fn::Function, args...)
+  function request(con::Connection.ClientConnection, fn::Integer, args...)
     if !isopen(con.sock) return false end
     #
     # This line is non blocking one
