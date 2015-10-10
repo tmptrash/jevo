@@ -10,45 +10,51 @@ module RemoteWorld
 
   export create
   export display
-
+  export stop
   #
-  # Contains data of for remote host, from where we broadcasting 
-  # world's region and shows on a canvas.
+  # Contains data of for remote host, from where we displaying 
+  # world's region and shows it on a canvas.
   #
   type RemoteData
     con::Connection.ClientConnection
-    timer::Function
+    resp::Function
   end
   #
   # Creates connection with remote host for display pixels
   # from organism's world.
-  # @param host Remote host we are connecting to
-  # @param port Remote port we are connecting to
+  # @param host  Remote host we are connecting to
+  # @param port  Remote port we are connecting to
+  # @param delay Delay between requests
   # @return RemoteData
   #
-  function create(host::Base.IpAddr, port::Integer)
-    RemoteData(Client.create(host, port), onTimer)
+  function create(host::Base.IpAddr, port::Integer, delay::Integer)
+    client = Client.create(host, port)
+    RemoteData(client, (ans::Connection.Answer) -> _onResponse(client, delay, ans))
   end
   #
   # 
   #
   function display(rd::RemoteData)
-    Event.on(rd.con.observer, Client.EVENT_ANSWER, onResponse)
-    #
-    #
-    #
+    Event.on(rd.con.observer, Client.EVENT_ANSWER, rd.resp)
     Client.request(rd.con, getRegion)
   end
   #
-  # Stops displaying
+  # Stops displaying organism's world
   #
   function stop(rd::RemoteData)
-    Event.off(rd.con.observer, Client.EVENT_ANSWER, onResponse)
+    Event.off(rd.con.observer, Client.EVENT_ANSWER, _onResponse)
     Client.stop(rd.con)
   end
-
-  function onResponse(ans::Connection.Answer)
+  #
+  # Handler of server answer
+  # @param rd remote data for specified server
+  # @param ans Answer object with region data
+  #
+  function _onResponse(con::Connection.ClientConnection, delay::Integer, ans::Connection.Answer)
     width  = size(ans.data)[2]
     height = size(ans.data)[1]
+    # TODO: show on canvas
+    sleep(delay)
+    Client.request(con, getRegion)
   end
 end
