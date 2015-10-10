@@ -29,6 +29,8 @@
 #   stepdown   {Organism, {ret=>Point}}  Fires to make a step down. "ret" will contain
 #                                        new organism's position.
 #
+# @author DeadbraiN
+#
 # TODO: code should be wrapped by try...catch, because different 
 # TODO: exceptions are possible.
 #

@@ -1,8 +1,10 @@
- #
- # Organism's script related functionality. Every organism, contains this
- # script. It's like a DNA for biological organisms. It can be mutated by 
- # Mutator module.
- #
+#
+# Organism's script related functionality. Every organism, contains this
+# script. It's like a DNA for biological organisms. It can be mutated by 
+# Mutator module.
+#
+# @author DeadbraiN
+#
  module Script
   export Code
   export Block

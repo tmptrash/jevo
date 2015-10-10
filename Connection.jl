@@ -1,3 +1,6 @@
+#
+# @author DeadbraiN
+#
 # TODO:
 module Connection
   import Event

@@ -3,6 +3,8 @@
 # This is a part of Manager module.
 # TODO: Dependencies
 #
+# @author DeadbraiN
+#
 
 #
 # @rpc

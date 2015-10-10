@@ -1,6 +1,9 @@
 #
 # Manages organisms and they world
 # @singleton
+#
+# @author DeadbraiN
+#
 # TODO: describe included files and how to split Manager on files.
 # TODO:   - Manager may call every function from any file
 # TODO:   - File may call every function except other files

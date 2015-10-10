@@ -12,8 +12,10 @@
 # server, it has only one place, where "magic" occures. It's
 # request() method. It uses tasks for sending non blocking 
 # requests and obtaining answers (see @async macro in code).
-# Every request creates one tasks
-# 
+# Every request creates one tasks 
+#
+# @author DeadbraiN
+#
 # See example below for details:
 #
 # TODO: check if this example work!!!

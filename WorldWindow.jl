@@ -8,6 +8,8 @@
 # TODO: write about tcp/ip connection to the server (this window is a client)
 # TODO: rename this module to CanvasWindow
 #
+# @author DeadbraiN
+#
 module WorldWindow
   import Base.Graphics
   import Cairo

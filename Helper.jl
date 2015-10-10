@@ -1,3 +1,6 @@
+#
+# @author DeadbraiN
+#
 module Helper
   export randTrue
   export getProbIndex

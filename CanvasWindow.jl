@@ -7,6 +7,8 @@
 # circles in OpenGL canvas.
 # TODO: write about tcp/ip connection to the server (this window is a client)
 #
+# @author DeadbraiN
+#
 module CanvasWindow
   import Base.Graphics
   import Cairo

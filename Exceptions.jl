@@ -1,6 +1,8 @@
 #
 # This module contains all application related exception types
 #
+# @author DeadbraiN
+#
 module Exceptions
   export UserException
 

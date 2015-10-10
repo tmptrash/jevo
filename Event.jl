@@ -1,6 +1,8 @@
 #
 # TODO: Describe this module
 #
+# @author DeadbraiN
+#
 module Event
   export Observer
   export on

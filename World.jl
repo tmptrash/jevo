@@ -2,6 +2,8 @@
 # 2D space, where all organisms are live.
 # TODO: describe update event
 #
+# @author DeadbraiN
+#
 module World
   import Creature
   import Helper
