@@ -33,6 +33,7 @@ module RemoteWorld
   #
   type RemoteData
     con::Connection.ClientConnection
+    win::CanvasWindow.Window
     resp::Function
     delay::Integer
     x::Integer
@@ -40,17 +41,19 @@ module RemoteWorld
     width::Integer
     height::Integer
 
-    RemoteData(con::Connection.ClientConnection) = new(con)
+    RemoteData(con::Connection.ClientConnection, win::CanvasWindow.Window) = new(con, win)
   end
   #
   # Creates connection with remote host for display pixels
   # from organism's world.
-  # @param host  Remote host we are connecting to
-  # @param port  Remote port we are connecting to
+  # @param host   Remote host we are connecting to
+  # @param port   Remote port we are connecting to
+  # @param width  Canvas width in pixels
+  # @param height Canvas height in pixels
   # @return RemoteData
   #
-  function create(host::Base.IpAddr, port::Integer)
-    RemoteData(Client.create(host, port))
+  function create(host::Base.IpAddr, port::Integer, width::Uint = Config.world["width"], height::Uint = Config.world["height"])
+    RemoteData(Client.create(host, port), CanvasWindow.create(width, height))
   end
   #
   #
@@ -74,16 +77,17 @@ module RemoteWorld
     Event.off(rd.con.observer, Client.EVENT_ANSWER, rd.resp)
     Client.stop(rd.con)
   end
-  #
+  # TODO: describe format of the answer:2 dimentional array
   # Handler of server answer
   # @param rd remote data for specified server
   # @param ans Answer object with region data
   #
-  function _onResponse(rd::RemoteData, ans::Connection.Answer)
-    println(ans)
-    width  = size(ans.data)[2]
-    height = size(ans.data)[1]
-    # TODO: show on canvas
+  function _onResponse(rd::RemoteData, ans::Connection.Answer)   
+    for x in 1:size(ans.data)[2]
+      for y in 1:size(ans.data)[1]
+        CanvasWindow.dot(rd.win, x, y, ans.data[x, y])
+      end
+    end
     sleep(rd.delay)
     Client.request(rd.con, RPC_GET_REGION, rd.x, rd.y, rd.width, rd.height)
   end

@@ -79,6 +79,19 @@ module CanvasWindow
     Tk.stroke(win.context)
   end
   #
+  # Draws one dot (point) on the canvas with specified color
+  # @param win Windows type
+  # @param x X coordinate of the point
+  # @param y Y coordinate of the point
+  # @param color Color of the dot. We use only first three bytes (24bits)
+  #
+  function dot(win::Window, x::Int, y::Int, color::Int32)
+    Tk.set_source_rgb(win.context, color >> 16, (color >> 8) & 0x0000ff, color & 0x0000ff)
+    Tk.move_to(win.context, x, y)
+    Tk.line_to(win.context, x+1, y)
+    Tk.stroke(win.context)
+  end
+  #
   # Updates the canvas. It's not nessesary to update it after
   # every new dot. It's better to update it after several dots
   # are drown.
