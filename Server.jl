@@ -150,6 +150,7 @@ module Server
   function _answer(sock::Base.TcpSocket, obs::Event.Observer)
     ans = Connection.Answer(null)
     Event.fire(obs, EVENT_COMMAND, deserialize(sock), ans)
+    println("answer")
     serialize(sock, ans)
   end
 end

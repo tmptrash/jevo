@@ -47,6 +47,8 @@ module Client
   export request
   export stop
   export EVENT_ANSWER
+
+  using Debug
   #
   # Name of the event, which is fired if answer from client's 
   # request is obtained.
@@ -91,7 +93,8 @@ module Client
   # @param args Custom fn arguments
   # @return true - request was sent, false wasn't
   #
-  function request(con::Connection.ClientConnection, fn::Integer, args...)
+  @debug function request(con::Connection.ClientConnection, fn::Integer, args...)
+  @bp
     if !isopen(con.sock) return false end
     #
     # This line is non blocking one

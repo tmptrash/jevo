@@ -56,8 +56,7 @@ module RemoteWorld
   #
   # @param delay Delay between requests 
   #
-  @debug function display(rd::RemoteData, delay::Integer = Config.world["frameDelay"], x::Integer = 1, y::Integer = 1, width::Integer = 0, height::Integer = 0)
-  @bp
+  function display(rd::RemoteData, delay::Integer = Config.world["frameDelay"], x::Integer = 1, y::Integer = 1, width::Integer = 0, height::Integer = 0)
     rd.delay  = delay
     rd.x      = x
     rd.y      = y
