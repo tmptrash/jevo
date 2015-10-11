@@ -6,5 +6,5 @@ function onRequest(cmd::Connection.Command, ans::Connection.Answer)
 end
 
 con = Server.create(ip"127.0.0.1", 2000)
-Event.on(con.observer, "command", onRequest)
+Event.on(con.observer, Server.EVENT_COMMAND, onRequest)
 Server.run(con)

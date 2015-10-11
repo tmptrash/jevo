@@ -5,5 +5,5 @@ function onAnswer(ans::Connection.Answer)
 end
 
 con = Client.create(ip"127.0.0.1", 2000)
-Event.on(con.observer, "answer", onAnswer)
+Event.on(con.observer, Client.EVENT_ANSWER, onAnswer)
 Client.request(con, 0, 2, 3)
