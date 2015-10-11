@@ -5,7 +5,7 @@
 #
 # @author DeadbraiN
 #
-
+include("ManagerRpcApi.jl")
 #
 # @rpc
 # Grabs world's rectangle region and returns it
@@ -86,16 +86,17 @@ end
 # then, false will be returned.
 #
 function _onRemoteCommand(cmd::Connection.Command, ans::Connection.Answer)
-  ans.data = haskey(Manager._rpcApi, cmd.cmd) ? apply(cmd.cmd, cmd.args) : false
+  ans.data = haskey(_rpcApi, cmd.fn) ? apply(cmd.fn, cmd.args) : false
 end
 #
 # An API for remove clients. This manager will be a server for them.
 # Only these functions may be called by clients. For calling them,
 # you have to use "Client" module.
 #
-_rpcApi = Dict{Function, Bool}([
-  createOrganisms  => true,
-  createOrganism   => true,
-  setPeriod        => true,
-  setProbabilities => true
+_rpcApi = Dict{Int, Function}([
+  RPC_GET_REGION        => getRegion,
+  RPC_CREATE_ORGANISMS  => createOrganisms,
+  RPC_CREATE_ORGANISM   => createOrganism,
+  RPC_SET_PERIOD        => setPeriod,
+  RPC_SET_PROBABILITIES => setProbabilities
 ])

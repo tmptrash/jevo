@@ -12,12 +12,6 @@ module Config
   export organism
   export world
   export connection
-
-  const RPC_RET_REGION        = 0
-  const RPC_CREATE_ORGANISMS  = 1
-  const RPC_CREATE_ORGANISM   = 2
-  const RPC_SET_PERIOD        = 3
-  const RPC_SET_PROBABILITIES = 4
   #
   # Mutator related configuration
   #
@@ -112,20 +106,6 @@ module Config
     #
     # Starting number for TCP/IP listening
     #
-    "serverPort"          => 2000,
-    #
-    # This is identifiers for Remote Procedure Calls.
-    # These identifiers may be mapped into the functions 
-    # in some module. For example in Manager module. We 
-    # use int function like a stub. It will be changed
-    # later on real functions.
-    #
-    "rpcIds" = {
-      RPC_RET_REGION        => int,
-      RPC_CREATE_ORGANISMS  => int,
-      RPC_CREATE_ORGANISM   => int,
-      RPC_SET_PERIOD        => int,
-      RPC_SET_PROBABILITIES => int
-    }
+    "serverPort"          => 2000
   }
 end

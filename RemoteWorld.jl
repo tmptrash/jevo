@@ -23,8 +23,10 @@ module RemoteWorld
   export create
   export display
   export stop
-
+  # TODO: remove this
   using Debug
+
+  include("ManagerRpcApi.jl")
   #
   # Contains data of for remote host, from where we displaying 
   # world's region and shows it on a canvas.
@@ -64,7 +66,7 @@ module RemoteWorld
     rd.resp   = (ans::Connection.Answer) -> _onResponse(rd, ans)
 
     Event.on(rd.con.observer, Client.EVENT_ANSWER, rd.resp)
-    Client.request(rd.con, getRegion, x, y, width, height)
+    Client.request(rd.con, RPC_GET_REGION, x, y, width, height)
   end
   #
   # Stops displaying organism's world
@@ -84,6 +86,6 @@ module RemoteWorld
     height = size(ans.data)[1]
     # TODO: show on canvas
     sleep(rd.delay)
-    Client.request(rd.con, "getRegion", rd.x, rd.y, rd.width, rd.height)
+    Client.request(rd.con, RPC_GET_REGION, rd.x, rd.y, rd.width, rd.height)
   end
 end
