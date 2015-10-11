@@ -21,7 +21,7 @@ function getRegion(x::Integer = 1, y::Integer = 1, width::Integer = 0, height::I
   if (width  === 0 || width  > maxWidth)  width  = maxWidth  end
   if (height === 0 || height > maxHeight) height = maxHeight end
   
-  _world[y:x, y + height:x + width]
+  _world.data[y:height, x:width]
 end
 #
 # @rpc
@@ -86,14 +86,14 @@ end
 # then, false will be returned.
 #
 function _onRemoteCommand(cmd::Connection.Command, ans::Connection.Answer)
-  ans.data = haskey(_rpcApi, cmd.fn) ? apply(cmd.fn, cmd.args) : false
+  ans.data = haskey(_rpcApi, cmd.fn) ? apply(_rpcApi[cmd.fn], cmd.args) : false
 end
 #
 # An API for remove clients. This manager will be a server for them.
 # Only these functions may be called by clients. For calling them,
 # you have to use "Client" module.
 #
-_rpcApi = Dict{Int, Function}([
+_rpcApi = Dict{Integer, Function}([
   RPC_GET_REGION        => getRegion,
   RPC_CREATE_ORGANISMS  => createOrganisms,
   RPC_CREATE_ORGANISM   => createOrganism,

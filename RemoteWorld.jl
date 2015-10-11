@@ -79,8 +79,8 @@ module RemoteWorld
   # @param rd remote data for specified server
   # @param ans Answer object with region data
   #
-  @debug function _onResponse(rd::RemoteData, ans::Connection.Answer)
-    @bp
+  function _onResponse(rd::RemoteData, ans::Connection.Answer)
+    println(ans)
     width  = size(ans.data)[2]
     height = size(ans.data)[1]
     # TODO: show on canvas

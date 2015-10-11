@@ -62,8 +62,7 @@ module Client
   # @param port Port number we are connecting to
   # @return Client connection object
   #
-  @debug function create(host::Base.IpAddr, port::Integer)
-  @bp
+  function create(host::Base.IpAddr, port::Integer)
     local sock::Base.TcpSocket
     local obs = Event.create()
 
@@ -94,8 +93,7 @@ module Client
   # @param args Custom fn arguments
   # @return true - request was sent, false wasn't
   #
-  @debug function request(con::Connection.ClientConnection, fn::Integer, args...)
-  @bp
+  function request(con::Connection.ClientConnection, fn::Integer, args...)
     if !isopen(con.sock) return false end
     #
     # This line is non blocking one
