@@ -19,6 +19,7 @@ module RemoteWorld
   import Connection
   import Client
   import Config
+  import CanvasWindow
 
   export create
   export display
@@ -76,13 +77,14 @@ module RemoteWorld
   function stop(rd::RemoteData)
     Event.off(rd.con.observer, Client.EVENT_ANSWER, rd.resp)
     Client.stop(rd.con)
+    CanvasWindow.destroy(rd.win)
   end
   # TODO: describe format of the answer:2 dimentional array
   # Handler of server answer
   # @param rd remote data for specified server
   # @param ans Answer object with region data
   #
-  function _onResponse(rd::RemoteData, ans::Connection.Answer)   
+  function _onResponse(rd::RemoteData, ans::Connection.Answer)
     for x in 1:size(ans.data)[2]
       for y in 1:size(ans.data)[1]
         CanvasWindow.dot(rd.win, x, y, ans.data[x, y])
