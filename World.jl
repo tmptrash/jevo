@@ -17,9 +17,6 @@ module World
   export grabEnergy
   export getNearFreePos
 
-  # TODO: remove this
-  using Debug
-
   #
   # 2D plane for living
   #

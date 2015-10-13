@@ -32,8 +32,6 @@
 
   import Helper
   import Config
-  # TODO Remove this
-  using  Debug
   
   #
   # Record for variable or number. Is used in findVars() function.

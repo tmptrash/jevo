@@ -9,8 +9,6 @@ module Event
   export off
   export fire
 
-  using Debug
-
   #
   # Contains events and they handlers
   #

@@ -1,6 +1,5 @@
 import Manager
 import Helper
-using  Debug
 
 function run()
     width  = Config.world["width"]

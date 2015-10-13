@@ -18,6 +18,7 @@ module CanvasWindow
   export create
   export dot
   export update
+  export destroy
 
   #
   # Data type, which contain one window related data: Canvas, Context,...
@@ -41,10 +42,11 @@ module CanvasWindow
   # Creates window and shows it on the screen
   # @param width Window width in pixels
   # @param height Window height in pixels
+  # @param title Window title
   # @return Window object
   #
-  function create(width::Uint, height::Uint)
-    win = Tk.Toplevel("Organism's world", width, height)
+  function create(width::Integer, height::Integer, title::ASCIIString = "")
+    win = Tk.Toplevel(title, width, height)
     c   = Tk.Canvas(win)
     Tk.pack(c, expand=true, fill="both")
     ctx = Base.Graphics.getgc(c)

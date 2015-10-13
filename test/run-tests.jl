@@ -2,6 +2,8 @@
 # This script runs all tests in current folder, which are 
 # in format: "test-<name>.jl". Other files will be skipped.
 #
+# @author DeadbraiN
+#
 using FactCheck
 
 #
@@ -9,7 +11,7 @@ using FactCheck
 #
 test_regex = r"^test-.*\.jl$"
 #
-# All test files shouls be in "test" folder
+# All test files should be in "test" folder
 #
 test_files = filter(n -> ismatch(test_regex, n), readdir("test"))
 if length(test_files) == 0

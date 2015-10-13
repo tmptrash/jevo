@@ -76,8 +76,6 @@ module Mutator
   import Exceptions
   import Helper
   import Config
-  # TODO: remove this module
-  using  Debug
 
   #
   # Do one random mutation of script. It may be: add or change.

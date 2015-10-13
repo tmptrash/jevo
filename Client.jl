@@ -48,7 +48,6 @@ module Client
   export stop
   export EVENT_ANSWER
 
-  using Debug
   #
   # Name of the event, which is fired if answer from client's 
   # request is obtained.

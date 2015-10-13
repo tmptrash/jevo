@@ -23,8 +23,6 @@ module Manager
   import Server
   import Connection
   import CommandLine
-  # TODO: remove this
-  using Debug
   #
   # This is how we collect Manager module from it's parts
   #

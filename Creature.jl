@@ -49,8 +49,6 @@ module Creature
   export RetObj
 
   export create
-  # TODO: remove this module
-  using  Debug
 
   #
   # Organism related data

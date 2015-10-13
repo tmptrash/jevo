@@ -7,55 +7,53 @@ module TestMutator
   using Mutator
   using Script
   using Config
-  # TODO: remove this
-  using Debug
 
-  #
-  # Checks if specified variable assign line is valid. It checks
-  # all possible variants (full, short, with function,...)
-  # @param block Current code block
-  # @param expr Expression without assign var. e.g.: v = ...
-  # In this case without "v".
-  #
-  function _testVar(block::Script.Block, expr::Expr)
-    if typeof(expr) === Int || # var = const
-       _isSignedVar(expr)      # var = sign{const|var}
-      return true
-    end
+  # #
+  # # Checks if specified variable assign line is valid. It checks
+  # # all possible variants (full, short, with function,...)
+  # # @param block Current code block
+  # # @param expr Expression without assign var. e.g.: v = ...
+  # # In this case without "v".
+  # #
+  # function _testVar(block::Script.Block, expr::Expr)
+  #   if typeof(expr) === Int || # var = const
+  #      _isSignedVar(expr)      # var = sign{const|var}
+  #     return true
+  #   end
 
-    false
-  end
+  #   false
+  # end
 
 
-  facts("Testing Mutator._addVar()...") do
-    code   = :(function t() end)
-    blocks = [Script.Block(
-      [:var2],
-      code.args[2],
-      Script.Block(
-        Symbol[],
-        Expr(:call, :~, 1)
-      )
-    )]
-    script = Script.Code(
-      0,0,Config.mutator["funcMaxArgs"],
-      code,
-      blocks,
-      Script.Func[],
-      code.args[2]
-    )
-    Mutator._addVar(script)
-    #
-    # After adding a var assign line it might be only one in block
-    #
-    @fact length(code.args[2].args)              => 1
-    #
-    # Before adding there is no variables in current block,
-    # so first variable will be "var1"
-    #
-    @fact code.args[2].args[1].args[1]           => :(var1)
-    #@fact _testVar(code.args[2].args[2].args[2]) => true
-  end
+  # facts("Testing Mutator._addVar()...") do
+  #   code   = :(function t() end)
+  #   blocks = [Script.Block(
+  #     [:var2],
+  #     code.args[2],
+  #     Script.Block(
+  #       Symbol[],
+  #       Expr(:call, :~, 1)
+  #     )
+  #   )]
+  #   script = Script.Code(
+  #     0,0,Config.mutator["funcMaxArgs"],
+  #     code,
+  #     blocks,
+  #     Script.Func[],
+  #     code.args[2]
+  #   )
+  #   Mutator._addVar(script)
+  #   #
+  #   # After adding a var assign line it might be only one in block
+  #   #
+  #   @fact length(code.args[2].args)              => 1
+  #   #
+  #   # Before adding there is no variables in current block,
+  #   # so first variable will be "var1"
+  #   #
+  #   @fact code.args[2].args[1].args[1]           => :(var1)
+  #   #@fact _testVar(code.args[2].args[2].args[2]) => true
+  # end
 
   # facts("Testing 'add' logic of Mutator.mutate()...") do
   #   #

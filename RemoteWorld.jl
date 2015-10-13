@@ -7,7 +7,7 @@
 # object, which is used in all functions. create() doesn't start 
 # displaying world. For this, you have to call display() function.
 # To stop displaying, call stop().
-# Displaying world is a frame based procedure. It means that, 
+# Displaying world is a frame based procedure. It means that,
 # every period of time (see delay argument of create()) a request
 # will be sent. So amount of frames per second depends on delay
 # and network(requests) speed.
@@ -24,12 +24,10 @@ module RemoteWorld
   export create
   export display
   export stop
-  # TODO: remove this
-  using Debug
 
   include("ManagerRpcApi.jl")
   #
-  # Contains data of for remote host, from where we displaying 
+  # Contains data of for remote host, from where we displaying
   # world's region and shows it on a canvas.
   #
   type RemoteData
@@ -90,6 +88,7 @@ module RemoteWorld
         CanvasWindow.dot(rd.win, x, y, ans.data[x, y])
       end
     end
+    CanvasWindow.update(rd.win)
     sleep(rd.delay)
     Client.request(rd.con, RPC_GET_REGION, rd.x, rd.y, rd.width, rd.height)
   end
