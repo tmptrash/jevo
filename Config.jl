@@ -97,7 +97,11 @@ module Config
     # Delay between requests for obtaining remote world region.
     # This parameter affects frames per second in a window canvas
     #
-    "frameDelay"          => 5
+    "frameDelay"          => 5,
+    #
+    # Background color of the canvas, where organisms will be shown
+    #
+    "backColor"           => 0
   }
   #
   # Configuration of the TCP connection

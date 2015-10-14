@@ -1,10 +1,15 @@
 #
-# Visual representation of the World module with Tk and Cairo. It creates
-# a platform independent window with organisms (one point - one organism)
-# and tracks them in real time. So, it's just a perresentation of organism's
-# moves in the World. We have to use separate module to have an ability to
-# change the output. For example, it's possible to show organisms like a 
-# circles in OpenGL canvas.
+# This module creates a platform independent window with a canvas inside. It
+# uses Tk and Cairo libraries for that. Has an ability to draw a color pixels
+# on a canvas. Uses RGB color format for drawing.
+#
+# Usage:
+#   using CanvasWindow
+#   ...
+#   win = CanvasWindow.create(100, 100, "Window title")
+#   CanvasWindow.dot(win, 10, 10, 1, 0, 0)  # R=1, G=0, B=0
+#   CanvasWindow.dot(win, 20, 20, 11197883) # R=AA,G=DD,B=BB
+#   CanvasWindow.destroy(win)
 #
 # @author DeadbraiN
 #
@@ -21,24 +26,17 @@ module CanvasWindow
 
   #
   # Data type, which contain one window related data: Canvas, Context,...
+  # Is used in all public methods as a canvas for drawing.
   #
   type Window
-    #
-    # TODO:
-    #
     win::Tk.Tk_Toplevel
-    #
-    # TODO:
-    #
     canvas::Tk.Canvas
-    #
-    # TODO:
-    #
     context::Cairo.CairoContext
   end
   
   #
-  # Creates window and shows it on the screen
+  # Creates window and shows it on the screen. Returns window related 
+  # data type, which is used in all public methods od current module.
   # @param width Window width in pixels
   # @param height Window height in pixels
   # @param title Window title
