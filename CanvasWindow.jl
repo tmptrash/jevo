@@ -5,7 +5,6 @@
 # moves in the World. We have to use separate module to have an ability to
 # change the output. For example, it's possible to show organisms like a 
 # circles in OpenGL canvas.
-# TODO: write about tcp/ip connection to the server (this window is a client)
 #
 # @author DeadbraiN
 #
