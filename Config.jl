@@ -99,9 +99,9 @@ module Config
     #
     "frameDelay"          => 5,
     #
-    # Background color of the canvas, where organisms will be shown
+    # RGB, background color of the canvas, where organisms will be shown
     #
-    "backColor"           => 0
+    "backColor"           => [0, 0, 0]
   }
   #
   # Configuration of the TCP connection

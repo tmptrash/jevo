@@ -13,3 +13,5 @@ https://www.youtube.com/playlist?list=PLWSJ9SwBJelIEbdaOXluI6VS8KnP6W7M6      Pr
 
 http://svaksha.github.io/Julia.jl/                                            Julia packages list
 http://it-ebooks.info/book/4852/                                              Julia book
+http://blog.leahhanson.us/pages/speaking.html                                 Julia lectures
+https://en.wikibooks.org/wiki/Introducing_Julia                               Links to manual and books (at the top)

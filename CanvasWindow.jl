@@ -17,6 +17,7 @@ module CanvasWindow
   import Base.Graphics
   import Cairo
   import Tk
+  import Config
 
   export Window
   export create
@@ -36,7 +37,7 @@ module CanvasWindow
   
   #
   # Creates window and shows it on the screen. Returns window related 
-  # data type, which is used in all public methods od current module.
+  # data type, which is used in all public methods of current module.
   # @param width Window width in pixels
   # @param height Window height in pixels
   # @param title Window title
@@ -47,17 +48,10 @@ module CanvasWindow
     c   = Tk.Canvas(win)
     Tk.pack(c, expand=true, fill="both")
     ctx = Base.Graphics.getgc(c)
-
-    #
-    # TODO: check if we need this line
-    #
-    #set_coords(ctx, 0, 0, 400, 200, 0, 399, 0, 199)
+    
     Tk.set_antialias(ctx, 1)
     Tk.set_line_width(ctx, 1)
-    #
-    # TODO: background color should be taken from config
-    #
-    Tk.set_source_rgb(ctx, 0, 0, 0)
+    apply(Tk.set_source_rgb, vcat(ctx, Config.world["backColor"]))
     Tk.paint(ctx)
 
     Window(win, c, ctx)
