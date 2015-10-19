@@ -65,7 +65,7 @@ module CanvasWindow
   # @param g Green part of RGB
   # @param b Blue part of RGB
   #
-  function dot(win::Window, x::Int, y::Int, r::Int, g::Int, b::Int)
+  function dot(win::Window, x::Int, y::Int, r::Real, g::Real, b::Real)
     Tk.set_source_rgb(win.context, r, g, b)
     Tk.move_to(win.context, x, y)
     Tk.line_to(win.context, x+1, y)
