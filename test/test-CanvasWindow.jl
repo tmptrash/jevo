@@ -18,6 +18,21 @@ module TestCanvasWindow
     b       = FixedPointNumbers.ufixed8(0.255)
     imgFile = "test.png"
 
+    function _dot(dotFn::Function)
+      x = rand(1:width)
+      y = rand(1:height)
+
+      win = CanvasWindow.create(width, height)
+      dotFn(win, x, y)
+      Cairo.write_to_png(win.canvas.back, imgFile)
+      img = Images.imread(imgFile)
+      @fact img.data[x + xoffset, y].r --> r
+      @fact img.data[x + xoffset, y].g --> g
+      @fact img.data[x + xoffset, y].b --> b
+      CanvasWindow.destroy(win)
+      #rm(imgFile)
+    end
+
 
     facts("create() should create and show window") do
       win = CanvasWindow.create(width, height, "Test")
@@ -34,22 +49,11 @@ module TestCanvasWindow
     # HACK: be removed after the test.
     #
     facts("dot(r,g,b) should draw a pixel") do
-      x = rand(1:width)
-      y = rand(1:height)
-
-      win = CanvasWindow.create(width, height)
-      CanvasWindow.dot(win, x, y, r, g, b)
-      Cairo.write_to_png(win.canvas.back, imgFile)
-      img = Images.imread(imgFile)
-      @fact img.data[x + xoffset, y].r --> r
-      @fact img.data[x + xoffset, y].g --> g
-      @fact img.data[x + xoffset, y].b --> b
-      CanvasWindow.destroy(win)
-      rm(imgFile)
+      _dot((win, x, y) -> CanvasWindow.dot(win, x, y, r, g, b))
     end
 
     facts("dot(color) should draw a pixel") do
-
+      _dot((win, x, y) -> CanvasWindow.dot(win, x, y, uint32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i)))
     end
   end
 end

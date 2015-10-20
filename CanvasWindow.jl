@@ -78,7 +78,7 @@ module CanvasWindow
   # @param y Y coordinate of the point
   # @param color Color of the dot. We use only first three bytes (24bits)
   #
-  function dot(win::Window, x::Int, y::Int, color::Int32)
+  function dot(win::Window, x::Int, y::Int, color::Uint32)
     Tk.set_source_rgb(win.context, color >> 16, (color >> 8) & 0x0000ff, color & 0x0000ff)
     Tk.move_to(win.context, x, y)
     Tk.line_to(win.context, x+1, y)
