@@ -15,18 +15,23 @@ module TestCanvasWindow
 
   facts("dot() method should draw the pixel") do
     xoffset = 1
+    width   = 100
+    height  = 100
+    x       = rand(1:width)
+    y       = rand(1:height)
+    r       = 1.0
+    g       = 0.122
+    b       = 0.255
+    imgFile = "test.png"
 
-    win = CanvasWindow.create(100, 100, "Test")
-    CanvasWindow.dot(win, 10, 10, 1.0, 0.122, 0.255)
-    Cairo.write_to_png(win.canvas.back, "test.png")
-    img = Images.imread("test.png")
-    println(img.data[10 + xoffset, 10].r)
-    println(img.data[10 + xoffset, 10].g)
-    println(img.data[10 + xoffset, 10].b)
-
-    @fact img.data[10 + xoffset, 10].r --> FixedPointNumbers.ufixed8(1.0)
-    @fact img.data[10 + xoffset, 10].g --> FixedPointNumbers.ufixed8(0.122)
-    @fact img.data[10 + xoffset, 10].b --> FixedPointNumbers.ufixed8(0.255)
+    win = CanvasWindow.create(width, height, "Test")
+    CanvasWindow.dot(win, x, y, r, g, b)
+    Cairo.write_to_png(win.canvas.back, imgFile)
+    img = Images.imread(imgFile)
+    @fact img.data[x + xoffset, y].r --> FixedPointNumbers.ufixed8(r)
+    @fact img.data[x + xoffset, y].g --> FixedPointNumbers.ufixed8(g)
+    @fact img.data[x + xoffset, y].b --> FixedPointNumbers.ufixed8(b)
     CanvasWindow.destroy(win)
+    rm(imgFile)
   end
 end
