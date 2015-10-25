@@ -17,6 +17,7 @@ module CanvasWindow
   import Base.Graphics
   import Cairo
   import Tk
+  import Colors
   import Config
 
   export Window
@@ -65,21 +66,22 @@ module CanvasWindow
   # @param g Green part of RGB
   # @param b Blue part of RGB
   #
-  function dot(win::Window, x::Int, y::Int, r::Real, g::Real, b::Real)
-    Tk.set_source_rgb(win.context, r, g, b)
-    Tk.move_to(win.context, x, y)
-    Tk.line_to(win.context, x+1, y)
-    Tk.stroke(win.context)
-  end
+  # function dot(win::Window, x::Int, y::Int, r::Real, g::Real, b::Real)
+  #   Tk.set_source_rgb(win.context, r, g, b)
+  #   Tk.move_to(win.context, x, y)
+  #   Tk.line_to(win.context, x+1, y)
+  #   Tk.stroke(win.context)
+  # end
   #
   # Draws one dot (point) on the canvas with specified color
   # @param win Windows type
   # @param x X coordinate of the point
   # @param y Y coordinate of the point
-  # @param color Color of the dot. We use only first three bytes (24bits)
+  # @param color Color of the dot. We use only last three bytes (24bits) of four.
   #
   function dot(win::Window, x::Int, y::Int, color::Uint32)
-    Tk.set_source_rgb(win.context, color >> 16, (color >> 8) & 0x0000ff, color & 0x0000ff)
+    col = convert(Colors.RGB, Colors.RGB24(color))
+    Tk.set_source_rgb(win.context, col.r, col.g, col.b)
     Tk.move_to(win.context, x, y)
     Tk.line_to(win.context, x+1, y)
     Tk.stroke(win.context)

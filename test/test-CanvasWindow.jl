@@ -30,7 +30,7 @@ module TestCanvasWindow
       @fact img.data[x + xoffset, y].g --> g
       @fact img.data[x + xoffset, y].b --> b
       CanvasWindow.destroy(win)
-      #rm(imgFile)
+      rm(imgFile)
     end
 
 
@@ -48,9 +48,9 @@ module TestCanvasWindow
     # HACK: array using Images package. Temporary png file will
     # HACK: be removed after the test.
     #
-    facts("dot(r,g,b) should draw a pixel") do
-      _dot((win, x, y) -> CanvasWindow.dot(win, x, y, r, g, b))
-    end
+    # facts("dot(r,g,b) should draw a pixel") do
+    #   _dot((win, x, y) -> CanvasWindow.dot(win, x, y, r, g, b))
+    # end
 
     facts("dot(color) should draw a pixel") do
       _dot((win, x, y) -> CanvasWindow.dot(win, x, y, uint32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i)))
