@@ -3,12 +3,16 @@
 # uses Tk and Cairo libraries for that. Has an ability to draw a color pixels
 # on a canvas. Uses RGB color format for drawing.
 #
+# Issues:
+#   - width and height parameters in create() method don't create the same inner
+#     window (canvas) space. It doesn't work on small canvas sizes.
+#
 # Usage:
 #   using CanvasWindow
 #   ...
 #   win = CanvasWindow.create(100, 100, "Window title")
-#   CanvasWindow.dot(win, 10, 10, 1, 0, 0)  # R=1, G=0, B=0
-#   CanvasWindow.dot(win, 20, 20, 11197883) # R=AA,G=DD,B=BB
+#   CanvasWindow.dot(win, 20, 20, uint32(11197883)) # R=AA,G=DD,B=BB
+#   ...
 #   CanvasWindow.destroy(win)
 #
 # @author DeadbraiN
@@ -39,6 +43,7 @@ module CanvasWindow
   #
   # Creates window and shows it on the screen. Returns window related 
   # data type, which is used in all public methods of current module.
+  # Sets default background color according to global configuration.
   # @param width Window width in pixels
   # @param height Window height in pixels
   # @param title Window title
@@ -49,10 +54,11 @@ module CanvasWindow
     c   = Tk.Canvas(win)
     Tk.pack(c, expand=true, fill="both")
     ctx = Base.Graphics.getgc(c)
+    rgb = convert(Colors.RGB, Colors.RGB24(Config.world["backColor"]))
     
     Tk.set_antialias(ctx, 1)
     Tk.set_line_width(ctx, 1)
-    apply(Tk.set_source_rgb, vcat(ctx, Config.world["backColor"]))
+    apply(Tk.set_source_rgb, vcat(ctx, [rgb.r, rgb.g, rgb.b]))
     Tk.paint(ctx)
 
     Window(win, c, ctx)
@@ -88,7 +94,7 @@ module CanvasWindow
   end
   #
   # Updates the canvas. It's not nessesary to update it after
-  # every new dot. It's better to update it after several dots
+  # every drawing. It's better to update it after several dots
   # are drown.
   # @param win Current window
   #
