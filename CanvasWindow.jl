@@ -18,7 +18,7 @@
 # @author DeadbraiN
 #
 module CanvasWindow
-  import Base.Graphics
+  import Graphics
   import Cairo
   import Tk
   import Colors
@@ -53,7 +53,7 @@ module CanvasWindow
     win = Tk.Toplevel(title, width, height)
     c   = Tk.Canvas(win)
     Tk.pack(c, expand=true, fill="both")
-    ctx = Base.Graphics.getgc(c)
+    ctx = Graphics.getgc(c)
     rgb = convert(Colors.RGB, Colors.RGB24(Config.world["backColor"]))
     
     Tk.set_antialias(ctx, 1)

@@ -10,6 +10,9 @@ using FactCheck
 # All tests should have format: "test-<name>.jl"
 #
 test_regex = r"^test-.*\.jl$"
+
+push!(LOAD_PATH, pwd())
+
 #
 # All test files should be in "test" folder
 #
