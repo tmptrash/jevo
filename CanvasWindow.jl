@@ -11,7 +11,7 @@
 #   using CanvasWindow
 #   ...
 #   win = CanvasWindow.create(100, 100, "Window title")
-#   CanvasWindow.dot(win, 20, 20, uint32(11197883)) # R=AA,G=DD,B=BB
+#   CanvasWindow.dot(win, 20, 20, UInt32(11197883)) # R=AA,G=DD,B=BB
 #   ...
 #   CanvasWindow.destroy(win)
 #
@@ -85,7 +85,7 @@ module CanvasWindow
   # @param y Y coordinate of the point
   # @param color Color of the dot. We use only last three bytes (24bits) of four.
   #
-  function dot(win::Window, x::Int, y::Int, color::Uint32)
+  function dot(win::Window, x::Int, y::Int, color::UInt32)
     col = convert(Colors.RGB, Colors.RGB24(color))
     Tk.set_source_rgb(win.context, col.r, col.g, col.b)
     Tk.move_to(win.context, x, y)

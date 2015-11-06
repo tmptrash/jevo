@@ -15,7 +15,7 @@ module Config
   #
   # Mutator related configuration
   #
-  const mutator = {
+  const mutator = Dict{ASCIIString, Any}(
     #
     # {Array} Probabilities with wich mutator decides what to do: add,
     #         or change existing construction of the script. 
@@ -27,7 +27,7 @@ module Config
     #
     "addChange"           => [1,1],
     #
-    # {Uint8} Maximum amount of function parameters in orgamism's script.
+    # {UInt8} Maximum amount of function parameters in orgamism's script.
     # It's used in Mutator during new function creation. Example:
     #
     #     function func12(var24, var25);end
@@ -35,17 +35,17 @@ module Config
     # In example above there are two arguments. This amount of arguments
     # must be less then funcMaxArgs
     #
-    "funcMaxArgs"         => uint8(10),
+    "funcMaxArgs"         => UInt8(10),
     #
     # {Uint} Amount of mutations, which will be applied to arganism after
     # clonning.
     #
-    "mutationsOnClone"    => uint(100)
-  }
+    "mutationsOnClone"    => UInt(100)
+  )
   #
   # Script related settings
   #
-  const script = {
+  const script = Dict{ASCIIString, Any}(
     #
     # It's possible to skip some reserved blocks of code in Script.Code.blocks 
     # property. For example, functions block.
@@ -59,40 +59,40 @@ module Config
     # Prefix for all variables. Final name of the function will be: var[num]
     #
     "varPrefix"           => "var"
-  }
+  )
   #
   # Organism related configs
   #
-  const organism = {
+  const organism = Dict{ASCIIString, Any}(
     #
     # Amount of organisms on program start
     #
-    "startAmount"         => uint(100),
+    "startAmount"         => UInt(100),
     #
     # {Uint} Amount of energy for first organisms. They are like Adam and 
     # Eve. It means that these organism were created by operator and not
     # by evolution.
     #
-    "startEnergy"         => uint(0xDDDD),
+    "startEnergy"         => UInt(0xDDDD),
     #
     # Maximum amount of energy, which one organism may contains
     #
-    "maxEnergy"           => uint(100000),
+    "maxEnergy"           => UInt(100000),
     #
     # Amount of iterations within organism's life loop, after that we decrease
     # amount of energy ono 1 point.
     #
-    "decreaseAfterTimes"  => uint(1000)
-  }
-  const world = {
+    "decreaseAfterTimes"  => UInt(1000)
+  )
+  const world = Dict{ASCIIString, Any}(
     #
     # World width
     #
-    "width"               => uint(3),
+    "width"               => UInt(3),
     #
     # World height
     #
-    "height"              => uint(3),
+    "height"              => UInt(3),
     #
     # Delay between requests for obtaining remote world region.
     # This parameter affects frames per second in a window canvas
@@ -101,15 +101,15 @@ module Config
     #
     # RGB, background color of the canvas, where organisms will be shown
     #
-    "backColor"           => uint32(0)
-  }
+    "backColor"           => UInt32(0)
+  )
   #
   # Configuration of the TCP connection
   #
-  const connection = {
+  const connection = Dict{ASCIIString, Any}(
     #
     # Starting number for TCP/IP listening
     #
     "serverPort"          => 2000
-  }
+  )
 end
