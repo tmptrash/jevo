@@ -1,7 +1,10 @@
 #
 # This module creates a platform independent window with a canvas inside. It
 # uses Tk and Cairo libraries for that. Has an ability to draw a color pixels
-# on a canvas. Uses RGB color format for drawing.
+# on a canvas. Uses RGB color format for drawing. It implements lazy update
+# logic. It means, that canvas will be updated only after calling update()
+# method. So, you may draw many dots, but user will not see them. Only after 
+# calling update() all dots will appear.
 #
 # Issues:
 #   - width and height parameters in create() method means, that a canvas should 
@@ -11,9 +14,9 @@
 # Usage:
 #   using CanvasWindow
 #   ...
-#   win = CanvasWindow.create(100, 100, "Window title")
+#   win = CanvasWindow.create(100, 100)
 #   CanvasWindow.dot(win, 20, 20, UInt32(11197883)) # R=AA,G=DD,B=BB
-#   CanvasWindow.dot(win, 21, 21, UInt32(11197883)) # R=AA,G=DD,B=BB
+#   CanvasWindow.dot(win, 30, 30, UInt32(11197883))
 #   ...
 #   CanvasWindow.update(win)
 #   ...
@@ -35,7 +38,7 @@ module CanvasWindow
   export destroy
 
   #
-  # Data type, which contain one window related data: Canvas, Context,...
+  # Data type, which contains window related data: Window, Canvas, Context,...
   # Is used in all public methods as a canvas for drawing.
   #
   type Window
