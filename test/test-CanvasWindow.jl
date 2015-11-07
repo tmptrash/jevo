@@ -25,7 +25,7 @@ module TestCanvasWindow
       win = CanvasWindow.create(width, height)
       dotFn(win, x, y)
       Cairo.write_to_png(win.canvas.back, imgFile)
-      img = Images.imread(imgFile)
+      img = Images.load(imgFile)
       @fact img.data[x + xoffset, y].r --> r
       @fact img.data[x + xoffset, y].g --> g
       @fact img.data[x + xoffset, y].b --> b
@@ -53,7 +53,7 @@ module TestCanvasWindow
     # end
 
     facts("dot(color) should draw a pixel") do
-      _dot((win, x, y) -> CanvasWindow.dot(win, x, y, uint32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i)))
+      _dot((win, x, y) -> CanvasWindow.dot(win, x, y, UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i)))
     end
   end
 end

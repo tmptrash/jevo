@@ -58,7 +58,7 @@ module CanvasWindow
     
     Tk.set_antialias(ctx, 1)
     Tk.set_line_width(ctx, 1)
-    apply(Tk.set_source_rgb, vcat(ctx, [rgb.r, rgb.g, rgb.b]))
+    Tk.set_source_rgb(ctx, rgb.r, rgb.g, rgb.b)
     Tk.paint(ctx)
 
     Window(win, c, ctx)
