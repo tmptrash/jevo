@@ -266,7 +266,7 @@ module Mutator
   # function call,...) it calls special callback function. 
   # Every callback function will be called with two arguments: 
   #
-  #     block::Script.Block, line::Expr, index::Uint
+  #     block::Script.Block, line::Expr, index::UInt
   #
   # @param code Script of particular organism we have to mutate
   #
@@ -308,7 +308,7 @@ module Mutator
   # @param line  Line with variables to change
   # @param index Index of "line" in "block"
   # 
-  function _changeVar(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
+  function _changeVar(code::Script.Code, block::Script.Block, line::Expr, index::UInt)
     vars = Script.VarOrNum[]
     #
     # We can't change first variable, because it may cause an errors.
@@ -317,7 +317,7 @@ module Mutator
     #
     Script.findVars(vars, line, uint(2))
     #
-    # We should use == instead === to cast Uint(v.typ) to Int(0,1,...)
+    # We should use == instead === to cast UInt(v.typ) to Int(0,1,...)
     #
     v = vars[rand(1:length(vars))]
     if v.typ == 0                                    # We may change it to variable or number
@@ -354,7 +354,7 @@ module Mutator
   # @param line  Line with for operator to change
   # @param index Index of "line" in "block"
   #
-  function _changeFor(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
+  function _changeFor(code::Script.Code, block::Script.Block, line::Expr, index::UInt)
     v = Script.getVarOrNum(block)
     line.args[1].args[2].args[Helper.randTrue() ? 1 : 2] = (v === line.args[1].args[1] ? getNum(true) : v)
   end
@@ -382,7 +382,7 @@ module Mutator
   # @param line  Line with for operator to change
   # @param index Index of "line" in "block"
   #
-  function _changeIf(code::Script.Code, block::Script.Block, line::Expr, index::Uint)
+  function _changeIf(code::Script.Code, block::Script.Block, line::Expr, index::UInt)
     #
     # 2 - condition, 1,3 - variables or numbers
     #

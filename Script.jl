@@ -44,11 +44,11 @@
     #
     # Index of variable or number within expression
     #
-    index::Uint
+    index::UInt
     #
     # 0 - var|num, 1 - operation, 2 - sign, 3 - func
     #
-    typ::Uint8
+    typ::UInt8
   end
   #
   # One code block. By block i mean code quote, which may contain it's
@@ -133,17 +133,17 @@
     # creation of unique variables, like: varXXX, where XXX - is a vIndex 
     # number.
     #
-    vIndex::Uint
+    vIndex::UInt
     #
     # Current index of new function. Should be 0 by default. The same like 
     # variables, but in format: funcXXX, where XXX is a fIndex number.
     #
-    fIndex::Uint
+    fIndex::UInt
     #
     # Maximum amount of parameters for function. See Config.mutator.funcMaxArgs 
     # parameter for details.
     #
-    funcMaxArgs::Uint8
+    funcMaxArgs::UInt8
     #
     # Reference to organism's script's code. It's changed by Mutator. This 
     # is native Julia code, represented by Expressions. See this link for 
@@ -213,7 +213,7 @@
   #
   # Generates new variable symbol.
   # @param  {Code} code Script of current organism.
-  # @return {Symbol} New symbol in format: "varXXX", where XXX - Uint
+  # @return {Symbol} New symbol in format: "varXXX", where XXX - UInt
   #
   function getNewVar(code::Code)
     symbol("var$(code.vIndex = code.vIndex + 1)")
@@ -403,7 +403,7 @@
   # @param parent Expression where we should search for variables/numbers
   # @param index Index of operand in expr, where we should start search
   #
-  function findVars(vars::Array{VarOrNum}, parent::Expr, index::Uint)
+  function findVars(vars::Array{VarOrNum}, parent::Expr, index::UInt)
     expr = parent.args[index]
     if typeof(expr) !== Expr                   
       push!(vars, VarOrNum(parent, index, 0))  # var or num
@@ -442,14 +442,14 @@
     #
   # Generates new function symbol.
   # @param  code Script of current organism.
-  # @return {Symbol} New symbol in format: "funcXXX", where XXX - Uint
+  # @return {Symbol} New symbol in format: "funcXXX", where XXX - UInt
   #
   function getNewFunc(code::Code)
     symbol("$(Config.script["funcPrefix"])$(code.fIndex = code.fIndex + 1)")
   end
   #
   # Returns random line and it's index within block
-  # @return {(Expr, Uint)}
+  # @return {(Expr, UInt)}
   #
   function getRandLine(block::Script.Block)
     index = uint(rand(1:length(block.block.args)))
