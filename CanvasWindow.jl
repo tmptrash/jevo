@@ -4,14 +4,18 @@
 # on a canvas. Uses RGB color format for drawing.
 #
 # Issues:
-#   - width and height parameters in create() method don't create the same inner
-#     window (canvas) space. It doesn't work on small canvas sizes.
+#   - width and height parameters in create() method means, that a canvas should 
+#     be with these values, but it choose some other values for canvas. It doesn't 
+#     work on small canvas sizes.
 #
 # Usage:
 #   using CanvasWindow
 #   ...
 #   win = CanvasWindow.create(100, 100, "Window title")
 #   CanvasWindow.dot(win, 20, 20, UInt32(11197883)) # R=AA,G=DD,B=BB
+#   CanvasWindow.dot(win, 21, 21, UInt32(11197883)) # R=AA,G=DD,B=BB
+#   ...
+#   CanvasWindow.update(win)
 #   ...
 #   CanvasWindow.destroy(win)
 #
@@ -63,7 +67,7 @@ module CanvasWindow
 
     Window(win, c, ctx)
   end
-  #
+  # TODO: do we need this at all?
   # Draws one dot (point) on the canvas with specified color
   # @param win Windows type
   # @param x X coordinate of the point
