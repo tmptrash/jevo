@@ -1,4 +1,4 @@
-module TestCanvasWindow
+module TestCommandLine
   using CommandLine
   using FactCheck
 
