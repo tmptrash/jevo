@@ -2,6 +2,7 @@
 # @author DeadbraiN
 #
 module Helper
+  export Point
   export randTrue
   export getProbIndex
 
