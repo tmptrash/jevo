@@ -1,10 +1,13 @@
 #
-# TODO: Describe this module
+# Implements Listener\Observer pattern. First, you have to create observer
+# object by calling create(). After that, it may fire events with parameters.
+# 
 #
 # @author DeadbraiN
 #
 module Event
   export Observer
+  export create
   export on
   export off
   export fire
@@ -60,7 +63,7 @@ module Event
     if !haskey(obs.events, event) return nothing end
     fns = obs.events[event]
     for i in fns
-      apply(i, args)
+      i(args...)
     end
   end
 end
