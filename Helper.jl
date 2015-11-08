@@ -5,8 +5,6 @@ module Helper
   export randTrue
   export getProbIndex
 
-  import Exceptions
-
   #
   # One point in the world. Is described by two coordinates.
   #
@@ -31,10 +29,10 @@ module Helper
   # in half cases, two in 1/3 cases and three in 1/6 cases. Probabilities
   # should be greated then -1.
   # @param {Array{Int}} prob Probabilities array. e.g.: [3,2] or [1,3]
-  # @return {Int}
+  # @return {Int} 0 Means that index is invalid
   #
   function getProbIndex(prob::Array{Int})
-    if length(prob) < 1 throw(UserException("Invalid parameter prob: $prob. Array with at least one element expected.")) end
+    if length(prob) < 1 return 0 end
 
     num = rand(1:sum(prob))
     s   = 0

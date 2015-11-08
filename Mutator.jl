@@ -73,7 +73,6 @@ module Mutator
   export mutate
 
   import Script
-  import Exceptions
   import Helper
   import Config
 
@@ -92,7 +91,9 @@ module Mutator
     # [add, change] operation. 1 - add, 2 - change
     #
     index = Helper.getProbIndex(prob)
-    if index === 1      # add
+	if index === 0      # invalid probability
+	  println("ERROR: Invalid parameter prob: $prob. Array with at least one element expected.")
+    elseif index === 1  # add
       _addCb[rand(1:length(_addCb))](code)
     elseif index === 2  # change
       _change(code)
