@@ -70,11 +70,11 @@
 # OPT : add speed tests before and after optimization
 #
 module Mutator
-  export mutate
-
   import Script
   import Helper
   import Config
+
+  export mutate
 
   #
   # Do one random mutation of script. It may be: add or change.
