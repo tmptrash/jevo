@@ -24,15 +24,15 @@ module World
     #
     # World width in pixels
     #
-    width::Uint
+    width::UInt
     #
     # World height in pixels
     #
-    height::Uint
+    height::UInt
     #
     # Array of pixels (RGB+8b)
     #
-    data::Array{Uint16, 2}
+    data::Array{UInt16, 2}
     #
     # {Event.Observer} Adds events listening/firing logic to the World.
     #
@@ -44,8 +44,8 @@ module World
   # @param width World width
   # @param height World height
   #
-  function create(width::Uint = Config.world["width"], height::Uint = Config.world["height"])
-    Plane(width, height, fill(uint16(0), (int(height), int(width))), Event.create())
+  function create(width::UInt = Config.world["width"], height::UInt = Config.world["height"])
+    Plane(width, height, fill(UInt16(0), (Int(height), Int(width))), Event.create())
   end
   #
   # Adds energy point by specified coordinates
@@ -53,7 +53,7 @@ module World
   # @param pos Position of the energy point
   # @param energy Amount of energy to add
   #
-  function setEnergy(plane::Plane, pos::Helper.Point, energy::Uint16)
+  function setEnergy(plane::Plane, pos::Helper.Point, energy::UInt16)
     plane.data[pos.y, pos.x] = energy
     Event.fire(plane.observer, "update", pos.x, pos.y, energy, plane)
   end
@@ -62,7 +62,7 @@ module World
   # specified coordinates
   # @param plane World's plane, where to check
   # @param pos Position to check
-  # @return {Uint} Amount of energy
+  # @return {UInt} Amount of energy
   #
   function getEnergy(plane::Plane, pos::Helper.Point)
     plane.data[pos.y, pos.x]
@@ -77,7 +77,7 @@ module World
   #
   function getFreePos(plane::Plane)
     pos = Helper.Point(int(plane.width / 2), int(plane.height / 2))
-    while World.getEnergy(plane, pos) > uint(0)
+    while World.getEnergy(plane, pos) > UInt(0)
       pos.x = int(rand(1:plane.width))
       pos.y = int(rand(1:plane.height))
     end
@@ -90,9 +90,9 @@ module World
   # @param plane Plane
   # @param pos Position to grab
   # @param amount Amount of energy we want to grab
-  # @return {Uint} amount of grabbed energy
+  # @return {UInt} amount of grabbed energy
   #
-  function grabEnergy(plane::Plane, pos::Helper.Point, amount::Uint)
+  function grabEnergy(plane::Plane, pos::Helper.Point, amount::UInt)
     energy = getEnergy(plane, pos)
     energy = energy > amount ? amount : energy
     plane.data[pos.y, pos.x] -= energy

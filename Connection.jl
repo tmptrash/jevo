@@ -13,13 +13,13 @@ module Connection
   # TODO:
   type ServerConnection
     tasks   ::Array{Task}
-    socks   ::Array{Base.TcpSocket}
-    server  ::Base.TcpServer
+    socks   ::Array{Base.TCPSocket}
+    server  ::Base.TCPServer
     observer::Event.Observer
   end
   # TODO:
   type ClientConnection
-  	sock    ::Base.TcpSocket
+  	sock    ::Base.TCPSocket
   	observer::Event.Observer
   end
   # TODO:

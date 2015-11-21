@@ -18,7 +18,7 @@
   # Updates organisms existance. We have to call this function to
   # update organisms life in memory world...
   #
-  function _updateOrganisms(counter::Uint)
+  function _updateOrganisms(counter::UInt)
       #
       # This block runs one iteration for all available organisms
       #
@@ -36,11 +36,11 @@
       if counter == Manager._options.period
         for i = 1:len
           org = _tasks[i].organism
-          org.energy -= uint(1)
+          org.energy -= UInt(1)
           _moveOrganism(org.pos, org)
           Mutator.mutate(org.script, Manager._options.probs)
         end
-        counter = uint(0)
+        counter = UInt(0)
       end
 
       counter
@@ -97,13 +97,13 @@
     # pos - new organism position
     # organism.pos - old organism position
     #
-    World.setEnergy(Manager._world, organism.pos, uint16(0))
-    World.setEnergy(Manager._world, pos, uint16(organism.energy))
+    World.setEnergy(Manager._world, organism.pos, UInt16(0))
+    World.setEnergy(Manager._world, pos, UInt16(organism.energy))
     organism.pos = pos
   end
   #
-  # Converts coodinates to the unique uint id
-  # @return {Uint}
+  # Converts coodinates to the unique UInt id
+  # @return {UInt}
   #
   function _getOrganismId(pos::Helper.Point)
     pos.y * Manager._world.width + pos.x
@@ -144,7 +144,7 @@
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  function _onGrabLeft(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+  function _onGrabLeft(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
     _onGrab(organism, amount, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
   end
   #
@@ -153,7 +153,7 @@
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  function _onGrabRight(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+  function _onGrabRight(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
     _onGrab(organism, amount, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
   end
   #
@@ -162,7 +162,7 @@
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  function _onGrabUp(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+  function _onGrabUp(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
     _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
   end
   #
@@ -171,7 +171,7 @@
   # @param amount Amount of energy we want to grab
   # @param retObj Special object for return value
   #
-  function _onGrabDown(organism::Creature.Organism, amount::Uint, retObj::Creature.RetObj)
+  function _onGrabDown(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
     _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
   end
   #
@@ -219,7 +219,7 @@
   # @param pos Point where we should check the energy
   # @param retObj Special object for return value
   #
-  function _onGrab(organism::Creature.Organism, amount::Uint, pos::Helper.Point, retObj::Creature.RetObj)
+  function _onGrab(organism::Creature.Organism, amount::UInt, pos::Helper.Point, retObj::Creature.RetObj)
     retObj.ret = World.grabEnergy(Manager._world, pos, amount)
     id         = _getOrganismId(pos)
     #

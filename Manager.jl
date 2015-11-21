@@ -39,7 +39,7 @@ module Manager
   # Manager's options, which may be changed by remote calls
   #
   type Options
-    period::Uint
+    period::UInt
     probs::Array{Int, 1}
   end
 
@@ -47,7 +47,7 @@ module Manager
   # Runs everything. Blocking function.
   #
   function run()
-    counter = uint(0)
+    counter = UInt(0)
     server  = _createServer() 
     #
     # This server is listening for all other managers and remote
@@ -81,11 +81,11 @@ module Manager
   # Positions map, which stores positions of all organisms. Is used
   # for fast access to the organism by it's coordinates.
   #
-  _posMap = Dict{Uint, Creature.Organism}()
+  _posMap = Dict{UInt, Creature.Organism}()
   #
   # Parameters passed through command line
   #
-  _params = CommandLine.parse()
+  _params = CommandLine.create()
   #
   # Global manager's options like: energy decrease period, add/change
   # operation probability and so on. This options may be changed by

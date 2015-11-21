@@ -86,8 +86,8 @@ module Server
   # @param port Port we are listening to
   # @return Server's related data object
   #
-  function create(host::Base.IpAddr, port::Integer)
-    Connection.ServerConnection(Task[], Base.TcpSocket[], listen(host, port), Event.create())
+  function create(host::Base.IPAddr, port::Integer)
+    Connection.ServerConnection(Task[], Base.TCPSocket[], listen(host, port), Event.create())
   end
   #
   # Runs the server. Starts listening clients connections
@@ -147,7 +147,7 @@ module Server
   # @param sock Client's socket
   # @param obs Observer for firing an event to "parent" code
   #
-  function _answer(sock::Base.TcpSocket, obs::Event.Observer)
+  function _answer(sock::Base.TCPSocket, obs::Event.Observer)
     ans = Connection.Answer(null)
     Event.fire(obs, EVENT_COMMAND, deserialize(sock), ans)
     serialize(sock, ans)

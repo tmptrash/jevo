@@ -12,8 +12,8 @@
 #     # test.jl file...
 #     #
 #     args = CommandLine.create()
-#     println(CommandLine.value(args, "1"))   # prints ""
-#     println(CommandLine.value(args, "arg")  # prints "val"
+#     println(CommandLine.val(args, "1"))   # prints ""
+#     println(CommandLine.val(args, "arg")  # prints "val"
 #
 # @author DeadbraiN
 #

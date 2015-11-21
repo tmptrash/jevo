@@ -4,19 +4,19 @@
 #   getenergy  {Organism, Point, {ret=>Num}} Fires to check if specified point
 #                                        in world contains an energy. Returns amount
 #                                        of energy in "ret" property.
-#   grableft   {Organism, Uint, {ret=>Num}} Fires to obtain energy from the left side of
+#   grableft   {Organism, UInt, {ret=>Num}} Fires to obtain energy from the left side of
 #                                        current organism. Second parameter is an 
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
-#   grabright  {Organism, Uint, {ret=>Num}} Fires to obtain energy from the right side of
+#   grabright  {Organism, UInt, {ret=>Num}} Fires to obtain energy from the right side of
 #                                        current organism. Second parameter is an 
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
-#   grabup     {Organism, Uint, {ret=>Num}} Fires to obtain energy from the up side of
+#   grabup     {Organism, UInt, {ret=>Num}} Fires to obtain energy from the up side of
 #                                        current organism. Second parameter is an 
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
-#   grabdown   {Organism, Uint, {ret=>Num}} Fires to obtain energy from the right side of
+#   grabdown   {Organism, UInt, {ret=>Num}} Fires to obtain energy from the right side of
 #                                        current organism. Second parameter is an 
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
@@ -56,9 +56,9 @@ module Creature
   #
   type Organism
     #
-    # {Uint} Amount of energy for current organism
+    # {UInt} Amount of energy for current organism
     #
-    energy::Uint
+    energy::UInt
     #
     # {Array{Int}} Organism's position in a world
     #
@@ -142,7 +142,7 @@ module Creature
         # @return {Int} Amount of grabbed energy
         #
         function funcGrabEnergyLeft(amount::Int)
-          Creature._grabEnergy(creature, "left", uint(amount))
+          Creature._grabEnergy(creature, "left", UInt(amount))
         end
         #
         # Grabs energy from the right point.
@@ -150,7 +150,7 @@ module Creature
         # @return {Int} Amount of grabbed energy
         #
         function funcGrabEnergyRight(amount::Int)
-          Creature._grabEnergy(creature, "right", uint(amount))
+          Creature._grabEnergy(creature, "right", UInt(amount))
         end
         #
         # Grabs energy from the up point.
@@ -158,7 +158,7 @@ module Creature
         # @return {Int} Amount of grabbed energy
         #
         function funcGrabEnergyUp(amount::Int)
-          Creature._grabEnergy(creature, "up", uint(amount))
+          Creature._grabEnergy(creature, "up", UInt(amount))
         end
         #
         # Grabs energy from the down point.
@@ -166,7 +166,7 @@ module Creature
         # @return {Int} Amount of grabbed energy
         #
         function funcGrabEnergyDown(amount::Int)
-          Creature._grabEnergy(creature, "down", uint(amount))
+          Creature._grabEnergy(creature, "down", UInt(amount))
         end
         #
         # Makes one step left. It decreases organism's x coodinate by 1.
@@ -313,7 +313,7 @@ module Creature
   # @param dir      Direction ("left", "right", "up", "down")
   # @param amount   Amount of energy to grab
   #
-  function _grabEnergy(creature::Organism, dir::ASCIIString, amount::Uint)
+  function _grabEnergy(creature::Organism, dir::ASCIIString, amount::UInt)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.

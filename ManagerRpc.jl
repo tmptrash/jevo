@@ -54,7 +54,7 @@ end
 # of organism's energy spending.
 # @param period Period we want to set
 #
-function setPeriod(period::Uint)
+function setPeriod(period::UInt)
   Manager._options.period = period
 end
 #
@@ -74,7 +74,7 @@ end
 # @return Connection object
 #
 function _createServer()
-  port = CommandLine.value(_params, Manager.PARAM_SERVER_PORT)
+  port = CommandLine.val(_params, Manager.PARAM_SERVER_PORT)
   port = port == "" ? Config.connection["serverPort"] : int(port)
   con  = Server.create(ip"127.0.0.1", port)
   Event.on(con.observer, Server.EVENT_COMMAND, _onRemoteCommand)
@@ -93,10 +93,10 @@ end
 # Only these functions may be called by clients. For calling them,
 # you have to use "Client" module.
 #
-_rpcApi = Dict{Integer, Function}([
+_rpcApi = Dict{Integer, Function}(
   RPC_GET_REGION        => getRegion,
   RPC_CREATE_ORGANISMS  => createOrganisms,
   RPC_CREATE_ORGANISM   => createOrganism,
   RPC_SET_PERIOD        => setPeriod,
   RPC_SET_PROBABILITIES => setProbabilities
-])
+)
