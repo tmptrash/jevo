@@ -45,7 +45,8 @@ end
 # @return {OrganismTask}
 #
 function createOrganism(pos = nothing)
-    Manager._createOrganism(pos)
+    orgTask = Manager._createOrganism(pos)
+    orgTask.id
 end
 #
 # @rpc

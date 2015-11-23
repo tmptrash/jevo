@@ -133,7 +133,7 @@
     #
     # Creates new organism and applies mutations to him.
     #
-    crTask = createOrganism(pos)
+    crTask = Manager._createOrganism(pos)
     for i = 1:Config.mutator["mutationsOnClone"]
       Mutator.mutate(crTask.organism.script, Config.mutator["addChange"])
     end
