@@ -61,8 +61,8 @@ module Client
   # @param port Port number we are connecting to
   # @return Client connection object
   #
-  function create(host::Base.IpAddr, port::Integer)
-    local sock::Base.TcpSocket
+  function create(host::Base.IPAddr, port::Integer)
+    local sock::Base.TCPSocket
     local obs = Event.create()
 
     try

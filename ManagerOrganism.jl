@@ -6,6 +6,10 @@
   #
   type OrganismTask
     #
+    # Organism unique id
+    #
+    id::UInt
+    #
     # Task object. With it we may use green
     #
     task::Task
@@ -14,9 +18,11 @@
     #
     organism::Creature.Organism
   end
-    #
-  # Updates organisms existance. We have to call this function to
-  # update organisms life in memory world...
+  #
+  # Updates organisms existances. We have to call this function to
+  # update organisms life in memory world. Decreases energy and
+  # provides rare mutations.
+  # @param counter Increment value for energy decreasing
   #
   function _updateOrganisms(counter::UInt)
       #
@@ -36,9 +42,12 @@
       if counter == Manager._options.period
         for i = 1:len
           org = _tasks[i].organism
-          org.energy -= UInt(1)
+          org.energy -= Manager._options.decValue
+          #
+          # This is how we updates organism's color after energy descreasing
+          #
           _moveOrganism(org.pos, org)
-          Mutator.mutate(org.script, Manager._options.probs)
+          #Mutator.mutate(org.script, Manager._options.probs)
         end
         counter = UInt(0)
       end
@@ -79,7 +88,7 @@
     #
     # Adds organism to organisms pool
     #
-    oTask = OrganismTask(task, org)
+    oTask = OrganismTask(_getOrganismId(pos), task, org)
     push!(_tasks, oTask)
     oTask
   end

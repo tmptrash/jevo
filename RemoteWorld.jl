@@ -51,7 +51,7 @@ module RemoteWorld
   # @param height Canvas height in pixels
   # @return RemoteData
   #
-  function create(host::Base.IpAddr, port::Integer, width::Uint = Config.world["width"], height::Uint = Config.world["height"])
+  function create(host::Base.IPAddr, port::Integer, width::UInt = Config.world["width"], height::UInt = Config.world["height"])
     RemoteData(Client.create(host, port), CanvasWindow.create(width, height))
   end
   #
@@ -85,7 +85,7 @@ module RemoteWorld
   function _onResponse(rd::RemoteData, ans::Connection.Answer)
     for x in 1:size(ans.data)[2]
       for y in 1:size(ans.data)[1]
-        CanvasWindow.dot(rd.win, x, y, ans.data[x, y])
+        CanvasWindow.dot(rd.win, x, y, UInt32(ans.data[x, y]))
       end
     end
     CanvasWindow.update(rd.win)

@@ -66,6 +66,27 @@ end
 function setProbabilities(probs::Array{Int})
   Manager._options.probs = probs
 end
+#
+# @rpc
+# Changes amount of energy, which is used for decreasing during
+# some period of time. See Config.organism["decreaseAfterTimes"]
+# config for details
+#
+function setEnergyDecrease(decVal::UInt)
+  Manager._options.decValue = decVal
+end
+#
+# @rpc
+# Does one mutation for specified organism
+# @param organismId Unique orgaism's ID
+#
+function mutate(organismId)
+  if (haskey(Manager._posMap, organismId))
+    Mutator.mutate(Manager._posMap[organismId].script, Manager._options.probs)
+    return true
+  end
+  false
+end
 
 #
 # Creates server and returns it's ServerConnection type. It 
@@ -75,7 +96,7 @@ end
 #
 function _createServer()
   port = CommandLine.val(_params, Manager.PARAM_SERVER_PORT)
-  port = port == "" ? Config.connection["serverPort"] : int(port)
+  port = port == "" ? Config.connection[PARAM_SERVER_PORT] : int(port)
   con  = Server.create(ip"127.0.0.1", port)
   Event.on(con.observer, Server.EVENT_COMMAND, _onRemoteCommand)
   con
@@ -86,7 +107,7 @@ end
 # then, false will be returned.
 #
 function _onRemoteCommand(cmd::Connection.Command, ans::Connection.Answer)
-  ans.data = haskey(_rpcApi, cmd.fn) ? apply(_rpcApi[cmd.fn], cmd.args) : false
+  ans.data = haskey(_rpcApi, cmd.fn) ? _rpcApi[cmd.fn](cmd.args...) : false
 end
 #
 # An API for remove clients. This manager will be a server for them.
@@ -98,5 +119,7 @@ _rpcApi = Dict{Integer, Function}(
   RPC_CREATE_ORGANISMS  => createOrganisms,
   RPC_CREATE_ORGANISM   => createOrganism,
   RPC_SET_PERIOD        => setPeriod,
-  RPC_SET_PROBABILITIES => setProbabilities
+  RPC_SET_PROBABILITIES => setProbabilities,
+  RPC_SET_ENERGY_DEC    => setEnergyDecrease,
+  RPC_MUTATE            => mutate
 )

@@ -216,7 +216,7 @@ module Mutator
     end
 
     Script.createBlock(code, block, ifParams[3], vars)
-    Script.addExpr(block, apply(Expr, ifParams))
+    Script.addExpr(block, Expr(ifParams...))
   end
   # 
   # Adds new named function into the functions block within script. See
@@ -258,7 +258,7 @@ module Mutator
       push!(vars, arg)
     end
     Script.addFunc(code, string(newFunc), funcArgs)
-    Script.addExpr(code.fnBlock.block, Expr(:function, apply(Expr, func), newBlock))
+    Script.addExpr(code.fnBlock.block, Expr(:function, Expr(func...), newBlock))
     Script.createBlock(code, code.fnBlock, newBlock, vars)
   end
   #

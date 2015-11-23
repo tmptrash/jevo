@@ -76,10 +76,10 @@ module World
   # TODO: possible infinite loop, if all point are full
   #
   function getFreePos(plane::Plane)
-    pos = Helper.Point(int(plane.width / 2), int(plane.height / 2))
+    pos = Helper.Point(round(Int, plane.width / 2), round(Int, plane.height / 2))
     while World.getEnergy(plane, pos) > UInt(0)
-      pos.x = int(rand(1:plane.width))
-      pos.y = int(rand(1:plane.height))
+      pos.x = round(Int, rand(1:plane.width))
+      pos.y = round(Int, rand(1:plane.height))
     end
     pos
   end

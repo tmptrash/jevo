@@ -34,12 +34,22 @@ module Manager
   # to send commands and obtain results. So, this port will be used for
   # current manager(server) for listening clients.
   #
-  const PARAM_SERVER_PORT = "serverPort"  
+  const PARAM_SERVER_PORT = "serverPort"
   #
   # Manager's options, which may be changed by remote calls
   #
   type Options
+    #
+    # Amount of iterations, after whichenergy will be decreased
+    #
     period::UInt
+    #
+    # Value for energy decrease per one time
+    #
+    decValue::UInt
+    #
+    # Mutation related probability: add/change/remove 
+    #
     probs::Array{Int, 1}
   end
 
@@ -48,7 +58,8 @@ module Manager
   #
   function run()
     counter = UInt(0)
-    server  = _createServer() 
+    server  = _createServer()
+
     #
     # This server is listening for all other managers and remote
     # terminal. It runs obtained commands and send answers back.
@@ -93,6 +104,7 @@ module Manager
   #
   _options = Options(
     Config.organism["decreaseAfterTimes"],
+    Config.organism["descreaseValue"],
     Config.mutator["addChange"]
   )
 end

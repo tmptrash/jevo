@@ -10,3 +10,5 @@ const RPC_CREATE_ORGANISMS  = 1
 const RPC_CREATE_ORGANISM   = 2
 const RPC_SET_PERIOD        = 3
 const RPC_SET_PROBABILITIES = 4
+const RPC_SET_ENERGY_DEC    = 5
+const RPC_MUTATE            = 6

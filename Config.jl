@@ -73,7 +73,7 @@ module Config
     # Eve. It means that these organism were created by operator and not
     # by evolution.
     #
-    "startEnergy"         => UInt(0xDDDD),
+    "startEnergy"         => UInt(10000),
     #
     # Maximum amount of energy, which one organism may contains
     #
@@ -82,7 +82,11 @@ module Config
     # Amount of iterations within organism's life loop, after that we decrease
     # amount of energy ono 1 point.
     #
-    "decreaseAfterTimes"  => UInt(1000)
+    "decreaseAfterTimes"  => UInt(1000),
+    #
+    # Value, which will be descreased in organism after "descreaseAfterTimes" period
+    #
+    "descreaseValue"      => UInt(1)
   )
   const world = Dict{ASCIIString, Any}(
     #

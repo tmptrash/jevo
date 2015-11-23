@@ -382,7 +382,7 @@
     # TODO: we assume, that all vars are Int
     for i = 1:length(func.args) push!(args, getVarOrNum(block)) end
 
-    apply(Expr, args)
+    Expr(args...)
   end
   #
   # Parses expression recursively and collects all variables and numbers
