@@ -58,7 +58,7 @@ module Creature
     #
     # {UInt} Amount of energy for current organism
     #
-    energy::UInt
+    energy::UInt32
     #
     # {Array{Int}} Organism's position in a world
     #

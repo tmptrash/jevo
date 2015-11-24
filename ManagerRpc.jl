@@ -6,6 +6,7 @@
 # @author DeadbraiN
 #
 include("ManagerRpcApi.jl")
+using Debug
 #
 # @rpc
 # Grabs world's rectangle region and returns it

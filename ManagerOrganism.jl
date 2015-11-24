@@ -1,6 +1,7 @@
 #
 # @author DeadbraiN
 #
+using Debug
   #
   # One task related to one organism
   #
@@ -42,6 +43,14 @@
       if counter == Manager._options.period
         for i = 1:len
           org = _tasks[i].organism
+          #
+          # if the energy of the organism is zero, we have to remove it
+          #
+          if org.energy <= Manager._options.decValue
+            org.energy = Manager._options.decValue
+            splice!(_tasks, i)
+            len -= 1
+          end
           org.energy -= Manager._options.decValue
           #
           # This is how we updates organism's color after energy descreasing
@@ -106,8 +115,8 @@
     # pos - new organism position
     # organism.pos - old organism position
     #
-    World.setEnergy(Manager._world, organism.pos, UInt16(0))
-    World.setEnergy(Manager._world, pos, UInt16(organism.energy))
+    World.setEnergy(Manager._world, organism.pos, UInt32(0))
+    World.setEnergy(Manager._world, pos, UInt32(organism.energy))
     organism.pos = pos
   end
   #
@@ -256,10 +265,6 @@
     end
   end
 
-  #
-  # TODO: All these three fields should be assembled in one type Data
-  # TODO: We don't need to set them as statics. I think it's quite possible to use
-  # TODO: this module for different objects (instances)
   #
   # All available organism's tasks
   #

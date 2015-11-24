@@ -42,11 +42,11 @@ module Manager
     #
     # Amount of iterations, after whichenergy will be decreased
     #
-    period::UInt
+    period::UInt32
     #
     # Value for energy decrease per one time
     #
-    decValue::UInt
+    decValue::UInt32
     #
     # Mutation related probability: add/change/remove 
     #

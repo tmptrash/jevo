@@ -32,7 +32,7 @@ module World
     #
     # Array of pixels (RGB+8b)
     #
-    data::Array{UInt16, 2}
+    data::Array{UInt32, 2}
     #
     # {Event.Observer} Adds events listening/firing logic to the World.
     #
@@ -45,7 +45,7 @@ module World
   # @param height World height
   #
   function create(width::UInt = Config.world["width"], height::UInt = Config.world["height"])
-    Plane(width, height, fill(UInt16(0), (Int(height), Int(width))), Event.create())
+    Plane(width, height, fill(UInt32(0), (Int(height), Int(width))), Event.create())
   end
   #
   # Adds energy point by specified coordinates
@@ -53,7 +53,7 @@ module World
   # @param pos Position of the energy point
   # @param energy Amount of energy to add
   #
-  function setEnergy(plane::Plane, pos::Helper.Point, energy::UInt16)
+  function setEnergy(plane::Plane, pos::Helper.Point, energy::UInt32)
     plane.data[pos.y, pos.x] = energy
     Event.fire(plane.observer, "update", pos.x, pos.y, energy, plane)
   end
