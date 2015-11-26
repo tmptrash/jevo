@@ -3,6 +3,7 @@
 # Contains configurations for entire application. It should be possible
 # to change some parameter here and the object, which contains it, updates
 # it's state.
+# TODO: describes sections and kets
 #
 # @author DeadbraiN
 #
@@ -12,6 +13,67 @@ module Config
   export organism
   export world
   export connection
+  #
+  # Small hack for saving/loading data from/to the data file
+  #
+  type Data
+    d::Dict{UInt16, Dict{UInt16, Any}}
+  end
+  #
+  # Sections id's
+  #
+  const MUTATOR::UInt16         = 1
+  #
+  # Keys id's in one section
+  #
+  const ADD_CHANGE::UInt16      = 1
+  const FUNC_MAX_ARGS::UInt16   = 2
+
+  #
+  # Saves all data into the file
+  # @param file File name
+  #
+  function save(file::ASCIIString = "config.data")
+    fileIO = open(file, "w")
+    serialize(fileIO, _data.d)
+    close(fileIO)
+  end
+  #
+  # Loads all data from the file
+  # @param file File name
+  #
+  function load(file::ASCIIString = "config.data")
+    fileIO = open(file)
+    _data.d = deserialize(fileIO)
+    close(fileIO)
+  end
+  #
+  # All configuration data
+  #
+  _data = Data(
+    MUTATOR => Dict{UInt16, Any}(
+      #
+      # {Array} Probabilities with wich mutator decides what to do: add,
+      #         or change existing construction of the script. 
+      #         Depending on this values, organism may have different
+      #         strategies of living. For example: if add value is bigger 
+      #         then del and change, then it will be grow up all the time.
+      #         If del value is bigger then other, then it will be decreased
+      #         to one line code and will die.
+      #
+      ADD_CHANGE    => [1,1],
+      #
+      # {UInt8} Maximum amount of function parameters in orgamism's script.
+      # It's used in Mutator during new function creation. Example:
+      #
+      #     function func12(var24, var25);end
+      #
+      # In example above there are two arguments. This amount of arguments
+      # must be less then funcMaxArgs
+      #
+      FUNC_MAX_ARGS => UInt8(10)
+    )
+  )
   #
   # Mutator related configuration
   #
@@ -82,7 +144,7 @@ module Config
     # Amount of iterations within organism's life loop, after that we decrease
     # amount of energy ono 1 point.
     #
-    "decreaseAfterTimes"  => UInt(1000),
+    "decreaseAfterTimes"  => UInt(1000000),
     #
     # Value, which will be descreased in organism after "descreaseAfterTimes" period
     #
