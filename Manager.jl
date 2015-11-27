@@ -2,6 +2,7 @@
 # Manages organisms and they world
 # @singleton
 #
+# @singleton
 # @author DeadbraiN
 #
 # TODO: describe included files and how to split Manager on files.

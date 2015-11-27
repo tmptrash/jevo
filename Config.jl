@@ -3,8 +3,9 @@
 # Contains configurations for entire application. It should be possible
 # to change some parameter here and the object, which contains it, updates
 # it's state.
-# TODO: describes sections and kets
+# TODO: describes sections and keys structure
 #
+# @singleton
 # @author DeadbraiN
 #
 module Config
@@ -13,21 +14,26 @@ module Config
   export organism
   export world
   export connection
+
+  export save
+  export load
+  export val
   #
   # Small hack for saving/loading data from/to the data file
   #
   type Data
-    d::Dict{UInt16, Dict{UInt16, Any}}
+    d::Dict{UInt64, Dict{UInt64, Any}}
   end
+
   #
   # Sections id's
   #
-  const MUTATOR::UInt16         = 1
+  const MUTATOR         = 1
   #
   # Keys id's in one section
   #
-  const ADD_CHANGE::UInt16      = 1
-  const FUNC_MAX_ARGS::UInt16   = 2
+  const ADD_CHANGE      = 1
+  const FUNC_MAX_ARGS   = 2
 
   #
   # Saves all data into the file
@@ -48,30 +54,50 @@ module Config
     close(fileIO)
   end
   #
+  # Returns configuration value according to section and key
+  # @param section Configuration section
+  # @param key Key inside the section
+  # @return {Any} Value of key in specified section
+  #
+  function val(section::Int64, key::Int64)
+    _data.d[section][key]
+  end
+  #
+  # Sets the value by section and key. Works in pair with 
+  # getter val() function
+  # @param section Configuration section
+  # @param key Key inside the section
+  #
+  function val(section::Int64, key::Int64, value::Any)
+    _data.d[section][key] = value
+  end
+  #
   # All configuration data
   #
   _data = Data(
-    MUTATOR => Dict{UInt16, Any}(
-      #
-      # {Array} Probabilities with wich mutator decides what to do: add,
-      #         or change existing construction of the script. 
-      #         Depending on this values, organism may have different
-      #         strategies of living. For example: if add value is bigger 
-      #         then del and change, then it will be grow up all the time.
-      #         If del value is bigger then other, then it will be decreased
-      #         to one line code and will die.
-      #
-      ADD_CHANGE    => [1,1],
-      #
-      # {UInt8} Maximum amount of function parameters in orgamism's script.
-      # It's used in Mutator during new function creation. Example:
-      #
-      #     function func12(var24, var25);end
-      #
-      # In example above there are two arguments. This amount of arguments
-      # must be less then funcMaxArgs
-      #
-      FUNC_MAX_ARGS => UInt8(10)
+    Dict{Int64, Dict{Int64, Any}}(
+      MUTATOR => Dict{Int16, Any}(
+        #
+        # {Array} Probabilities with wich mutator decides what to do: add,
+        #         or change existing construction of the script. 
+        #         Depending on this values, organism may have different
+        #         strategies of living. For example: if add value is bigger 
+        #         then del and change, then it will be grow up all the time.
+        #         If del value is bigger then other, then it will be decreased
+        #         to one line code and will die.
+        #
+        ADD_CHANGE    => [1,1],
+        #
+        # {UInt8} Maximum amount of function parameters in orgamism's script.
+        # It's used in Mutator during new function creation. Example:
+        #
+        #     function func12(var24, var25);end
+        #
+        # In example above there are two arguments. This amount of arguments
+        # must be less then funcMaxArgs
+        #
+        FUNC_MAX_ARGS => UInt8(10)
+      )
     )
   )
   #
