@@ -1,6 +1,5 @@
 #
 # Manages organisms and they world
-# @singleton
 #
 # @singleton
 # @author DeadbraiN
@@ -17,13 +16,14 @@
 module Manager
   import Creature
   import World
-  import Config
   import Helper
   import Event
   import Mutator
   import Server
   import Connection
   import CommandLine
+
+  using Config
   #
   # This is how we collect Manager module from it's parts
   #
@@ -104,8 +104,8 @@ module Manager
   # remote calls. See _rpcApi for details.
   #
   _options = Options(
-    Config.organism["decreaseAfterTimes"],
-    Config.organism["descreaseValue"],
-    Config.mutator["addChange"]
+    Config.val(ORGANISM, DESCREASE_AFTER_TIMES),
+    Config.val(ORGANISM, DESCREASE_VALUE),
+    Config.val(MUTATOR, ADD_CHANGE)
   )
 end

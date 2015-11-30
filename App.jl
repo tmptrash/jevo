@@ -1,9 +1,10 @@
 import Manager
 import Helper
+using Config
 
 function run()
-    width  = Config.world["width"]
-    height = Config.world["height"]
+    width  = Config.val(WORLD, WIDTH)
+    height = Config.val(WORLD, HEIGHT)
     for i = 1:Int(width * height / 4)
         World.setEnergy(Manager._world, Helper.Point(rand(1:width), rand(1:height)), UInt16(0xFF))
     end
@@ -31,8 +32,8 @@ function runTest()
     # this is s hack. We override configs for tests,
     # to prevent creation of organisms inside Manager.run().
     #
-    Config.organism["startAmount"] = UInt(0)
-    Config.organism["decreaseAfterTimes"] = UInt(100)
+    Config.val(ORGANISM, START_AMOUNT, UInt(0))
+    Config.val(ORGANISM, DECREASE_AFTER_TIMES, UInt(100))
 
     Manager._createTask(Helper.Point(2, 2))
     Manager.run()

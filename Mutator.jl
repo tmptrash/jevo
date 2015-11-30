@@ -82,7 +82,7 @@ module Mutator
   # type of operation (add, change) and modifies script (code
   # parameter).
   # @param code Organism's script we have to mutate
-  # @param prob Strategy of mutating. See Config.mutator["addChange"] 
+  # @param prob Strategy of mutating. See Config.val(MUTATOR, ADD_CHANGE) 
   # for details.
   #
   function mutate(code::Script.Code, prob::Array{Int})
@@ -233,7 +233,7 @@ module Mutator
   # body of the function. Also, this block contains it's own variables scope.
   # It's important, that all functions leave in special separate block. All
   # function's arguments will be used as local(scope) variables. Amount of
-  # arguments is specified in Config.mutator["funcMaxArgs"] parameter. Example:
+  # arguments is specified in Config.val(MUTATOR, FUNC_MAX_ARGS) parameter. Example:
   #
   #   function func1() end
   #   function func2(var1) end

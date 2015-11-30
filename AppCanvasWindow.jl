@@ -1,3 +1,4 @@
+push!(LOAD_PATH, pwd())
 import CanvasWindow
 #using Debug
 

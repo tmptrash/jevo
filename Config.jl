@@ -9,17 +9,50 @@
 # @author DeadbraiN
 #
 module Config
-  export mutator
-  export script
-  export organism
-  export world
-  export connection
-
   export save
   export load
   export val
 
-  using Debug
+  #
+  # Sections...
+  # 
+  export MUTATOR
+  export SCRIPT
+  export ORGANISM
+  export WORLD 
+  export CONNECTION
+  #
+  # Keys id's in MUTATOR section
+  #
+  export ADD_CHANGE
+  export FUNC_MAX_ARGS
+  export MUTATIONS_ON_CLONE
+  #
+  # Keys id's in SCRIPT section
+  #
+  export BLOCKS_START_INDEX
+  export FUNC_PREFIX
+  export VAR_PREFIX
+  #
+  # Keys id's in ORGANISM section
+  #
+  export START_AMOUNT
+  export START_ENERGY
+  export MAX_ENERGY
+  export DECREASE_AFTER_TIMES
+  export DECREASE_VALUE
+  #
+  # Keys id's in WORLD section
+  #
+  export WIDTH
+  export HEIGHT
+  export FRAME_DELAY
+  export BACK_COLOR
+  #
+  # Keys id's in CONNECTION section
+  #
+  export SERVER_PORT
+
   #
   # Small hack for saving/loading data from/to the data file
   #
@@ -72,8 +105,7 @@ module Config
   # be overrided
   # @param file File name
   #
-  @debug function save(file::ASCIIString = "config.data")
-  @bp
+  function save(file::ASCIIString = "config.data")
     fileIO = null
     try
       fileIO = open(file, "w")
@@ -215,109 +247,5 @@ module Config
         SERVER_PORT          => Int(2000)
       )
     )
-  )
-  #
-  # Mutator related configuration
-  #
-  const mutator = Dict{ASCIIString, Any}(
-    #
-    # {Array} Probabilities with wich mutator decides what to do: add,
-    #         or change existing construction of the script. 
-    #         Depending on this values, organism may have different
-    #         strategies of living. For example: if add value is bigger 
-    #         then del and change, then it will be grow up all the time.
-    #         If del value is bigger then other, then it will be decreased
-    #         to one line code and will die.
-    #
-    "addChange"           => [1,1],
-    #
-    # {UInt8} Maximum amount of function parameters in orgamism's script.
-    # It's used in Mutator during new function creation. Example:
-    #
-    #     function func12(var24, var25);end
-    #
-    # In example above there are two arguments. This amount of arguments
-    # must be less then funcMaxArgs
-    #
-    "funcMaxArgs"         => UInt8(10),
-    #
-    # {Uint} Amount of mutations, which will be applied to arganism after
-    # clonning.
-    #
-    "mutationsOnClone"    => UInt(100)
-  )
-  #
-  # Script related settings
-  #
-  const script = Dict{ASCIIString, Any}(
-    #
-    # It's possible to skip some reserved blocks of code in Script.Code.blocks 
-    # property. For example, functions block.
-    #
-    "blocksStartIndex"    => 2,
-    #
-    # Prefix for all custom functions. Final name of the function will be: func[num]
-    #
-    "funcPrefix"          => "func",
-    #
-    # Prefix for all variables. Final name of the function will be: var[num]
-    #
-    "varPrefix"           => "var"
-  )
-  #
-  # Organism related configs
-  #
-  const organism = Dict{ASCIIString, Any}(
-    #
-    # Amount of organisms on program start
-    #
-    "startAmount"         => UInt(100),
-    #
-    # {Uint} Amount of energy for first organisms. They are like Adam and 
-    # Eve. It means that these organism were created by operator and not
-    # by evolution.
-    #
-    "startEnergy"         => UInt(10000),
-    #
-    # Maximum amount of energy, which one organism may contains
-    #
-    "maxEnergy"           => UInt(100000),
-    #
-    # Amount of iterations within organism's life loop, after that we decrease
-    # amount of energy ono 1 point.
-    #
-    "decreaseAfterTimes"  => UInt(1000000),
-    #
-    # Value, which will be descreased in organism after "descreaseAfterTimes" period
-    #
-    "descreaseValue"      => UInt(1)
-  )
-  const world = Dict{ASCIIString, Any}(
-    #
-    # World width
-    #
-    "width"               => UInt(3),
-    #
-    # World height
-    #
-    "height"              => UInt(3),
-    #
-    # Delay between requests for obtaining remote world region.
-    # This parameter affects frames per second in a window canvas
-    #
-    "frameDelay"          => 5,
-    #
-    # RGB, background color of the canvas, where organisms will be shown
-    #
-    "backColor"           => UInt32(0)
-  )
-  #
-  # Configuration of the TCP connection
-  #
-  const connection = Dict{ASCIIString, Any}(
-    #
-    # Starting number for TCP/IP listening
-    #
-    "serverPort"          => 2000
   )
 end

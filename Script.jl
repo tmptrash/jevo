@@ -31,7 +31,7 @@
   export getRandLine
 
   import Helper
-  import Config
+  using Config
   
   #
   # Record for variable or number. Is used in findVars() function.
@@ -140,8 +140,8 @@
     #
     fIndex::UInt
     #
-    # Maximum amount of parameters for function. See Config.mutator.funcMaxArgs 
-    # parameter for details.
+    # Maximum amount of parameters for function. See Config.val(MUTATOR, 
+    # FUNC_MAX_ARGS) parameter for details.
     #
     funcMaxArgs::UInt8
     #
@@ -251,7 +251,7 @@
   # @return {Dict{ASCIIString, Any}}
   #
   function getRandBlock(code::Code)
-    code.blocks[rand(Config.script["blocksStartIndex"]:length(code.blocks))]
+    code.blocks[rand(Config.val(SCRIPT, BLOCKS_START_INDEX):length(code.blocks))]
   end
   #
   # Returns random sign from the list (_sign) of available.
@@ -415,9 +415,9 @@
         findVars(vars, expr, uint(i))          # expression, go deepper
       elseif isSign(item) && length(expr.args) === 2
           push!(vars, VarOrNum(expr, i, 2))    # sign (-,+,~)
-      elseif beginswith(string(item), Config.script["funcPrefix"])
+      elseif beginswith(string(item), Config.val(SCRIPT, FUNC_PREFIX))
         push!(vars, VarOrNum(parent, 2, 3))    # function
-      elseif beginswith(string(item), Config.script["varPrefix"]) || typeof(item) === Int
+      elseif beginswith(string(item), Config.val(SCRIPT, VAR_PREFIX)) || typeof(item) === Int
         push!(vars, VarOrNum(expr, i, 0))      # var or num
       else
         push!(vars, VarOrNum(expr, i, 1))      # operation (-,+,/,$,...)
@@ -445,7 +445,7 @@
   # @return {Symbol} New symbol in format: "funcXXX", where XXX - UInt
   #
   function getNewFunc(code::Code)
-    symbol("$(Config.script["funcPrefix"])$(code.fIndex = code.fIndex + 1)")
+    symbol("$(Config.val(SCRIPT, FUNC_PREFIX))$(code.fIndex = code.fIndex + 1)")
   end
   #
   # Returns random line and it's index within block

@@ -41,9 +41,9 @@
 module Creature
   import Mutator
   import Script
-  import Config
   import Event
   import Helper
+  using Config
 
   export Organism
   export RetObj
@@ -275,7 +275,7 @@ module Creature
     # @return {Organism}
     # New organism with default parameters
     # TODO: position should be set from outside
-    Organism(Config.organism["startEnergy"], pos, script, Event.create())
+    Organism(Config.val(ORGANISM, START_ENERGY), pos, script, Event.create())
   end
   #
   # Clones an organism. It only fires an event. Clonning will be

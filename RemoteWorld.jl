@@ -18,8 +18,8 @@ module RemoteWorld
   import Event
   import Connection
   import Client
-  import Config
   import CanvasWindow
+  using Config
 
   export create
   export display
@@ -51,14 +51,14 @@ module RemoteWorld
   # @param height Canvas height in pixels
   # @return RemoteData
   #
-  function create(host::Base.IPAddr, port::Integer, width::UInt = Config.world["width"], height::UInt = Config.world["height"])
+  function create(host::Base.IPAddr, port::Integer, width::UInt = Config.val(WORLD, WIDTH), height::UInt = Config.val(WORLD, HEIGHT))
     RemoteData(Client.create(host, port), CanvasWindow.create(width, height))
   end
   #
   #
   # @param delay Delay between requests 
   #
-  function display(rd::RemoteData, delay::Integer = Config.world["frameDelay"], x::Integer = 1, y::Integer = 1, width::Integer = 0, height::Integer = 0)
+  function display(rd::RemoteData, delay::Integer = Config.val(WORLD, FRAME_DELAY), x::Integer = 1, y::Integer = 1, width::Integer = 0, height::Integer = 0)
     rd.delay  = delay
     rd.x      = x
     rd.y      = y

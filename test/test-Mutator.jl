@@ -36,7 +36,7 @@ module TestMutator
   #     )
   #   )]
   #   script = Script.Code(
-  #     0,0,Config.mutator["funcMaxArgs"],
+  #     0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),
   #     code,
   #     blocks,
   #     Script.Func[],
@@ -79,7 +79,7 @@ module TestMutator
   #     # there will be nothing to call and @fact will fail. Second important issue,
   #     # that this function should in the same block with other code (function t()...end)
   #     #
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[["name"=>"f", "args"=>[]]],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[["name"=>"f", "args"=>[]]],code.args[2])
   #     Mutator.mutate(script, [1,0,0])
   #     #
   #     # > 1, because this block already has function t() and our new code,
@@ -106,7 +106,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,1,0])
   #     #
   #     # In this particular test var1 should't be changed, because it's only one 
@@ -134,7 +134,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,1,0])
   #     #
   #     # In this particular test var1 should't be changed, because it's only one 
@@ -163,7 +163,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,1,0])
   #     #
   #     # In this particular test var1 should't be changed, because it's only one 
@@ -191,7 +191,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,1,0])
   #     #
   #     # In this particular test var1 should't be changed, because it's only one 
@@ -220,7 +220,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,1,0])
   #     #
   #     # In this particular test var1 should't be changed, because it's only one 
@@ -249,7 +249,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,1,0])
   #     #
   #     # In this particular test var1 should't be changed, because it's only one 
@@ -278,7 +278,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,1,0])
   #     #
   #     # In this particular test var1 should't be changed, because it's only one 
@@ -308,7 +308,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,1,0])
   #     #
   #     # In this particular test var1 should't be changed, because it's only one 
@@ -338,7 +338,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,1,0])
   #     #
   #     # In case of if operator only left, right operands and comparison operation may be changed
@@ -363,7 +363,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,1,0])
       
   #     args = code.args[2].args[1].args
@@ -391,7 +391,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,0,1])
 
   #     @fact length(code.args[2].args) => 0
@@ -412,7 +412,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,0,1])
 
   #     @fact length(code.args[2].args) => 0
@@ -433,7 +433,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,0,1])
 
   #     @fact length(code.args[2].args) => 0
@@ -454,7 +454,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,0,1])
 
   #     @fact length(code.args[2].args) => 0
@@ -476,7 +476,7 @@ module TestMutator
   #         "parent"=> nothing
   #       ]
   #     ]]
-  #     script = Script.Code(0,0,Config.mutator["funcMaxArgs"],code,blocks,[],code.args[2])
+  #     script = Script.Code(0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),code,blocks,[],code.args[2])
   #     Mutator.mutate(script, [0,0,1])
 
   #     @fact length(code.args[2].args) => 0

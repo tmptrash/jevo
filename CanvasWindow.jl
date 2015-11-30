@@ -29,7 +29,7 @@ module CanvasWindow
   import Cairo
   import Tk
   import Colors
-  import Config
+  using Config
 
   export Window
   export create
@@ -61,7 +61,7 @@ module CanvasWindow
     c   = Tk.Canvas(win)
     Tk.pack(c, expand=true, fill="both")
     ctx = Graphics.getgc(c)
-    rgb = convert(Colors.RGB, Colors.RGB24(Config.world["backColor"]))
+    rgb = convert(Colors.RGB, Colors.RGB24(Config.val(WORLD, BACK_COLOR)))
     
     Tk.set_antialias(ctx, 1)
     Tk.set_line_width(ctx, 1)

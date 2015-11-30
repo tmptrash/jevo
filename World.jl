@@ -44,7 +44,7 @@ module World
   # @param width World width
   # @param height World height
   #
-  function create(width::UInt = Config.world["width"], height::UInt = Config.world["height"])
+  function create(width::UInt = Config.val(WORLD, WIDTH), height::UInt = Config.val(WORLD, HEIGHT))
     Plane(width, height, fill(UInt32(0), (Int(height), Int(width))), Event.create())
   end
   #

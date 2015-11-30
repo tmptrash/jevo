@@ -33,7 +33,7 @@ function createOrganisms()
   #
   # Inits available organisms in Tasks
   #
-  for i = 1:Config.organism["startAmount"]
+  for i = 1:Config.val(ORGANISM, START_AMOUNT)
     createOrganism()
   end
 end
@@ -71,7 +71,7 @@ end
 #
 # @rpc
 # Changes amount of energy, which is used for decreasing during
-# some period of time. See Config.organism["decreaseAfterTimes"]
+# some period of time. See Config.val(ORGANISM, DESCREASE_AFTER_TIMES)
 # config for details
 #
 function setEnergyDecrease(decVal::UInt)
