@@ -100,8 +100,6 @@ _rpcApi = Dict{Integer, Function}(
   RPC_GET_REGION        => getRegion,
   RPC_CREATE_ORGANISMS  => createOrganisms,
   RPC_CREATE_ORGANISM   => createOrganism,
-  RPC_SET_PERIOD        => setPeriod,
-  RPC_SET_PROBABILITIES => setProbabilities,
-  RPC_SET_ENERGY_DEC    => setEnergyDecrease,
+  RPC_SET_CONFIG        => setConfig,
   RPC_MUTATE            => mutate
 )
