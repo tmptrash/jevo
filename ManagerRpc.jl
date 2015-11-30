@@ -51,31 +51,11 @@ function createOrganism(pos = nothing)
 end
 #
 # @rpc
-# Energy decrease period setter. This method may be called
-# from remote for changing this perion. It affects on speed
-# of organism's energy spending.
+# Sets configuration value according to it's section and a key
 # @param period Period we want to set
 #
-function setPeriod(period::UInt)
-  Manager._options.period = period
-end
-#
-# @rpc
-# Mutator's change/add probability array. This is a probability
-# for mutator, which affects more changes or additions in 
-# organism's source code.
-#
-function setProbabilities(probs::Array{Int})
-  Manager._options.probs = probs
-end
-#
-# @rpc
-# Changes amount of energy, which is used for decreasing during
-# some period of time. See Config.val(ORGANISM, DESCREASE_AFTER_TIMES)
-# config for details
-#
-function setEnergyDecrease(decVal::UInt)
-  Manager._options.decValue = decVal
+function setConfig(section::Int64, key::Int64, value::Any)
+  Config.val(section, key, value)
 end
 #
 # @rpc
@@ -84,7 +64,7 @@ end
 #
 function mutate(organismId)
   if (haskey(Manager._posMap, organismId))
-    Mutator.mutate(Manager._posMap[organismId].script, Manager._options.probs)
+    Mutator.mutate(Manager._posMap[organismId].script, Config.val(MUTATOR, ADD_CHANGE, probs))
     return true
   end
   false

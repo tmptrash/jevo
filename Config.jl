@@ -106,14 +106,14 @@ module Config
   # @param file File name
   #
   function save(file::ASCIIString = "config.data")
-    fileIO = null
+    io = null
     try
-      fileIO = open(file, "w")
-      serialize(fileIO, _data.d)
+      io = open(file, "w")
+      serialize(io, _data.d)
     catch(e)
       println("Config.save(): $e")
     finally
-      if (fileIO !== null) close(fileIO) end
+      if (io !== null) close(io) end
     end
   end
   #
@@ -121,33 +121,42 @@ module Config
   # @param file File name
   #
   function load(file::ASCIIString = "config.data")
-    fileIO = null
+    io = null
     try
-      fileIO  = open(file)
-      _data.d = deserialize(fileIO)
+      io = open(file)
+      _data.d = deserialize(io)
     catch(e)
       println("Config.load(): $e")
     finally
-      if (fileIO !== null) close(fileIO) end
+      if (io !== null) close(io) end
     end
   end
   #
   # Returns configuration value according to section and key
   # @param section Configuration section
   # @param key Key inside the section
-  # @return {Any} Value of key in specified section
+  # @return {Any|null} Value of key in specified section or null
+  # in case of incorrect section or key
   #
   function val(section::Int64, key::Int64)
-    _data.d[section][key]
+    if (haskey(_data.d, section) && haskey(_data.d[section], key))
+      return _data.d[section][key]
+    end
+    null
   end
   #
   # Sets the value by section and key. Works in pair with 
   # getter val() function
   # @param section Configuration section
   # @param key Key inside the section
+  # @return Operation boolean result
   #
   function val(section::Int64, key::Int64, value::Any)
+    if (haskey(_data.d, section) && haskey(_data.d[section], key))
+      return false
+    end
     _data.d[section][key] = value
+    true
   end
   #
   # All configuration data
