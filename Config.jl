@@ -215,7 +215,7 @@ module Config
         # Eve. It means that these organism were created by operator and not
         # by evolution.
         #
-        START_ENERGY         => UInt(10000),
+        START_ENERGY         => UInt(50000),
         #
         # Maximum amount of energy, which one organism may contains
         #

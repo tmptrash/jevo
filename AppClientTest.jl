@@ -2,6 +2,7 @@ push!(LOAD_PATH, pwd())
 include("Client.jl")
 include("Config.jl")
 include("ManagerRpcApi.jl")
+using Config
 
 function onAnswer(ans::Connection.Answer)
   println(ans)

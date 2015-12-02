@@ -78,7 +78,7 @@ end
 #
 function _createServer()
   port = CommandLine.val(_params, Manager.PARAM_SERVER_PORT)
-  port = port == "" ? Config.connection[PARAM_SERVER_PORT] : Int(port)
+  port = port == "" ? Config.val(CONNECTION, SERVER_PORT) : Int(port)
   con  = Server.create(ip"127.0.0.1", port)
   Event.on(con.observer, Server.EVENT_COMMAND, _onRemoteCommand)
   con

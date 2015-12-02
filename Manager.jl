@@ -64,7 +64,7 @@ module Manager
     #
     # This server is listening for all other managers and remote
     # terminal. It runs obtained commands and send answers back.
-    # In other words, it works like RPC mechanism...
+    # In other words, it works like RPC runner...
     #
     Server.run(server)
     #
@@ -98,14 +98,4 @@ module Manager
   # Parameters passed through command line
   #
   _params = CommandLine.create()
-  #
-  # Global manager's options like: energy decrease period, add/change
-  # operation probability and so on. This options may be changed by
-  # remote calls. See _rpcApi for details.
-  #
-  _options = Options(
-    Config.val(ORGANISM, DESCREASE_AFTER_TIMES),
-    Config.val(ORGANISM, DESCREASE_VALUE),
-    Config.val(MUTATOR, ADD_CHANGE)
-  )
 end

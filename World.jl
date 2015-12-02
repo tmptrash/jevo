@@ -7,8 +7,8 @@
 module World
   import Creature
   import Helper
-  import Config
   import Event
+  using Config
 
   export create
   export setEnergy

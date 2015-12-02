@@ -237,7 +237,7 @@ module Creature
       #
       # {Script.Fields} Code variables and functions related fields
       #
-      0,0,Config.mutator["funcMaxArgs"],
+      0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),
       #
       # {Expr} Initial organism's script. Will be mutated soon. Related to 
       # blocks field below. See Script.Code.code for details.

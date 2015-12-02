@@ -103,7 +103,15 @@ module Server
   function run(con::Connection.ServerConnection)
     @async begin
       while true
-        push!(con.socks, accept(con.server))
+        try
+          push!(con.socks, accept(con.server))
+        catch e
+          _update(con)
+          if isopen(con.server) === false
+            #_closeAllConneciton()
+            break
+          end
+        end
         sock = con.socks[length(con.socks)]
         push!(con.tasks, @async while isopen(sock) 
           _answer(sock, con.observer)
@@ -149,7 +157,11 @@ module Server
   #
   function _answer(sock::Base.TCPSocket, obs::Event.Observer)
     ans = Connection.Answer(null)
-    Event.fire(obs, EVENT_COMMAND, deserialize(sock), ans)
-    serialize(sock, ans)
+    try
+      Event.fire(obs, EVENT_COMMAND, deserialize(sock), ans)
+      serialize(sock, ans)
+    catch e
+      if isa(e, EOFError) close(sock) end
+    end
   end
 end
