@@ -106,14 +106,14 @@ module Config
   # @param file File name
   #
   function save(file::ASCIIString = "config.data")
-    io = null
+    local io::IOStream
     try
       io = open(file, "w")
       serialize(io, _data.d)
     catch(e)
       println("Config.save(): $e")
     finally
-      if (io !== null) close(io) end
+      if isdefined(:io) close(io) end
     end
   end
   #
@@ -121,14 +121,14 @@ module Config
   # @param file File name
   #
   function load(file::ASCIIString = "config.data")
-    io = null
+    local io::IOStream
     try
       io = open(file)
       _data.d = deserialize(io)
     catch(e)
       println("Config.load(): $e")
     finally
-      if (io !== null) close(io) end
+      if isdefined(:io) close(io) end
     end
   end
   #

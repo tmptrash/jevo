@@ -84,10 +84,15 @@ module Server
   # it start to listen specified host and port using Base.listen() method.
   # @param host Host we are listening to
   # @param port Port we are listening to
-  # @return Server's related data object
+  # @return Server's related data object or false if error
   #
   function create(host::Base.IPAddr, port::Integer)
-    Connection.ServerConnection(Task[], Base.TCPSocket[], listen(host, port), Event.create())
+    try
+      return Connection.ServerConnection(Task[], Base.TCPSocket[], listen(host, port), Event.create())
+    catch e
+      println("Server.run(): $e")
+      return false
+    end
   end
   #
   # Runs the server. Starts listening clients connections
@@ -104,9 +109,12 @@ module Server
     @async begin
       while true
         try
+          #
+          # This line handles new connections
+          #
           push!(con.socks, accept(con.server))
         catch e
-          _update(con)
+          println("Server.run(): $e")
           if isopen(con.server) === false
             for sock in con.socks close(sock) end
             break
@@ -161,6 +169,7 @@ module Server
       Event.fire(obs, EVENT_COMMAND, deserialize(sock), ans)
       serialize(sock, ans)
     catch e
+      println("Server._answer(): $e")
       if isa(e, EOFError) close(sock) end
     end
   end

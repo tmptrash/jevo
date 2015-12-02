@@ -59,7 +59,7 @@ module Client
   # in any case. You have to check this calling isopen() function.
   # @param host Host we are connecting to
   # @param port Port number we are connecting to
-  # @return Client connection object
+  # @return Client connection object or false if error
   #
   function create(host::Base.IPAddr, port::Integer)
     local sock::Base.TCPSocket
@@ -73,14 +73,22 @@ module Client
       # using green thread (Task).
       #
       @async while true
-        Event.fire(obs, EVENT_ANSWER, deserialize(sock))
+        try
+          Event.fire(obs, EVENT_ANSWER, deserialize(sock))
+        catch e
+          println("Client.create(): $e")
+          if isdefined(:sock)
+            close(sock)
+            break
+          end
+        end
       end
     catch e
-      # TODO: what to do with e?
-      close(sock)
+      println("Client.create(): $e")
+      if isdefined(:sock) close(sock) end
     end
 
-    Connection.ClientConnection(sock, obs)
+    isdefined(:sock) ? Connection.ClientConnection(sock, obs) : false
   end
   #
   # Makes request to server. This method is not blocking. It returns
@@ -97,7 +105,12 @@ module Client
     #
     # This line is non blocking one
     #
-    serialize(con.sock, Connection.Command(fn, [i for i in args]))
+    try
+      serialize(con.sock, Connection.Command(fn, [i for i in args]))
+    catch e
+      println("Client.request(): $e")
+      close(con.sock)
+    end
 
     return true
   end
