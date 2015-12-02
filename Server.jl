@@ -108,7 +108,7 @@ module Server
         catch e
           _update(con)
           if isopen(con.server) === false
-            #_closeAllConneciton()
+            for sock in con.socks close(sock) end
             break
           end
         end
