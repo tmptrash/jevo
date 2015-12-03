@@ -43,6 +43,8 @@ module Client
   import Connection
   import Event
 
+  using Debug
+
   export create
   export request
   export stop
@@ -61,9 +63,10 @@ module Client
   # @param port Port number we are connecting to
   # @return Client connection object or false if error
   #
-  function create(host::Base.IPAddr, port::Integer)
-    local sock::Base.TCPSocket
-    local obs = Event.create()
+  @debug function create(host::Base.IPAddr, port::Integer)
+  @bp
+    sock = null
+    obs  = Event.create()
 
     try
       sock = Base.connect(host, port)
@@ -77,7 +80,7 @@ module Client
           Event.fire(obs, EVENT_ANSWER, deserialize(sock))
         catch e
           println("Client.create(): $e")
-          if isdefined(:sock)
+          if sock !== null
             close(sock)
             break
           end
@@ -85,10 +88,10 @@ module Client
       end
     catch e
       println("Client.create(): $e")
-      if isdefined(:sock) close(sock) end
+      if sock !== null close(sock) end
     end
 
-    isdefined(:sock) ? Connection.ClientConnection(sock, obs) : false
+    sock !== null ? Connection.ClientConnection(sock, obs) : false
   end
   #
   # Makes request to server. This method is not blocking. It returns

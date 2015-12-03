@@ -52,7 +52,8 @@ module RemoteWorld
   # @return RemoteData
   #
   function create(host::Base.IPAddr, port::Integer, width::UInt = Config.val(WORLD, WIDTH), height::UInt = Config.val(WORLD, HEIGHT))
-    RemoteData(Client.create(host, port), CanvasWindow.create(width, height))
+    con = Client.create(host, port)
+    con !== false ? RemoteData(con, CanvasWindow.create(width, height)) : false
   end
   #
   #
