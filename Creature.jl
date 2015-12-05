@@ -58,7 +58,7 @@ module Creature
     #
     # {UInt} Amount of energy for current organism
     #
-    energy::UInt32
+    energy::UInt
     #
     # {Array{Int}} Organism's position in a world
     #
@@ -130,7 +130,7 @@ module Creature
         # Possible values [0:typemax(Int)]. 0 means no energy.
         # @param x X coordinate
         # @param y Y coordinate
-        # @return {Int} Energy value
+        # @return {UInt} Energy value
         #
         function funcGetEnergy(x::Int, y::Int)
           Creature._getEnergy(creature, x, y)
@@ -139,34 +139,34 @@ module Creature
         # Grabs energy from the left point. Grabbibg means decrease energy at point
         # and increase it at organism.
         # @param amount Amount of energy to grab
-        # @return {Int} Amount of grabbed energy
+        # @return {UInt} Amount of grabbed energy
         #
-        function funcGrabEnergyLeft(amount::Int)
-          Creature._grabEnergy(creature, "left", UInt(amount))
+        function funcGrabEnergyLeft(amount::UInt)
+          Creature._grabEnergy(creature, "left", amount)
         end
         #
         # Grabs energy from the right point.
         # @param amount Amount of energy to grab
-        # @return {Int} Amount of grabbed energy
+        # @return {UInt} Amount of grabbed energy
         #
-        function funcGrabEnergyRight(amount::Int)
-          Creature._grabEnergy(creature, "right", UInt(amount))
+        function funcGrabEnergyRight(amount::UInt)
+          Creature._grabEnergy(creature, "right", amount)
         end
         #
         # Grabs energy from the up point.
         # @param amount Amount of energy to grab
-        # @return {Int} Amount of grabbed energy
+        # @return {UInt} Amount of grabbed energy
         #
-        function funcGrabEnergyUp(amount::Int)
-          Creature._grabEnergy(creature, "up", UInt(amount))
+        function funcGrabEnergyUp(amount::UInt)
+          Creature._grabEnergy(creature, "up", amount)
         end
         #
         # Grabs energy from the down point.
         # @param amount Amount of energy to grab
         # @return {Int} Amount of grabbed energy
         #
-        function funcGrabEnergyDown(amount::Int)
-          Creature._grabEnergy(creature, "down", UInt(amount))
+        function funcGrabEnergyDown(amount::UInt)
+          Creature._grabEnergy(creature, "down", amount)
         end
         #
         # Makes one step left. It decreases organism's x coodinate by 1.
@@ -255,16 +255,16 @@ module Creature
       # Embedded functions can't be changed by enyone. Generated may be.
       #
       [
-        Script.Func("funcGetEnergy",       [Script.Var("x",      Int), Script.Var("y", Int)])
-        Script.Func("funcGrabEnergyLeft",  [Script.Var("amount", Int)                      ])
-        Script.Func("funcGrabEnergyRight", [Script.Var("amount", Int)                      ])
-        Script.Func("funcGrabEnergyUp",    [Script.Var("amount", Int)                      ])
-        Script.Func("funcGrabEnergyDown",  [Script.Var("amount", Int)                      ])
-        Script.Func("funcStepLeft",        [                                               ])
-        Script.Func("funcStepRight",       [                                               ])
-        Script.Func("funcStepUp",          [                                               ])
-        Script.Func("funcStepDown",        [                                               ])
-        Script.Func("funcClone",           [                                               ])
+        Script.Func("funcGetEnergy",       [Script.Var("x",      Int ), Script.Var("y", Int)])
+        Script.Func("funcGrabEnergyLeft",  [Script.Var("amount", UInt)                      ])
+        Script.Func("funcGrabEnergyRight", [Script.Var("amount", UInt)                      ])
+        Script.Func("funcGrabEnergyUp",    [Script.Var("amount", UInt)                      ])
+        Script.Func("funcGrabEnergyDown",  [Script.Var("amount", UInt)                      ])
+        Script.Func("funcStepLeft",        [                                                ])
+        Script.Func("funcStepRight",       [                                                ])
+        Script.Func("funcStepUp",          [                                                ])
+        Script.Func("funcStepDown",        [                                                ])
+        Script.Func("funcClone",           [                                                ])
       ],
       #
       # {Expr} Block for functions. See Script.Code.fnBlock for details.
