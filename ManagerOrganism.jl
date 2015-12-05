@@ -49,12 +49,12 @@ function _updateOrganisms(counter::UInt)
         #
         # if the energy of the organism is zero, we have to remove it
         #
-        if org.energy <= Config.val(ORGANISM, DESCREASE_VALUE)
-          org.energy = Config.val(ORGANISM, DESCREASE_VALUE)
+        if org.energy <= Config.val(ORGANISM, DECREASE_VALUE)
+          org.energy = Config.val(ORGANISM, DECREASE_VALUE)
           splice!(_tasks, i)
           len -= 1
         end
-        org.energy -= Config.val(ORGANISM, DESCREASE_VALUE)
+        org.energy -= Config.val(ORGANISM, DECREASE_VALUE)
         #
         # This is how we updates organism's color after energy descreasing
         #

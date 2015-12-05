@@ -169,8 +169,11 @@ module Server
       Event.fire(obs, EVENT_COMMAND, deserialize(sock), ans)
       serialize(sock, ans)
     catch e
-      println("Server._answer(): $e")
-      if isa(e, EOFError) close(sock) end
+      if isa(e, EOFError)
+        close(sock)
+      else
+        println("Server._answer(): $e")
+      end
     end
   end
 end

@@ -57,7 +57,7 @@ module Config
   # Small hack for saving/loading data from/to the data file
   #
   type Data
-    d::Dict{UInt64, Dict{UInt64, Any}}
+    d::Dict{Int64, Dict{Int64, Any}}
   end
 
   #
@@ -139,10 +139,10 @@ module Config
   # in case of incorrect section or key
   #
   function val(section::Int64, key::Int64)
-    if (haskey(_data.d, section) && haskey(_data.d[section], key))
-      return _data.d[section][key]
+    if (!haskey(_data.d, section) || !haskey(_data.d[section], key))
+      return null
     end
-    null
+    _data.d[section][key]
   end
   #
   # Sets the value by section and key. Works in pair with 
@@ -152,7 +152,7 @@ module Config
   # @return Operation boolean result
   #
   function val(section::Int64, key::Int64, value::Any)
-    if (haskey(_data.d, section) && haskey(_data.d[section], key))
+    if (!haskey(_data.d, section) || !haskey(_data.d[section], key))
       return false
     end
     _data.d[section][key] = value

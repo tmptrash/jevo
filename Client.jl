@@ -43,8 +43,6 @@ module Client
   import Connection
   import Event
 
-  using Debug
-
   export create
   export request
   export stop
@@ -63,8 +61,7 @@ module Client
   # @param port Port number we are connecting to
   # @return Client connection object or false if error
   #
-  @debug function create(host::Base.IPAddr, port::Integer)
-  @bp
+  function create(host::Base.IPAddr, port::Integer)
     sock = null
     obs  = Event.create()
 
@@ -79,7 +76,13 @@ module Client
         try
           Event.fire(obs, EVENT_ANSWER, deserialize(sock))
         catch e
-          println("Client.create(): $e")
+          #
+          # This exception means, that client has disconnected.
+          # All other exceptions should be shown in terminal.
+          #
+          if !isa(e, EOFError)
+            println("Client.create.deserialize() : $e")
+          end
           if sock !== null
             close(sock)
             break
@@ -87,7 +90,7 @@ module Client
         end
       end
     catch e
-      println("Client.create(): $e")
+      println("Client.create.connect(): $e")
       if sock !== null close(sock) end
     end
 
