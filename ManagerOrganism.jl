@@ -43,7 +43,7 @@ function _updateOrganisms(counter::UInt)
     #
     # This block decreases energy from organisms, because they spend it while leaving
     #
-    if counter == Config.val(ORGANISM, DECREASE_AFTER_TIMES)
+    if counter >= Config.val(ORGANISM, DECREASE_AFTER_TIMES)
       for i = 1:len
         org = _tasks[i].organism
         #

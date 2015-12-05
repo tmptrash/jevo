@@ -234,11 +234,11 @@ module Config
         #
         # World width
         #
-        WIDTH                => UInt(3),
+        WIDTH                => UInt(300),
         #
         # World height
         #
-        HEIGHT               => UInt(3),
+        HEIGHT               => UInt(300),
         #
         # Delay between requests for obtaining remote world region.
         # This parameter affects frames per second in a window canvas
