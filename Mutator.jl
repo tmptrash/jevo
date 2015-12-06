@@ -316,7 +316,7 @@ module Mutator
     # This variable me be used later in code, so we can't remove it.
     # 2 means - skip first variable: varXXX = ...
     #
-    Script.findVars(vars, line, uint(2))
+    Script.findVars(vars, line, UInt(2))
     #
     # We should use == instead === to cast UInt(v.typ) to Int(0,1,...)
     #

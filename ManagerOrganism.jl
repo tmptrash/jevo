@@ -26,16 +26,18 @@ end
 # Updates organisms existances. We have to call this function to
 # update organisms life in memory world. Decreases energy and
 # provides rare mutations.
-# @param counter Increment value for energy decreasing
+# @param eCounter Increments value for energy decreasing
+# @param mCounter Counter for mtations speed
 #
-function _updateOrganisms(counter::UInt)
+function _updateOrganisms(eCounter::UInt, mCounter::UInt)
     #
     # This block runs one iteration for all available organisms.
     # By one iteration i mean that every organism from a list
     # run peace of it's script - code between two produce() calls.
     #
-    len      = length(_tasks)
-    counter += 1
+    len       = length(_tasks)
+    eCounter += 1
+    mCounter += 1
     for i = 1:len
       try
         consume(_tasks[i].task)
@@ -47,12 +49,16 @@ function _updateOrganisms(counter::UInt)
     # This block decreases energy from organisms, because they 
     # spend it while leaving.
     #
-    if counter >= Config.val(ORGANISM, DECREASE_AFTER_TIMES)
-      _updateOrganismsEnergy(counter)
-      counter = UInt(0)
+    if eCounter >= Config.val(ORGANISM, DECREASE_AFTER_TIMES)
+      _updateOrganismsEnergy(eCounter)
+      eCounter = UInt(0)
+    end
+    if mCounter >= Config.val(MUTATOR, MUTATE_AFTER_TIMES)
+      _mutateOrganisms()
+      mCounter = UInt(0)
     end
 
-    counter
+    eCounter, mCounter
 end
 #
 # Updates energy of all organisms. Decreases their energy according
@@ -80,9 +86,25 @@ function _updateOrganismsEnergy(counter::UInt)
     # This is how we updates organism's color after energy descreasing
     #
     _moveOrganism(org.pos, org)
-    #Mutator.mutate(org.script, Config.val(MUTATOR, ADD_CHANGE))
 
     i -= 1
+  end
+end
+#
+# Mutates every organism according to amount of mutations in a config
+# (MUTATOR, MUTATE_AMOUNT).
+#
+function _mutateOrganisms()
+  len       = length(_tasks)
+  mutations = Config.val(MUTATOR, MUTATE_AFTER_TIMES)
+  probs     = Config.val(MUTATOR, ADD_CHANGE)
+
+  if mutations > UInt(0)
+    for i = 1:len
+      for j = 1:mutations
+        Mutator.mutate(_tasks[i].organism.script, probs)
+      end
+    end
   end
 end
 #

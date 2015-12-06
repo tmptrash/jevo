@@ -58,8 +58,9 @@ module Manager
   # Runs everything. Blocking function.
   #
   function run()
-    counter = UInt(0)
-    server  = _createServer()
+    eCounter = UInt(0)
+    mCounter = UInt(0)
+    server   = _createServer()
 
     #
     # This server is listening for all other managers and remote
@@ -75,7 +76,7 @@ module Manager
       #
       # This call runs all organism related tasks one by one
       #
-      counter = _updateOrganisms(counter)
+      eCounter, mCounter = _updateOrganisms(eCounter, mCounter)
       #
       # This call switches between all non blocking asynchronous
       # functions (see @async macro). For example, it handles all

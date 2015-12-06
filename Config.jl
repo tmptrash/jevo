@@ -27,6 +27,8 @@ module Config
   export ADD_CHANGE
   export FUNC_MAX_ARGS
   export MUTATIONS_ON_CLONE
+  export MUTATE_AFTER_TIMES
+  export MUTATE_AMOUNT
   #
   # Keys id's in SCRIPT section
   #
@@ -74,6 +76,8 @@ module Config
   const ADD_CHANGE           = 1
   const FUNC_MAX_ARGS        = 2
   const MUTATIONS_ON_CLONE   = 3
+  const MUTATE_AFTER_TIMES   = 4
+  const MUTATE_AMOUNT        = 5
   #
   # Keys id's in SCRIPT section. Description is provided below...
   #
@@ -173,7 +177,7 @@ module Config
         #         If del value is bigger then other, then it will be decreased
         #         to one line code and will die.
         #
-        ADD_CHANGE           => [1,1],
+        ADD_CHANGE           => [1,10],
         #
         # {UInt8} Maximum amount of function parameters in orgamism's script.
         # It's used in Mutator during new function creation. Example:
@@ -188,7 +192,18 @@ module Config
         # {Uint} Amount of mutations, which will be applied to arganism after
         # clonning.
         #
-        MUTATIONS_ON_CLONE   => UInt(100)
+        MUTATIONS_ON_CLONE   => UInt(100),
+        #
+        # Amount of iterations within organism's life loop, after that we 
+        # do mutations according to MUTATE_AMOUNT config amount
+        #
+        MUTATE_AFTER_TIMES   => UInt(1000000),
+        #
+        # Value, which will be used like amount of mutations per 
+        # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
+        # we want to disable mutations.
+        #
+        MUTATE_AMOUNT        => UInt(5)
       ),
       SCRIPT     => Dict{Int64, Any}(
         #
@@ -229,6 +244,7 @@ module Config
         # Value, which will be descreased in organism after "descreaseAfterTimes" period
         #
         DECREASE_VALUE       => UInt(1)
+
       ),
       WORLD      => Dict{Int64, Any}(
         #

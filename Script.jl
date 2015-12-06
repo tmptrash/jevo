@@ -412,12 +412,12 @@
     for i = 1:length(expr.args)
       item = expr.args[i]
       if typeof(item) === Expr                          
-        findVars(vars, expr, uint(i))          # expression, go deepper
+        findVars(vars, expr, UInt(i))          # expression, go deepper
       elseif isSign(item) && length(expr.args) === 2
           push!(vars, VarOrNum(expr, i, 2))    # sign (-,+,~)
-      elseif beginswith(string(item), Config.val(SCRIPT, FUNC_PREFIX))
+      elseif startswith(string(item), Config.val(SCRIPT, FUNC_PREFIX))
         push!(vars, VarOrNum(parent, 2, 3))    # function
-      elseif beginswith(string(item), Config.val(SCRIPT, VAR_PREFIX)) || typeof(item) === Int
+      elseif startswith(string(item), Config.val(SCRIPT, VAR_PREFIX)) || typeof(item) === Int
         push!(vars, VarOrNum(expr, i, 0))      # var or num
       else
         push!(vars, VarOrNum(expr, i, 1))      # operation (-,+,/,$,...)
@@ -452,7 +452,7 @@
   # @return {(Expr, UInt)}
   #
   function getRandLine(block::Script.Block)
-    index = uint(rand(1:length(block.block.args)))
+    index = UInt(rand(1:length(block.block.args)))
     (block.block.args[index], index)
   end
   #
