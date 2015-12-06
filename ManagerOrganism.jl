@@ -41,25 +41,33 @@ function _updateOrganisms(counter::UInt)
       end
     end
     #
-    # This block decreases energy from organisms, because they spend it while leaving
+    # This block decreases energy from organisms, because they 
+    # spend it while leaving.
     #
     if counter >= Config.val(ORGANISM, DECREASE_AFTER_TIMES)
-      for i = 1:len
+      decVal = Config.val(ORGANISM, DECREASE_VALUE)
+      #
+      # We have to go through tasks in reverse way, because we may
+      # remove some elements inside while loop.
+      #
+      i = len
+      while i > 0
         org = _tasks[i].organism
         #
         # if the energy of the organism is zero, we have to remove it
         #
-        if org.energy <= Config.val(ORGANISM, DECREASE_VALUE)
-          org.energy = Config.val(ORGANISM, DECREASE_VALUE)
+        if org.energy <= decVal
+          org.energy = decVal
           splice!(_tasks, i)
-          len -= 1
         end
-        org.energy -= Config.val(ORGANISM, DECREASE_VALUE)
+        org.energy -= decVal
         #
         # This is how we updates organism's color after energy descreasing
         #
         _moveOrganism(org.pos, org)
         #Mutator.mutate(org.script, Config.val(MUTATOR, ADD_CHANGE))
+
+        i -= 1
       end
       counter = UInt(0)
     end
