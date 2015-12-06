@@ -30,14 +30,17 @@ end
 #
 function _updateOrganisms(counter::UInt)
     #
-    # This block runs one iteration for all available organisms
+    # This block runs one iteration for all available organisms.
+    # By one iteration i mean that every organism from a list
+    # run peace of it's script - code between two produce() calls.
     #
     len      = length(_tasks)
     counter += 1
     for i = 1:len
       try
         consume(_tasks[i].task)
-        # TODO: think about exceptions in organisms. maybe log somewhere?
+      catch e
+        println("Manager._updateOrganisms(): $e")
       end
     end
     #
@@ -45,34 +48,42 @@ function _updateOrganisms(counter::UInt)
     # spend it while leaving.
     #
     if counter >= Config.val(ORGANISM, DECREASE_AFTER_TIMES)
-      decVal = Config.val(ORGANISM, DECREASE_VALUE)
-      #
-      # We have to go through tasks in reverse way, because we may
-      # remove some elements inside while loop.
-      #
-      i = len
-      while i > 0
-        org = _tasks[i].organism
-        #
-        # if the energy of the organism is zero, we have to remove it
-        #
-        if org.energy <= decVal
-          org.energy = decVal
-          splice!(_tasks, i)
-        end
-        org.energy -= decVal
-        #
-        # This is how we updates organism's color after energy descreasing
-        #
-        _moveOrganism(org.pos, org)
-        #Mutator.mutate(org.script, Config.val(MUTATOR, ADD_CHANGE))
-
-        i -= 1
-      end
+      _updateOrganismsEnergy(counter)
       counter = UInt(0)
     end
 
     counter
+end
+#
+# Updates energy of all organisms. Decreases their energy according
+# to config (ORGANISM, DECREASE_VALUE).
+# @param counter Current iterator value
+#
+function _updateOrganismsEnergy(counter::UInt)
+  decVal = Config.val(ORGANISM, DECREASE_VALUE)
+  #
+  # We have to go through tasks in reverse way, because we may
+  # remove some elements inside while loop.
+  #
+  i = length(_tasks)
+  while i > 0
+    org = _tasks[i].organism
+    #
+    # if the energy of the organism is zero, we have to remove it
+    #
+    if org.energy <= decVal
+      org.energy = decVal
+      splice!(_tasks, i)
+    end
+    org.energy -= decVal
+    #
+    # This is how we updates organism's color after energy descreasing
+    #
+    _moveOrganism(org.pos, org)
+    #Mutator.mutate(org.script, Config.val(MUTATOR, ADD_CHANGE))
+
+    i -= 1
+  end
 end
 #
 # Creates new organism and binds event handlers to him. It also
