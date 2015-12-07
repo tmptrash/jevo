@@ -257,9 +257,12 @@ module Config
         HEIGHT               => UInt(300),
         #
         # Delay between requests for obtaining remote world region.
-        # This parameter affects frames per second in a window canvas
+        # This parameter affects frames per second in a window canvas.
+		# Value in seconds. It's possible to have zero based value. In
+		# this case requests will be posted one by one without delays.
+		# So the speed for 0 delay depends only on network speed.
         #
-        FRAME_DELAY          => 5,
+        FRAME_DELAY          => 2,
         #
         # RGB, background color of the canvas, where organisms will be shown
         #
