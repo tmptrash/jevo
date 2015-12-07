@@ -100,6 +100,14 @@ module CanvasWindow
     Tk.stroke(win.context)
   end
   #
+  # Sets title to specified
+  # @param win Window data type
+  # @param title String title
+  #
+  function title(win::Window, title::ASCIIString)
+    Tk.set_value(win.win, title)
+  end
+  #
   # Updates the canvas. It's not nessesary to update it after
   # every drawing. It's better to update it after several dots
   # are drown.

@@ -22,6 +22,7 @@ module Manager
   import Server
   import Connection
   import CommandLine
+  import RpcApi
 
   using Config
   #
@@ -60,7 +61,8 @@ module Manager
   function run()
     eCounter = UInt(0)
     mCounter = UInt(0)
-    spi      = float(0)
+    ips      = UInt(0)
+    stamp    = time()
     server   = _createServer()
 
     #
@@ -74,7 +76,6 @@ module Manager
     # and organism's tasks switching.
     #
     while true
-      spi = time()
       #
       # This call runs all organism related tasks one by one
       #
@@ -86,10 +87,14 @@ module Manager
       #
       yield()
       #
-      # This value may be used for calculationg of SPI (Seconds
-      # Per oneIteration).
+      # We have to update IPS (Iterations Per Second) every second
       #
-      Config.val(WORLD, SPI, time() - spi)
+      if (time() - stamp >= float(1))
+        Config.val(WORLD, IPS, ips)
+        stamp = time()
+        ips   = UInt(0)
+      end
+      ips += 1
     end
   end
 

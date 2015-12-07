@@ -25,7 +25,7 @@ module RemoteWorld
   export display
   export stop
 
-  include("ManagerRpcApi.jl")
+  using RpcApi
   #
   # Contains data of for remote host, from where we displaying
   # world's region and shows it on a canvas.
@@ -84,9 +84,12 @@ module RemoteWorld
   # @param ans Answer object with region data
   #
   function _onResponse(rd::RemoteData, ans::Connection.Answer)
-    for x in 1:size(ans.data)[2]
-      for y in 1:size(ans.data)[1]
-        CanvasWindow.dot(rd.win, x, y, UInt32(ans.data[x, y]))
+    region = ans.data.reg
+
+    CanvasWindow.title(rd.win, "ips: $(ans.data.ips)")
+    for x in 1:size(region)[2]
+      for y in 1:size(region)[1]
+        CanvasWindow.dot(rd.win, x, y, UInt32(region[x, y]))
       end
     end
     CanvasWindow.update(rd.win)

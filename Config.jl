@@ -50,7 +50,7 @@ module Config
   export HEIGHT
   export FRAME_DELAY
   export BACK_COLOR
-  export SPI
+  export IPS
   #
   # Keys id's in CONNECTION section
   #
@@ -100,7 +100,7 @@ module Config
   const HEIGHT               = 2
   const FRAME_DELAY          = 3
   const BACK_COLOR           = 4
-  const SPI                  = 5
+  const IPS                  = 5
   #
   # Keys id's in CONNECTION section. Description is provided below...
   #
@@ -199,13 +199,13 @@ module Config
         # Amount of iterations within organism's life loop, after that we 
         # do mutations according to MUTATE_AMOUNT config amount
         #
-        MUTATE_AFTER_TIMES   => UInt(1000000),
+        MUTATE_AFTER_TIMES   => UInt(10000000),
         #
         # Value, which will be used like amount of mutations per 
         # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
         # we want to disable mutations.
         #
-        MUTATE_AMOUNT        => UInt(5)
+        MUTATE_AMOUNT        => UInt(2)
       ),
       SCRIPT     => Dict{Int64, Any}(
         #
@@ -270,12 +270,12 @@ module Config
         #
         BACK_COLOR           => UInt32(0),
         #
-        # SPI (Seconds Per one Iteration). Amount of seconds, which were
-        # ticked within one iteration. One iteration means one for all 
-        # organisms in a World. This vaue will be set many times in main
+        # IPS (Iteration Per Second). Amount of iterations, which were
+        # occures within one second. One iteration means one for all 
+        # organisms in a World. This value will be set many times in main
         # Manager's loop.
         #
-        SPI                  => float(0)
+        IPS                  => float(0)
       ),
       CONNECTION => Dict{Int64, Any}(
         #

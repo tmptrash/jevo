@@ -5,8 +5,7 @@
 #
 # @author DeadbraiN
 #
-include("ManagerRpcApi.jl")
-using Debug
+using RpcApi
 #
 # @rpc
 # Grabs world's rectangle region and returns it
@@ -22,7 +21,7 @@ function getRegion(x::Integer = 1, y::Integer = 1, width::Integer = 0, height::I
   if (width  === 0 || width  > maxWidth)  width  = maxWidth  end
   if (height === 0 || height > maxHeight) height = maxHeight end
   
-  _world.data[y:height, x:width]
+  RpcApi.Region(_world.data[y:height, x:width], Config.val(WORLD, IPS))
 end
 #
 # @rpc
@@ -71,11 +70,11 @@ function mutate(organismId)
 end
 #
 # @rpc
-# Returns current SPI (Seconds Per one Iteration) value
+# Returns current IPS (Iterations Per Second) value
 # @return Float
 #
-function getSpi()
-  Config.val(WORLD, SPI)
+function getIps()
+  Config.val(WORLD, IPS)
 end
 
 #
@@ -110,5 +109,5 @@ _rpcApi = Dict{Integer, Function}(
   RPC_CREATE_ORGANISM   => createOrganism,
   RPC_SET_CONFIG        => setConfig,
   RPC_MUTATE            => mutate,
-  RPC_GET_SPI           => getSpi
+  RPC_GET_IPS           => getIps
 )
