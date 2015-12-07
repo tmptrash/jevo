@@ -1,5 +1,6 @@
 push!(LOAD_PATH, pwd())
-include("Client.jl")
+import Client
+using Creature
 using Config
 using RpcApi
 

@@ -76,6 +76,17 @@ end
 function getIps()
   Config.val(WORLD, IPS)
 end
+#
+# Returns an organism by it's unique id
+# @param id
+# @return Creature.Organismor false if no organism with this id
+# TODO: remake to organism id, not position related id
+function getOrganism(id::UInt)
+  if haskey(Manager._posMap, id)
+    return Manager._posMap[id]
+  end
+  false
+end
 
 #
 # Creates server and returns it's ServerConnection type. It 
@@ -109,5 +120,6 @@ _rpcApi = Dict{Integer, Function}(
   RPC_CREATE_ORGANISM   => createOrganism,
   RPC_SET_CONFIG        => setConfig,
   RPC_MUTATE            => mutate,
-  RPC_GET_IPS           => getIps
+  RPC_GET_IPS           => getIps,
+  RPC_GET_ORGANISM      => getOrganism
 )

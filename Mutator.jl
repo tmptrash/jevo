@@ -91,13 +91,15 @@ module Mutator
     # [add, change] operation. 1 - add, 2 - change
     #
     index = Helper.getProbIndex(prob)
-	if index === 0      # invalid probability
-	  println("ERROR: Invalid parameter prob: $prob. Array with at least one element expected.")
+    if index === 0      # invalid probability
+      println("ERROR: Invalid parameter prob: $prob. Array with at least one element expected.")
     elseif index === 1  # add
       _addCb[rand(1:length(_addCb))](code)
     elseif index === 2  # change
       _change(code)
     end
+
+    index
   end
   # TODO: Check if it's possible to obtain something different from number
   # TODO: on function return. It's possible to get an error in this case.

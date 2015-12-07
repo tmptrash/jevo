@@ -74,14 +74,15 @@ function _updateOrganismsEnergy(counter::UInt)
   i = length(_tasks)
   while i > 0
     org = _tasks[i].organism
+    dec = decVal + length(org.script.blocks)
     #
     # if the energy of the organism is zero, we have to remove it
     #
-    if org.energy <= decVal
-      org.energy = decVal
+    if org.energy <= dec
+      org.energy = dec
       splice!(_tasks, i)
     end
-    org.energy -= decVal
+    org.energy -= dec
     #
     # This is how we updates organism's color after energy descreasing
     #

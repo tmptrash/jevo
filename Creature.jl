@@ -71,6 +71,10 @@ module Creature
     # {Event.Observer} Adds events listening/firing logic to the organism.
     #
     observer::Event.Observer
+    #
+    # Size of organism's code. By real, it's amount of code blocks
+    #
+    size::UInt
   end
   #
   # Universal structure for returning a value from event handlers.
@@ -275,7 +279,7 @@ module Creature
     # @return {Organism}
     # New organism with default parameters
     # TODO: position should be set from outside
-    Organism(Config.val(ORGANISM, START_ENERGY), pos, script, Event.create())
+    Organism(Config.val(ORGANISM, START_ENERGY), pos, script, Event.create(), UInt(0))
   end
   #
   # Clones an organism. It only fires an event. Clonning will be

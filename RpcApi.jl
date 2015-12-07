@@ -12,6 +12,8 @@ module RpcApi
   export RPC_SET_CONFIG
   export RPC_MUTATE
   export RPC_GET_IPS
+  export RPC_GET_ORGANISM
+  
   export Region
   #
   # Describes 2D region in a world
@@ -30,4 +32,5 @@ module RpcApi
   const RPC_SET_CONFIG        = 4
   const RPC_MUTATE            = 5
   const RPC_GET_IPS           = 6
+  const RPC_GET_ORGANISM      = 7
 end
