@@ -10,3 +10,4 @@ const RPC_CREATE_ORGANISMS  = 1
 const RPC_CREATE_ORGANISM   = 2
 const RPC_SET_CONFIG        = 3
 const RPC_MUTATE            = 4
+const RPC_GET_SPI           = 5

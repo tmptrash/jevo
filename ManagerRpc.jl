@@ -69,6 +69,14 @@ function mutate(organismId)
   end
   false
 end
+#
+# @rpc
+# Returns current SPI (Seconds Per one Iteration) value
+# @return Float
+#
+function getSpi()
+  Config.val(WORLD, SPI)
+end
 
 #
 # Creates server and returns it's ServerConnection type. It 
@@ -101,5 +109,6 @@ _rpcApi = Dict{Integer, Function}(
   RPC_CREATE_ORGANISMS  => createOrganisms,
   RPC_CREATE_ORGANISM   => createOrganism,
   RPC_SET_CONFIG        => setConfig,
-  RPC_MUTATE            => mutate
+  RPC_MUTATE            => mutate,
+  RPC_GET_SPI           => getSpi
 )

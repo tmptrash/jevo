@@ -50,6 +50,7 @@ module Config
   export HEIGHT
   export FRAME_DELAY
   export BACK_COLOR
+  export SPI
   #
   # Keys id's in CONNECTION section
   #
@@ -99,6 +100,7 @@ module Config
   const HEIGHT               = 2
   const FRAME_DELAY          = 3
   const BACK_COLOR           = 4
+  const SPI                  = 5
   #
   # Keys id's in CONNECTION section. Description is provided below...
   #
@@ -258,15 +260,22 @@ module Config
         #
         # Delay between requests for obtaining remote world region.
         # This parameter affects frames per second in a window canvas.
-		# Value in seconds. It's possible to have zero based value. In
-		# this case requests will be posted one by one without delays.
-		# So the speed for 0 delay depends only on network speed.
+        # Value in seconds. It's possible to have zero based value. In
+        # this case requests will be posted one by one without delays.
+        # So the speed for 0 delay depends only on network speed.
         #
         FRAME_DELAY          => 2,
         #
         # RGB, background color of the canvas, where organisms will be shown
         #
-        BACK_COLOR           => UInt32(0)
+        BACK_COLOR           => UInt32(0),
+        #
+        # SPI (Seconds Per one Iteration). Amount of seconds, which were
+        # ticked within one iteration. One iteration means one for all 
+        # organisms in a World. This vaue will be set many times in main
+        # Manager's loop.
+        #
+        SPI                  => float(0)
       ),
       CONNECTION => Dict{Int64, Any}(
         #

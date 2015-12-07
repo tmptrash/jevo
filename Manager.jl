@@ -60,6 +60,7 @@ module Manager
   function run()
     eCounter = UInt(0)
     mCounter = UInt(0)
+    spi      = float(0)
     server   = _createServer()
 
     #
@@ -73,6 +74,7 @@ module Manager
     # and organism's tasks switching.
     #
     while true
+      spi = time()
       #
       # This call runs all organism related tasks one by one
       #
@@ -83,6 +85,11 @@ module Manager
       # input connections for current server.
       #
       yield()
+      #
+      # This value may be used for calculationg of SPI (Seconds
+      # Per oneIteration).
+      #
+      Config.val(WORLD, SPI, time() - spi)
     end
   end
 
