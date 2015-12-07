@@ -81,6 +81,8 @@ function _updateOrganismsEnergy(counter::UInt)
     if org.energy <= dec
       org.energy = dec
       splice!(_tasks, i)
+      delete!(_posMap, _tasks[i].id)
+      delete!(_map, _tasks[i].id)
     end
     org.energy -= dec
     #
@@ -118,6 +120,7 @@ function _createOrganism(pos = nothing)
   pos  = pos == nothing ? World.getFreePos(Manager._world) : pos
   org  = Creature.create(pos)
   task = Task(eval(org.script.code))
+  id   = Config.val(ORGANISM, CURRENT_ID)
 
   Event.on(org.observer, "getenergy", _onGetEnergy)
   Event.on(org.observer, "grableft",  _onGrabLeft )
@@ -142,7 +145,9 @@ function _createOrganism(pos = nothing)
   #
   # Adds organism to organisms pool
   #
-  oTask = OrganismTask(_getOrganismId(pos), task, org)
+  oTask = OrganismTask(id, task, org)
+  Config.val(ORGANISM, CURRENT_ID, id + UInt(1))
+  _map[id] = org
   push!(_tasks, oTask)
   oTask
 end

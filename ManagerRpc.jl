@@ -82,8 +82,8 @@ end
 # @return Creature.Organismor false if no organism with this id
 # TODO: remake to organism id, not position related id
 function getOrganism(id::UInt)
-  if haskey(Manager._posMap, id)
-    return Manager._posMap[id]
+  if haskey(Manager._map, id)
+    return Manager._map[id]
   end
   false
 end

@@ -43,6 +43,7 @@ module Config
   export MAX_ENERGY
   export DECREASE_AFTER_TIMES
   export DECREASE_VALUE
+  export CURRENT_ID
   #
   # Keys id's in WORLD section
   #
@@ -93,6 +94,7 @@ module Config
   const MAX_ENERGY           = 3
   const DECREASE_AFTER_TIMES = 4
   const DECREASE_VALUE       = 5
+  const CURRENT_ID           = 6
   #
   # Keys id's in WORLD section. Description is provided below...
   #
@@ -245,7 +247,11 @@ module Config
         #
         # Value, which will be descreased in organism after "descreaseAfterTimes" period
         #
-        DECREASE_VALUE       => UInt(1)
+        DECREASE_VALUE       => UInt(1),
+        #
+        # Current organism unique id. Is used like increment for setting id's for new organisms
+        #
+        CURRENT_ID           => UInt(0)
 
       ),
       WORLD      => Dict{Int64, Any}(

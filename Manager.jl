@@ -38,24 +38,6 @@ module Manager
   #
   const PARAM_SERVER_PORT = "serverPort"
   #
-  # Manager's options, which may be changed by remote calls
-  #
-  type Options
-    #
-    # Amount of iterations, after whichenergy will be decreased
-    #
-    period::UInt32
-    #
-    # Value for energy decrease per one time
-    #
-    decValue::UInt32
-    #
-    # Mutation related probability: add/change/remove 
-    #
-    probs::Array{Int, 1}
-  end
-
-  #
   # Runs everything. Blocking function.
   #
   function run()
@@ -101,12 +83,16 @@ module Manager
   #
   # Instance of the world
   #
-  _world = World.create()
+  _world  = World.create()
   #
   # Positions map, which stores positions of all organisms. Is used
   # for fast access to the organism by it's coordinates.
   #
   _posMap = Dict{UInt, Creature.Organism}()
+  #
+  # Map of organisms by id
+  #
+  _map    = Dict{UInt, Creature.Organism}() 
   #
   # Parameters passed through command line
   #
