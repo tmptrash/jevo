@@ -212,7 +212,7 @@ module Creature
       # This is main loop, where organism lives. It's body will be changed soon
       # in Mutator module. This loop must be after ambedded functions.
       #
-      while true
+      while creature.energy > UInt(0)
         produce()
       end
     end)
