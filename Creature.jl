@@ -278,7 +278,7 @@ module Creature
     #
     # @return {Organism}
     # New organism with default parameters
-    # TODO: position should be set from outside
+    #
     Organism(Config.val(ORGANISM, START_ENERGY), pos, script, Event.create(), UInt(0))
   end
   #
