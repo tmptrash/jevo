@@ -51,10 +51,22 @@ end
 #
 # @rpc
 # Sets configuration value according to it's section and a key
-# @param period Period we want to set
+# @param section
+# @param key
+# @param value Custom value
 #
 function setConfig(section::Int64, key::Int64, value::Any)
   Config.val(section, key, value)
+end
+#
+# @rpc
+# Gets configuration value according to it's section and a key
+# @param section
+# @param key
+# @return {Any|null} value or null if invalid section or key
+#
+function getConfig(section::Int64, key::Int64)
+  Config.val(section, key)
 end
 #
 # @rpc
@@ -119,6 +131,7 @@ _rpcApi = Dict{Integer, Function}(
   RPC_CREATE_ORGANISMS  => createOrganisms,
   RPC_CREATE_ORGANISM   => createOrganism,
   RPC_SET_CONFIG        => setConfig,
+  RPC_GET_CONFIG        => getConfig,
   RPC_MUTATE            => mutate,
   RPC_GET_IPS           => getIps,
   RPC_GET_ORGANISM      => getOrganism

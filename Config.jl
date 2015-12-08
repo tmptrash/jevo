@@ -199,9 +199,10 @@ module Config
         MUTATIONS_ON_CLONE   => UInt(100),
         #
         # Amount of iterations within organism's life loop, after that we 
-        # do mutations according to MUTATE_AMOUNT config amount
+        # do mutations according to MUTATE_AMOUNT config amount. If 0, then
+        # mutations will be disabled.
         #
-        MUTATE_AFTER_TIMES   => UInt(10000000),
+        MUTATE_AFTER_TIMES   => UInt(0),
         #
         # Value, which will be used like amount of mutations per 
         # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
@@ -241,13 +242,14 @@ module Config
         MAX_ENERGY           => UInt(100000),
         #
         # Amount of iterations within organism's life loop, after that we decrease
-        # amount of energy ono 1 point.
+        # amount of energy into DECREASE_VALUE points. If 0, then energy decreasing 
+        # will be disabled.
         #
         DECREASE_AFTER_TIMES => UInt(10000000),
         #
         # Value, which will be descreased in organism after "descreaseAfterTimes" period
         #
-        DECREASE_VALUE       => UInt(1),
+        DECREASE_VALUE       => UInt(100),
         #
         # Current organism unique id. Is used like increment for setting id's for new organisms
         #

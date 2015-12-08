@@ -49,11 +49,11 @@ function _updateOrganisms(eCounter::UInt, mCounter::UInt)
     # This block decreases energy from organisms, because they 
     # spend it while leaving.
     #
-    if eCounter >= Config.val(ORGANISM, DECREASE_AFTER_TIMES)
+    if (daf = Config.val(ORGANISM, DECREASE_AFTER_TIMES)) > UInt(0) && eCounter >= daf
       _updateOrganismsEnergy(eCounter)
       eCounter = UInt(0)
     end
-    if mCounter >= Config.val(MUTATOR, MUTATE_AFTER_TIMES)
+    if (maf = Config.val(MUTATOR, MUTATE_AFTER_TIMES)) > UInt(0) && mCounter >= maf
       _mutateOrganisms()
       mCounter = UInt(0)
     end
@@ -78,10 +78,10 @@ function _updateOrganismsEnergy(counter::UInt)
     #
     # if the energy of the organism is zero, we have to remove it
     #
-    if org.energy <= dec
-      _killOrganism(UInt(i))
-    else
+    if org.energy > dec
       org.energy -= dec
+    else
+      _killOrganism(UInt(i))
     end
     #
     # This is how we updates organism's color after energy descreasing
@@ -90,20 +90,6 @@ function _updateOrganismsEnergy(counter::UInt)
 
     i -= 1
   end
-end
-#
-# Kills one organism and remove it from all related maps
-# @param i Index of current task
-#
-@debug function _killOrganism(i::UInt)
-@bp
-  if i === 0 return false end
-
-  org = _tasks[i].organism
-  org.energy = UInt(0)
-  delete!(Manager._posMap, _getOrganismId(org.pos))
-  delete!(Manager._map, _tasks[i].id)
-  splice!(_tasks, i)
 end
 #
 # Mutates every organism according to amount of mutations in a config
@@ -121,6 +107,19 @@ function _mutateOrganisms()
       end
     end
   end
+end
+#
+# Kills one organism and remove it from all related maps
+# @param i Index of current task
+#
+function _killOrganism(i::UInt)
+  if i === 0 return false end
+
+  org = _tasks[i].organism
+  org.energy = UInt(0)
+  delete!(Manager._posMap, _getOrganismId(org.pos))
+  delete!(Manager._map, _tasks[i].id)
+  splice!(_tasks, i)
 end
 #
 # Creates new organism and binds event handlers to him. It also
