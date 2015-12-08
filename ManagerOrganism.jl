@@ -101,9 +101,9 @@ end
 
   org = _tasks[i].organism
   org.energy = UInt(0)
-  splice!(_tasks, i)
   delete!(Manager._posMap, _getOrganismId(org.pos))
   delete!(Manager._map, _tasks[i].id)
+  splice!(_tasks, i)
 end
 #
 # Mutates every organism according to amount of mutations in a config
