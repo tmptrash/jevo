@@ -63,23 +63,33 @@ module Manager
       #
       eCounter, mCounter = _updateOrganisms(eCounter, mCounter)
       #
+      # We have to update IPS (Iterations Per Second) every second
+      #
+      ips, stamp = _updateIps(ips, stamp)
+      #
       # This call switches between all non blocking asynchronous
       # functions (see @async macro). For example, it handles all
       # input connections for current server.
       #
       yield()
-      #
-      # We have to update IPS (Iterations Per Second) every second
-      #
-      if (time() - stamp >= float(1))
-        Config.val(WORLD, IPS, ips)
-        stamp = time()
-        ips   = UInt(0)
-      end
-      ips += 1
     end
   end
 
+  #
+  # Updates IPS (Iterations Per second) counter and stores it in config
+  # @param ips IPS
+  # @param stamp Current UNIX tame stamp value
+  # @return {UInt, Float64} new ips and current UNIX time stamp
+  #
+  function _updateIps(ips::UInt, stamp::Float64)
+    ts = time() - stamp
+    if (ts >= float(1))
+      Config.val(WORLD, IPS, trunc(UInt, ips / ts))
+      stamp = time()
+      ips   = UInt(0)
+    end
+    ips + 1, stamp
+  end
   #
   # Instance of the world
   #

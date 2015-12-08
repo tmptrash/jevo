@@ -81,7 +81,7 @@ function _updateOrganismsEnergy(counter::UInt)
     if org.energy <= dec
       org.energy = dec
       splice!(_tasks, i)
-      delete!(_posMap, _tasks[i].id)
+      delete!(Manager._posMap, _getOrganismId(org.pos))
       delete!(_map, _tasks[i].id)
     end
     org.energy -= dec
