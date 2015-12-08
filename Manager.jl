@@ -25,6 +25,7 @@ module Manager
   import RpcApi
 
   using Config
+  using Debug
   #
   # This is how we collect Manager module from it's parts
   #

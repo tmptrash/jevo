@@ -79,12 +79,10 @@ function _updateOrganismsEnergy(counter::UInt)
     # if the energy of the organism is zero, we have to remove it
     #
     if org.energy <= dec
-      org.energy = dec
-      splice!(_tasks, i)
-      delete!(Manager._posMap, _getOrganismId(org.pos))
-      delete!(_map, _tasks[i].id)
+      _killOrganism(UInt(i))
+    else
+      org.energy -= dec
     end
-    org.energy -= dec
     #
     # This is how we updates organism's color after energy descreasing
     #
@@ -92,6 +90,20 @@ function _updateOrganismsEnergy(counter::UInt)
 
     i -= 1
   end
+end
+#
+# Kills one organism and remove it from all related maps
+# @param i Index of current task
+#
+@debug function _killOrganism(i::UInt)
+@bp
+  if i === 0 return false end
+
+  org = _tasks[i].organism
+  org.energy = UInt(0)
+  splice!(_tasks, i)
+  delete!(Manager._posMap, _getOrganismId(org.pos))
+  delete!(Manager._map, _tasks[i].id)
 end
 #
 # Mutates every organism according to amount of mutations in a config
@@ -290,11 +302,21 @@ end
 function _onGrab(organism::Creature.Organism, amount::UInt, pos::Helper.Point, retObj::Creature.RetObj)
   retObj.ret = World.grabEnergy(Manager._world, pos, amount)
   id         = _getOrganismId(pos)
+  i          = UInt(0)
   #
   # If other organism at the position of the check, 
   # then grab energy from him
   #
-  if haskey(Manager._posMap, id) Manager._posMap[id].energy -= retObj.ret end
+  if haskey(Manager._posMap, id) 
+    org = Manager._posMap[id]
+    if org.energy > retObj.ret
+      org.energy -= retObj.ret
+    else
+      # TODO: possibly, slow code. To fix this we have to
+      # TODO: use map instead array for tasks (_tasks)
+      _killOrganism(findfirst((t) -> t.organism === org, _tasks))
+    end
+  end
 
   retObj.ret
 end
