@@ -119,8 +119,12 @@ function _killOrganism(i::UInt)
   org.energy = UInt(0)
   delete!(Manager._posMap, _getOrganismId(org.pos))
   delete!(Manager._map, _tasks[i].id)
+  #
+  # This is small hack. It stops the task immediately. We 
+  # have to do this, because task is a memory leak.
+  #
   try
-    _tasks[i].task.exception = "stop task"
+    _tasks[i].task.exception = null
     yieldto(_tasks[i].task)
   end
   splice!(_tasks, i)
