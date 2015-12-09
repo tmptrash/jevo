@@ -119,6 +119,10 @@ function _killOrganism(i::UInt)
   org.energy = UInt(0)
   delete!(Manager._posMap, _getOrganismId(org.pos))
   delete!(Manager._map, _tasks[i].id)
+  try
+    _tasks[i].task.exception = "stop task"
+    yieldto(_tasks[i].task)
+  end
   splice!(_tasks, i)
 end
 #
