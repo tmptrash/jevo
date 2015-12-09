@@ -245,7 +245,7 @@ module Config
         # amount of energy into DECREASE_VALUE points. If 0, then energy decreasing 
         # will be disabled.
         #
-        DECREASE_AFTER_TIMES => UInt(10000),
+        DECREASE_AFTER_TIMES => UInt(1000000),
         #
         # Value, which will be descreased in organism after "descreaseAfterTimes" period
         #

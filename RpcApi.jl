@@ -24,6 +24,11 @@ module RpcApi
     ips::UInt
   end
   #
+  # This is an analog of 
+  #
+  type Organism
+  end
+  #
   # RPC API unique identifiers. Only these functions may be called
   # remotely on the server.
   #

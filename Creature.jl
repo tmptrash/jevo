@@ -71,10 +71,6 @@ module Creature
     # {Event.Observer} Adds events listening/firing logic to the organism.
     #
     observer::Event.Observer
-    #
-    # Size of organism's code. By real, it's amount of code blocks
-    #
-    size::UInt
   end
   #
   # Universal structure for returning a value from event handlers.
