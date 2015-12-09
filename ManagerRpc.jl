@@ -95,7 +95,8 @@ end
 # TODO: remake to organism id, not position related id
 function getOrganism(id::UInt)
   if haskey(Manager._map, id)
-    return Manager._map[id]
+    org = Manager._map[id]
+    return RpcApi.SimpleOrganism(org.energy, [org.pos.x, org.pos.y], org.script.code)
   end
   false
 end

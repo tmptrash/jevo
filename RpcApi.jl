@@ -2,6 +2,8 @@
 # This module is a RPC remote API. It contains Manager RPC
 # functions identifiers. They are used for Remote Procedure Calls
 # from any other processes. See Connection.Command type for details.
+# It'salso important, that this module should contain only native
+# Julia definition. It shouldn't contain other modules.
 #
 # @author DeadbraiN
 #
@@ -24,9 +26,23 @@ module RpcApi
     ips::UInt
   end
   #
-  # This is an analog of 
+  # This is an analog of Creature.Organism type. It's used for 
+  # transporting more simple version of organism data through
+  # network.
   #
-  type Organism
+  type SimpleOrganism
+    #
+    # Amount of energy for current organism
+    #
+    energy::UInt
+    #
+    # Organism's position in a world
+    #
+    pos::Array{Int}
+    #
+    # Code of organism
+    #
+    code::Expr
   end
   #
   # RPC API unique identifiers. Only these functions may be called

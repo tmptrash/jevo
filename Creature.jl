@@ -60,7 +60,7 @@ module Creature
     #
     energy::UInt
     #
-    # {Array{Int}} Organism's position in a world
+    # {Helper.Point} Organism's position in a world
     #
     pos::Helper.Point
     #
@@ -95,7 +95,7 @@ module Creature
   # Creates new organism with default settings.
   # @return {Creature}
   #
-  function create(pos::Helper.Point = Helper.Point(0, 0))
+  function create(pos::Helper.Point = Helper.Point(1, 1))
     #
     # Native organism's code on Julia. First oranisms start them living
     # with this default code. Later, Mutator module will change it.
@@ -275,7 +275,7 @@ module Creature
     # @return {Organism}
     # New organism with default parameters
     #
-    Organism(Config.val(ORGANISM, START_ENERGY), pos, script, Event.create(), UInt(0))
+    Organism(Config.val(ORGANISM, START_ENERGY), pos, script, Event.create())
   end
   #
   # Clones an organism. It only fires an event. Clonning will be
