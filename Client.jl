@@ -116,6 +116,7 @@ module Client
     catch e
       println("Client.request(): $e")
       close(con.sock)
+      return false
     end
 
     return true
