@@ -97,7 +97,7 @@ end
 #
 function _mutateOrganisms()
   len       = length(_tasks)
-  mutations = Config.val(MUTATOR, MUTATE_AFTER_TIMES)
+  mutations = Config.val(MUTATOR, MUTATE_AMOUNT)
   probs     = Config.val(MUTATOR, ADD_CHANGE)
 
   if mutations > UInt(0)
