@@ -1,0 +1,1 @@
+julia -P "include(\"AppClientTest.jl\")"

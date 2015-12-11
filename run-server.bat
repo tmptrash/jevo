@@ -1,0 +1,1 @@
+julia -P "include(\"AppManager.jl\")"
