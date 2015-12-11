@@ -202,13 +202,13 @@ module Config
         # do mutations according to MUTATE_AMOUNT config amount. If 0, then
         # mutations will be disabled.
         #
-        MUTATE_AFTER_TIMES   => UInt(10000000),
+        MUTATE_AFTER_TIMES   => UInt(1000000),
         #
         # Value, which will be used like amount of mutations per 
         # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
         # we want to disable mutations.
         #
-        MUTATE_AMOUNT        => UInt(1)
+        MUTATE_AMOUNT        => UInt(100000)
       ),
       SCRIPT     => Dict{Int64, Any}(
         #
@@ -249,7 +249,7 @@ module Config
         #
         # Value, which will be descreased in organism after "descreaseAfterTimes" period
         #
-        DECREASE_VALUE       => UInt(100),
+        DECREASE_VALUE       => UInt(100000),
         #
         # Current organism unique id. Is used like increment for setting id's for new organisms
         #

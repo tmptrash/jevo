@@ -66,4 +66,11 @@ module Event
       i(args...)
     end
   end
+  #
+  # Removes all event handlers from observer
+  # @param {Observer} obs Events container
+  #
+  function clear(obs::Observer)
+    empty!(obs.events)
+  end
 end

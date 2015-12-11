@@ -103,7 +103,11 @@ module Manager
   #
   # Map of organisms by id
   #
-  _map    = Dict{UInt, Creature.Organism}() 
+  _map    = Dict{UInt, Creature.Organism}()
+  #
+  # All available organism's tasks
+  #
+  _tasks  = OrganismTask[]
   #
   # Parameters passed through command line
   #

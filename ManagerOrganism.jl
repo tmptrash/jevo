@@ -35,12 +35,12 @@ function _updateOrganisms(eCounter::UInt, mCounter::UInt)
     # By one iteration i mean that every organism from a list
     # run peace of it's script - code between two produce() calls.
     #
-    len       = length(_tasks)
+    len       = length(Manager._tasks)
     eCounter += 1
     mCounter += 1
     for i = 1:len
       try
-        consume(_tasks[i].task)
+        consume(Manager._tasks[i].task)
       catch e
         println("Manager._updateOrganisms(): $e")
       end
@@ -71,9 +71,9 @@ function _updateOrganismsEnergy(counter::UInt)
   # We have to go through tasks in reverse way, because we may
   # remove some elements inside while loop.
   #
-  i = length(_tasks)
+  i = length(Manager._tasks)
   while i > 0
-    org = _tasks[i].organism
+    org = Manager._tasks[i].organism
     dec = decVal + length(org.script.blocks)
     #
     # if the energy of the organism is zero, we have to remove it
@@ -96,14 +96,14 @@ end
 # (MUTATOR, MUTATE_AMOUNT).
 #
 function _mutateOrganisms()
-  len       = length(_tasks)
+  len       = length(Manager._tasks)
   mutations = Config.val(MUTATOR, MUTATE_AMOUNT)
   probs     = Config.val(MUTATOR, ADD_CHANGE)
 
   if mutations > UInt(0)
     for i = 1:len
       for j = 1:mutations
-        Mutator.mutate(_tasks[i].organism.script, probs)
+        Mutator.mutate(Manager._tasks[i].organism.script, probs)
       end
     end
   end
@@ -115,19 +115,22 @@ end
 function _killOrganism(i::UInt)
   if i === 0 return false end
 
-  org = _tasks[i].organism
+  org = Manager._tasks[i].organism
   org.energy = UInt(0)
+  Event.clear(org.observer)
+
   delete!(Manager._posMap, _getOrganismId(org.pos))
-  delete!(Manager._map, _tasks[i].id)
+  delete!(Manager._map, Manager._tasks[i].id)
   #
   # This is small hack. It stops the task immediately. We 
-  # have to do this, because task is a memory leak.
+  # have to do this, because task is a memory leak if we don't
+  # stop (interrupt) it
   #
   try
-    _tasks[i].task.exception = null
-    yieldto(_tasks[i].task)
+    Manager._tasks[i].task.exception = null
+    yieldto(Manager._tasks[i].task)
   end
-  splice!(_tasks, i)
+  splice!(Manager._tasks, i)
 end
 #
 # Creates new organism and binds event handlers to him. It also
@@ -167,7 +170,7 @@ function _createOrganism(pos = nothing)
   oTask = OrganismTask(id, task, org)
   Config.val(ORGANISM, CURRENT_ID, id + UInt(1))
   _map[id] = org
-  push!(_tasks, oTask)
+  push!(Manager._tasks, oTask)
   oTask
 end
 #
@@ -320,8 +323,8 @@ function _onGrab(organism::Creature.Organism, amount::UInt, pos::Helper.Point, r
       org.energy -= retObj.ret
     else
       # TODO: possibly, slow code. To fix this we have to
-      # TODO: use map instead array for tasks (_tasks)
-      _killOrganism(findfirst((t) -> t.organism === org, _tasks))
+      # TODO: use map instead array for tasks (Manager._tasks)
+      _killOrganism(findfirst((t) -> t.organism === org, Manager._tasks))
     end
   end
 
@@ -343,8 +346,3 @@ function _onStep(organism::Creature.Organism, pos::Helper.Point, retObj::Creatur
     retObj.pos = organism.pos 
   end
 end
-
-#
-# All available organism's tasks
-#
-_tasks = OrganismTask[]
