@@ -1,5 +1,6 @@
 push!(LOAD_PATH, pwd())
-include("Manager.jl")
+using Manager
 
+#data = Manager.Data
 println("Server has run")
 Manager.run()

@@ -1,1 +1,1 @@
-julia -P "include(\"AppManager.jl\")"
+julia -e "include(\"AppManager.jl\")"

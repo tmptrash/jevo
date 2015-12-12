@@ -32,6 +32,32 @@ module Manager
   include("ManagerRpc.jl")
   include("ManagerOrganism.jl")
   #
+  # This type describes all objects in a manager, which it works with.
+  #
+  type Objects
+    #
+    # Instance of the world
+    #
+    world::World.Plane
+    #
+    # Positions map, which stores positions of all organisms. Is used
+    # for fast access to the organism by it's coordinates.
+    #
+    posMap::Dict{UInt, Creature.Organism}
+    #
+    # Map of organisms by id
+    #
+    map::Dict{UInt, Creature.Organism}
+    #
+    # All available organism's tasks
+    #
+    tasks::Array{OrganismTask}
+    #
+    # Parameters passed through command line
+    #
+    params::Dict{ASCIIString, ASCIIString}
+  end
+  #
   # This manager is also a server for all other remote managers. These
   # remote managers are clients for current and may use "Client" module
   # to send commands and obtain results. So, this port will be used for
