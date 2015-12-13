@@ -100,6 +100,21 @@ function getOrganism(id::UInt)
   end
   false
 end
+#
+# @rpc
+# Calls Garbage Collector in current process
+#
+function debugGc()
+  Base.gc_enable(true)
+  Base.gc()
+end
+#
+# @rpc
+# Calls Garbage Collector in current process
+#
+function debugWhos()
+  whos()
+end
 
 #
 # Creates server and returns it's ServerConnection type. It 
@@ -135,5 +150,7 @@ _rpcApi = Dict{Integer, Function}(
   RPC_GET_CONFIG        => getConfig,
   RPC_MUTATE            => mutate,
   RPC_GET_IPS           => getIps,
-  RPC_GET_ORGANISM      => getOrganism
+  RPC_GET_ORGANISM      => getOrganism,
+  RPC_DEBUG_GC          => debugGc,
+  RPC_DEBUG_WHOS        => debugWhos
 )

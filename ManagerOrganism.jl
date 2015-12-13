@@ -131,6 +131,8 @@ function _killOrganism(i::UInt)
     yieldto(Manager._tasks[i].task)
   end
   splice!(Manager._tasks, i)
+  # TODO: this line is under the big question
+  gc()
 end
 #
 # Creates new organism and binds event handlers to him. It also
@@ -141,7 +143,7 @@ end
 function _createOrganism(pos = nothing)
   pos  = pos == nothing ? World.getFreePos(Manager._world) : pos
   org  = Creature.create(pos)
-  task = Task(eval(org.script.code))
+  task = Task(eval(Manager, org.script.code))
   id   = Config.val(ORGANISM, CURRENT_ID)
 
   Event.on(org.observer, "getenergy", _onGetEnergy)

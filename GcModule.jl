@@ -8,15 +8,18 @@ module GcModule
 	    task::Task
 	end
 	
+	function test()
+	    Task(eval(:(() -> true)))
+	end
 	function start(tasks::Array{MyType})
 		len = 1
 		for i = 1:len
 			cr = Creature.create()
-			t  = Task(function f() c = Creature.Organism[]; produce(c); c = c[1]; produce(); produce(); end)
+			t  = Task(eval(GcModule, :(function f() c = Creature.Organism[]; produce(c); c = c[1]; produce(); produce(); end)))
 
 			push!(consume(t), cr)
 			consume(t)
-			for k = 1:100000 Mutator.mutate(cr.script, [1,0]) end
+			for k = 1:1000000 Mutator.mutate(cr.script, [1,0]) end
 			push!(tasks, MyType(t))
 		end
 		for i = 1:len
@@ -26,6 +29,6 @@ module GcModule
 			end
 		end
 		empty!(tasks)
-		#gc()
+		gc()
 	end
 end
