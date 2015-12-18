@@ -1,1 +1,1 @@
-julia AppManager.jl
+julia src\AppManager.jl

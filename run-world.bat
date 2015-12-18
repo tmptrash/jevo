@@ -1,1 +1,1 @@
-julia -P "include(\"AppRemoteWorld.jl\")"
+julia -P "include(\"src\AppRemoteWorld.jl\")"
