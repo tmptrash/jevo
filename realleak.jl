@@ -1,12 +1,9 @@
 function leak()
 	for i=1:100000
-		f = eval(:(function() produce() end))
-		t = Task(f)
+		t = Task(eval(:(function() produce() end)))
 		consume(t)
-
-		t.exception = null
 		try
-		  yieldto(t)
+		  Base.throwto(t, null)
 		end
 	end
 	gc()
