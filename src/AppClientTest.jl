@@ -1,7 +1,7 @@
 #
 # TODO:
 #
-push!(LOAD_PATH, pwd())
+push!(LOAD_PATH, "$(pwd())/src")
 
 import Client
 using Creature
