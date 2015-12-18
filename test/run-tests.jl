@@ -14,7 +14,7 @@ test_regex = r"^test-.*\.jl$"
 # This line is needed after migrating to julia v0.4, because
 # include() doesn't search files(modules) in current folder.
 #
-push!(LOAD_PATH, pwd())
+push!(LOAD_PATH, "$(pwd())/src")
 
 #
 # All test files should be in "test" folder
