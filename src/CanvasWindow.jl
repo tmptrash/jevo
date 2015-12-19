@@ -35,6 +35,7 @@ module CanvasWindow
   export create
   export dot
   export update
+  export title
   export destroy
 
   #
@@ -70,21 +71,6 @@ module CanvasWindow
 
     Window(win, c, ctx)
   end
-  # TODO: do we need this at all?
-  # Draws one dot (point) on the canvas with specified color
-  # @param win Windows type
-  # @param x X coordinate of the point
-  # @param y Y coordinate of the point
-  # @param r Red part of RGB
-  # @param g Green part of RGB
-  # @param b Blue part of RGB
-  #
-  # function dot(win::Window, x::Int, y::Int, r::Real, g::Real, b::Real)
-  #   Tk.set_source_rgb(win.context, r, g, b)
-  #   Tk.move_to(win.context, x, y)
-  #   Tk.line_to(win.context, x+1, y)
-  #   Tk.stroke(win.context)
-  # end
   #
   # Draws one dot (point) on the canvas with specified color
   # @param win Windows type

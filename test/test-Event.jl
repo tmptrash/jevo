@@ -48,4 +48,20 @@ module TestEvent
     @fact flag1 --> false
     @fact flag2 --> false
   end
+
+  facts("clear() hsould clear all handlers") do
+    flag1 = false
+    flag2 = false
+    obs   = Event.create()
+    function handler1() flag1 = true end
+    function handler2() flag2 = true end
+
+    Event.on(obs, "event", handler1)
+    Event.on(obs, "event", handler2)
+    Event.clear(obs)
+    Event.fire(obs, "event")
+
+    @fact flag1 --> false
+    @fact flag2 --> false
+  end
 end

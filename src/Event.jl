@@ -11,6 +11,7 @@ module Event
   export on
   export off
   export fire
+  export clear
 
   #
   # Contains events and they handlers
