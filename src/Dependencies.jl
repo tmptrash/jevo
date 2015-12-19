@@ -1,0 +1,5 @@
+Pkg.add("Colors")
+Pkg.add("Debug")
+Pkg.checkout("Cairo")
+Pkg.checkout("FactCheck")
+Pkg.checkout("Tk")
