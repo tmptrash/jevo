@@ -1,9 +1,18 @@
 #
-# Applcation wide configuration. Simuates static fields in OOP world.
-# Contains configurations for entire application. It should be possible
-# to change some parameter here and the object, which contains it, updates
-# it's state.
-# TODO: describes sections and keys structure
+# Applcation wide configuration. It contains default values from the
+# scratch. It's also possible to change them using val() function.
+# May be used not only like configuration and also like intermodule
+# data object. One module may set a value and other module may read 
+# it later. Every configuration value may be obtained by setting it's
+# section and key. This is like absolute address of every value.
+#
+# Usage:
+#     using Config
+#     ...
+#     Config.val(SECTION_ID, KEY_ID)         # returns value or null
+#     Config.val(SECTION_ID, KEY_ID, newVal) # sets new value
+#     Config.save("config.data")             # saves all to file
+#     Config.load("config.data")             # loads all from file
 #
 # @singleton
 # @author DeadbraiN
@@ -283,7 +292,7 @@ module Config
         # organisms in a World. This value will be set many times in main
         # Manager's loop.
         #
-        IPS                  => float(0)
+        IPS                  => UInt(0)
       ),
       CONNECTION => Dict{Int64, Any}(
         #
