@@ -6,54 +6,76 @@ module TestCanvasWindow
   using Images
   using FixedPointNumbers
 
-  begin
-    #
-    # Shared variables for all tests...
-    #
-    xoffset = 1
-    width   = 100
-    height  = 100
-    r       = FixedPointNumbers.ufixed8(1.0)
-    g       = FixedPointNumbers.ufixed8(0.122)
-    b       = FixedPointNumbers.ufixed8(0.255)
-    imgFile = "test.png"
+  #
+  # Shared variables for all facts...
+  #
+  global xoffset = 1
+  global width   = 234
+  global height  = 345
+  global r       = FixedPointNumbers.ufixed8(1.0)
+  global g       = FixedPointNumbers.ufixed8(0.122)
+  global b       = FixedPointNumbers.ufixed8(0.255)
+  global title   = "Test"
+  global imgFile = "test.png"
 
-    function _dot(dotFn::Function)
-      x = rand(1:width)
-      y = rand(1:height)
+  facts("create() should create and show window with title") do
+    win = CanvasWindow.create(width, height, title)
+    @fact Tk.get_value(win.win) --> title "Window should be created"
+    CanvasWindow.destroy(win)
+  end
+  facts("create() should create canvas with passed width and height") do
+    win = CanvasWindow.create(width, height, title)
+    Cairo.write_to_png(win.canvas.back, imgFile)
+    img = Images.load(imgFile)
+    @fact size(img.data)[1] --> width
+    @fact size(img.data)[2] --> height
+    CanvasWindow.destroy(win)
+    rm(imgFile)
+  end
 
-      win = CanvasWindow.create(width, height)
-      dotFn(win, x, y)
-      Cairo.write_to_png(win.canvas.back, imgFile)
-      img = Images.load(imgFile)
-      @fact img.data[x + xoffset, y].r --> r
-      @fact img.data[x + xoffset, y].g --> g
-      @fact img.data[x + xoffset, y].b --> b
-      CanvasWindow.destroy(win)
-      rm(imgFile)
+  facts("title() should change the title") do
+    win = CanvasWindow.create(width, height, "No title!")
+    CanvasWindow.title(win, title)
+    @fact Tk.get_value(win.win) --> title
+    CanvasWindow.destroy(win)
+  end
+
+  facts("dot(color) should draw a pixel only on back surface") do
+    x = rand(1:width)
+    y = rand(1:height)
+
+    win = CanvasWindow.create(width, height)
+    CanvasWindow.dot(win, x, y, UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i))
+    Cairo.write_to_png(win.canvas.back, imgFile)
+    img = Images.load(imgFile)
+    @fact img.data[x + xoffset, y].r --> r
+    @fact img.data[x + xoffset, y].g --> g
+    @fact img.data[x + xoffset, y].b --> b
+    CanvasWindow.destroy(win)
+    rm(imgFile)
+  end
+
+  facts("update() should update front surface") do
+    x = rand(1:width)
+    y = rand(1:height)
+
+    win = CanvasWindow.create(width, height)
+    CanvasWindow.dot(win, x, y, UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i))
+    CanvasWindow.update(win)
+    Tk.render_to_cairo(win.canvas.c) do front
+      Cairo.write_to_png(front, imgFile)
     end
+    img = Images.load(imgFile)
+    @fact img.data[x + xoffset, y].r --> r
+    @fact img.data[x + xoffset, y].g --> g
+    @fact img.data[x + xoffset, y].b --> b
+    CanvasWindow.destroy(win)
+    rm(imgFile)
+  end
 
-
-    facts("create() should create and show window") do
-      win = CanvasWindow.create(width, height, "Test")
-      @fact Tk.get_value(win.win) --> "Test" "Window should be created"
-      CanvasWindow.destroy(win)
-      @fact_throws Tk.get_value(win.win) "Window should be destroyed"
-    end
-
-    #
-    # HACK: I didn't find a possibility to get a pixel from
-    # HACK: canvas by (x,y) coordinates. But it's possible to
-    # HACK: save it to the file and load into the 2 dimentional
-    # HACK: array using Images package. Temporary png file will
-    # HACK: be removed after the test.
-    #
-    # facts("dot(r,g,b) should draw a pixel") do
-    #   _dot((win, x, y) -> CanvasWindow.dot(win, x, y, r, g, b))
-    # end
-
-    facts("dot(color) should draw a pixel") do
-      _dot((win, x, y) -> CanvasWindow.dot(win, x, y, UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i)))
-    end
+  facts("destroy() should destroy the window") do
+    win = CanvasWindow.create(width, height, title)
+    CanvasWindow.destroy(win)
+    @fact_throws Tk.get_value(win.win) "Window should be destroyed"
   end
 end
