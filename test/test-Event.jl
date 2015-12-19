@@ -49,7 +49,7 @@ module TestEvent
     @fact flag2 --> false
   end
 
-  facts("clear() hsould clear all handlers") do
+  facts("clear() should clear all handlers") do
     flag1 = false
     flag2 = false
     obs   = Event.create()

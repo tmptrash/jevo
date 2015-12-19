@@ -1,7 +1,21 @@
 #
 # Implements Listener\Observer pattern. First, you have to create observer
-# object by calling create(). After that, it may fire events with parameters.
+# object by calling create(), assign some handlers with on() and after that, 
+# you may fire events with parameters.
 # 
+# Usage:
+#     using Event
+#     ...
+#     function handlerFn(p1, p2)
+#         ....
+#     end
+#     ...
+#     obs = Event.create()
+#     Event.on(obs, "event", handlerFn)
+#     ...
+#     Event.fire(obs, "event", param1, param2)
+#     ...
+#     Event.clear(obs)
 #
 # @author DeadbraiN
 #
