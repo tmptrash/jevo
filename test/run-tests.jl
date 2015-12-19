@@ -26,7 +26,10 @@ end
 #
 # Include tests means run them
 #
-for test_file in test_files include(test_file) end
+for test_file in test_files
+	println("\n\nRunning $test_file")
+	include(test_file)
+end
 #
 # return the overall exit status
 #
