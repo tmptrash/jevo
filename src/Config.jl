@@ -162,7 +162,7 @@ module Config
     _data.d[section][key]
   end
   #
-  # Sets the value by section and key. Works in pair with 
+  # Sets the value by section and key. Works in pair with
   # getter val() function
   # @param section Configuration section
   # @param key Key inside the section

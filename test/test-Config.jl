@@ -22,9 +22,19 @@ module TestConfig
 
   facts("Save configuration into the file") do
     cfgFile = "config.data"
-    rm(cfgFile)
+    try rm(cfgFile) end
     Config.save(cfgFile)
     @fact isfile(cfgFile) --> true
+    rm(cfgFile)
+  end
+  facts("Save configuration into the file with correct data") do
+    cfgFile = "config.data"
+    try rm(cfgFile) end
+    Config.val(WORLD, IPS, UInt(666))
+    Config.save(cfgFile)
+    Config.val(WORLD, IPS, UInt(777))
+    Config.load(cfgFile)
+    @fact Config.val(WORLD, IPS) --> UInt(666)
     rm(cfgFile)
   end
  end
