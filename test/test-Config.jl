@@ -46,9 +46,39 @@ module TestConfig
     @fact Config.load(cfgFile) --> false
     rm(cfgFile)
   end
-  facts("Load configuration from file, which is doesn't exist") do
+  facts("Load configuration from file, which doesn't exist") do
     cfgFile = "config.data"
     try rm(cfgFile) end
     @fact Config.load(cfgFile) --> false
+  end
+
+  facts("Combined test of all functions") do
+    cfgFile1 = "config1.data"
+    cfgFile2 = "config2.data"
+    
+    try rm(cfgFile1) end
+    @fact Config.val(WORLD, IPS, UInt(666)) --> true
+    @fact Config.save(cfgFile1)             --> true      # IPS === 666
+    @fact Config.val(WORLD, IPS)            --> UInt(666)
+    @fact Config.val(WORLD, IPS, UInt(777)) --> true
+    @fact Config.val(WORLD, IPS)            --> UInt(777)
+    @fact Config.load(cfgFile1)             --> true
+    @fact Config.val(WORLD, IPS)            --> UInt(666)
+    @fact Config.val(WORLD, IPS, UInt(777)) --> true
+    @fact Config.val(WORLD, IPS)            --> UInt(777)
+
+    @fact Config.save(cfgFile2)             --> true      # IPS === 777
+    @fact Config.val(WORLD, IPS, UInt(666)) --> true
+    @fact Config.val(WORLD, IPS)            --> UInt(666)
+    @fact Config.load(cfgFile2)             --> true
+    @fact Config.val(WORLD, IPS)            --> UInt(777)
+    
+    @fact Config.load(cfgFile1)             --> true
+    @fact Config.val(WORLD, IPS)            --> UInt(666)
+    @fact Config.load(cfgFile2)             --> true
+    @fact Config.val(WORLD, IPS)            --> UInt(777)
+
+    rm(cfgFile1)
+    rm(cfgFile2)
   end
  end

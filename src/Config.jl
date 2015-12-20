@@ -121,11 +121,12 @@ module Config
   # Saves all data into the file. If file exists, it will
   # be overrided
   # @param file File name
+  # @return {Bool} saving result
   #
   function save(file::ASCIIString = "config.data")
     local io  = null
     local ret = true
-    
+
     try
       io = open(file, "w")
       serialize(io, _data.d)
@@ -140,6 +141,7 @@ module Config
   #
   # Loads all data from the file
   # @param file File name
+  # @return {Bool} loading result
   #
   function load(file::ASCIIString = "config.data")
     local io  = null
@@ -266,7 +268,7 @@ module Config
         #
         # Value, which will be descreased in organism after "descreaseAfterTimes" period
         #
-        DECREASE_VALUE       => UInt(100000),
+        DECREASE_VALUE       => UInt(100),
         #
         # Current organism unique id. Is used like increment for setting id's for new organisms
         #
