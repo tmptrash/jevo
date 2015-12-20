@@ -55,7 +55,7 @@ module TestConfig
   facts("Combined test of all functions") do
     cfgFile1 = "config1.data"
     cfgFile2 = "config2.data"
-    
+
     try rm(cfgFile1) end
     @fact Config.val(WORLD, IPS, UInt(666)) --> true
     @fact Config.save(cfgFile1)             --> true      # IPS === 666
@@ -73,9 +73,9 @@ module TestConfig
     @fact Config.load(cfgFile2)             --> true
     @fact Config.val(WORLD, IPS)            --> UInt(777)
     
-    @fact Config.load(cfgFile1)             --> true
+    @fact Config.load(cfgFile1)             --> true      # IPS === 666
     @fact Config.val(WORLD, IPS)            --> UInt(666)
-    @fact Config.load(cfgFile2)             --> true
+    @fact Config.load(cfgFile2)             --> true      # IPS === 777
     @fact Config.val(WORLD, IPS)            --> UInt(777)
 
     rm(cfgFile1)

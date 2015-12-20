@@ -19,6 +19,17 @@ module TestCanvasWindow
   global title   = "Test"
   global imgFile = "test.png"
 
+  function _dotOnFront(win::CanvasWindow.Window, x, y, r, g, b)
+    Tk.render_to_cairo(win.canvas.c) do front
+      Cairo.write_to_png(front, imgFile)
+    end
+    img = Images.load(imgFile)
+
+    img.data[x + xoffset, y].r === r &&
+    img.data[x + xoffset, y].g === g &&
+    img.data[x + xoffset, y].b === b
+  end
+
   facts("create() should create and show window with title") do
     win = CanvasWindow.create(width, height, title)
     @fact Tk.get_value(win.win) --> title "Window should be created"
@@ -60,17 +71,19 @@ module TestCanvasWindow
     x = rand(1:width)
     y = rand(1:height)
 
-    win = CanvasWindow.create(width, height)
+    win = CanvasWindow.create(width, height, title)
     CanvasWindow.dot(win, x, y, UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i))
     CanvasWindow.update(win)
     # grabbed from tkwidget.jl::reveal()
-    Tk.render_to_cairo(win.canvas.c) do front
-      Cairo.write_to_png(front, imgFile)
-    end
-    img = Images.load(imgFile)
-    @fact img.data[x + xoffset, y].r --> r
-    @fact img.data[x + xoffset, y].g --> g
-    @fact img.data[x + xoffset, y].b --> b
+    # Tk.render_to_cairo(win.canvas.c) do front
+    #   Cairo.write_to_png(front, imgFile)
+    # end
+    # img = Images.load(imgFile)
+    # @fact img.data[x + xoffset, y].r --> r
+    # @fact img.data[x + xoffset, y].g --> g
+    # @fact img.data[x + xoffset, y].b --> b
+    _dotOnFront(win, x, y, r, g, b)
+
     CanvasWindow.destroy(win)
     rm(imgFile)
   end
@@ -79,5 +92,35 @@ module TestCanvasWindow
     win = CanvasWindow.create(width, height, title)
     CanvasWindow.destroy(win)
     @fact_throws Tk.get_value(win.win) "Window should be destroyed"
+  end
+
+  facts("Combined test of all functions") do
+    win = CanvasWindow.create(width, height, title)
+    @fact Tk.get_value(win.win) --> title
+
+    # paint pixel on back surface
+    x = 10
+    y = 10
+    CanvasWindow.dot(win, x, y, UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i))
+    _dotOnFront(win, x, y, 0, 0, 0)
+    # paint another pixel on back surface
+    x = 20
+    y = 20
+    CanvasWindow.dot(win, x, y, UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i))
+    _dotOnFront(win, x, y, 0, 0, 0)
+
+    CanvasWindow.update(win)
+
+    # checks pixel on front surface
+    x = 10
+    y = 10
+    _dotOnFront(win, x, y, r, g, b)
+    # checks pixel on front surface
+    x = 20
+    y = 20
+    _dotOnFront(win, x, y, r, g, b)
+
+    CanvasWindow.destroy(win)
+    rm(imgFile)
   end
 end
