@@ -123,30 +123,38 @@ module Config
   # @param file File name
   #
   function save(file::ASCIIString = "config.data")
-    local io = null
+    local io  = null
+    local ret = true
+    
     try
       io = open(file, "w")
       serialize(io, _data.d)
     catch(e)
       println("Config.save(): $e")
+      ret = false
     finally
-      if sock !== null close(io) end
+      if io !== null close(io) end
     end
+    ret
   end
   #
   # Loads all data from the file
   # @param file File name
   #
   function load(file::ASCIIString = "config.data")
-    local io = null
+    local io  = null
+    local ret = true
+
     try
       io = open(file)
       _data.d = deserialize(io)
     catch(e)
       println("Config.load(): $e")
+      ret = false
     finally
-      if sock !== null close(io) end
+      if io !== null close(io) end
     end
+    ret
   end
   #
   # Returns configuration value according to section and key

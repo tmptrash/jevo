@@ -23,18 +23,32 @@ module TestConfig
   facts("Save configuration into the file") do
     cfgFile = "config.data"
     try rm(cfgFile) end
-    Config.save(cfgFile)
-    @fact isfile(cfgFile) --> true
+    @fact Config.save(cfgFile) --> true
+    @fact isfile(cfgFile)      --> true
     rm(cfgFile)
   end
-  facts("Save configuration into the file with correct data") do
+  facts("Save/load configuration into/from file with correct data") do
     cfgFile = "config.data"
     try rm(cfgFile) end
     Config.val(WORLD, IPS, UInt(666))
-    Config.save(cfgFile)
+    @fact Config.save(cfgFile)   --> true
     Config.val(WORLD, IPS, UInt(777))
     Config.load(cfgFile)
     @fact Config.val(WORLD, IPS) --> UInt(666)
     rm(cfgFile)
+  end
+  facts("Load configuration from incorrect file") do
+    cfgFile = "config.data"
+    try rm(cfgFile) end
+    io = open(cfgFile, "w")
+    write(io, "Hello!")
+    close(io)
+    @fact Config.load(cfgFile) --> false
+    rm(cfgFile)
+  end
+  facts("Load configuration from file, which is doesn't exist") do
+    cfgFile = "config.data"
+    try rm(cfgFile) end
+    @fact Config.load(cfgFile) --> false
   end
  end
