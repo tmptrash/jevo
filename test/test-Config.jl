@@ -57,6 +57,7 @@ module TestConfig
     cfgFile2 = "config2.data"
 
     try rm(cfgFile1) end
+    try rm(cfgFile2) end
     @fact Config.val(WORLD, IPS, UInt(666)) --> true
     @fact Config.save(cfgFile1)             --> true      # IPS === 666
     @fact Config.val(WORLD, IPS)            --> UInt(666)

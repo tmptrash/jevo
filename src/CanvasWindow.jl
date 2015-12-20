@@ -7,17 +7,16 @@
 # calling update() all dots will appear.
 #
 # Issues:
-#   - width and height parameters in create() method means, that a canvas should 
-#     be with these values, but it choose some other values for canvas. It doesn't 
-#     work on small canvas sizes.
+#   - width and height parameters in create() method means, that a canvas should
+#     be with these values, but it choose some other values for canvas. It doesn't
+#     work on small canvas sizes (I think less then 200px).
 #
 # Usage:
-#   using CanvasWindow
+#   import CanvasWindow
 #   ...
-#   win = CanvasWindow.create(100, 100)
+#   win = CanvasWindow.create(300, 300)
 #   CanvasWindow.dot(win, 20, 20, UInt32(11197883)) # R=AA,G=DD,B=BB
-#   CanvasWindow.dot(win, 30, 30, UInt32(11197883))
-#   ...
+#   CanvasWindow.dot(win, 30, 30, UInt32(11197883)) # R=AA,G=DD,B=BB
 #   CanvasWindow.update(win)
 #   ...
 #   CanvasWindow.destroy(win)
@@ -29,7 +28,7 @@ module CanvasWindow
   import Cairo
   import Tk
   import Colors
-  using Config
+  importall Config
 
   export Window
   export create
@@ -47,7 +46,6 @@ module CanvasWindow
     canvas::Tk.Canvas
     context::Cairo.CairoContext
   end
-  
   #
   # Creates window and shows it on the screen. Returns window related 
   # data type, which is used in all public methods of current module.
@@ -103,11 +101,12 @@ module CanvasWindow
     Tk.reveal(win.canvas)
     Tk.update()
   end
-  # TODO: i have to check if i need to destroy context and canvas
+  #
   # Destroys specified windows
   # @param win Windows to destroy
   #
   function destroy(win::Window)
-  	Tk.destroy(win.win)
+    Cairo.destroy(win.context.surface)
+    Tk.destroy(win.win)
   end
 end
