@@ -74,16 +74,7 @@ module TestCanvasWindow
     win = CanvasWindow.create(width, height, title)
     CanvasWindow.dot(win, x, y, UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i))
     CanvasWindow.update(win)
-    # grabbed from tkwidget.jl::reveal()
-    # Tk.render_to_cairo(win.canvas.c) do front
-    #   Cairo.write_to_png(front, imgFile)
-    # end
-    # img = Images.load(imgFile)
-    # @fact img.data[x + xoffset, y].r --> r
-    # @fact img.data[x + xoffset, y].g --> g
-    # @fact img.data[x + xoffset, y].b --> b
     _dotOnFront(win, x, y, r, g, b)
-
     CanvasWindow.destroy(win)
     rm(imgFile)
   end
