@@ -12,7 +12,9 @@ module AsciiMutator
     str::ASCIIString
     function Code() new("; ;") end
   end
-
+  #
+  # TODO: optimize this method as deep aspossible
+  #
   function mutate(code::Code, prob::Array{Int})
     p = Helper.getProbIndex(prob)
     l = length(code.str) - 1
