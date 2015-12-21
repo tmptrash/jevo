@@ -10,6 +10,7 @@ http://life.ou.edu/tierra/                                                    Ti
 https://www.youtube.com/watch?v=Wl5rRGVD0QI                                   Tierra demo and description
 http://devolab.msu.edu/                                                       Digital evelution laboratory
 https://www.youtube.com/playlist?list=PLWSJ9SwBJelIEbdaOXluI6VS8KnP6W7M6      Prof. Markov evolution biology lectures
+http://www.cc.gatech.edu/~turk/bio_sim/articles/tierra_thomas_ray.pdf         Evolution, Ecology and Optimization of Digital Organisms
 
 http://svaksha.github.io/Julia.jl/                                            Julia packages list
 http://it-ebooks.info/book/4852/                                              Julia book
