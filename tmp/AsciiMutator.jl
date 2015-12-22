@@ -6,10 +6,11 @@ module AsciiMutator
   export Code
 
   type Code
+    str::ASCIIString
     #
     # Start string should contain 3 symbols: 1 unchanged, 2 empty and 3 unchanged.
+	# String should be a correct julia code. 
     #
-    str::ASCIIString
     function Code() new("; ;") end
   end
   #
