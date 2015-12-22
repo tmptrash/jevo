@@ -3,7 +3,7 @@ include("Server.jl")
 using Config
 
 function onRequest(cmd::Connection.Command, ans::Connection.Answer)
-  println(cmd, ans)
+  println(cmd)
   ans.data = "$(cmd.fn) answer"
 end
 
