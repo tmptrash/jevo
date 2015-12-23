@@ -137,6 +137,11 @@ module Creature
     #
     try
       org.fnCode = eval(parse("function body() $(org.code.str) end"))
+      #
+      # If parsed code doesn't contain mistakes, then current organism
+      # should be fed with 30% bonus energy.
+      #
+      org.energy += UInt(div(org.energy / 3))
     end
   end
   #
