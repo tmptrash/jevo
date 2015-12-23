@@ -1,2 +1,2 @@
 #!/bin/bash
-julia src/AppManager.jl
+julia --depwarn=no src/AppManager.jl
