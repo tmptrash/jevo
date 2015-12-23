@@ -140,8 +140,7 @@ end
 # @param pos Optional. Position of organism.
 # @return {OrganismTask}
 #
-@debug function _createOrganism(pos = nothing)
-@bp
+function _createOrganism(pos = nothing)
   pos  = pos == nothing ? World.getFreePos(Manager._world) : pos
   org  = Creature.create(pos)
   task = Task(Creature.born(org))

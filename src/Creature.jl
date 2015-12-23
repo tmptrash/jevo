@@ -218,7 +218,7 @@ module Creature
     return function life()
       while org.energy > UInt(0)
         produce()
-        org.fnCode()
+        try org.fnCode() end
       end
     end
   end
