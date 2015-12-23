@@ -53,7 +53,7 @@ function _updateOrganisms(eCounter::UInt, mCounter::UInt)
       _updateOrganismsEnergy(eCounter)
       eCounter = UInt(0)
     end
-    if (maf = Config.val(MUTATOR, MUTATE_AFTER_TIMES)) > UInt(0) && mCounter >= maf
+    if (maf = Config.val(ORGANISM, MUTATE_AFTER_TIMES)) > UInt(0) && mCounter >= maf
       _mutateOrganisms()
       mCounter = UInt(0)
     end
@@ -74,7 +74,7 @@ function _updateOrganismsEnergy(counter::UInt)
   i = length(Manager._tasks)
   while i > 0
     org = Manager._tasks[i].organism
-    dec = decVal + length(org.script.blocks)
+    dec = decVal + length(org.code.str)
     #
     # if the energy of the organism is zero, we have to remove it
     #
@@ -93,17 +93,17 @@ function _updateOrganismsEnergy(counter::UInt)
 end
 #
 # Mutates every organism according to amount of mutations in a config
-# (MUTATOR, MUTATE_AMOUNT).
+# (ORGANISM, MUTATE_AMOUNT).
 #
 function _mutateOrganisms()
   len       = length(Manager._tasks)
-  mutations = Config.val(MUTATOR, MUTATE_AMOUNT)
-  probs     = Config.val(MUTATOR, ADD_CHANGE)
+  mutations = Config.val(ORGANISM, MUTATE_AMOUNT)
+  probs     = Config.val(ORGANISM, ADD_CHANGE)
 
   if mutations > UInt(0)
     for i = 1:len
       for j = 1:mutations
-        Mutator.mutate(Manager._tasks[i].organism.script, probs)
+        Creature.mutate(Manager._tasks[i].organism, probs)
       end
     end
   end
@@ -140,10 +140,11 @@ end
 # @param pos Optional. Position of organism.
 # @return {OrganismTask}
 #
-function _createOrganism(pos = nothing)
+@debug function _createOrganism(pos = nothing)
+@bp
   pos  = pos == nothing ? World.getFreePos(Manager._world) : pos
   org  = Creature.create(pos)
-  task = Task(eval(Manager, org.script.code))
+  task = Task(Creature.born(org))
   id   = Config.val(ORGANISM, CURRENT_ID)
 
   Event.on(org.observer, "getenergy", _onGetEnergy)
@@ -160,12 +161,6 @@ function _createOrganism(pos = nothing)
   # Shows organism
   #
   _moveOrganism(pos, org)
-  #
-  # Initializes the organism with it's instance
-  #
-  obj = consume(task)
-  push!(obj, org)
-  consume(task)
   #
   # Adds organism to organisms pool
   #
@@ -217,8 +212,8 @@ function _onClone(organism::Creature.Organism)
   # Creates new organism and applies mutations to him.
   #
   crTask = Manager._createOrganism(pos)
-  for i = 1:Config.val(MUTATOR, MUTATIONS_ON_CLONE)
-    Mutator.mutate(crTask.organism.script, Config.val(MUTATOR, ADD_CHANGE))
+  for i = 1:Config.val(ORGANISM, MUTATIONS_ON_CLONE)
+    Creature.mutate(crTask.organism, Config.val(ORGANISM, ADD_CHANGE))
   end
 end
 #

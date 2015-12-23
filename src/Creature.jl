@@ -39,36 +39,50 @@
 # TODO: add memory operations: mem_read(index):Int, mem_write(index, Int)
 #
 module Creature
-  import Mutator
-  import Script
   import Event
   import Helper
   using Config
+  using Debug
 
+  export Code
   export Organism
   export RetObj
 
   export create
+  export mutate
 
+  # TODO: remove this type and use ASCIIString instead
+  type Code
+    str::ASCIIString
+    #
+    # Start string should contain 3 symbols: 1 unchanged, 2 empty and 3 unchanged.
+    # String should be a correct julia code. 
+    #
+    function Code() new("   ") end
+  end
   #
   # Organism related data
   # TODO: describe events. e.g.: beforeclone, clone
   #
   type Organism
     #
-    # {UInt} Amount of energy for current organism
+    # Amount of energy for current organism
     #
     energy::UInt
     #
-    # {Helper.Point} Organism's position in a world
+    # Organism's position in a world
     #
     pos::Helper.Point
     #
-    # {Script.Code} Code of organism
+    # Code of organism
     #
-    script::Script.Code
+    code::Code
     #
-    # {Event.Observer} Adds events listening/firing logic to the organism.
+    # Compiled and covered by function version of code
+    #
+    fnCode::Function
+    #
+    # Adds events listening/firing logic to the organism.
     #
     observer::Event.Observer
   end
@@ -90,192 +104,123 @@ module Creature
     #
     RetObj(r = nothing, p = nothing) = (x = new(r); p === nothing ? x : (x.pos = p;x))
   end
-
   #
   # Creates new organism with default settings.
   # @return {Creature}
   #
   function create(pos::Helper.Point = Helper.Point(1, 1))
-    #
-    # Native organism's code on Julia. First oranisms start them living
-    # with this default code. Later, Mutator module will change it.
-    #
-    code = :(function life()
-      creature = Creature.Organism[]
-      #
-      # It should be first produce() call. This is how we obtain creature
-      # instance from outside. We need it for embedded functions like clone().
-      # We have to use some type (e.g. Array), because it's passed by reference
-      # and after returning it will contain creature instance inside array.
-      #
-      produce(creature)
-      #
-      # {Organism} creature Instance of code related creature. This instance
-      # will be used in organism's script during events fire.
-      #
-      creature = creature[1]
-      #
-      # This produce() tells outside code, that organism's instance was stored
-      #
-      produce()
-      #
-      # Library functions section. This functions are embedded for Organism.
-      # These functions shouldn't be in a Script.Code.blocks array, because 
-      # we can't change them (e.g. in Mutator). But they should be in 
-      # "Script.Code.funcs" array.
-      #
-      begin
-        #
-        # Checks if specified point with (x,y) coordinates has an energy value.
-        # Possible values [0:typemax(Int)]. 0 means no energy.
-        # @param x X coordinate
-        # @param y Y coordinate
-        # @return {UInt} Energy value
-        #
-        function funcGetEnergy(x::Int, y::Int)
-          Creature._getEnergy(creature, x, y)
-        end
-        #
-        # Grabs energy from the left point. Grabbibg means decrease energy at point
-        # and increase it at organism.
-        # @param amount Amount of energy to grab
-        # @return {UInt} Amount of grabbed energy
-        #
-        function funcGrabEnergyLeft(amount::UInt)
-          Creature._grabEnergy(creature, "left", amount)
-        end
-        #
-        # Grabs energy from the right point.
-        # @param amount Amount of energy to grab
-        # @return {UInt} Amount of grabbed energy
-        #
-        function funcGrabEnergyRight(amount::UInt)
-          Creature._grabEnergy(creature, "right", amount)
-        end
-        #
-        # Grabs energy from the up point.
-        # @param amount Amount of energy to grab
-        # @return {UInt} Amount of grabbed energy
-        #
-        function funcGrabEnergyUp(amount::UInt)
-          Creature._grabEnergy(creature, "up", amount)
-        end
-        #
-        # Grabs energy from the down point.
-        # @param amount Amount of energy to grab
-        # @return {Int} Amount of grabbed energy
-        #
-        function funcGrabEnergyDown(amount::UInt)
-          Creature._grabEnergy(creature, "down", amount)
-        end
-        #
-        # Makes one step left. It decreases organism's x coodinate by 1.
-        #
-        function funcStepLeft()
-          Creature._step(creature, "left")
-        end
-        #
-        # Makes one step right. It increases organism's x coodinate by 1.
-        #
-        function funcStepRight()
-          Creature._step(creature, "right")
-        end
-        #
-        # Makes one step up. It decrease organism's y coodinate by 1.
-        #
-        function funcStepUp()
-          Creature._step(creature, "up")
-        end
-        #
-        # Makes one step down. It increase organism's y coodinate by 1.
-        #
-        function funcStepDown()
-          Creature._step(creature, "down")
-        end
-        #
-        # Makes organism clone. During cloning new organism will get few
-        # mutations. It will be a difference from father's organism. This
-        # function should find "free" place for new organism around it.
-        # If there is no "free" place, then cloning will be declined.
-        #
-        function funcClone()
-          Creature._clone(creature)
-        end
-      end
+    Organism(Config.val(ORGANISM, START_ENERGY), pos, Code(), ()->nothing, Event.create())
+  end
+  #
+  # TODO: optimize this method as deep aspossible
+  # Produces one add/change/del mutation on code and returns it's modified version.
+  # Probabilities array is an array of three items: add,change,del values. e.g.:
+  # [1,2,1] means that add and del mutations will be twice less then change one.
+  # Character for adding and changing is in visible ASCII range - 32:126. see ASCII
+  # table for details. Change mutation is the most frequent, so it should be first.
+  # @param org Organism, which code we have to modify
+  # @param prob Probability array (add,change,del). e.g.: [X,X,X]
+  #
+  function mutate(org::Organism, prob::Array{Int})
+    pIndex = Helper.getProbIndex(prob)
+    len    = length(org.code.str) - 1
+    i      = rand(2:len)
 
-      #
-      # -----------------------------------------------------------------------
-      # This is main loop, where organism lives. It's body will be changed soon
-      # in Mutator module. This loop must be after ambedded functions.
-      #
-      while creature.energy > UInt(0)
+    # 1 - add, 2 - change, 3 - del
+    if pIndex === 2 org.code.str     = string(org.code.str[1:i-1], Char(rand(32:126)), org.code.str[i+1:end])
+    elseif pIndex === 1 org.code.str = string(org.code.str[1:i-1], Char(rand(32:126)), org.code.str[i:end])
+    elseif len > 2 org.code.str      = string(org.code.str[1:i-1], org.code.str[i+1:end]) end
+    #
+    # Updates compiled version of the code. Only valid code will be applied.
+    # TODO: if code is valid, then we have to check in on remote controlled
+    # TODO: worker to prevent infinite loop.
+    #
+    try
+      org.fnCode = eval(parse("function body() $(org.code.str) end"))
+    end
+  end
+  #
+  # TODO: describe organism's task function
+  #
+  function born(org)
+    #
+    # eg - means Energy Get. Short name to help organism find this name faster.
+    # Checks if specified point with (x,y) coordinates has an energy value.
+    # Possible values [0:typemax(Int)]. 0 means no energy.
+    # @param x X coordinate
+    # @param y Y coordinate
+    # @return {UInt} Energy value
+    #
+    function eg(x::Int, y::Int) Creature._getEnergy(org, x, y) end
+    #
+    # el - means get Energy Left. Short name to help organism find this name faster.
+    # Grabs energy from the left point. Grabbibg means decrease energy at point
+    # and increase it at organism.
+    # @param amount Amount of energy to grab
+    # @return {UInt} Amount of grabbed energy
+    #
+    function el(amount::UInt) Creature._grabEnergy(org, "left", amount) end
+    #
+    # er - means get Energy Right. Short name to help organism find this name faster.
+    # Grabs energy from the right point.
+    # @param amount Amount of energy to grab
+    # @return {UInt} Amount of grabbed energy
+    #
+    function er(amount::UInt) Creature._grabEnergy(org, "right", amount) end
+    #
+    # eu - means get Energy Up. Short name to help organism find this name faster.
+    # Grabs energy from the up point.
+    # @param amount Amount of energy to grab
+    # @return {UInt} Amount of grabbed energy
+    #
+    function eu(amount::UInt) Creature._grabEnergy(org, "up", amount) end
+    #
+    # ed - means get Energy Down. Short name to help organism find this name faster.
+    # Grabs energy from the down point.
+    # @param amount Amount of energy to grab
+    # @return {Int} Amount of grabbed energy
+    #
+    function ed(amount::UInt) Creature._grabEnergy(org, "down", amount) end
+    #
+    # sl - means make Step Left. Short name to help organism find this name faster.
+    # Makes one step left. It decreases organism's x coodinate by 1.
+    #
+    function sl() Creature._step(org, "left") end
+    #
+    # sr - means make Step Right. Short name to help organism find this name faster.
+    # Makes one step right. It increases organism's x coodinate by 1.
+    #
+    function sr() Creature._step(org, "right") end
+    #
+    # su - means make Step Up. Short name to help organism find this name faster.
+    # Makes one step up. It decrease organism's y coodinate by 1.
+    #
+    function su() Creature._step(org, "up") end
+    #
+    # sd - means make Step Down. Short name to help organism find this name faster.
+    # Makes one step down. It increase organism's y coodinate by 1.
+    #
+    function sd() Creature._step(org, "down") end
+    #
+    # c - means Clone. Short name to help organism find this name faster.
+    # Makes organism clone. During cloning new organism will get few
+    # mutations. It will be a difference from father's organism. This
+    # function should find "free" place for new organism around it.
+    # If there is no "free" place, then cloning will be declined.
+    #
+    function c() Creature._clone(org) end
+
+    #
+    # -----------------------------------------------------------------------
+    # This is main loop, where organism lives. It's body will be changed soon
+    # by mutations. This loop must be after ambedded functions.
+    #
+    return function life()
+      while org.energy > UInt(0)
         produce()
+        org.fnCode()
       end
-    end)
-    #
-    # Code blocks for current application (see code var)
-    #
-    blocks = [
-      Script.Block(                    # all functions block (begin...end)         
-        Symbol[],
-        code.args[2].args[10]
-      ),
-      Script.Block(                    # while(true) block
-        Symbol[],
-        code.args[2].args[12].args[2],
-        Script.Block(                  # parent, function's life() block
-          Symbol[],
-          code.args[2]
-        )
-      )
-    ]
-    #
-    # {Script.Code} Default code of the organism. It will be changed 
-    # soon throught mutations.
-    #
-    script = Script.Code(
-      #
-      # {Script.Fields} Code variables and functions related fields
-      #
-      0,0,Config.val(MUTATOR, FUNC_MAX_ARGS),
-      #
-      # {Expr} Initial organism's script. Will be mutated soon. Related to 
-      # blocks field below. See Script.Code.code for details.
-      #
-      code,
-      #
-      # {Array{Block} Blocks structure. Describes default code above. See 
-      # Script.Code.blocks for details.
-      #
-      blocks,
-      #
-      # {Array{Script.Func}} All functions in a script. See
-      # Script.Code.funcs for details. This section contains two type
-      # of functions: embedded (funcGetEnergy()...funcClone()) and generated.
-      # Embedded functions can't be changed by enyone. Generated may be.
-      #
-      [
-        Script.Func("funcGetEnergy",       [Script.Var("x",      Int ), Script.Var("y", Int)])
-        Script.Func("funcGrabEnergyLeft",  [Script.Var("amount", UInt)                      ])
-        Script.Func("funcGrabEnergyRight", [Script.Var("amount", UInt)                      ])
-        Script.Func("funcGrabEnergyUp",    [Script.Var("amount", UInt)                      ])
-        Script.Func("funcGrabEnergyDown",  [Script.Var("amount", UInt)                      ])
-        Script.Func("funcStepLeft",        [                                                ])
-        Script.Func("funcStepRight",       [                                                ])
-        Script.Func("funcStepUp",          [                                                ])
-        Script.Func("funcStepDown",        [                                                ])
-        Script.Func("funcClone",           [                                                ])
-      ],
-      #
-      # {Expr} Block for functions. See Script.Code.fnBlock for details.
-      #
-      blocks[1]
-    )
-    #
-    # @return {Organism}
-    # New organism with default parameters
-    #
-    Organism(Config.val(ORGANISM, START_ENERGY), pos, script, Event.create())
+    end
   end
   #
   # Clones an organism. It only fires an event. Clonning will be

@@ -24,20 +24,11 @@ module Config
 
   #
   # Sections...
-  # 
-  export MUTATOR
+  #
   export SCRIPT
   export ORGANISM
   export WORLD 
   export CONNECTION
-  #
-  # Keys id's in MUTATOR section
-  #
-  export ADD_CHANGE
-  export FUNC_MAX_ARGS
-  export MUTATIONS_ON_CLONE
-  export MUTATE_AFTER_TIMES
-  export MUTATE_AMOUNT
   #
   # Keys id's in SCRIPT section
   #
@@ -47,6 +38,10 @@ module Config
   #
   # Keys id's in ORGANISM section
   #
+  export ADD_CHANGE
+  export MUTATIONS_ON_CLONE
+  export MUTATE_AFTER_TIMES
+  export MUTATE_AMOUNT
   export START_AMOUNT
   export START_ENERGY
   export MAX_ENERGY
@@ -76,19 +71,10 @@ module Config
   #
   # Sections id's
   #
-  const MUTATOR              = 1
-  const SCRIPT               = 2
-  const ORGANISM             = 3
-  const WORLD                = 4
-  const CONNECTION           = 5
-  #
-  # Keys id's in MUTATOR section. Description is provided below...
-  #
-  const ADD_CHANGE           = 1
-  const FUNC_MAX_ARGS        = 2
-  const MUTATIONS_ON_CLONE   = 3
-  const MUTATE_AFTER_TIMES   = 4
-  const MUTATE_AMOUNT        = 5
+  const SCRIPT               = 1
+  const ORGANISM             = 2
+  const WORLD                = 3
+  const CONNECTION           = 4
   #
   # Keys id's in SCRIPT section. Description is provided below...
   #
@@ -98,12 +84,16 @@ module Config
   #
   # Keys id's in ORGANISM section. Description is provided below...
   #
-  const START_AMOUNT         = 1
-  const START_ENERGY         = 2
-  const MAX_ENERGY           = 3
-  const DECREASE_AFTER_TIMES = 4
-  const DECREASE_VALUE       = 5
-  const CURRENT_ID           = 6
+  const ADD_CHANGE           = 1
+  const MUTATIONS_ON_CLONE   = 2
+  const MUTATE_AFTER_TIMES   = 3
+  const MUTATE_AMOUNT        = 4
+  const START_AMOUNT         = 5
+  const START_ENERGY         = 6
+  const MAX_ENERGY           = 7
+  const DECREASE_AFTER_TIMES = 8
+  const DECREASE_VALUE       = 9
+  const CURRENT_ID           = 10
   #
   # Keys id's in WORLD section. Description is provided below...
   #
@@ -190,45 +180,6 @@ module Config
   #
   _data = Data(
     Dict{Int64, Dict{Int64, Any}}(
-      MUTATOR    => Dict{Int64, Any}(
-        #
-        # {Array} Probabilities with wich mutator decides what to do: add,
-        #         or change existing construction of the script. 
-        #         Depending on this values, organism may have different
-        #         strategies of living. For example: if add value is bigger 
-        #         then del and change, then it will be grow up all the time.
-        #         If del value is bigger then other, then it will be decreased
-        #         to one line code and will die.
-        #
-        ADD_CHANGE           => [1,10],
-        #
-        # {UInt8} Maximum amount of function parameters in orgamism's script.
-        # It's used in Mutator during new function creation. Example:
-        #
-        #     function func12(var24, var25);end
-        #
-        # In example above there are two arguments. This amount of arguments
-        # must be less then funcMaxArgs
-        #
-        FUNC_MAX_ARGS        => UInt8(10),
-        #
-        # {Uint} Amount of mutations, which will be applied to arganism after
-        # clonning.
-        #
-        MUTATIONS_ON_CLONE   => UInt(100),
-        #
-        # Amount of iterations within organism's life loop, after that we 
-        # do mutations according to MUTATE_AMOUNT config amount. If 0, then
-        # mutations will be disabled.
-        #
-        MUTATE_AFTER_TIMES   => UInt(40000),
-        #
-        # Value, which will be used like amount of mutations per 
-        # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
-        # we want to disable mutations.
-        #
-        MUTATE_AMOUNT        => UInt(1000)
-      ),
       SCRIPT     => Dict{Int64, Any}(
         #
         # It's possible to skip some reserved blocks of code in Script.Code.blocks 
@@ -245,6 +196,33 @@ module Config
         VAR_PREFIX           => "var"
       ),
       ORGANISM   => Dict{Int64, Any}(
+        #
+        # {Array} Probabilities with wich mutator decides what to do: add,
+        #         change and delete existing construction of the script. 
+        #         Depending on this values, organism may have different
+        #         strategies of living. For example: if add value is bigger 
+        #         then del and change, then it will be grow up all the time.
+        #         If del value is bigger then other, then it will be decreased
+        #         to one line code and will die.
+        #
+        ADD_CHANGE           => [1,10,1],
+        #
+        # {Uint} Amount of mutations, which will be applied to arganism after
+        # clonning.
+        #
+        MUTATIONS_ON_CLONE   => UInt(100),
+        #
+        # Amount of iterations within organism's life loop, after that we 
+        # do mutations according to MUTATE_AMOUNT config amount. If 0, then
+        # mutations will be disabled.
+        #
+        MUTATE_AFTER_TIMES   => UInt(40000),
+        #
+        # Value, which will be used like amount of mutations per 
+        # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
+        # we want to disable mutations.
+        #
+        MUTATE_AMOUNT        => UInt(1000),
         #
         # Amount of organisms on program start
         #

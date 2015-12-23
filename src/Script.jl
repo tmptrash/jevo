@@ -1,7 +1,6 @@
 #
 # Organism's script related functionality. Every organism, contains this
-# script. It's like a DNA for biological organisms. It can be mutated by 
-# Mutator module.
+# script. It's like a DNA for biological organisms.
 #
 # @author DeadbraiN
 #
@@ -186,8 +185,8 @@
     # There are two types of functions: embedded and generated. Embedded function
     # are functions like checkEnergy() or stepLeft(). They aren't be changed by
     # enyone. Generated functions are functions, which were created by organism
-    # itself (e.g. by Mutator module). These functions may be changed, added and
-    # removed (again by Mutator). And don't forget, that funcs and blocks must
+    # itself (e.g. by Creature module). These functions may be changed, added and
+    # removed (again by Creature). And don't forget, that funcs and blocks must
     # be synchronized.
     # TODO: optimize this to type instead of Dict
     # 

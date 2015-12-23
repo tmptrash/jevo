@@ -75,7 +75,7 @@ end
 #
 function mutate(organismId)
   if (haskey(Manager._posMap, organismId))
-    Mutator.mutate(Manager._posMap[organismId].script, Config.val(MUTATOR, ADD_CHANGE, probs))
+    Creature.mutate(Manager._posMap[organismId], Config.val(ORGANISM, ADD_CHANGE, probs))
     return true
   end
   false
@@ -91,12 +91,12 @@ end
 #
 # Returns an organism by it's unique id
 # @param id
-# @return Creature.Organismor false if no organism with this id
+# @return Creature.Organism or false if no organism with this id
 # TODO: remake to organism id, not position related id
 function getOrganism(id::UInt)
   if haskey(Manager._map, id)
     org = Manager._map[id]
-    return RpcApi.SimpleOrganism(org.energy, [org.pos.x, org.pos.y], org.script.code)
+    return RpcApi.SimpleOrganism(org.energy, [org.pos.x, org.pos.y], org.code)
   end
   false
 end

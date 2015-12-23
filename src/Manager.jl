@@ -9,7 +9,7 @@
 # TODO:   - File may call every function except other files
 # TOSO:   - If file calls Manager function it hould add Manager. before calling
 # TODO: describe that manager is a mediator between all other objects
-# TODO: like mutator, world, terminal and so on.
+# TODO: like world, terminal and so on.
 # TODO: add support of serverPort cmd line argument
 # TODO: add remote functions for changing period and probs
 #
@@ -18,7 +18,6 @@ module Manager
   import World
   import Helper
   import Event
-  import Mutator
   import Server
   import Connection
   import CommandLine
