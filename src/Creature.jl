@@ -217,9 +217,12 @@ module Creature
     # by mutations. This loop must be after ambedded functions.
     #
     return function life()
-      oldCode = org.fnCode
-      orgId   = "org-$(id)"
+      oldStr = org.code.str
+      orgId  = "org-$(id)"
       println("$(orgId) started")
+      #
+      # TODO: describe organism's main loop
+      #
       while true
         produce()
         #
@@ -231,14 +234,14 @@ module Creature
           #
           # TODO: temporary code. shows correct organisms
           #
-          if org.fnCode !== oldCode
-            println("$(orgId): $(org.code.str)")
+          if org.code.str !== oldStr
+            #println("$(orgId): $(org.code.str)")
             #
             # If parsed code doesn't contain mistakes, then current organism
             # should be fed with bonus energy.
             #
             org.energy += Config.val(ORGANISM, GOOD_MUTATION_ENERGY)
-            oldCode = org.fnCode
+            oldStr = org.code.str
           end
         end
       end

@@ -218,13 +218,13 @@ module Config
         # do mutations according to MUTATE_AMOUNT config amount. If 0, then
         # mutations will be disabled.
         #
-        MUTATE_AFTER_TIMES   => UInt(40000),
+        MUTATE_AFTER_TIMES   => UInt(1000),
         #
         # Value, which will be used like amount of mutations per 
         # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
         # we want to disable mutations.
         #
-        MUTATE_AMOUNT        => UInt(1000),
+        MUTATE_AMOUNT        => UInt(1),
         #
         # Amount of organisms on program start
         #
