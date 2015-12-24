@@ -207,7 +207,7 @@ module Config
         #         If del value is bigger then other, then it will be decreased
         #         to one line code and will die.
         #
-        ADD_CHANGE           => [1,10,1],
+        ADD_CHANGE           => [1,100,2],
         #
         # {Uint} Amount of mutations, which will be applied to arganism after
         # clonning.

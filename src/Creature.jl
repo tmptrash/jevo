@@ -222,6 +222,7 @@ module Creature
     #
     return function life()
       while org.energy > UInt(0)
+        oldCode = org.code.str
         produce()
         #
         # It's okay if organism has errors and throws exceptions. It's possible
@@ -232,7 +233,7 @@ module Creature
           #
           # TODO: temporary code. shows correct organisms
           #
-          println(org.code.str)
+          if org.code.str !== oldCode println("code: $(org.code.str)") end
         end
       end
     end
