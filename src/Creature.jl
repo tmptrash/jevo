@@ -137,7 +137,7 @@ module Creature
     # TODO: worker to prevent infinite loop.
     #
     try
-      org.fnCode = eval(parse("function body() $(org.code.str) end"))
+      org.fnCode = eval(parse("function body() c(); $(org.code.str) end"))
     end
   end
   #
@@ -235,7 +235,6 @@ module Creature
           # TODO: temporary code. shows correct organisms
           #
           if org.code.str !== oldStr
-            #println("$(orgId): $(org.code.str)")
             #
             # If parsed code doesn't contain mistakes, then current organism
             # should be fed with bonus energy.
