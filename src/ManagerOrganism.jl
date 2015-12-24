@@ -143,8 +143,8 @@ end
 function _createOrganism(pos = nothing)
   pos  = pos == nothing ? World.getFreePos(Manager._world) : pos
   org  = Creature.create(pos)
-  task = Task(Creature.born(org))
   id   = Config.val(ORGANISM, CURRENT_ID)
+  task = Task(Creature.born(org, id))
 
   Event.on(org.observer, "getenergy", _onGetEnergy)
   Event.on(org.observer, "grableft",  _onGrabLeft )

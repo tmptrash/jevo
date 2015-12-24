@@ -50,6 +50,7 @@ module Creature
 
   export create
   export mutate
+  export born
 
   # TODO: remove this type and use ASCIIString instead
   type Code
@@ -137,17 +138,12 @@ module Creature
     #
     try
       org.fnCode = eval(parse("function body() $(org.code.str) end"))
-      #
-      # If parsed code doesn't contain mistakes, then current organism
-      # should be fed with bonus energy.
-      #
-      org.energy += Config.val(ORGANISM, GOOD_MUTATION_ENERGY)
     end
   end
   #
   # TODO: describe organism's task function
   #
-  function born(org)
+  function born(org::Creature.Organism, id::UInt)
     #
     # eg - means Energy Get. Short name to help organism find this name faster.
     # Checks if specified point with (x,y) coordinates has an energy value.
@@ -221,8 +217,10 @@ module Creature
     # by mutations. This loop must be after ambedded functions.
     #
     return function life()
-      while org.energy > UInt(0)
-        oldCode = org.code.str
+      oldCode = org.fnCode
+      orgId   = "org-$(id)"
+      println("$(orgId) started")
+      while true
         produce()
         #
         # It's okay if organism has errors and throws exceptions. It's possible
@@ -233,7 +231,15 @@ module Creature
           #
           # TODO: temporary code. shows correct organisms
           #
-          if org.code.str !== oldCode println("code: $(org.code.str)") end
+          if org.fnCode !== oldCode
+            println("$(orgId): $(org.code.str)")
+            #
+            # If parsed code doesn't contain mistakes, then current organism
+            # should be fed with bonus energy.
+            #
+            org.energy += Config.val(ORGANISM, GOOD_MUTATION_ENERGY)
+            oldCode = org.fnCode
+          end
         end
       end
     end
