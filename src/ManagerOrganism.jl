@@ -202,7 +202,6 @@ end
 # @param organism Parent organism
 #
 function _onClone(organism::Creature.Organism)
-  println("clone!!!!!!!!!!!!")
   #
   # First, we have to find free point near the organism
   #

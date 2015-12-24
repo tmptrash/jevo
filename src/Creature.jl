@@ -137,7 +137,12 @@ module Creature
     # TODO: worker to prevent infinite loop.
     #
     try
-      org.fnCode = eval(parse("function body() c(); $(org.code.str) end"))
+      #
+      # This function must be anonymous, because it's used for comparison
+      # with other functions for other organisms. If their names are equal
+      # and they are in the same module, then === operator returns true.
+      #
+      org.fnCode = eval(parse("function () $(org.code.str) end"))
     end
   end
   #
@@ -145,80 +150,13 @@ module Creature
   #
   function born(org::Creature.Organism, id::UInt)
     #
-    # eg - means Energy Get. Short name to help organism find this name faster.
-    # Checks if specified point with (x,y) coordinates has an energy value.
-    # Possible values [0:typemax(Int)]. 0 means no energy.
-    # @param x X coordinate
-    # @param y Y coordinate
-    # @return {UInt} Energy value
-    #
-    function eg(x::Int, y::Int) Creature._getEnergy(org, x, y) end
-    #
-    # el - means get Energy Left. Short name to help organism find this name faster.
-    # Grabs energy from the left point. Grabbibg means decrease energy at point
-    # and increase it at organism.
-    # @param amount Amount of energy to grab
-    # @return {UInt} Amount of grabbed energy
-    #
-    function el(amount::UInt) Creature._grabEnergy(org, "left", amount) end
-    #
-    # er - means get Energy Right. Short name to help organism find this name faster.
-    # Grabs energy from the right point.
-    # @param amount Amount of energy to grab
-    # @return {UInt} Amount of grabbed energy
-    #
-    function er(amount::UInt) Creature._grabEnergy(org, "right", amount) end
-    #
-    # eu - means get Energy Up. Short name to help organism find this name faster.
-    # Grabs energy from the up point.
-    # @param amount Amount of energy to grab
-    # @return {UInt} Amount of grabbed energy
-    #
-    function eu(amount::UInt) Creature._grabEnergy(org, "up", amount) end
-    #
-    # ed - means get Energy Down. Short name to help organism find this name faster.
-    # Grabs energy from the down point.
-    # @param amount Amount of energy to grab
-    # @return {Int} Amount of grabbed energy
-    #
-    function ed(amount::UInt) Creature._grabEnergy(org, "down", amount) end
-    #
-    # sl - means make Step Left. Short name to help organism find this name faster.
-    # Makes one step left. It decreases organism's x coodinate by 1.
-    #
-    function sl() Creature._step(org, "left") end
-    #
-    # sr - means make Step Right. Short name to help organism find this name faster.
-    # Makes one step right. It increases organism's x coodinate by 1.
-    #
-    function sr() Creature._step(org, "right") end
-    #
-    # su - means make Step Up. Short name to help organism find this name faster.
-    # Makes one step up. It decrease organism's y coodinate by 1.
-    #
-    function su() Creature._step(org, "up") end
-    #
-    # sd - means make Step Down. Short name to help organism find this name faster.
-    # Makes one step down. It increase organism's y coodinate by 1.
-    #
-    function sd() Creature._step(org, "down") end
-    #
-    # c - means Clone. Short name to help organism find this name faster.
-    # Makes organism clone. During cloning new organism will get few
-    # mutations. It will be a difference from father's organism. This
-    # function should find "free" place for new organism around it.
-    # If there is no "free" place, then cloning will be declined.
-    #
-    function c() Creature._clone(org) end
-
-    #
     # -----------------------------------------------------------------------
     # This is main loop, where organism lives. It's body will be changed soon
     # by mutations. This loop must be after ambedded functions.
     #
     return function life()
-      oldStr = org.code.str
-      orgId  = "org-$(id)"
+      oldCode = org.fnCode
+      orgId   = "org-$(id)"
       println("$(orgId) started")
       #
       # TODO: describe organism's main loop
@@ -234,18 +172,96 @@ module Creature
           #
           # TODO: temporary code. shows correct organisms
           #
-          if org.code.str !== oldStr
+          if org.fnCode !== oldCode
             #
             # If parsed code doesn't contain mistakes, then current organism
             # should be fed with bonus energy.
             #
             org.energy += Config.val(ORGANISM, GOOD_MUTATION_ENERGY)
-            oldStr = org.code.str
+            oldCode = org.fnCode
           end
         end
       end
     end
   end
+
+  #
+  # @oapi
+  # eg - means Energy Get. Short name to help organism find this name faster.
+  # Checks if specified point with (x,y) coordinates has an energy value.
+  # Possible values [0:typemax(Int)]. 0 means no energy.
+  # @param x X coordinate
+  # @param y Y coordinate
+  # @return {UInt} Energy value
+  #
+  function eg(x::Int, y::Int) _getEnergy(org, x, y) end
+  #
+  # @oapi
+  # el - means get Energy Left. Short name to help organism find this name faster.
+  # Grabs energy from the left point. Grabbibg means decrease energy at point
+  # and increase it at organism.
+  # @param amount Amount of energy to grab
+  # @return {UInt} Amount of grabbed energy
+  #
+  function el(amount::UInt) _grabEnergy(org, "left", amount) end
+  #
+  # @oapi
+  # er - means get Energy Right. Short name to help organism find this name faster.
+  # Grabs energy from the right point.
+  # @param amount Amount of energy to grab
+  # @return {UInt} Amount of grabbed energy
+  #
+  function er(amount::UInt) _grabEnergy(org, "right", amount) end
+  #
+  # @oapi
+  # eu - means get Energy Up. Short name to help organism find this name faster.
+  # Grabs energy from the up point.
+  # @param amount Amount of energy to grab
+  # @return {UInt} Amount of grabbed energy
+  #
+  function eu(amount::UInt) _grabEnergy(org, "up", amount) end
+  #
+  # @oapi
+  # ed - means get Energy Down. Short name to help organism find this name faster.
+  # Grabs energy from the down point.
+  # @param amount Amount of energy to grab
+  # @return {Int} Amount of grabbed energy
+  #
+  function ed(amount::UInt) _grabEnergy(org, "down", amount) end
+  #
+  # @oapi
+  # sl - means make Step Left. Short name to help organism find this name faster.
+  # Makes one step left. It decreases organism's x coodinate by 1.
+  #
+  function sl() _step(org, "left") end
+  #
+  # @oapi
+  # sr - means make Step Right. Short name to help organism find this name faster.
+  # Makes one step right. It increases organism's x coodinate by 1.
+  #
+  function sr() _step(org, "right") end
+  #
+  # @oapi
+  # su - means make Step Up. Short name to help organism find this name faster.
+  # Makes one step up. It decrease organism's y coodinate by 1.
+  #
+  function su() _step(org, "up") end
+  #
+  # @oapi
+  # sd - means make Step Down. Short name to help organism find this name faster.
+  # Makes one step down. It increase organism's y coodinate by 1.
+  #
+  function sd() _step(org, "down") end
+  #
+  # @oapi
+  # c - means Clone. Short name to help organism find this name faster.
+  # Makes organism clone. During cloning new organism will get few
+  # mutations. It will be a difference from father's organism. This
+  # function should find "free" place for new organism around it.
+  # If there is no "free" place, then cloning will be declined.
+  #
+  function c() println("clone!!!!!"); _clone(org) end
+
   #
   # Clones an organism. It only fires an event. Clonning will be
   # processes in a Manager module. See it for details.
