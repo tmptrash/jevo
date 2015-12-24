@@ -44,7 +44,7 @@ module RpcApi
     #
     # Code of organism
     #
-    code::Expr
+    code::ASCIIString
   end
   #
   # RPC API unique identifiers. Only these functions may be called

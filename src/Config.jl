@@ -48,6 +48,7 @@ module Config
   export DECREASE_AFTER_TIMES
   export DECREASE_VALUE
   export CURRENT_ID
+  export GOOD_MUTATION_ENERGY
   #
   # Keys id's in WORLD section
   #
@@ -94,6 +95,7 @@ module Config
   const DECREASE_AFTER_TIMES = 8
   const DECREASE_VALUE       = 9
   const CURRENT_ID           = 10
+  const GOOD_MUTATION_ENERGY = 11
   #
   # Keys id's in WORLD section. Description is provided below...
   #
@@ -250,7 +252,11 @@ module Config
         #
         # Current organism unique id. Is used like increment for setting id's for new organisms
         #
-        CURRENT_ID           => UInt(0)
+        CURRENT_ID           => UInt(0),
+        #
+        # Bonus energy for good mutation. For mistakes there is no energy bonus
+        #
+        GOOD_MUTATION_ENERGY => UInt(100)
 
       ),
       WORLD      => Dict{Int64, Any}(

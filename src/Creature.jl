@@ -139,9 +139,9 @@ module Creature
       org.fnCode = eval(parse("function body() $(org.code.str) end"))
       #
       # If parsed code doesn't contain mistakes, then current organism
-      # should be fed with 30% bonus energy.
+      # should be fed with bonus energy.
       #
-      org.energy += UInt(div(org.energy / 3))
+      org.energy += Config.val(ORGANISM, GOOD_MUTATION_ENERGY)
     end
   end
   #
@@ -223,7 +223,17 @@ module Creature
     return function life()
       while org.energy > UInt(0)
         produce()
-        try org.fnCode() end
+        #
+        # It's okay if organism has errors and throws exceptions. It's possible
+        # that these errors will be fixed by future mutations.
+        #
+        try
+          org.fnCode()
+          #
+          # TODO: temporary code. shows correct organisms
+          #
+          println(org.code.str)
+        end
       end
     end
   end
