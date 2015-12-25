@@ -54,7 +54,7 @@ function _updateOrganisms(eCounter::UInt, mCounter::UInt)
       eCounter = UInt(0)
     end
     if (maf = Config.val(ORGANISM, MUTATE_AFTER_TIMES)) > UInt(0) && mCounter >= maf
-      _mutateOrganisms()
+      #_mutateOrganisms()
       mCounter = UInt(0)
     end
 
@@ -126,10 +126,8 @@ function _killOrganism(i::UInt)
   # have to do this, because task is a memory leak if we don't
   # stop (interrupt) it
   #
-  try
-    Manager._tasks[i].task.exception = null
-    yieldto(Manager._tasks[i].task)
-  end
+  try Base.throwto(Manager._tasks[i].task, null) end
+  _organismMsg(Manager._tasks[i].id, "die")
   splice!(Manager._tasks, i)
   # TODO: this line is under the big question
   gc()
@@ -146,6 +144,7 @@ function _createOrganism(pos = nothing)
   id   = Config.val(ORGANISM, CURRENT_ID)
   task = Task(Creature.born(org, id))
 
+  _organismMsg(id, "run")
   Event.on(org.observer, "getenergy", _onGetEnergy)
   Event.on(org.observer, "grableft",  _onGrabLeft )
   Event.on(org.observer, "grabright", _onGrabRight)
@@ -168,6 +167,14 @@ function _createOrganism(pos = nothing)
   _map[id] = org
   push!(Manager._tasks, oTask)
   oTask
+end
+#
+# Shows organism related message
+# @param id Unique orgainsm identifier
+# @param msg Organism's message
+#
+function _organismMsg(id::UInt, msg::ASCIIString)
+  println("org-$(id) $(msg)")
 end
 #
 # Moves organism to specified position. Updates organism's 

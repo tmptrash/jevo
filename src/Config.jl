@@ -244,11 +244,11 @@ module Config
         # amount of energy into DECREASE_VALUE points. If 0, then energy decreasing 
         # will be disabled.
         #
-        DECREASE_AFTER_TIMES => UInt(100000),
+        DECREASE_AFTER_TIMES => UInt(100),
         #
         # Value, which will be descreased in organism after "descreaseAfterTimes" period
         #
-        DECREASE_VALUE       => UInt(100),
+        DECREASE_VALUE       => UInt(10),
         #
         # Current organism unique id. Is used like increment for setting id's for new organisms
         #

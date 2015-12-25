@@ -154,10 +154,9 @@ module Creature
     # This is main loop, where organism lives. It's body will be changed soon
     # by mutations. This loop must be after ambedded functions.
     #
-    return function life()
+    return function ()
       oldCode = org.fnCode
       orgId   = "org-$(id)"
-      println("$(orgId) started")
       #
       # TODO: describe organism's main loop
       #
