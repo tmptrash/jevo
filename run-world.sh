@@ -1,2 +1,2 @@
 #!/bin/bash
-julia -P "include(\"src/AppRemoteWorld.jl\")"
+julia -i --quiet "include(\"src/AppRemoteWorld.jl\")"

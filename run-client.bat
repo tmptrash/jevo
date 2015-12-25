@@ -1,1 +1,1 @@
-julia -P "include(\"src\\AppClientTest.jl\")"
+julia -i --quiet "include(\"src\\AppClientTest.jl\")"
