@@ -50,7 +50,7 @@ function _updateOrganisms(eCounter::UInt, mCounter::UInt)
     # spend it while leaving.
     #
     if (daf = Config.val(ORGANISM, DECREASE_AFTER_TIMES)) > UInt(0) && eCounter >= daf
-      _updateOrganismsEnergy(eCounter)
+      #_updateOrganismsEnergy(eCounter)
       eCounter = UInt(0)
     end
     if (maf = Config.val(ORGANISM, MUTATE_AFTER_TIMES)) > UInt(0) && mCounter >= maf

@@ -1,1 +1,1 @@
-julia -i --quiet "include(\"src\\AppRemoteWorld.jl\")"
+julia --quiet -i -e "include(\"src\\AppRemoteWorld.jl\")"
