@@ -82,7 +82,7 @@ module Mutator
   # type of operation (add, change) and modifies script (code
   # parameter).
   # @param code Organism's script we have to mutate
-  # @param prob Strategy of mutating. See Config.val(MUTATOR, ADD_CHANGE) 
+  # @param prob Strategy of mutating. See Config.val(:ORGANISM_ADD_CHANGE) 
   # for details.
   #
   function mutate(code::Script.Code, prob::Array{Int})

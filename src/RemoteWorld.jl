@@ -51,7 +51,7 @@ module RemoteWorld
   # @param height Canvas height in pixels
   # @return RemoteData
   #
-  function create(host::Base.IPAddr, port::Integer, width::UInt = Config.val(WORLD, WIDTH), height::UInt = Config.val(WORLD, HEIGHT))
+  function create(host::Base.IPAddr, port::Integer, width::UInt = Config.val(:WORLD_WIDTH), height::UInt = Config.val(:WORLD_HEIGHT))
     con = Client.create(host, port)
     con !== false ? RemoteData(con, CanvasWindow.create(width, height)) : false
   end
@@ -59,7 +59,7 @@ module RemoteWorld
   #
   # @param delay Delay between requests 
   #
-  function display(rd::RemoteData, delay::Integer = Config.val(WORLD, FRAME_DELAY), x::Integer = 1, y::Integer = 1, width::Integer = 0, height::Integer = 0)
+  function display(rd::RemoteData, delay::Integer = Config.val(:WORLD_FRAME_DELAY), x::Integer = 1, y::Integer = 1, width::Integer = 0, height::Integer = 0)
     rd.delay  = delay
     rd.x      = x
     rd.y      = y

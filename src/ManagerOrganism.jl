@@ -29,13 +29,17 @@ end
 # @param eCounter Increments value for energy decreasing
 # @param mCounter Counter for mtations speed
 #
-function _updateOrganisms(eCounter::UInt, mCounter::UInt)
+function _updateOrganisms(eCounter::Int, mCounter::Int)
     #
     # This block runs one iteration for all available organisms.
     # By one iteration i mean that every organism from a list
     # run peace of it's script - code between two produce() calls.
     #
-    len       = length(Manager._tasks)
+    local len::Int = length(Manager._tasks)
+    local i  ::Int
+    local daf::UInt
+    local maf::UInt
+
     eCounter += 1
     mCounter += 1
     for i = 1:len
@@ -49,13 +53,13 @@ function _updateOrganisms(eCounter::UInt, mCounter::UInt)
     # This block decreases energy from organisms, because they 
     # spend it while leaving.
     #
-    if (daf = Config.val(ORGANISM, DECREASE_AFTER_TIMES)) > UInt(0) && eCounter >= daf
-      #_updateOrganismsEnergy(eCounter)
-      eCounter = UInt(0)
+    if (daf = Config.val(:ORGANISM_DECREASE_AFTER_TIMES)) > 0 && eCounter >= daf
+      _updateOrganismsEnergy(eCounter)
+      eCounter = 0
     end
-    if (maf = Config.val(ORGANISM, MUTATE_AFTER_TIMES)) > UInt(0) && mCounter >= maf
-      #_mutateOrganisms()
-      mCounter = UInt(0)
+    if (maf = Config.val(:ORGANISM_MUTATE_AFTER_TIMES)) > 0 && mCounter >= maf
+      _mutateOrganisms()
+      mCounter = 0
     end
 
     eCounter, mCounter
@@ -65,8 +69,8 @@ end
 # to config (ORGANISM, DECREASE_VALUE).
 # @param counter Current iterator value
 #
-function _updateOrganismsEnergy(counter::UInt)
-  decVal = Config.val(ORGANISM, DECREASE_VALUE)
+function _updateOrganismsEnergy(counter::Int)
+  decVal = Config.val(:ORGANISM_DECREASE_VALUE)
   #
   # We have to go through tasks in reverse way, because we may
   # remove some elements inside while loop.
@@ -81,7 +85,7 @@ function _updateOrganismsEnergy(counter::UInt)
     if org.energy > dec
       org.energy -= dec
     else
-      _killOrganism(UInt(i))
+      _killOrganism(i)
     end
     #
     # This is how we updates organism's color after energy descreasing
@@ -96,9 +100,11 @@ end
 # (ORGANISM, MUTATE_AMOUNT).
 #
 function _mutateOrganisms()
-  len       = length(Manager._tasks)
-  mutations = Config.val(ORGANISM, MUTATE_AMOUNT)
-  probs     = Config.val(ORGANISM, ADD_CHANGE)
+  local len::Int          = length(Manager._tasks)
+  local mutations::UInt   = Config.val(:ORGANISM_MUTATE_AMOUNT)
+  local probs::Array{Int} = Config.val(:ORGANISM_ADD_CHANGE)
+  local i::Int
+  local j::Int
 
   if mutations > UInt(0)
     for i = 1:len
@@ -112,7 +118,7 @@ end
 # Kills one organism and remove it from all related maps
 # @param i Index of current task
 #
-function _killOrganism(i::UInt)
+function _killOrganism(i::Int)
   if i === 0 return false end
 
   org = Manager._tasks[i].organism
@@ -141,7 +147,7 @@ end
 function _createOrganism(pos = nothing)
   pos  = pos == nothing ? World.getFreePos(Manager._world) : pos
   org  = Creature.create(pos)
-  id   = Config.val(ORGANISM, CURRENT_ID)
+  id   = Config.val(:ORGANISM_CURRENT_ID)
   task = Task(Creature.born(org, id))
 
   _organismMsg(id, "run")
@@ -163,7 +169,7 @@ function _createOrganism(pos = nothing)
   # Adds organism to organisms pool
   #
   oTask = OrganismTask(id, task, org)
-  Config.val(ORGANISM, CURRENT_ID, id + UInt(1))
+  Config.val(:ORGANISM_CURRENT_ID, id + UInt(1))
   _map[id] = org
   push!(Manager._tasks, oTask)
   oTask
@@ -218,8 +224,8 @@ function _onClone(organism::Creature.Organism)
   # Creates new organism and applies mutations to him.
   #
   crTask = Manager._createOrganism(pos)
-  for i = 1:Config.val(ORGANISM, MUTATIONS_ON_CLONE)
-    Creature.mutate(crTask.organism, Config.val(ORGANISM, ADD_CHANGE))
+  for i = 1:Config.val(:ORGANISM_MUTATIONS_ON_CLONE)
+    Creature.mutate(crTask.organism, Config.val(:ORGANISM_ADD_CHANGE))
   end
 end
 #

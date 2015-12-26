@@ -110,7 +110,7 @@ module Creature
   # @return {Creature}
   #
   function create(pos::Helper.Point = Helper.Point(1, 1))
-    Organism(Config.val(ORGANISM, START_ENERGY), pos, Code(), ()->nothing, Event.create())
+    Organism(Config.val(:ORGANISM_START_ENERGY), pos, Code(), ()->nothing, Event.create())
   end
   #
   # TODO: optimize this method as deep aspossible
@@ -176,7 +176,7 @@ module Creature
             # If parsed code doesn't contain mistakes, then current organism
             # should be fed with bonus energy.
             #
-            org.energy += Config.val(ORGANISM, GOOD_MUTATION_ENERGY)
+            org.energy += Config.val(:ORGANISM_GOOD_MUTATION_ENERGY)
             oldCode = org.fnCode
           end
         end

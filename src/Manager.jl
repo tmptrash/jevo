@@ -41,11 +41,11 @@ module Manager
   # Runs everything. Blocking function.
   #
   function run()
-    eCounter = UInt(0)
-    mCounter = UInt(0)
-    ips      = UInt(0)
-    stamp    = time()
-    server   = _createServer()
+    local eCounter::Int = 0
+    local mCounter::Int = 0
+    local ips     ::Int = 0
+    local stamp   ::Float64 = time()
+    local server  ::Connection.ServerConnection = _createServer()
 
     #
     # This server is listening for all other managers and remote
@@ -81,12 +81,13 @@ module Manager
   # @param stamp Current UNIX tame stamp value
   # @return {UInt, Float64} new ips and current UNIX time stamp
   #
-  function _updateIps(ips::UInt, stamp::Float64)
-    ts = time() - stamp
-    if (ts >= float(1))
-      Config.val(WORLD, IPS, trunc(UInt, ips / ts))
+  function _updateIps(ips::Int, stamp::Float64)
+    local ts::Float64 = time() - stamp
+
+    if ts >= 1.0
+      Config.val(:WORLD_IPS, trunc(UInt, ips / ts))
       stamp = time()
-      ips   = UInt(0)
+      ips   = 0
     end
     ips + 1, stamp
   end

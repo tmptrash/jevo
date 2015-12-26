@@ -21,7 +21,7 @@ function getRegion(x::Integer = 1, y::Integer = 1, width::Integer = 0, height::I
   if (width  === 0 || width  > maxWidth)  width  = maxWidth  end
   if (height === 0 || height > maxHeight) height = maxHeight end
   
-  RpcApi.Region(_world.data[y:height, x:width], Config.val(WORLD, IPS))
+  RpcApi.Region(_world.data[y:height, x:width], Config.val(:WORLD_IPS))
 end
 #
 # @rpc
@@ -32,7 +32,7 @@ function createOrganisms()
   #
   # Inits available organisms in Tasks
   #
-  for i = 1:Config.val(ORGANISM, START_AMOUNT)
+  for i = 1:Config.val(:ORGANISM_START_AMOUNT)
     createOrganism()
   end
 end
@@ -51,22 +51,20 @@ end
 #
 # @rpc
 # Sets configuration value according to it's section and a key
-# @param section
-# @param key
+# @param Unique config symbol
 # @param value Custom value
 #
-function setConfig(section::Int64, key::Int64, value::Any)
-  Config.val(section, key, value)
+function setConfig(name::Symbol, value::Any)
+  Config.val(name, value)
 end
 #
 # @rpc
 # Gets configuration value according to it's section and a key
-# @param section
-# @param key
+# @param name config symbol
 # @return {Any|null} value or null if invalid section or key
 #
-function getConfig(section::Int64, key::Int64)
-  Config.val(section, key)
+function getConfig(name::Symbol)
+  Config.val(section)
 end
 #
 # @rpc
@@ -75,7 +73,7 @@ end
 #
 function mutate(organismId)
   if (haskey(Manager._posMap, organismId))
-    Creature.mutate(Manager._posMap[organismId], Config.val(ORGANISM, ADD_CHANGE, probs))
+    Creature.mutate(Manager._posMap[organismId], Config.val(:ORGANISM_ADD_CHANGE, probs))
     return true
   end
   false
@@ -86,7 +84,7 @@ end
 # @return Float
 #
 function getIps()
-  Config.val(WORLD, IPS)
+  Config.val(:WORLD_IPS)
 end
 #
 # Returns an organism by it's unique id
@@ -124,7 +122,7 @@ end
 #
 function _createServer()
   port = CommandLine.val(_params, Manager.PARAM_SERVER_PORT)
-  port = port == "" ? Config.val(CONNECTION, SERVER_PORT) : Int(port)
+  port = port == "" ? Config.val(:CONNECTION_SERVER_PORT) : Int(port)
   con  = Server.create(ip"127.0.0.1", port)
   Event.on(con.observer, Server.EVENT_COMMAND, _onRemoteCommand)
   con

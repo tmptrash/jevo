@@ -9,8 +9,8 @@
 # Usage:
 #     using Config
 #     ...
-#     Config.val(SECTION_ID, KEY_ID)         # returns value or null
-#     Config.val(SECTION_ID, KEY_ID, newVal) # sets new value
+#     Config.val(:SECTION_ID_KEY_ID)         # returns value or null
+#     Config.val(:SECTION_ID_KEY_ID, newVal) # sets new value
 #     Config.save("config.data")             # saves all to file
 #     Config.load("config.data")             # loads all from file
 #
@@ -22,92 +22,113 @@ module Config
   export load
   export val
 
-  #
-  # Sections...
-  #
-  export SCRIPT
-  export ORGANISM
-  export WORLD 
-  export CONNECTION
-  #
-  # Keys id's in SCRIPT section
-  #
-  export BLOCKS_START_INDEX
-  export FUNC_PREFIX
-  export VAR_PREFIX
-  #
-  # Keys id's in ORGANISM section
-  #
-  export ADD_CHANGE
-  export MUTATIONS_ON_CLONE
-  export MUTATE_AFTER_TIMES
-  export MUTATE_AMOUNT
-  export START_AMOUNT
-  export START_ENERGY
-  export MAX_ENERGY
-  export DECREASE_AFTER_TIMES
-  export DECREASE_VALUE
-  export CURRENT_ID
-  export GOOD_MUTATION_ENERGY
-  #
-  # Keys id's in WORLD section
-  #
-  export WIDTH
-  export HEIGHT
-  export FRAME_DELAY
-  export BACK_COLOR
-  export IPS
-  #
-  # Keys id's in CONNECTION section
-  #
-  export SERVER_PORT
+  export Data
 
   #
-  # Small hack for saving/loading data from/to the data file
+  # Data type for storing configuration data. Is used in pair with GData
+  # type. For accessing use Gonfig.val(:SYMBOL[, value])
   #
   type Data
-    d::Dict{Int64, Dict{Int64, Any}}
+    #
+    # {Array} Probabilities with wich mutator decides what to do: add,
+    #         change and delete existing construction of the script. 
+    #         Depending on this values, organism may have different
+    #         strategies of living. For example: if add value is bigger 
+    #         then del and change, then it will be grow up all the time.
+    #         If del value is bigger then other, then it will be decreased
+    #         to one line code and will die.
+    #
+    ORGANISM_ADD_CHANGE::Array{Int}
+    #
+    # {Uint} Amount of mutations, which will be applied to arganism after
+    # clonning.
+    #
+    ORGANISM_MUTATIONS_ON_CLONE::UInt
+    #
+    # Amount of iterations within organism's life loop, after that we 
+    # do mutations according to MUTATE_AMOUNT config amount. If 0, then
+    # mutations will be disabled.
+    #
+    ORGANISM_MUTATE_AFTER_TIMES::UInt
+    #
+    # Value, which will be used like amount of mutations per 
+    # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
+    # we want to disable mutations.
+    #
+    ORGANISM_MUTATE_AMOUNT::UInt
+    #
+    # Amount of organisms on program start
+    #
+    ORGANISM_START_AMOUNT::UInt
+    #
+    # {Uint} Amount of energy for first organisms. They are like Adam and 
+    # Eve. It means that these organism were created by operator and not
+    # by evolution.
+    #
+    ORGANISM_START_ENERGY::UInt
+    #
+    # Maximum amount of energy, which one organism may contains
+    #
+    ORGANISM_MAX_ENERGY::UInt
+    #
+    # Amount of iterations within organism's life loop, after that we decrease
+    # amount of energy into DECREASE_VALUE points. If 0, then energy decreasing 
+    # will be disabled.
+    #
+    ORGANISM_DECREASE_AFTER_TIMES::UInt
+    #
+    # Value, which will be descreased in organism after "descreaseAfterTimes" period
+    #
+    ORGANISM_DECREASE_VALUE::UInt
+    #
+    # @read @write Current organism unique id. Is used like increment for setting id's for new organisms
+    #
+    ORGANISM_CURRENT_ID::UInt
+    #
+    # Bonus energy for good mutation. For mistakes there is no energy bonus
+    #
+    ORGANISM_GOOD_MUTATION_ENERGY::UInt
+    #
+    # World width
+    #
+    WORLD_WIDTH::UInt
+    #
+    # World height
+    #
+    WORLD_HEIGHT::UInt
+    #
+    # Delay between requests for obtaining remote world region.
+    # This parameter affects frames per second in a window canvas.
+    # Value in seconds. It's possible to have zero based value. In
+    # this case requests will be posted one by one without delays.
+    # So the speed for 0 delay depends only on network speed.
+    #
+    WORLD_FRAME_DELAY::Int
+    #
+    # RGB, background color of the canvas, where organisms will be shown
+    #
+    WORLD_BACK_COLOR::UInt32
+    #
+    # @read @write
+    # IPS (Iteration Per Second). Amount of iterations, which were
+    # occures within one second. One iteration means one for all 
+    # organisms in a World. This value will be set many times in main
+    # Manager's loop.
+    #
+    WORLD_IPS::UInt
+    #
+    # Starting number for TCP/IP listening
+    #
+    CONNECTION_SERVER_PORT::Int
+  end
+  #
+  # Just a wrapper for Data type to have an ability to update
+  # global _data field after loading from a file.
+  #
+  type GData
+    d::Data
   end
 
-  #
-  # Sections id's
-  #
-  const SCRIPT               = 1
-  const ORGANISM             = 2
-  const WORLD                = 3
-  const CONNECTION           = 4
-  #
-  # Keys id's in SCRIPT section. Description is provided below...
-  #
-  const BLOCKS_START_INDEX   = 1
-  const FUNC_PREFIX          = 2
-  const VAR_PREFIX           = 3
-  #
-  # Keys id's in ORGANISM section. Description is provided below...
-  #
-  const ADD_CHANGE           = 1
-  const MUTATIONS_ON_CLONE   = 2
-  const MUTATE_AFTER_TIMES   = 3
-  const MUTATE_AMOUNT        = 4
-  const START_AMOUNT         = 5
-  const START_ENERGY         = 6
-  const MAX_ENERGY           = 7
-  const DECREASE_AFTER_TIMES = 8
-  const DECREASE_VALUE       = 9
-  const CURRENT_ID           = 10
-  const GOOD_MUTATION_ENERGY = 11
-  #
-  # Keys id's in WORLD section. Description is provided below...
-  #
-  const WIDTH                = 1
-  const HEIGHT               = 2
-  const FRAME_DELAY          = 3
-  const BACK_COLOR           = 4
-  const IPS                  = 5
-  #
-  # Keys id's in CONNECTION section. Description is provided below...
-  #
-  const SERVER_PORT          = 1
 
   #
   # Saves all data into the file. If file exists, it will
@@ -151,18 +172,13 @@ module Config
     ret
   end
   #
-  # Returns configuration value according to section and key
-  # @param section Configuration section
-  # @param key Key inside the section
-  # @return {Any|null} Value of key in specified section or null
+  # Returns configuration value according to section and key. In
+  # case of incorrect symbol an exception will be throwed.
+  # @param Field's name symbol
+  # @return {Any} Value of key in specified section
   # in case of incorrect section or key
   #
-  function val(section::Int64, key::Int64)
-    if (!haskey(_data.d, section) || !haskey(_data.d[section], key))
-      return null
-    end
-    _data.d[section][key]
-  end
+  function val(name::Symbol) getfield(_data.d, name) end
   #
   # Sets the value by section and key. Works in pair with
   # getter val() function
@@ -170,130 +186,29 @@ module Config
   # @param key Key inside the section
   # @return Operation boolean result
   #
-  function val(section::Int64, key::Int64, value::Any)
-    if (!haskey(_data.d, section) || !haskey(_data.d[section], key))
-      return false
-    end
-    _data.d[section][key] = value
-    true
-  end
+  function val(name::Symbol, value::Any) setfield!(_data.d, name, value) end
   #
-  # All configuration data
+  # Global configuration data
   #
-  _data = Data(
-    Dict{Int64, Dict{Int64, Any}}(
-      SCRIPT     => Dict{Int64, Any}(
-        #
-        # It's possible to skip some reserved blocks of code in Script.Code.blocks 
-        # property. For example, functions block.
-        #
-        BLOCKS_START_INDEX   => 2,
-        #
-        # Prefix for all custom functions. Final name of the function will be: func[num]
-        #
-        FUNC_PREFIX          => "func",
-        #
-        # Prefix for all variables. Final name of the function will be: var[num]
-        #
-        VAR_PREFIX           => "var"
-      ),
-      ORGANISM   => Dict{Int64, Any}(
-        #
-        # {Array} Probabilities with wich mutator decides what to do: add,
-        #         change and delete existing construction of the script. 
-        #         Depending on this values, organism may have different
-        #         strategies of living. For example: if add value is bigger 
-        #         then del and change, then it will be grow up all the time.
-        #         If del value is bigger then other, then it will be decreased
-        #         to one line code and will die.
-        #
-        ADD_CHANGE           => [1,100,2],
-        #
-        # {Uint} Amount of mutations, which will be applied to arganism after
-        # clonning.
-        #
-        MUTATIONS_ON_CLONE   => UInt(100),
-        #
-        # Amount of iterations within organism's life loop, after that we 
-        # do mutations according to MUTATE_AMOUNT config amount. If 0, then
-        # mutations will be disabled.
-        #
-        MUTATE_AFTER_TIMES   => UInt(1),
-        #
-        # Value, which will be used like amount of mutations per 
-        # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
-        # we want to disable mutations.
-        #
-        MUTATE_AMOUNT        => UInt(1),
-        #
-        # Amount of organisms on program start
-        #
-        START_AMOUNT         => UInt(100),
-        #
-        # {Uint} Amount of energy for first organisms. They are like Adam and 
-        # Eve. It means that these organism were created by operator and not
-        # by evolution.
-        #
-        START_ENERGY         => UInt(50000),
-        #
-        # Maximum amount of energy, which one organism may contains
-        #
-        MAX_ENERGY           => UInt(100000),
-        #
-        # Amount of iterations within organism's life loop, after that we decrease
-        # amount of energy into DECREASE_VALUE points. If 0, then energy decreasing 
-        # will be disabled.
-        #
-        DECREASE_AFTER_TIMES => UInt(100),
-        #
-        # Value, which will be descreased in organism after "descreaseAfterTimes" period
-        #
-        DECREASE_VALUE       => UInt(10),
-        #
-        # Current organism unique id. Is used like increment for setting id's for new organisms
-        #
-        CURRENT_ID           => UInt(0),
-        #
-        # Bonus energy for good mutation. For mistakes there is no energy bonus
-        #
-        GOOD_MUTATION_ENERGY => UInt(100)
-
-      ),
-      WORLD      => Dict{Int64, Any}(
-        #
-        # World width
-        #
-        WIDTH                => UInt(300),
-        #
-        # World height
-        #
-        HEIGHT               => UInt(300),
-        #
-        # Delay between requests for obtaining remote world region.
-        # This parameter affects frames per second in a window canvas.
-        # Value in seconds. It's possible to have zero based value. In
-        # this case requests will be posted one by one without delays.
-        # So the speed for 0 delay depends only on network speed.
-        #
-        FRAME_DELAY          => 2,
-        #
-        # RGB, background color of the canvas, where organisms will be shown
-        #
-        BACK_COLOR           => UInt32(0),
-        #
-        # IPS (Iteration Per Second). Amount of iterations, which were
-        # occures within one second. One iteration means one for all 
-        # organisms in a World. This value will be set many times in main
-        # Manager's loop.
-        #
-        IPS                  => UInt(0)
-      ),
-      CONNECTION => Dict{Int64, Any}(
-        #
-        # Starting number for TCP/IP listening
-        #
-        SERVER_PORT          => Int(2000)
-      )
+  global _data = GData(
+    Data(
+      [1,100,2],        # ORGANISM_ADD_CHANGE
+      UInt(100),        # ORGANISM_MUTATIONS_ON_CLONE
+      UInt(1),          # ORGANISM_MUTATE_AFTER_TIMES
+      UInt(1),          # ORGANISM_MUTATE_AMOUNT
+      UInt(100),        # ORGANISM_START_AMOUNT
+      UInt(50000),      # ORGANISM_START_ENERGY
+      UInt(100000),     # ORGANISM_MAX_ENERGY
+      UInt(1),          # ORGANISM_DECREASE_AFTER_TIMES
+      UInt(10),         # ORGANISM_DECREASE_VALUE
+      UInt(0),          # ORGANISM_CURRENT_ID
+      UInt(100),        # ORGANISM_GOOD_MUTATION_ENERGY
+      UInt(300),        # WORLD_WIDTH
+      UInt(300),        # WORLD_HEIGHT
+      2,                # WORLD_FRAME_DELAY
+      UInt32(0),        # WORLD_BACK_COLOR
+      UInt(0),          # WORLD_IPS
+      Int(2000)         # CONNECTION_SERVER_PORT
     )
   )
 end
