@@ -51,16 +51,6 @@ module Creature
   export create
   export mutate
   export born
-
-  # TODO: remove this type and use ASCIIString instead
-  type Code
-    str::ASCIIString
-    #
-    # Start string should contain at least 3 symbols: 1 unchanged, 2 empty and 3 unchanged.
-    # String should be a correct julia code. 
-    #
-    function Code() new(" c(o) ") end
-  end
   #
   # Organism related data
   # TODO: describe events. e.g.: beforeclone, clone
@@ -77,7 +67,7 @@ module Creature
     #
     # Code of organism
     #
-    code::Code
+    code::ASCIIString
     #
     # Compiled and covered by function version of code
     #
@@ -110,7 +100,7 @@ module Creature
   # @return {Creature}
   #
   function create(pos::Helper.Point = Helper.Point(1, 1))
-    Organism(Config.val(:ORGANISM_START_ENERGY), pos, Code(), ()->nothing, Event.create())
+    Organism(Config.val(:ORGANISM_START_ENERGY), pos, Config.val(:ORGANISM_START_CODE), ()->nothing, Event.create())
   end
   #
   # TODO: optimize this method as deep aspossible
@@ -124,13 +114,13 @@ module Creature
   #
   function mutate(org::Organism, prob::Array{Int})
     pIndex = Helper.getProbIndex(prob)
-    len    = length(org.code.str) - 1
+    len    = length(org.code) - 1
     i      = rand(2:len)
 
     # 1 - add, 2 - change, 3 - del
-    if pIndex === 2 org.code.str     = string(org.code.str[1:i-1], Char(rand(32:126)), org.code.str[i+1:end])
-    elseif pIndex === 1 org.code.str = string(org.code.str[1:i-1], Char(rand(32:126)), org.code.str[i:end])
-    elseif len > 2 org.code.str      = string(org.code.str[1:i-1], org.code.str[i+1:end]) end
+    if pIndex === 2 org.code     = string(org.code[1:i-1], Char(rand(32:126)), org.code[i+1:end])
+    elseif pIndex === 1 org.code = string(org.code[1:i-1], Char(rand(32:126)), org.code[i:end])
+    elseif len > 2 org.code      = string(org.code[1:i-1], org.code[i+1:end]) end
     #
     # Updates compiled version of the code. Only valid code will be applied,
     # because exception will be fired in case of error organismcode.
@@ -144,7 +134,7 @@ module Creature
       # and they are in the same module, then === operator returns true.
       # @param o Associated with this code organism
       #
-      org.fnCode = eval(parse("function(o) $(org.code.str) end"))
+      org.fnCode = eval(parse("function(o) $(org.code) end"))
     end
   end
   #

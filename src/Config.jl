@@ -89,6 +89,12 @@ module Config
     #
     ORGANISM_GOOD_MUTATION_ENERGY::UInt
     #
+    # Minimal text code on julia language, which is used for new organisms at the very beginning
+    # stage of evolution. Before first stable organisms will be produced. By default, organism may
+    # produce it's copies and nothing more.
+    #
+    ORGANISM_START_CODE::ASCIIString
+    #
     # World width
     #
     WORLD_WIDTH::UInt
@@ -203,6 +209,7 @@ module Config
       UInt(1),          # ORGANISM_DECREASE_VALUE
       UInt(0),          # ORGANISM_CURRENT_ID
       UInt(100),        # ORGANISM_GOOD_MUTATION_ENERGY
+      " c(o) ",         # ORGANISM_START_CODE
       UInt(300),        # WORLD_WIDTH
       UInt(300),        # WORLD_HEIGHT
       2,                # WORLD_FRAME_DELAY

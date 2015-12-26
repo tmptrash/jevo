@@ -78,7 +78,7 @@ function _updateOrganismsEnergy(counter::Int)
   i = length(Manager._tasks)
   while i > 0
     org = Manager._tasks[i].organism
-    dec = decVal + length(org.code.str)
+    dec = decVal + length(org.code)
     #
     # if the energy of the organism is zero, we have to remove it
     #
