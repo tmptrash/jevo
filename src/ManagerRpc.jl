@@ -73,7 +73,7 @@ end
 #
 function mutate(organismId)
   if (haskey(Manager._posMap, organismId))
-    Creature.mutate(Manager._posMap[organismId], Config.val(:ORGANISM_ADD_CHANGE, probs))
+    Creature.mutate(Manager._posMap[organismId], Config.val(:ORGANISM_MUTATION_PROBABILITIES, probs))
     return true
   end
   false

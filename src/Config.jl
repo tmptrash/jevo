@@ -38,7 +38,7 @@ module Config
     #         If del value is bigger then other, then it will be decreased
     #         to one line code and will die.
     #
-    ORGANISM_ADD_CHANGE::Array{Int}
+    ORGANISM_MUTATION_PROBABILITIES::Array{Int}
     #
     # {Uint} Amount of mutations, which will be applied to arganism after
     # clonning.
@@ -49,16 +49,16 @@ module Config
     # do mutations according to MUTATE_AMOUNT config amount. If 0, then
     # mutations will be disabled.
     #
-    ORGANISM_MUTATE_AFTER_TIMES::UInt
+    ORGANISM_MUTATION_PERIOD::UInt
     #
     # Value, which will be used like amount of mutations per 
     # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
     # we want to disable mutations.
     #
-    ORGANISM_MUTATE_AMOUNT::UInt
+    ORGANISM_MUTATION_AMOUNT::UInt
     #
     # Amount of organisms on program start
-    #
+    # TODO: is not used now!
     ORGANISM_START_AMOUNT::UInt
     #
     # {Uint} Amount of energy for first organisms. They are like Adam and 
@@ -68,6 +68,7 @@ module Config
     ORGANISM_START_ENERGY::UInt
     #
     # Maximum amount of energy, which one organism may contains
+    # TODO: not used now!
     #
     ORGANISM_MAX_ENERGY::UInt
     #
@@ -75,7 +76,7 @@ module Config
     # amount of energy into DECREASE_VALUE points. If 0, then energy decreasing 
     # will be disabled.
     #
-    ORGANISM_DECREASE_AFTER_TIMES::UInt
+    ORGANISM_DECREASE_PERIOD::UInt
     #
     # Value, which will be descreased in organism after "descreaseAfterTimes" period
     #
@@ -198,18 +199,18 @@ module Config
   #
   global _data = GData(
     Data(
-      [1,100,2],        # ORGANISM_ADD_CHANGE
+      [1,100,2],        # ORGANISM_MUTATION_PROBABILITIES
       UInt(100),        # ORGANISM_MUTATIONS_ON_CLONE
-      UInt(1000),       # ORGANISM_MUTATE_AFTER_TIMES
-      UInt(1),          # ORGANISM_MUTATE_AMOUNT
-      UInt(100),        # ORGANISM_START_AMOUNT
-      UInt(50000),      # ORGANISM_START_ENERGY
-      UInt(100000),     # ORGANISM_MAX_ENERGY
-      UInt(1000),       # ORGANISM_DECREASE_AFTER_TIMES
-      UInt(1),          # ORGANISM_DECREASE_VALUE
-      UInt(0),          # ORGANISM_CURRENT_ID
-      UInt(100),        # ORGANISM_GOOD_MUTATION_ENERGY
-      " c(o) ",         # ORGANISM_START_CODE
+      UInt(1000),       # ORGANISM_MUTATION_PERIOD
+      UInt(1),          # ORGANISM_MUTATION_AMOUNT
+      UInt(100),        # ORGANISM_START_AMOUNT         stay here
+      UInt(50000),      # ORGANISM_START_ENERGY         stay here
+      UInt(100000),     # ORGANISM_MAX_ENERGY           stay here
+      UInt(1000),       # ORGANISM_DECREASE_PERIOD      stay here
+      UInt(1),          # ORGANISM_DECREASE_VALUE       stay here
+      UInt(0),          # ORGANISM_CURRENT_ID           stay here
+      UInt(100),        # ORGANISM_GOOD_MUTATION_ENERGY stay here
+      " c(o) ",         # ORGANISM_START_CODE           stay here
       UInt(300),        # WORLD_WIDTH
       UInt(300),        # WORLD_HEIGHT
       2,                # WORLD_FRAME_DELAY

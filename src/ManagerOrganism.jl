@@ -53,11 +53,11 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     # This block decreases energy from organisms, because they 
     # spend it while leaving.
     #
-    if (daf = Config.val(:ORGANISM_DECREASE_AFTER_TIMES)) > 0 && eCounter >= daf
+    if (daf = Config.val(:ORGANISM_DECREASE_PERIOD)) > 0 && eCounter >= daf
       _updateOrganismsEnergy(eCounter)
       eCounter = 0
     end
-    if (maf = Config.val(:ORGANISM_MUTATE_AFTER_TIMES)) > 0 && mCounter >= maf
+    if (maf = Config.val(:ORGANISM_MUTATION_PERIOD)) > 0 && mCounter >= maf
       _mutateOrganisms()
       mCounter = 0
     end
@@ -101,8 +101,8 @@ end
 #
 function _mutateOrganisms()
   local len::Int          = length(Manager._tasks)
-  local mutations::UInt   = Config.val(:ORGANISM_MUTATE_AMOUNT)
-  local probs::Array{Int} = Config.val(:ORGANISM_ADD_CHANGE)
+  local mutations::UInt   = Config.val(:ORGANISM_MUTATION_AMOUNT)
+  local probs::Array{Int} = Config.val(:ORGANISM_MUTATION_PROBABILITIES)
   local i::Int
   local j::Int
 
@@ -225,7 +225,7 @@ function _onClone(organism::Creature.Organism)
   #
   crTask = Manager._createOrganism(pos)
   for i = 1:Config.val(:ORGANISM_MUTATIONS_ON_CLONE)
-    Creature.mutate(crTask.organism, Config.val(:ORGANISM_ADD_CHANGE))
+    Creature.mutate(crTask.organism, Config.val(:ORGANISM_MUTATION_PROBABILITIES))
   end
 end
 #

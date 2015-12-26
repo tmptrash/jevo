@@ -31,12 +31,7 @@
 #
 # @author DeadbraiN
 #
-# TODO: code should be wrapped by try...catch, because different 
-# TODO: exceptions are possible.
-#
-# TODO: think about energy limit for organism. add new library
-# TODO: function: fullOfEnergy():Bool
-# TODO: add memory operations: mem_read(index):Int, mem_write(index, Int)
+# TODO: describe events. e.g.: beforeclone, clone
 #
 module Creature
   import Event
@@ -52,26 +47,59 @@ module Creature
   export mutate
   export born
   #
-  # Organism related data
-  # TODO: describe events. e.g.: beforeclone, clone
+  # Describes one organism. In general it consists of energy, world
+  # position and many inheritable properties like code, mutationPeriod
+  # and so on...
   #
   type Organism
     #
-    # Amount of energy for current organism
-    #
-    energy::UInt
-    #
-    # Organism's position in a world
-    #
-    pos::Helper.Point
-    #
-    # Code of organism
+    # @inheritable
+    # Code of organism. String on Julia language.
     #
     code::ASCIIString
     #
-    # Compiled and covered by function version of code
+    # @inheritable
+    # Compiled and covered by function version of code. This
+    # code is running in a loop all the time.
     #
     fnCode::Function
+    #
+    # @inheritable
+    # Amount of mutations, which will be applied to arganism after
+    # clonning.
+    #
+    mutationsOnClone::UInt
+    #
+    # @inheritable
+    # Mutations probability. Add, change, delete. e.g.: [1,10,2]
+    # means, that "add" mutation will be 10 times rare then "change"
+    # and 2 times rare then "delete" mutations.
+    #
+    mutationProbabilities::Array{Int} # changed name
+    #
+    # @inheritable
+    # Amount of iterations within organism's life loop, after that we 
+    # do mutations according to MUTATE_AMOUNT config amount. If 0, then
+    # mutations will be disabled.
+    #
+    mutationPeriod::UInt # changed name
+    #
+    # @inheritable
+    # Value, which will be used like amount of mutations per 
+    # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
+    # we want to disable mutations.
+    #
+    mutationAmount::UInt # changed name
+    #
+    # Organism's energy. If it's zero, then organism is die.
+    # It can't be more then ORGANISM_MAX_ENERGY configuration.
+    #
+    energy::UInt
+    #
+    # Organism's position in a 2D world. Starts from (1,1) 
+    # ends with (WORLD_WIDTH, WORLD_HEIGHT) configurations.
+    #
+    pos::Helper.Point
     #
     # Adds events listening/firing logic to the organism.
     #
@@ -100,7 +128,19 @@ module Creature
   # @return {Creature}
   #
   function create(pos::Helper.Point = Helper.Point(1, 1))
-    Organism(Config.val(:ORGANISM_START_ENERGY), pos, Config.val(:ORGANISM_START_CODE), ()->nothing, Event.create())
+    local code::ASCIIString = Config.val(:ORGANISM_START_CODE)
+
+    Organism(
+      code,                                          # code
+      eval(parse(code)),                             # fnCode
+      Config.val(:ORGANISM_MUTATIONS_ON_CLONE),      # mutationsOnClone
+      Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
+      Config.val(:ORGANISM_MUTATION_PERIOD),         # mutationPeriod
+      Config.val(:ORGANISM_MUTATION_AMOUNT),         # mutationAmount
+      Config.val(:ORGANISM_START_ENERGY),            # energy
+      pos,                                           # pos
+      Event.create()                                 # observer
+    )
   end
   #
   # TODO: optimize this method as deep aspossible
