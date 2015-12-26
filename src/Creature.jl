@@ -144,7 +144,7 @@ module Creature
       # and they are in the same module, then === operator returns true.
       # @param o Associated with this code organism
       #
-      org.fnCode = eval(parse("function (o) c(o); $(org.code.str) end"))
+      org.fnCode = eval(parse("function(o) c(o);$(org.code.str) end"))
     end
   end
   #

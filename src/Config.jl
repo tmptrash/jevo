@@ -205,7 +205,7 @@ module Config
       UInt(100),        # ORGANISM_GOOD_MUTATION_ENERGY
       UInt(300),        # WORLD_WIDTH
       UInt(300),        # WORLD_HEIGHT
-      1,                # WORLD_FRAME_DELAY
+      2,                # WORLD_FRAME_DELAY
       UInt32(0),        # WORLD_BACK_COLOR
       UInt(0),          # WORLD_IPS
       Int(2000)         # CONNECTION_SERVER_PORT
