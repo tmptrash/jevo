@@ -132,7 +132,8 @@ module Creature
     elseif pIndex === 1 org.code.str = string(org.code.str[1:i-1], Char(rand(32:126)), org.code.str[i:end])
     elseif len > 2 org.code.str      = string(org.code.str[1:i-1], org.code.str[i+1:end]) end
     #
-    # Updates compiled version of the code. Only valid code will be applied.
+    # Updates compiled version of the code. Only valid code will be applied,
+    # because exception will be fired in case of error organismcode.
     # TODO: if code is valid, then we have to check in on remote controlled
     # TODO: worker to prevent infinite loop.
     #
@@ -141,8 +142,9 @@ module Creature
       # This function must be anonymous, because it's used for comparison
       # with other functions for other organisms. If their names are equal
       # and they are in the same module, then === operator returns true.
+      # @param o Associated with this code organism
       #
-      org.fnCode = eval(parse("function () $(org.code.str) end"))
+      org.fnCode = eval(parse("function (o) c(o); $(org.code.str) end"))
     end
   end
   #
@@ -167,7 +169,7 @@ module Creature
         # that these errors will be fixed by future mutations.
         #
         try
-          org.fnCode()
+          org.fnCode(org)
           #
           # TODO: temporary code. shows correct organisms
           #
@@ -189,77 +191,87 @@ module Creature
   # eg - means Energy Get. Short name to help organism find this name faster.
   # Checks if specified point with (x,y) coordinates has an energy value.
   # Possible values [0:typemax(Int)]. 0 means no energy.
+  # @param org Current organism
   # @param x X coordinate
   # @param y Y coordinate
   # @return {UInt} Energy value
   #
-  function eg(x::Int, y::Int) _getEnergy(org, x, y) end
+  function eg(org::Organism, x::Int, y::Int) _getEnergy(org, x, y) end
   #
   # @oapi
   # el - means get Energy Left. Short name to help organism find this name faster.
   # Grabs energy from the left point. Grabbibg means decrease energy at point
   # and increase it at organism.
+  # @param org Current organism
   # @param amount Amount of energy to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function el(amount::UInt) _grabEnergy(org, "left", amount) end
+  function el(org::Organism, amount::UInt) _grabEnergy(org, "left", amount) end
   #
   # @oapi
   # er - means get Energy Right. Short name to help organism find this name faster.
   # Grabs energy from the right point.
+  # @param org Current organism
   # @param amount Amount of energy to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function er(amount::UInt) _grabEnergy(org, "right", amount) end
+  function er(org::Organism, amount::UInt) _grabEnergy(org, "right", amount) end
   #
   # @oapi
   # eu - means get Energy Up. Short name to help organism find this name faster.
   # Grabs energy from the up point.
+  # @param org Current organism
   # @param amount Amount of energy to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function eu(amount::UInt) _grabEnergy(org, "up", amount) end
+  function eu(org::Organism, amount::UInt) _grabEnergy(org, "up", amount) end
   #
   # @oapi
   # ed - means get Energy Down. Short name to help organism find this name faster.
   # Grabs energy from the down point.
+  # @param org Current organism
   # @param amount Amount of energy to grab
   # @return {Int} Amount of grabbed energy
   #
-  function ed(amount::UInt) _grabEnergy(org, "down", amount) end
+  function ed(org::Organism, amount::UInt) _grabEnergy(org, "down", amount) end
   #
   # @oapi
+  # @param org Current organism
   # sl - means make Step Left. Short name to help organism find this name faster.
   # Makes one step left. It decreases organism's x coodinate by 1.
   #
-  function sl() _step(org, "left") end
+  function sl(org::Organism) _step(org, "left") end
   #
   # @oapi
+  # @param org Current organism
   # sr - means make Step Right. Short name to help organism find this name faster.
   # Makes one step right. It increases organism's x coodinate by 1.
   #
-  function sr() _step(org, "right") end
+  function sr(org::Organism) _step(org, "right") end
   #
   # @oapi
+  # @param org Current organism
   # su - means make Step Up. Short name to help organism find this name faster.
   # Makes one step up. It decrease organism's y coodinate by 1.
   #
-  function su() _step(org, "up") end
+  function su(org::Organism) _step(org, "up") end
   #
   # @oapi
+  # @param org Current organism
   # sd - means make Step Down. Short name to help organism find this name faster.
   # Makes one step down. It increase organism's y coodinate by 1.
   #
-  function sd() _step(org, "down") end
+  function sd(org::Organism) _step(org, "down") end
   #
   # @oapi
+  # @param org Current organism
   # c - means Clone. Short name to help organism find this name faster.
   # Makes organism clone. During cloning new organism will get few
   # mutations. It will be a difference from father's organism. This
   # function should find "free" place for new organism around it.
   # If there is no "free" place, then cloning will be declined.
   #
-  function c() println("clone!!!!!"); _clone(org) end
+  function c(org::Organism) println("clone!!!!!"); _clone(org) end
 
   #
   # Clones an organism. It only fires an event. Clonning will be
