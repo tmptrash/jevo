@@ -194,13 +194,13 @@ module Config
     Data(
       [1,100,2],        # ORGANISM_ADD_CHANGE
       UInt(100),        # ORGANISM_MUTATIONS_ON_CLONE
-      UInt(1),          # ORGANISM_MUTATE_AFTER_TIMES
+      UInt(1000),       # ORGANISM_MUTATE_AFTER_TIMES
       UInt(1),          # ORGANISM_MUTATE_AMOUNT
       UInt(100),        # ORGANISM_START_AMOUNT
       UInt(50000),      # ORGANISM_START_ENERGY
       UInt(100000),     # ORGANISM_MAX_ENERGY
-      UInt(1),          # ORGANISM_DECREASE_AFTER_TIMES
-      UInt(10),         # ORGANISM_DECREASE_VALUE
+      UInt(1000),       # ORGANISM_DECREASE_AFTER_TIMES
+      UInt(1),          # ORGANISM_DECREASE_VALUE
       UInt(0),          # ORGANISM_CURRENT_ID
       UInt(100),        # ORGANISM_GOOD_MUTATION_ENERGY
       UInt(300),        # WORLD_WIDTH

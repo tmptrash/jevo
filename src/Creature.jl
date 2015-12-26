@@ -56,7 +56,7 @@ module Creature
   type Code
     str::ASCIIString
     #
-    # Start string should contain 3 symbols: 1 unchanged, 2 empty and 3 unchanged.
+    # Start string should contain at least 3 symbols: 1 unchanged, 2 empty and 3 unchanged.
     # String should be a correct julia code. 
     #
     function Code() new(" c(o) ") end
