@@ -59,7 +59,7 @@ module Creature
     # Start string should contain 3 symbols: 1 unchanged, 2 empty and 3 unchanged.
     # String should be a correct julia code. 
     #
-    function Code() new("   ") end
+    function Code() new(" c(o) ") end
   end
   #
   # Organism related data
@@ -144,7 +144,7 @@ module Creature
       # and they are in the same module, then === operator returns true.
       # @param o Associated with this code organism
       #
-      org.fnCode = eval(parse("function(o) c(o);$(org.code.str) end"))
+      org.fnCode = eval(parse("function(o) $(org.code.str) end"))
     end
   end
   #
