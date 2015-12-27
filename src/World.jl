@@ -128,8 +128,8 @@ module World
     for i = 1:8
       pos.x = positions[i]
       pos.y = positions[i + 1]
-      if plane.width >= pos.x && plane.height >= pos.y
-        World.getEnergy(plane, pos) == 0 return pos
+      if plane.width >= pos.x && plane.height >= pos.y && World.getEnergy(plane, pos) == 0
+        return pos
       end
     end
 

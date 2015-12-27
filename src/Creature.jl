@@ -134,7 +134,7 @@ module Creature
     Organism(
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       code,                                          # code
-      eval(parse(code)),                             # fnCode
+      _wrapCode(code),                               # fnCode
       Config.val(:ORGANISM_MUTATIONS_ON_CLONE),      # mutationsOnClone
       Config.val(:ORGANISM_MUTATION_PERIOD),         # mutationPeriod
       Config.val(:ORGANISM_MUTATION_AMOUNT),         # mutationAmount
@@ -198,7 +198,7 @@ module Creature
         # and they are in the same module, then === operator returns true.
         # @param o Associated with this code organism
         #
-        org.fnCode = eval(parse("function(o) $(org.code) end"))
+        org.fnCode = _wrapCode(org.code)
       end
     end
   end
@@ -328,6 +328,18 @@ module Creature
   #
   function c(org::Organism) _clone(org) end
 
+  #
+  # Wraps code with anonymous function. This function must be anonymous, 
+  # because it's used for comparison with other functions for other 
+  # organisms. If their names are equal and they are in the same module,
+  # then === operator returns true.
+  # @param o Associated with this code organism
+  #
+  # @return {Function}
+  #
+  function _wrapCode(code::ASCIIString)
+    eval(parse("function(o) $(code) end"))
+  end
   #
   # Clones an organism. It only fires an event. Clonning will be
   # processes in a Manager module. See it for details.

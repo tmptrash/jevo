@@ -136,7 +136,8 @@ end
 # @param pos Optional. Position of organism.
 # @return {OrganismTask}
 #
-function _createOrganism(org = nothing, pos = nothing)
+@debug function _createOrganism(org = nothing, pos = nothing)
+@bp
   pos  = org !== nothing ? World.getNearFreePos(_world.plane, org.pos) : (pos === nothing ? World.getFreePos(Manager._world) : pos)
   org  = org === nothing ? Creature.create(pos) : (Creature.copy(org); org.pos = pos)
   id   = Config.val(:ORGANISM_CURRENT_ID)
