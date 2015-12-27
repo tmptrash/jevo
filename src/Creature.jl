@@ -32,6 +32,7 @@
 # @author DeadbraiN
 #
 # TODO: describe events. e.g.: beforeclone, clone
+# TODO: describe annotations: @oapi (organism API), @inheritable (an ability to inherit the property to child).
 #
 module Creature
   import Event
@@ -54,6 +55,13 @@ module Creature
   type Organism
     #
     # @inheritable
+    # Mutations probability. Add, change, delete. e.g.: [1,10,2]
+    # means, that "add" mutation will be 10 times rare then "change"
+    # and 2 times rare then "delete" mutations.
+    #
+    mutationProbabilities::Array{Int}
+    #
+    # @inheritable
     # Code of organism. String on Julia language.
     #
     code::ASCIIString
@@ -68,28 +76,21 @@ module Creature
     # Amount of mutations, which will be applied to arganism after
     # clonning.
     #
-    mutationsOnClone::UInt
-    #
-    # @inheritable
-    # Mutations probability. Add, change, delete. e.g.: [1,10,2]
-    # means, that "add" mutation will be 10 times rare then "change"
-    # and 2 times rare then "delete" mutations.
-    #
-    mutationProbabilities::Array{Int} # changed name
+    mutationsOnClone::Int
     #
     # @inheritable
     # Amount of iterations within organism's life loop, after that we 
     # do mutations according to MUTATE_AMOUNT config amount. If 0, then
     # mutations will be disabled.
     #
-    mutationPeriod::UInt # changed name
+    mutationPeriod::Int
     #
     # @inheritable
     # Value, which will be used like amount of mutations per 
     # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
     # we want to disable mutations.
     #
-    mutationAmount::UInt # changed name
+    mutationAmount::Int
     #
     # Organism's energy. If it's zero, then organism is die.
     # It can't be more then ORGANISM_MAX_ENERGY configuration.
@@ -131,10 +132,10 @@ module Creature
     local code::ASCIIString = Config.val(:ORGANISM_START_CODE)
 
     Organism(
+      Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       code,                                          # code
       eval(parse(code)),                             # fnCode
       Config.val(:ORGANISM_MUTATIONS_ON_CLONE),      # mutationsOnClone
-      Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       Config.val(:ORGANISM_MUTATION_PERIOD),         # mutationPeriod
       Config.val(:ORGANISM_MUTATION_AMOUNT),         # mutationAmount
       Config.val(:ORGANISM_START_ENERGY),            # energy
@@ -143,7 +144,25 @@ module Creature
     )
   end
   #
-  # TODO: optimize this method as deep aspossible
+  # Creates copy of specified organism. Don't forget to 
+  # set a position of new (created) organism.
+  # @param org Organism to copy
+  # @return {Creature}
+  #
+  function copy(org::Organism)
+    Organism(
+      org.mutationProbabilities,                     # mutationProbabilities
+      org.code,                                      # code
+      eval(parse(org.code)),                         # fnCode
+      org.mutationsOnClone,                          # mutationsOnClone
+      org.mutationPeriod,                            # mutationPeriod
+      org.mutationAmount,                            # mutationAmount
+      org.energy,                                    # energy
+      org.pos,                                       # pos
+      Event.create()                                 # observer
+    )
+  end
+  # TODO: update description
   # Produces one add/change/del mutation on code and returns it's modified version.
   # Probabilities array is an array of three items: add,change,del values. e.g.:
   # [1,2,1] means that add and del mutations will be twice less then change one.
@@ -157,10 +176,14 @@ module Creature
     len    = length(org.code) - 1
     i      = rand(2:len)
 
-    # 1 - add, 2 - change, 3 - del
-    if pIndex === 2 org.code     = string(org.code[1:i-1], Char(rand(32:126)), org.code[i+1:end])
-    elseif pIndex === 1 org.code = string(org.code[1:i-1], Char(rand(32:126)), org.code[i:end])
-    elseif len > 2 org.code      = string(org.code[1:i-1], org.code[i+1:end]) end
+    if     pIndex === 2 org.code             = string(org.code[1:i-1], Char(rand(32:126)), org.code[i+1:end])
+    elseif pIndex === 1 org.code             = string(org.code[1:i-1], Char(rand(32:126)), org.code[i:end])
+    elseif pIndex === 3 && len > 2 org.code  = string(org.code[1:i-1], org.code[i+1:end])
+    elseif pIndex === 4 org.mutationsOnClone = rand(0:Config.val(:ORGANISM_MAX_MUTATIONS_ON_CLONE))
+    elseif pIndex === 5 org.mutationPeriod   = rand(0:Config.val(:ORGANISM_MAX_MUTATION_PERIOD))
+    elseif pIndex === 6 org.mutationAmount   = rand(0:Config.val(:ORGANISM_MAX_MUTATION_AMOUNT))
+    end
+
     #
     # Updates compiled version of the code. Only valid code will be applied,
     # because exception will be fired in case of error organismcode.
@@ -301,7 +324,7 @@ module Creature
   # function should find "free" place for new organism around it.
   # If there is no "free" place, then cloning will be declined.
   #
-  function c(org::Organism) println("clone!!!!!"); _clone(org) end
+  function c(org::Organism) _clone(org) end
 
   #
   # Clones an organism. It only fires an event. Clonning will be

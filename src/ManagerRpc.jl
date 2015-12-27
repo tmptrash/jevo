@@ -4,6 +4,7 @@
 # TODO: Dependencies
 #
 # @author DeadbraiN
+# TODO: describe annotations: @rpc (RPC function)
 #
 using RpcApi
 #
@@ -45,7 +46,7 @@ end
 # @return {OrganismTask}
 #
 function createOrganism(pos = nothing)
-    orgTask = Manager._createOrganism(pos)
+    orgTask = Manager._createOrganism(nothing, pos)
     orgTask.id
 end
 #

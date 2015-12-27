@@ -16,7 +16,9 @@
 #
 # @singleton
 # @author DeadbraiN
-#
+# 
+# TODO: describe annotations: @read @write (config property as shared data between modules)
+# TODO: may be move @read @write properties to separate module?
 module Config
   export save
   export load
@@ -30,42 +32,63 @@ module Config
   #
   type Data
     #
-    # {Array} Probabilities with wich mutator decides what to do: add,
-    #         change and delete existing construction of the script. 
-    #         Depending on this values, organism may have different
-    #         strategies of living. For example: if add value is bigger 
-    #         then del and change, then it will be grow up all the time.
-    #         If del value is bigger then other, then it will be decreased
-    #         to one line code and will die.
+    # Format: [
+    #     add     - Probability of adding of new character to the code
+    #     change  - Probability of changing existing character in a code
+    #     delete  - Probability of deleting of a character in a code
+    #     clone   - Probability for amount of mutations on clone
+    #     period  - Probability of period of organism mutations
+    #     amount  - Probability of amount of mutations per period
+    # ]
+    # Probabilities with wich mutator decides what to do: add,
+    # change, delete character of the code; change amount of 
+    # mutations or change mutations period... Depending on these
+    # values, organism may have different strategies of living.
+    # For example: if add value is bigger then del and change, 
+    # then it will be grow up all the time. If del value is 
+    # bigger then other, then it will be decreased to one line 
+    # code and will die.
     #
     ORGANISM_MUTATION_PROBABILITIES::Array{Int}
     #
     # {Uint} Amount of mutations, which will be applied to arganism after
     # clonning.
     #
-    ORGANISM_MUTATIONS_ON_CLONE::UInt
+    ORGANISM_MUTATIONS_ON_CLONE::Int
+    #
+    # Maximum amount of mutations on clone
+    #
+    ORGANISM_MAX_MUTATIONS_ON_CLONE::Int
     #
     # Amount of iterations within organism's life loop, after that we 
     # do mutations according to MUTATE_AMOUNT config amount. If 0, then
     # mutations will be disabled.
     #
-    ORGANISM_MUTATION_PERIOD::UInt
+    ORGANISM_MUTATION_PERIOD::Int
+    #
+    # Maximum period for mutations. Related to ORGANISM_MUTATION_PERIOD config
+    #
+    ORGANISM_MAX_MUTATION_PERIOD::Int
     #
     # Value, which will be used like amount of mutations per 
     # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
     # we want to disable mutations.
     #
-    ORGANISM_MUTATION_AMOUNT::UInt
+    ORGANISM_MUTATION_AMOUNT::Int
+    #
+    # Maximum amount of mutations per one mutation period
+    #
+    ORGANISM_MAX_MUTATION_AMOUNT::Int
     #
     # Amount of organisms on program start
     # TODO: is not used now!
-    ORGANISM_START_AMOUNT::UInt
+    ORGANISM_START_AMOUNT::Int
     #
-    # {Uint} Amount of energy for first organisms. They are like Adam and 
+    # Amount of energy for first organisms. They are like Adam and 
     # Eve. It means that these organism were created by operator and not
     # by evolution.
     #
-    ORGANISM_START_ENERGY::UInt
+    ORGANISM_START_ENERGY::UInt32
     #
     # Maximum amount of energy, which one organism may contains
     # TODO: not used now!
@@ -76,11 +99,11 @@ module Config
     # amount of energy into DECREASE_VALUE points. If 0, then energy decreasing 
     # will be disabled.
     #
-    ORGANISM_DECREASE_PERIOD::UInt
+    ORGANISM_DECREASE_PERIOD::Int
     #
     # Value, which will be descreased in organism after "descreaseAfterTimes" period
     #
-    ORGANISM_DECREASE_VALUE::UInt
+    ORGANISM_DECREASE_VALUE::Int
     #
     # @read @write Current organism unique id. Is used like increment for setting id's for new organisms
     #
@@ -88,7 +111,7 @@ module Config
     #
     # Bonus energy for good mutation. For mistakes there is no energy bonus
     #
-    ORGANISM_GOOD_MUTATION_ENERGY::UInt
+    ORGANISM_GOOD_MUTATION_ENERGY::Int
     #
     # Minimal text code on julia language, which is used for new organisms at the very beginning
     # stage of evolution. Before first stable organisms will be produced. By default, organism may
@@ -199,24 +222,27 @@ module Config
   #
   global _data = GData(
     Data(
-      [1,100,2],        # ORGANISM_MUTATION_PROBABILITIES
-      UInt(100),        # ORGANISM_MUTATIONS_ON_CLONE
-      UInt(1000),       # ORGANISM_MUTATION_PERIOD
-      UInt(1),          # ORGANISM_MUTATION_AMOUNT
-      UInt(100),        # ORGANISM_START_AMOUNT         stay here
-      UInt(50000),      # ORGANISM_START_ENERGY         stay here
-      UInt(100000),     # ORGANISM_MAX_ENERGY           stay here
-      UInt(1000),       # ORGANISM_DECREASE_PERIOD      stay here
-      UInt(1),          # ORGANISM_DECREASE_VALUE       stay here
-      UInt(0),          # ORGANISM_CURRENT_ID           stay here
-      UInt(100),        # ORGANISM_GOOD_MUTATION_ENERGY stay here
-      " c(o) ",         # ORGANISM_START_CODE           stay here
-      UInt(300),        # WORLD_WIDTH
-      UInt(300),        # WORLD_HEIGHT
-      2,                # WORLD_FRAME_DELAY
-      UInt32(0),        # WORLD_BACK_COLOR
-      UInt(0),          # WORLD_IPS
-      Int(2000)         # CONNECTION_SERVER_PORT
+      [2,100,1,0,0,0],       # ORGANISM_MUTATION_PROBABILITIES
+      100,                   # ORGANISM_MUTATIONS_ON_CLONE
+      1000,                  # ORGANISM_MAX_MUTATIONS_ON_CLONE
+      1000,                  # ORGANISM_MUTATION_PERIOD
+      1000000000,            # ORGANISM_MAX_MUTATION_PERIOD
+      1,                     # ORGANISM_MUTATION_AMOUNT
+      1000,                  # ORGANISM_MAX_MUTATION_AMOUNT
+      UInt(100),             # ORGANISM_START_AMOUNT
+      UInt(50000),           # ORGANISM_START_ENERGY
+      UInt(100000),          # ORGANISM_MAX_ENERGY
+      UInt(1000),            # ORGANISM_DECREASE_PERIOD
+      UInt(1),               # ORGANISM_DECREASE_VALUE
+      UInt(0),               # ORGANISM_CURRENT_ID
+      UInt(100),             # ORGANISM_GOOD_MUTATION_ENERGY
+      " c(o) ",              # ORGANISM_START_CODE
+      UInt(300),             # WORLD_WIDTH
+      UInt(300),             # WORLD_HEIGHT
+      2,                     # WORLD_FRAME_DELAY
+      UInt32(0),             # WORLD_BACK_COLOR
+      UInt(0),               # WORLD_IPS
+      Int(2000)              # CONNECTION_SERVER_PORT
     )
   )
 end

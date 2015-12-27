@@ -107,16 +107,31 @@ module World
   # @return {Helper.Point|Bool}
   #
   function getNearFreePos(plane::Plane, pos::Helper.Point)
-    pos = Helper.Point(pos.x, pos.y)
+    local i::Int
+    local x::Int = pos.x
+    local y::Int = pos.y
+    local positions::Array{Int} = [
+      x + 1, y,     # right
+      x + 1, y + 1, # right down
+      x    , y + 1, # down
+      x - 1, y + 1, # down left
+      x - 1, y,     # left
+      x - 1, y - 1, # left up
+      x    , y - 1, # up
+      x + 1, y - 1  # up right
+    ]
+    #
+    # We have to have a copy of position to prevent of organism moving
+    #
+    pos = Helper.Point(0, 0)
 
-    pos.x += 1
-    if World.getEnergy(plane, pos) == 0 return pos end
-    pos.x -= 2;
-    if World.getEnergy(plane, pos) == 0 return pos end
-    pos.x += 1; pos.y -= 1
-    if World.getEnergy(plane, pos) == 0 return pos end
-    pos.y += 2
-    if World.getEnergy(plane, pos) == 0 return pos end
+    for i = 1:8
+      pos.x = positions[i]
+      pos.y = positions[i + 1]
+      if plane.width >= pos.x && plane.height >= pos.y
+        World.getEnergy(plane, pos) == 0 return pos
+      end
+    end
 
     false
   end

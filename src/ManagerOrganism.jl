@@ -30,21 +30,32 @@ end
 # @param mCounter Counter for mtations speed
 #
 function _updateOrganisms(eCounter::Int, mCounter::Int)
+    local len::Int = length(Manager._tasks) # length(tasks) === length(organisms)
+    local i  ::Int
+    local j  ::Int
+    local dPeriod::Int
+    local org::Creature.Organism
+
+    eCounter += 1
+    mCounter += 1
     #
     # This block runs one iteration for all available organisms.
     # By one iteration i mean that every organism from a list
     # run peace of it's script - code between two produce() calls.
     #
-    local len::Int = length(Manager._tasks)
-    local i  ::Int
-    local daf::UInt
-    local maf::UInt
-
-    eCounter += 1
-    mCounter += 1
     for i = 1:len
+      org = Manager._tasks[i].organism
       try
         consume(Manager._tasks[i].task)
+        #
+        # This is how we mutate organisms during their life.
+        # Mutations occures according to organisms settings.
+        # If mutationPeriod or mutationAmount set to 0, it 
+        # means that mutations during leaving are disabled.
+        #
+        if mCounter % org.mutationPeriod === 0 && org.mutationPeriod > 0 && org.mutationAmount > 0
+          for j = 1:org.mutationAmount Creature.mutate(org, org.mutationProbabilities) end
+        end
       catch e
         println("Manager._updateOrganisms(): $e")
       end
@@ -53,12 +64,11 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     # This block decreases energy from organisms, because they 
     # spend it while leaving.
     #
-    if (daf = Config.val(:ORGANISM_DECREASE_PERIOD)) > 0 && eCounter >= daf
+    if (dPeriod = Config.val(:ORGANISM_DECREASE_PERIOD)) > 0 && eCounter >= dPeriod
       _updateOrganismsEnergy(eCounter)
       eCounter = 0
     end
-    if (maf = Config.val(:ORGANISM_MUTATION_PERIOD)) > 0 && mCounter >= maf
-      _mutateOrganisms()
+    if mCounter === typemax(Int)
       mCounter = 0
     end
 
@@ -102,15 +112,16 @@ end
 function _mutateOrganisms()
   local len::Int          = length(Manager._tasks)
   local mutations::UInt   = Config.val(:ORGANISM_MUTATION_AMOUNT)
-  local probs::Array{Int} = Config.val(:ORGANISM_MUTATION_PROBABILITIES)
   local i::Int
   local j::Int
+  local org::Creature.Organism
+  local prob::Array{Int}
 
   if mutations > UInt(0)
     for i = 1:len
-      for j = 1:mutations
-        Creature.mutate(Manager._tasks[i].organism, probs)
-      end
+      org  = Manager._tasks[i].organism
+      prob = org.mutationProbabilities
+      for j = 1:mutations Creature.mutate(org, prob) end
     end
   end
 end
@@ -141,12 +152,13 @@ end
 #
 # Creates new organism and binds event handlers to him. It also
 # finds free point in a world, where organism will start living.
+# @param org Organism we have to copy. Optional.
 # @param pos Optional. Position of organism.
 # @return {OrganismTask}
 #
-function _createOrganism(pos = nothing)
-  pos  = pos == nothing ? World.getFreePos(Manager._world) : pos
-  org  = Creature.create(pos)
+function _createOrganism(org = nothing, pos = nothing)
+  pos  = org !== nothing ? World.getNearFreePos(_world.plane, org.pos) : (pos === nothing ? World.getFreePos(Manager._world) : pos)
+  org  = org === nothing ? Creature.create(pos) : (Creature.copy(org); org.pos = pos)
   id   = Config.val(:ORGANISM_CURRENT_ID)
   task = Task(Creature.born(org, id))
 
@@ -216,16 +228,17 @@ end
 #
 function _onClone(organism::Creature.Organism)
   #
-  # First, we have to find free point near the organism
+  # First, we have to find free point near the organism to put
+  # clone in. It's possible, that all places are filled.
   #
   pos = World.getNearFreePos(Manager._world, organism.pos)
   if pos == false return nothing end
   #
   # Creates new organism and applies mutations to him.
   #
-  crTask = Manager._createOrganism(pos)
-  for i = 1:Config.val(:ORGANISM_MUTATIONS_ON_CLONE)
-    Creature.mutate(crTask.organism, Config.val(:ORGANISM_MUTATION_PROBABILITIES))
+  crTask = Manager._createOrganism(organism)
+  for i = 1:crTask.organism.mutationsOnClone
+    Creature.mutate(crTask.organism, crTask.organism.mutationProbabilities)
   end
 end
 #
