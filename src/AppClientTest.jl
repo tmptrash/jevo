@@ -9,7 +9,7 @@ using Config
 using RpcApi
 
 function onAnswer(ans::Connection.Answer)
-  println(ans)
+  dump(ans)
 end
 
 con = Client.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT))

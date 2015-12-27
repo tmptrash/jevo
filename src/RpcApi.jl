@@ -34,17 +34,47 @@ module RpcApi
   #
   type SimpleOrganism
     #
-    # Amount of energy for current organism
+    # @inheritable
+    # Mutations probability. Add, change, delete. e.g.: [1,10,2]
+    # means, that "add" mutation will be 10 times rare then "change"
+    # and 2 times rare then "delete" mutations.
     #
-    energy::UInt
+    mutationProbabilities::Array{Int}
     #
-    # Organism's position in a world
-    #
-    pos::Array{Int}
-    #
-    # Code of organism
+    # @inheritable
+    # Code of organism. String on Julia language.
     #
     code::ASCIIString
+    #
+    # @inheritable
+    # Amount of mutations, which will be applied to arganism after
+    # clonning.
+    #
+    mutationsOnClone::Int
+    #
+    # @inheritable
+    # Amount of iterations within organism's life loop, after that we 
+    # do mutations according to MUTATE_AMOUNT config amount. If 0, then
+    # mutations will be disabled.
+    #
+    mutationPeriod::Int
+    #
+    # @inheritable
+    # Value, which will be used like amount of mutations per 
+    # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
+    # we want to disable mutations.
+    #
+    mutationAmount::Int
+    #
+    # Organism's energy. If it's zero, then organism is die.
+    # It can't be more then ORGANISM_MAX_ENERGY configuration.
+    #
+    energy::Int
+    #
+    # Organism's position in a 2D world. Starts from (1,1) 
+    # ends with (WORLD_WIDTH, WORLD_HEIGHT) configurations.
+    #
+    pos::Array{Int}
   end
   #
   # RPC API unique identifiers. Only these functions may be called

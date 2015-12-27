@@ -94,8 +94,17 @@ end
 function getOrganism(id::UInt)
   if haskey(Manager._map, id)
     org = Manager._map[id]
-    return RpcApi.SimpleOrganism(org.energy, [org.pos.x, org.pos.y], org.code)
+    return RpcApi.SimpleOrganism(
+      org.mutationProbabilities,
+      org.code,
+      org.mutationsOnClone,
+      org.mutationPeriod,
+      org.mutationAmount,
+      org.energy,
+      [org.pos.x, org.pos.y]
+    )
   end
+  
   false
 end
 #
