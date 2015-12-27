@@ -136,12 +136,13 @@ end
 # @param pos Optional. Position of organism.
 # @return {OrganismTask}
 #
-function _createOrganism(org = nothing, pos = nothing)
-  pos  = org !== nothing ? World.getNearFreePos(_world.plane, org.pos) : (pos === nothing ? World.getFreePos(Manager._world) : pos)
-  org  = org === nothing ? Creature.create(pos) : (Creature.copy(org); org.pos = pos)
+function _createOrganism(organism = nothing, pos = nothing)
+  pos  = organism !== nothing ? World.getNearFreePos(_world, organism.pos) : (pos === nothing ? World.getFreePos(Manager._world) : pos)
+  org  = organism === nothing ? Creature.create(pos) : Creature.copy(organism)
   id   = Config.val(:ORGANISM_CURRENT_ID)
   task = Task(Creature.born(org, id))
 
+  org.pos = pos
   _organismMsg(id, "run")
   Event.on(org.observer, "getenergy", _onGetEnergy)
   Event.on(org.observer, "grableft",  _onGrabLeft )

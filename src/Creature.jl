@@ -153,7 +153,7 @@ module Creature
     Organism(
       org.mutationProbabilities,                     # mutationProbabilities
       org.code,                                      # code
-      eval(parse(org.code)),                         # fnCode
+      _wrapCode(org.code),                           # fnCode
       org.mutationsOnClone,                          # mutationsOnClone
       org.mutationPeriod,                            # mutationPeriod
       org.mutationAmount,                            # mutationAmount
@@ -225,9 +225,6 @@ module Creature
         #
         try
           org.fnCode(org)
-          #
-          # TODO: temporary code. shows correct organisms
-          #
           if org.fnCode !== oldCode
             #
             # If parsed code doesn't contain mistakes, then current organism
@@ -333,8 +330,7 @@ module Creature
   # because it's used for comparison with other functions for other 
   # organisms. If their names are equal and they are in the same module,
   # then === operator returns true.
-  # @param o Associated with this code organism
-  #
+  # @param code Associated with this organism code
   # @return {Function}
   #
   function _wrapCode(code::ASCIIString)

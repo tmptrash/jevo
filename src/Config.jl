@@ -222,9 +222,9 @@ module Config
   global _data = GData(
     Data(
       [2,100,1,0,0,0],       # ORGANISM_MUTATION_PROBABILITIES
-      100,                   # ORGANISM_MUTATIONS_ON_CLONE
+      0,                     # ORGANISM_MUTATIONS_ON_CLONE
       1000,                  # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      1000,                  # ORGANISM_MUTATION_PERIOD
+      100000,                # ORGANISM_MUTATION_PERIOD
       1000000000,            # ORGANISM_MAX_MUTATION_PERIOD
       1,                     # ORGANISM_MUTATION_AMOUNT
       1000,                  # ORGANISM_MAX_MUTATION_AMOUNT
