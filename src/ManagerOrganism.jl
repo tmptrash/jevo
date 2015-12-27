@@ -80,15 +80,15 @@ end
 # @param counter Current iterator value
 #
 function _updateOrganismsEnergy(counter::Int)
-  decVal = Config.val(:ORGANISM_DECREASE_VALUE)
+  local decVal::Int = Config.val(:ORGANISM_DECREASE_VALUE)
   #
   # We have to go through tasks in reverse way, because we may
   # remove some elements inside while loop.
   #
-  i = length(Manager._tasks)
+  local i::Int = length(Manager._tasks)
   while i > 0
-    org = Manager._tasks[i].organism
-    dec = decVal + length(org.code)
+    local org::Creature.Organism = Manager._tasks[i].organism
+    local dec::Int = decVal + length(org.code)
     #
     # if the energy of the organism is zero, we have to remove it
     #
@@ -103,26 +103,6 @@ function _updateOrganismsEnergy(counter::Int)
     _moveOrganism(org.pos, org)
 
     i -= 1
-  end
-end
-#
-# Mutates every organism according to amount of mutations in a config
-# (ORGANISM, MUTATE_AMOUNT).
-#
-function _mutateOrganisms()
-  local len::Int          = length(Manager._tasks)
-  local mutations::UInt   = Config.val(:ORGANISM_MUTATION_AMOUNT)
-  local i::Int
-  local j::Int
-  local org::Creature.Organism
-  local prob::Array{Int}
-
-  if mutations > UInt(0)
-    for i = 1:len
-      org  = Manager._tasks[i].organism
-      prob = org.mutationProbabilities
-      for j = 1:mutations Creature.mutate(org, prob) end
-    end
   end
 end
 #

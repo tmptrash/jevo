@@ -30,12 +30,11 @@ end
 # will be in _tasks field.
 #
 function createOrganisms()
+  local i::Int
   #
   # Inits available organisms in Tasks
   #
-  for i = 1:Config.val(:ORGANISM_START_AMOUNT)
-    createOrganism()
-  end
+  for i = 1:Config.val(:ORGANISM_START_AMOUNT) createOrganism() end
 end
 #
 # @rpc
@@ -82,7 +81,7 @@ end
 #
 # @rpc
 # Returns current IPS (Iterations Per Second) value
-# @return Float
+# @return Int
 #
 function getIps()
   Config.val(:WORLD_IPS)

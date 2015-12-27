@@ -88,12 +88,12 @@ module Config
     # Eve. It means that these organism were created by operator and not
     # by evolution.
     #
-    ORGANISM_START_ENERGY::UInt32
+    ORGANISM_START_ENERGY::Int
     #
     # Maximum amount of energy, which one organism may contains
     # TODO: not used now!
     #
-    ORGANISM_MAX_ENERGY::UInt
+    ORGANISM_MAX_ENERGY::Int
     #
     # Amount of iterations within organism's life loop, after that we decrease
     # amount of energy into DECREASE_VALUE points. If 0, then energy decreasing 
@@ -145,7 +145,7 @@ module Config
     # organisms in a World. This value will be set many times in main
     # Manager's loop.
     #
-    WORLD_IPS::UInt
+    WORLD_IPS::Int
     #
     # Starting number for TCP/IP listening
     #
@@ -158,7 +158,6 @@ module Config
   type GData
     d::Data
   end
-
 
   #
   # Saves all data into the file. If file exists, it will
@@ -229,19 +228,19 @@ module Config
       1000000000,            # ORGANISM_MAX_MUTATION_PERIOD
       1,                     # ORGANISM_MUTATION_AMOUNT
       1000,                  # ORGANISM_MAX_MUTATION_AMOUNT
-      UInt(100),             # ORGANISM_START_AMOUNT
-      UInt(50000),           # ORGANISM_START_ENERGY
-      UInt(100000),          # ORGANISM_MAX_ENERGY
-      UInt(1000),            # ORGANISM_DECREASE_PERIOD
-      UInt(1),               # ORGANISM_DECREASE_VALUE
+      100,                   # ORGANISM_START_AMOUNT
+      50000,                 # ORGANISM_START_ENERGY
+      100000,                # ORGANISM_MAX_ENERGY
+      1000,                  # ORGANISM_DECREASE_PERIOD
+      1,                     # ORGANISM_DECREASE_VALUE
       UInt(0),               # ORGANISM_CURRENT_ID
-      UInt(100),             # ORGANISM_GOOD_MUTATION_ENERGY
+      100,                   # ORGANISM_GOOD_MUTATION_ENERGY
       " c(o) ",              # ORGANISM_START_CODE
       UInt(300),             # WORLD_WIDTH
       UInt(300),             # WORLD_HEIGHT
       2,                     # WORLD_FRAME_DELAY
       UInt32(0),             # WORLD_BACK_COLOR
-      UInt(0),               # WORLD_IPS
+      0,                     # WORLD_IPS
       Int(2000)              # CONNECTION_SERVER_PORT
     )
   )

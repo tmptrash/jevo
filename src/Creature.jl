@@ -95,7 +95,7 @@ module Creature
     # Organism's energy. If it's zero, then organism is die.
     # It can't be more then ORGANISM_MAX_ENERGY configuration.
     #
-    energy::UInt
+    energy::Int
     #
     # Organism's position in a 2D world. Starts from (1,1) 
     # ends with (WORLD_WIDTH, WORLD_HEIGHT) configurations.
@@ -138,7 +138,7 @@ module Creature
       Config.val(:ORGANISM_MUTATIONS_ON_CLONE),      # mutationsOnClone
       Config.val(:ORGANISM_MUTATION_PERIOD),         # mutationPeriod
       Config.val(:ORGANISM_MUTATION_AMOUNT),         # mutationAmount
-      Config.val(:ORGANISM_START_ENERGY),            # energy
+      Int(Config.val(:ORGANISM_START_ENERGY)),       # energy
       pos,                                           # pos
       Event.create()                                 # observer
     )
@@ -190,14 +190,16 @@ module Creature
     # TODO: if code is valid, then we have to check in on remote controlled
     # TODO: worker to prevent infinite loop.
     #
-    try
-      #
-      # This function must be anonymous, because it's used for comparison
-      # with other functions for other organisms. If their names are equal
-      # and they are in the same module, then === operator returns true.
-      # @param o Associated with this code organism
-      #
-      org.fnCode = eval(parse("function(o) $(org.code) end"))
+    if pIndex < 4
+      try
+        #
+        # This function must be anonymous, because it's used for comparison
+        # with other functions for other organisms. If their names are equal
+        # and they are in the same module, then === operator returns true.
+        # @param o Associated with this code organism
+        #
+        org.fnCode = eval(parse("function(o) $(org.code) end"))
+      end
     end
   end
   #

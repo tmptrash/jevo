@@ -85,7 +85,7 @@ module Manager
     local ts::Float64 = time() - stamp
 
     if ts >= 1.0
-      Config.val(:WORLD_IPS, trunc(UInt, ips / ts))
+      Config.val(:WORLD_IPS, trunc(Int, ips / ts))
       stamp = time()
       ips   = 0
     end

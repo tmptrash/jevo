@@ -25,7 +25,7 @@ module RpcApi
   #
   type Region
     reg::Array{UInt32, 2}
-    ips::UInt
+    ips::Int
   end
   #
   # This is an analog of Creature.Organism type. It's used for 
