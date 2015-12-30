@@ -246,7 +246,7 @@ module Config
       2,                     # WORLD_FRAME_DELAY
       UInt32(0),             # WORLD_BACK_COLOR
       0,                     # WORLD_IPS
-      2000,                  # WORLD_MAX_ORGANISMS
+      3000,                  # WORLD_MAX_ORGANISMS
       Int(2000)              # CONNECTION_SERVER_PORT
     )
   )
