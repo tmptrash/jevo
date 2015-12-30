@@ -42,11 +42,12 @@ end
 # task will be added to _tasks array. Position may be set
 # or random free position will be used.
 # @param pos Position|nothing Position of the organism
-# @return {OrganismTask}
+# @return {Int} Organism id or false if organisms limit is riched
 #
 function createOrganism(pos = nothing)
-    orgTask = Manager._createOrganism(nothing, pos)
-    orgTask.id
+  if length(_tasks) > Config.val(:WORLD_MAX_ORGANISMS) return false end
+  orgTask = Manager._createOrganism(nothing, pos)
+  orgTask.id
 end
 #
 # @rpc

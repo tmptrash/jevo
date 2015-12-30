@@ -147,6 +147,11 @@ module Config
     #
     WORLD_IPS::Int
     #
+    # Maximum amount of organisms in a world. If some organisms will
+    # try to clone itself, then it will not happen.
+    #
+    WORLD_MAX_ORGANISMS::Int
+    #
     # Starting number for TCP/IP listening
     #
     CONNECTION_SERVER_PORT::Int
@@ -241,6 +246,7 @@ module Config
       2,                     # WORLD_FRAME_DELAY
       UInt32(0),             # WORLD_BACK_COLOR
       0,                     # WORLD_IPS
+      1000,                  # WORLD_MAX_ORGANISMS
       Int(2000)              # CONNECTION_SERVER_PORT
     )
   )
