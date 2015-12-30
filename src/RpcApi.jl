@@ -16,8 +16,8 @@ module RpcApi
   export RPC_MUTATE
   export RPC_GET_IPS
   export RPC_GET_ORGANISM
+  export RPC_GET_AMOUNT
   export RPC_DEBUG_GC
-  export RPC_DEBUG_WHOS
   
   export Region
   #
@@ -88,6 +88,6 @@ module RpcApi
   const RPC_MUTATE            = 6
   const RPC_GET_IPS           = 7
   const RPC_GET_ORGANISM      = 8
-  const RPC_DEBUG_GC          = 9
-  const RPC_DEBUG_WHOS        = 10
+  const RPC_GET_AMOUNT        = 9
+  const RPC_DEBUG_GC          = 10
 end

@@ -8,11 +8,14 @@ using Creature
 using Config
 using RpcApi
 
+
 function onAnswer(ans::Connection.Answer)
-  dump(ans)
+  global answer = ans.data
+  println(answer)
 end
 
-con = Client.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT))
+answer = null 
+con    = Client.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT))
 if con === false quit() end
 
 Event.on(con.observer, Client.EVENT_ANSWER, onAnswer)

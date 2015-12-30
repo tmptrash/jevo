@@ -35,6 +35,8 @@ function createOrganisms()
   # Inits available organisms in Tasks
   #
   for i = 1:Config.val(:ORGANISM_START_AMOUNT) createOrganism() end
+
+  true
 end
 #
 # @rpc
@@ -93,20 +95,27 @@ end
 # @return Creature.Organism or false if no organism with this id
 # TODO: remake to organism id, not position related id
 function getOrganism(id::UInt)
-  if haskey(Manager._map, id)
-    org = Manager._map[id]
-    return RpcApi.SimpleOrganism(
-      org.mutationProbabilities,
-      org.code,
-      org.mutationsOnClone,
-      org.mutationPeriod,
-      org.mutationAmount,
-      org.energy,
-      [org.pos.x, org.pos.y]
-    )
-  end
+  if !haskey(Manager._map, id) return false end
   
-  false
+  org = Manager._map[id]
+  return RpcApi.SimpleOrganism(
+    org.mutationProbabilities,
+    org.code,
+    org.mutationsOnClone,
+    org.mutationPeriod,
+    org.mutationAmount,
+    org.energy,
+    [org.pos.x, org.pos.y]
+  )
+end
+#
+# @rpc
+# Returns amount of organisms in a world. Died organisms are
+# not calculated.
+# @return {Int}
+#
+function getAmount()
+  length(_tasks)
 end
 #
 # @rpc
@@ -115,13 +124,7 @@ end
 function debugGc()
   Base.gc_enable(true)
   Base.gc()
-end
-#
-# @rpc
-# Calls Garbage Collector in current process
-#
-function debugWhos()
-  whos()
+  true
 end
 
 #
@@ -159,6 +162,6 @@ _rpcApi = Dict{Integer, Function}(
   RPC_MUTATE            => mutate,
   RPC_GET_IPS           => getIps,
   RPC_GET_ORGANISM      => getOrganism,
-  RPC_DEBUG_GC          => debugGc,
-  RPC_DEBUG_WHOS        => debugWhos
+  RPC_GET_AMOUNT        => getAmount,
+  RPC_DEBUG_GC          => debugGc
 )
