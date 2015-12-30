@@ -67,7 +67,7 @@ end
 # @return {Any|null} value or null if invalid section or key
 #
 function getConfig(name::Symbol)
-  Config.val(section)
+  Config.val(name)
 end
 #
 # @rpc

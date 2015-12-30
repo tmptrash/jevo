@@ -239,7 +239,7 @@ module Config
       10,                    # ORGANISM_DECREASE_PERIOD
       1,                     # ORGANISM_DECREASE_VALUE
       UInt(0),               # ORGANISM_CURRENT_ID
-      10,                    # ORGANISM_GOOD_MUTATION_ENERGY
+      100,                   # ORGANISM_GOOD_MUTATION_ENERGY
       " c(o) ",              # ORGANISM_START_CODE
       UInt(300),             # WORLD_WIDTH
       UInt(300),             # WORLD_HEIGHT
