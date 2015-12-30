@@ -53,7 +53,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
         # If mutationPeriod or mutationAmount set to 0, it 
         # means that mutations during leaving are disabled.
         #
-        if mCounter % org.mutationPeriod === 0 && org.mutationPeriod > 0 && org.mutationAmount > 0
+        if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0 && org.mutationAmount > 0
           for j = 1:org.mutationAmount Creature.mutate(org, org.mutationProbabilities) end
         end
       catch e
