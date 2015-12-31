@@ -55,7 +55,7 @@ module CanvasWindow
   # @param title Window title
   # @return Window object
   #
-  function create(width::Integer, height::Integer, title::ASCIIString = "")
+  function create(width::Int, height::Int, title::ASCIIString = "")
     win = Tk.Toplevel(title, width, height)
     c   = Tk.Canvas(win)
     Tk.pack(c, expand=true, fill="both")

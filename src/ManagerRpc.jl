@@ -12,17 +12,17 @@ using RpcApi
 # Grabs world's rectangle region and returns it
 # @param x Start X coordinate of region
 # @param y Start Y coordinate of region
-# @param width Width. 0 means all width
-# @param height Height. 0 means all height
+# @param x1 End x. 0 means all width
+# @param y1 End y. 0 means all height
 #
-function getRegion(x::Integer = 1, y::Integer = 1, width::Integer = 0, height::Integer = 0)
+function getRegion(x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
   maxWidth  = size(_world.data)[2]
   maxHeight = size(_world.data)[1]
 
-  if (width  === 0 || width  > maxWidth)  width  = maxWidth  end
-  if (height === 0 || height > maxHeight) height = maxHeight end
+  if (x1 === 0 || x1 > maxWidth)  x1 = maxWidth  end
+  if (y1 === 0 || y1 > maxHeight) y1 = maxHeight end
   
-  RpcApi.Region(_world.data[y:height, x:width], Config.val(:WORLD_IPS))
+  RpcApi.Region(_world.data[y:y1, x:x1], Config.val(:WORLD_IPS))
 end
 #
 # @rpc

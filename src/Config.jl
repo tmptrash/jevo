@@ -125,11 +125,11 @@ module Config
     #
     # World width
     #
-    WORLD_WIDTH::UInt
+    WORLD_WIDTH::Int
     #
     # World height
     #
-    WORLD_HEIGHT::UInt
+    WORLD_HEIGHT::Int
     #
     # Delay between requests for obtaining remote world region.
     # This parameter affects frames per second in a window canvas.
@@ -241,18 +241,18 @@ module Config
       100,                   # ORGANISM_START_ENERGY
       100000,                # ORGANISM_MAX_ENERGY
       5,                     # ORGANISM_DECREASE_PERIOD
-      10,                    # ORGANISM_DECREASE_VALUE
+      30,                    # ORGANISM_DECREASE_VALUE
       UInt(0),               # ORGANISM_CURRENT_ID
       50,                    # ORGANISM_GOOD_MUTATION_ENERGY
-      200,                   # ORGANISM_CLONE_ENERGY
+      100,                   # ORGANISM_CLONE_ENERGY
       " c(o) ",              # ORGANISM_START_CODE
-      UInt(300),             # WORLD_WIDTH
-      UInt(300),             # WORLD_HEIGHT
+      300,                   # WORLD_WIDTH
+      200,                   # WORLD_HEIGHT
       1,                     # WORLD_FRAME_DELAY
       UInt32(0),             # WORLD_BACK_COLOR
       0,                     # WORLD_IPS
       3000,                  # WORLD_MAX_ORGANISMS
-      Int(2000)              # CONNECTION_SERVER_PORT
+      2000                   # CONNECTION_SERVER_PORT
     )
   )
 end

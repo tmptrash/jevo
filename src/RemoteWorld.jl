@@ -34,11 +34,11 @@ module RemoteWorld
     con::Connection.ClientConnection
     win::CanvasWindow.Window
     resp::Function
-    delay::Integer
-    x::Integer
-    y::Integer
-    width::Integer
-    height::Integer
+    delay::Int
+    x::Int
+    y::Int
+    x1::Int
+    y1::Int
 
     RemoteData(con::Connection.ClientConnection, win::CanvasWindow.Window) = new(con, win)
   end
@@ -51,7 +51,7 @@ module RemoteWorld
   # @param height Canvas height in pixels
   # @return RemoteData
   #
-  function create(host::Base.IPAddr, port::Integer, width::UInt = Config.val(:WORLD_WIDTH), height::UInt = Config.val(:WORLD_HEIGHT))
+  function create(host::Base.IPAddr, port::Integer, width::Int = Config.val(:WORLD_WIDTH), height::Int = Config.val(:WORLD_HEIGHT))
     con = Client.create(host, port)
     con !== false ? RemoteData(con, CanvasWindow.create(width, height)) : false
   end
@@ -59,16 +59,16 @@ module RemoteWorld
   #
   # @param delay Delay between requests 
   #
-  function display(rd::RemoteData, delay::Integer = Config.val(:WORLD_FRAME_DELAY), x::Integer = 1, y::Integer = 1, width::Integer = 0, height::Integer = 0)
-    rd.delay  = delay
-    rd.x      = x
-    rd.y      = y
-    rd.width  = width
-    rd.height = height
-    rd.resp   = (ans::Connection.Answer) -> _onResponse(rd, ans)
+  function display(rd::RemoteData, delay::Int = Config.val(:WORLD_FRAME_DELAY), x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
+    rd.delay = delay
+    rd.x     = x
+    rd.y     = y
+    rd.x1    = x1
+    rd.y1    = y1
+    rd.resp  = (ans::Connection.Answer) -> _onResponse(rd, ans)
 
     Event.on(rd.con.observer, Client.EVENT_ANSWER, rd.resp)
-    Client.request(rd.con, RPC_GET_REGION, x, y, width, height)
+    Client.request(rd.con, RPC_GET_REGION, x, y, x1, y1)
   end
   #
   # Stops displaying organism's world
@@ -89,11 +89,11 @@ module RemoteWorld
     CanvasWindow.title(rd.win, "ips: $(ans.data.ips)")
     for x in 1:size(region)[2]
       for y in 1:size(region)[1]
-        CanvasWindow.dot(rd.win, x, y, UInt32(region[x, y]))
+        CanvasWindow.dot(rd.win, x, y, UInt32(region[y, x]))
       end
     end
     CanvasWindow.update(rd.win)
     sleep(rd.delay)
-    Client.request(rd.con, RPC_GET_REGION, rd.x, rd.y, rd.width, rd.height)
+    Client.request(rd.con, RPC_GET_REGION, rd.x, rd.y, rd.x1, rd.y1)
   end
 end

@@ -24,11 +24,11 @@ module World
     #
     # World width in pixels
     #
-    width::UInt
+    width::Int
     #
     # World height in pixels
     #
-    height::UInt
+    height::Int
     #
     # Array of pixels (RGB+8b)
     #
@@ -44,8 +44,8 @@ module World
   # @param width World width
   # @param height World height
   #
-  function create(width::UInt = Config.val(:WORLD_WIDTH), height::UInt = Config.val(:WORLD_HEIGHT))
-    Plane(width, height, fill(UInt32(0), (Int(height), Int(width))), Event.create())
+  function create(width::Int = Config.val(:WORLD_WIDTH), height::Int = Config.val(:WORLD_HEIGHT))
+    Plane(width, height, fill(UInt32(0), height, width), Event.create())
   end
   #
   # Adds energy point by specified coordinates
@@ -76,10 +76,10 @@ module World
   # TODO: possible infinite loop, if all point are full
   #
   function getFreePos(plane::Plane)
-    pos = Helper.Point(round(Int, plane.width / 2), round(Int, plane.height / 2))
-    while World.getEnergy(plane, pos) > UInt(0)
-      pos.x = round(Int, rand(1:plane.width))
-      pos.y = round(Int, rand(1:plane.height))
+    local pos::Helper.Point = Helper.Point(round(Int, plane.width / 2), round(Int, plane.height / 2))
+    while World.getEnergy(plane, pos) > UInt32(0)
+      pos.x = rand(1:plane.width)
+      pos.y = rand(1:plane.height)
     end
     pos
   end
@@ -108,6 +108,7 @@ module World
   #
   function getNearFreePos(plane::Plane, pos::Helper.Point)
     local i::Int
+    local j::Int
     local x::Int = pos.x
     local y::Int = pos.y
     local positions::Array{Int} = [
@@ -125,13 +126,14 @@ module World
     #
     pos = Helper.Point(0, 0)
 
-    for i = 1:8
-      pos.x = positions[i]
-      pos.y = positions[i + 1]
-      if plane.width >= pos.x && plane.height >= pos.y && World.getEnergy(plane, pos) == 0
+    j = 1
+    for i = 1:4
+      pos.x = positions[j]
+      pos.y = positions[j + 1]
+      if plane.width >= pos.x && plane.height >= pos.y && World.getEnergy(plane, pos) === UInt32(0)
         return pos
       end
-      i += 1
+      j += 2
     end
 
     false
