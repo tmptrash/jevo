@@ -131,6 +131,7 @@ module World
       if plane.width >= pos.x && plane.height >= pos.y && World.getEnergy(plane, pos) == 0
         return pos
       end
+      i += 1
     end
 
     false

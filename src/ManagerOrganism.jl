@@ -210,6 +210,10 @@ end
 function _onClone(organism::Creature.Organism)
   if length(_tasks) > Config.val(:WORLD_MAX_ORGANISMS) return nothing end
   #
+  # We have to promote clonning, because it's very fundamental element of evolution
+  #
+  organism.energy += Config.val(:ORGANISM_CLONE_ENERGY)
+  #
   # First, we have to find free point near the organism to put
   # clone in. It's possible, that all places are filled.
   #

@@ -113,6 +113,10 @@ module Config
     #
     ORGANISM_GOOD_MUTATION_ENERGY::Int
     #
+    # Amount of energy, which is added if organism clone itself. This is how we promote clonning
+    #
+    ORGANISM_CLONE_ENERGY::Int
+    #
     # Minimal text code on julia language, which is used for new organisms at the very beginning
     # stage of evolution. Before first stable organisms will be produced. By default, organism may
     # produce it's copies and nothing more.
@@ -229,21 +233,22 @@ module Config
       [10,100,1,1,1,1],      # ORGANISM_MUTATION_PROBABILITIES (add,change,del,clone,period,amount)
       1,                     # ORGANISM_MUTATIONS_ON_CLONE
       100,                   # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      30,                    # ORGANISM_MUTATION_PERIOD
+      100,                   # ORGANISM_MUTATION_PERIOD
       1000000,               # ORGANISM_MAX_MUTATION_PERIOD
       1,                     # ORGANISM_MUTATION_AMOUNT
-      1000,                  # ORGANISM_MAX_MUTATION_AMOUNT
+      100,                   # ORGANISM_MAX_MUTATION_AMOUNT
       100,                   # ORGANISM_START_AMOUNT
       100,                   # ORGANISM_START_ENERGY
       100000,                # ORGANISM_MAX_ENERGY
-      10,                    # ORGANISM_DECREASE_PERIOD
-      1,                     # ORGANISM_DECREASE_VALUE
+      5,                     # ORGANISM_DECREASE_PERIOD
+      10,                    # ORGANISM_DECREASE_VALUE
       UInt(0),               # ORGANISM_CURRENT_ID
-      100,                   # ORGANISM_GOOD_MUTATION_ENERGY
+      50,                    # ORGANISM_GOOD_MUTATION_ENERGY
+      200,                   # ORGANISM_CLONE_ENERGY
       " c(o) ",              # ORGANISM_START_CODE
       UInt(300),             # WORLD_WIDTH
       UInt(300),             # WORLD_HEIGHT
-      2,                     # WORLD_FRAME_DELAY
+      1,                     # WORLD_FRAME_DELAY
       UInt32(0),             # WORLD_BACK_COLOR
       0,                     # WORLD_IPS
       3000,                  # WORLD_MAX_ORGANISMS
