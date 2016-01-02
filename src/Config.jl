@@ -240,7 +240,7 @@ module Config
       [10,100,1,1,1,1],          # ORGANISM_MUTATION_PROBABILITIES (add,change,del,clone,period,amount)
       1,                         # ORGANISM_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      100,                       # ORGANISM_MUTATION_PERIOD
+      1,                         # ORGANISM_MUTATION_PERIOD
       1000000,                   # ORGANISM_MAX_MUTATION_PERIOD
       1,                         # ORGANISM_MUTATION_AMOUNT
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT
@@ -248,7 +248,7 @@ module Config
       1000,                      # ORGANISM_START_ENERGY
       100000,                    # ORGANISM_MAX_ENERGY
       200,                       # ORGANISM_CODE_BUF_SIZE
-      1000,                      # ORGANISM_DECREASE_PERIOD
+      100000,                    # ORGANISM_DECREASE_PERIOD
       10,                        # ORGANISM_DECREASE_VALUE
       UInt(0),                   # ORGANISM_CURRENT_ID
       50,                        # ORGANISM_GOOD_MUTATION_ENERGY

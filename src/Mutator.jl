@@ -121,14 +121,14 @@ module Mutator
     "_","<",">",".",",","@","!","=","{","}","[","]","(",")","'","\"","?",":","&",
     "*","+","-","%",";","^","|","/","~",":","\$"," ",
     # operators
-    "&&","||","\\","+=","-=","!=","*=","/=","^=","÷=","%=",".%=","&=","\$=","=>",
+    "&&","||","\\","+=","-=","!=","*=","/=","^=","%=",".%=","&=","\$=","=>",
     "<<=",">>=",">>>=",">=","<=","==","===","!==",">>","<<",">>>","|=",".%",".!=",
     ".*",".+",".-","./",".<",".>",".<<",".<=",".==",".>=",".>>",".\\",".^",
     # letters
     "0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f","g","h","i",
-    "j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","A","B",
-    "C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U",
-    "V","W","X","Y","Z",
+    "j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z",#"A","B",
+    #"C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U",
+    #"V","W","X","Y","Z",
     # keywords
     "function","for","end","while","if","else","elseif","break","switch","case",
     "otherwise","try","catch","type","typealias","return","true","false","macro",
@@ -139,14 +139,14 @@ module Mutator
     "UInt128","Int","Int8","Int16","Int32","Int64","Int128","BigFloat","FloatingPoint",
     "Float16","Float32","Float64","Bool","Char","ASCIIString","UTF8String","ByteString",
     "Array","BitArray","Range","Tuple","Symbol","Function","Type","Any","String",
-    "Signed","Dict",
+    "Signed","Dict"
     # TODO: here should be a buildin functions from Base, Core and Main modules
     # math/geom functions
-    "round","iround","floor","ifloor","ceil","iceil","trunc","itrunc","div","fld",
-    "rem","mod","gcd","lcm","abs","abs2","sign","signbit","copysign","flipsign",
-    "sqrt","cbrt","hypot","exp","expm1","ldexp","log","log2","log10","log1p",
-    "exponent","significand","sin","cos","tan","cot","sec","csc","sinh","cosh",
-    "tanh","coth","sech","csch","asin","acos","atan","acot","asec","acsc","asinh",
-    "acosh","atanh","acoth","asech","acsch","sinc","cosc","atan2"
+    # "round","iround","floor","ifloor","ceil","iceil","trunc","itrunc","div","fld",
+    # "rem","mod","gcd","lcm","abs","abs2","sign","signbit","copysign","flipsign",
+    # "sqrt","cbrt","hypot","exp","expm1","ldexp","log","log2","log10","log1p",
+    # "exponent","significand","sin","cos","tan","cot","sec","csc","sinh","cosh",
+    # "tanh","coth","sech","csch","asin","acos","atan","acot","asec","acsc","asinh",
+    # "acosh","atanh","acoth","asech","acsch","sinc","cosc","atan2"
   ]
 end
