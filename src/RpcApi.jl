@@ -42,9 +42,9 @@ module RpcApi
     mutationProbabilities::Array{Int}
     #
     # @inheritable
-    # Code of organism. String on Julia language.
+    # Code of organism. Array of atomic string blocks on Julia language.
     #
-    code::ASCIIString
+    code::Array{ASCIIString}
     #
     # @inheritable
     # Amount of mutations, which will be applied to arganism after

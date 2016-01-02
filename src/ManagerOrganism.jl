@@ -54,7 +54,9 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
         # means that mutations during leaving are disabled.
         #
         if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0 && org.mutationAmount > 0
-          for j = 1:org.mutationAmount Creature.mutate(org, org.mutationProbabilities) end
+          for j = 1:org.mutationAmount
+            Mutator.mutate(org) 
+          end
         end
       catch e
         println("Manager._updateOrganisms(): $e")
@@ -224,7 +226,7 @@ function _onClone(organism::Creature.Organism)
   #
   crTask = Manager._createOrganism(organism)
   for i = 1:crTask.organism.mutationsOnClone
-    Creature.mutate(crTask.organism, crTask.organism.mutationProbabilities)
+    Mutator.mutate(crTask.organism)
   end
 end
 #

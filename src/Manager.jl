@@ -15,6 +15,7 @@
 #
 module Manager
   import Creature
+  import Mutator
   import World
   import Helper
   import Event

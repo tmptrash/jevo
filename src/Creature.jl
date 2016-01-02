@@ -45,7 +45,6 @@ module Creature
   export RetObj
 
   export create
-  export mutate
   export born
   #
   # Describes one organism. In general it consists of energy, world
@@ -62,15 +61,22 @@ module Creature
     mutationProbabilities::Array{Int}
     #
     # @inheritable
-    # Code of organism. String on Julia language.
+    # Code of organism. This is an array of atomic Julia language peaces
+    # like "for", "end", "UInt32", "{", "+=", etc. Result script is a 
+    # joining of this array into a string, which will be parsed and
+    # evaluated with eval(parse(code_str))
     #
-    code::ASCIIString
+    code::Array{ASCIIString}
     #
     # @inheritable
     # Compiled and covered by function version of code. This
     # code is running in a loop all the time.
     #
     fnCode::Function
+    #
+    # Amount of filled block in code array. Less or equal to array size
+    #
+    codeSize::Int
     #
     # @inheritable
     # Amount of mutations, which will be applied to arganism after
@@ -129,16 +135,18 @@ module Creature
   # @return {Creature}
   #
   function create(pos::Helper.Point = Helper.Point(1, 1))
-    local code::ASCIIString = Config.val(:ORGANISM_START_CODE)
-
+    local code::Array{ASCIIString} = Base.copy(Config.val(:ORGANISM_START_CODE))
+    local codeSize::Int = length(code)
+    resize!(code, Config.val(:ORGANISM_CODE_BUF_SIZE))
     Organism(
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       code,                                          # code
-      _wrapCode(code),                               # fnCode
+      _wrapCode(code, codeSize),                     # fnCode
+      codeSize,                                      # codeSize
       Config.val(:ORGANISM_MUTATIONS_ON_CLONE),      # mutationsOnClone
       Config.val(:ORGANISM_MUTATION_PERIOD),         # mutationPeriod
       Config.val(:ORGANISM_MUTATION_AMOUNT),         # mutationAmount
-      Int(Config.val(:ORGANISM_START_ENERGY)),       # energy
+      Config.val(:ORGANISM_START_ENERGY),            # energy
       pos,                                           # pos
       Event.create()                                 # observer
     )
@@ -154,6 +162,7 @@ module Creature
       org.mutationProbabilities,                     # mutationProbabilities
       org.code,                                      # code
       _wrapCode(org.code),                           # fnCode
+      org.codeSize,                                  # codeSize
       org.mutationsOnClone,                          # mutationsOnClone
       org.mutationPeriod,                            # mutationPeriod
       org.mutationAmount,                            # mutationAmount
@@ -161,46 +170,6 @@ module Creature
       org.pos,                                       # pos
       Event.create()                                 # observer
     )
-  end
-  # TODO: update description
-  # Produces one add/change/del mutation on code and returns it's modified version.
-  # Probabilities array is an array of three items: add,change,del values. e.g.:
-  # [1,2,1] means that add and del mutations will be twice less then change one.
-  # Character for adding and changing is in visible ASCII range - 32:126. see ASCII
-  # table for details. Change mutation is the most frequent, so it should be first.
-  # @param org Organism, which code we have to modify
-  # @param prob Probability array (add,change,del). e.g.: [X,X,X]
-  #
-  function mutate(org::Organism, prob::Array{Int})
-    pIndex = Helper.getProbIndex(prob)
-    len    = length(org.code) - 1
-    i      = rand(2:len)
-
-    if     pIndex === 2 org.code             = string(org.code[1:i-1], Char(rand(32:126)), org.code[i+1:end])
-    elseif pIndex === 1 org.code             = string(org.code[1:i-1], Char(rand(32:126)), org.code[i:end])
-    elseif pIndex === 3 && len > 2 org.code  = string(org.code[1:i-1], org.code[i+1:end])
-    elseif pIndex === 4 org.mutationsOnClone = rand(0:Config.val(:ORGANISM_MAX_MUTATIONS_ON_CLONE))
-    elseif pIndex === 5 org.mutationPeriod   = rand(0:Config.val(:ORGANISM_MAX_MUTATION_PERIOD))
-    elseif pIndex === 6 org.mutationAmount   = rand(0:Config.val(:ORGANISM_MAX_MUTATION_AMOUNT))
-    end
-
-    #
-    # Updates compiled version of the code. Only valid code will be applied,
-    # because exception will be fired in case of error organismcode.
-    # TODO: if code is valid, then we have to check in on remote controlled
-    # TODO: worker to prevent infinite loop.
-    #
-    if pIndex < 4
-      try
-        #
-        # This function must be anonymous, because it's used for comparison
-        # with other functions for other organisms. If their names are equal
-        # and they are in the same module, then === operator returns true.
-        # @param o Associated with this code organism
-        #
-        org.fnCode = _wrapCode(org.code)
-      end
-    end
   end
   #
   # TODO: describe organism's task function
@@ -330,11 +299,12 @@ module Creature
   # because it's used for comparison with other functions for other 
   # organisms. If their names are equal and they are in the same module,
   # then === operator returns true.
-  # @param code Associated with this organism code
+  # @param code Associated with this organism code array
+  # @param size Size of the code in code array
   # @return {Function}
   #
-  function _wrapCode(code::ASCIIString)
-    eval(parse("function(o) $(code) end"))
+  function _wrapCode(code::Array{ASCIIString}, size::Int)
+    eval(parse("function(o) $(join(code[1:size])) end"))
   end
   #
   # Clones an organism. It only fires an event. Clonning will be
