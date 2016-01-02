@@ -44,7 +44,7 @@ module RpcApi
     # @inheritable
     # Code of organism. Array of atomic string blocks on Julia language.
     #
-    code::Array{ASCIIString}
+    code::ASCIIString
     #
     # @inheritable
     # Amount of mutations, which will be applied to arganism after

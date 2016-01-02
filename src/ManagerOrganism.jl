@@ -55,7 +55,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
         #
         if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0 && org.mutationAmount > 0
           for j = 1:org.mutationAmount
-            Mutator.mutate(org) 
+            Mutator.mutate(org)
           end
         end
       catch e
@@ -100,7 +100,9 @@ function _updateOrganismsEnergy(counter::Int)
       _killOrganism(i)
     end
     #
-    # This is how we updates organism's color after energy descreasing
+    # This is how we updates organism's color after energy descreasing.
+    # We don't need to check return value, because we don't change organism's
+    # position. Just update it color (energy).
     #
     _moveOrganism(org.pos, org)
 
@@ -138,8 +140,10 @@ end
 # @param pos Optional. Position of organism.
 # @return {OrganismTask}
 #
-function _createOrganism(organism = nothing, pos = nothing)
+@debug function _createOrganism(organism = nothing, pos = nothing)
+@bp
   pos  = organism !== nothing ? World.getNearFreePos(_world, organism.pos) : (pos === nothing ? World.getFreePos(Manager._world) : pos)
+  if pos === false return false end
   org  = organism === nothing ? Creature.create(pos) : Creature.copy(organism)
   id   = Config.val(:ORGANISM_CURRENT_ID)
   task = Task(Creature.born(org, id))
@@ -183,8 +187,14 @@ end
 # organism's previous position from Manager._posMap.
 # @param pos New position
 # @param organism Organism to move
+# @return {Bool}
 #
-function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
+@debug function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
+@bp
+  # TODO: this is a place where organism may step to another area (instance).
+  # TODO: this functionality will be implemented in future versions...
+  if pos.x > Manager._world.width || pos.x < 1 || pos.y > Manager._world.height || pos.y < 1 return false end
+
   delete!(Manager._posMap, _getOrganismId(organism.pos))
   Manager._posMap[_getOrganismId(pos)] = organism
   #
@@ -194,6 +204,8 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   World.setEnergy(Manager._world, organism.pos, UInt32(0))
   World.setEnergy(Manager._world, pos, UInt32(organism.energy))
   organism.pos = pos
+
+  true
 end
 #
 # Converts coodinates to the unique UInt id
@@ -210,6 +222,7 @@ end
 # @param organism Parent organism
 #
 function _onClone(organism::Creature.Organism)
+  println("clone!!!")
   if length(_tasks) > Config.val(:WORLD_MAX_ORGANISMS) return nothing end
   #
   # We have to promote clonning, because it's very fundamental element of evolution
@@ -236,6 +249,7 @@ end
 # @param retObj Special object for return value
 #
 function _onGetEnergy(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
+  println("get energy!!!")
   retObj.ret = World.getEnergy(Manager._world, pos)
 end
 #
@@ -245,6 +259,7 @@ end
 # @param retObj Special object for return value
 #
 function _onGrabLeft(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
+  println("grab left!!!")
   _onGrab(organism, amount, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
 end
 #
@@ -254,6 +269,7 @@ end
 # @param retObj Special object for return value
 #
 function _onGrabRight(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
+  println("grab right!!!")
   _onGrab(organism, amount, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
 end
 #
@@ -263,6 +279,7 @@ end
 # @param retObj Special object for return value
 #
 function _onGrabUp(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
+  println("grab up!!!")
   _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
 end
 #
@@ -272,6 +289,7 @@ end
 # @param retObj Special object for return value
 #
 function _onGrabDown(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
+  println("grab up!!!")
   _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
 end
 #
@@ -281,6 +299,7 @@ end
 # @param retObj Special object for return value
 #
 function _onStepLeft(organism::Creature.Organism, retObj::Creature.RetObj)
+  println("step left!!!")
   _onStep(organism, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
 end
 #
@@ -290,6 +309,7 @@ end
 # @param retObj Special object for return value
 #
 function _onStepRight(organism::Creature.Organism, retObj::Creature.RetObj)
+  println("step right!!!")
   _onStep(organism, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
 end
 #
@@ -299,6 +319,7 @@ end
 # @param retObj Special object for return value
 #
 function _onStepUp(organism::Creature.Organism, retObj::Creature.RetObj)
+  println("step up!!!")
   _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
 end
 #
@@ -308,6 +329,7 @@ end
 # @param retObj Special object for return value
 #
 function _onStepDown(organism::Creature.Organism, retObj::Creature.RetObj)
+  println("step down!!!")
   _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
 end
 #
@@ -321,11 +343,10 @@ end
 #
 function _onGrab(organism::Creature.Organism, amount::UInt, pos::Helper.Point, retObj::Creature.RetObj)
   retObj.ret = World.grabEnergy(Manager._world, pos, amount)
-  id         = _getOrganismId(pos)
-  i          = UInt(0)
+  local id::Int = _getOrganismId(pos)
   #
   # If other organism at the position of the check, 
-  # then grab energy from him
+  # then grab energy from it
   #
   if haskey(Manager._posMap, id) 
     org = Manager._posMap[id]
@@ -349,10 +370,9 @@ end
 # @param retObj Special object for return value
 #
 function _onStep(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
-  if World.getEnergy(Manager._world, pos) == 0
+  if World.getEnergy(Manager._world, pos) === UInt32(0) && _moveOrganism(pos, organism)
     retObj.pos = pos
-    _moveOrganism(pos, organism)
   else
-    retObj.pos = organism.pos 
+    retObj.ret = false
   end
 end

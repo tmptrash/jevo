@@ -109,7 +109,7 @@ module Mutator
         # and they are in the same module, then === operator returns true.
         # @param o Associated with this code organism
         #
-        org.fnCode = _wrapCode(org.code)
+        org.fnCode = Creature.wrapCode(org.code, org.codeSize)
       end
     end
   end
@@ -139,7 +139,10 @@ module Mutator
     "UInt128","Int","Int8","Int16","Int32","Int64","Int128","BigFloat","FloatingPoint",
     "Float16","Float32","Float64","Bool","Char","ASCIIString","UTF8String","ByteString",
     "Array","BitArray","Range","Tuple","Symbol","Function","Type","Any","String",
-    "Signed","Dict"
+    "Signed","Dict",
+    # organism api
+    "clone(o);","getEnergy(o);","energyLeft(o);","energyRight(o);","energyUp(o);",
+    "energyDown(o);","stepLeft(o);","stepRight(o);","stepUp(o);","stepDown(o);"
     # TODO: here should be a buildin functions from Base, Core and Main modules
     # math/geom functions
     # "round","iround","floor","ifloor","ceil","iceil","trunc","itrunc","div","fld",

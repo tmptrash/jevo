@@ -47,6 +47,10 @@ module Creature
   export create
   export born
   #
+  # Enumeration for direction: up, down, left, right
+  #
+  @enum DIRECTION UP=1 DOWN=2 LEFT=3 RIGHT=4
+  #
   # Describes one organism. In general it consists of energy, world
   # position and many inheritable properties like code, mutationPeriod
   # and so on...
@@ -141,7 +145,7 @@ module Creature
     Organism(
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       code,                                          # code
-      _wrapCode(code, codeSize),                     # fnCode
+      wrapCode(code, codeSize),                      # fnCode
       codeSize,                                      # codeSize
       Config.val(:ORGANISM_MUTATIONS_ON_CLONE),      # mutationsOnClone
       Config.val(:ORGANISM_MUTATION_PERIOD),         # mutationPeriod
@@ -161,7 +165,7 @@ module Creature
     Organism(
       org.mutationProbabilities,                     # mutationProbabilities
       org.code,                                      # code
-      _wrapCode(org.code),                           # fnCode
+      wrapCode(org.code),                            # fnCode
       org.codeSize,                                  # codeSize
       org.mutationsOnClone,                          # mutationsOnClone
       org.mutationPeriod,                            # mutationPeriod
@@ -170,6 +174,18 @@ module Creature
       org.pos,                                       # pos
       Event.create()                                 # observer
     )
+  end
+  #
+  # Wraps code with anonymous function. This function must be anonymous, 
+  # because it's used for comparison with other functions for other 
+  # organisms. If their names are equal and they are in the same module,
+  # then === operator returns true.
+  # @param code Associated with this organism code array
+  # @param size Size of the code in code array
+  # @return {Function}
+  #
+  function wrapCode(code::Array{ASCIIString}, size::Int)
+    eval(parse("function(o) $(join(code[1:size])) end"))
   end
   #
   # TODO: describe organism's task function
@@ -217,72 +233,68 @@ module Creature
   # @param y Y coordinate
   # @return {UInt} Energy value
   #
-  function eg(org::Organism, x::Int, y::Int) _getEnergy(org, x, y) end
+  function getEnergy(org::Organism, x::Int, y::Int) _getEnergy(org, x, y) end
   #
   # @oapi
   # el - means get Energy Left. Short name to help organism find this name faster.
   # Grabs energy from the left point. Grabbibg means decrease energy at point
   # and increase it at organism.
   # @param org Current organism
-  # @param amount Amount of energy to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function el(org::Organism, amount::UInt) _grabEnergy(org, "left", amount) end
+  function energyLeft(org::Organism) _grabEnergy(org, LEFT) end
   #
   # @oapi
   # er - means get Energy Right. Short name to help organism find this name faster.
   # Grabs energy from the right point.
   # @param org Current organism
-  # @param amount Amount of energy to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function er(org::Organism, amount::UInt) _grabEnergy(org, "right", amount) end
+  function energyRight(org::Organism) _grabEnergy(org, RIGHT) end
   #
   # @oapi
   # eu - means get Energy Up. Short name to help organism find this name faster.
   # Grabs energy from the up point.
   # @param org Current organism
-  # @param amount Amount of energy to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function eu(org::Organism, amount::UInt) _grabEnergy(org, "up", amount) end
+  function energyUp(org::Organism) _grabEnergy(org, UP) end
   #
   # @oapi
   # ed - means get Energy Down. Short name to help organism find this name faster.
   # Grabs energy from the down point.
-  # @param org Current organism
-  # @param amount Amount of energy to grab
+  # @param org Current organism  
   # @return {Int} Amount of grabbed energy
   #
-  function ed(org::Organism, amount::UInt) _grabEnergy(org, "down", amount) end
+  function energyDown(org::Organism) _grabEnergy(org, DOWN) end
   #
   # @oapi
   # @param org Current organism
   # sl - means make Step Left. Short name to help organism find this name faster.
   # Makes one step left. It decreases organism's x coodinate by 1.
   #
-  function sl(org::Organism) _step(org, "left") end
+  function stepLeft(org::Organism) _step(org, LEFT) end
   #
   # @oapi
   # @param org Current organism
   # sr - means make Step Right. Short name to help organism find this name faster.
   # Makes one step right. It increases organism's x coodinate by 1.
   #
-  function sr(org::Organism) _step(org, "right") end
+  function stepRight(org::Organism) _step(org, RIGHT) end
   #
   # @oapi
   # @param org Current organism
   # su - means make Step Up. Short name to help organism find this name faster.
   # Makes one step up. It decrease organism's y coodinate by 1.
   #
-  function su(org::Organism) _step(org, "up") end
+  function stepUp(org::Organism) _step(org, UP) end
   #
   # @oapi
   # @param org Current organism
   # sd - means make Step Down. Short name to help organism find this name faster.
   # Makes one step down. It increase organism's y coodinate by 1.
   #
-  function sd(org::Organism) _step(org, "down") end
+  function stepDown(org::Organism) _step(org, DOWN) end
   #
   # @oapi
   # @param org Current organism
@@ -292,20 +304,8 @@ module Creature
   # function should find "free" place for new organism around it.
   # If there is no "free" place, then cloning will be declined.
   #
-  function c(org::Organism) _clone(org) end
+  function clone(org::Organism) _clone(org) end
 
-  #
-  # Wraps code with anonymous function. This function must be anonymous, 
-  # because it's used for comparison with other functions for other 
-  # organisms. If their names are equal and they are in the same module,
-  # then === operator returns true.
-  # @param code Associated with this organism code array
-  # @param size Size of the code in code array
-  # @return {Function}
-  #
-  function _wrapCode(code::Array{ASCIIString}, size::Int)
-    eval(parse("function(o) $(join(code[1:size])) end"))
-  end
   #
   # Clones an organism. It only fires an event. Clonning will be
   # processes in a Manager module. See it for details.
@@ -339,10 +339,10 @@ module Creature
   # Universal method for grabbing energy from the world. It grabs at
   # the position up, left, bottom or right from current organism.
   # @param creature Current organism
-  # @param dir      Direction ("left", "right", "up", "down")
+  # @param dir      Direction Enum(left, right, up, down)
   # @param amount   Amount of energy to grab
   #
-  function _grabEnergy(creature::Organism, dir::ASCIIString, amount::UInt)
+  function _grabEnergy(creature::Organism, dir::DIRECTION)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
@@ -352,7 +352,7 @@ module Creature
     # Listener of "grab$dir" should set amount of energy in retObj.ret
     # Possible values [0...amount]
     #
-    Event.fire(creature.observer, "grab$dir", creature, amount, retObj)
+    Event.fire(creature.observer, "grab$(string(dir))", creature, amount, retObj)
     creature.energy += retObj.ret
 
     retObj.ret
@@ -360,9 +360,9 @@ module Creature
   #
   # Makes one step with specified direction
   # @param creature Organism to move
-  # @param dir Direction ("left", "right", "up", "down")
+  # @param dir Direction Enum(left, right, up, down)
   #
-  function _step(creature::Organism, dir::ASCIIString)
+  function _step(creature::Organism, dir::DIRECTION)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
@@ -371,7 +371,7 @@ module Creature
     #
     # Listener of "step$dir" should set new position in retObj.ret
     #
-    Event.fire(creature.observer, "step$dir", creature, retObj)
-    creature.pos = retObj.pos
+    Event.fire(creature.observer, "step$(string(dir))", creature, retObj)
+    if retObj.ret creature.pos = retObj.pos end
   end
 end

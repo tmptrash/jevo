@@ -100,7 +100,7 @@ module Manager
   # Positions map, which stores positions of all organisms. Is used
   # for fast access to the organism by it's coordinates.
   #
-  _posMap = Dict{UInt, Creature.Organism}()
+  _posMap = Dict{Int, Creature.Organism}()
   #
   # Map of organisms by id
   #

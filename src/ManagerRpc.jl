@@ -49,7 +49,7 @@ end
 function createOrganism(pos = nothing)
   if length(_tasks) > Config.val(:WORLD_MAX_ORGANISMS) return false end
   orgTask = Manager._createOrganism(nothing, pos)
-  orgTask.id
+  orgTask === false ? false : orgTask.id
 end
 #
 # @rpc
@@ -74,9 +74,9 @@ end
 # Does one mutation for specified organism
 # @param organismId Unique orgaism's ID
 #
-function mutate(organismId)
-  if (haskey(Manager._posMap, organismId))
-    Mutator.mutate(Manager._posMap[organismId])
+function mutate(organismId::UInt)
+  if (haskey(Manager._map, organismId))
+    Mutator.mutate(Manager._map[organismId])
     return true
   end
   false
@@ -100,7 +100,7 @@ function getOrganism(id::UInt)
   org = Manager._map[id]
   return RpcApi.SimpleOrganism(
     org.mutationProbabilities,
-    org.code,
+    join(org.code[1:org.codeSize]),
     org.mutationsOnClone,
     org.mutationPeriod,
     org.mutationAmount,

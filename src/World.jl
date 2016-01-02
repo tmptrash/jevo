@@ -62,7 +62,7 @@ module World
   # specified coordinates
   # @param plane World's plane, where to check
   # @param pos Position to check
-  # @return {UInt} Amount of energy
+  # @return {UInt32} Amount of energy
   #
   function getEnergy(plane::Plane, pos::Helper.Point)
     plane.data[pos.y, pos.x]
