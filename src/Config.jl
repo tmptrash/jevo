@@ -242,7 +242,7 @@ module Config
   #
   global _data = GData(
     Data(
-      [2,1000,1,1,1,1],          # ORGANISM_MUTATION_PROBABILITIES (add,change,del,clone,period,amount)
+      [5,100,1,1,1,1],           # ORGANISM_MUTATION_PROBABILITIES (add,change,del,clone,period,amount)
       1,                         # ORGANISM_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
       10,                        # ORGANISM_MUTATION_PERIOD
@@ -254,8 +254,8 @@ module Config
       100000,                    # ORGANISM_MAX_ENERGY
       100,                       # ORGANISM_GRAB_ENERGY
       200,                       # ORGANISM_CODE_BUF_SIZE
-      100,                       # ORGANISM_DECREASE_PERIOD
-      1,                         # ORGANISM_DECREASE_VALUE
+      10,                        # ORGANISM_DECREASE_PERIOD
+      100,                       # ORGANISM_DECREASE_VALUE
       UInt(0),                   # ORGANISM_CURRENT_ID
       100,                       # ORGANISM_GOOD_MUTATION_ENERGY
       100,                       # ORGANISM_CLONE_ENERGY
@@ -265,7 +265,7 @@ module Config
       1,                         # WORLD_FRAME_DELAY
       UInt32(0),                 # WORLD_BACK_COLOR
       0,                         # WORLD_IPS
-      1000,                      # WORLD_MAX_ORGANISMS
+      500,                       # WORLD_MAX_ORGANISMS
       2000                       # CONNECTION_SERVER_PORT
     )
   )

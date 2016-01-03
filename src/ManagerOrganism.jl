@@ -192,7 +192,10 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   # TODO: this functionality will be implemented in future versions...
   if pos.x > Manager._world.width  || pos.x < 1 ||
      pos.y > Manager._world.height || pos.y < 1 ||
-     World.getEnergy(Manager._world, pos) > UInt32(0) return false end
+     World.getEnergy(Manager._world, pos) > UInt32(0) && 
+     (pos.x !== organism.pos.x || pos.y !== organism.pos.y)
+     return false
+   end
 
   delete!(Manager._posMap, _getOrganismId(organism.pos))
   Manager._posMap[_getOrganismId(pos)] = organism
@@ -344,6 +347,8 @@ function _onGrab(organism::Creature.Organism, amount::UInt, pos::Helper.Point, r
       # TODO: possibly, slow code. To fix this we have to
       # TODO: use map instead array for tasks (Manager._tasks)
       _killOrganism(findfirst((t) -> t.organism === org, Manager._tasks))
+      _moveOrganism(org.pos, org)
+      _moveOrganism(organism.pos, organism)
     end
   end
 
@@ -358,9 +363,5 @@ end
 # @param retObj Special object for return value
 #
 function _onStep(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
-  if World.getEnergy(Manager._world, pos) === UInt32(0) && _moveOrganism(pos, organism)
-    retObj.pos = pos
-  else
-    retObj.ret = false
-  end
+  World.getEnergy(Manager._world, pos) === UInt32(0) && _moveOrganism(pos, organism)
 end

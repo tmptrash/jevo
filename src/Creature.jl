@@ -288,28 +288,28 @@ module Creature
   # sl - means make Step Left. Short name to help organism find this name faster.
   # Makes one step left. It decreases organism's x coodinate by 1.
   #
-  function stepLeft(org::Organism) _step(org, left) end
+  function stepLeft(org::Organism) Event.fire(org.observer, "stepleft", org) end
   #
   # @oapi
   # @param org Current organism
   # sr - means make Step Right. Short name to help organism find this name faster.
   # Makes one step right. It increases organism's x coodinate by 1.
   #
-  function stepRight(org::Organism) _step(org, right) end
+  function stepRight(org::Organism) Event.fire(org.observer, "stepright", org) end
   #
   # @oapi
   # @param org Current organism
   # su - means make Step Up. Short name to help organism find this name faster.
   # Makes one step up. It decrease organism's y coodinate by 1.
   #
-  function stepUp(org::Organism) _step(org, up) end
+  function stepUp(org::Organism) Event.fire(org.observer, "stepup", org) end
   #
   # @oapi
   # @param org Current organism
   # sd - means make Step Down. Short name to help organism find this name faster.
   # Makes one step down. It increase organism's y coodinate by 1.
   #
-  function stepDown(org::Organism) _step(org, down) end
+  function stepDown(org::Organism) Event.fire(org.observer, "stepdown", org) end
   #
   # @oapi
   # @param org Current organism
@@ -342,22 +342,5 @@ module Creature
     creature.energy += retObj.ret
 
     retObj.ret
-  end
-  #
-  # Makes one step with specified direction
-  # @param creature Organism to move
-  # @param dir Direction Enum(left, right, up, down)
-  #
-  function _step(creature::Organism, dir::DIRECTION)
-    #
-    # This map will be used for communication between this organism and
-    # some outside object. "ret" key will be contained amount of grabbed energy.
-    #
-    local retObj::RetObj = RetObj()
-    #
-    # Listener of "step$dir" should set new position in retObj.pos
-    #
-    Event.fire(creature.observer, "step$(string(dir))", creature, retObj)
-    if retObj.ret creature.pos = retObj.pos end
   end
 end

@@ -135,19 +135,20 @@ module Mutator
     #"C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U",
     #"V","W","X","Y","Z",
     # keywords
-    "function","for","end","while","if","else","elseif","break","switch","case",
-    "otherwise","try","catch","type","typealias","return","true","false","macro",
-    "quote","in","abstract","module","baremodule","using","using","continue",
-    "ifelse","do","eval","let","finally","throw","bitstype",
+    ";function ",";for ",";end;",";while ",";if ",";else;",";elseif ",";break;",
+    ";switch ",";case ",";otherwise ",";try;",";catch (e);",";type ",";typealias ",
+    ";return "," true "," false ",";quote;"," in ",";abstract ",";module ",";baremodule ",
+    ";using ",";continue;",";ifelse ",";do ",";eval(",";let ",";finally;",";throw ",
+    ";bitstype ",
     # types
-    "Number","Real","BigInt","Integer","UInt","UInt8","UInt16","UInt32","UInt64",
-    "UInt128","Int","Int8","Int16","Int32","Int64","Int128","BigFloat","FloatingPoint",
-    "Float16","Float32","Float64","Bool","Char","ASCIIString","UTF8String","ByteString",
-    "Array","BitArray","Range","Tuple","Symbol","Function","Type","Any","String",
-    "Signed","Dict",
+    " Number "," Real "," BigInt "," Integer "," UInt "," UInt8 "," UInt16 "," UInt32 ",
+    " UInt64 "," UInt128 "," Int "," Int8 "," Int16 "," Int32 "," Int64 "," Int128 ",
+    " BigFloat "," FloatingPoint "," Float16 "," Float32 "," Float64 "," Bool "," Char ",
+    " ASCIIString "," UTF8String "," ByteString "," Array "," BitArray "," Range ",
+    " Tuple "," Symbol "," Function "," Type "," Any "," String "," Signed "," Dict ",
     # organism api
-    "clone(o);","getEnergy(o,","energyLeft(o);","energyRight(o);","energyUp(o);",
-    "energyDown(o);","stepLeft(o);","stepRight(o);","stepUp(o);","stepDown(o);"
+    ";clone(o);",";getEnergy(o,",";energyLeft(o);",";energyRight(o);",";energyUp(o);",
+    ";energyDown(o);",";stepLeft(o);",";stepRight(o);",";stepUp(o);",";stepDown(o);"
     # TODO: here should be a buildin functions from Base, Core and Main modules
     # math/geom functions
     # "round","iround","floor","ifloor","ceil","iceil","trunc","itrunc","div","fld",
