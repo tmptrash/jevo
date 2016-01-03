@@ -249,7 +249,7 @@ module Config
       1000000,                   # ORGANISM_MAX_MUTATION_PERIOD
       1,                         # ORGANISM_MUTATION_AMOUNT
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT
-      1000,                      # ORGANISM_START_AMOUNT
+      300,                       # ORGANISM_START_AMOUNT
       64000,                     # ORGANISM_START_ENERGY
       100000,                    # ORGANISM_MAX_ENERGY
       100,                       # ORGANISM_GRAB_ENERGY
@@ -265,7 +265,7 @@ module Config
       1,                         # WORLD_FRAME_DELAY
       UInt32(0),                 # WORLD_BACK_COLOR
       0,                         # WORLD_IPS
-      3000,                      # WORLD_MAX_ORGANISMS
+      1000,                      # WORLD_MAX_ORGANISMS
       2000                       # CONNECTION_SERVER_PORT
     )
   )
