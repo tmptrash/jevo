@@ -95,6 +95,11 @@ module Config
     #
     ORGANISM_MAX_ENERGY::Int
     #
+    # An amount of energy, which is grabbed from specified position and given
+    # to current organism. It may be eating of energy or another organism.
+    #
+    ORGANISM_GRAB_ENERGY::Int
+    #
     # This is amount of a code array. It's fixed, at least now to improve mutations
     # speed.
     # TODO: make this size dynamic. Every time code length riaches array size,
@@ -237,23 +242,24 @@ module Config
   #
   global _data = GData(
     Data(
-      [0,0,0,0,0,0],             # ORGANISM_MUTATION_PROBABILITIES (add,change,del,clone,period,amount)
+      [2,1000,1,1,1,1],          # ORGANISM_MUTATION_PROBABILITIES (add,change,del,clone,period,amount)
       1,                         # ORGANISM_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      1,                         # ORGANISM_MUTATION_PERIOD
+      10,                        # ORGANISM_MUTATION_PERIOD
       1000000,                   # ORGANISM_MAX_MUTATION_PERIOD
       1,                         # ORGANISM_MUTATION_AMOUNT
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT
-      100,                       # ORGANISM_START_AMOUNT
-      100000,                    # ORGANISM_START_ENERGY
+      1000,                      # ORGANISM_START_AMOUNT
+      64000,                     # ORGANISM_START_ENERGY
       100000,                    # ORGANISM_MAX_ENERGY
+      100,                       # ORGANISM_GRAB_ENERGY
       200,                       # ORGANISM_CODE_BUF_SIZE
-      100000,                    # ORGANISM_DECREASE_PERIOD
+      100,                       # ORGANISM_DECREASE_PERIOD
       1,                         # ORGANISM_DECREASE_VALUE
       UInt(0),                   # ORGANISM_CURRENT_ID
-      50,                        # ORGANISM_GOOD_MUTATION_ENERGY
+      100,                       # ORGANISM_GOOD_MUTATION_ENERGY
       100,                       # ORGANISM_CLONE_ENERGY
-      ["sd(o)"],                 # ORGANISM_START_CODE
+      [""],                      # ORGANISM_START_CODE
       300,                       # WORLD_WIDTH
       200,                       # WORLD_HEIGHT
       1,                         # WORLD_FRAME_DELAY

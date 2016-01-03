@@ -35,7 +35,9 @@ module Helper
   function getProbIndex(prob::Array{Int})
     if length(prob) < 1 return 0 end
 
-    num = rand(1:sum(prob))
+    local s::Int = sum(prob)
+    if s < 1 return 0 end
+    num = rand(1:s)
     s   = 0
     i   = 1
 

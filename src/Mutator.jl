@@ -73,6 +73,7 @@ module Mutator
   import Config
   import Helper
   import Creature
+  using Debug
 
   export mutate
   #
@@ -81,8 +82,10 @@ module Mutator
   #
   function mutate(org::Creature.Organism)
     local pIndex::Int = Helper.getProbIndex(org.mutationProbabilities)
-    local len::Int    = org.codeSize
+    local len::Int = org.codeSize
     local i::Int
+
+    if len < 1 return false end
 
     if     pIndex === 2 org.code[rand(1:len)] = CODE_BLOCKS[rand(1:length(CODE_BLOCKS))]
     elseif pIndex === 1
@@ -112,6 +115,8 @@ module Mutator
         org.fnCode = Creature.wrapCode(org.code, org.codeSize)
       end
     end
+
+    true
   end
   #
   # TODO:
@@ -141,7 +146,7 @@ module Mutator
     "Array","BitArray","Range","Tuple","Symbol","Function","Type","Any","String",
     "Signed","Dict",
     # organism api
-    "clone(o);","getEnergy(o);","energyLeft(o);","energyRight(o);","energyUp(o);",
+    "clone(o);","getEnergy(o,","energyLeft(o);","energyRight(o);","energyUp(o);",
     "energyDown(o);","stepLeft(o);","stepRight(o);","stepUp(o);","stepDown(o);"
     # TODO: here should be a buildin functions from Base, Core and Main modules
     # math/geom functions

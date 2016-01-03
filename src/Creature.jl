@@ -49,7 +49,7 @@ module Creature
   #
   # Enumeration for direction: up, down, left, right
   #
-  @enum DIRECTION UP=1 DOWN=2 LEFT=3 RIGHT=4
+  @enum DIRECTION up=1 down=2 left=3 right=4
   #
   # Describes one organism. In general it consists of energy, world
   # position and many inheritable properties like code, mutationPeriod
@@ -165,7 +165,7 @@ module Creature
     Organism(
       org.mutationProbabilities,                     # mutationProbabilities
       org.code,                                      # code
-      wrapCode(org.code),                            # fnCode
+      wrapCode(org.code, org.codeSize),              # fnCode
       org.codeSize,                                  # codeSize
       org.mutationsOnClone,                          # mutationsOnClone
       org.mutationPeriod,                            # mutationPeriod
@@ -233,93 +233,7 @@ module Creature
   # @param y Y coordinate
   # @return {UInt} Energy value
   #
-  function getEnergy(org::Organism, x::Int, y::Int) _getEnergy(org, x, y) end
-  #
-  # @oapi
-  # el - means get Energy Left. Short name to help organism find this name faster.
-  # Grabs energy from the left point. Grabbibg means decrease energy at point
-  # and increase it at organism.
-  # @param org Current organism
-  # @return {UInt} Amount of grabbed energy
-  #
-  function energyLeft(org::Organism) _grabEnergy(org, LEFT) end
-  #
-  # @oapi
-  # er - means get Energy Right. Short name to help organism find this name faster.
-  # Grabs energy from the right point.
-  # @param org Current organism
-  # @return {UInt} Amount of grabbed energy
-  #
-  function energyRight(org::Organism) _grabEnergy(org, RIGHT) end
-  #
-  # @oapi
-  # eu - means get Energy Up. Short name to help organism find this name faster.
-  # Grabs energy from the up point.
-  # @param org Current organism
-  # @return {UInt} Amount of grabbed energy
-  #
-  function energyUp(org::Organism) _grabEnergy(org, UP) end
-  #
-  # @oapi
-  # ed - means get Energy Down. Short name to help organism find this name faster.
-  # Grabs energy from the down point.
-  # @param org Current organism  
-  # @return {Int} Amount of grabbed energy
-  #
-  function energyDown(org::Organism) _grabEnergy(org, DOWN) end
-  #
-  # @oapi
-  # @param org Current organism
-  # sl - means make Step Left. Short name to help organism find this name faster.
-  # Makes one step left. It decreases organism's x coodinate by 1.
-  #
-  function stepLeft(org::Organism) _step(org, LEFT) end
-  #
-  # @oapi
-  # @param org Current organism
-  # sr - means make Step Right. Short name to help organism find this name faster.
-  # Makes one step right. It increases organism's x coodinate by 1.
-  #
-  function stepRight(org::Organism) _step(org, RIGHT) end
-  #
-  # @oapi
-  # @param org Current organism
-  # su - means make Step Up. Short name to help organism find this name faster.
-  # Makes one step up. It decrease organism's y coodinate by 1.
-  #
-  function stepUp(org::Organism) _step(org, UP) end
-  #
-  # @oapi
-  # @param org Current organism
-  # sd - means make Step Down. Short name to help organism find this name faster.
-  # Makes one step down. It increase organism's y coodinate by 1.
-  #
-  function stepDown(org::Organism) _step(org, DOWN) end
-  #
-  # @oapi
-  # @param org Current organism
-  # c - means Clone. Short name to help organism find this name faster.
-  # Makes organism clone. During cloning new organism will get few
-  # mutations. It will be a difference from father's organism. This
-  # function should find "free" place for new organism around it.
-  # If there is no "free" place, then cloning will be declined.
-  #
-  function clone(org::Organism) _clone(org) end
-
-  #
-  # Clones an organism. It only fires an event. Clonning will be
-  # processes in a Manager module. See it for details.
-  # @param {Organism} creature Instance of parent organism.
-  #
-  function _clone(creature::Organism)
-    Event.fire(creature.observer, "clone", creature)
-  end
-  #
-  # Checks amount of organism's energy in {x,y} point
-  # @param x X coordinate
-  # @param y Y coordinate
-  #
-  function _getEnergy(creature::Organism, x::Int, y::Int)
+  function getEnergy(org::Organism, x::Int, y::Int)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" will be contained amount of energy.
@@ -329,12 +243,84 @@ module Creature
     # Listener of "getenergy" should set amount of energy in retObj.ret
     # Possible values [0...typemax(Int)]
     #
-    Event.fire(creature.observer, "getenergy", creature, Helper.Point(x, y), retObj)
+    Event.fire(org.observer, "getenergy", org, Helper.Point(x, y), retObj)
     #
     # Return value
     #
     retObj.ret
   end
+  #
+  # @oapi
+  # el - means get Energy Left. Short name to help organism find this name faster.
+  # Grabs energy from the left point. Grabbibg means decrease energy at point
+  # and increase it at organism.
+  # @param org Current organism
+  # @return {UInt} Amount of grabbed energy
+  #
+  function energyLeft(org::Organism) _grabEnergy(org, left) end
+  #
+  # @oapi
+  # er - means get Energy Right. Short name to help organism find this name faster.
+  # Grabs energy from the right point.
+  # @param org Current organism
+  # @return {UInt} Amount of grabbed energy
+  #
+  function energyRight(org::Organism) _grabEnergy(org, right) end
+  #
+  # @oapi
+  # eu - means get Energy Up. Short name to help organism find this name faster.
+  # Grabs energy from the up point.
+  # @param org Current organism
+  # @return {UInt} Amount of grabbed energy
+  #
+  function energyUp(org::Organism) _grabEnergy(org, up) end
+  #
+  # @oapi
+  # ed - means get Energy Down. Short name to help organism find this name faster.
+  # Grabs energy from the down point.
+  # @param org Current organism  
+  # @return {Int} Amount of grabbed energy
+  #
+  function energyDown(org::Organism) _grabEnergy(org, down) end
+  #
+  # @oapi
+  # @param org Current organism
+  # sl - means make Step Left. Short name to help organism find this name faster.
+  # Makes one step left. It decreases organism's x coodinate by 1.
+  #
+  function stepLeft(org::Organism) _step(org, left) end
+  #
+  # @oapi
+  # @param org Current organism
+  # sr - means make Step Right. Short name to help organism find this name faster.
+  # Makes one step right. It increases organism's x coodinate by 1.
+  #
+  function stepRight(org::Organism) _step(org, right) end
+  #
+  # @oapi
+  # @param org Current organism
+  # su - means make Step Up. Short name to help organism find this name faster.
+  # Makes one step up. It decrease organism's y coodinate by 1.
+  #
+  function stepUp(org::Organism) _step(org, up) end
+  #
+  # @oapi
+  # @param org Current organism
+  # sd - means make Step Down. Short name to help organism find this name faster.
+  # Makes one step down. It increase organism's y coodinate by 1.
+  #
+  function stepDown(org::Organism) _step(org, down) end
+  #
+  # @oapi
+  # @param org Current organism
+  # c - means Clone. Short name to help organism find this name faster.
+  # Makes organism clone. During cloning new organism will get few
+  # mutations. It will be a difference from father's organism. This
+  # function should find "free" place for new organism around it.
+  # If there is no "free" place, then cloning will be declined.
+  #
+  function clone(org::Organism) Event.fire(org.observer, "clone", org) end
+
   #
   # Universal method for grabbing energy from the world. It grabs at
   # the position up, left, bottom or right from current organism.
@@ -352,7 +338,7 @@ module Creature
     # Listener of "grab$dir" should set amount of energy in retObj.ret
     # Possible values [0...amount]
     #
-    Event.fire(creature.observer, "grab$(string(dir))", creature, amount, retObj)
+    Event.fire(creature.observer, "grab$(string(dir))", creature, Config.val(:ORGANISM_GRAB_ENERGY), retObj)
     creature.energy += retObj.ret
 
     retObj.ret
@@ -367,9 +353,9 @@ module Creature
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
     #
-    retObj = RetObj()
+    local retObj::RetObj = RetObj()
     #
-    # Listener of "step$dir" should set new position in retObj.ret
+    # Listener of "step$dir" should set new position in retObj.pos
     #
     Event.fire(creature.observer, "step$(string(dir))", creature, retObj)
     if retObj.ret creature.pos = retObj.pos end

@@ -53,10 +53,8 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
         # If mutationPeriod or mutationAmount set to 0, it 
         # means that mutations during leaving are disabled.
         #
-        if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0 && org.mutationAmount > 0
-          for j = 1:org.mutationAmount
-            Mutator.mutate(org)
-          end
+        if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0
+          for j = 1:org.mutationAmount Mutator.mutate(org) end
         end
       catch e
         println("Manager._updateOrganisms(): $e")
@@ -140,16 +138,14 @@ end
 # @param pos Optional. Position of organism.
 # @return {OrganismTask}
 #
-@debug function _createOrganism(organism = nothing, pos = nothing)
-@bp
-  pos  = organism !== nothing ? World.getNearFreePos(_world, organism.pos) : (pos === nothing ? World.getFreePos(Manager._world) : pos)
+function _createOrganism(organism = nothing, pos = nothing)
+  pos  = organism !== nothing && pos === nothing ? World.getNearFreePos(_world, organism.pos) : (pos === nothing ? World.getFreePos(Manager._world) : pos)
   if pos === false return false end
   org  = organism === nothing ? Creature.create(pos) : Creature.copy(organism)
   id   = Config.val(:ORGANISM_CURRENT_ID)
   task = Task(Creature.born(org, id))
 
   org.pos = pos
-  _organismMsg(id, "run")
   Event.on(org.observer, "getenergy", _onGetEnergy)
   Event.on(org.observer, "grableft",  _onGrabLeft )
   Event.on(org.observer, "grabright", _onGrabRight)
@@ -171,6 +167,8 @@ end
   Config.val(:ORGANISM_CURRENT_ID, id + UInt(1))
   _map[id] = org
   push!(Manager._tasks, oTask)
+  _organismMsg(id, "run")
+
   oTask
 end
 #
@@ -189,11 +187,12 @@ end
 # @param organism Organism to move
 # @return {Bool}
 #
-@debug function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
-@bp
+function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   # TODO: this is a place where organism may step to another area (instance).
   # TODO: this functionality will be implemented in future versions...
-  if pos.x > Manager._world.width || pos.x < 1 || pos.y > Manager._world.height || pos.y < 1 return false end
+  if pos.x > Manager._world.width  || pos.x < 1 ||
+     pos.y > Manager._world.height || pos.y < 1 ||
+     World.getEnergy(Manager._world, pos) > UInt32(0) return false end
 
   delete!(Manager._posMap, _getOrganismId(organism.pos))
   Manager._posMap[_getOrganismId(pos)] = organism
@@ -222,25 +221,23 @@ end
 # @param organism Parent organism
 #
 function _onClone(organism::Creature.Organism)
-  println("clone!!!")
-  if length(_tasks) > Config.val(:WORLD_MAX_ORGANISMS) return nothing end
   #
   # We have to promote clonning, because it's very fundamental element of evolution
   #
   organism.energy += Config.val(:ORGANISM_CLONE_ENERGY)
+  if length(_tasks) > Config.val(:WORLD_MAX_ORGANISMS) return nothing end
   #
   # First, we have to find free point near the organism to put
   # clone in. It's possible, that all places are filled.
   #
   pos = World.getNearFreePos(Manager._world, organism.pos)
-  if pos == false return nothing end
+  if pos === false return nothing end
   #
   # Creates new organism and applies mutations to him.
   #
-  crTask = Manager._createOrganism(organism)
-  for i = 1:crTask.organism.mutationsOnClone
-    Mutator.mutate(crTask.organism)
-  end
+  crTask = Manager._createOrganism(organism, pos)
+  if crTask === false return false end
+  for i = 1:crTask.organism.mutationsOnClone Mutator.mutate(crTask.organism) end
 end
 #
 # Returns an energy amount in specified point in a world.
@@ -249,7 +246,6 @@ end
 # @param retObj Special object for return value
 #
 function _onGetEnergy(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
-  println("get energy!!!")
   retObj.ret = World.getEnergy(Manager._world, pos)
 end
 #
@@ -259,7 +255,6 @@ end
 # @param retObj Special object for return value
 #
 function _onGrabLeft(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
-  println("grab left!!!")
   _onGrab(organism, amount, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
 end
 #
@@ -269,7 +264,6 @@ end
 # @param retObj Special object for return value
 #
 function _onGrabRight(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
-  println("grab right!!!")
   _onGrab(organism, amount, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
 end
 #
@@ -279,7 +273,6 @@ end
 # @param retObj Special object for return value
 #
 function _onGrabUp(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
-  println("grab up!!!")
   _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
 end
 #
@@ -289,7 +282,6 @@ end
 # @param retObj Special object for return value
 #
 function _onGrabDown(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
-  println("grab up!!!")
   _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
 end
 #
@@ -299,7 +291,6 @@ end
 # @param retObj Special object for return value
 #
 function _onStepLeft(organism::Creature.Organism, retObj::Creature.RetObj)
-  println("step left!!!")
   _onStep(organism, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
 end
 #
@@ -309,7 +300,6 @@ end
 # @param retObj Special object for return value
 #
 function _onStepRight(organism::Creature.Organism, retObj::Creature.RetObj)
-  println("step right!!!")
   _onStep(organism, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
 end
 #
@@ -319,7 +309,6 @@ end
 # @param retObj Special object for return value
 #
 function _onStepUp(organism::Creature.Organism, retObj::Creature.RetObj)
-  println("step up!!!")
   _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
 end
 #
@@ -329,7 +318,6 @@ end
 # @param retObj Special object for return value
 #
 function _onStepDown(organism::Creature.Organism, retObj::Creature.RetObj)
-  println("step down!!!")
   _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
 end
 #
