@@ -17,6 +17,7 @@ module RpcApi
   export RPC_GET_IPS
   export RPC_GET_ORGANISM
   export RPC_GET_AMOUNT
+  export RPC_GET_ORGANISMS
   export RPC_DEBUG_GC
   
   export Region
@@ -33,6 +34,10 @@ module RpcApi
   # network.
   #
   type SimpleOrganism
+    #
+    # Unique organism id
+    #
+    id::UInt
     #
     # @inheritable
     # Mutations probability. Add, change, delete. e.g.: [1,10,2]
@@ -89,5 +94,6 @@ module RpcApi
   const RPC_GET_IPS           = 7
   const RPC_GET_ORGANISM      = 8
   const RPC_GET_AMOUNT        = 9
-  const RPC_DEBUG_GC          = 10
+  const RPC_GET_ORGANISMS     = 10
+  const RPC_DEBUG_GC          = 11
 end

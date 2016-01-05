@@ -119,6 +119,13 @@ module Mutator
     true
   end
   #
+  # Generates function in format function <name>([<args>]) end. Returns
+  # [";function <name>(","<arg1>,","<arg2>,...",")", " ", ]
+  #
+  # function _getFunction()
+  #   ["function(",]
+  # end
+  #
   # TODO:
   #
   const CODE_BLOCKS = [
@@ -134,6 +141,8 @@ module Mutator
     "j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z",#"A","B",
     #"C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U",
     #"V","W","X","Y","Z",
+    # complex keywords
+    #_getFunction,
     # keywords
     ";function ",";for ",";end;",";while ",";if ",";else;",";elseif ",";break;",
     ";switch ",";case ",";otherwise ",";try;",";catch (e);",";type ",";typealias ",

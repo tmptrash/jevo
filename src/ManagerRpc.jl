@@ -90,6 +90,7 @@ function getIps()
   Config.val(:WORLD_IPS)
 end
 #
+# @rpc
 # Returns an organism by it's unique id
 # @param id
 # @return Creature.Organism or false if no organism with this id
@@ -99,6 +100,7 @@ function getOrganism(id::UInt)
   
   org = Manager._map[id]
   return RpcApi.SimpleOrganism(
+    id,
     org.mutationProbabilities,
     join(org.code[1:org.codeSize]),
     org.mutationsOnClone,
@@ -116,6 +118,27 @@ end
 #
 function getAmount()
   length(_tasks)
+end
+#
+# @rpc
+# Returns organism's list in specified range or all ovailable. from
+# and to indexes are not unique ids. This is just indexes in _tasks
+# list.
+# @param from Start index in _tasks list
+# @param to   End index in _tasks list. 0 - means last item
+# @return {Array{SimpleOrganism}}
+#
+function getOrganisms(from::Int = 1, to::Int = 0)
+  local orgs::Array{RpcApi.SimpleOrganism, 1} = Array{RpcApi.SimpleOrganism, 1}()
+  local len::Int = length(_tasks)
+  local i::Int
+
+  from = from < 1 || from > len ? 1 : from
+  to   = to === 0 ? len : to
+
+  for i=from:to push!(orgs, getOrganism(_tasks[i].id)) end
+
+  orgs
 end
 #
 # @rpc
@@ -163,5 +186,6 @@ _rpcApi = Dict{Integer, Function}(
   RPC_GET_IPS           => getIps,
   RPC_GET_ORGANISM      => getOrganism,
   RPC_GET_AMOUNT        => getAmount,
+  RPC_GET_ORGANISMS     => getOrganisms,
   RPC_DEBUG_GC          => debugGc
 )
