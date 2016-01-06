@@ -64,6 +64,7 @@ module Mutator
     :(local $(_getNewVar(org))::$(typ)=$(_getVal(typ)))
   end
   #
+  # @cmd
   # + operator implementation. Sums two variables.
   # @param org Organism we have to mutate
   # @return {Expr}
