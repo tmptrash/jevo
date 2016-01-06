@@ -65,22 +65,21 @@ module Creature
     mutationProbabilities::Array{Int}
     #
     # @inheritable
-    # Code of organism. This is an array of atomic Julia language peaces
-    # like "for", "end", "UInt32", "{", "+=", etc. Result script is a 
-    # joining of this array into a string, which will be parsed and
-    # evaluated with eval(parse(code_str))
+    # Code in AST format
     #
-    code::Array{ASCIIString}
+    code::Expr
     #
     # @inheritable
-    # Compiled and covered by function version of code. This
-    # code is running in a loop all the time.
+    # Counter, which is used for creating unique variable names. e.g.: 
+    # var_12. Increase itself every time, then new variable is created.
     #
-    fnCode::Function
+    varId::Int
     #
-    # Amount of filled block in code array. Less or equal to array size
+    # @inheritable
+    # Map of available at the time variables. It means, that they are
+    # currently are in the code.
     #
-    codeSize::Int
+    vars::Dict{DataType, Array{Symbol, 1}}
     #
     # @inheritable
     # Amount of mutations, which will be applied to arganism after
@@ -135,18 +134,43 @@ module Creature
     RetObj(r = nothing, p = nothing) = (x = new(r); p === nothing ? x : (x.pos = p;x))
   end
   #
-  # Creates new organism with default settings.
+  # Creates new organism with default settings. New code should contain
+  # variables of all supported types. This is speed optimization feature.
+  # @param pos Position of organism
   # @return {Creature}
   #
   function create(pos::Helper.Point = Helper.Point(1, 1))
-    local code::Array{ASCIIString} = Base.copy(Config.val(:ORGANISM_START_CODE))
-    local codeSize::Int = length(code)
-    resize!(code, Config.val(:ORGANISM_CODE_BUF_SIZE))
+    #
+    # TODO: set o parameter type to Creature.Organism
+    # Expression below means:
+    # function (o)
+    #   local var_1::ASCIString=randstring()
+    #   local var_1::Bool=rand(Bool)
+    #   local var_1::Int8=rand(Int8)
+    #   local var_1::Int16=rand(Int16)
+    # end
+    #
+    local code::Expr = Expr(:function, Expr(:tuple, :o), Expr(:block,
+      Expr(:local, Expr(:(=), Expr(:(::), :var_1, :ASCIIString), randstring())),
+      Expr(:local, Expr(:(=), Expr(:(::), :var_2, :Bool),        rand(Bool))),
+      Expr(:local, Expr(:(=), Expr(:(::), :var_3, :Int8),        rand(Int8))),
+      Expr(:local, Expr(:(=), Expr(:(::), :var_4, :Int16),       rand(Int16)))
+    ))
+    #
+    # This map should be synchronized with code expression above
+    #
+    local vars::Dict{DataType, Array{Symbol, 1}} = Dict{DataType, Array{Symbol, 1}}(
+      ASCIIString => [:var_1],
+      Bool        => [:var_2],
+      Int8        => [:var_3],
+      Int16       => [:var_4]
+    )
+
     Organism(
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       code,                                          # code
-      wrapCode(code, codeSize),                      # fnCode
-      codeSize,                                      # codeSize
+      4,                                             # varId
+      vars,                                          # vars
       Config.val(:ORGANISM_MUTATIONS_ON_CLONE),      # mutationsOnClone
       Config.val(:ORGANISM_MUTATION_PERIOD),         # mutationPeriod
       Config.val(:ORGANISM_MUTATION_AMOUNT),         # mutationAmount
@@ -165,8 +189,8 @@ module Creature
     Organism(
       org.mutationProbabilities,                     # mutationProbabilities
       org.code,                                      # code
-      wrapCode(org.code, org.codeSize),              # fnCode
-      org.codeSize,                                  # codeSize
+      org.varId,                                     # varId
+      Dict{DataType, Array{Symbol, 1}}(),            # vars
       org.mutationsOnClone,                          # mutationsOnClone
       org.mutationPeriod,                            # mutationPeriod
       org.mutationAmount,                            # mutationAmount

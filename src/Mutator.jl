@@ -1,73 +1,7 @@
-# TODO: update this comment according to new mutations algorithm
-# The purpose of this module is in mutation process. In real nature,
-# organisms have DNA inside all cells. This DNA may be mutated during copy.
-# In most cases mutations add errors and garbage to DNA. But in very small
-# cases, they add new abilities... In our case DNA is a organism's script
-# on Julia language. Like with DNA, it changes this script. Every change or 
-# mutation is a small add or change operation on script line. It's 
-# impossible to mutate the script with syntax error. But it's possible to 
-# create logical errors. For example it's possible to have stack overflow. 
-# This is normal situation. An exception in this case will occure and 
-# organism will lost some energy. Main method here is called mutate(). It 
-# makes one change/add operation with script. It works in a simple way:
 #
-#   1. Finds random block of code in Script.Code.blocks array
-#   2. Finds one line in block
-#   2. Chooses one operation (add, change)
-#   3. apply operation to this line
-#
-# So, all you need to do is call mutate(script, probabilities). Second 
-# argument is a probabilities array. It sets probabilities for add, 
-# and change operations. For example: [3,2] means that mutator will add(3)
-# new operand more often, then change(2).
-#
-# There are many organisms in our virtual world. So, we have to have an
-# ability to switch between them. For this, Mutator adds produce() calls
-# in every block. In our case: for, if, else, function.
-# This module uses special expression for describing operands. For example:
-#     
-#    var = {[sign]{const|var} [op [sign]{const|var}]|func([args])}
-#
-# It means:
-#    
-#     var   - Variable
-#     sign  - One of possible signs. See _sign for details
-#     const - constant. e.g.: 34 or 0
-#     op    - operator. e.g.: +,-,^ and so on
-#     []    - optional expression
-#     {|}   - one value should be choosed
-#     func  - custom function
-#
-# Mutator does it's modifications throught expressions. See this link for 
-# details: http://julia.readthedocs.org/en/latest/manual/metaprogramming/
-# Julia has special type for this. It's called Expr(). Descriptions in this
-# module use short syntax for expressions. For example:
-#
-#     Expr: (:(=), :var1, (:call, :func1))
-#     Real: var1 = func1()
-#  
-# Short, because we don't use Expr before every (...) block. Real (full)
-# expression in this case should be:
-#
-#     ex = Expr(:(=), :var1, Expr(:call, :func1))
-#
-# This expression may be run in Julia by calling eval(). Like this:
-#
-#     eval(ex)
-# 
-# Usage:
-#     organism = Creature.create()   # creates new organism
-#     Mutator.mutate(organism)       # ads one mutation to his code
-#
-# @author DeadbraiN
-#
-# TODO: every private method should have standart description of operation it
-# TODO: works with. e.g.: if {var|const} op {var|const} end
-# TODO: usage...
-# TODO: think about functions copy (like gene copy)
-# TODO: Check if we can move some constants to global Config module
-#
-# OPT : add speed tests before and after optimization
+# TODO: module description
+# TODO: describe linear quoted structure of the script we support
+# TODO: describe @cmd annotation
 #
 module Mutator
   import Config
@@ -119,14 +53,75 @@ module Mutator
     true
   end
   #
-  # Generates function in format function <name>([<args>]) end. Returns
-  # [";function <name>(","<arg1>,","<arg2>,...",")", " ", ]
+  # @cmd
+  # Returns AST expression for variable creating. Variable format: 
+  # local name::Type = value
+  # @param org Organism we have to mutate
+  # @return {Expr}
   #
-  # function _getFunction()
-  #   ["function(",]
-  #   splice!([1,2,3], n:n-1, [4,5]) - array into array insertion
-  #   splice!([1,2,3], 2:1, [4,5])  -> [1,4,5,2,3]
-  # end
+  function _var(org::Creature.Organism)
+    local typ::DataType = _getType()
+    :(local $(_getNewVar(org))::$(typ)=$(_getVal(typ)))
+  end
+  #
+  # + operator implementation. Sums two variables.
+  # @param org Organism we have to mutate
+  # @return {Expr}
+  #
+  function _plus(org::Creature.Organism)
+    local typ::DataType = _getType()
+    local v1::Symbol = _getVar(org, typ)
+    local v2::Symbol = _getVar(org, typ)
+
+    if typ === ASCIIString 
+      return :($(v1) * $(v2))
+    elseif typ === Bool
+      return :($(v1) & $(v2))
+    end
+
+    :($(v1) + $(v2))
+  end
+
+  #
+  # Creates new unique variable name and returns it's symbol
+  # @param org Owner of new variable
+  # @return {Symbol}
+  #
+  function _getNewVar(org::Creature.Organism)
+    Symbol("var_$(org.varId += 1)")
+  end
+  #
+  # Returns one of supported types. Is used randomizer for choosing type.
+  # @return {DataType}
+  #
+  function _getType()
+    local types::Array{DataType} = [ASCIIString, Bool, Int8, Int16]
+    types[rand(1:length(types))]
+  end
+  #
+  # Returns random value by data type. e.g.: 123 for Int8
+  # @param typ Data type
+  # @return {Any}
+  #
+  function _getVal(typ::DataType)
+    typ !== ASCIIString ? rand(typ) : randstring()
+  end
+  #
+  # Returns a variable from existing in a code
+  # @param org Organism we are mutating
+  # @param typ Type of variable we want to take
+  # @return {Symbol}
+  #
+  function _getVar(org::Creature.Organism, typ::DataType)
+    org.vars[typ][rand(1:length(org.vars[typ]))]
+  end
+
+  #
+  # TODO:
+  #
+  const CODE_SNIPPETS = [
+    _var
+  ]
   #
   # TODO:
   #
