@@ -121,7 +121,7 @@ module Mutator
   # TODO:
   #
   const CODE_SNIPPETS = [
-    _var
+    _var, _plus
   ]
   #
   # TODO:
