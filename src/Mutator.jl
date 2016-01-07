@@ -115,8 +115,7 @@ module Mutator
   # @param org Organism we are working with
   # @return {Expr|nothing}
   #
-  @debug function _fnCall(org::Creature.Organism)
-  @bp
+  function _fnCall(org::Creature.Organism)
     local len::Int = length(org.funcs)
     if len < 1 return nothing end
     local fnExpr::Expr = org.funcs[rand(1:len)]
@@ -179,7 +178,7 @@ module Mutator
   # TODO:
   #
   const CODE_SNIPPETS = [
-    _var, _plus, _fn
+    _var, _plus, _fn, _fnCall
   ]
   #
   # TODO:
