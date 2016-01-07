@@ -69,6 +69,10 @@ module Creature
     #
     code::Expr
     #
+    # Amount of code lines including lines in functions
+    #
+    codeSize::Int
+    #
     # @inheritable
     # Counter, which is used for creating unique variable names. e.g.: 
     # var_12. Increase itself every time, then new variable is created.
@@ -180,6 +184,7 @@ module Creature
     Organism(
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       code,                                          # code
+      4,                                             # codeSize
       4,                                             # varId
       0,                                             # fnId
       vars,                                          # vars
@@ -203,6 +208,7 @@ module Creature
     Organism(
       org.mutationProbabilities,                     # mutationProbabilities
       org.code,                                      # code
+      org.codeSize,                                  # codeSize
       org.varId,                                     # varId
       org.fnId,                                      # fnId
       org.vars,                                      # vars

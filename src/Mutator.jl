@@ -13,6 +13,7 @@ module Mutator
   #
   # TODO: add description of the method
   # TODO: describe indexes
+  # TODO: add org.codeSize += 1 for every adding
   #
   function mutate(org::Creature.Organism)
     local pIndex::Int = Helper.getProbIndex(org.mutationProbabilities)
