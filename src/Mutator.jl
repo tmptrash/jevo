@@ -19,25 +19,18 @@ module Mutator
   function mutate(org::Creature.Organism)
     local pIndex::Int = Helper.getProbIndex(org.mutationProbabilities)
     local len::Int = org.codeSize
-    local i::Int
+    local map::Array{Function, 1} = [_add, _change, _smallChange, _del, _onClone, _onPeriod, _onAmount]
 
     if len < 1 return false end
 
-    if     pIndex === 3 _smallChange(org)
-    elseif pIndex === 2 _change(org)
-    elseif pIndex === 1 _add(org)
-    elseif pIndex === 4 _del(org)
-    elseif pIndex === 5 org.mutationsOnClone = rand(0:Config.val(:ORGANISM_MAX_MUTATIONS_ON_CLONE))
-    elseif pIndex === 6 org.mutationPeriod = rand(0:Config.val(:ORGANISM_MAX_MUTATION_PERIOD))
-    elseif pIndex === 7 org.mutationAmount = rand(0:Config.val(:ORGANISM_MAX_MUTATION_AMOUNT))
-    end
+    map[pIndex](org)
     #
     # Updates compiled version of the code. Only valid code will be applied,
     # because exception will be fired in case of error organismcode.
     # TODO: if code is valid, then we have to check in on remote controlled
     # TODO: worker to prevent infinite loop.
     #
-    if pIndex < 4
+    if pIndex < 5
       try
         #
         # This function must be anonymous, because it's used for comparison
@@ -45,7 +38,7 @@ module Mutator
         # and they are in the same module, then === operator returns true.
         # @param o Associated with this code organism
         #
-        org.fnCode = Creature.wrapCode(org.code, org.codeSize)
+        org.codeFn = Creature.wrapCode(org.code)
       end
     end
 
@@ -160,7 +153,30 @@ module Mutator
   #
   function _del(org::Creature.Organism)
   end
-
+  #
+  # mutationsOnClone property mutation handler. It changes this 
+  # property randomly.
+  # @param org Organism we are working with
+  #
+  function _onClone(org::Creature.Organism)
+    org.mutationsOnClone = rand(0:Config.val(:ORGANISM_MAX_MUTATIONS_ON_CLONE))
+  end
+  #
+  # mutationPeriod property mutation handler. It changes this 
+  # property randomly.
+  # @param org Organism we are working with
+  #
+  function _onPeriod(org::Creature.Organism)
+    org.mutationPeriod = rand(0:Config.val(:ORGANISM_MAX_MUTATION_PERIOD))
+  end
+  #
+  # mutationAmount property mutation handler. It changes this 
+  # property randomly.
+  # @param org Organism we are working with
+  #
+  function _onAmount(org::Creature.Organism)
+    org.mutationAmount = rand(0:Config.val(:ORGANISM_MAX_MUTATION_AMOUNT))
+  end
   #
   # Creates new unique variable name and returns it's symbol
   # @param org Owner of new variable

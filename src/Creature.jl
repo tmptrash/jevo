@@ -69,6 +69,10 @@ module Creature
     #
     code::Expr
     #
+    # Compiled version of code
+    #
+    codeFn::Function
+    #
     # Amount of code lines including lines in functions
     #
     codeSize::Int
@@ -184,6 +188,7 @@ module Creature
     Organism(
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       code,                                          # code
+      wrapCode(code),                                # codeFn
       4,                                             # codeSize
       4,                                             # varId
       0,                                             # fnId
@@ -208,6 +213,7 @@ module Creature
     Organism(
       org.mutationProbabilities,                     # mutationProbabilities
       org.code,                                      # code
+      org.codeFn,                                    # codeFn
       org.codeSize,                                  # codeSize
       org.varId,                                     # varId
       org.fnId,                                      # fnId
@@ -227,11 +233,12 @@ module Creature
   # organisms. If their names are equal and they are in the same module,
   # then === operator returns true.
   # @param code Associated with this organism code array
-  # @param size Size of the code in code array
   # @return {Function}
   #
-  function wrapCode(code::Array{ASCIIString}, size::Int)
-    eval(parse("function(o) $(join(code[1:size])) end"))
+  function wrapCode(code::Expr)
+    #eval(parse("function(o) $(join(code[1:size])) end"))
+    # TODO: wrap this code to anonymous function
+    eval(code)
   end
   #
   # TODO: describe organism's task function
