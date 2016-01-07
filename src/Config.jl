@@ -100,13 +100,6 @@ module Config
     #
     ORGANISM_GRAB_ENERGY::Int
     #
-    # This is amount of a code array. It's fixed, at least now to improve mutations
-    # speed.
-    # TODO: make this size dynamic. Every time code length riaches array size,
-    # TODO: it should be increased to the same size (*2) ans so on.
-    #
-    ORGANISM_CODE_BUF_SIZE::Int
-    #
     # Amount of iterations within organism's life loop, after that we decrease
     # amount of energy into DECREASE_VALUE points. If 0, then energy decreasing 
     # will be disabled.
@@ -129,11 +122,9 @@ module Config
     #
     ORGANISM_CLONE_ENERGY::Int
     #
-    # Minimal text code on julia language, which is used for new organisms at the very beginning
-    # stage of evolution. Before first stable organisms will be produced. By default, organism may
-    # produce it's copies and nothing more.
+    # Maximum amount of arguments in custom functions
     #
-    ORGANISM_START_CODE::Array{ASCIIString}
+    CODE_MAX_FUNC_PARAMS::Int
     #
     # World width
     #
@@ -253,13 +244,12 @@ module Config
       64000,                     # ORGANISM_START_ENERGY
       100000,                    # ORGANISM_MAX_ENERGY
       100,                       # ORGANISM_GRAB_ENERGY
-      200,                       # ORGANISM_CODE_BUF_SIZE
       10,                        # ORGANISM_DECREASE_PERIOD
       100,                       # ORGANISM_DECREASE_VALUE
       UInt(0),                   # ORGANISM_CURRENT_ID
       100,                       # ORGANISM_GOOD_MUTATION_ENERGY
       100,                       # ORGANISM_CLONE_ENERGY
-      [""],                      # ORGANISM_START_CODE
+      4,                         # CODE_MAX_FUNC_PARAMS
       300,                       # WORLD_WIDTH
       200,                       # WORLD_HEIGHT
       1,                         # WORLD_FRAME_DELAY

@@ -76,6 +76,11 @@ module Creature
     varId::Int
     #
     # @inheritable
+    # The same like varId, but for functions.
+    #
+    fnId::Int
+    #
+    # @inheritable
     # Map of available at the time variables. It means, that they are
     # currently are in the code.
     #
@@ -170,6 +175,7 @@ module Creature
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       code,                                          # code
       4,                                             # varId
+      0,                                             # fnId
       vars,                                          # vars
       Config.val(:ORGANISM_MUTATIONS_ON_CLONE),      # mutationsOnClone
       Config.val(:ORGANISM_MUTATION_PERIOD),         # mutationPeriod
@@ -190,7 +196,8 @@ module Creature
       org.mutationProbabilities,                     # mutationProbabilities
       org.code,                                      # code
       org.varId,                                     # varId
-      Dict{DataType, Array{Symbol, 1}}(),            # vars
+      org.fnId,                                      # fnId
+      org.vars,                                      # vars
       org.mutationsOnClone,                          # mutationsOnClone
       org.mutationPeriod,                            # mutationPeriod
       org.mutationAmount,                            # mutationAmount

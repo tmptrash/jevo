@@ -65,7 +65,9 @@ module Mutator
   end
   #
   # @cmd
-  # + operator implementation. Sums two variables.
+  # + operator implementation. Sums two variables. Supports all
+  # types: ASCIIString, Int8, Bool,... In case of string uses 
+  # concatination, for boolean - & operator.
   # @param org Organism we have to mutate
   # @return {Expr}
   #
@@ -73,14 +75,31 @@ module Mutator
     local typ::DataType = _getType()
     local v1::Symbol = _getVar(org, typ)
     local v2::Symbol = _getVar(org, typ)
+    local v3::Symbol = _getVar(org, typ)
 
     if typ === ASCIIString 
-      return :($(v1) * $(v2))
+      return :($(v1) = $(v2) * $(v3))
     elseif typ === Bool
-      return :($(v1) & $(v2))
+      return :($(v1) = $(v2) & $(v3))
     end
 
-    :($(v1) + $(v2))
+    :($(v1) = $(v2) + $(v3))
+  end
+  #
+  # @cmd
+  # Creates custom function with unique name, random arguments with
+  # default values and empty body block.
+  # @param org Organism we are working with
+  # @return {Expr}
+  #
+  function _fn(org::Creature.Organism)
+    local typ::DataType
+    local i::Int
+    local p::Symbol
+    local len::Int      = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
+    local params::Tuple = tuple([:($(typ = _getType();_getNewVar(org))::$(typ)=$(_getVal(typ))) for i=1:len]...)
+
+    :(function $(_getNewFn(org))($([:($p) for p in params]...)) end)
   end
 
   #
@@ -90,6 +109,14 @@ module Mutator
   #
   function _getNewVar(org::Creature.Organism)
     Symbol("var_$(org.varId += 1)")
+  end
+  #
+  # Creates new unique custom function name.
+  # @param org Organism we are working with
+  # @return {Symbol}
+  #
+  function _getNewFn(org::Creature.Organism)
+    Symbol("func_$(org.fnId += 1)")
   end
   #
   # Returns one of supported types. Is used randomizer for choosing type.
