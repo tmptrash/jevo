@@ -61,7 +61,12 @@ module Mutator
   #
   function _var(org::Creature.Organism)
     local typ::DataType = _getType()
-    :(local $(_getNewVar(org))::$(typ)=$(_getVal(typ)))
+    local varSym::Symbol = _getNewVar(org)
+    local ex::Expr = :(local $(varSym)::$(typ)=$(_getVal(typ)))
+
+    push!(org.vars[typ], varSym)
+
+    ex
   end
   #
   # @cmd
@@ -96,10 +101,36 @@ module Mutator
     local typ::DataType
     local i::Int
     local p::Symbol
-    local len::Int      = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
-    local params::Tuple = tuple([:($(typ = _getType();_getNewVar(org))::$(typ)=$(_getVal(typ))) for i=1:len]...)
+    local len::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
+    local params::Tuple = tuple([:($(typ = _getType();_getNewVar(org))::$(typ)=$(_getVal(typ))) for i=0:len]...)
+    local ex::Expr = :(function $(_getNewFn(org))($([p for p in params]...)) end)
 
-    :(function $(_getNewFn(org))($([:($p) for p in params]...)) end)
+    push!(org.funcs, ex)
+
+    ex
+  end
+  #
+  # @cmd
+  # Calls custom function or do nothing if no available functions
+  # @param org Organism we are working with
+  # @return {Expr|nothing}
+  #
+  @debug function _fnCall(org::Creature.Organism)
+  @bp
+    local len::Int = length(org.funcs)
+    if len < 1 return nothing end
+    local fnExpr::Expr = org.funcs[rand(1:len)]
+    local args::Array{Any, 1} = fnExpr.args[1].args         # shortcut to func args
+    local params::Array{DataType, 1} = Array{DataType, 1}() # func types only
+    local argsLen::Int = length(args)
+
+    if argsLen > 1
+      for i=2:rand(2:argsLen)
+        push!(params, args[i].args[1].args[2])
+      end
+    end
+
+    :($(fnExpr.args[1].args[1])($([_getVar(org, i) for i in params]...)))
   end
 
   #
@@ -148,7 +179,7 @@ module Mutator
   # TODO:
   #
   const CODE_SNIPPETS = [
-    _var, _plus
+    _var, _plus, _fn
   ]
   #
   # TODO:

@@ -87,6 +87,12 @@ module Creature
     vars::Dict{DataType, Array{Symbol, 1}}
     #
     # @inheritable
+    # Map of functions. Is used for finding functions bodies and later
+    # for mutations in these bodies.
+    #
+    funcs::Array{Expr, 1}
+    #
+    # @inheritable
     # Amount of mutations, which will be applied to arganism after
     # clonning.
     #
@@ -177,6 +183,7 @@ module Creature
       4,                                             # varId
       0,                                             # fnId
       vars,                                          # vars
+      Array{Expr, 1}(),                              # funcs
       Config.val(:ORGANISM_MUTATIONS_ON_CLONE),      # mutationsOnClone
       Config.val(:ORGANISM_MUTATION_PERIOD),         # mutationPeriod
       Config.val(:ORGANISM_MUTATION_AMOUNT),         # mutationAmount
@@ -192,12 +199,14 @@ module Creature
   # @return {Creature}
   #
   function copy(org::Organism)
+    # TODO: !!!check if we need a copy of this!!!
     Organism(
       org.mutationProbabilities,                     # mutationProbabilities
       org.code,                                      # code
       org.varId,                                     # varId
       org.fnId,                                      # fnId
       org.vars,                                      # vars
+      org.funcs,                                     # funcs
       org.mutationsOnClone,                          # mutationsOnClone
       org.mutationPeriod,                            # mutationPeriod
       org.mutationAmount,                            # mutationAmount
