@@ -14,6 +14,7 @@ module Mutator
   # TODO: add description of the method
   # TODO: describe indexes
   # TODO: add org.codeSize += 1 for every adding
+  # TODO: describe indexes (add,change,del,...)
   #
   function mutate(org::Creature.Organism)
     local pIndex::Int = Helper.getProbIndex(org.mutationProbabilities)
@@ -22,16 +23,13 @@ module Mutator
 
     if len < 1 return false end
 
-    if     pIndex === 2 org.code[rand(1:len)] = CODE_BLOCKS[rand(1:length(CODE_BLOCKS))]
-    elseif pIndex === 1
-      i = rand(1:len + 1)
-      if i > len && len === length(org.code) resize!(org.code, (org.codeSize += div(len, 2))) end
-      org.codeSize += 1
-      insert!(org.code, i, CODE_BLOCKS[rand(1:length(CODE_BLOCKS))])
-    elseif pIndex === 3 org.code[rand(1:len)] = ""
-    elseif pIndex === 4 org.mutationsOnClone = rand(0:Config.val(:ORGANISM_MAX_MUTATIONS_ON_CLONE))
-    elseif pIndex === 5 org.mutationPeriod = rand(0:Config.val(:ORGANISM_MAX_MUTATION_PERIOD))
-    elseif pIndex === 6 org.mutationAmount = rand(0:Config.val(:ORGANISM_MAX_MUTATION_AMOUNT))
+    if     pIndex === 3 _smallChange(org)
+    elseif pIndex === 2 _change(org)
+    elseif pIndex === 1 _add(org)
+    elseif pIndex === 4 _del(org)
+    elseif pIndex === 5 org.mutationsOnClone = rand(0:Config.val(:ORGANISM_MAX_MUTATIONS_ON_CLONE))
+    elseif pIndex === 6 org.mutationPeriod = rand(0:Config.val(:ORGANISM_MAX_MUTATION_PERIOD))
+    elseif pIndex === 7 org.mutationAmount = rand(0:Config.val(:ORGANISM_MAX_MUTATION_AMOUNT))
     end
     #
     # Updates compiled version of the code. Only valid code will be applied,
@@ -131,6 +129,36 @@ module Mutator
     end
 
     :($(fnExpr.args[1].args[1])($([_getVar(org, i) for i in params]...)))
+  end
+
+  #
+  # Makes one small change in a code included code of all 
+  # custom functions. Small change it's change of variable
+  # or constant to other/same variable or constant.
+  # @param org Organism we are working with
+  #
+  function _smallChange(org::Creature.Organism)
+  end
+  #
+  # Makes one big change in a code included code of all 
+  # custom functions. Big change it's change one line.
+  # @param org Organism we are working with
+  #
+  function _change(org::Creature.Organism)
+  end
+  #
+  # Adds one line of code into existing code including all
+  # custom function bodies. It shouldn't add function inside
+  # existing function.
+  # @param org Organism we are working with
+  #
+  function _add(org::Creature.Organism)
+  end
+  #
+  # Removes one code line if possible.
+  # @param org Organism we are working with
+  #
+  function _del(org::Creature.Organism)
   end
 
   #
