@@ -160,7 +160,6 @@ module Creature
   #
   function create(pos::Helper.Point = Helper.Point(1, 1))
     #
-    # TODO: set o parameter type to Creature.Organism
     # Expression below means:
     # function (o)
     #   local var_1::ASCIString=randstring()
@@ -169,7 +168,7 @@ module Creature
     #   local var_1::Int16=rand(Int16)
     # end
     #
-    local code::Expr = Expr(:function, Expr(:tuple, :o), Expr(:block,
+    local code::Expr = Expr(:function, Expr(:tuple, Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))), Expr(:block,
       Expr(:local, Expr(:(=), Expr(:(::), :var_1, :ASCIIString), randstring())),
       Expr(:local, Expr(:(=), Expr(:(::), :var_2, :Bool),        rand(Bool))),
       Expr(:local, Expr(:(=), Expr(:(::), :var_3, :Int8),        rand(Int8))),

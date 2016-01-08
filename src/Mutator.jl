@@ -138,6 +138,7 @@ module Mutator
   # @param org Organism we are working with
   #
   function _change(org::Creature.Organism)
+    local insert::Tuple = _getInsertPos()
   end
   #
   # Adds one line of code into existing code including all
@@ -176,6 +177,25 @@ module Mutator
   #
   function _onAmount(org::Creature.Organism)
     org.mutationAmount = rand(0:Config.val(:ORGANISM_MAX_MUTATION_AMOUNT))
+  end
+  #
+  # Returns position in a code (including all cusom functions),
+  # where we have to insert/change/delete code line. Position
+  # is chose randomly. It takes main function and all custom
+  # functions together, choose one function randomly and choose 
+  # random position inside this function.
+  # @param org Organism we are working with
+  # @return {Tuple} (index::Int,lines::Any)
+  #
+  @debug function _getInsertPos(org::Creature.Organism)
+  @bp
+    local fn::Int = rand(1:length(org.funcs) + 1) # + 1 for main func
+    #
+    # 1 means main function (not custom)
+    #
+    if fn === 1 return (rand(1:length(org.code.args[2].args)), org.code.args[2].args) end
+
+    (rand(1:length(org.funcs[fn - 1].args[2].args) + 1), org.funcs[fn - 1].args[2].args)
   end
   #
   # Creates new unique variable name and returns it's symbol
