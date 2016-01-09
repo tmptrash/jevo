@@ -13,6 +13,7 @@ https://www.youtube.com/playlist?list=PLWSJ9SwBJelIEbdaOXluI6VS8KnP6W7M6      Pr
 http://www.cc.gatech.edu/~turk/bio_sim/articles/tierra_thomas_ray.pdf         Evolution, Ecology and Optimization of Digital Organisms
 http://www.ncbi.nlm.nih.gov/pmc/articles/PMC1560214/                          Sexual reproduction reshapes the genetic architecture of digital organisms
 http://www.microbeworld.org/index.php?option=com_content&view=article&id=784  Charles Ofria - Digital Life
+http://macroevolution.livejournal.com/206803.html                             Biology evolution lectures (A. Markov)
 
 http://svaksha.github.io/Julia.jl/                                            Julia packages list
 http://it-ebooks.info/book/4852/                                              Julia book

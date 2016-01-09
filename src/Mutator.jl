@@ -172,6 +172,8 @@ module Mutator
   #
   # Removes one code line if possible.
   # @param org Organism we are working with
+  # TODO: if we remove function we have to calculate it's
+  # TODO: body size to decrease codeSize (-= bodyLen)
   #
   @debug function _del(org::Creature.Organism)
   @bp
