@@ -16,7 +16,8 @@ module Mutator
   # TODO: add org.codeSize += 1 for every adding
   # TODO: describe indexes (add,change,del,...)
   #
-  function mutate(org::Creature.Organism)
+  @debug function mutate(org::Creature.Organism)
+  @bp
     local pIndex::Int = Helper.getProbIndex(org.mutationProbabilities)
     local len::Int = org.codeSize
     local map::Array{Function, 1} = [_add, _change, _smallChange, _del, _onClone, _onPeriod, _onAmount]
@@ -64,7 +65,8 @@ module Mutator
   # @cmd
   # + operator implementation. Sums two variables. Supports all
   # types: ASCIIString, Int8, Bool,... In case of string uses 
-  # concatination, for boolean - & operator.
+  # concatination, for boolean - & operator. If code is empty
+  # this function will skipp the execution.
   # @param org Organism we have to mutate
   # @return {Expr}
   #
@@ -73,6 +75,8 @@ module Mutator
     local v1::Symbol = _getVar(org, typ)
     local v2::Symbol = _getVar(org, typ)
     local v3::Symbol = _getVar(org, typ)
+
+    if v1 === :nothing return :nothing end
 
     if typ === ASCIIString 
       return :($(v1) = $(v2) * $(v3))
@@ -112,16 +116,17 @@ module Mutator
     if len < 1 return nothing end
     local fnExpr::Expr = org.funcs[rand(1:len)]
     local args::Array{Any, 1} = fnExpr.args[1].args         # shortcut to func args
-    local params::Array{DataType, 1} = Array{DataType, 1}() # func types only
+    local types::Array{DataType, 1} = Array{DataType, 1}() # func types only
     local argsLen::Int = length(args)
+    local ex::Expr
 
     if argsLen > 1
       for i=2:rand(2:argsLen)
-        push!(params, args[i].args[1].args[2])
+        push!(types, args[i].args[1].args[2])
       end
     end
 
-    :($(fnExpr.args[1].args[1])($([_getVar(org, i) for i in params]...)))
+    :($(fnExpr.args[1].args[1])($([(ex = _getVar(org, i);ex === :nothing ? _getVal(i) : ex) for i in types]...)))
   end
 
   #
@@ -131,14 +136,26 @@ module Mutator
   # @param org Organism we are working with
   #
   function _smallChange(org::Creature.Organism)
+    local insert::Tuple = _getInsertPos(org)
+
+    if length(insert[2]) > 0
+      # TODO: AST deep analyzing here!
+    end
   end
   #
   # Makes one big change in a code included code of all 
-  # custom functions. Big change it's change one line.
+  # custom functions. Big change it's change one line. It's
+  # possible to skip changing if, for example, insertion
+  # position is an empty body of the function.
   # @param org Organism we are working with
   #
-  function _change(org::Creature.Organism)
-    local insert::Tuple = _getInsertPos()
+  @debug function _change(org::Creature.Organism)
+  @bp
+    local insert::Tuple = _getInsertPos(org)
+
+    if length(insert[2]) > 0
+      insert[2][insert[1]] = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))](org)
+    end
   end
   #
   # Adds one line of code into existing code including all
@@ -146,13 +163,24 @@ module Mutator
   # existing function.
   # @param org Organism we are working with
   #
-  function _add(org::Creature.Organism)
+  @debug function _add(org::Creature.Organism)
+  @bp
+    local insert::Tuple = _getInsertPos(org)
+    insert!(insert[2], insert[1], CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))](org))
+    org.codeSize += 1
   end
   #
   # Removes one code line if possible.
   # @param org Organism we are working with
   #
-  function _del(org::Creature.Organism)
+  @debug function _del(org::Creature.Organism)
+  @bp
+    local insert::Tuple = _getInsertPos(org)
+
+    if length(insert[2]) > 0
+      deleteat!(insert[2], insert[1])
+      org.codeSize -= 1
+    end
   end
   #
   # mutationsOnClone property mutation handler. It changes this 
@@ -236,6 +264,7 @@ module Mutator
   # @return {Symbol}
   #
   function _getVar(org::Creature.Organism, typ::DataType)
+    if length(org.vars[typ]) < 1 return :nothing end 
     org.vars[typ][rand(1:length(org.vars[typ]))]
   end
 
