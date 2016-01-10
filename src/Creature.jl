@@ -187,7 +187,7 @@ module Creature
     Organism(
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       code,                                          # code
-      wrapCode(code),                                # codeFn
+      eval(code),                                    # codeFn
       4,                                             # codeSize
       4,                                             # varId
       0,                                             # fnId
@@ -225,19 +225,6 @@ module Creature
       org.pos,                                       # pos
       Event.create()                                 # observer
     )
-  end
-  #
-  # Wraps code with anonymous function. This function must be anonymous, 
-  # because it's used for comparison with other functions for other 
-  # organisms. If their names are equal and they are in the same module,
-  # then === operator returns true.
-  # @param code Associated with this organism code array
-  # @return {Function}
-  #
-  function wrapCode(code::Expr)
-    #eval(parse("function(o) $(join(code[1:size])) end"))
-    # TODO: wrap this code to anonymous function
-    eval(code)
   end
   #
   # TODO: describe organism's task function

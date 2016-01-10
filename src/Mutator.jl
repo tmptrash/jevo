@@ -1,5 +1,7 @@
 #
-# TODO: module description
+# TODO: module description.
+# TODO: describe generl approach of a module. mutations probabilities
+# TODO: small-changes, code evaluation, energy & cloning
 # TODO: describe linear quoted structure of the script we support
 # TODO: describe @cmd annotation
 #
@@ -16,20 +18,19 @@ module Mutator
   # TODO: add org.codeSize += 1 for every adding
   # TODO: describe indexes (add,change,del,...)
   #
-  @debug function mutate(org::Creature.Organism)
-  @bp
-    local pIndex::Int = Helper.getProbIndex(org.mutationProbabilities)
-    local len::Int = org.codeSize
-    local map::Array{Function, 1} = [_add, _change, _smallChange, _del, _onClone, _onPeriod, _onAmount]
+  function mutate(org::Creature.Organism)
+    #
+    # If there is no code, we can't mutate it
+    #
+    if org.codeSize < 1 return false end
 
-    if len < 1 return false end
+    local pIndex::Int = Helper.getProbIndex(org.mutationProbabilities)
+    local map::Array{Function, 1} = [_add, _change, _smallChange, _del, _onClone, _onPeriod, _onAmount]
 
     map[pIndex](org)
     #
     # Updates compiled version of the code. Only valid code will be applied,
     # because exception will be fired in case of error organismcode.
-    # TODO: if code is valid, then we have to check in on remote controlled
-    # TODO: worker to prevent infinite loop.
     #
     if pIndex < 5
       try
@@ -39,7 +40,7 @@ module Mutator
         # and they are in the same module, then === operator returns true.
         # @param o Associated with this code organism
         #
-        org.codeFn = Creature.wrapCode(org.code)
+        org.codeFn = eval(org.code)
       end
     end
 
@@ -111,14 +112,14 @@ module Mutator
   # @param org Organism we are working with
   # @return {Expr|nothing}
   #
-  function _fnCall(org::Creature.Organism)
+  @debug function _fnCall(org::Creature.Organism)
+  @bp
     local len::Int = length(org.funcs)
     if len < 1 return nothing end
     local fnExpr::Expr = org.funcs[rand(1:len)]
     local args::Array{Any, 1} = fnExpr.args[1].args         # shortcut to func args
     local types::Array{DataType, 1} = Array{DataType, 1}() # func types only
     local argsLen::Int = length(args)
-    local ex::Expr
 
     if argsLen > 1
       for i=2:rand(2:argsLen)
@@ -149,8 +150,7 @@ module Mutator
   # position is an empty body of the function.
   # @param org Organism we are working with
   #
-  @debug function _change(org::Creature.Organism)
-  @bp
+  function _change(org::Creature.Organism)
     local insert::Tuple = _getInsertPos(org)
 
     if length(insert[2]) > 0
@@ -163,8 +163,7 @@ module Mutator
   # existing function.
   # @param org Organism we are working with
   #
-  @debug function _add(org::Creature.Organism)
-  @bp
+  function _add(org::Creature.Organism)
     local insert::Tuple = _getInsertPos(org)
     insert!(insert[2], insert[1], CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))](org))
     org.codeSize += 1
@@ -175,8 +174,7 @@ module Mutator
   # TODO: if we remove function we have to calculate it's
   # TODO: body size to decrease codeSize (-= bodyLen)
   #
-  @debug function _del(org::Creature.Organism)
-  @bp
+  function _del(org::Creature.Organism)
     local insert::Tuple = _getInsertPos(org)
 
     if length(insert[2]) > 0
@@ -217,8 +215,7 @@ module Mutator
   # @param org Organism we are working with
   # @return {Tuple} (index::Int,lines::Any)
   #
-  @debug function _getInsertPos(org::Creature.Organism)
-  @bp
+  function _getInsertPos(org::Creature.Organism)
     local fn::Int = rand(1:length(org.funcs) + 1) # + 1 for main func
     #
     # 1 means main function (not custom)

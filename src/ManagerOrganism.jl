@@ -42,7 +42,8 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     # This block runs one iteration for all available organisms.
     # By one iteration i mean that every organism from a list
     # run peace of it's script - code between two produce() calls.
-    #
+    # TODO: optimize this two approaches. We have to have only one
+    # TODO: reverse loop.
     for i = 1:len
       org = Manager._tasks[i].organism
       try
@@ -56,6 +57,12 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
         if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0
           for j = 1:org.mutationAmount Mutator.mutate(org) end
         end
+        #
+        # Cloning procedure. The meaning of this is in ability to 
+        # produce children as fast as much energy has anorganism.
+        # If organism has high energy value, then it will produce
+        # more copies and these copies will supplant other organisms. 
+        #
       catch e
         println("Manager._updateOrganisms(): $e")
       end
