@@ -114,14 +114,6 @@ module Config
     #
     ORGANISM_CURRENT_ID::UInt
     #
-    # Bonus energy for good mutation. For mistakes there is no energy bonus
-    #
-    ORGANISM_GOOD_MUTATION_ENERGY::Int
-    #
-    # Amount of energy, which is added if organism clone itself. This is how we promote clonning
-    #
-    ORGANISM_CLONE_ENERGY::Int
-    #
     # Maximum amount of arguments in custom functions
     #
     CODE_MAX_FUNC_PARAMS::Int
@@ -237,7 +229,7 @@ module Config
       1,                         # ORGANISM_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
       10,                        # ORGANISM_MUTATION_PERIOD
-      1000000,                   # ORGANISM_MAX_MUTATION_PERIOD
+      100000,                    # ORGANISM_MAX_MUTATION_PERIOD
       1,                         # ORGANISM_MUTATION_AMOUNT
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT
       300,                       # ORGANISM_START_AMOUNT
@@ -245,10 +237,8 @@ module Config
       100000,                    # ORGANISM_MAX_ENERGY
       100,                       # ORGANISM_GRAB_ENERGY
       10,                        # ORGANISM_DECREASE_PERIOD
-      100,                       # ORGANISM_DECREASE_VALUE
+      1,                         # ORGANISM_DECREASE_VALUE
       UInt(0),                   # ORGANISM_CURRENT_ID
-      100,                       # ORGANISM_GOOD_MUTATION_ENERGY
-      100,                       # ORGANISM_CLONE_ENERGY
       4,                         # CODE_MAX_FUNC_PARAMS
       300,                       # WORLD_WIDTH
       200,                       # WORLD_HEIGHT

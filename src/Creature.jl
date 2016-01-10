@@ -250,11 +250,6 @@ module Creature
         try
           org.fnCode(org)
           if org.fnCode !== oldCode
-            #
-            # If parsed code doesn't contain mistakes, then current organism
-            # should be fed with bonus energy.
-            #
-            org.energy += Config.val(:ORGANISM_GOOD_MUTATION_ENERGY)
             oldCode = org.fnCode
           end
         end

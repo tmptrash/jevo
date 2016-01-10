@@ -25,7 +25,7 @@ module Mutator
     if org.codeSize < 1 return false end
 
     local pIndex::Int = Helper.getProbIndex(org.mutationProbabilities)
-    local map::Array{Function, 1} = [_add, _change, _smallChange, _del, _onClone, _onPeriod, _onAmount]
+    local map::Array{Function, 1} = [_onAdd, _onChange, _onSmallChange, _onDel, _onClone, _onPeriod, _onAmount]
 
     map[pIndex](org)
     #
@@ -103,6 +103,7 @@ module Mutator
     local ex::Expr = :(function $(_getNewFn(org))($([p for p in params]...)) end)
 
     push!(org.funcs, ex)
+    push!(org.code.args[2], ex)
 
     ex
   end
@@ -111,13 +112,13 @@ module Mutator
   # Calls custom function or do nothing if no available functions
   # @param org Organism we are working with
   # @return {Expr|nothing}
+  # TODO: add check if we call a function inside other function
   #
-  @debug function _fnCall(org::Creature.Organism)
-  @bp
+  function _fnCall(org::Creature.Organism)
     local len::Int = length(org.funcs)
     if len < 1 return nothing end
     local fnExpr::Expr = org.funcs[rand(1:len)]
-    local args::Array{Any, 1} = fnExpr.args[1].args         # shortcut to func args
+    local args::Array{Any, 1} = fnExpr.args[1].args        # shortcut to func args
     local types::Array{DataType, 1} = Array{DataType, 1}() # func types only
     local argsLen::Int = length(args)
 
@@ -136,7 +137,7 @@ module Mutator
   # or constant to other/same variable or constant.
   # @param org Organism we are working with
   #
-  function _smallChange(org::Creature.Organism)
+  function _onSmallChange(org::Creature.Organism)
     local insert::Tuple = _getInsertPos(org)
 
     if length(insert[2]) > 0
@@ -150,11 +151,15 @@ module Mutator
   # position is an empty body of the function.
   # @param org Organism we are working with
   #
-  function _change(org::Creature.Organism)
+  function _onChange(org::Creature.Organism)
     local insert::Tuple = _getInsertPos(org)
+    local fn::Function
 
     if length(insert[2]) > 0
-      insert[2][insert[1]] = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))](org)
+      fn = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
+      if insert[3] || !insert[3] && fn !== _fn && fn !== _fnCall
+        insert[2][insert[1]] = fn(org)
+      end
     end
   end
   #
@@ -163,10 +168,14 @@ module Mutator
   # existing function.
   # @param org Organism we are working with
   #
-  function _add(org::Creature.Organism)
+  function _onAdd(org::Creature.Organism)
     local insert::Tuple = _getInsertPos(org)
-    insert!(insert[2], insert[1], CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))](org))
-    org.codeSize += 1
+    local fn::Function = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
+
+    if insert[3] || !insert[3] && fn !== _fn && fn !== _fnCall
+      insert!(insert[2], insert[1], fn(org))
+      org.codeSize += 1
+    end
   end
   #
   # Removes one code line if possible.
@@ -174,7 +183,7 @@ module Mutator
   # TODO: if we remove function we have to calculate it's
   # TODO: body size to decrease codeSize (-= bodyLen)
   #
-  function _del(org::Creature.Organism)
+  function _onDel(org::Creature.Organism)
     local insert::Tuple = _getInsertPos(org)
 
     if length(insert[2]) > 0
@@ -211,18 +220,19 @@ module Mutator
   # where we have to insert/change/delete code line. Position
   # is chose randomly. It takes main function and all custom
   # functions together, choose one function randomly and choose 
-  # random position inside this function.
+  # random position inside this function. Last tuple parameter
+  # is boolean flag, which shows if it main or custom function.
   # @param org Organism we are working with
-  # @return {Tuple} (index::Int,lines::Any)
+  # @return {Tuple} (index::Int,lines::Any,mainFn::Bool)
   #
   function _getInsertPos(org::Creature.Organism)
     local fn::Int = rand(1:length(org.funcs) + 1) # + 1 for main func
     #
     # 1 means main function (not custom)
     #
-    if fn === 1 return (rand(1:length(org.code.args[2].args)), org.code.args[2].args) end
+    if fn === 1 return (rand(1:length(org.code.args[2].args)), org.code.args[2].args, true) end
 
-    (rand(1:length(org.funcs[fn - 1].args[2].args) + 1), org.funcs[fn - 1].args[2].args)
+    (rand(1:length(org.funcs[fn - 1].args[2].args) + 1), org.funcs[fn - 1].args[2].args, false)
   end
   #
   # Creates new unique variable name and returns it's symbol

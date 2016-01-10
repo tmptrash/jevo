@@ -35,6 +35,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     local j  ::Int
     local dPeriod::Int
     local org::Creature.Organism
+    local maxEnergy::Int = Config.val(:ORGANISM_MAX_ENERGY)
 
     eCounter += 1
     mCounter += 1
@@ -63,6 +64,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
         # If organism has high energy value, then it will produce
         # more copies and these copies will supplant other organisms. 
         #
+        if mCounter % (maxEnergy - org.energy) === 0 _onClone(org) end
       catch e
         println("Manager._updateOrganisms(): $e")
       end
@@ -231,10 +233,6 @@ end
 # @param organism Parent organism
 #
 function _onClone(organism::Creature.Organism)
-  #
-  # We have to promote clonning, because it's very fundamental element of evolution
-  #
-  organism.energy += Config.val(:ORGANISM_CLONE_ENERGY)
   if length(_tasks) > Config.val(:WORLD_MAX_ORGANISMS) return nothing end
   #
   # First, we have to find free point near the organism to put
