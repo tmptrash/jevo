@@ -233,7 +233,7 @@ end
 # @param organism Parent organism
 #
 function _onClone(organism::Creature.Organism)
-  if length(_tasks) > Config.val(:WORLD_MAX_ORGANISMS) return nothing end
+  if length(_tasks) >= Config.val(:WORLD_MAX_ORGANISMS) return nothing end
   #
   # First, we have to find free point near the organism to put
   # clone in. It's possible, that all places are filled.

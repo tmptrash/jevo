@@ -51,27 +51,31 @@ module Mutator
   # Returns AST expression for variable creating. Variable format: 
   # local name::Type = value
   # @param org Organism we have to mutate
+  # @param fn An expression of parent(current) function within 
+  # we are orking in
   # @return {Expr}
   #
-  function _var(org::Creature.Organism)
+  function _var(org::Creature.Organism, fn::Expr)
     local typ::DataType = _getType()
     local varSym::Symbol = _getNewVar(org)
     local ex::Expr = :(local $(varSym)::$(typ)=$(_getVal(typ)))
 
-    push!(org.vars[typ], varSym)
+    push!(org.vars[fn][typ], varSym)
 
     ex
   end
   #
   # @cmd
   # + operator implementation. Sums two variables. Supports all
-  # types: ASCIIString, Int8, Bool,... In case of string uses 
+  # types: ASCIIString, Int8, Bool,... In case of string uses
   # concatination, for boolean - & operator. If code is empty
   # this function will skipp the execution.
   # @param org Organism we have to mutate
+  # @param fn An expression of parent(current) function within 
+  # we are orking in
   # @return {Expr}
   #
-  function _plus(org::Creature.Organism)
+  function _plus(org::Creature.Organism, fn::Expr)
     local typ::DataType = _getType()
     local v1::Symbol = _getVar(org, typ)
     local v2::Symbol = _getVar(org, typ)
@@ -92,9 +96,11 @@ module Mutator
   # Creates custom function with unique name, random arguments with
   # default values and empty body block.
   # @param org Organism we are working with
+  # @param fn An expression of parent(current) function within 
+  # we are orking in
   # @return {Expr}
   #
-  function _fn(org::Creature.Organism)
+  function _fn(org::Creature.Organism, fn::Expr)
     local typ::DataType
     local i::Int
     local p::Symbol
@@ -109,12 +115,17 @@ module Mutator
   end
   #
   # @cmd
-  # Calls custom function or do nothing if no available functions
+  # Calls custom function or do nothing if no available functions.
+  # It choose custom function from org.funcs array, fill parameters
+  # and call it.
   # @param org Organism we are working with
+  # @param fn An expression of parent(current) function within 
+  # we are orking in
   # @return {Expr|nothing}
   # TODO: add check if we call a function inside other function
   #
-  function _fnCall(org::Creature.Organism)
+  function _fnCall(org::Creature.Organism, fn:Expr)
+    if fn !== org.code return nothing end
     local len::Int = length(org.funcs)
     if len < 1 return nothing end
     local fnExpr::Expr = org.funcs[rand(1:len)]
@@ -157,8 +168,10 @@ module Mutator
 
     if length(insert[2]) > 0
       fn = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
-      if insert[3] || !insert[3] && fn !== _fn && fn !== _fnCall
-        insert[2][insert[1]] = fn(org)
+      if insert[3] === org.code || insert[3] !== org.code && fn !== _fn && fn !== _fnCall
+        # TODO: we have to check previous code line and clear all related structures
+        # TODO: like variables, funcs and blocks
+        insert[2][insert[1]] = fn(org, insert[3])
       end
     end
   end
@@ -172,8 +185,8 @@ module Mutator
     local insert::Tuple = _getInsertPos(org)
     local fn::Function = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
 
-    if insert[3] || !insert[3] && fn !== _fn && fn !== _fnCall
-      insert!(insert[2], insert[1], fn(org))
+    if insert[3] === org.code || insert[3] !== org.code && fn !== _fn && fn !== _fnCall
+      insert!(insert[2], insert[1], fn(org, insert[3]))
       org.codeSize += 1
     end
   end
@@ -221,7 +234,7 @@ module Mutator
   # is chose randomly. It takes main function and all custom
   # functions together, choose one function randomly and choose 
   # random position inside this function. Last tuple parameter
-  # is boolean flag, which shows if it main or custom function.
+  # is a parent(current) function.
   # @param org Organism we are working with
   # @return {Tuple} (index::Int,lines::Any,mainFn::Bool)
   #
@@ -230,9 +243,9 @@ module Mutator
     #
     # 1 means main function (not custom)
     #
-    if fn === 1 return (rand(1:length(org.code.args[2].args)), org.code.args[2].args, true) end
+    if fn === 1 return (rand(1:length(org.code.args[2].args)), org.code.args[2].args, org.code) end
 
-    (rand(1:length(org.funcs[fn - 1].args[2].args) + 1), org.funcs[fn - 1].args[2].args, false)
+    (rand(1:length(org.funcs[fn - 1].args[2].args) + 1), org.funcs[fn - 1].args[2].args, org.funcs[fn - 1])
   end
   #
   # Creates new unique variable name and returns it's symbol
@@ -269,12 +282,14 @@ module Mutator
   #
   # Returns a variable from existing in a code
   # @param org Organism we are mutating
+  # @param fn An expression of parent(current) function within 
+  # we are orking in
   # @param typ Type of variable we want to take
   # @return {Symbol}
   #
-  function _getVar(org::Creature.Organism, typ::DataType)
-    if length(org.vars[typ]) < 1 return :nothing end 
-    org.vars[typ][rand(1:length(org.vars[typ]))]
+  function _getVar(org::Creature.Organism, fn::Expr, typ::DataType)
+    if length(org.vars[fn][typ]) < 1 return :nothing end 
+    org.vars[fn][typ][rand(1:length(org.vars[fn][typ]))]
   end
 
   #

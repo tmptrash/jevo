@@ -89,16 +89,21 @@ module Creature
     fnId::Int
     #
     # @inheritable
-    # Map of available at the time variables. It means, that they are
-    # currently are in the code.
+    # Map of available variables separated by functions and types. 
+    # Function in this case is a parent (container) for variables.
     #
-    vars::Dict{DataType, Array{Symbol, 1}}
+    vars::Dict{Expr, Dict{DataType, Array{Symbol, 1}}}
     #
     # @inheritable
     # Map of functions. Is used for finding functions bodies and later
     # for mutations in these bodies.
     #
     funcs::Array{Expr, 1}
+    #
+    # @inheritable
+    # All blocks in a code. For example: if, for have blocks as a body
+    #
+    blocks::Array{Expr, 1}
     #
     # @inheritable
     # Amount of mutations, which will be applied to arganism after
@@ -175,13 +180,15 @@ module Creature
       Expr(:local, Expr(:(=), Expr(:(::), :var_4, :Int16),       rand(Int16)))
     ))
     #
-    # This map should be synchronized with code expression above
+    # Variables of this map should be synchronized with code expression above
     #
-    local vars::Dict{DataType, Array{Symbol, 1}} = Dict{DataType, Array{Symbol, 1}}(
-      ASCIIString => [:var_1],
-      Bool        => [:var_2],
-      Int8        => [:var_3],
-      Int16       => [:var_4]
+    local vars::Dict{Expr, Dict{DataType, Array{Symbol, 1}}} = Dict{Expr, Dict{DataType, Array{Symbol, 1}}}(
+      code => Dict{DataType, Array{Symbol, 1}}(
+        ASCIIString => [:var_1],
+        Bool        => [:var_2],
+        Int8        => [:var_3],
+        Int16       => [:var_4]
+      )
     )
 
     Organism(
@@ -193,6 +200,7 @@ module Creature
       0,                                             # fnId
       vars,                                          # vars
       Array{Expr, 1}(),                              # funcs
+      Array{Expr, 1}(),                              # blocks
       Config.val(:ORGANISM_MUTATIONS_ON_CLONE),      # mutationsOnClone
       Config.val(:ORGANISM_MUTATION_PERIOD),         # mutationPeriod
       Config.val(:ORGANISM_MUTATION_AMOUNT),         # mutationAmount
@@ -218,6 +226,7 @@ module Creature
       org.fnId,                                      # fnId
       org.vars,                                      # vars
       org.funcs,                                     # funcs
+      org.blocks,                                    # blocks
       org.mutationsOnClone,                          # mutationsOnClone
       org.mutationPeriod,                            # mutationPeriod
       org.mutationAmount,                            # mutationAmount
