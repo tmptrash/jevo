@@ -56,7 +56,7 @@ module Mutator
   # @return {Expr}
   #
   function _var(org::Creature.Organism, fn::Expr)
-    local typ::DataType = _getType()
+    local typ::DataType  = _getType()
     local varSym::Symbol = _getNewVar(org)
     local ex::Expr = :(local $(varSym)::$(typ)=$(_getVal(typ)))
 
@@ -77,9 +77,9 @@ module Mutator
   #
   function _plus(org::Creature.Organism, fn::Expr)
     local typ::DataType = _getType()
-    local v1::Symbol = _getVar(org, typ)
-    local v2::Symbol = _getVar(org, typ)
-    local v3::Symbol = _getVar(org, typ)
+    local v1::Symbol = _getVar(org, fn, typ)
+    local v2::Symbol = _getVar(org, fn, typ)
+    local v3::Symbol = _getVar(org, fn, typ)
 
     if v1 === :nothing return :nothing end
 
@@ -94,24 +94,41 @@ module Mutator
   #
   # @cmd
   # Creates custom function with unique name, random arguments with
-  # default values and empty body block.
+  # default values. By default it returns first parameter as local 
+  # variable
   # @param org Organism we are working with
   # @param fn An expression of parent(current) function within 
   # we are orking in
   # @return {Expr}
   #
   function _fn(org::Creature.Organism, fn::Expr)
+    #
+    # We may add functions only in main one. Custom functions can't
+    # be used as a container for other custom functions.
+    #
+    if fn !== org.code return :nothing end
     local typ::DataType
     local i::Int
     local p::Symbol
     local len::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
-    local params::Tuple = tuple([:($(typ = _getType();_getNewVar(org))::$(typ)=$(_getVal(typ))) for i=0:len]...)
-    local ex::Expr = :(function $(_getNewFn(org))($([p for p in params]...)) end)
+    local var::Dict{DataType, Array{Symbol, 1}} = org.vars[fn]
+    #
+    # New function parameters in format: [name::Type=val,...]. 
+    # At least one parameter should exist.
+    #
+    local params::Array{Expr, 1} = [:($(typ = _getType();_getNewVar(org))::$(typ)=$(_getVal(typ))) for i=1:len]
+    #
+    # New function in format: function func_x(var_x::Type=val,...) return var_x end
+    # All parameters will be added as local variables.
+    #
+    local fnEx::Expr = :(function $(_getNewFn(org))($([(push!(var[p.args[1].args[2]], p.args[1].args[1]);p) for p in params]...))
+      return $(params[1].args[1].args[1])
+    end)
 
-    push!(org.funcs, ex)
-    push!(org.code.args[2], ex)
+    push!(org.funcs, fnEx)
+    push!(org.code.args[2].args, fnEx)
 
-    ex
+    fnEx
   end
   #
   # @cmd
@@ -124,10 +141,10 @@ module Mutator
   # @return {Expr|nothing}
   # TODO: add check if we call a function inside other function
   #
-  function _fnCall(org::Creature.Organism, fn:Expr)
-    if fn !== org.code return nothing end
+  function _fnCall(org::Creature.Organism, fn::Expr)
+    if fn !== org.code return :nothing end
     local len::Int = length(org.funcs)
-    if len < 1 return nothing end
+    if len < 1 return :nothing end
     local fnExpr::Expr = org.funcs[rand(1:len)]
     local args::Array{Any, 1} = fnExpr.args[1].args        # shortcut to func args
     local types::Array{DataType, 1} = Array{DataType, 1}() # func types only
@@ -143,16 +160,19 @@ module Mutator
   end
 
   #
-  # Makes one small change in a code included code of all 
-  # custom functions. Small change it's change of variable
-  # or constant to other/same variable or constant.
+  # Adds one line of code into existing code including all
+  # custom function bodies. It shouldn't add function inside
+  # existing function.
   # @param org Organism we are working with
   #
-  function _onSmallChange(org::Creature.Organism)
-    local insert::Tuple = _getInsertPos(org)
+  function _onAdd(org::Creature.Organism)
+    local pos::Tuple = _getRandPos(org)
+    local fn::Function = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
+    local ex::Expr
 
-    if length(insert[2]) > 0
-      # TODO: AST deep analyzing here!
+    if pos[2] === org.code || (pos[2] !== org.code && fn !== _fn && fn !== _fnCall) && (ex = fn(org, pos[2])) !== :nothing
+      insert!(pos[2].args[2].args, pos[1], ex)
+      org.codeSize += 1
     end
   end
   #
@@ -163,31 +183,31 @@ module Mutator
   # @param org Organism we are working with
   #
   function _onChange(org::Creature.Organism)
-    local insert::Tuple = _getInsertPos(org)
+    local pos::Tuple = _getRandPos(org)
+    local args::Array{Expr, 1} = pos[2].args[2].args
     local fn::Function
+    local oldExpr::Expr
+    local ex::Expr
 
-    if length(insert[2]) > 0
+    if length(args) > 0
       fn = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
-      if insert[3] === org.code || insert[3] !== org.code && fn !== _fn && fn !== _fnCall
-        # TODO: we have to check previous code line and clear all related structures
-        # TODO: like variables, funcs and blocks
-        insert[2][insert[1]] = fn(org, insert[3])
+      if pos[2] === org.code || (pos[2] !== org.code && fn !== _fn && fn !== _fnCall) && (ex = fn(org, pos[2])) !== :nothing
+        _onRemoveLine(pos)
+        args[pos[1]] = ex
       end
     end
   end
   #
-  # Adds one line of code into existing code including all
-  # custom function bodies. It shouldn't add function inside
-  # existing function.
+  # Makes one small change in a code included code of all 
+  # custom functions. Small change it's change of variable
+  # or constant to other/same variable or constant.
   # @param org Organism we are working with
   #
-  function _onAdd(org::Creature.Organism)
-    local insert::Tuple = _getInsertPos(org)
-    local fn::Function = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
+  function _onSmallChange(org::Creature.Organism)
+    local pos::Tuple = _getRandPos(org)
 
-    if insert[3] === org.code || insert[3] !== org.code && fn !== _fn && fn !== _fnCall
-      insert!(insert[2], insert[1], fn(org, insert[3]))
-      org.codeSize += 1
+    if length(pos[2].args[2].args) > 0
+      # TODO: AST deep analyzing here!
     end
   end
   #
@@ -197,11 +217,12 @@ module Mutator
   # TODO: body size to decrease codeSize (-= bodyLen)
   #
   function _onDel(org::Creature.Organism)
-    local insert::Tuple = _getInsertPos(org)
+    local pos::Tuple = _getRandPos(org)
+    local args::Array{Expr, 1} = pos[2].args[2].args
 
-    if length(insert[2]) > 0
-      deleteat!(insert[2], insert[1])
-      org.codeSize -= 1
+    if length(args) > 0
+      _onRemoveLine(pos)
+      deleteat!(args, pos[1])
     end
   end
   #
@@ -229,23 +250,61 @@ module Mutator
     org.mutationAmount = rand(0:Config.val(:ORGANISM_MAX_MUTATION_AMOUNT))
   end
   #
-  # Returns position in a code (including all cusom functions),
-  # where we have to insert/change/delete code line. Position
-  # is chose randomly. It takes main function and all custom
-  # functions together, choose one function randomly and choose 
-  # random position inside this function. Last tuple parameter
-  # is a parent(current) function.
+  # This method is called before one code line is removed or changed.
+  # It checks if removed/changed line is a local variable declaration
+  # or function declaration. In this case it clears all related 
+  # structures like org.vars and org.funcs... Remove position in a parameter
+  # is a tuple of three elements: code::Array{Expr},pos::Int,fn::Expr, where
+  # code - array of code lines some AST node, pos - current removing 
+  # position in code, fn - parent(current) function.
+  # @param pos Remove position. 
+  #
+  function _onRemoveLine(org::Creature.Organism, pos::Tuple)
+    local expr::Expr = pos[2][pos[1]]        # line we want to remove
+    local ex::Expr   = expr.args[1].args[1]  # shortcut to variable
+    local i::Int
+
+    # TODO: check if removed line doesn't contain blocks. In this 
+    # TODO: case codeSize should be decreased more.
+    #org.codeSize -= 1
+
+    #
+    # Finds currently removed variable within it's function and 
+    # removes it from Creature.Organism.vars map
+    #
+    if expr.head === :local
+      i = findfirst(org.vars[pos[3]][ex.args[2]], ex.args[1])
+      if i > 0 deleteat!(org.vars[pos[3]][ex.args[2]], i) end
+    #
+    # Finds currently removed function declaration and remove it
+    # from Creature.Organism.funcs map
+    #
+    elseif expr.head === :function
+      i = findfirst(org.funcs[pos[3]])
+      if i > 0 deleteat!(org.funcs[pos[3]], i) end
+      org.codeSize -= length(pos[2])
+    # TODO: blocks check will be added here
+    end
+    org.codeSize -= 1
+  end
+  #
+  # Returns random position in a code (including all cusom 
+  # functions), where we have to insert/change/delete code 
+  # line. Position is chose randomly. It takes main function 
+  # and all custom functions together, choose one function 
+  # randomly and choose random position inside this function. 
+  # Last tuple parameter is a parent(current) function.
   # @param org Organism we are working with
   # @return {Tuple} (index::Int,lines::Any,mainFn::Bool)
   #
-  function _getInsertPos(org::Creature.Organism)
+  function _getRandPos(org::Creature.Organism)
     local fn::Int = rand(1:length(org.funcs) + 1) # + 1 for main func
     #
     # 1 means main function (not custom)
     #
-    if fn === 1 return (rand(1:length(org.code.args[2].args)), org.code.args[2].args, org.code) end
+    if fn === 1 return (rand(1:length(org.code.args[2].args)), org.code) end
 
-    (rand(1:length(org.funcs[fn - 1].args[2].args) + 1), org.funcs[fn - 1].args[2].args, org.funcs[fn - 1])
+    (rand(1:length(org.funcs[fn - 1].args[2].args) + 1), org.funcs[fn - 1])
   end
   #
   # Creates new unique variable name and returns it's symbol
