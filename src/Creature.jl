@@ -92,7 +92,7 @@ module Creature
     # Map of available variables separated by functions and types. 
     # Function in this case is a parent (container) for variables.
     #
-    vars::Dict{Expr, Dict{DataType, Array{Symbol, 1}}}
+    vars::Dict{ASCIIString, Dict{DataType, Array{Symbol, 1}}}
     #
     # @inheritable
     # Map of functions. Is used for finding functions bodies and later
@@ -180,10 +180,11 @@ module Creature
       Expr(:local, Expr(:(=), Expr(:(::), :var_4, :Int16),       rand(Int16)))
     ))
     #
-    # Variables of this map should be synchronized with code expression above
+    # Variables of this map should be synchronized with code expression above.
+    # Main function is empty string in Creature.vars array.
     #
-    local vars::Dict{Expr, Dict{DataType, Array{Symbol, 1}}} = Dict{Expr, Dict{DataType, Array{Symbol, 1}}}(
-      code => Dict{DataType, Array{Symbol, 1}}(
+    local vars::Dict{ASCIIString, Dict{DataType, Array{Symbol, 1}}} = Dict{ASCIIString, Dict{DataType, Array{Symbol, 1}}}(
+      "" => Dict{DataType, Array{Symbol, 1}}(
         ASCIIString => [:var_1],
         Bool        => [:var_2],
         Int8        => [:var_3],

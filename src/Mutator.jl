@@ -51,11 +51,11 @@ module Mutator
   # Returns AST expression for variable creating. Variable format: 
   # local name::Type = value
   # @param org Organism we have to mutate
-  # @param fn An expression of parent(current) function within 
+  # @param fn Parent(current) function unique name 
   # we are orking in
   # @return {Expr}
   #
-  function _var(org::Creature.Organism, fn::Expr)
+  function _var(org::Creature.Organism, fn::ASCIIString)
     local typ::DataType  = _getType()
     local varSym::Symbol = _getNewVar(org)
     local ex::Expr = :(local $(varSym)::$(typ)=$(_getVal(typ)))
@@ -71,11 +71,11 @@ module Mutator
   # concatination, for boolean - & operator. If code is empty
   # this function will skipp the execution.
   # @param org Organism we have to mutate
-  # @param fn An expression of parent(current) function within 
+  # @param fn Parent(current) function unique name 
   # we are orking in
   # @return {Expr}
   #
-  function _plus(org::Creature.Organism, fn::Expr)
+  function _plus(org::Creature.Organism, fn::ASCIIString)
     local typ::DataType = _getType()
     local v1::Symbol = _getVar(org, fn, typ)
     local v2::Symbol = _getVar(org, fn, typ)
@@ -97,26 +97,28 @@ module Mutator
   # default values. By default it returns first parameter as local 
   # variable
   # @param org Organism we are working with
-  # @param fn An expression of parent(current) function within 
+  # @param fn Parent(current) function unique name 
   # we are orking in
   # @return {Expr}
   #
-  function _fn(org::Creature.Organism, fn::Expr)
+  function _fn(org::Creature.Organism, fn::ASCIIString)
     #
     # We may add functions only in main one. Custom functions can't
     # be used as a container for other custom functions.
     #
-    if fn !== org.code return :nothing end
+    if !isempty(fn) return :nothing end
     local typ::DataType
     local i::Int
     local p::Symbol
-    local len::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
+    local paramLen::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
     local var::Dict{DataType, Array{Symbol, 1}} = org.vars[fn]
     #
     # New function parameters in format: [name::Type=val,...]. 
-    # At least one parameter should exist.
+    # At least one parameter should exist. We choose amount of
+    # parameters randomly. All other parameters will be set by
+    # default values.
     #
-    local params::Array{Expr, 1} = [:($(typ = _getType();_getNewVar(org))::$(typ)=$(_getVal(typ))) for i=1:len]
+    local params::Array{Expr, 1} = [:($(typ = _getType();_getNewVar(org))::$(typ)=$(_getVal(typ))) for i=1:paramLen]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
     # All parameters will be added as local variables.
@@ -126,7 +128,6 @@ module Mutator
     end)
 
     push!(org.funcs, fnEx)
-    push!(org.code.args[2].args, fnEx)
 
     fnEx
   end
@@ -136,13 +137,13 @@ module Mutator
   # It choose custom function from org.funcs array, fill parameters
   # and call it.
   # @param org Organism we are working with
-  # @param fn An expression of parent(current) function within 
+  # @param fn Parent(current) function unique name
   # we are orking in
   # @return {Expr|nothing}
   # TODO: add check if we call a function inside other function
   #
-  function _fnCall(org::Creature.Organism, fn::Expr)
-    if fn !== org.code return :nothing end
+  function _fnCall(org::Creature.Organism, fn::ASCIIString)
+    if !isempty(fn) return :nothing end
     local len::Int = length(org.funcs)
     if len < 1 return :nothing end
     local fnExpr::Expr = org.funcs[rand(1:len)]
@@ -156,7 +157,7 @@ module Mutator
       end
     end
 
-    :($(fnExpr.args[1].args[1])($([(ex = _getVar(org, i);ex === :nothing ? _getVal(i) : ex) for i in types]...)))
+    :($(fnExpr.args[1].args[1])($([(ex = _getVar(org, fn, i);ex === :nothing ? _getVal(i) : ex) for i in types]...)))
   end
 
   #
@@ -165,12 +166,14 @@ module Mutator
   # existing function.
   # @param org Organism we are working with
   #
-  function _onAdd(org::Creature.Organism)
+  @debug function _onAdd(org::Creature.Organism)
+  @bp
     local pos::Tuple = _getRandPos(org)
     local fn::Function = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
+    local fnName::ASCIIString = pos[2] === org.code ? "" : string(pos[2].args[1].args[1])
     local ex::Expr
 
-    if pos[2] === org.code || (pos[2] !== org.code && fn !== _fn && fn !== _fnCall) && (ex = fn(org, pos[2])) !== :nothing
+    if (pos[2] === org.code || (pos[2] !== org.code && fn !== _fn && fn !== _fnCall)) && (ex = fn(org, fnName)) !== :nothing
       insert!(pos[2].args[2].args, pos[1], ex)
       org.codeSize += 1
     end
@@ -185,13 +188,14 @@ module Mutator
   function _onChange(org::Creature.Organism)
     local pos::Tuple = _getRandPos(org)
     local args::Array{Expr, 1} = pos[2].args[2].args
+    local fnName::ASCIIString = pos[2] === org.code ? "" : string(pos[2].args[1].args[1])
     local fn::Function
     local oldExpr::Expr
     local ex::Expr
 
     if length(args) > 0
       fn = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
-      if pos[2] === org.code || (pos[2] !== org.code && fn !== _fn && fn !== _fnCall) && (ex = fn(org, pos[2])) !== :nothing
+      if (pos[2] === org.code || (pos[2] !== org.code && fn !== _fn && fn !== _fnCall)) && (ex = fn(org, fnName)) !== :nothing
         _onRemoveLine(pos)
         args[pos[1]] = ex
       end
@@ -263,6 +267,7 @@ module Mutator
     local expr::Expr = pos[2][pos[1]]        # line we want to remove
     local ex::Expr   = expr.args[1].args[1]  # shortcut to variable
     local i::Int
+    local vars::Array{Symbol, 1}
 
     # TODO: check if removed line doesn't contain blocks. In this 
     # TODO: case codeSize should be decreased more.
@@ -273,15 +278,17 @@ module Mutator
     # removes it from Creature.Organism.vars map
     #
     if expr.head === :local
-      i = findfirst(org.vars[pos[3]][ex.args[2]], ex.args[1])
-      if i > 0 deleteat!(org.vars[pos[3]][ex.args[2]], i) end
+      vars = org.vars[string(pos[2].args[1].args[1])][ex.args[2]]
+      i = findfirst(vars, ex.args[1])
+      if i > 0 deleteat!(vars, i) end
     #
     # Finds currently removed function declaration and remove it
     # from Creature.Organism.funcs map
     #
     elseif expr.head === :function
-      i = findfirst(org.funcs[pos[3]])
-      if i > 0 deleteat!(org.funcs[pos[3]], i) end
+      i = findfirst(org.funcs[pos[2]])
+      if i > 0 deleteat!(org.funcs[pos[2]], i) end
+      # TODO: check if this minus correct!
       org.codeSize -= length(pos[2])
     # TODO: blocks check will be added here
     end
@@ -346,7 +353,7 @@ module Mutator
   # @param typ Type of variable we want to take
   # @return {Symbol}
   #
-  function _getVar(org::Creature.Organism, fn::Expr, typ::DataType)
+  function _getVar(org::Creature.Organism, fn::ASCIIString, typ::DataType)
     if length(org.vars[fn][typ]) < 1 return :nothing end 
     org.vars[fn][typ][rand(1:length(org.vars[fn][typ]))]
   end
