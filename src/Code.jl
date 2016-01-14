@@ -97,10 +97,9 @@ module Code
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
     # All parameters will be added as local variables.
     #
-    local fnEx::Expr = :(function $(Symbol(fnName))($([(push!(var[p.args[1].args[2]], p.args[1].args[1]);p) for p in params]...))
-      return $(params[1].args[1].args[1])
-    end)
+    local fnEx::Expr = :(function $(Symbol(fnName))($([(push!(var[p.args[1].args[2]], p.args[1].args[1]);p) for p in params]...)) end)
 
+    push!(fnEx.args[2].args, :(return $(params[1].args[1].args[1])))
     push!(org.funcs, fnEx)
 
     fnEx
