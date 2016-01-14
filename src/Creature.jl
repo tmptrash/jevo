@@ -40,7 +40,6 @@ module Creature
   using Config
   using Debug
 
-  export Code
   export Organism
   export RetObj
 
@@ -184,13 +183,12 @@ module Creature
     # Main function is empty string in Creature.vars array.
     #
     local vars::Dict{ASCIIString, Dict{DataType, Array{Symbol, 1}}} = Dict{ASCIIString, Dict{DataType, Array{Symbol, 1}}}(
-      "" => Dict{DataType, Array{Symbol, 1}}(
-        ASCIIString => [:var_1],
-        Bool        => [:var_2],
-        Int8        => [:var_3],
-        Int16       => [:var_4]
-      )
+      "" => Helper.getTypesMap()
     )
+    vars[""][ASCIIString] = [:var_1]
+    vars[""][Bool]        = [:var_2]
+    vars[""][Int8]        = [:var_3]
+    vars[""][Int16]       = [:var_4]
 
     Organism(
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities

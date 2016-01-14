@@ -47,4 +47,17 @@ module Helper
 
     i
   end
+  #
+  # Returns default empty map with supported Julia types. All supported
+  # types should be stored here.
+  # @return {Dict{DataType, Array{Symbol, 1}}}
+  #
+  function getTypesMap()
+    Dict{DataType, Array{Symbol, 1}}(
+      ASCIIString => [],
+      Bool        => [],
+      Int8        => [],
+      Int16       => []
+    )
+  end
 end

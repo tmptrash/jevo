@@ -60,8 +60,12 @@ module Mutator
     local isMainFn::Bool = isempty(fnName)
     local ex::Expr
 
-    if (isMainFn || !isMainFn && fn !== Code.fn && fn !== Code.fnCall) && (ex = fn(org, fnName)) !== :nothing
-      insert!(pos[2].args[2].args, pos[1], ex)
+    if (isMainFn || !isMainFn && fn !== Code.fn && fn !== Code.fnCall) && (ex = fn(org, fnName)).head !== :nothing
+      #
+      # All new custom functions should be at the beginning
+      # to prevent UndefVarError error
+      #
+      insert!(pos[2].args[2].args, fn === Code.fn ? 1 : pos[1], ex)
       org.codeSize += 1
     end
   end
@@ -72,7 +76,8 @@ module Mutator
   # position is an empty body of the function.
   # @param org Organism we are working with
   #
-  function _onChange(org::Creature.Organism)
+  @debug function _onChange(org::Creature.Organism)
+  @bp
     local pos::Tuple = Code.getRandPos(org)
     local lines::Array{Expr, 1} = pos[2].args[2].args
     local fnName::ASCIIString = pos[2] === org.code ? "" : string(pos[2].args[1].args[1])
@@ -83,9 +88,11 @@ module Mutator
 
     if length(lines) > 0
       fn = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
-      if (isMainFn || !isMainFn && fn !== Code.fn && fn !== Code.fnCall) && (ex = fn(org, fnName)) !== :nothing
-        Code.onRemoveLine(pos)
-        lines[pos[1]] = ex
+      if (isMainFn || !isMainFn && fn !== Code.fn && fn !== Code.fnCall) && (ex = fn(org, fnName)).head !== :nothing
+        if fn !== Code.fn || (fn === Code.fn && pos[1] === 1)
+          Code.onRemoveLine(org, pos)
+          lines[pos[1]] = ex
+        end
       end
     end
   end
@@ -113,7 +120,7 @@ module Mutator
     local args::Array{Expr, 1} = pos[2].args[2].args
 
     if length(args) > 0
-      Code.onRemoveLine(pos)
+      Code.onRemoveLine(org, pos)
       deleteat!(args, pos[1])
     end
   end

@@ -9,6 +9,15 @@
 module Code
   import Creature
   import Config
+  import Helper
+
+  export var
+  export plus
+  export fn
+  export fnCall
+
+  export onRemoveLine
+  export getRandPos
 
   #
   # @cmd
@@ -45,7 +54,7 @@ module Code
     local v2::Symbol = _getVar(org, fn, typ)
     local v3::Symbol = _getVar(org, fn, typ)
 
-    if v1 === :nothing return :nothing end
+    if v1 === :nothing return Expr(:nothing) end
 
     if typ === ASCIIString 
       return :($(v1) = $(v2) * $(v3))
@@ -70,12 +79,13 @@ module Code
     # We may add functions only in main one. Custom functions can't
     # be used as a container for other custom functions.
     #
-    if !isempty(fn) return :nothing end
+    if !isempty(fn) return Expr(:nothing) end
     local typ::DataType
     local i::Int
     local p::Symbol
+    local fnName::ASCIIString = _getNewFn(org)
     local paramLen::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
-    local var::Dict{DataType, Array{Symbol, 1}} = org.vars[fn]
+    local var::Dict{DataType, Array{Symbol, 1}} = (org.vars[fnName] = Helper.getTypesMap())
     #
     # New function parameters in format: [name::Type=val,...]. 
     # At least one parameter should exist. We choose amount of
@@ -87,7 +97,7 @@ module Code
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
     # All parameters will be added as local variables.
     #
-    local fnEx::Expr = :(function $(_getNewFn(org))($([(push!(var[p.args[1].args[2]], p.args[1].args[1]);p) for p in params]...))
+    local fnEx::Expr = :(function $(Symbol(fnName))($([(push!(var[p.args[1].args[2]], p.args[1].args[1]);p) for p in params]...))
       return $(params[1].args[1].args[1])
     end)
 
@@ -107,9 +117,9 @@ module Code
   # TODO: add check if we call a function inside other function
   #
   function fnCall(org::Creature.Organism, fn::ASCIIString)
-    if !isempty(fn) return :nothing end
+    if !isempty(fn) return Expr(:nothing) end
     local len::Int = length(org.funcs)
-    if len < 1 return :nothing end
+    if len < 1 return Expr(:nothing) end
     local fnExpr::Expr = org.funcs[rand(1:len)]
     local args::Array{Any, 1} = fnExpr.args[1].args        # shortcut to func args
     local types::Array{DataType, 1} = Array{DataType, 1}() # func types only
@@ -182,7 +192,7 @@ module Code
     #
     fn === 1 ?
       (rand(1:length(org.code.args[2].args)), org.code) :
-      (rand(1:length(org.funcs[fn - 1].args[2].args) + 1), org.funcs[fn - 1])
+      (rand(1:length(org.funcs[fn - 1].args[2].args)), org.funcs[fn - 1])
   end
   #
   # Creates new unique variable name and returns it's symbol
@@ -195,10 +205,10 @@ module Code
   #
   # Creates new unique custom function name.
   # @param org Organism we are working with
-  # @return {Symbol}
+  # @return {ASCIIString}
   #
   function _getNewFn(org::Creature.Organism)
-    Symbol("func_$(org.fnId += 1)")
+    "func_$(org.fnId += 1)"
   end
   #
   # Returns one of supported types. Is used randomizer for choosing type.
