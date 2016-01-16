@@ -49,38 +49,39 @@ module Mutator
 
   #
   # Adds one line of code into existing code including all
-  # custom function bodies. It shouldn't add function inside
-  # existing function.
+  # custom function bodies. It shouldn't add function or
+  # function call inside existing function.
   # @param org Organism we are working with
   #
   function _onAdd(org::Creature.Organism)
-    local pos::Tuple = Code.getRandPos(org)
-    local fn::Function = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
-    local fnName::ASCIIString = pos[2] === org.code ? "" : string(pos[2].args[1].args[1])
-    local isMainFn::Bool = isempty(fnName)
-    local ex::Expr
+    pos::Int, fnEx::Expr      = Code.getRandPos(org)
+    local cmd::Function       = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
+    local fnName::ASCIIString = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
+    local mainFn::Bool        = isempty(fnName)
+    local cmdEx::Expr
 
-    if (isMainFn || !isMainFn && fn !== Code.fn && fn !== Code.fnCall) && (ex = fn(org, fnName)).head !== :nothing
+    if (!mainFn && cmd !== Code.fn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing
       #
       # All new custom functions should be at the beginning
-      # to prevent UndefVarError error
+      # to prevent UndefVarError error in case of calling 
+      # before defining the function.
       #
-      insert!(pos[2].args[2].args, fn === Code.fn ? 1 : pos[1], ex)
+      insert!(fnEx.args[2].args, cmd === Code.fn ? 1 : pos, cmdEx)
       org.codeSize += 1
     end
   end
   #
   # Makes one big change in a code included code of all 
-  # custom functions. Big change it's change one line. It's
+  # custom functions. Big change means changing one line. It's
   # possible to skip changing if, for example, insertion
   # position is an empty body of the function.
   # @param org Organism we are working with
   #
   @debug function _onChange(org::Creature.Organism)
   @bp
-    local pos::Tuple = Code.getRandPos(org)
-    local lines::Array{Expr, 1} = pos[2].args[2].args
-    local fnName::ASCIIString = pos[2] === org.code ? "" : string(pos[2].args[1].args[1])
+    pos::Int, fnEx::Expr      = Code.getRandPos(org)
+    local lines::Array{Expr, 1} = fnEx.args[2].args
+    local fnName::ASCIIString = fnEx === org.code ? "" : string(fnEx.args[1].args[1])
     local isMainFn::Bool = isempty(fnName)
     local fn::Function
     local oldExpr::Expr
@@ -89,9 +90,9 @@ module Mutator
     if length(lines) > 0
       fn = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
       if (isMainFn || !isMainFn && fn !== Code.fn && fn !== Code.fnCall) && (ex = fn(org, fnName)).head !== :nothing
-        if fn !== Code.fn || (fn === Code.fn && pos[1] === 1)
-          Code.onRemoveLine(org, pos)
-          lines[pos[1]] = ex
+        if fn !== Code.fn || (fn === Code.fn && pos === 1)
+          Code.onRemoveLine(org, pos, fnEx)
+          lines[pos = ex
         end
       end
     end
@@ -116,12 +117,12 @@ module Mutator
   # TODO: body size to decrease codeSize (-= bodyLen)
   #
   function _onDel(org::Creature.Organism)
-    local pos::Tuple = Code.getRandPos(org)
-    local args::Array{Expr, 1} = pos[2].args[2].args
+    pos::Int, fnEx::Expr       = Code.getRandPos(org)
+    local args::Array{Expr, 1} = fnEx.args[2].args
 
     if length(args) > 0
-      Code.onRemoveLine(org, pos)
-      deleteat!(args, pos[1])
+      Code.onRemoveLine(org, pos, fnEx)
+      deleteat!(args, pos)
     end
   end
   #
@@ -151,7 +152,8 @@ module Mutator
 
   #
   # Array of available functions. Each function should return Expr type.
-  # They are used for generating (add,change) code of organisms.
+  # They are used for generating (add,change) code of organisms. This
+  # array can't be empty.
   #
   const CODE_SNIPPETS = [
     Code.var, Code.plus, Code.fn, Code.fnCall

@@ -10,32 +10,35 @@ module Code
   import Creature
   import Config
   import Helper
-
+  #
+  # Command functions. Amount of these functions will be increased
+  # as many Julia language part i'mgoing to support...
+  #
   export var
   export plus
   export fn
   export fnCall
-
+  #
+  # Public functions
+  #
   export onRemoveLine
   export getRandPos
 
   #
   # @cmd
-  # Returns AST expression for variable creating. Variable format: 
+  # Returns AST expression for variable declaration. Format:
   # local name::Type = value
   # @param org Organism we have to mutate
-  # @param fn Parent(current) function unique name 
-  # we are orking in
+  # @param fn Parent(current) function unique name
   # @return {Expr}
   #
   function var(org::Creature.Organism, fn::ASCIIString)
     local typ::DataType  = _getType()
     local varSym::Symbol = _getNewVar(org)
-    local ex::Expr = :(local $(varSym)::$(typ)=$(_getVal(typ)))
 
     push!(org.vars[fn][typ], varSym)
 
-    ex
+    :(local $(varSym)::$(typ)=$(_getVal(typ)))
   end
   #
   # @cmd
@@ -44,8 +47,8 @@ module Code
   # concatination, for boolean - & operator. If code is empty
   # this function will skipp the execution.
   # @param org Organism we have to mutate
-  # @param fn Parent(current) function unique name 
-  # we are orking in
+  # @param fn Parent(current) function unique name
+  # we are working in
   # @return {Expr}
   #
   function plus(org::Creature.Organism, fn::ASCIIString)
@@ -141,11 +144,13 @@ module Code
   # is a tuple of three elements: code::Array{Expr},pos::Int,fn::Expr, where
   # code - array of code lines some AST node, pos - current removing 
   # position in code, fn - parent(current) function.
-  # @param pos Remove position. 
+  # @param org Organism we are working with
+  # @param pos Remove position
+  # @param fnEx Expressiom of function body, we are deleting in
   #
-  function onRemoveLine(org::Creature.Organism, pos::Tuple)
-    local expr::Expr = pos[2][pos[1]]        # line we want to remove
-    local ex::Expr   = expr.args[1].args[1]  # shortcut to variable
+  function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr)
+    local expr::Expr = fnEx[pos]            # line we want to remove
+    local ex::Expr   = expr.args[1].args[1] # shortcut to variable
     local i::Int
     local vars::Array{Symbol, 1}
 
@@ -158,7 +163,7 @@ module Code
     # removes it from Creature.Organism.vars map
     #
     if expr.head === :local
-      vars = org.vars[string(pos[2].args[1].args[1])][ex.args[2]]
+      vars = org.vars[string(fnEx.args[1].args[1])][ex.args[2]]
       i = findfirst(vars, ex.args[1])
       if i > 0 deleteat!(vars, i) end
     #
@@ -166,10 +171,10 @@ module Code
     # from Creature.Organism.funcs map
     #
     elseif expr.head === :function
-      i = findfirst(org.funcs[pos[2]])
-      if i > 0 deleteat!(org.funcs[pos[2]], i) end
+      i = findfirst(org.funcs[fnEx])
+      if i > 0 deleteat!(org.funcs[fnEx], i) end
       # TODO: check if this minus correct!
-      org.codeSize -= length(pos[2])
+      org.codeSize -= (length(fnEx) - 1) # we don't calculate return operator
     # TODO: blocks check will be added here
     end
     org.codeSize -= 1
@@ -182,16 +187,20 @@ module Code
   # randomly and choose random position inside this function. 
   # Last tuple parameter is a parent(current) function.
   # @param org Organism we are working with
-  # @return {Tuple} (index::Int,lines::Any,mainFn::Bool)
+  # @return {Tuple} (index::Int, fn::Expr)
   #
   function getRandPos(org::Creature.Organism)
-    local fn::Int = rand(1:length(org.funcs) + 1) # + 1 for main func
     #
-    # 1 means main function (not custom)
+    # + 1, because main function exists everytime
+    #
+    local fn::Int = rand(1:length(org.funcs) + 1)
+
+    #
+    # args[2].args is an array of function body (block)
     #
     fn === 1 ?
-      (rand(1:length(org.code.args[2].args)), org.code) :
-      (rand(1:length(org.funcs[fn - 1].args[2].args)), org.funcs[fn - 1])
+      (rand(1:length(org.code.args[2].args)), org.code) :             # main function
+      (rand(1:length(org.funcs[fn-1].args[2].args)), org.funcs[fn-1]) # custom function
   end
   #
   # Creates new unique variable name and returns it's symbol
@@ -214,7 +223,7 @@ module Code
   # @return {DataType}
   #
   function _getType()
-    local types::Array{DataType} = [ASCIIString, Bool, Int8, Int16]
+    local types::Array{DataType} = Helper.getSupportedTypes()
     types[rand(1:length(types))]
   end
   #

@@ -5,6 +5,7 @@ module Helper
   export Point
   export randTrue
   export getProbIndex
+  export getSupportedTypes
 
   #
   # One point in the world. Is described by two coordinates.
@@ -49,15 +50,19 @@ module Helper
   end
   #
   # Returns default empty map with supported Julia types. All supported
-  # types should be stored here.
+  # types should be stored in getSupportedTypes() function.
   # @return {Dict{DataType, Array{Symbol, 1}}}
   #
   function getTypesMap()
-    Dict{DataType, Array{Symbol, 1}}(
-      ASCIIString => [],
-      Bool        => [],
-      Int8        => [],
-      Int16       => []
-    )
+    Dict{DataType, Array{Symbol, 1}}(map((typ) -> typ => Symbol[], dt)...)
+  end
+  #
+  # Returns supported types array for organism language
+  # @param fn Callback function, which is called for
+  # every array element
+  # @return {Array{DataType, 1}}
+  #
+  function getSupportedTypes(fn::Function = (t) -> t)
+    map(fn, [ASCIIString, Bool, Int8, Int16])
   end
 end

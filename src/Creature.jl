@@ -163,6 +163,7 @@ module Creature
   # @return {Creature}
   #
   function create(pos::Helper.Point = Helper.Point(1, 1))
+    local i::Int = 1
     #
     # Expression below means:
     # function (o)
@@ -173,10 +174,10 @@ module Creature
     # end
     #
     local code::Expr = Expr(:function, Expr(:tuple, Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))), Expr(:block,
-      Expr(:local, Expr(:(=), Expr(:(::), :var_1, :ASCIIString), randstring())),
-      Expr(:local, Expr(:(=), Expr(:(::), :var_2, :Bool),        rand(Bool))),
-      Expr(:local, Expr(:(=), Expr(:(::), :var_3, :Int8),        rand(Int8))),
-      Expr(:local, Expr(:(=), Expr(:(::), :var_4, :Int16),       rand(Int16)))
+      map((typ) -> 
+        Expr(:local, Expr(:(=), Expr(:(::), Symbol("var_$(i+=1)"), Symbol(typ)), typ === ASCIIString ? randstring() : rand(typ))),
+        Helper.getSupportedTypes()
+      )...
     ))
     #
     # Variables of this map should be synchronized with code expression above.
@@ -185,15 +186,14 @@ module Creature
     local vars::Dict{ASCIIString, Dict{DataType, Array{Symbol, 1}}} = Dict{ASCIIString, Dict{DataType, Array{Symbol, 1}}}(
       "" => Helper.getTypesMap()
     )
-    vars[""][ASCIIString] = [:var_1]
-    vars[""][Bool]        = [:var_2]
-    vars[""][Int8]        = [:var_3]
-    vars[""][Int16]       = [:var_4]
+    i = 1
+    Helper.getSupportedTypes((t) -> vars[""][t] = [Symbol("var_$(i+=1)")])
 
     Organism(
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       code,                                          # code
       eval(code),                                    # codeFn
+      # TODO: change to length(Helper.getSupportedTypes)
       4,                                             # codeSize
       4,                                             # varId
       0,                                             # fnId
