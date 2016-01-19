@@ -10,6 +10,8 @@ module Code
   import Creature
   import Config
   import Helper
+
+  using Debug
   #
   # Command functions. Amount of these functions will be increased
   # as many Julia language part i'mgoing to support...
@@ -148,7 +150,8 @@ module Code
   # @param pos Remove position
   # @param fnEx Expressiom of function body, we are deleting in
   #
-  function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr)
+  @debug function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr)
+  @bp
     local expr::Expr = fnEx[pos]            # line we want to remove
     local ex::Expr   = expr.args[1].args[1] # shortcut to variable
     local i::Int

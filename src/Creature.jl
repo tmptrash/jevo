@@ -162,7 +162,8 @@ module Creature
   # @param pos Position of organism
   # @return {Creature}
   #
-  function create(pos::Helper.Point = Helper.Point(1, 1))
+  @debug function create(pos::Helper.Point = Helper.Point(1, 1))
+  @bp
     local i::Int = 1
     #
     # Expression below means:
@@ -175,7 +176,7 @@ module Creature
     #
     local code::Expr = Expr(:function, Expr(:tuple, Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))), Expr(:block,
       map((typ) -> 
-        Expr(:local, Expr(:(=), Expr(:(::), Symbol("var_$(i+=1)"), Symbol(typ)), typ === ASCIIString ? randstring() : rand(typ))),
+        Expr(:local, Expr(:(=), Expr(:(::), Symbol("var_$(i+=1)"), Symbol("$typ")), typ === ASCIIString ? randstring() : rand(typ))),
         Helper.getSupportedTypes()
       )...
     ))

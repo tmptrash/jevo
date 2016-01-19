@@ -54,10 +54,11 @@ module Mutator
   # @param org Organism we are working with
   #
   function _onAdd(org::Creature.Organism)
-    pos::Int, fnEx::Expr      = Code.getRandPos(org)
-    local cmd::Function       = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
-    local fnName::ASCIIString = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
-    local mainFn::Bool        = isempty(fnName)
+    pos::Int, fnEx::Expr        = Code.getRandPos(org)
+    local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
+    local lines::Array{Expr, 1} = fnEx.args[2].args
+    local fnName::ASCIIString   = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
+    local mainFn::Bool          = isempty(fnName)
     local cmdEx::Expr
 
     if (!mainFn && cmd !== Code.fn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing
@@ -66,7 +67,7 @@ module Mutator
       # to prevent UndefVarError error in case of calling 
       # before defining the function.
       #
-      insert!(fnEx.args[2].args, cmd === Code.fn ? 1 : pos, cmdEx)
+      insert!(lines, cmd === Code.fn ? 1 : pos, cmdEx)
       org.codeSize += 1
     end
   end
@@ -79,21 +80,20 @@ module Mutator
   #
   @debug function _onChange(org::Creature.Organism)
   @bp
-    pos::Int, fnEx::Expr      = Code.getRandPos(org)
+    pos::Int, fnEx::Expr        = Code.getRandPos(org)
+    local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
     local lines::Array{Expr, 1} = fnEx.args[2].args
-    local fnName::ASCIIString = fnEx === org.code ? "" : string(fnEx.args[1].args[1])
-    local isMainFn::Bool = isempty(fnName)
-    local fn::Function
-    local oldExpr::Expr
-    local ex::Expr
+    local fnName::ASCIIString   = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
+    local mainFn::Bool          = isempty(fnName)
+    local cmdEx::Expr
 
     if length(lines) > 0
-      fn = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
-      if (isMainFn || !isMainFn && fn !== Code.fn && fn !== Code.fnCall) && (ex = fn(org, fnName)).head !== :nothing
-        if fn !== Code.fn || (fn === Code.fn && pos === 1)
-          Code.onRemoveLine(org, pos, fnEx)
-          lines[pos = ex
-        end
+      #
+      # We can't change function declaration
+      #
+      if cmd !== Code.fn && (!mainFn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing
+        Code.onRemoveLine(org, pos, fnEx)
+        lines[pos] = cmdEx
       end
     end
   end
