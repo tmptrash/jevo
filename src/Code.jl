@@ -152,20 +152,21 @@ module Code
   #
   @debug function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr)
   @bp
-    local expr::Expr = fnEx[pos]            # line we want to remove
-    local ex::Expr   = expr.args[1].args[1] # shortcut to variable
+    local expr::Expr = fnEx.args[2].args[pos] # line we want to remove
+    local ex::Expr
     local i::Int
     local vars::Array{Symbol, 1}
 
-    # TODO: check if removed line doesn't contain blocks. In this 
+    # TODO: check if removed line doesn't contain blocks. In this
     # TODO: case codeSize should be decreased more.
     #org.codeSize -= 1
 
     #
-    # Finds currently removed variable within it's function and 
+    # Finds currently removed variable within it's function and
     # removes it from Creature.Organism.vars map
     #
     if expr.head === :local
+      ex   = expr.args[1].args[1]   # shortcut to variable
       vars = org.vars[string(fnEx.args[1].args[1])][ex.args[2]]
       i = findfirst(vars, ex.args[1])
       if i > 0 deleteat!(vars, i) end

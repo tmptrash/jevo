@@ -53,10 +53,10 @@ module Mutator
   # function call inside existing function.
   # @param org Organism we are working with
   #
-  function _onAdd(org::Creature.Organism)
+  @debug function _onAdd(org::Creature.Organism)
+  @bp
     pos::Int, fnEx::Expr        = Code.getRandPos(org)
     local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
-    local lines::Array{Expr, 1} = fnEx.args[2].args
     local fnName::ASCIIString   = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
     local mainFn::Bool          = isempty(fnName)
     local cmdEx::Expr
@@ -67,7 +67,7 @@ module Mutator
       # to prevent UndefVarError error in case of calling 
       # before defining the function.
       #
-      insert!(lines, cmd === Code.fn ? 1 : pos, cmdEx)
+      insert!(fnEx.args[2].args, cmd === Code.fn ? 1 : pos, cmdEx)
       org.codeSize += 1
     end
   end
@@ -82,18 +82,17 @@ module Mutator
   @bp
     pos::Int, fnEx::Expr        = Code.getRandPos(org)
     local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
-    local lines::Array{Expr, 1} = fnEx.args[2].args
     local fnName::ASCIIString   = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
     local mainFn::Bool          = isempty(fnName)
     local cmdEx::Expr
 
-    if length(lines) > 0
+    if length(fnEx.args[2].args) > 0
       #
       # We can't change function declaration
       #
       if cmd !== Code.fn && (!mainFn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing
         Code.onRemoveLine(org, pos, fnEx)
-        lines[pos] = cmdEx
+        fnEx.args[2].args[pos] = cmdEx
       end
     end
   end
