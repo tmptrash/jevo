@@ -90,7 +90,7 @@ module Mutator
       #
       # We can't change function declaration
       #
-      if cmd !== Code.fn && (!mainFn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing
+      if cmd !== Code.fn && (!mainFn && cmd !== Code.fnCall || mainFn) && fnEx.args[2].args[pos].head !== :return && (cmdEx = cmd(org, fnName)).head !== :nothing
         Code.onRemoveLine(org, pos, fnEx)
         fnEx.args[2].args[pos] = cmdEx
       end
@@ -119,7 +119,7 @@ module Mutator
     pos::Int, fnEx::Expr       = Code.getRandPos(org)
     local args::Array{Expr, 1} = fnEx.args[2].args
 
-    if length(args) > 0
+    if length(args) > 0 && fnEx.args[2].args[pos].head !== :return
       Code.onRemoveLine(org, pos, fnEx)
       deleteat!(args, pos)
     end

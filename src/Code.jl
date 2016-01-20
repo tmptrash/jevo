@@ -152,7 +152,7 @@ module Code
   #
   @debug function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr)
   @bp
-    local expr::Expr = fnEx.args[2].args[pos] # line we want to remove
+    local lineEx::Expr = fnEx.args[2].args[pos] # line we want to remove
     local ex::Expr
     local i::Int
     local vars::Array{Symbol, 1}
@@ -165,8 +165,8 @@ module Code
     # Finds currently removed variable within it's function and
     # removes it from Creature.Organism.vars map
     #
-    if expr.head === :local
-      ex   = expr.args[1].args[1]   # shortcut to variable
+    if lineEx.head === :local
+      ex   = lineEx.args[1].args[1]   # shortcut to variable
       vars = org.vars[string(fnEx.args[1].args[1])][ex.args[2]]
       i = findfirst(vars, ex.args[1])
       if i > 0 deleteat!(vars, i) end
@@ -174,7 +174,7 @@ module Code
     # Finds currently removed function declaration and remove it
     # from Creature.Organism.funcs map
     #
-    elseif expr.head === :function
+    elseif lineEx.head === :function
       i = findfirst(org.funcs[fnEx])
       if i > 0 deleteat!(org.funcs[fnEx], i) end
       # TODO: check if this minus correct!
