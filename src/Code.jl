@@ -153,7 +153,6 @@ module Code
   #
   function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr)
     local lineEx::Expr = fnEx.args[2].args[pos] # line we want to remove
-    #local types::Dict{Symbol, DataType} = Dict{Symbol, DataType}(Helper.getSupportedTypes((typ) -> Symbol("$typ") => typ))
     local ex::Expr
     local i::Int
     #
