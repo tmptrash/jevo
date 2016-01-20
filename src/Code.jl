@@ -204,7 +204,7 @@ module Code
     #
     fn === 1 ?
       (rand(1:length(org.code.args[2].args)), org.code) :             # main function
-      (rand(1:length(org.funcs[fn-1].args[2].args)), org.funcs[fn-1]) # custom function
+      (rand(1:length(org.funcs[fn-1].args[2].args)-1), org.funcs[fn-1]) # custom function
   end
   #
   # Creates new unique variable name and returns it's symbol
