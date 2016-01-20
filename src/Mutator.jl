@@ -53,8 +53,7 @@ module Mutator
   # function call inside existing function.
   # @param org Organism we are working with
   #
-  @debug function _onAdd(org::Creature.Organism)
-  @bp
+  function _onAdd(org::Creature.Organism)
     pos::Int, fnEx::Expr        = Code.getRandPos(org)
     local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
     local fnName::ASCIIString   = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"

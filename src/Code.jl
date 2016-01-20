@@ -167,7 +167,7 @@ module Code
     #
     if lineEx.head === :local
       ex   = lineEx.args[1].args[1]   # shortcut to variable
-      vars = org.vars[string(fnEx.args[1].args[1])][ex.args[2]]
+      vars = org.vars[fnEx === org.code ? "" : "$fnEx.args[1].args[1]"][ex.args[2]]
       i = findfirst(vars, ex.args[1])
       if i > 0 deleteat!(vars, i) end
     #
@@ -198,16 +198,18 @@ module Code
     # + 1, because main function exists everytime
     #
     local fn::Int = rand(1:length(org.funcs) + 1)
+    local i::Int
 
     #
     # args[2].args is an array of function body (block)
+    # This is custom function. i-1 means that we can't change 
+    # return operator at the end of custom function
     #
-    fn > 1 ?
-      #
-      # -1 means that we can't change return operator inside custom function
-      #
-      (rand(1:length(org.funcs[fn-1].args[2].args) - 1), org.funcs[fn-1]) : # custom function
-      (rand(1:length(org.code.args[2].args)), org.code)                     # main function
+    if fn > 1 return (rand(1:(i = length(org.funcs[fn-1].args[2].args)) > 1 ? i - 1 : 1), org.funcs[fn-1]) end
+    #
+    # main function
+    #
+    (rand(1:length(org.code.args[2].args)), org.code)
       
   end
   #
