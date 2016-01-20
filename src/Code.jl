@@ -202,9 +202,13 @@ module Code
     #
     # args[2].args is an array of function body (block)
     #
-    fn === 1 ?
-      (rand(1:length(org.code.args[2].args)), org.code) :             # main function
-      (rand(1:length(org.funcs[fn-1].args[2].args)-1), org.funcs[fn-1]) # custom function
+    fn > 1 ?
+      #
+      # -1 means that we can't change return operator inside custom function
+      #
+      (rand(1:length(org.funcs[fn-1].args[2].args) - 1), org.funcs[fn-1]) : # custom function
+      (rand(1:length(org.code.args[2].args)), org.code)                     # main function
+      
   end
   #
   # Creates new unique variable name and returns it's symbol
