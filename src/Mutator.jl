@@ -77,8 +77,7 @@ module Mutator
   # position is an empty body of the function.
   # @param org Organism we are working with
   #
-  @debug function _onChange(org::Creature.Organism)
-  @bp
+  function _onChange(org::Creature.Organism)
     pos::Int, fnEx::Expr        = Code.getRandPos(org)
     local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
     local fnName::ASCIIString   = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
@@ -106,21 +105,20 @@ module Mutator
 
     if length(pos[2].args[2].args) > 0
       # TODO: AST deep analyzing here!
+      # TODO: variables and constants should be used here
     end
   end
   #
-  # Removes one code line if possible.
+  # Removes one code line if possible. It can't remove return
+  # operator inside custom functions
   # @param org Organism we are working with
-  # TODO: if we remove function we have to calculate it's
-  # TODO: body size to decrease codeSize (-= bodyLen)
   #
   function _onDel(org::Creature.Organism)
-    pos::Int, fnEx::Expr       = Code.getRandPos(org)
-    local args::Array{Expr, 1} = fnEx.args[2].args
+    pos::Int, fnEx::Expr = Code.getRandPos(org)
 
-    if length(args) > 0
+    if length(fnEx.args[2].args) > 0 && fnEx.args[2].args[pos].head !== :return
       Code.onRemoveLine(org, pos, fnEx)
-      deleteat!(args, pos)
+      deleteat!(fnEx.args[2].args, pos)
     end
   end
   #

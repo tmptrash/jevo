@@ -3,6 +3,7 @@
 # Mutator module.
 #
 # TODO: describe @cmd annotation
+# TODO: describe that return operator inside custom functions don't affect of script size
 #
 # @author DeadbraiN
 #
@@ -151,23 +152,18 @@ module Code
   # @param fnEx Expressiom of function body, we are deleting in
   #
   @debug function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr)
-  @bp
     local lineEx::Expr = fnEx.args[2].args[pos] # line we want to remove
+    #local types::Dict{Symbol, DataType} = Dict{Symbol, DataType}(Helper.getSupportedTypes((typ) -> Symbol("$typ") => typ))
     local ex::Expr
     local i::Int
-    local vars::Array{Symbol, 1}
-
-    # TODO: check if removed line doesn't contain blocks. In this
-    # TODO: case codeSize should be decreased more.
-    #org.codeSize -= 1
-
     #
     # Finds currently removed variable within it's function and
     # removes it from Creature.Organism.vars map
     #
     if lineEx.head === :local
+      @bp
       ex   = lineEx.args[1].args[1]   # shortcut to variable
-      vars = org.vars[fnEx === org.code ? "" : "$fnEx.args[1].args[1]"][ex.args[2]]
+      vars = org.vars[fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"][ex.args[2]]
       i = findfirst(vars, ex.args[1])
       if i > 0 deleteat!(vars, i) end
     #
@@ -175,10 +171,9 @@ module Code
     # from Creature.Organism.funcs map
     #
     elseif lineEx.head === :function
-      i = findfirst(org.funcs[fnEx])
-      if i > 0 deleteat!(org.funcs[fnEx], i) end
-      # TODO: check if this minus correct!
-      org.codeSize -= (length(fnEx) - 1) # we don't calculate return operator
+      i = findfirst(org.funcs, lineEx)
+      if i > 0 deleteat!(org.funcs, i) end
+      org.codeSize -= (length(lineEx.args[2].args) - 1) # -1, because we don't calc return operator
     # TODO: blocks check will be added here
     end
     org.codeSize -= 1
@@ -189,7 +184,6 @@ module Code
   # line. Position is chose randomly. It takes main function 
   # and all custom functions together, choose one function 
   # randomly and choose random position inside this function. 
-  # Last tuple parameter is a parent(current) function.
   # @param org Organism we are working with
   # @return {Tuple} (index::Int, fn::Expr)
   #
@@ -199,13 +193,12 @@ module Code
     #
     local fn::Int = rand(1:length(org.funcs) + 1)
     local i::Int
-
     #
     # args[2].args is an array of function body (block)
     # This is custom function. i-1 means that we can't change 
     # return operator at the end of custom function
     #
-    if fn > 1 return (rand(1:(i = length(org.funcs[fn-1].args[2].args)) > 1 ? i - 1 : 1), org.funcs[fn-1]) end
+    if fn > 1 return (rand(1:((i = length(org.funcs[fn-1].args[2].args)) > 1 ? i - 1 : 1)), org.funcs[fn-1]) end
     #
     # main function
     #
