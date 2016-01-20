@@ -151,7 +151,7 @@ module Code
   # @param pos Remove position
   # @param fnEx Expressiom of function body, we are deleting in
   #
-  @debug function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr)
+  function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr)
     local lineEx::Expr = fnEx.args[2].args[pos] # line we want to remove
     #local types::Dict{Symbol, DataType} = Dict{Symbol, DataType}(Helper.getSupportedTypes((typ) -> Symbol("$typ") => typ))
     local ex::Expr
@@ -161,7 +161,6 @@ module Code
     # removes it from Creature.Organism.vars map
     #
     if lineEx.head === :local
-      @bp
       ex   = lineEx.args[1].args[1]   # shortcut to variable
       vars = org.vars[fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"][ex.args[2]]
       i = findfirst(vars, ex.args[1])
