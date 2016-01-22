@@ -20,14 +20,17 @@ module Mutator
   #
   function mutate(org::Creature.Organism)
     #
-    # If there is no code, we can't mutate it
+    # If there is no code, we can't mutate it. We may only add code line
     #
-    if org.codeSize < 1 return false end
+    if org.codeSize < 1 
+      _onAdd(org)
+      return true
+    end
 
     local pIndex::Int = Helper.getProbIndex(org.mutationProbabilities)
-    local map::Array{Function, 1} = [_onAdd, _onChange, _onSmallChange, _onDel, _onClone, _onPeriod, _onAmount]
+    local mutations::Array{Function, 1} = [_onAdd, _onChange, _onSmallChange, _onDel, _onClone, _onPeriod, _onAmount]
 
-    map[pIndex](org)
+    mutations[pIndex](org)
     #
     # Updates compiled version of the code. Only valid code will be applied,
     # because exception will be fired in case of error organismcode.
