@@ -156,7 +156,7 @@ module Mutator
   # array can't be empty.
   #
   const CODE_SNIPPETS = [
-    Code.var, Code.plus, Code.fn, Code.fnCall
+    Code.var, Code.plus, Code.fn, Code.fnCall, Code.condition
   ]
  #  #
  #  # TODO:

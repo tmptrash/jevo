@@ -77,7 +77,7 @@ module Code
   # variable
   # @param org Organism we are working with
   # @param fn Parent(current) function unique name 
-  # we are orking in
+  # we are working in
   # @return {Expr}
   #
   function fn(org::Creature.Organism, fn::ASCIIString)
@@ -117,7 +117,7 @@ module Code
   # and call it.
   # @param org Organism we are working with
   # @param fn Parent(current) function unique name
-  # we are orking in
+  # we are working in
   # @return {Expr|nothing}
   # TODO: add check if we call a function inside other function
   #
@@ -137,6 +137,17 @@ module Code
     end
 
     :($(fnExpr.args[1].args[1])($([(ex = _getVar(org, fn, i);ex === :nothing ? _getVal(i) : ex) for i in types]...)))
+  end
+  #
+  # @cmd
+  # TODO:
+  # if operator implementation
+  # @param org Organism we are working with
+  # @param fn Parent(current) function unique name
+  # we are working in
+  # @return {Expr|nothing}
+  #
+  function condition(org::Creature.Organism, fn::ASCIIString)
   end
 
   #
