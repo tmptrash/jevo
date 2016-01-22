@@ -3,6 +3,7 @@
 # TODO: describe generl approach of a module. mutations probabilities
 # TODO: small-changes, code evaluation, energy & cloning
 # TODO: describe linear quoted structure of the script we support
+# TODO: describe functions and variables at the top of the code
 #
 module Mutator
   import Config
@@ -69,7 +70,7 @@ module Mutator
       # to prevent UndefVarError error in case of calling 
       # before defining the function.
       #
-      insert!(fnEx.args[2].args, cmd === Code.fn ? 1 : pos, cmdEx)
+      insert!(fnEx.args[2].args, cmd === Code.fn || cmd === Code.var ? 1 : pos, cmdEx)
       org.codeSize += 1
     end
   end
