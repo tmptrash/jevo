@@ -21,12 +21,12 @@ module Code
   export plus
   export fn
   export fnCall
+  export condition
   #
   # Public functions
   #
   export onRemoveLine
   export getRandPos
-
   #
   # @cmd
   # Returns AST expression for variable declaration. Format:
@@ -35,11 +35,12 @@ module Code
   # @param fn Parent(current) function unique name
   # @return {Expr}
   #
-  function var(org::Creature.Organism, fn::ASCIIString)
+  @debug function var(org::Creature.Organism, fn::ASCIIString)
+  @bp
     local typ::DataType  = _getType()
     local varSym::Symbol = _getNewVar(org)
 
-    push!(org.vars[fn][typ], varSym)
+    push!(org.vars[fn].vars[typ], varSym)
 
     :(local $(varSym)::$(typ)=$(_getVal(typ)))
   end
@@ -54,7 +55,8 @@ module Code
   # we are working in
   # @return {Expr}
   #
-  function plus(org::Creature.Organism, fn::ASCIIString)
+  @debug function plus(org::Creature.Organism, fn::ASCIIString)
+  @bp
     local typ::DataType = _getType()
     local v1::Symbol = _getVar(org, fn, typ)
     local v2::Symbol = _getVar(org, fn, typ)
@@ -80,7 +82,8 @@ module Code
   # we are working in
   # @return {Expr}
   #
-  function fn(org::Creature.Organism, fn::ASCIIString)
+  @debug function fn(org::Creature.Organism, fn::ASCIIString)
+  @bp
     #
     # We may add functions only in main one. Custom functions can't
     # be used as a container for other custom functions.
@@ -91,7 +94,7 @@ module Code
     local p::Symbol
     local fnName::ASCIIString = _getNewFn(org)
     local paramLen::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
-    local var::Dict{DataType, Array{Symbol, 1}} = (org.vars[fnName] = Helper.getTypesMap())
+    local func::Func = (org.vars[fnName] = Func(Helper.getTypesMap(), []))
     #
     # New function parameters in format: [name::Type=val,...]. 
     # At least one parameter should exist. We choose amount of
@@ -103,9 +106,10 @@ module Code
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
     # All parameters will be added as local variables.
     #
-    local fnEx::Expr = :(function $(Symbol(fnName))($([(push!(var[p.args[1].args[2]], p.args[1].args[1]);p) for p in params]...)) end)
+    local fnEx::Expr = :(function $(Symbol(fnName))($([(push!(func.vars[p.args[1].args[2]], p.args[1].args[1]);p) for p in params]...)) end)
 
     push!(fnEx.args[2].args, :(return $(params[1].args[1].args[1])))
+    push!(org.vars[fn].blocks, fnEx.args[2].args)
     push!(org.funcs, fnEx)
 
     fnEx
@@ -121,7 +125,8 @@ module Code
   # @return {Expr|nothing}
   # TODO: add check if we call a function inside other function
   #
-  function fnCall(org::Creature.Organism, fn::ASCIIString)
+  @debug function fnCall(org::Creature.Organism, fn::ASCIIString)
+  @bp
     if !isempty(fn) return Expr(:nothing) end
     local len::Int = length(org.funcs)
     if len < 1 return Expr(:nothing) end
@@ -148,6 +153,7 @@ module Code
   # @return {Expr|nothing}
   #
   function condition(org::Creature.Organism, fn::ASCIIString)
+
   end
 
   #
@@ -162,17 +168,19 @@ module Code
   # @param pos Remove position
   # @param fnEx Expressiom of function body, we are deleting in
   #
-  function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr)
+  @debug function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr)
+  @bp
     local lineEx::Expr = fnEx.args[2].args[pos] # line we want to remove
     local ex::Expr
     local i::Int
+    local vars::Array{Symbol, 1}
     #
     # Finds currently removed variable within it's function and
     # removes it from Creature.Organism.vars map
     #
     if lineEx.head === :local
       ex   = lineEx.args[1].args[1]   # shortcut to variable
-      vars = org.vars[fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"][ex.args[2]]
+      vars = org.vars[fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"].vars[ex.args[2]]
       i = findfirst(vars, ex.args[1])
       if i > 0 deleteat!(vars, i) end
     #
@@ -181,7 +189,10 @@ module Code
     #
     elseif lineEx.head === :function
       i = findfirst(org.funcs, lineEx)
-      if i > 0 deleteat!(org.funcs, i) end
+      if i > 0
+        delete!(org.vars, org.funcs[i].args[1].args[1])
+        deleteat!(org.funcs, i)
+      end
       org.codeSize -= (length(lineEx.args[2].args) - 1) # -1, because we don't calc return operator
     # TODO: blocks check will be added here
     end
@@ -194,25 +205,44 @@ module Code
   # and all custom functions together, choose one function 
   # randomly and choose random position inside this function. 
   # @param org Organism we are working with
-  # @return {Tuple} (index::Int, fn::Expr)
+  # @return {Tuple} (index::Int, fn::Expr, block::Expr)
   #
-  function getRandPos(org::Creature.Organism)
+  @debug function getRandPos(org::Creature.Organism)
+  @bp
     #
     # + 1, because main function exists everytime
     #
-    local fn::Int = rand(1:length(org.funcs) + 1)
+    local fnIndex::Int = rand(1:length(org.funcs) + 1)
+    local block::Expr
+    local blocks::Expr
+    local fnName::ASCIIString
     local i::Int
+    local fnEx::Expr
     #
     # args[2].args is an array of function body (block)
     # This is custom function. i-1 means that we can't change 
     # return operator at the end of custom function
     #
-    if fn > 1 return (rand(1:((i = length(org.funcs[fn-1].args[2].args)) > 1 ? i - 1 : 1)), org.funcs[fn-1]) end
+    if fnIndex > 1
+      fnEx   = org.funcs[fnIndex-1]
+      fnName = "$(fnEx.args[1].args[1])"
+      blocks = org.vars[fnName].blocks
+      block  = blocks[rand(1:length(blocks))]
+      if block === fnEx.args[2] # block of the function's body
+        i = (rand(1:(i = length(block.args)) > 1 ? i - 1 : 1))
+      else
+        i = rand(1:length(block.args))
+      end
+
+      return (i, org.funcs[fnIndex-1], block)
+    end
     #
     # main function
-    #
-    (rand(1:length(org.code.args[2].args)), org.code)
-      
+    blocks = org.vars[""].blocks
+    block  = blocks[rand(1:length(blocks))]
+    i      = rand(1:length(block.args))
+
+    (i, org.code, block)
   end
   #
   # Creates new unique variable name and returns it's symbol
@@ -255,7 +285,7 @@ module Code
   # @return {Symbol}
   #
   function _getVar(org::Creature.Organism, fn::ASCIIString, typ::DataType)
-    if length(org.vars[fn][typ]) < 1 return :nothing end 
-    org.vars[fn][typ][rand(1:length(org.vars[fn][typ]))]
+    if length(org.vars[fn].vars[typ]) < 1 return :nothing end 
+    org.vars[fn].vars[typ][rand(1:length(org.vars[fn].vars[typ]))]
   end
 end

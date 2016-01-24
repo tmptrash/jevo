@@ -50,6 +50,24 @@ module Creature
   #
   @enum DIRECTION up=1 down=2 left=3 right=4
   #
+  # Describes one function as a data container. It contains blocks
+  # and variables collected by types. See Creature.Organism.vars
+  # property for details.
+  #
+  type Func
+    #
+    # Map of available variables separated by types. All these
+    # variables belong to one (current) function
+    #
+    vars::Dict{DataType, Array{Symbol, 1}}
+    #
+    # All blocks within one (current) function. Blocks are belong
+    # to if, for, function and other operators. All mtations shouls 
+    # be done within blocks
+    #
+    blocks::Array{Expr, 1}
+  end
+  #
   # Describes one organism. In general it consists of energy, world
   # position and many inheritable properties like code, mutationPeriod
   # and so on...
@@ -91,18 +109,13 @@ module Creature
     # Map of available variables separated by functions and types. 
     # Function in this case is a parent (container) for variables.
     #
-    vars::Dict{ASCIIString, Dict{DataType, Array{Symbol, 1}}}
+    vars::Dict{ASCIIString, Func}
     #
     # @inheritable
     # Map of functions. Is used for finding functions bodies and later
     # for mutations in these bodies.
     #
     funcs::Array{Expr, 1}
-    #
-    # @inheritable
-    # All blocks in a code. For example: if, for have blocks as a body
-    #
-    blocks::Array{Expr, 1}
     #
     # @inheritable
     # Amount of mutations, which will be applied to arganism after
@@ -170,7 +183,7 @@ module Creature
     #   local var_1::ASCIString=randstring()
     #   local var_1::Bool=rand(Bool)
     #   local var_1::Int8=rand(Int8)
-    #   local var_1::Int16=rand(Int16)
+    #   ...
     # end
     #
     local code::Expr = Expr(:function, Expr(:tuple, Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))), Expr(:block,
@@ -180,26 +193,30 @@ module Creature
       )...
     ))
     #
-    # Variables of this map should be synchronized with code expression above.
-    # Main function is empty string in Creature.vars array.
+    # This block below, creates variables of main function, which we created
+    # in code above (local code::Expr  = ...). It also creates one block,
+    # which belong to main function.
     #
-    local vars::Dict{ASCIIString, Dict{DataType, Array{Symbol, 1}}} = Dict{ASCIIString, Dict{DataType, Array{Symbol, 1}}}(
-      "" => Helper.getTypesMap()
+    local vars::Dict{ASCIIString, Func} = Dict{ASCIIString, Func}(
+      "" => Func(Helper.getTypesMap(), [code.args[2]])
     )
     i = 1
-    Helper.getSupportedTypes((t) -> vars[""][t] = [Symbol("var_$(i+=1)")])
-
+    Helper.getSupportedTypes((t) -> vars[""].vars[t] = [Symbol("var_$(i+=1)")])
+    #
+    # We have to add main funcion's block by default
+    #
+    push!(vars[""].blocks, code.args[2])
     Organism(
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       code,                                          # code
       eval(code),                                    # codeFn
       # TODO: change to length(Helper.getSupportedTypes)
       4,                                             # codeSize
+      # TODO: the same like codeSize
       4,                                             # varId
       0,                                             # fnId
       vars,                                          # vars
       Array{Expr, 1}(),                              # funcs
-      Array{Expr, 1}(),                              # blocks
       Config.val(:ORGANISM_MUTATIONS_ON_CLONE),      # mutationsOnClone
       Config.val(:ORGANISM_MUTATION_PERIOD),         # mutationPeriod
       Config.val(:ORGANISM_MUTATION_AMOUNT),         # mutationAmount
@@ -225,7 +242,6 @@ module Creature
       org.fnId,                                      # fnId
       org.vars,                                      # vars
       org.funcs,                                     # funcs
-      org.blocks,                                    # blocks
       org.mutationsOnClone,                          # mutationsOnClone
       org.mutationPeriod,                            # mutationPeriod
       org.mutationAmount,                            # mutationAmount

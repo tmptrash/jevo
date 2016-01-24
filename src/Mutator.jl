@@ -19,7 +19,8 @@ module Mutator
   # TODO: add org.codeSize += 1 for every adding
   # TODO: describe indexes (add,change,del,...)
   #
-  function mutate(org::Creature.Organism)
+  @debug function mutate(org::Creature.Organism)
+  @bp
     #
     # If there is no code, we can't mutate it. We may only add code line
     #
@@ -57,7 +58,8 @@ module Mutator
   # function call inside existing function.
   # @param org Organism we are working with
   #
-  function _onAdd(org::Creature.Organism)
+  @debug function _onAdd(org::Creature.Organism)
+  @bp
     pos::Int, fnEx::Expr        = Code.getRandPos(org)
     local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
     local fnName::ASCIIString   = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
@@ -81,7 +83,8 @@ module Mutator
   # position is an empty body of the function.
   # @param org Organism we are working with
   #
-  function _onChange(org::Creature.Organism)
+  @debug function _onChange(org::Creature.Organism)
+  @bp
     pos::Int, fnEx::Expr        = Code.getRandPos(org)
     local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
     local fnName::ASCIIString   = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
@@ -117,7 +120,8 @@ module Mutator
   # operator inside custom functions
   # @param org Organism we are working with
   #
-  function _onDel(org::Creature.Organism)
+  @debug function _onDel(org::Creature.Organism)
+  @bp
     pos::Int, fnEx::Expr = Code.getRandPos(org)
 
     if length(fnEx.args[2].args) > 0 && fnEx.args[2].args[pos].head !== :return
