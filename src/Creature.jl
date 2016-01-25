@@ -202,10 +202,7 @@ module Creature
     )
     i = 1
     Helper.getSupportedTypes((t) -> vars[""].vars[t] = [Symbol("var_$(i+=1)")])
-    #
-    # We have to add main funcion's block by default
-    #
-    push!(vars[""].blocks, code.args[2])
+    
     Organism(
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       code,                                          # code

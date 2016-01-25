@@ -214,7 +214,7 @@ module Code
     #
     local fnIndex::Int = rand(1:length(org.funcs) + 1)
     local block::Expr
-    local blocks::Expr
+    local blocks::Array{Expr, 1}
     local fnName::ASCIIString
     local i::Int
     local fnEx::Expr
@@ -238,6 +238,7 @@ module Code
     end
     #
     # main function
+    #
     blocks = org.vars[""].blocks
     block  = blocks[rand(1:length(blocks))]
     i      = rand(1:length(block.args))

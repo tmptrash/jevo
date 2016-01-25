@@ -60,7 +60,7 @@ module Mutator
   #
   @debug function _onAdd(org::Creature.Organism)
   @bp
-    pos::Int, fnEx::Expr        = Code.getRandPos(org)
+    pos::Int, fnEx::Expr, block::Array{Expr,1} = Code.getRandPos(org)
     local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
     local fnName::ASCIIString   = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
     local mainFn::Bool          = isempty(fnName)
