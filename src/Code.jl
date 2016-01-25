@@ -109,7 +109,7 @@ module Code
     local fnEx::Expr = :(function $(Symbol(fnName))($([(push!(func.vars[p.args[1].args[2]], p.args[1].args[1]);p) for p in params]...)) end)
 
     push!(fnEx.args[2].args, :(return $(params[1].args[1].args[1])))
-    push!(org.vars[fn].blocks, fnEx.args[2])
+    push!(org.vars[fnName].blocks, fnEx.args[2])
     push!(org.funcs, fnEx)
 
     fnEx
@@ -252,7 +252,8 @@ module Code
   # @return {Symbol}
   #
   function _getNewVar(org::Creature.Organism)
-    Symbol("var_$(org.varId += 1)")
+    local varId::Int = (org.varId += 1)
+    Symbol("var_$varId")
   end
   #
   # Creates new unique custom function name.
@@ -260,7 +261,8 @@ module Code
   # @return {ASCIIString}
   #
   function _getNewFn(org::Creature.Organism)
-    "func_$(org.fnId += 1)"
+    local fnId::Int = (org.fnId += 1)
+    "func_$fnId"
   end
   #
   # Returns one of supported types. Is used randomizer for choosing type.

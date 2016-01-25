@@ -176,7 +176,7 @@ module Creature
   # @return {Creature}
   #
   function create(pos::Helper.Point = Helper.Point(1, 1))
-    local i::Int = 1
+    local i::Int = 0
     #
     # Expression below means:
     # function (o)
@@ -200,7 +200,7 @@ module Creature
     local vars::Dict{ASCIIString, Func} = Dict{ASCIIString, Func}(
       "" => Func(Helper.getTypesMap(), [code.args[2]])
     )
-    i = 1
+    i = 0
     Helper.getSupportedTypes((t) -> vars[""].vars[t] = [Symbol("var_$(i+=1)")])
     
     Organism(
