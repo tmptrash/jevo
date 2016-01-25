@@ -94,7 +94,7 @@ module Code
     local p::Symbol
     local fnName::ASCIIString = _getNewFn(org)
     local paramLen::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
-    local func::Func = (org.vars[fnName] = Func(Helper.getTypesMap(), []))
+    local func::Creature.Func = (org.vars[fnName] = Creature.Func(Helper.getTypesMap(), []))
     #
     # New function parameters in format: [name::Type=val,...]. 
     # At least one parameter should exist. We choose amount of
@@ -109,7 +109,7 @@ module Code
     local fnEx::Expr = :(function $(Symbol(fnName))($([(push!(func.vars[p.args[1].args[2]], p.args[1].args[1]);p) for p in params]...)) end)
 
     push!(fnEx.args[2].args, :(return $(params[1].args[1].args[1])))
-    push!(org.vars[fn].blocks, fnEx.args[2].args)
+    push!(org.vars[fn].blocks, fnEx.args[2])
     push!(org.funcs, fnEx)
 
     fnEx
@@ -167,10 +167,11 @@ module Code
   # @param org Organism we are working with
   # @param pos Remove position
   # @param fnEx Expressiom of function body, we are deleting in
+  # @param block Current block, where mutation occures
   #
-  @debug function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr)
+  @debug function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr, block::Expr)
   @bp
-    local lineEx::Expr = fnEx.args[2].args[pos] # line we want to remove
+    local lineEx::Expr = block.args[pos] # line we want to remove
     local ex::Expr
     local i::Int
     local vars::Array{Symbol, 1}

@@ -60,7 +60,7 @@ module Mutator
   #
   @debug function _onAdd(org::Creature.Organism)
   @bp
-    pos::Int, fnEx::Expr, block::Array{Expr,1} = Code.getRandPos(org)
+    pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
     local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
     local fnName::ASCIIString   = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
     local mainFn::Bool          = isempty(fnName)
@@ -72,7 +72,7 @@ module Mutator
       # to prevent UndefVarError error in case of calling 
       # before defining the function.
       #
-      insert!(fnEx.args[2].args, cmd === Code.fn || cmd === Code.var ? 1 : pos, cmdEx)
+      insert!(block.args, cmd === Code.fn || cmd === Code.var ? 1 : pos, cmdEx)
       org.codeSize += 1
     end
   end
@@ -85,19 +85,19 @@ module Mutator
   #
   @debug function _onChange(org::Creature.Organism)
   @bp
-    pos::Int, fnEx::Expr        = Code.getRandPos(org)
+    pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
     local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
     local fnName::ASCIIString   = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
     local mainFn::Bool          = isempty(fnName)
     local cmdEx::Expr
 
-    if length(fnEx.args[2].args) > 0
+    if length(block.args) > 0
       #
       # We can't change function declaration
       #
       if cmd !== Code.fn && (!mainFn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing
-        Code.onRemoveLine(org, pos, fnEx)
-        fnEx.args[2].args[pos] = cmdEx
+        Code.onRemoveLine(org, pos, fnEx, block)
+        block.args[pos] = cmdEx
       end
     end
   end
@@ -108,9 +108,9 @@ module Mutator
   # @param org Organism we are working with
   #
   function _onSmallChange(org::Creature.Organism)
-    local pos::Tuple = Code.getRandPos(org)
+    pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
 
-    if length(pos[2].args[2].args) > 0
+    if length(block.args) > 0
       # TODO: AST deep analyzing here!
       # TODO: variables and constants should be used here
     end
@@ -122,10 +122,10 @@ module Mutator
   #
   @debug function _onDel(org::Creature.Organism)
   @bp
-    pos::Int, fnEx::Expr = Code.getRandPos(org)
+    pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
 
-    if length(fnEx.args[2].args) > 0 && fnEx.args[2].args[pos].head !== :return
-      Code.onRemoveLine(org, pos, fnEx)
+    if length(block.args) > 0 && block.args[pos].head !== :return
+      Code.onRemoveLine(org, pos, fnEx, block)
       deleteat!(fnEx.args[2].args, pos)
     end
   end
@@ -160,7 +160,7 @@ module Mutator
   # array can't be empty.
   #
   const CODE_SNIPPETS = [
-    Code.var, Code.plus, Code.fn, Code.fnCall, Code.condition
+    Code.var, Code.plus, Code.fn, Code.fnCall
   ]
  #  #
  #  # TODO:
