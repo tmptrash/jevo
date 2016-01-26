@@ -230,7 +230,7 @@ module Code
       blocks = org.vars[fnName].blocks
       block  = blocks[rand(1:length(blocks))]
       if block === fnEx.args[2] # block of the function's body
-        i = (rand(1:(i = length(block.args)) > 1 ? i - 1 : 1))
+        i = rand(1:((i = length(block.args)) > 1 ? i - 1 : 1))
       else
         i = rand(1:length(block.args))
       end
