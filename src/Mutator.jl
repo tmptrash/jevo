@@ -89,8 +89,13 @@ module Mutator
     local mainFn::Bool          = isempty(fnName)
     local cmdEx::Expr
 
-    if length(block.args) < 1 return false end
-    if !(cmd !== Code.fn && (!mainFn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing) return false end
+    if length(block.args) < 1 ||                     # no lines to change
+       block.args[pos].head === :return ||           # return is unmutable
+       !(cmd !== Code.fn &&                          # fn may be only in main function
+       (!mainFn && cmd !== Code.fnCall || mainFn) && # fnCall may be only in main function
+       (cmdEx = cmd(org, fnName)).head !== :nothing) # impossible obtain new code line
+      return false
+    end
 
     Code.onRemoveLine(org, pos, fnEx, block)
     block.args[pos] = cmdEx
@@ -126,7 +131,7 @@ module Mutator
     if length(block.args) < 1 || block.args[pos].head === :return return false end
 
     Code.onRemoveLine(org, pos, fnEx, block)
-    deleteat!(fnEx.args[2].args, pos)
+    deleteat!(block.args, pos)
     true
   end
   #
