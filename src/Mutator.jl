@@ -24,15 +24,13 @@ module Mutator
     #
     # If there is no code, we can't mutate it. We may only add code line
     #
-    if org.codeSize < 1 return _onAdd(org) end
-
-    local pIndex::Int  = Helper.getProbIndex(org.mutationProbabilities)
-    local result::Bool = MUTATION_FUNCS[pIndex](org)
+    local pIndex::Int  = org.codeSize < 1 ? 1           : Helper.getProbIndex(org.mutationProbabilities)
+    local result::Bool = org.codeSize < 1 ? _onAdd(org) : MUTATION_FUNCS[pIndex](org)
     #
     # Updates compiled version of the code. Only valid code will be applied,
     # because exception will be fired in case of error organismcode.
     #
-    if pIndex < 5
+    if pIndex < 5 && result
       try
         #
         # This function must be anonymous, because it's used for comparison
