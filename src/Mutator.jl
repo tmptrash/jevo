@@ -60,7 +60,7 @@ module Mutator
   @bp
     pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
     local cmd::Function       = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
-    local fnName::ASCIIString = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
+    local fnName::ASCIIString = fnEx === org.code ? "" : string(fnEx.args[1].args[1])
     local mainFn::Bool        = isempty(fnName)
     local cmdEx::Expr
 
@@ -75,10 +75,8 @@ module Mutator
     true
   end
   #
-  # Makes one big change in a code included code of all 
-  # custom functions. Big change means changing one line. It's
-  # possible to skip changing if, for example, insertion
-  # position is an empty body of the function.
+  # Makes one big change in a code of main and custom functions. Big 
+  # change means changing one line. It's possible to skip changing.
   # @param org Organism we are working with
   # @return {Bool} true means that there were a change, false
   # that there were no change or change was skipped.
@@ -87,18 +85,15 @@ module Mutator
   @bp
     pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
     local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
-    local fnName::ASCIIString   = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
+    local fnName::ASCIIString   = fnEx === org.code ? "" : string(fnEx.args[1].args[1])
     local mainFn::Bool          = isempty(fnName)
     local cmdEx::Expr
 
     if length(block.args) < 1 return false end
-    #
-    # We can't change function declaration
-    #
-    if cmd !== Code.fn && (!mainFn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing
-      Code.onRemoveLine(org, pos, fnEx, block)
-      block.args[pos] = cmdEx
-    end
+    if !(cmd !== Code.fn && (!mainFn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing) return false end
+
+    Code.onRemoveLine(org, pos, fnEx, block)
+    block.args[pos] = cmdEx
     true
   end
   #
