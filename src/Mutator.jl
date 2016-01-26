@@ -24,15 +24,10 @@ module Mutator
     #
     # If there is no code, we can't mutate it. We may only add code line
     #
-    if org.codeSize < 1 
-      _onAdd(org)
-      return true
-    end
+    if org.codeSize < 1 return _onAdd(org) end
 
-    local pIndex::Int = Helper.getProbIndex(org.mutationProbabilities)
-    local mutations::Array{Function, 1} = [_onAdd, _onChange, _onSmallChange, _onDel, _onClone, _onPeriod, _onAmount]
-
-    mutations[pIndex](org)
+    local pIndex::Int  = Helper.getProbIndex(org.mutationProbabilities)
+    local result::Bool = MUTATION_FUNCS[pIndex](org)
     #
     # Updates compiled version of the code. Only valid code will be applied,
     # because exception will be fired in case of error organismcode.
@@ -49,7 +44,7 @@ module Mutator
       end
     end
 
-    true
+    result
   end
 
   #
@@ -57,6 +52,8 @@ module Mutator
   # custom function bodies. It shouldn't add function or
   # function call inside existing function.
   # @param org Organism we are working with
+  # @return {Bool} true means that there were an add, false
+  # that there were no change or adding was skipped.
   #
   @debug function _onAdd(org::Creature.Organism)
   @bp
@@ -66,15 +63,15 @@ module Mutator
     local mainFn::Bool          = isempty(fnName)
     local cmdEx::Expr
 
-    if (!mainFn && cmd !== Code.fn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing
-      #
-      # All new custom functions should be at the beginning
-      # to prevent UndefVarError error in case of calling 
-      # before defining the function.
-      #
-      insert!(block.args, cmd === Code.fn || cmd === Code.var ? 1 : pos, cmdEx)
-      org.codeSize += 1
-    end
+    if !((!mainFn && cmd !== Code.fn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing) return false end
+    #
+    # All new custom functions should be at the beginning
+    # to prevent UndefVarError error in case of calling 
+    # before defining the function.
+    #
+    insert!(block.args, cmd === Code.fn || cmd === Code.var ? 1 : pos, cmdEx)
+    org.codeSize += 1
+    true
   end
   #
   # Makes one big change in a code included code of all 
@@ -82,6 +79,8 @@ module Mutator
   # possible to skip changing if, for example, insertion
   # position is an empty body of the function.
   # @param org Organism we are working with
+  # @return {Bool} true means that there were a change, false
+  # that there were no change or change was skipped.
   #
   @debug function _onChange(org::Creature.Organism)
   @bp
@@ -91,43 +90,48 @@ module Mutator
     local mainFn::Bool          = isempty(fnName)
     local cmdEx::Expr
 
-    if length(block.args) > 0
-      #
-      # We can't change function declaration
-      #
-      if cmd !== Code.fn && (!mainFn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing
-        Code.onRemoveLine(org, pos, fnEx, block)
-        block.args[pos] = cmdEx
-      end
+    if length(block.args) < 1 return false end
+    #
+    # We can't change function declaration
+    #
+    if cmd !== Code.fn && (!mainFn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing
+      Code.onRemoveLine(org, pos, fnEx, block)
+      block.args[pos] = cmdEx
     end
+    true
   end
   #
   # Makes one small change in a code included code of all 
   # custom functions. Small change it's change of variable
   # or constant to other/same variable or constant.
   # @param org Organism we are working with
+  # @return {Bool} true means that there were a change, false
+  # that there were no change or change was skipped.
   #
   function _onSmallChange(org::Creature.Organism)
     pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
 
-    if length(block.args) > 0
-      # TODO: AST deep analyzing here!
-      # TODO: variables and constants should be used here
-    end
+    if length(block.args) < 1 return  false end
+    # TODO: AST deep analyzing here!
+    # TODO: variables and constants should be used here
+    true
   end
   #
   # Removes one code line if possible. It can't remove return
   # operator inside custom functions
   # @param org Organism we are working with
+  # @return {Bool} true means that there were a delete, false
+  # that there were no delete or delete was skipped.
   #
   @debug function _onDel(org::Creature.Organism)
   @bp
     pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
 
-    if length(block.args) > 0 && block.args[pos].head !== :return
-      Code.onRemoveLine(org, pos, fnEx, block)
-      deleteat!(fnEx.args[2].args, pos)
-    end
+    if length(block.args) < 1 || block.args[pos].head === :return return false end
+
+    Code.onRemoveLine(org, pos, fnEx, block)
+    deleteat!(fnEx.args[2].args, pos)
+    true
   end
   #
   # mutationsOnClone property mutation handler. It changes this 
@@ -136,6 +140,7 @@ module Mutator
   #
   function _onClone(org::Creature.Organism)
     org.mutationsOnClone = rand(0:Config.val(:ORGANISM_MAX_MUTATIONS_ON_CLONE))
+    true
   end
   #
   # mutationPeriod property mutation handler. It changes this 
@@ -144,6 +149,7 @@ module Mutator
   #
   function _onPeriod(org::Creature.Organism)
     org.mutationPeriod = rand(0:Config.val(:ORGANISM_MAX_MUTATION_PERIOD))
+    true
   end
   #
   # mutationAmount property mutation handler. It changes this 
@@ -152,6 +158,7 @@ module Mutator
   #
   function _onAmount(org::Creature.Organism)
     org.mutationAmount = rand(0:Config.val(:ORGANISM_MAX_MUTATION_AMOUNT))
+    true
   end
 
   #
@@ -162,6 +169,10 @@ module Mutator
   const CODE_SNIPPETS = [
     Code.var, Code.plus, Code.fn, Code.fnCall
   ]
+  #
+  # All available functions for mutation types: change, add, del,...
+  #
+  const MUTATION_FUNCS = [_onAdd, _onChange, _onSmallChange, _onDel, _onClone, _onPeriod, _onAmount]
  #  #
  #  # TODO:
  #  #
