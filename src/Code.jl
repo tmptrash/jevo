@@ -204,7 +204,8 @@ module Code
   # functions), where we have to insert/change/delete code 
   # line. Position is chose randomly. It takes main function 
   # and all custom functions together, choose one function 
-  # randomly and choose random position inside this function. 
+  # randomly and choose random position inside this function's
+  # block.
   # @param org Organism we are working with
   # @return {Tuple} (index::Int, fn::Expr, block::Expr)
   #
@@ -220,31 +221,26 @@ module Code
     local i::Int
     local fnEx::Expr
     #
-    # args[2].args is an array of function body (block)
-    # This is custom function. i-1 means that we can't change 
-    # return operator at the end of custom function
+    # fnIndex > 1 means custom function
     #
     if fnIndex > 1
-      fnEx   = org.funcs[fnIndex-1]
-      fnName = "$(fnEx.args[1].args[1])"
+      fnEx   = org.funcs[fnIndex - 1]
+      fnName = string(fnEx.args[1].args[1])
       blocks = org.vars[fnName].blocks
       block  = blocks[rand(1:length(blocks))]
-      if block === fnEx.args[2] # block of the function's body
-        i = rand(1:((i = length(block.args)) > 1 ? i - 1 : 1))
-      else
-        i = rand(1:length(block.args))
-      end
-
-      return (i, org.funcs[fnIndex-1], block)
+      #
+      # If it's block of the function body, then we have to skip return operator
+      #
+      if block === fnEx.args[2] return (rand(1:((i = length(block.args)) > 1 ? i - 1 : 1)), org.funcs[fnIndex-1], block) end
+      return (rand(1:length(block.args)), org.funcs[fnIndex-1], block)
     end
     #
     # main function
     #
     blocks = org.vars[""].blocks
     block  = blocks[rand(1:length(blocks))]
-    i      = rand(1:length(block.args))
 
-    (i, org.code, block)
+    (rand(1:length(block.args)), org.code, block)
   end
   #
   # Creates new unique variable name and returns it's symbol

@@ -4,6 +4,7 @@
 # TODO: small-changes, code evaluation, energy & cloning
 # TODO: describe linear quoted structure of the script we support
 # TODO: describe functions and variables at the top of the code
+# TODO: describe main and custom functions
 #
 module Mutator
   import Config
@@ -18,6 +19,7 @@ module Mutator
   # TODO: describe indexes
   # TODO: add org.codeSize += 1 for every adding
   # TODO: describe indexes (add,change,del,...)
+  # TODO: describe return value. false mean no mutation
   #
   @debug function mutate(org::Creature.Organism)
   @bp
@@ -39,26 +41,27 @@ module Mutator
         # @param o Associated with this code organism
         #
         org.codeFn = eval(org.code)
+      catch e
+        # TODO: here fault script statictics should be collected
       end
     end
 
     result
   end
-
   #
-  # Adds one line of code into existing code including all
-  # custom function bodies. It shouldn't add function or
-  # function call inside existing function.
+  # Adds one line of code into existing code blocks including all
+  # custom function bodies and their blocks. It shouldn't add function
+  # or function call inside custom function.
   # @param org Organism we are working with
-  # @return {Bool} true means that there were an add, false
-  # that there were no change or adding was skipped.
+  # @return {Bool} true means that add mutation was occured, false
+  # that there were no add or adding was skipped.
   #
   @debug function _onAdd(org::Creature.Organism)
   @bp
     pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
-    local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
-    local fnName::ASCIIString   = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
-    local mainFn::Bool          = isempty(fnName)
+    local cmd::Function       = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
+    local fnName::ASCIIString = fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"
+    local mainFn::Bool        = isempty(fnName)
     local cmdEx::Expr
 
     if !((!mainFn && cmd !== Code.fn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing) return false end
