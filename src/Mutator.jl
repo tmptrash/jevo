@@ -21,8 +21,7 @@ module Mutator
   # TODO: describe indexes (add,change,del,...)
   # TODO: describe return value. false mean no mutation
   #
-  @debug function mutate(org::Creature.Organism)
-  @bp
+  function mutate(org::Creature.Organism)
     #
     # If there is no code, we can't mutate it. We may only add code line
     #
@@ -56,8 +55,7 @@ module Mutator
   # @return {Bool} true means that add mutation was occured, false
   # that there were no add or adding was skipped.
   #
-  @debug function _onAdd(org::Creature.Organism)
-  @bp
+  function _onAdd(org::Creature.Organism)
     pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
     local cmd::Function       = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
     local fnName::ASCIIString = fnEx === org.code ? "" : string(fnEx.args[1].args[1])
@@ -81,8 +79,7 @@ module Mutator
   # @return {Bool} true means that there were a change, false
   # that there were no change or change was skipped.
   #
-  @debug function _onChange(org::Creature.Organism)
-  @bp
+  function _onChange(org::Creature.Organism)
     pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
     local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
     local fnName::ASCIIString   = fnEx === org.code ? "" : string(fnEx.args[1].args[1])
@@ -124,8 +121,7 @@ module Mutator
   # @return {Bool} true means that there were a delete, false
   # that there were no delete or delete was skipped.
   #
-  @debug function _onDel(org::Creature.Organism)
-  @bp
+  function _onDel(org::Creature.Organism)
     pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
 
     if length(block.args) < 1 || block.args[pos].head === :return return false end

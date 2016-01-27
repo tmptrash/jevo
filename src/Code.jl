@@ -35,8 +35,7 @@ module Code
   # @param fn Parent(current) function unique name
   # @return {Expr}
   #
-  @debug function var(org::Creature.Organism, fn::ASCIIString)
-  @bp
+  function var(org::Creature.Organism, fn::ASCIIString)
     local typ::DataType  = _getType()
     local varSym::Symbol = _getNewVar(org)
 
@@ -55,8 +54,7 @@ module Code
   # we are working in
   # @return {Expr}
   #
-  @debug function plus(org::Creature.Organism, fn::ASCIIString)
-  @bp
+  function plus(org::Creature.Organism, fn::ASCIIString)
     local typ::DataType = _getType()
     local v1::Symbol = _getVar(org, fn, typ)
     local v2::Symbol = _getVar(org, fn, typ)
@@ -82,8 +80,8 @@ module Code
   # we are working in
   # @return {Expr}
   #
-  @debug function fn(org::Creature.Organism, fn::ASCIIString)
-  @bp
+ @debug function fn(org::Creature.Organism, fn::ASCIIString)
+ @bp
     #
     # We may add functions only in main one. Custom functions can't
     # be used as a container for other custom functions.
@@ -104,9 +102,10 @@ module Code
     local params::Array{Expr, 1} = [:($(typ = _getType();_getNewVar(org))::$(typ)=$(_getVal(typ))) for i=1:paramLen]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
-    # All parameters will be added as local variables.
+    # All parameters will be added as local variables. Here a small hack. :(=) symbol
+    # switched by :kw. I don't know why, but it doesn't work without this...
     #
-    local fnEx::Expr = :(function $(Symbol(fnName))($([(push!(func.vars[p.args[1].args[2]], p.args[1].args[1]);p) for p in params]...)) end)
+    local fnEx::Expr = :(function $(Symbol(fnName))($([(push!(func.vars[p.args[1].args[2]], p.args[1].args[1]);p.head=:kw;p) for p in params]...)) end)
 
     push!(fnEx.args[2].args, :(return $(params[1].args[1].args[1])))
     push!(org.vars[fnName].blocks, fnEx.args[2])
@@ -125,8 +124,7 @@ module Code
   # @return {Expr|nothing}
   # TODO: add check if we call a function inside other function
   #
-  @debug function fnCall(org::Creature.Organism, fn::ASCIIString)
-  @bp
+  function fnCall(org::Creature.Organism, fn::ASCIIString)
     if !isempty(fn) return Expr(:nothing) end
     local len::Int = length(org.funcs)
     if len < 1 return Expr(:nothing) end
@@ -169,8 +167,7 @@ module Code
   # @param fnEx Expressiom of function body, we are deleting in
   # @param block Current block, where mutation occures
   #
-  @debug function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr, block::Expr)
-  @bp
+  function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr, block::Expr)
     local lineEx::Expr = block.args[pos] # line we want to remove
     local ex::Expr
     local i::Int
@@ -194,7 +191,10 @@ module Code
         delete!(org.vars, org.funcs[i].args[1].args[1])
         deleteat!(org.funcs, i)
       end
-      org.codeSize -= (length(lineEx.args[2].args) - 1) # -1, because we don't calc return operator
+      #
+      # -1, because we don't calc return operator
+      #
+      org.codeSize -= (length(lineEx.args[2].args) - 1)
     # TODO: blocks check will be added here
     end
     org.codeSize -= 1
@@ -209,8 +209,7 @@ module Code
   # @param org Organism we are working with
   # @return {Tuple} (index::Int, fn::Expr, block::Expr)
   #
-  @debug function getRandPos(org::Creature.Organism)
-  @bp
+  function getRandPos(org::Creature.Organism)
     #
     # + 1, because main function exists everytime
     #
@@ -229,10 +228,11 @@ module Code
       blocks = org.vars[fnName].blocks
       block  = blocks[rand(1:length(blocks))]
       #
-      # If it's block of the function body, then we have to skip return operator
+      # If it's block of the function body, then we have to skip 
+      # return operator.
       #
       if block === fnEx.args[2] return (rand(1:((i = length(block.args)) > 1 ? i - 1 : 1)), org.funcs[fnIndex-1], block) end
-      return (rand(1:(i=length(block.args)) > 0 ? i : 1), org.funcs[fnIndex-1], block)
+      return (rand(1:((i=length(block.args)) > 0 ? i : 1)), org.funcs[fnIndex-1], block)
     end
     #
     # main function
@@ -240,7 +240,7 @@ module Code
     blocks = org.vars[""].blocks
     block  = blocks[rand(1:length(blocks))]
 
-    (rand(1:(i=length(block.args)) > 0 ? i : 1), org.code, block)
+    (rand(1:((i=length(block.args)) > 0 ? i : 1)), org.code, block)
   end
   #
   # Creates new unique variable name and returns it's symbol
