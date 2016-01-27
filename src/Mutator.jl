@@ -136,7 +136,7 @@ module Mutator
   end
   #
   # mutationsOnClone property mutation handler. It changes this 
-  # property randomly.
+  # property randomly. 0 means disable property.
   # @param org Organism we are working with
   #
   function _onClone(org::Creature.Organism)
@@ -145,7 +145,7 @@ module Mutator
   end
   #
   # mutationPeriod property mutation handler. It changes this 
-  # property randomly.
+  # property randomly. 0 means disable property.
   # @param org Organism we are working with
   #
   function _onPeriod(org::Creature.Organism)
@@ -154,7 +154,7 @@ module Mutator
   end
   #
   # mutationAmount property mutation handler. It changes this 
-  # property randomly.
+  # property randomly. 0 means disable property.
   # @param org Organism we are working with
   #
   function _onAmount(org::Creature.Organism)
