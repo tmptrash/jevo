@@ -80,8 +80,7 @@ module Code
   # we are working in
   # @return {Expr}
   #
- @debug function fn(org::Creature.Organism, fn::ASCIIString)
- @bp
+ function fn(org::Creature.Organism, fn::ASCIIString)
     #
     # We may add functions only in main one. Custom functions can't
     # be used as a container for other custom functions.
