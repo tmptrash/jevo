@@ -232,7 +232,7 @@ module Code
       # If it's block of the function body, then we have to skip return operator
       #
       if block === fnEx.args[2] return (rand(1:((i = length(block.args)) > 1 ? i - 1 : 1)), org.funcs[fnIndex-1], block) end
-      return (rand(1:length(block.args)), org.funcs[fnIndex-1], block)
+      return (rand(1:(i=length(block.args)) > 0 ? i : 1), org.funcs[fnIndex-1], block)
     end
     #
     # main function
@@ -240,7 +240,7 @@ module Code
     blocks = org.vars[""].blocks
     block  = blocks[rand(1:length(blocks))]
 
-    (rand(1:length(block.args)), org.code, block)
+    (rand(1:(i=length(block.args)) > 0 ? i : 1), org.code, block)
   end
   #
   # Creates new unique variable name and returns it's symbol
