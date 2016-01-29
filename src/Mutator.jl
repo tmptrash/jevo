@@ -26,7 +26,7 @@ module Mutator
     # If there is no code, we can't mutate it. We may only add code line
     #
     local pIndex::Int  = org.codeSize < 1 ? 1           : Helper.getProbIndex(org.mutationProbabilities)
-    local result::Bool = org.codeSize < 1 ? _onAdd(org) : MUTATION_FUNCS[pIndex](org)
+    local result::Bool = org.codeSize < 1 ? _onAdd(org) : _MUTATION_FUNCS[pIndex](org)
     #
     # Updates compiled version of the code. Only valid code will be applied,
     # because exception will be fired in case of error organismcode.
@@ -57,12 +57,12 @@ module Mutator
   #
   function _onAdd(org::Creature.Organism)
     pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
-    local cmd::Function       = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
+    local cmd::Function       = _CODE_SNIPPETS[rand(1:length(_CODE_SNIPPETS))]
     local fnName::ASCIIString = fnEx === org.code ? "" : string(fnEx.args[1].args[1])
     local mainFn::Bool        = isempty(fnName)
     local cmdEx::Expr
 
-    if !((!mainFn && cmd !== Code.fn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName)).head !== :nothing) return false end
+    if !((!mainFn && cmd !== Code.fn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName, block)).head !== :nothing) return false end
     #
     # All new custom functions should be at the beginning
     # to prevent UndefVarError error in case of calling 
@@ -81,16 +81,16 @@ module Mutator
   #
   function _onChange(org::Creature.Organism)
     pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
-    local cmd::Function         = CODE_SNIPPETS[rand(1:length(CODE_SNIPPETS))]
+    local cmd::Function         = _CODE_SNIPPETS[rand(1:length(_CODE_SNIPPETS))]
     local fnName::ASCIIString   = fnEx === org.code ? "" : string(fnEx.args[1].args[1])
     local mainFn::Bool          = isempty(fnName)
     local cmdEx::Expr
 
-    if length(block.args) < 1 ||                     # no lines to change
-       block.args[pos].head === :return ||           # return is unmutable
-       !(cmd !== Code.fn &&                          # fn may be only in main function
-       (!mainFn && cmd !== Code.fnCall || mainFn) && # fnCall may be only in main function
-       (cmdEx = cmd(org, fnName)).head !== :nothing) # impossible obtain new code line
+    if length(block.args) < 1 ||                            # no lines to change
+       block.args[pos].head === :return ||                  # return is unmutable
+       !(cmd !== Code.fn &&                                 # fn may be only in main function
+       (!mainFn && cmd !== Code.fnCall || mainFn) &&        # fnCall may be only in main function
+       (cmdEx = cmd(org, fnName, block)).head !== :nothing) # impossible obtain new code line
       return false
     end
 
@@ -105,11 +105,12 @@ module Mutator
   # @param org Organism we are working with
   # @return {Bool} true means that there were a change, false
   # that there were no change or change was skipped.
+  # TODO: implement in future
   #
   function _onSmallChange(org::Creature.Organism)
     pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
 
-    if length(block.args) < 1 return  false end
+    if length(block.args) < 1 return false end
     # TODO: AST deep analyzing here!
     # TODO: variables and constants should be used here
     true
@@ -163,13 +164,13 @@ module Mutator
   # They are used for generating (add,change) code of organisms. This
   # array can't be empty.
   #
-  const CODE_SNIPPETS = [
-    Code.var, Code.plus, Code.fn, Code.fnCall
+  const _CODE_SNIPPETS = [
+    Code.var, Code.plus, Code.fn, Code.fnCall, Code.condition
   ]
   #
   # All available functions for mutation types: change, add, del,...
   #
-  const MUTATION_FUNCS = [_onAdd, _onChange, _onSmallChange, _onDel, _onClone, _onPeriod, _onAmount]
+  const _MUTATION_FUNCS = [_onAdd, _onChange, _onSmallChange, _onDel, _onClone, _onPeriod, _onAmount]
  #  #
  #  # TODO:
  #  #

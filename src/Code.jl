@@ -4,6 +4,7 @@
 #
 # TODO: describe @cmd annotation
 # TODO: describe that return operator inside custom functions don't affect of script size
+# TODO: describe Expr(:nothing) return value
 #
 # @author DeadbraiN
 #
@@ -33,9 +34,10 @@ module Code
   # local name::Type = value
   # @param org Organism we have to mutate
   # @param fn Parent(current) function unique name
+  # @param block Current flock within fn function
   # @return {Expr}
   #
-  function var(org::Creature.Organism, fn::ASCIIString)
+  function var(org::Creature.Organism, fn::ASCIIString, block::Expr)
     local typ::DataType  = _getType()
     local varSym::Symbol = _getNewVar(org)
 
@@ -52,9 +54,10 @@ module Code
   # @param org Organism we have to mutate
   # @param fn Parent(current) function unique name
   # we are working in
+  # @param block Current flock within fn function
   # @return {Expr}
   #
-  function plus(org::Creature.Organism, fn::ASCIIString)
+  function plus(org::Creature.Organism, fn::ASCIIString, block::Expr)
     local typ::DataType = _getType()
     local v1::Symbol = _getVar(org, fn, typ)
     local v2::Symbol = _getVar(org, fn, typ)
@@ -78,9 +81,10 @@ module Code
   # @param org Organism we are working with
   # @param fn Parent(current) function unique name 
   # we are working in
+  # @param block Current flock within fn function
   # @return {Expr}
   #
- function fn(org::Creature.Organism, fn::ASCIIString)
+ function fn(org::Creature.Organism, fn::ASCIIString, block::Expr)
     #
     # We may add functions only in main one. Custom functions can't
     # be used as a container for other custom functions.
@@ -120,15 +124,16 @@ module Code
   # @param org Organism we are working with
   # @param fn Parent(current) function unique name
   # we are working in
+  # @param block Current flock within fn function
   # @return {Expr|nothing}
   # TODO: add check if we call a function inside other function
   #
-  function fnCall(org::Creature.Organism, fn::ASCIIString)
+  function fnCall(org::Creature.Organism, fn::ASCIIString, block::Expr)
     if !isempty(fn) return Expr(:nothing) end
     local len::Int = length(org.funcs)
     if len < 1 return Expr(:nothing) end
-    local fnExpr::Expr = org.funcs[rand(1:len)]
-    local args::Array{Any, 1} = fnExpr.args[1].args        # shortcut to func args
+    local fnEx::Expr = org.funcs[rand(1:len)]
+    local args::Array{Any, 1} = fnEx.args[1].args        # shortcut to func args
     local types::Array{DataType, 1} = Array{DataType, 1}() # func types only
     local argsLen::Int = length(args)
 
@@ -138,19 +143,30 @@ module Code
       end
     end
 
-    :($(fnExpr.args[1].args[1])($([(ex = _getVar(org, fn, i);ex === :nothing ? _getVal(i) : ex) for i in types]...)))
+    :($(fnEx.args[1].args[1])($([(ex = _getVar(org, fn, i);ex === :nothing ? _getVal(i) : ex) for i in types]...)))
   end
   #
   # @cmd
   # TODO:
-  # if operator implementation
+  # if operator implementation. It contains block inside, so it can't be inside
+  # other block. For example, it can't be inside body of "for" operator.
   # @param org Organism we are working with
   # @param fn Parent(current) function unique name
   # we are working in
+  # @param block Current flock within fn function
   # @return {Expr|nothing}
   #
-  function condition(org::Creature.Organism, fn::ASCIIString)
+  function condition(org::Creature.Organism, fn::ASCIIString, block::Expr)
+    if block !== org.funcs[fn].args[2] return Expr(:nothing) end
+    local typ::DataType = _getType()
+    local v1::Symbol    = _getVar(org, fn, typ)
+    local v2::Symbol    = _getVar(org, fn, typ)
+    local op::Symbol    = _COMPARE_OPERATORS[rand(1:length(_COMPARE_OPERATORS))]
+    local ifEx          = :(if $(op)($(v1),$(v2)) end) # if v1 comparison v2 end
 
+    push!(org.vars[fn].blocks, ifEx.args[2])
+
+    ifEx
   end
 
   #
@@ -182,7 +198,8 @@ module Code
       if i > 0 deleteat!(vars, i) end
     #
     # Finds currently removed function declaration and remove it
-    # from Creature.Organism.funcs map
+    # from Creature.Organism.funcs map. We alse have to remove this
+    # function from Creature.Organism.vars map.
     #
     elseif lineEx.head === :function
       i = findfirst(org.funcs, lineEx)
@@ -194,7 +211,14 @@ module Code
       # -1, because we don't calc return operator
       #
       org.codeSize -= (length(lineEx.args[2].args) - 1)
-    # TODO: blocks check will be added here
+    #
+    # Finds block of current if operator and removes it from 
+    # Organism.vars[fn].blocks array
+    #
+    elseif lineEx.head === :comparison
+      i = findfirst(org.vars[fn].blocks, block)
+      if i > 0 deleteat!(org.vars[fn].blocks, i) end
+      org.codeSize -= length(lineEx.args[2].args)
     end
     org.codeSize -= 1
   end
@@ -287,4 +311,9 @@ module Code
     if length(org.vars[fn].vars[typ]) < 1 return :nothing end 
     org.vars[fn].vars[typ][rand(1:length(org.vars[fn].vars[typ]))]
   end
+
+  #
+  # Available comparison operators. Are used in "if" operator
+  #
+  const _COMPARE_OPERATORS = [:<, :>, :<=, :>=, :(==), :!=, :!==, :(===)]
 end
