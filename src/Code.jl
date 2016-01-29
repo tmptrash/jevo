@@ -187,7 +187,7 @@ module Code
     elseif lineEx.head === :function
       i = findfirst(org.funcs, lineEx)
       if i > 0
-        delete!(org.vars, org.funcs[i].args[1].args[1])
+        delete!(org.vars, string(lineEx.args[1].args[1]))
         deleteat!(org.funcs, i)
       end
       #
