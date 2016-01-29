@@ -176,41 +176,27 @@ module Creature
   # @return {Creature}
   #
   function create(pos::Helper.Point = Helper.Point(1, 1))
-    local i::Int = 0
     #
     # Expression below means:
-    # function (o)
-    #   local var_1::ASCIString=randstring()
-    #   local var_1::Bool=rand(Bool)
-    #   local var_1::Int8=rand(Int8)
-    #   ...
-    # end
+    # function (o) end
     #
-    local code::Expr = Expr(:function, Expr(:tuple, Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))), Expr(:block,
-      map((typ) -> 
-        Expr(:local, Expr(:(=), Expr(:(::), Symbol("var_$(i+=1)"), typ), typ === ASCIIString ? randstring() : rand(typ))),
-        Helper.getSupportedTypes()
-      )...
-    ))
+    local code::Expr = Expr(:function, Expr(:tuple, Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))), Expr(:block))
     #
     # This block below, creates variables of main function, which we created
     # in code above (local code::Expr  = ...). It also creates one block,
     # which belong to main function.
     #
-    local vars::Dict{ASCIIString, Func} = Dict{ASCIIString, Func}(
-      "" => Func(Helper.getTypesMap(), [code.args[2]])
-    )
-    i = 0
-    Helper.getSupportedTypes((t) -> vars[""].vars[t] = [Symbol("var_$(i+=1)")])
-    
+    local vars::Dict{ASCIIString, Func} = Dict{ASCIIString, Func}("" => Func(Helper.getTypesMap(), [code.args[2]]))
+
+    Helper.getSupportedTypes((t) -> vars[""].vars[t] = [])
     Organism(
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
       code,                                          # code
       eval(code),                                    # codeFn
       # TODO: change to length(Helper.getSupportedTypes)
-      4,                                             # codeSize
+      0,                                             # codeSize
       # TODO: the same like codeSize
-      4,                                             # varId
+      0,                                             # varId
       0,                                             # fnId
       vars,                                          # vars
       Array{Expr, 1}(),                              # funcs
