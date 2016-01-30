@@ -87,9 +87,10 @@ module Code
  function fn(org::Creature.Organism, fn::ASCIIString, block::Expr)
     #
     # We may add functions only in main one. Custom functions can't
-    # be used as a container for other custom functions.
+    # be used as a container for other custom functions. Also, custom
+    # functions can't be added into blocks. Except main one.
     #
-    if !isempty(fn) return Expr(:nothing) end
+    if !isempty(fn) || block !== org.vars[fn].blocks[1] return Expr(:nothing) end
     local typ::DataType
     local i::Int
     local p::Symbol
@@ -133,7 +134,7 @@ module Code
     local len::Int = length(org.funcs)
     if len < 1 return Expr(:nothing) end
     local fnEx::Expr = org.funcs[rand(1:len)]
-    local args::Array{Any, 1} = fnEx.args[1].args        # shortcut to func args
+    local args::Array{Any, 1} = fnEx.args[1].args          # shortcut to func args
     local types::Array{DataType, 1} = Array{DataType, 1}() # func types only
     local argsLen::Int = length(args)
 
@@ -157,9 +158,10 @@ module Code
   # @return {Expr|nothing}
   #
   function condition(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    if block !== org.funcs[fn].args[2] return Expr(:nothing) end
+    if block !== org.vars[fn].blocks[1] return Expr(:nothing) end
     local typ::DataType = _getType()
     local v1::Symbol    = _getVar(org, fn, typ)
+    if v1 === :nothing return Expr(:nothing) end
     local v2::Symbol    = _getVar(org, fn, typ)
     local op::Symbol    = _COMPARE_OPERATORS[rand(1:length(_COMPARE_OPERATORS))]
     local ifEx          = :(if $(op)($(v1),$(v2)) end) # if v1 comparison v2 end
