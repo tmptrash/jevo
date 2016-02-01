@@ -29,6 +29,35 @@ module Code
   export onRemoveLine
   export getRandPos
   #
+  # Returns random value by data type. e.g.: 123 for Int8
+  # @param {DataType} typ Data type
+  # @return {Any}
+  #
+  macro GET_VALUE(typ)
+    :($typ !== ASCIIString ? rand($typ) : randstring())
+  end
+  #
+  # Checks if specified block belongs to specified function. We need 
+  # this for preventing inline blocks generation. For example if operator
+  # inside other if operator is impossible. So, if block belongs to
+  # specified function, then we may add other block based operator inside,
+  # otherwise we return Expr(:nothing) from current function.
+  # @param {Creature.Organism} org Organism we are working with
+  # @param {ASCIIString} fn Function String name
+  # @param {Expr} block Blockexpression we want to check
+  #
+  macro IN_FUNC_BLOCK(org, fn, block)
+    :(if $block !== $org.vars[$fn].blocks[1] return Expr(:nothing) end)
+  end
+  #
+  # Checks if secified function is a main one. In other case we return
+  # Expr(:nothing) from current function.
+  # @param {ASCIIString} fn Function string name
+  #
+  macro IN_MAIN_FUNC(fn)
+    :(if !isempty($fn) return Expr(:nothing) end)
+  end
+  #
   # @cmd
   # Returns AST expression for variable declaration. Format:
   # local name::Type = value
@@ -43,7 +72,7 @@ module Code
 
     push!(org.vars[fn].vars[typ], varSym)
 
-    :(local $(varSym)::$(typ)=$(_getVal(typ)))
+    :(local $(varSym)::$(typ)=$(@GET_VALUE(typ)))
   end
   #
   # @cmd
@@ -90,7 +119,8 @@ module Code
     # be used as a container for other custom functions. Also, custom
     # functions can't be added into blocks. Except main one.
     #
-    if !isempty(fn) || block !== org.vars[fn].blocks[1] return Expr(:nothing) end
+    @IN_MAIN_FUNC(fn)
+    @IN_FUNC_BLOCK(org, fn, block)
     local typ::DataType
     local i::Int
     local p::Symbol
@@ -103,7 +133,7 @@ module Code
     # parameters randomly. All other parameters will be set by
     # default values.
     #
-    local params::Array{Expr, 1} = [:($(typ = _getType();_getNewVar(org))::$(typ)=$(_getVal(typ))) for i=1:paramLen]
+    local params::Array{Expr, 1} = [:($(typ = _getType();_getNewVar(org))::$(typ)=$(@GET_VALUE(typ))) for i=1:paramLen]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
     # All parameters will be added as local variables. Here a small hack. :(=) symbol
@@ -144,7 +174,7 @@ module Code
       end
     end
 
-    :($(fnEx.args[1].args[1])($([(ex = _getVar(org, fn, i);ex === :nothing ? _getVal(i) : ex) for i in types]...)))
+    :($(fnEx.args[1].args[1])($([(ex = _getVar(org, fn, i);ex === :nothing ? @GET_VALUE(i) : ex) for i in types]...)))
   end
   #
   # @cmd
@@ -158,7 +188,7 @@ module Code
   # @return {Expr|nothing}
   #
   function condition(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    if block !== org.vars[fn].blocks[1] return Expr(:nothing) end
+    @IN_FUNC_BLOCK(org, fn, block)
     local typ::DataType = _getType()
     local v1::Symbol    = _getVar(org, fn, typ)
     if v1 === :nothing return Expr(:nothing) end
@@ -267,23 +297,23 @@ module Code
 
     (rand(1:((i=length(block.args)) > 0 ? i : 1)), org.code, block)
   end
-  #
+  # TODO: rewrite to macros
   # Creates new unique variable name and returns it's symbol
   # @param org Owner of new variable
   # @return {Symbol}
   #
   function _getNewVar(org::Creature.Organism)
     local varId::Int = (org.varId += 1)
-    Symbol("var_$varId")
+    Symbol(string("var_", varId))
   end
-  #
+  # TODO: rewrite to macros
   # Creates new unique custom function name.
   # @param org Organism we are working with
   # @return {ASCIIString}
   #
   function _getNewFn(org::Creature.Organism)
     local fnId::Int = (org.fnId += 1)
-    "func_$fnId"
+    string("func_", fnId)
   end
   #
   # Returns one of supported types. Is used randomizer for choosing type.
@@ -293,15 +323,7 @@ module Code
     local types::Array{DataType} = Helper.getSupportedTypes()
     types[rand(1:length(types))]
   end
-  #
-  # Returns random value by data type. e.g.: 123 for Int8
-  # @param typ Data type
-  # @return {Any}
-  #
-  function _getVal(typ::DataType)
-    typ !== ASCIIString ? rand(typ) : randstring()
-  end
-  #
+  # TODO: rewrite to macros
   # Returns a variable from existing in a code
   # @param org Organism we are mutating
   # @param fn An expression of parent(current) function within 
@@ -315,7 +337,7 @@ module Code
   end
 
   #
-  # Available comparison operators. Are used in "if" operator
+  # Available comparison operators. May be used with "if" operator
   #
   const _COMPARE_OPERATORS = [:<, :>, :<=, :>=, :(==), :!=, :!==, :(===)]
 end
