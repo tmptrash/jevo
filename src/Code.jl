@@ -41,7 +41,7 @@ module Code
   # @return {Expr}
   #
   function var(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    local typ::DataType  = _getType()
+    local typ::DataType  = @getType()
     local varSym::Symbol = @getNewVar(org)
 
     push!(org.vars[fn].vars[typ], varSym)
@@ -61,10 +61,10 @@ module Code
   # @return {Expr}
   #
   function plus(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    local typ::DataType = _getType()
-    local v1::Symbol = _getVar(org, fn, typ)
-    local v2::Symbol = _getVar(org, fn, typ)
-    local v3::Symbol = _getVar(org, fn, typ)
+    local typ::DataType = @getType()
+    local v1::Symbol    = @getVar(org, fn, typ)
+    local v2::Symbol    = @getVar(org, fn, typ)
+    local v3::Symbol    = @getVar(org, fn, typ)
 
     if v1 === :nothing return Expr(:nothing) end
 
@@ -107,7 +107,7 @@ module Code
     # parameters randomly. All other parameters will be set by
     # default values.
     #
-    local params::Array{Expr, 1} = [:($(typ = _getType();@getNewVar(org))::$(typ)=$(@getValue(typ))) for i=1:paramLen]
+    local params::Array{Expr, 1} = [:($(typ = @getType();@getNewVar(org))::$(typ)=$(@getValue(typ))) for i=1:paramLen]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
     # All parameters will be added as local variables. Here a small hack. :(=) symbol
@@ -148,7 +148,7 @@ module Code
       end
     end
 
-    :($(fnEx.args[1].args[1])($([(ex = _getVar(org, fn, i);ex === :nothing ? @getValue(i) : ex) for i in types]...)))
+    :($(fnEx.args[1].args[1])($([(ex = @getVar(org, fn, i);ex === :nothing ? @getValue(i) : ex) for i in types]...)))
   end
   #
   # @cmd
@@ -163,10 +163,10 @@ module Code
   #
   function condition(org::Creature.Organism, fn::ASCIIString, block::Expr)
     @inFuncBlock(org, fn, block)
-    local typ::DataType = _getType()
-    local v1::Symbol    = _getVar(org, fn, typ)
+    local typ::DataType = @getType()
+    local v1::Symbol    = @getVar(org, fn, typ)
     if v1 === :nothing return Expr(:nothing) end
-    local v2::Symbol    = _getVar(org, fn, typ)
+    local v2::Symbol    = @getVar(org, fn, typ)
     local op::Symbol    = _COMPARE_OPERATORS[rand(1:length(_COMPARE_OPERATORS))]
     local ifEx          = :(if $(op)($(v1),$(v2)) end) # if v1 comparison v2 end
 
@@ -271,27 +271,6 @@ module Code
 
     (rand(1:((i=length(block.args)) > 0 ? i : 1)), org.code, block)
   end
-  #
-  # Returns one of supported types. Is used randomizer for choosing type.
-  # @return {DataType}
-  #
-  function _getType()
-    local types::Array{DataType} = Helper.getSupportedTypes()
-    types[rand(1:length(types))]
-  end
-  # TODO: rewrite to macros
-  # Returns a variable from existing in a code
-  # @param org Organism we are mutating
-  # @param fn An expression of parent(current) function within 
-  # we are orking in
-  # @param typ Type of variable we want to take
-  # @return {Symbol}
-  #
-  function _getVar(org::Creature.Organism, fn::ASCIIString, typ::DataType)
-    if length(org.vars[fn].vars[typ]) < 1 return :nothing end 
-    org.vars[fn].vars[typ][rand(1:length(org.vars[fn].vars[typ]))]
-  end
-
   #
   # Available comparison operators. May be used with "if" operator
   #

@@ -50,3 +50,22 @@ end
 macro getNewFunc(org)
   :(string("func_", $org.fnId += 1))
 end
+#
+# Returns one of supported types. Is used randomizer for choosing type.
+# @return {DataType}
+#
+macro getType()
+  local types::Array{DataType} = Helper.getSupportedTypes()
+  :($types[rand(1:length($types))])
+end
+#
+# Returns a variable from existing in a code
+# @param {Creature.Organism} org Organism we are mutating
+# @param {ASCIIString} fn An expression of parent(current) function within 
+# we are orking in
+# @param {DataType} typ Type of variable we want to take
+# @return {Symbol}
+#
+macro getVar(org, fn, typ)
+  :(if length($org.vars[$fn].vars[$typ]) < 1 return :nothing end; $org.vars[$fn].vars[$typ][rand(1:length($org.vars[$fn].vars[$typ]))])
+end
