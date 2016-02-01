@@ -33,7 +33,7 @@ module Code
   # @param {DataType} typ Data type
   # @return {Any}
   #
-  macro GET_VALUE(typ)
+  macro getValue(typ)
     :($typ !== ASCIIString ? rand($typ) : randstring())
   end
   #
@@ -46,7 +46,7 @@ module Code
   # @param {ASCIIString} fn Function String name
   # @param {Expr} block Blockexpression we want to check
   #
-  macro IN_FUNC_BLOCK(org, fn, block)
+  macro inFuncBlock(org, fn, block)
     :(if $block !== $org.vars[$fn].blocks[1] return Expr(:nothing) end)
   end
   #
@@ -54,7 +54,7 @@ module Code
   # Expr(:nothing) from current function.
   # @param {ASCIIString} fn Function string name
   #
-  macro IN_MAIN_FUNC(fn)
+  macro inMainFunc(fn)
     :(if !isempty($fn) return Expr(:nothing) end)
   end
   #
@@ -62,7 +62,7 @@ module Code
   # @param {Creature.Organism} org Owner of new variable
   # @return {Symbol}
   #
-  macro GET_NEW_VAR(org)
+  macro getNewVar(org)
     :(symbol("var_", $org.varId += 1))
   end
   #
@@ -70,7 +70,7 @@ module Code
   # @param {Creature.Organism} org Organism we are working with
   # @return {ASCIIString}
   #
-  macro GET_NEW_FUNC(org)
+  macro getNewFunc(org)
     :(string("func_", $org.fnId += 1))
   end
   #
@@ -84,11 +84,11 @@ module Code
   #
   function var(org::Creature.Organism, fn::ASCIIString, block::Expr)
     local typ::DataType  = _getType()
-    local varSym::Symbol = @GET_NEW_VAR(org)
+    local varSym::Symbol = @getNewVar(org)
 
     push!(org.vars[fn].vars[typ], varSym)
 
-    :(local $(varSym)::$(typ)=$(@GET_VALUE(typ)))
+    :(local $(varSym)::$(typ)=$(@getValue(typ)))
   end
   #
   # @cmd
@@ -135,12 +135,12 @@ module Code
     # be used as a container for other custom functions. Also, custom
     # functions can't be added into blocks. Except main one.
     #
-    @IN_MAIN_FUNC(fn)
-    @IN_FUNC_BLOCK(org, fn, block)
+    @inMainFunc(fn)
+    @inFuncBlock(org, fn, block)
     local typ::DataType
     local i::Int
     local p::Symbol
-    local fnName::ASCIIString = @GET_NEW_FUNC(org)
+    local fnName::ASCIIString = @getNewFunc(org)
     local paramLen::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
     local func::Creature.Func = (org.vars[fnName] = Creature.Func(Helper.getTypesMap(), []))
     #
@@ -149,7 +149,7 @@ module Code
     # parameters randomly. All other parameters will be set by
     # default values.
     #
-    local params::Array{Expr, 1} = [:($(typ = _getType();@GET_NEW_VAR(org))::$(typ)=$(@GET_VALUE(typ))) for i=1:paramLen]
+    local params::Array{Expr, 1} = [:($(typ = _getType();@getNewVar(org))::$(typ)=$(@getValue(typ))) for i=1:paramLen]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
     # All parameters will be added as local variables. Here a small hack. :(=) symbol
@@ -190,7 +190,7 @@ module Code
       end
     end
 
-    :($(fnEx.args[1].args[1])($([(ex = _getVar(org, fn, i);ex === :nothing ? @GET_VALUE(i) : ex) for i in types]...)))
+    :($(fnEx.args[1].args[1])($([(ex = _getVar(org, fn, i);ex === :nothing ? @getValue(i) : ex) for i in types]...)))
   end
   #
   # @cmd
@@ -204,7 +204,7 @@ module Code
   # @return {Expr|nothing}
   #
   function condition(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    @IN_FUNC_BLOCK(org, fn, block)
+    @inFuncBlock(org, fn, block)
     local typ::DataType = _getType()
     local v1::Symbol    = _getVar(org, fn, typ)
     if v1 === :nothing return Expr(:nothing) end
