@@ -58,6 +58,22 @@ module Code
     :(if !isempty($fn) return Expr(:nothing) end)
   end
   #
+  # Creates new unique variable name and returns it's symbol
+  # @param {Creature.Organism} org Owner of new variable
+  # @return {Symbol}
+  #
+  macro GET_NEW_VAR(org)
+    :(symbol("var_", $org.varId += 1))
+  end
+  #
+  # Creates new unique custom function name.
+  # @param {Creature.Organism} org Organism we are working with
+  # @return {ASCIIString}
+  #
+  macro GET_NEW_FUNC(org)
+    :(string("func_", $org.fnId += 1))
+  end
+  #
   # @cmd
   # Returns AST expression for variable declaration. Format:
   # local name::Type = value
@@ -68,7 +84,7 @@ module Code
   #
   function var(org::Creature.Organism, fn::ASCIIString, block::Expr)
     local typ::DataType  = _getType()
-    local varSym::Symbol = _getNewVar(org)
+    local varSym::Symbol = @GET_NEW_VAR(org)
 
     push!(org.vars[fn].vars[typ], varSym)
 
@@ -124,7 +140,7 @@ module Code
     local typ::DataType
     local i::Int
     local p::Symbol
-    local fnName::ASCIIString = _getNewFn(org)
+    local fnName::ASCIIString = @GET_NEW_FUNC(org)
     local paramLen::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
     local func::Creature.Func = (org.vars[fnName] = Creature.Func(Helper.getTypesMap(), []))
     #
@@ -133,7 +149,7 @@ module Code
     # parameters randomly. All other parameters will be set by
     # default values.
     #
-    local params::Array{Expr, 1} = [:($(typ = _getType();_getNewVar(org))::$(typ)=$(@GET_VALUE(typ))) for i=1:paramLen]
+    local params::Array{Expr, 1} = [:($(typ = _getType();@GET_NEW_VAR(org))::$(typ)=$(@GET_VALUE(typ))) for i=1:paramLen]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
     # All parameters will be added as local variables. Here a small hack. :(=) symbol
@@ -296,24 +312,6 @@ module Code
     block  = blocks[rand(1:length(blocks))]
 
     (rand(1:((i=length(block.args)) > 0 ? i : 1)), org.code, block)
-  end
-  # TODO: rewrite to macros
-  # Creates new unique variable name and returns it's symbol
-  # @param org Owner of new variable
-  # @return {Symbol}
-  #
-  function _getNewVar(org::Creature.Organism)
-    local varId::Int = (org.varId += 1)
-    Symbol(string("var_", varId))
-  end
-  # TODO: rewrite to macros
-  # Creates new unique custom function name.
-  # @param org Organism we are working with
-  # @return {ASCIIString}
-  #
-  function _getNewFn(org::Creature.Organism)
-    local fnId::Int = (org.fnId += 1)
-    string("func_", fnId)
   end
   #
   # Returns one of supported types. Is used randomizer for choosing type.
