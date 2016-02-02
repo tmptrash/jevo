@@ -46,7 +46,7 @@ end
 # @return {DataType}
 #
 macro getType()
-  local types::Array{DataType} = Helper.getSupportedTypes()
+  local types::Array{DataType} = Helper.SUPPORTED_TYPES
   :($types[rand(1:length($types))])
 end
 #

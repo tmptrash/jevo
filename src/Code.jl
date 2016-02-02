@@ -132,13 +132,18 @@ module Code
   # @param block Current flock within fn function
   # @return {Expr|nothing}
   # TODO: add check if we call a function inside other function
-  #
-  function fnCall(org::Creature.Organism, fn::ASCIIString, block::Expr)
+  # TODO: we have to check if custom function exists, but there are no
+  # TODO: variables with needed types were creates in current function
+  # TODO: in this case we have to skip function calling
+  @debug function fnCall(org::Creature.Organism, fn::ASCIIString, block::Expr)
+  @bp
     if !isempty(fn) return Expr(:nothing) end
     local len::Int = length(org.funcs)
     if len < 1 return Expr(:nothing) end
-    local fnEx::Expr = org.funcs[rand(1:len)]
-    local args::Array{Any, 1} = fnEx.args[1].args          # shortcut to func args
+    local fnEx::Expr                = org.funcs[rand(1:len)]
+    local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]
+    local varSym::Symbol            = @getNewVar(org)
+    local args::Array{Any, 1}       = fnEx.args[1].args    # shortcut to func args
     local types::Array{DataType, 1} = Array{DataType, 1}() # func types only
     local argsLen::Int = length(args)
 
@@ -148,7 +153,8 @@ module Code
       end
     end
 
-    :($(fnEx.args[1].args[1])($([(ex = @getVar(org, fn, i);ex === :nothing ? @getValue(i) : ex) for i in types]...)))
+    push!(org.vars[fn].vars[typ], varSym)
+    :(local $(varSym)::$(typ)=$(fnEx.args[1].args[1])($([(ex = @getVar(org, fn, i);ex === :nothing ? @getValue(i) : ex) for i in types]...)))
   end
   #
   # @cmd
@@ -271,6 +277,7 @@ module Code
 
     (rand(1:((i=length(block.args)) > 0 ? i : 1)), org.code, block)
   end
+
   #
   # Available comparison operators. May be used with "if" operator
   #

@@ -6,6 +6,7 @@ module Helper
   export randTrue
   export getProbIndex
   export getSupportedTypes
+  export SUPPORTED_TYPES
 
   #
   # One point in the world. Is described by two coordinates.
@@ -54,7 +55,7 @@ module Helper
   # @return {Dict{DataType, Array{Symbol, 1}}}
   #
   function getTypesMap()
-    Dict{DataType, Array{Symbol, 1}}(map((typ) -> typ => Symbol[], getSupportedTypes())...)
+    Dict{DataType, Array{Symbol, 1}}(getSupportedTypes((typ) -> typ => Symbol[])...)
   end
   #
   # Returns supported types array for organism language
@@ -63,6 +64,11 @@ module Helper
   # @return {Array{DataType, 1}}
   #
   function getSupportedTypes(fn::Function = (t) -> t)
-    map(fn, [ASCIIString, Bool, Int8, Int16])
+    map(fn, SUPPORTED_TYPES)
   end
+
+  #
+  # Supported type of code inside organism
+  #
+  const SUPPORTED_TYPES = [ASCIIString, Bool, Int8, Int16]
 end
