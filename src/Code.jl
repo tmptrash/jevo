@@ -172,8 +172,7 @@ module Code
   # @return {Expr|nothing}
   # TODO: add check if we call a function inside other function
   # 
-  @debug function fnCall(org::Creature.Organism, fn::ASCIIString, block::Expr)
-  @bp
+  function fnCall(org::Creature.Organism, fn::ASCIIString, block::Expr)
     if !isempty(fn) return Expr(:nothing) end
     local len::Int = length(org.funcs)
     if len < 1 return Expr(:nothing) end
