@@ -22,6 +22,7 @@ module Code
   #
   export var
   export plus
+  export minus
   export fn
   export fnCall
   export condition
@@ -96,19 +97,17 @@ module Code
     local l::Int
 
     if v1 === :nothing return Expr(:nothing) end
-
     #
     # "1234"   - "85"  = "12" (just cut v1 by length of v2)
     # "qwerty" - "111" = "qwe"
     #
     if typ === ASCIIString
-      l = length(v3)
-      return :($(v1) = $(v2)[1:(l > length(v2) ? end : l)])
+      return :($(v1) = $(v2)[1:(length(v3) > length(v2) ? end : length(v3))])
+    #
+    # true  - true  = false, true  - false = true, 
+    # false - false = false, false - true  = true
+    #
     elseif typ === Bool
-      #
-      # true  - true  = false, true  - false = true, 
-      # false - false = false, false - true  = true
-      #
       return :($(v1) = Bool(abs($(v2) - $(v3))))
     end
 
@@ -125,7 +124,7 @@ module Code
   # @param block Current flock within fn function
   # @return {Expr}
   #
- function fn(org::Creature.Organism, fn::ASCIIString, block::Expr)
+  function fn(org::Creature.Organism, fn::ASCIIString, block::Expr)
     #
     # We may add functions only in main one. Custom functions can't
     # be used as a container for other custom functions. Also, custom
@@ -188,9 +187,7 @@ module Code
         push!(types, args[i].args[1].args[2])
       end
     end
-    fnEx = :(local $(varSym)::$(typ)=$(fnEx.args[1].args[1])(
-      $([(ex = @getVar(org, fn, i); if ex === :nothing return Expr(:nothing) end) for i in types]...)
-    ))
+    fnEx = :(local $(varSym)::$(typ)=$(fnEx.args[1].args[1])($([(ex = @getVar(org, fn, i); if ex === :nothing return Expr(:nothing) end;ex) for i in types]...)))
     #
     # Pushing of new variable should be after function call to prevent
     # error of calling function with argument of just created variable
