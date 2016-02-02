@@ -165,7 +165,7 @@ module Mutator
   # array can't be empty.
   #
   const _CODE_SNIPPETS = [
-    Code.var, Code.plus, Code.fn, Code.fnCall, Code.condition
+    Code.var, Code.plus, Code.minus, Code.fn, Code.fnCall, Code.condition
   ]
   #
   # All available functions for mutation types: change, add, del,...

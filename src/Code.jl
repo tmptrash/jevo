@@ -78,6 +78,44 @@ module Code
   end
   #
   # @cmd
+  # - operator implementation. Minus two variables. Supports all
+  # types: ASCIIString, Int8, Bool,... In case of string uses
+  # concatination, for boolean - & operator. If code is empty
+  # this function will skipp the execution.
+  # @param org Organism we have to mutate
+  # @param fn Parent(current) function unique name
+  # we are working in
+  # @param block Current flock within fn function
+  # @return {Expr}
+  #
+  function minus(org::Creature.Organism, fn::ASCIIString, block::Expr)
+    local typ::DataType = @getType()
+    local v1::Symbol    = @getVar(org, fn, typ)
+    local v2::Symbol    = @getVar(org, fn, typ)
+    local v3::Symbol    = @getVar(org, fn, typ)
+    local l::Int
+
+    if v1 === :nothing return Expr(:nothing) end
+
+    #
+    # "1234"   - "85"  = "12" (just cut v1 by length of v2)
+    # "qwerty" - "111" = "qwe"
+    #
+    if typ === ASCIIString
+      l = length(v3)
+      return :($(v1) = $(v2)[1:(l > length(v2) ? end : l)])
+    elseif typ === Bool
+      #
+      # true  - true  = false, true  - false = true, 
+      # false - false = false, false - true  = true
+      #
+      return :($(v1) = Bool(abs($(v2) - $(v3))))
+    end
+
+    :($(v1) = $(v2) - $(v3))
+  end
+  #
+  # @cmd
   # Creates custom function with unique name, random arguments with
   # default values. By default it returns first parameter as local 
   # variable
@@ -124,17 +162,16 @@ module Code
   #
   # @cmd
   # Calls custom function or do nothing if no available functions.
-  # It choose custom function from org.funcs array, fill parameters
-  # and call it.
+  # It choose custom function from org.funcs array, fills parameters
+  # and call it. It also creates new variable with appropriate type.
+  # Example: local var_x::Type = func_x(<args>)
   # @param org Organism we are working with
   # @param fn Parent(current) function unique name
   # we are working in
   # @param block Current flock within fn function
   # @return {Expr|nothing}
   # TODO: add check if we call a function inside other function
-  # TODO: we have to check if custom function exists, but there are no
-  # TODO: variables with needed types were creates in current function
-  # TODO: in this case we have to skip function calling
+  # 
   @debug function fnCall(org::Creature.Organism, fn::ASCIIString, block::Expr)
   @bp
     if !isempty(fn) return Expr(:nothing) end
@@ -152,9 +189,16 @@ module Code
         push!(types, args[i].args[1].args[2])
       end
     end
-
+    fnEx = :(local $(varSym)::$(typ)=$(fnEx.args[1].args[1])(
+      $([(ex = @getVar(org, fn, i); if ex === :nothing return Expr(:nothing) end) for i in types]...)
+    ))
+    #
+    # Pushing of new variable should be after function call to prevent
+    # error of calling function with argument of just created variable
+    #
     push!(org.vars[fn].vars[typ], varSym)
-    :(local $(varSym)::$(typ)=$(fnEx.args[1].args[1])($([(ex = @getVar(org, fn, i);ex === :nothing ? @getValue(i) : ex) for i in types]...)))
+
+    fnEx
   end
   #
   # @cmd
