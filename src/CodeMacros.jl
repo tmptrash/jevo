@@ -4,15 +4,6 @@
 #
 # @author DeadbraiN
 #
-
-#
-# Returns random value by data type. e.g.: 123 for Int8
-# @param {DataType} typ Data type
-# @return {Any}
-#
-macro getValue(typ)
-  :($typ !== ASCIIString ? rand($typ) : randstring())
-end
 #
 # Checks if specified block belongs to specified function. We need 
 # this for preventing inline blocks generation. For example if operator
@@ -67,5 +58,13 @@ end
 # @return {Symbol}
 #
 macro getVar(org, fn, typ)
-  :(if length($org.vars[$fn].vars[$typ]) < 1 return :nothing end; $org.vars[$fn].vars[$typ][rand(1:length($org.vars[$fn].vars[$typ]))])
+  :(length($org.vars[$fn].vars[$typ]) < 1 ? :nothing : $org.vars[$fn].vars[$typ][rand(1:length($org.vars[$fn].vars[$typ]))])
+end
+#
+# Returns random value by data type. e.g.: 123 for Int8
+# @param {DataType} typ Data type
+# @return {Any}
+#
+macro getValue(typ)
+  :($typ !== ASCIIString ? rand($typ) : randstring())
 end
