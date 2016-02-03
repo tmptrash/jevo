@@ -142,6 +142,10 @@ module Creature
     #
     energy::Int
     #
+    # Organism's personal memory. Is used in any possible way.
+    #
+    mem::Dict{Int16, Int16}
+    #
     # Organism's position in a 2D world. Starts from (1,1) 
     # ends with (WORLD_WIDTH, WORLD_HEIGHT) configurations.
     #
@@ -204,6 +208,7 @@ module Creature
       Config.val(:ORGANISM_MUTATION_PERIOD),         # mutationPeriod
       Config.val(:ORGANISM_MUTATION_AMOUNT),         # mutationAmount
       Config.val(:ORGANISM_START_ENERGY),            # energy
+      Dict{Int16, Int16}(),                          # mem
       pos,                                           # pos
       Event.create()                                 # observer
     )
@@ -229,6 +234,7 @@ module Creature
       org.mutationPeriod,                            # mutationPeriod
       org.mutationAmount,                            # mutationAmount
       org.energy,                                    # energy
+      org.mem,                                       # mem
       org.pos,                                       # pos
       Event.create()                                 # observer
     )

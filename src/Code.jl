@@ -110,7 +110,9 @@ module Code
     elseif typ === Bool
       return :($(v1) = Bool(abs($(v2) - $(v3))))
     end
-
+    #
+    # Numeric types are here
+    #
     :($(v1) = $(v2) - $(v3))
   end
   #
@@ -163,7 +165,7 @@ module Code
   # Calls custom function or do nothing if no available functions.
   # It choose custom function from org.funcs array, fills parameters
   # and call it. It also creates new variable with appropriate type.
-  # Example: local var_x::Type = func_x(<args>)
+  # Example: var_x = func_x(<args>)
   # @param org Organism we are working with
   # @param fn Parent(current) function unique name
   # we are working in
@@ -177,7 +179,7 @@ module Code
     if len < 1 return Expr(:nothing) end
     local fnEx::Expr                = org.funcs[rand(1:len)]
     local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]
-    local varSym::Symbol            = @getNewVar(org)
+    local varSym::Symbol            = @getVar(org, fn, typ)
     local args::Array{Any, 1}       = fnEx.args[1].args    # shortcut to func args
     local types::Array{DataType, 1} = Array{DataType, 1}() # func types only
     local argsLen::Int = length(args)
@@ -187,7 +189,7 @@ module Code
         push!(types, args[i].args[1].args[2])
       end
     end
-    fnEx = :(local $(varSym)::$(typ)=$(fnEx.args[1].args[1])($([(ex = @getVar(org, fn, i); if ex === :nothing return Expr(:nothing) end;ex) for i in types]...)))
+    fnEx = :($varSym=$(fnEx.args[1].args[1])($([(ex = @getVar(org, fn, i); if ex === :nothing return Expr(:nothing) end;ex) for i in types]...)))
     #
     # Pushing of new variable should be after function call to prevent
     # error of calling function with argument of just created variable
@@ -219,6 +221,42 @@ module Code
     push!(org.vars[fn].blocks, ifEx.args[2])
 
     ifEx
+  end
+  #
+  # @cmd
+  # Saves custom value to organism's private memory
+  # @param org Organism we are working with
+  # @param fn Parent(current) function unique name
+  # we are working in
+  # @param block Current flock within fn function
+  # @return {Expr|nothing}
+  #
+  function toMem(org::Creature.Organism, fn::ASCIIString, block::Expr)
+    local typ::DataType = @getType()
+    local key::Symbol   = @getVar(org, fn, Int16)
+    local val::Symbol   = @getVar(org, fn, Int16)
+
+    if key === :nothing return Expr(:nothing) end
+
+    :(o.mem[$key]=$val)
+  end
+  #
+  # @cmd
+  # Extracts custom value from organism's private memory
+  # @param org Organism we are working with
+  # @param fn Parent(current) function unique name
+  # we are working in
+  # @param block Current flock within fn function
+  # @return {Expr|nothing}
+  #
+  function fromMem(org::Creature.Organism, fn::ASCIIString, block::Expr)
+    local typ::DataType = @getType()
+    local key::Symbol   = @getVar(org, fn, Int16)
+    local val::Symbol   = @getVar(org, fn, Int16)
+
+    if key === :nothing return Expr(:nothing) end
+    # TODO: how to check return type?
+    :($val=o.mem[$key])
   end
 
   #
