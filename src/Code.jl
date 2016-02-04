@@ -23,9 +23,13 @@ module Code
   export var
   export plus
   export minus
+  export multiply
+  export divide
   export fn
   export fnCall
   export condition
+  export toMem
+  export fromMem
   #
   # Public functions
   #
@@ -54,7 +58,7 @@ module Code
   # + operator implementation. Sums two variables. Supports all
   # types: ASCIIString, Int8, Bool,... In case of string uses
   # concatination, for boolean - & operator. If code is empty
-  # this function will skipp the execution.
+  # this function will skip the execution.
   # @param org Organism we have to mutate
   # @param fn Parent(current) function unique name
   # we are working in
@@ -82,7 +86,7 @@ module Code
   # - operator implementation. Minus two variables. Supports all
   # types: ASCIIString, Int8, Bool,... In case of string uses
   # concatination, for boolean - & operator. If code is empty
-  # this function will skipp the execution.
+  # this function will skip the execution.
   # @param org Organism we have to mutate
   # @param fn Parent(current) function unique name
   # we are working in
@@ -102,7 +106,7 @@ module Code
     # "qwerty" - "111" = "qwe"
     #
     if typ === ASCIIString
-      return :($(v1) = $(v2)[1:(length(v3) > length(v2) ? end : length(v3))])
+      return :($(v1) = $(v2)[1:(length(v3) > length(v2) > 0 ? 0 : length(v2) - length(v3))])
     #
     # true  - true  = false, true  - false = true, 
     # false - false = false, false - true  = true
@@ -114,6 +118,59 @@ module Code
     # Numeric types are here
     #
     :($(v1) = $(v2) - $(v3))
+  end
+  #
+  # @cmd
+  # * operator implementation. Multiply two variables. Supports all
+  # types: ASCIIString, Int8, Bool,... In case of string uses
+  # concatination, for boolean - & operator. If code is empty
+  # this function will skip the execution.
+  # @param org Organism we have to mutate
+  # @param fn Parent(current) function unique name
+  # we are working in
+  # @param block Current flock within fn function
+  # @return {Expr}
+  #
+  function multiply(org::Creature.Organism, fn::ASCIIString, block::Expr)
+    local typ::DataType = @getType()
+    local v1::Symbol    = @getVar(org, fn, typ)
+    local v2::Symbol    = @getVar(org, fn, typ)
+    local v3::Symbol    = @getVar(org, fn, typ)
+
+    if v1 === :nothing return Expr(:nothing) end
+
+    :($(v1) = $(v2) * $(v3))
+  end
+  #
+  # @cmd
+  # / operator implementation. Divides two variables. Supports all
+  # types: ASCIIString, Int8, Bool,... In case of string uses
+  # concatination, for boolean - | operator. If code is empty
+  # this function will skip the execution.
+  # @param org Organism we have to mutate
+  # @param fn Parent(current) function unique name
+  # we are working in
+  # @param block Current flock within fn function
+  # @return {Expr}
+  #
+  function divide(org::Creature.Organism, fn::ASCIIString, block::Expr)
+    local typ::DataType = @getType()
+    local v1::Symbol    = @getVar(org, fn, typ)
+    local v2::Symbol    = @getVar(org, fn, typ)
+    local v3::Symbol    = @getVar(org, fn, typ)
+
+    if v1 === :nothing return Expr(:nothing) end
+    #
+    # "1234"   / "854" = "1"   (just cut v1 by length of v1 / v2)
+    # "qwerty" / "111" = "qw"
+    #
+    if typ === ASCIIString
+      return :($(v1) = $(v2)[1:(length(v3) > length(v2) > 0 ? 0 : div(length(v2), length(v3)))])
+    elseif typ === Bool
+      return :($(v1) = $(v2) | $(v3))
+    end
+
+    :($(v1) = $(v2) / $(v3))
   end
   #
   # @cmd
@@ -255,8 +312,11 @@ module Code
     local val::Symbol   = @getVar(org, fn, Int16)
 
     if key === :nothing return Expr(:nothing) end
-    # TODO: how to check return type?
-    :($val=o.mem[$key])
+    #
+    # We don't need to create separate block here, because
+    # this is one code line.
+    #
+    :($val=haskey(o.mem, $key) ? o.mem[$key] : $val)
   end
 
   #
