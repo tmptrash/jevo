@@ -215,13 +215,11 @@ module Code
   #
   function loop(org::Creature.Organism, fn::ASCIIString, block::Expr)
     @inFuncBlock(org, fn, block)
-    local v1::Symbol = @getNewVar(org)
     local v2::Symbol = @getVar(org, fn, Int8)
     if v2 === :nothing return Expr(:nothing) end
-    local loopEx     = :(begin local $v1::Int8; for $v1=1:$v2 end end)
+    local loopEx     = :(begin local i::Int8; for i=1:$v2 end end)
 
-    push!(org.vars[fn].vars[Int8], v1)
-    push!(org.vars[fn].blocks, loopEx.args[2])
+    push!(org.vars[fn].blocks, loopEx.args[4].args[2])
 
     loopEx
   end
