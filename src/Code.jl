@@ -16,6 +16,7 @@ module Code
   using Debug
 
   include("CodeMacros.jl")
+  include("CodeOrganism.jl")
   #
   # Command functions. Amount of these functions will be increased
   # as many Julia language part i'mgoing to support...
@@ -30,6 +31,7 @@ module Code
   export condition
   export toMem
   export fromMem
+  export loop
   #
   # Public functions
   #
@@ -201,6 +203,27 @@ module Code
     end
 
     :($v1 = $v2 / $v3)
+  end
+  #
+  # @cmd
+  # Creates a for loop. We have to create small loops, because they
+  # afects entire speed.
+  # @param org Organism we are working with
+  # @param fn Parent(current) function unique name 
+  # we are working in
+  # @param block Current flock within fn function
+  #
+  function loop(org::Creature.Organism, fn::ASCIIString, block::Expr)
+    @inFuncBlock(org, fn, block)
+    local v1::Symbol = @getNewVar(org)
+    local v2::Symbol = @getVar(org, fn, Int8)
+    if v2 === :nothing return Expr(:nothing) end
+    local loopEx     = :(begin local $v1::Int8; for $v1=1:$v2 end end)
+
+    push!(org.vars[fn].vars[Int8], v1)
+    push!(org.vars[fn].blocks, loopEx.args[2])
+
+    loopEx
   end
   #
   # @cmd

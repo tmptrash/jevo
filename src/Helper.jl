@@ -70,5 +70,5 @@ module Helper
   #
   # Supported type of code inside organism
   #
-  const SUPPORTED_TYPES = [ASCIIString, Bool, Int8, Int16]
+  const SUPPORTED_TYPES = [ASCIIString, Bool, Int8, Int16, Int]
 end

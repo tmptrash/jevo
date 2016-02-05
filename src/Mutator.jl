@@ -165,12 +165,23 @@ module Mutator
   # array can't be empty.
   #
   const _CODE_SNIPPETS = [
-    Code.var, Code.plus, Code.minus, Code.multiply, Code.divide, Code.fn, Code.fnCall, Code.condition, Code.toMem, Code.fromMem
+    #
+    # Code
+    #
+    Code.var, Code.plus, Code.minus, Code.multiply, Code.divide, Code.fn, 
+    Code.fnCall, Code.condition, Code.toMem, Code.fromMem, Code.loop,
+    #
+    # CodeOrganism
+    #
+    Code.getEnergy, Code.eatLeft, Code.eatRight, Code.eatUp, Code.eatDown, 
+    Code.stepLeft, Code.stepRight, Code.stepUp, Code.stepDown, Code.clone
   ]
   #
   # All available functions for mutation types: change, add, del,...
   #
-  const _MUTATION_FUNCS = [_onAdd, _onChange, _onSmallChange, _onDel, _onClone, _onPeriod, _onAmount]
+  const _MUTATION_FUNCS = [
+    _onAdd, _onChange, _onSmallChange, _onDel, _onClone, _onPeriod, _onAmount
+  ]
  #  #
  #  # TODO:
  #  #
