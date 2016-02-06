@@ -174,7 +174,7 @@ module Mutator
     # CodeOrganism
     #
     Code.getEnergy, Code.eatLeft, Code.eatRight, Code.eatUp, Code.eatDown, 
-    Code.stepLeft, Code.stepRight, Code.stepUp, Code.stepDown, Code.clone
+    Code.stepLeft, Code.stepRight, Code.stepUp, Code.stepDown#=, Code.clone =#
   ]
   #
   # All available functions for mutation types: change, add, del,...

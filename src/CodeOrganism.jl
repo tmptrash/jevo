@@ -110,16 +110,19 @@ end
 function stepDown(org::Creature.Organism, fn::ASCIIString, block::Expr)
   :(Creature.stepDown(o))
 end
-#
+# TODO: at least now we don't need clonning from script. It should
+# TODO: be done automatically by Manager module
 # @cmd
 # Makes organism clone and places it near original one
 # @param org Organism we have to mutate
 # @param fn Parent(current) function unique name
 # @param block Current flock within fn function
 #
+#=
 function clone(org::Creature.Organism, fn::ASCIIString, block::Expr)
   :(Creature.clone(o))
 end
+=#
 #
 # @cmd
 # Saves custom value to organism's private memory

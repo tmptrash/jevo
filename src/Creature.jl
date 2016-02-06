@@ -365,8 +365,8 @@ module Creature
   # mutations. It will be a difference from father's organism. This
   # function should find "free" place for new organism around it.
   # If there is no "free" place, then cloning will be declined.
-  #
-  function clone(org::Organism) Event.fire(org.observer, "clone", org) end
+  # TODO: this function is under question
+  #function clone(org::Organism) Event.fire(org.observer, "clone", org) end
 
   #
   # Universal method for grabbing energy from the world. It grabs at

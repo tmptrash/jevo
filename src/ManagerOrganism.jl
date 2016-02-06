@@ -164,7 +164,8 @@ function _createOrganism(organism = nothing, pos = nothing)
   Event.on(org.observer, "stepright", _onStepRight)
   Event.on(org.observer, "stepup",    _onStepUp   )
   Event.on(org.observer, "stepdown",  _onStepDown )
-  Event.on(org.observer, "clone",     _onClone    )
+  # TODO: clonning is under question now...
+  #Event.on(org.observer, "clone",     _onClone    )
   #
   # Shows organism
   #
