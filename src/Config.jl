@@ -225,7 +225,7 @@ module Config
   #
   global _data = GData(
     Data(
-      [5,50,100,1,1,1,1],        # ORGANISM_MUTATION_PROBABILITIES (add,change,small-change,del,clone,period,amount)
+      [5,50,100,4,1,1,1],        # ORGANISM_MUTATION_PROBABILITIES (add,change,small-change,del,clone,period,amount)
       1,                         # ORGANISM_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
       0,                         # ORGANISM_MUTATION_PERIOD
