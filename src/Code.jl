@@ -1,6 +1,8 @@
 #
 # Contains Organism's code related functions. Works in pair with
-# Mutator module.
+# Mutator module. This file should contain only basic language related
+# element like: for, if, variables,... All other operations should
+# be in special files like CodeXXX.jl (e.g. CodeMath, CodeOrganism,...)
 #
 # TODO: describe @cmd annotation
 # TODO: describe that return operator inside custom functions don't affect of script size
@@ -17,20 +19,15 @@ module Code
 
   include("CodeMacros.jl")
   include("CodeOrganism.jl")
+  include("CodeMath.jl")
   #
   # Command functions. Amount of these functions will be increased
   # as many Julia language part i'mgoing to support...
   #
   export var
-  export plus
-  export minus
-  export multiply
-  export divide
   export fn
   export fnCall
   export condition
-  export toMem
-  export fromMem
   export loop
   #
   # Public functions
@@ -54,155 +51,6 @@ module Code
     push!(org.vars[fn].vars[typ], varSym)
 
     :(local $(varSym)::$(typ)=$(@getValue(typ)))
-  end
-  #
-  # @cmd
-  # + operator implementation. Sums two variables. Supports all
-  # types: ASCIIString, Int8, Bool,... In case of string uses
-  # concatination, for boolean - & operator. If code is empty
-  # this function will skip the execution.
-  # @param org Organism we have to mutate
-  # @param fn Parent(current) function unique name
-  # we are working in
-  # @param block Current flock within fn function
-  # @return {Expr}
-  #
-  function plus(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    local typ::DataType = @getType()
-    local v1::Symbol    = @getVar(org, fn, typ)
-    local v2::Symbol    = @getVar(org, fn, typ)
-    local v3::Symbol    = @getVar(org, fn, typ)
-
-    if v1 === :nothing return Expr(:nothing) end
-
-    if typ === ASCIIString 
-      return :($v1 = $(v2) * $v3)
-    elseif typ === Bool
-      return :($v1 = $v2 & $v3)
-    end
-
-    :($v1 = $v2 + $v3)
-  end
-  #
-  # @cmd
-  # - operator implementation. Minus two variables. Supports all
-  # types: ASCIIString, Int8, Bool,... In case of string uses
-  # concatination, for boolean - & operator. If code is empty
-  # this function will skip the execution.
-  # @param org Organism we have to mutate
-  # @param fn Parent(current) function unique name
-  # we are working in
-  # @param block Current flock within fn function
-  # @return {Expr}
-  #
-  function minus(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    local typ::DataType = @getType()
-    local v1::Symbol    = @getVar(org, fn, typ)
-    local v2::Symbol    = @getVar(org, fn, typ)
-    local v3::Symbol    = @getVar(org, fn, typ)
-    local l::Int
-
-    if v1 === :nothing return Expr(:nothing) end
-    #
-    # "1234"   - "85"  = "12" (just cut v1 by length of v2)
-    # "qwerty" - "111" = "qwe"
-    #
-    if typ === ASCIIString
-      return :($(v1) = $(v2)[1:(length($v3) > length($v2) > 0 ? 0 : length($v2) - length($v3))])
-    #
-    # true  - true  = false, true  - false = true, 
-    # false - false = false, false - true  = true
-    #
-    elseif typ === Bool
-      return :($v1 = Bool(abs($v2 - $v3)))
-    end
-    #
-    # Numeric types are here
-    #
-    :($v1 = $v2 - $v3)
-  end
-  #
-  # @cmd
-  # * operator implementation. Multiply two variables. Supports all
-  # types: ASCIIString, Int8, Bool,... In case of string uses
-  # concatination, for boolean - & operator. If code is empty
-  # this function will skip the execution.
-  # @param org Organism we have to mutate
-  # @param fn Parent(current) function unique name
-  # we are working in
-  # @param block Current flock within fn function
-  # @return {Expr}
-  #
-  function multiply(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    local typ::DataType = @getType()
-    local v1::Symbol    = @getVar(org, fn, typ)
-    local v2::Symbol    = @getVar(org, fn, typ)
-    local v3::Symbol    = @getVar(org, fn, typ)
-
-    if v1 === :nothing return Expr(:nothing) end
-
-    :($v1 = $v2 * $v3)
-  end
-  #
-  # @cmd
-  # / operator implementation. Divides two variables. Supports all
-  # types: ASCIIString, Int8, Bool,... In case of string uses
-  # concatination, for boolean - | operator. If code is empty
-  # this function will skip the execution.
-  # @param org Organism we have to mutate
-  # @param fn Parent(current) function unique name
-  # we are working in
-  # @param block Current flock within fn function
-  # @return {Expr}
-  #
-  function divide(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    local typ::DataType = @getType()
-    local v1::Symbol    = @getVar(org, fn, typ)
-    local v2::Symbol    = @getVar(org, fn, typ)
-    local v3::Symbol    = @getVar(org, fn, typ)
-
-    if v1 === :nothing return Expr(:nothing) end
-    #
-    # "1234"   / "854" = "1"   (just cut v1 by length of v1 / v2)
-    # "qwerty" / "111" = "qw"
-    #
-    if typ === ASCIIString
-      return :($v1 = $v2[1:(length($v3) > length($v2) > 0 ? 0 : div(length($v2), length($v3)))])
-    elseif typ === Bool
-      return :($(v1) = $(v2) | $(v3))
-    end
-
-    :($(v1) = $(v2) / $(v3))
-  end
-  #
-  # @cmd
-  # Calculates reminder of division of two numbers. For ASCIIString
-  # calculates reminder of cutting: "12345" % "23" = "345". It uses
-  # length of second string for cut. For Bool uses | operator.
-  # @param org Organism we have to mutate
-  # @param fn Parent(current) function unique name
-  # we are working in
-  # @param block Current flock within fn function
-  # @return {Expr}
-  #
-  function reminder(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    local typ::DataType = @getType()
-    local v1::Symbol    = @getVar(org, fn, typ)
-    local v2::Symbol    = @getVar(org, fn, typ)
-    local v3::Symbol    = @getVar(org, fn, typ)
-
-    if v1 === :nothing return Expr(:nothing) end
-    #
-    # "1234"   / "854" = "1"   (just cut v1 by length of v1 / v2)
-    # "qwerty" / "111" = "qw"
-    #
-    if typ === ASCIIString
-      return :($v1 = $v2[(length($v3) > length($v2) ? 1 : length($v3)):(length($v3) > length($v2) > 0 ? 0 : end)])
-    elseif typ === Bool
-      return :($v1 = $v2 | $v3)
-    end
-
-    :($v1 = $v2 / $v3)
   end
   #
   # @cmd
@@ -330,45 +178,6 @@ module Code
 
     ifEx
   end
-  #
-  # @cmd
-  # Saves custom value to organism's private memory
-  # @param org Organism we are working with
-  # @param fn Parent(current) function unique name
-  # we are working in
-  # @param block Current flock within fn function
-  # @return {Expr|nothing}
-  #
-  function toMem(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    local typ::DataType = @getType()
-    local key::Symbol   = @getVar(org, fn, Int16)
-    local val::Symbol   = @getVar(org, fn, Int16)
-
-    if key === :nothing return Expr(:nothing) end
-
-    :(o.mem[$key]=$val)
-  end
-  #
-  # @cmd
-  # Extracts custom value from organism's private memory
-  # @param org Organism we are working with
-  # @param fn Parent(current) function unique name
-  # we are working in
-  # @param block Current flock within fn function
-  # @return {Expr|nothing}
-  #
-  function fromMem(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    local typ::DataType = @getType()
-    local key::Symbol   = @getVar(org, fn, Int16)
-    local val::Symbol   = @getVar(org, fn, Int16)
-
-    if key === :nothing return Expr(:nothing) end
-    #
-    # We don't need to create separate block here, because
-    # this is one code line.
-    #
-    :($val=haskey(o.mem, $key) ? o.mem[$key] : $val)
-  end
 
   #
   # This method is called before one code line is removed or changed.
@@ -389,10 +198,18 @@ module Code
     local i::Int
     local vars::Array{Symbol, 1}
     #
+    # Finds block of current "if" operator and removes it from 
+    # Organism.vars[fn].blocks array
+    #
+    if lineEx.head === :comparison || lineEx.head === :for
+      i = findfirst(org.vars[fn].blocks, block)
+      if i > 0 deleteat!(org.vars[fn].blocks, i) end
+      org.codeSize -= length(block.args)
+    #
     # Finds currently removed variable within it's function and
     # removes it from Creature.Organism.vars map
     #
-    if lineEx.head === :local
+    elseif lineEx.head === :local
       ex   = lineEx.args[1].args[1]   # shortcut to variable
       vars = org.vars[fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"].vars[ex.args[2]]
       i = findfirst(vars, ex.args[1])
@@ -412,14 +229,6 @@ module Code
       # -1, because we don't calc return operator
       #
       org.codeSize -= (length(lineEx.args[2].args) - 1)
-    #
-    # Finds block of current if operator and removes it from 
-    # Organism.vars[fn].blocks array
-    #
-    elseif lineEx.head === :comparison
-      i = findfirst(org.vars[fn].blocks, block)
-      if i > 0 deleteat!(org.vars[fn].blocks, i) end
-      org.codeSize -= length(lineEx.args[2].args)
     end
     org.codeSize -= 1
   end

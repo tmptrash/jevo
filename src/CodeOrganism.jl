@@ -1,9 +1,17 @@
+#
+# This fiel is a part of Code module. Contains Code functions related 
+# to Organism. For example eating, moving, working with memory,...
+#
+# @author DeadbraiN
+#
 export getEnergy
 export eatLeft
 export eatRight
 export eatUp
 export eatDown
 export clone
+export toMem
+export fromMem
 
 #
 # @cmd
@@ -111,4 +119,43 @@ end
 #
 function clone(org::Creature.Organism, fn::ASCIIString, block::Expr)
   :(Creature.clone(o))
+end
+#
+# @cmd
+# Saves custom value to organism's private memory
+# @param org Organism we are working with
+# @param fn Parent(current) function unique name
+# we are working in
+# @param block Current flock within fn function
+# @return {Expr|nothing}
+#
+function toMem(org::Creature.Organism, fn::ASCIIString, block::Expr)
+  local typ::DataType = @getType()
+  local key::Symbol   = @getVar(org, fn, Int16)
+  local val::Symbol   = @getVar(org, fn, Int16)
+
+  if key === :nothing return Expr(:nothing) end
+
+  :(o.mem[$key]=$val)
+end
+#
+# @cmd
+# Extracts custom value from organism's private memory
+# @param org Organism we are working with
+# @param fn Parent(current) function unique name
+# we are working in
+# @param block Current flock within fn function
+# @return {Expr|nothing}
+#
+function fromMem(org::Creature.Organism, fn::ASCIIString, block::Expr)
+  local typ::DataType = @getType()
+  local key::Symbol   = @getVar(org, fn, Int16)
+  local val::Symbol   = @getVar(org, fn, Int16)
+
+  if key === :nothing return Expr(:nothing) end
+  #
+  # We don't need to create separate block here, because
+  # this is one code line.
+  #
+  :($val=haskey(o.mem, $key) ? o.mem[$key] : $val)
 end

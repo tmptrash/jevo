@@ -168,7 +168,7 @@ module Mutator
     #
     # Code
     #
-    Code.var, Code.plus, Code.minus, Code.multiply, Code.divide, Code.fn, 
+    Code.var, Code.plus, Code.minus, Code.multiply, Code.divide, Code.reminder, Code.fn, 
     Code.fnCall, Code.condition, Code.toMem, Code.fromMem, Code.loop,
     #
     # CodeOrganism
