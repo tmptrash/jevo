@@ -143,6 +143,35 @@ function getOrganisms(from::Int = 1, to::Int = 0)
 end
 #
 # @rpc
+# Sets specified amount of energy into the point with x,y coordinates
+# @param x X coordinate
+# @param y Y coordinate
+# @param energy Amount of energy
+#
+function setEnergy(x::Int, y::Int, energy::UInt32)
+  World.setEnergy(Manager._world, Helper.Point(x, y), energy)
+end
+#
+# @rpc
+# Sets custom amount of energy points randomly by world
+# @param amount Amount of energy points
+# @param energy Amount of energy within one point
+#
+function setEnergyRandom(amount::Int, energy::UInt32)
+  local i::Int
+  local x::Int
+  local y::Int
+
+  for i=1:amount
+    x = rand(1:Manager._world.width)
+    y = rand(1:Manager._world.height)
+    if Manager._world.data[y, x] === UInt32(0)
+      World.setEnergy(Manager._world, Helper.Point(x, y), energy)
+    end
+  end
+end
+#
+# @rpc
 # Calls Garbage Collector in current process
 #
 function debugGc()
@@ -188,5 +217,7 @@ _rpcApi = Dict{Integer, Function}(
   RPC_GET_ORGANISM      => getOrganism,
   RPC_GET_AMOUNT        => getAmount,
   RPC_GET_ORGANISMS     => getOrganisms,
+  RPC_SET_ENERGY        => setEnergy,
+  RPC_SET_ENERGY_RND    => setEnergyRandom,
   RPC_DEBUG_GC          => debugGc
 )
