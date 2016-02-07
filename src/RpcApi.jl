@@ -49,7 +49,7 @@ module RpcApi
     # @inheritable
     # Code of organism. Array of atomic string blocks on Julia language.
     #
-    code::ASCIIString
+    code::Expr
     #
     # @inheritable
     # Amount of mutations, which will be applied to arganism after
@@ -75,6 +75,10 @@ module RpcApi
     # It can't be more then ORGANISM_MAX_ENERGY configuration.
     #
     energy::Int
+    #
+    # Organism's personal memory. Is used in any possible way.
+    #
+    mem::Dict{Int16, Int16}
     #
     # Organism's position in a 2D world. Starts from (1,1) 
     # ends with (WORLD_WIDTH, WORLD_HEIGHT) configurations.

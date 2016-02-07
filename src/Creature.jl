@@ -249,7 +249,7 @@ module Creature
     # by mutations. This loop must be after ambedded functions.
     #
     return function ()
-      oldCode = org.fnCode
+      oldCode = org.codeFn
       orgId   = "org-$(id)"
       #
       # TODO: describe organism's main loop
@@ -262,8 +262,8 @@ module Creature
         #
         try
           org.fnCode(org)
-          if org.fnCode !== oldCode
-            oldCode = org.fnCode
+          if org.codeFn !== oldCode
+            oldCode = org.codeFn
           end
         end
       end

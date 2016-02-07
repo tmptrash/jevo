@@ -102,11 +102,12 @@ function getOrganism(id::UInt)
   return RpcApi.SimpleOrganism(
     id,
     org.mutationProbabilities,
-    join(org.code[1:org.codeSize]),
+    org.code,
     org.mutationsOnClone,
     org.mutationPeriod,
     org.mutationAmount,
     org.energy,
+    org.mem,
     [org.pos.x, org.pos.y]
   )
 end

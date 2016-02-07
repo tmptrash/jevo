@@ -97,12 +97,11 @@ function _updateOrganismsEnergy(counter::Int)
   local i::Int = length(Manager._tasks)
   while i > 0
     local org::Creature.Organism = Manager._tasks[i].organism
-    local dec::Int = decVal + length(org.code)
     #
     # if the energy of the organism is zero, we have to remove it
     #
-    if org.energy > dec
-      org.energy -= dec
+    if org.energy > decVal
+      org.energy -= decVal
     else
       _killOrganism(i)
     end
