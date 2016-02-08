@@ -57,7 +57,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
         # Mutation will be automatically applied if organism
         # doesn't contain any code line.
         #
-        if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0 || length((org.code.args[2].args)) === 0
+        if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0
           for j = 1:org.mutationAmount Mutator.mutate(org) end
         end
         #

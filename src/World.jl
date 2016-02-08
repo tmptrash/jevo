@@ -54,9 +54,9 @@ module World
   # @param energy Amount of energy to add
   #
   function setEnergy(plane::Plane, pos::Helper.Point, energy::UInt32)
-    if pos.x < 0 || pos.x > plane.width || pos.y < 0 || pos.y > plane.height return nothing end
+    if pos.x < 1 || pos.x > plane.width || pos.y < 1 || pos.y > plane.height return nothing end
     plane.data[pos.y, pos.x] = energy
-    Event.fire(plane.observer, "update", pos.x, pos.y, energy, plane)
+    #Event.fire(plane.observer, "update", pos.x, pos.y, energy, plane)
   end
   #
   # Returns amount of energy in a point with
@@ -66,7 +66,7 @@ module World
   # @return {UInt32} Amount of energy
   #
   function getEnergy(plane::Plane, pos::Helper.Point)
-    if pos.x < 0 || pos.x > plane.width || pos.y < 0 || pos.y > plane.height return UInt32(0) end
+    if pos.x < 1 || pos.x > plane.width || pos.y < 1 || pos.y > plane.height return UInt32(0) end
     plane.data[pos.y, pos.x]
   end
   #
@@ -98,8 +98,10 @@ module World
     local energy::UInt32 = getEnergy(plane, pos)
 
     energy = energy > amount ? amount : energy
-    if energy > 0 plane.data[pos.y, pos.x] -= energy end
-    Event.fire(plane.observer, "update", pos.x, pos.y, plane.data[pos.y, pos.x], plane)
+    if energy > 0
+      plane.data[pos.y, pos.x] -= energy
+      #Event.fire(plane.observer, "update", pos.x, pos.y, plane.data[pos.y, pos.x], plane)
+    end
     energy
   end
   #
