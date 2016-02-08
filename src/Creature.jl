@@ -249,7 +249,7 @@ module Creature
             oldCode = org.codeFn
           end
         catch e
-          dump(e)
+          # TODO: what we have to do with code errors?
         end
       end
     end

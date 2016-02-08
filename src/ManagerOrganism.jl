@@ -46,6 +46,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     # TODO: optimize this two approaches. We have to have only one
     # TODO: reverse loop.
     for i = 1:len
+      if istaskdone(Manager._tasks[i].task) continue end
       org = Manager._tasks[i].organism
       try
         consume(Manager._tasks[i].task)
@@ -68,7 +69,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
         #
         if mCounter % (maxEnergy - org.energy) === 0 _onClone(org) end
       catch e
-        println("Manager._updateOrganisms(): $e")
+        println("Manager._updateOrganisms(): $(dump(e))")
       end
     end
     #
