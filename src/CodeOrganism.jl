@@ -26,7 +26,7 @@ function getEnergy(org::Creature.Organism, fn::ASCIIString, block::Expr)
   local xSym::Symbol   = @getVar(org, fn, Int16)
   local ySym::Symbol   = @getVar(org, fn, Int16)
 
-  if xSym === :nothing return Expr(:nothing) end
+  if varSym === :nothing || xSym === :nothing return Expr(:nothing) end
 
   :($varSym=Int(Creature.getEnergy(o, Int($xSym), Int($ySym))))
 end

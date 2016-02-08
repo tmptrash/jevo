@@ -54,8 +54,10 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
         # Mutations occures according to organisms settings.
         # If mutationPeriod or mutationAmount set to 0, it 
         # means that mutations during leaving are disabled.
+        # Mutation will be automatically applied if organism
+        # doesn't contain any code line.
         #
-        if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0
+        if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0 || length((org.code.args[2].args)) === 0
           for j = 1:org.mutationAmount Mutator.mutate(org) end
         end
         #
@@ -85,7 +87,8 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
 end
 #
 # Updates energy of all organisms. Decreases their energy according
-# to config (ORGANISM, DECREASE_VALUE).
+# to config (ORGANISM, DECREASE_VALUE). Removes marked as "delete"
+# tasks from Manager._tasks map.
 # @param counter Current iterator value
 #
 function _updateOrganismsEnergy(counter::Int)
@@ -110,13 +113,18 @@ function _updateOrganismsEnergy(counter::Int)
     # We don't need to check return value, because we don't change organism's
     # position. Just update it color (energy).
     #
-    _moveOrganism(org.pos, org)
+    if istaskdone(Manager._tasks[i].task)
+      splice!(Manager._tasks, i)
+    else
+      _moveOrganism(org.pos, org)
+    end
 
     i -= 1
   end
 end
 #
-# Kills one organism and remove it from all related maps
+# Marks one organism as "removed". Deletion will be done in 
+# _updateOrganismsEnergy() function.
 # @param i Index of current task
 #
 function _killOrganism(i::Int)
@@ -131,13 +139,12 @@ function _killOrganism(i::Int)
   #
   # This is small hack. It stops the task immediately. We 
   # have to do this, because task is a memory leak if we don't
-  # stop (interrupt) it
+  # stop (interrupt) it. Real removing of task from Manager._tasks
+  # map will be done later. This method only marks the task as 
+  # "deleted".
   #
   try Base.throwto(Manager._tasks[i].task, null) end
   _organismMsg(Manager._tasks[i].id, "die")
-  splice!(Manager._tasks, i)
-  # TODO: this line is under the big question
-  gc()
 end
 #
 # Creates new organism and binds event handlers to him. It also
@@ -149,7 +156,7 @@ end
 function _createOrganism(organism = nothing, pos = nothing)
   pos  = organism !== nothing && pos === nothing ? World.getNearFreePos(_world, organism.pos) : (pos === nothing ? World.getFreePos(Manager._world) : pos)
   if pos === false return false end
-  org  = organism === nothing ? Creature.create(pos) : Creature.copy(organism)
+  org  = organism === nothing ? Creature.create(pos) : deepcopy(organism)
   id   = Config.val(:ORGANISM_CURRENT_ID)
   task = Task(Creature.born(org, id))
 
@@ -262,7 +269,7 @@ end
 # @param amount Amount of energy we want to grab
 # @param retObj Special object for return value
 #
-function _onGrabLeft(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
+function _onGrabLeft(organism::Creature.Organism, amount::Int, retObj::Creature.RetObj)
   _onGrab(organism, amount, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
 end
 #
@@ -271,7 +278,7 @@ end
 # @param amount Amount of energy we want to grab
 # @param retObj Special object for return value
 #
-function _onGrabRight(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
+function _onGrabRight(organism::Creature.Organism, amount::Int, retObj::Creature.RetObj)
   _onGrab(organism, amount, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
 end
 #
@@ -280,7 +287,7 @@ end
 # @param amount Amount of energy we want to grab
 # @param retObj Special object for return value
 #
-function _onGrabUp(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
+function _onGrabUp(organism::Creature.Organism, amount::Int, retObj::Creature.RetObj)
   _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
 end
 #
@@ -289,44 +296,40 @@ end
 # @param amount Amount of energy we want to grab
 # @param retObj Special object for return value
 #
-function _onGrabDown(organism::Creature.Organism, amount::UInt, retObj::Creature.RetObj)
+function _onGrabDown(organism::Creature.Organism, amount::Int, retObj::Creature.RetObj)
   _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
 end
 #
 # Handler of "stepleft" event. Checks a possibility to step left.
 # New position will be set to "retObj.pos" property.
 # @param organism Parent organism
-# @param retObj Special object for return value
 #
-function _onStepLeft(organism::Creature.Organism, retObj::Creature.RetObj)
-  _onStep(organism, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
+function _onStepLeft(organism::Creature.Organism)
+  _onStep(organism, Helper.Point(organism.pos.x - 1, organism.pos.y))
 end
 #
 # Handler of "stepright" event. Checks a possibility to step right.
 # New position will be set to "retObj.pos" property.
 # @param organism Parent organism
-# @param retObj Special object for return value
 #
-function _onStepRight(organism::Creature.Organism, retObj::Creature.RetObj)
-  _onStep(organism, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
+function _onStepRight(organism::Creature.Organism)
+  _onStep(organism, Helper.Point(organism.pos.x + 1, organism.pos.y))
 end
 #
 # Handler of "stepup" event. Checks a possibility to step up.
 # New position will be set to "retObj.pos" property.
 # @param organism Parent organism
-# @param retObj Special object for return value
 #
-function _onStepUp(organism::Creature.Organism, retObj::Creature.RetObj)
-  _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
+function _onStepUp(organism::Creature.Organism)
+  _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y - 1))
 end
 #
 # Handler of "stepdown" event. Checks a possibility to step down.
 # New position will be set to "retObj.pos" property.
 # @param organism Parent organism
-# @param retObj Special object for return value
 #
-function _onStepDown(organism::Creature.Organism, retObj::Creature.RetObj)
-  _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
+function _onStepDown(organism::Creature.Organism)
+  _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y + 1))
 end
 #
 # Grabs energy on specified point. It grabs the energy and 
@@ -337,8 +340,8 @@ end
 # @param pos Point where we should check the energy
 # @param retObj Special object for return value
 #
-function _onGrab(organism::Creature.Organism, amount::UInt, pos::Helper.Point, retObj::Creature.RetObj)
-  retObj.ret = World.grabEnergy(Manager._world, pos, amount)
+function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, retObj::Creature.RetObj)
+  retObj.ret = World.grabEnergy(Manager._world, pos, UInt32(amount))
   local id::Int = _getOrganismId(pos)
   #
   # If other organism at the position of the check, 
@@ -365,8 +368,7 @@ end
 # the same position will be set to "retObj.pos".
 # @param organism Organism hwo grabs
 # @param pos Point where we should check the energy
-# @param retObj Special object for return value
 #
-function _onStep(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
+function _onStep(organism::Creature.Organism, pos::Helper.Point)
   World.getEnergy(Manager._world, pos) === UInt32(0) && _moveOrganism(pos, organism)
 end

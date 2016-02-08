@@ -45,6 +45,15 @@ module Creature
 
   export create
   export born
+  export getEnergy
+  export energyLeft
+  export energyRight
+  export energyUp
+  export energyDown
+  export stepLeft
+  export stepRight
+  export stepUp
+  export stepDown
   #
   # Enumeration for direction: up, down, left, right
   #
@@ -214,32 +223,6 @@ module Creature
     )
   end
   #
-  # Creates copy of specified organism. Don't forget to 
-  # set a position of new (created) organism.
-  # @param org Organism to copy
-  # @return {Creature}
-  #
-  function copy(org::Organism)
-    # TODO: !!!check if we need a copy of this!!!
-    Organism(
-      org.mutationProbabilities,                     # mutationProbabilities
-      org.code,                                      # code
-      org.codeFn,                                    # codeFn
-      org.codeSize,                                  # codeSize
-      org.varId,                                     # varId
-      org.fnId,                                      # fnId
-      org.vars,                                      # vars
-      org.funcs,                                     # funcs
-      org.mutationsOnClone,                          # mutationsOnClone
-      org.mutationPeriod,                            # mutationPeriod
-      org.mutationAmount,                            # mutationAmount
-      org.energy,                                    # energy
-      org.mem,                                       # mem
-      org.pos,                                       # pos
-      Event.create()                                 # observer
-    )
-  end
-  #
   # TODO: describe organism's task function
   #
   function born(org::Creature.Organism, id::UInt)
@@ -261,10 +244,12 @@ module Creature
         # that these errors will be fixed by future mutations.
         #
         try
-          org.fnCode(org)
+          org.codeFn(org)
           if org.codeFn !== oldCode
             oldCode = org.codeFn
           end
+        catch e
+          dump(e)
         end
       end
     end
@@ -356,7 +341,9 @@ module Creature
   # sd - means make Step Down. Short name to help organism find this name faster.
   # Makes one step down. It increase organism's y coodinate by 1.
   #
-  function stepDown(org::Organism) Event.fire(org.observer, "stepdown", org) end
+  function stepDown(org::Organism)
+    Event.fire(org.observer, "stepdown", org)
+  end
   #
   # @oapi
   # @param org Current organism
@@ -380,12 +367,12 @@ module Creature
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
     #
-    retObj = RetObj()
+    local retObj::RetObj = RetObj()
     #
     # Listener of "grab$dir" should set amount of energy in retObj.ret
     # Possible values [0...amount]
     #
-    Event.fire(creature.observer, "grab$(string(dir))", creature, Config.val(:ORGANISM_GRAB_ENERGY), retObj)
+    Event.fire(creature.observer, string("grab", dir), creature, Config.val(:ORGANISM_GRAB_ENERGY), retObj)
     creature.energy += retObj.ret
 
     retObj.ret

@@ -19,8 +19,10 @@ function getRegion(x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
   maxWidth  = size(_world.data)[2]
   maxHeight = size(_world.data)[1]
 
-  if (x1 === 0 || x1 > maxWidth)  x1 = maxWidth  end
-  if (y1 === 0 || y1 > maxHeight) y1 = maxHeight end
+  if (x1 < 1 || x1 > maxWidth)  x1 = maxWidth  end
+  if (y1 < 1 || y1 > maxHeight) y1 = maxHeight end
+  if (x  < 1 || x  > maxWidth)  x  = 1 end
+  if (y  < 1 || y  > maxHeight) y  = 1 end 
   
   RpcApi.Region(_world.data[y:y1, x:x1], Config.val(:WORLD_IPS))
 end
@@ -149,7 +151,11 @@ end
 # @param energy Amount of energy
 #
 function setEnergy(x::Int, y::Int, energy::UInt32)
-  World.setEnergy(Manager._world, Helper.Point(x, y), energy)
+  local pos::Helper.Point = Helper.Point(x, y)
+
+  if World.getEnergy(Manager._world, pos) === UInt32(0)
+    World.setEnergy(Manager._world, pos, energy)
+  end
 end
 #
 # @rpc
@@ -159,15 +165,9 @@ end
 #
 function setEnergyRandom(amount::Int, energy::UInt32)
   local i::Int
-  local x::Int
-  local y::Int
 
-  for i=1:amount
-    x = rand(1:Manager._world.width)
-    y = rand(1:Manager._world.height)
-    if Manager._world.data[y, x] === UInt32(0)
-      World.setEnergy(Manager._world, Helper.Point(x, y), energy)
-    end
+  for i = 1:amount
+    setEnergy(rand(1:Manager._world.width), rand(1:Manager._world.height), energy)
   end
 end
 #
