@@ -55,7 +55,7 @@ module Code
   #
   # @cmd
   # Creates a for loop. We have to create small loops, because they
-  # afects entire speed.
+  # affects entire speed.
   # @param org Organism we are working with
   # @param fn Parent(current) function unique name 
   # we are working in
@@ -63,11 +63,12 @@ module Code
   #
   function loop(org::Creature.Organism, fn::ASCIIString, block::Expr)
     @inFuncBlock(org, fn, block)
-    local v2::Symbol = @getVar(org, fn, Int8)
-    if v2 === :nothing return Expr(:nothing) end
-    local loopEx     = :(begin local i::Int8; for i=1:$v2 end end)
+    local v::Symbol = @getVar(org, fn, Int8)
+    if v === :nothing return Expr(:nothing) end
+    local i::Symbol = @getNewVar(org)
+    local loopEx    = :(local $i::Int8; for $i=1:$v end)
 
-    push!(org.vars[fn].blocks, loopEx.args[4].args[2])
+    push!(org.vars[fn].blocks, loopEx.args[2].args[2])
 
     loopEx
   end
