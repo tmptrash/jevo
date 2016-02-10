@@ -75,11 +75,11 @@ end
 # @rpc
 # Does one mutation for specified organism
 # @param organismId Unique orgaism's ID
+# @param amount Amount of mutations
 #
-function mutate(organismId::UInt)
+function mutate(organismId::UInt, amount::Int = 1)
   if (haskey(Manager._map, organismId))
-    Mutator.mutate(Manager._map[organismId])
-    return true
+    return Mutator.mutate(Manager._map[organismId], amount)
   end
   false
 end

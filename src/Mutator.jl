@@ -21,27 +21,35 @@ module Mutator
   # TODO: describe indexes (add,change,del,...)
   # TODO: describe return value. false mean no mutation
   #
-  function mutate(org::Creature.Organism)
-    #
-    # If there is no code, we can't mutate it. We may only add code line
-    #
-    local pIndex::Int  = org.codeSize < 1 ? 1           : Helper.getProbIndex(org.mutationProbabilities)
-    local result::Bool = org.codeSize < 1 ? _onAdd(org) : _MUTATION_FUNCS[pIndex](org)
-    #
-    # Updates compiled version of the code. Only valid code will be applied,
-    # because exception will be fired in case of error organismcode.
-    #
-    if pIndex < 5 && result
-      try
-        #
-        # This function must be anonymous, because it's used for comparison
-        # with other functions for other organisms. If their names are equal
-        # and they are in the same module, then === operator returns true.
-        # @param o Associated with this code organism
-        #
-        org.codeFn = eval(org.code)
-      catch e
-        # TODO: here fault script statictics should be collected
+  function mutate(org::Creature.Organism, amount::Int = 1)
+    local i     ::Int
+    local res   ::Bool
+    local pIndex::Int
+    local result::Bool = true
+
+    for i = 1:amount
+      #
+      # If there is no code, we can't mutate it. We may only add code line
+      #
+      pIndex = org.codeSize < 1 ? 1           : Helper.getProbIndex(org.mutationProbabilities)
+      res    = org.codeSize < 1 ? _onAdd(org) : _MUTATION_FUNCS[pIndex](org)
+      result &= res
+      #
+      # Updates compiled version of the code. Only valid code will be applied,
+      # because exception will be fired in case of error organismcode.
+      #
+      if pIndex < 5 && res
+        try
+          #
+          # This function must be anonymous, because it's used for comparison
+          # with other functions for other organisms. If their names are equal
+          # and they are in the same module, then === operator returns true.
+          # @param o Associated with this code organism
+          #
+          org.codeFn = eval(org.code)
+        catch e
+          # TODO: here fault script statictics should be collected
+        end
       end
     end
 

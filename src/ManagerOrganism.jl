@@ -59,7 +59,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
         # doesn't contain any code line.
         #
         if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0
-          for j = 1:org.mutationAmount Mutator.mutate(org) end
+          Mutator.mutate(org, org.mutationAmount)
         end
         #
         # Cloning procedure. The meaning of this is in ability to 
@@ -75,14 +75,13 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     #
     # This block decreases energy from organisms, because they 
     # spend it while leaving.
-    #
+    # TODO: this method should be merged with this one, because we
+    # TODO: go through all organisms twice (for, while)
     if (dPeriod = Config.val(:ORGANISM_DECREASE_PERIOD)) > 0 && eCounter >= dPeriod
       _updateOrganismsEnergy(eCounter)
       eCounter = 0
     end
-    if mCounter === typemax(Int)
-      mCounter = 0
-    end
+    if mCounter === typemax(Int) mCounter = 0 end
 
     eCounter, mCounter
 end
@@ -129,7 +128,7 @@ end
 # @param i Index of current task
 #
 function _killOrganism(i::Int)
-  if i === 0 return false end
+  if i === 0 || istaskdone(Manager._tasks[i].task) return false end
 
   org = Manager._tasks[i].organism
   org.energy = UInt(0)
@@ -247,13 +246,13 @@ function _onClone(organism::Creature.Organism)
   # clone in. It's possible, that all places are filled.
   #
   pos = World.getNearFreePos(Manager._world, organism.pos)
-  if pos === false return nothing end
+  if pos === false return false end
   #
   # Creates new organism and applies mutations to him.
   #
   crTask = Manager._createOrganism(organism, pos)
   if crTask === false return false end
-  for i = 1:crTask.organism.mutationsOnClone Mutator.mutate(crTask.organism) end
+  return Mutator.mutate(crTask.organism, crTask.organism.mutationsOnClone)
 end
 #
 # Returns an energy amount in specified point in a world.
