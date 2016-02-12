@@ -208,10 +208,10 @@ module Config
   # Returns configuration value according to section and key. In
   # case of incorrect symbol an exception will be throwed.
   # @param Field's name symbol
-  # @return {Any} Value of key in specified section
-  # in case of incorrect section or key
+  # @return {Any|nothing} Value of key in specified section
+  # in case of incorrect section or key returns nothing
   #
-  function val(name::Symbol) getfield(_data.d, name) end
+  function val(name::Symbol) try getfield(_data.d, name) end end
   #
   # Sets the value by section and key. Works in pair with
   # getter val() function
@@ -219,7 +219,7 @@ module Config
   # @param key Key inside the section
   # @return Operation boolean result
   #
-  function val(name::Symbol, value::Any) setfield!(_data.d, name, value) end
+  function val(name::Symbol, value::Any) try setfield!(_data.d, name, value) end end
   #
   # Global configuration data
   #

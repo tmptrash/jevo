@@ -3,21 +3,21 @@ module TestConfig
   using FactCheck
 
   facts("Read default value") do
-    @fact Config.val(SCRIPT, FUNC_PREFIX) --> "func"
+    @fact Config.val(:WORLD_IPS) --> 0
   end
-  facts("Read default value with incorrect section/key") do
-    @fact Config.val(0, 0) === null --> true
+  facts("Read default value with incorrect key") do
+    @fact Config.val(:UNKNOWN_KEY) --> nothing
   end
 
   facts("Write value") do
-    Config.val(WORLD, IPS, UInt(1))
-    @fact Config.val(WORLD, IPS) --> UInt(1)
-    Config.val(WORLD, IPS, UInt(2))
-    @fact Config.val(WORLD, IPS) --> UInt(2)
+    Config.val(:WORLD_IPS, 1)
+    @fact Config.val(:WORLD_IPS) --> 1
+    Config.val(:WORLD_IPS, 2)
+    @fact Config.val(:WORLD_IPS) --> 2
   end
-  facts("Write value in incorrect section/key") do
-    @fact Config.val(0, 0, UInt(1)) --> false
-    @fact Config.val(0, 0) === null --> true
+  facts("Write value in incorrect key") do
+    @fact Config.val(:UNKNOWN_KEY, 1) --> nothing
+    @fact Config.val(:UNKNOWN_KEY) --> nothing
   end
 
   facts("Save configuration into the file") do
@@ -30,11 +30,11 @@ module TestConfig
   facts("Save/load configuration into/from file with correct data") do
     cfgFile = "config.data"
     try rm(cfgFile) end
-    Config.val(WORLD, IPS, UInt(666))
+    Config.val(:WORLD_IPS, 666)
     @fact Config.save(cfgFile)   --> true
-    Config.val(WORLD, IPS, UInt(777))
+    Config.val(:WORLD_IPS, 777)
     Config.load(cfgFile)
-    @fact Config.val(WORLD, IPS) --> UInt(666)
+    @fact Config.val(:WORLD_IPS) --> 666
     rm(cfgFile)
   end
   facts("Load configuration from incorrect file") do
@@ -58,26 +58,26 @@ module TestConfig
 
     try rm(cfgFile1) end
     try rm(cfgFile2) end
-    @fact Config.val(WORLD, IPS, UInt(666)) --> true
-    @fact Config.save(cfgFile1)             --> true      # IPS === 666
-    @fact Config.val(WORLD, IPS)            --> UInt(666)
-    @fact Config.val(WORLD, IPS, UInt(777)) --> true
-    @fact Config.val(WORLD, IPS)            --> UInt(777)
-    @fact Config.load(cfgFile1)             --> true
-    @fact Config.val(WORLD, IPS)            --> UInt(666)
-    @fact Config.val(WORLD, IPS, UInt(777)) --> true
-    @fact Config.val(WORLD, IPS)            --> UInt(777)
+    @fact Config.val(:WORLD_IPS, 666) --> 666
+    @fact Config.save(cfgFile1)       --> true      # IPS === 666
+    @fact Config.val(:WORLD_IPS)      --> 666
+    @fact Config.val(:WORLD_IPS, 777) --> 777
+    @fact Config.val(:WORLD_IPS)      --> 777
+    @fact Config.load(cfgFile1)       --> true
+    @fact Config.val(:WORLD_IPS)      --> 666
+    @fact Config.val(:WORLD_IPS, 777) --> 777
+    @fact Config.val(:WORLD_IPS)      --> 777
 
-    @fact Config.save(cfgFile2)             --> true      # IPS === 777
-    @fact Config.val(WORLD, IPS, UInt(666)) --> true
-    @fact Config.val(WORLD, IPS)            --> UInt(666)
-    @fact Config.load(cfgFile2)             --> true
-    @fact Config.val(WORLD, IPS)            --> UInt(777)
+    @fact Config.save(cfgFile2)       --> true      # IPS === 777
+    @fact Config.val(:WORLD_IPS, 666) --> 666
+    @fact Config.val(:WORLD_IPS)      --> 666
+    @fact Config.load(cfgFile2)       --> true
+    @fact Config.val(:WORLD_IPS)      --> 777
     
-    @fact Config.load(cfgFile1)             --> true      # IPS === 666
-    @fact Config.val(WORLD, IPS)            --> UInt(666)
-    @fact Config.load(cfgFile2)             --> true      # IPS === 777
-    @fact Config.val(WORLD, IPS)            --> UInt(777)
+    @fact Config.load(cfgFile1)       --> true      # IPS === 666
+    @fact Config.val(:WORLD_IPS)      --> 666
+    @fact Config.load(cfgFile2)       --> true      # IPS === 777
+    @fact Config.val(:WORLD_IPS)      --> 777
 
     rm(cfgFile1)
     rm(cfgFile2)
