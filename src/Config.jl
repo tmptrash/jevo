@@ -7,12 +7,6 @@
 # settings are used like data containers in sense that, they
 # just store the values, which may be changed many times during
 # application life cicle.
-# Every setting may be read or write or both. Some of them only
-# readable, some - readable and writable. By default settings are
-# marked as readable (@read annotation). For writable settings
-# @write annotation is used. For example WORLD_IPS setting is
-# used like @read @write, because every module may set new value
-# into this setting.
 #
 # Usage:
 #     import Config
@@ -134,11 +128,11 @@ module Config
     #
     WORLD_FRAME_DELAY::Int
     #
-    # RGB, background color of the canvas, where organisms will be shown
+    # RGB, background color of the canvas, where organisms will be 
+    # shown. First byte is unused.
     #
     WORLD_BACK_COLOR::UInt32
     #
-    # @read @write
     # IPS (Iteration Per Second). Amount of iterations, which were
     # occures within one second. One iteration means one for all 
     # organisms in a World. This value will be set many times in main
@@ -147,7 +141,8 @@ module Config
     WORLD_IPS::Int
     #
     # Maximum amount of organisms in a world. If some organisms will
-    # try to clone itself, then it will not happen.
+    # try to clone itself, when entire amount of organisms are equal
+    # this value, then it(clonning) will not happen.
     #
     WORLD_MAX_ORGANISMS::Int
     #
@@ -157,7 +152,7 @@ module Config
   end
   #
   # Just a wrapper for Data type to have an ability to update
-  # global _data field after loading from a file.
+  # global _data.d field after loading from a file.
   #
   type GData
     d::Data
@@ -205,18 +200,18 @@ module Config
     ret
   end
   #
-  # Returns configuration value according to section and key. In
-  # case of incorrect symbol an exception will be throwed.
+  # Returns configuration value according to unique key. In
+  # case of incorrect key nothing will be returned.
   # @param Field's name symbol
   # @return {Any|nothing} Value of key in specified section
   # in case of incorrect section or key returns nothing
   #
   function val(name::Symbol) try getfield(_data.d, name) end end
   #
-  # Sets the value by section and key. Works in pair with
-  # getter val() function
-  # @param section Configuration section
-  # @param key Key inside the section
+  # Sets the value by unique key. Works in pair with getter 
+  # val() function
+  # @param key Unique key of the value
+  # @param value Value we have to set
   # @return Operation boolean result
   #
   function val(name::Symbol, value::Any) try setfield!(_data.d, name, value) end end

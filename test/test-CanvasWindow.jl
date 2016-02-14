@@ -1,4 +1,3 @@
-# TODO: add combined test of all functions
 module TestCanvasWindow
   using FactCheck
   using CanvasWindow

@@ -10,6 +10,7 @@
 #   - width and height parameters in create() method means, that a canvas should
 #     be with these values, but it choose some other values for canvas. It doesn't
 #     work on small canvas sizes (I think less then 200px).
+#   - window resize action cause window crash
 #
 # Usage:
 #   import CanvasWindow
@@ -17,7 +18,7 @@
 #   win = CanvasWindow.create(300, 300)
 #   CanvasWindow.dot(win, 20, 20, UInt32(11197883)) # R=AA,G=DD,B=BB
 #   CanvasWindow.dot(win, 30, 30, UInt32(11197883)) # R=AA,G=DD,B=BB
-#   CanvasWindow.update(win)
+#   CanvasWindow.update(win)                        # Two dots will be shown
 #   ...
 #   CanvasWindow.destroy(win)
 #
@@ -28,7 +29,7 @@ module CanvasWindow
   import Cairo
   import Tk
   import Colors
-  importall Config
+  import Config
 
   export Window
   export create
@@ -80,7 +81,7 @@ module CanvasWindow
     col = convert(Colors.RGB, Colors.RGB24(color))
     Tk.set_source_rgb(win.context, col.r, col.g, col.b)
     Tk.move_to(win.context, x, y)
-    Tk.line_to(win.context, x+1, y)
+    Tk.line_to(win.context, x + 1, y)
     Tk.stroke(win.context)
   end
   #
