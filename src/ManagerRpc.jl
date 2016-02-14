@@ -16,20 +16,20 @@ using RpcApi
 # @param y1 End y. 0 means all height
 #
 function getRegion(x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
-  maxWidth  = size(_world.data)[2]
-  maxHeight = size(_world.data)[1]
+  maxWidth  = size(Manager._data.world.data)[2]
+  maxHeight = size(Manager._data.world.data)[1]
 
   if (x1 < 1 || x1 > maxWidth)  x1 = maxWidth  end
   if (y1 < 1 || y1 > maxHeight) y1 = maxHeight end
   if (x  < 1 || x  > maxWidth)  x  = 1 end
   if (y  < 1 || y  > maxHeight) y  = 1 end 
   
-  RpcApi.Region(_world.data[y:y1, x:x1], Config.val(:WORLD_IPS))
+  RpcApi.Region(Manager._data.world.data[y:y1, x:x1], Config.val(:WORLD_IPS))
 end
 #
 # @rpc
 # Creates tasks and organisms according to Config. All tasks
-# will be in _tasks field.
+# will be in Manager._data.tasks field.
 #
 function createOrganisms()
   local i::Int
@@ -43,13 +43,13 @@ end
 #
 # @rpc
 # Creates one task and organism inside this task. Created
-# task will be added to _tasks array. Position may be set
-# or random free position will be used.
+# task will be added to Manager._data.tasks array. Position 
+# may be set or random free position will be used.
 # @param pos Position|nothing Position of the organism
 # @return {Int} Organism id or false if organisms limit is riched
 #
 function createOrganism(pos = nothing)
-  if length(_tasks) > Config.val(:WORLD_MAX_ORGANISMS) return false end
+  if length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS) return false end
   orgTask = Manager._createOrganism(nothing, pos)
   orgTask === false ? false : orgTask.id
 end
@@ -78,8 +78,8 @@ end
 # @param amount Amount of mutations
 #
 function mutate(organismId::UInt, amount::Int = 1)
-  if (haskey(Manager._map, organismId))
-    return Mutator.mutate(Manager._map[organismId], amount)
+  if (haskey(Manager._data.map, organismId))
+    return Mutator.mutate(Manager._data.map[organismId], amount)
   end
   false
 end
@@ -98,9 +98,9 @@ end
 # @return Creature.Organism or false if no organism with this id
 # TODO: remake to organism id, not position related id
 function getOrganism(id::UInt)
-  if !haskey(Manager._map, id) return false end
+  if !haskey(Manager._data.map, id) return false end
   
-  org = Manager._map[id]
+  org = Manager._data.map[id]
   return RpcApi.SimpleOrganism(
     id,
     org.mutationProbabilities,
@@ -120,26 +120,26 @@ end
 # @return {Int}
 #
 function getAmount()
-  length(_tasks)
+  length(Manager._data.tasks)
 end
 #
 # @rpc
 # Returns organism's list in specified range or all ovailable. from
-# and to indexes are not unique ids. This is just indexes in _tasks
+# and to indexes are not unique ids. This is just indexes in Manager._data.tasks
 # list.
-# @param from Start index in _tasks list
-# @param to   End index in _tasks list. 0 - means last item
+# @param from Start index in Manager._data.tasks list
+# @param to   End index in Manager._data.tasks list. 0 - means last item
 # @return {Array{SimpleOrganism}}
 #
 function getOrganisms(from::Int = 1, to::Int = 0)
   local orgs::Array{RpcApi.SimpleOrganism, 1} = Array{RpcApi.SimpleOrganism, 1}()
-  local len::Int = length(_tasks)
+  local len::Int = length(Manager._data.tasks)
   local i::Int
 
   from = from < 1 || from > len ? 1 : from
   to   = to === 0 ? len : to
 
-  for i=from:to push!(orgs, getOrganism(_tasks[i].id)) end
+  for i=from:to push!(orgs, getOrganism(Manager._data.tasks[i].id)) end
 
   orgs
 end
@@ -153,8 +153,8 @@ end
 function setEnergy(x::Int, y::Int, energy::UInt32)
   local pos::Helper.Point = Helper.Point(x, y)
 
-  if World.getEnergy(Manager._world, pos) === UInt32(0)
-    World.setEnergy(Manager._world, pos, energy)
+  if World.getEnergy(Manager._data.world, pos) === UInt32(0)
+    World.setEnergy(Manager._data.world, pos, energy)
   end
 end
 #
@@ -167,7 +167,7 @@ function setEnergyRandom(amount::Int, energy::UInt32)
   local i::Int
 
   for i = 1:amount
-    setEnergy(rand(1:Manager._world.width), rand(1:Manager._world.height), energy)
+    setEnergy(rand(1:Manager._data.world.width), rand(1:Manager._data.world.height), energy)
   end
 end
 #
@@ -187,7 +187,7 @@ end
 # @return Connection object
 #
 function _createServer()
-  port = CommandLine.val(_params, Manager.PARAM_SERVER_PORT)
+  port = CommandLine.val(Manager._data.params, Manager.PARAM_SERVER_PORT)
   port = port == "" ? Config.val(:CONNECTION_SERVER_PORT) : Int(port)
   con  = Server.create(ip"127.0.0.1", port)
   Event.on(con.observer, Server.EVENT_COMMAND, _onRemoteCommand)

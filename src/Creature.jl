@@ -203,23 +203,23 @@ module Creature
 
     Helper.getSupportedTypes((t) -> vars[""].vars[t] = [])
     Organism(
-      Config.val(:ORGANISM_MUTATION_PROBABILITIES),  # mutationProbabilities
-      code,                                          # code
-      eval(code),                                    # codeFn
+      Config.val(:ORGANISM_MUTATION_PROBABILITIES),                                          # mutationProbabilities
+      code,                                                                                  # code
+      eval(code),                                                                            # codeFn
       # TODO: change to length(Helper.getSupportedTypes)
-      0,                                             # codeSize
+      0,                                                                                     # codeSize
       # TODO: the same like codeSize
-      0,                                             # varId
-      0,                                             # fnId
-      vars,                                          # vars
-      Array{Expr, 1}(),                              # funcs
-      Config.val(:ORGANISM_MUTATIONS_ON_CLONE),      # mutationsOnClone
-      Config.val(:ORGANISM_MUTATION_PERIOD),         # mutationPeriod
-      Config.val(:ORGANISM_MUTATION_AMOUNT),         # mutationAmount
-      Config.val(:ORGANISM_START_ENERGY),            # energy
-      Dict{Int16, Int16}(),                          # mem
-      pos,                                           # pos
-      Event.create()                                 # observer
+      0,                                                                                     # varId
+      0,                                                                                     # fnId
+      vars,                                                                                  # vars
+      Array{Expr, 1}(),                                                                      # funcs
+      Config.val(:ORGANISM_MUTATIONS_ON_CLONE),                                              # mutationsOnClone
+      min(Config.val(:ORGANISM_MUTATION_PERIOD), Config.val(:ORGANISM_MAX_MUTATION_PERIOD)), # mutationPeriod
+      min(Config.val(:ORGANISM_MUTATION_AMOUNT), Config.val(:ORGANISM_MAX_MUTATION_AMOUNT)), # mutationAmount
+      Config.val(:ORGANISM_START_ENERGY),                                                    # energy
+      Dict{Int16, Int16}(),                                                                  # mem
+      pos,                                                                                   # pos
+      Event.create()                                                                         # observer
     )
   end
   #
@@ -287,33 +287,37 @@ module Creature
   # Grabs energy from the left point. Grabbibg means decrease energy at point
   # and increase it at organism.
   # @param org Current organism
+  # @param amount Amount of energy organism wants to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function energyLeft(org::Organism) _grabEnergy(org, left) end
+  function energyLeft(org::Organism, amount::Int) _grabEnergy(org, left, amount) end
   #
   # @oapi
   # er - means get Energy Right. Short name to help organism find this name faster.
   # Grabs energy from the right point.
   # @param org Current organism
+  # @param amount Amount of energy organism wants to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function energyRight(org::Organism) _grabEnergy(org, right) end
+  function energyRight(org::Organism, amount::Int) _grabEnergy(org, right, amount) end
   #
   # @oapi
   # eu - means get Energy Up. Short name to help organism find this name faster.
   # Grabs energy from the up point.
   # @param org Current organism
+  # @param amount Amount of energy organism wants to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function energyUp(org::Organism) _grabEnergy(org, up) end
+  function energyUp(org::Organism, amount::Int) _grabEnergy(org, up, amount) end
   #
   # @oapi
   # ed - means get Energy Down. Short name to help organism find this name faster.
   # Grabs energy from the down point.
-  # @param org Current organism  
+  # @param org Current organism
+  # @param amount Amount of energy organism wants to grab
   # @return {Int} Amount of grabbed energy
   #
-  function energyDown(org::Organism) _grabEnergy(org, down) end
+  function energyDown(org::Organism, amount::Int) _grabEnergy(org, down, amount) end
   #
   # @oapi
   # @param org Current organism
@@ -360,9 +364,10 @@ module Creature
   # the position up, left, bottom or right from current organism.
   # @param creature Current organism
   # @param dir      Direction Enum(left, right, up, down)
+  # @param amount   Amount of grabbed energy
   # @param amount   Amount of energy to grab
   #
-  function _grabEnergy(creature::Organism, dir::DIRECTION)
+  function _grabEnergy(creature::Organism, dir::DIRECTION, amount::Int)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
@@ -372,9 +377,10 @@ module Creature
     # Listener of "grab$dir" should set amount of energy in retObj.ret
     # Possible values [0...amount]
     #
-    Event.fire(creature.observer, string("grab", dir), creature, Config.val(:ORGANISM_GRAB_ENERGY), retObj)
-    creature.energy += retObj.ret
-
-    retObj.ret
+    Event.fire(creature.observer, string("grab", dir), creature, amount, retObj)
+    #
+    # We can't exceed max amount of energy
+    #
+    creature.energy = min(creature.energy + retObj.ret, Config.val(:ORGANISM_MAX_ENERGY))
   end
 end

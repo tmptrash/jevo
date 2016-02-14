@@ -20,7 +20,7 @@ export fromMem
 # @param fn Parent(current) function unique name
 # @param block Current flock within fn function
 # @return {Expr} New expression or Expr(:nothing) if skipped
-#
+# TODO: rename to lookAt
 function getEnergy(org::Creature.Organism, fn::ASCIIString, block::Expr)
   local varSym::Symbol = @getVar(org, fn, Int)
   local xSym::Symbol   = @getVar(org, fn, Int16)
@@ -38,7 +38,11 @@ end
 # @param block Current flock within fn function
 #
 function eatLeft(org::Creature.Organism, fn::ASCIIString, block::Expr)
-  :(Creature.energyLeft(o))
+  local amount::Symbol = @getVar(org, fn, Int8)
+
+  if amount === :nothing return Expr(:nothing) end
+
+  :(Creature.energyLeft(o, Int($(amount))))
 end
 #
 # @cmd
@@ -48,7 +52,11 @@ end
 # @param block Current flock within fn function
 #
 function eatRight(org::Creature.Organism, fn::ASCIIString, block::Expr)
-  :(Creature.energyRight(o))
+  local amount::Symbol = @getVar(org, fn, Int8)
+
+  if amount === :nothing return Expr(:nothing) end
+
+  :(Creature.energyRight(o, Int($(amount))))
 end
 #
 # @cmd
@@ -58,7 +66,11 @@ end
 # @param block Current flock within fn function
 #
 function eatUp(org::Creature.Organism, fn::ASCIIString, block::Expr)
-  :(Creature.energyUp(o))
+  local amount::Symbol = @getVar(org, fn, Int8)
+
+  if amount === :nothing return Expr(:nothing) end
+
+  :(Creature.energyUp(o, Int($(amount))))
 end
 #
 # @cmd
@@ -68,7 +80,11 @@ end
 # @param block Current flock within fn function
 #
 function eatDown(org::Creature.Organism, fn::ASCIIString, block::Expr)
-  :(Creature.energyDown(o))
+  local amount::Symbol = @getVar(org, fn, Int8)
+
+  if amount === :nothing return Expr(:nothing) end
+
+  :(Creature.energyDown(o, Int($(amount))))
 end
 #
 # @cmd

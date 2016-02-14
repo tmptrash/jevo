@@ -39,6 +39,33 @@ module Manager
   #
   const PARAM_SERVER_PORT = "serverPort"
   #
+  # Manager's related type. Contains world, command line parameters,
+  # organisms map and so on...
+  #
+  type Data
+    #
+    # Instance of the world
+    #
+    world::World.Plane
+    #
+    # Positions map, which stores positions of all organisms. Is used
+    # for fast access to the organism by it's coordinates.
+    # TODO: rename to organismLocations
+    posMap::Dict{Int, Creature.Organism}
+    #
+    # Map of organisms by id
+    # TODO: rename to organisms
+    map::Dict{UInt, Creature.Organism}
+    #
+    # All available organism's tasks
+    #
+    tasks::Array{OrganismTask}
+    #
+    # Parameters passed through command line
+    #
+    params::Dict{ASCIIString, ASCIIString}
+  end
+  #
   # Runs everything. Blocking function.
   #
   function run()
@@ -54,6 +81,11 @@ module Manager
     # In other words, it works like RPC runner...
     #
     Server.run(server)
+    #
+    # If user set up some amount of organisms they will be created
+    # in this call.
+    #
+    createOrganisms()
     #
     # This is main infinite loop. It manages input connections
     # and organism's tasks switching.
@@ -93,24 +125,14 @@ module Manager
     ips + 1, stamp
   end
   #
-  # Instance of the world
+  # Manager related data. See Data type for details. It's global, because
+  # Manager is a singleton.
   #
-  _world  = World.create()
-  #
-  # Positions map, which stores positions of all organisms. Is used
-  # for fast access to the organism by it's coordinates.
-  #
-  _posMap = Dict{Int, Creature.Organism}()
-  #
-  # Map of organisms by id
-  #
-  _map    = Dict{UInt, Creature.Organism}()
-  #
-  # All available organism's tasks
-  #
-  _tasks  = OrganismTask[]
-  #
-  # Parameters passed through command line
-  #
-  _params = CommandLine.create()
+  global _data = Data(
+    World.create(),
+    Dict{Int, Creature.Organism}(),
+    Dict{UInt, Creature.Organism}(),
+    OrganismTask[],
+    CommandLine.create()
+  )
 end
