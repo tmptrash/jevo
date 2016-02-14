@@ -50,12 +50,12 @@ module Manager
     #
     # Positions map, which stores positions of all organisms. Is used
     # for fast access to the organism by it's coordinates.
-    # TODO: rename to organismLocations
-    posMap::Dict{Int, Creature.Organism}
+    #
+    positions::Dict{Int, Creature.Organism}
     #
     # Map of organisms by id
     # TODO: rename to organisms
-    map::Dict{UInt, Creature.Organism}
+    organisms::Dict{UInt, Creature.Organism}
     #
     # All available organism's tasks
     #

@@ -78,8 +78,8 @@ end
 # @param amount Amount of mutations
 #
 function mutate(organismId::UInt, amount::Int = 1)
-  if (haskey(Manager._data.map, organismId))
-    return Mutator.mutate(Manager._data.map[organismId], amount)
+  if (haskey(Manager._data.organisms, organismId))
+    return Mutator.mutate(Manager._data.organisms[organismId], amount)
   end
   false
 end
@@ -98,9 +98,9 @@ end
 # @return Creature.Organism or false if no organism with this id
 # TODO: remake to organism id, not position related id
 function getOrganism(id::UInt)
-  if !haskey(Manager._data.map, id) return false end
+  if !haskey(Manager._data.organisms, id) return false end
   
-  org = Manager._data.map[id]
+  org = Manager._data.organisms[id]
   return RpcApi.SimpleOrganism(
     id,
     org.mutationProbabilities,

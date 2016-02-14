@@ -134,8 +134,8 @@ function _killOrganism(i::Int)
   org.energy = 0
   Event.clear(org.observer)
 
-  delete!(Manager._data.posMap, _getOrganismId(org.pos))
-  delete!(Manager._data.map, Manager._data.tasks[i].id)
+  delete!(Manager._data.positions, _getOrganismId(org.pos))
+  delete!(Manager._data.organisms, Manager._data.tasks[i].id)
   #
   # This is small hack. It stops the task immediately. We 
   # have to do this, because task is a memory leak if we don't
@@ -181,7 +181,7 @@ function _createOrganism(organism = nothing, pos = nothing)
   #
   oTask = OrganismTask(id, task, org)
   Config.val(:ORGANISM_CURRENT_ID, id + UInt(1))
-  Manager._data.map[id] = org
+  Manager._data.organisms[id] = org
   push!(Manager._data.tasks, oTask)
   _organismMsg(id, "run")
 
@@ -197,8 +197,8 @@ function _organismMsg(id::UInt, msg::ASCIIString)
 end
 #
 # Moves organism to specified position. Updates organism's 
-# position and set new one into the Manager._data.posMap. Removes 
-# organism's previous position from Manager._data.posMap.
+# position and set new one into the Manager._data.positions. Removes 
+# organism's previous position from Manager._data.positions.
 # @param pos New position
 # @param organism Organism to move
 # @return {Bool}
@@ -213,8 +213,8 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
      return false
    end
 
-  delete!(Manager._data.posMap, _getOrganismId(organism.pos))
-  Manager._data.posMap[_getOrganismId(pos)] = organism
+  delete!(Manager._data.positions, _getOrganismId(organism.pos))
+  Manager._data.positions[_getOrganismId(pos)] = organism
   #
   # pos - new organism position
   # organism.pos - old organism position
@@ -347,8 +347,8 @@ function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, re
   # If other organism at the position of the check, 
   # then grab energy from it
   #
-  if haskey(Manager._data.posMap, id) 
-    org = Manager._data.posMap[id]
+  if haskey(Manager._data.positions, id) 
+    org = Manager._data.positions[id]
     if org.energy > retObj.ret
       org.energy -= retObj.ret
     else
