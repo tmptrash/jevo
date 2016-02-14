@@ -29,7 +29,7 @@ end
 # @param eCounter Increments value for energy decreasing
 # @param mCounter Counter for mtations speed
 #
-function _updateOrganisms(eCounter::Int, mCounter::Int)
+@debug function _updateOrganisms(eCounter::Int, mCounter::Int)
     local len::Int = length(Manager._data.tasks) # length(tasks) === length(organisms)
     local i  ::Int
     local j  ::Int
@@ -67,8 +67,9 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
         # If organism has high energy value, then it will produce
         # more copies and these copies will supplant other organisms. 
         #
-        if mCounter % (maxEnergy - org.energy) === 0 _onClone(org) end
+        if mCounter % (org.energy >= maxEnergy ? 1 : maxEnergy - org.energy) === 0 _onClone(org) end
       catch e
+        @bp
         println("Manager._updateOrganisms(): $(dump(e))")
       end
     end
@@ -157,7 +158,7 @@ function _createOrganism(organism = nothing, pos = nothing)
   pos  = organism !== nothing && pos === nothing ? World.getNearFreePos(Manager._data.world, organism.pos) : (pos === nothing ? World.getFreePos(Manager._data.world) : pos)
   if pos === false return false end
   org  = organism === nothing ? Creature.create(pos) : deepcopy(organism)
-  id   = Config.val(:ORGANISM_CURRENT_ID)
+  id   = Manager._data.organismId
   task = Task(Creature.born(org, id))
 
   org.pos = pos
@@ -180,7 +181,7 @@ function _createOrganism(organism = nothing, pos = nothing)
   # Adds organism to organisms pool
   #
   oTask = OrganismTask(id, task, org)
-  Config.val(:ORGANISM_CURRENT_ID, id + UInt(1))
+  Manager._data.organismId += UInt(1)
   Manager._data.organisms[id] = org
   push!(Manager._data.tasks, oTask)
   _organismMsg(id, "run")

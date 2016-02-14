@@ -64,6 +64,11 @@ module Manager
     # Parameters passed through command line
     #
     params::Dict{ASCIIString, ASCIIString}
+    #
+    # Unique id of organism. It's increased every time, when new
+    # organism will be created
+    #
+    organismId::UInt
   end
   #
   # Runs everything. Blocking function.
@@ -133,6 +138,7 @@ module Manager
     Dict{Int, Creature.Organism}(),
     Dict{UInt, Creature.Organism}(),
     OrganismTask[],
-    CommandLine.create()
+    CommandLine.create(),
+    UInt(0)
   )
 end

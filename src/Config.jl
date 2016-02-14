@@ -114,10 +114,6 @@ module Config
     #
     ORGANISM_ENERGY_DECREASE_VALUE::Int
     #
-    # @read @write Current organism unique id. Is used like increment for setting id's for new organisms
-    # TODO: this config shoyld be moved to Manager module
-    ORGANISM_CURRENT_ID::UInt
-    #
     # Maximum amount of arguments in custom functions
     #
     CODE_MAX_FUNC_PARAMS::Int
@@ -241,7 +237,6 @@ module Config
       100000,                    # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
       100,                       # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                         # ORGANISM_ENERGY_DECREASE_VALUE
-      UInt(0),                   # ORGANISM_CURRENT_ID
       4,                         # CODE_MAX_FUNC_PARAMS
       300,                       # WORLD_WIDTH
       200,                       # WORLD_HEIGHT
