@@ -12,6 +12,7 @@
 # TODO: like world, terminal and so on.
 # TODO: add support of serverPort cmd line argument
 # TODO: add remote functions for changing period and probs
+# TODO: add command line parameter for creating default config file
 #
 module Manager
   import Creature

@@ -177,6 +177,7 @@ module Config
     finally
       if io !== null close(io) end
     end
+
     ret
   end
   #
@@ -197,6 +198,7 @@ module Config
     finally
       if io !== null close(io) end
     end
+    
     ret
   end
   #

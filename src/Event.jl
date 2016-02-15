@@ -4,7 +4,7 @@
 # you may fire events with parameters.
 # 
 # Usage:
-#     using Event
+#     import Event
 #     ...
 #     function handlerFn(p1, p2)
 #         ....
@@ -18,7 +18,7 @@
 #     Event.clear(obs)
 #
 # @author DeadbraiN
-#
+# TODO: optimize events from ASCIIString to Int type
 module Event
   export Observer
   export create

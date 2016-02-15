@@ -189,6 +189,7 @@ end
 function _createServer()
   port = CommandLine.val(Manager._data.params, Manager.PARAM_SERVER_PORT)
   port = port == "" ? Config.val(:CONNECTION_SERVER_PORT) : Int(port)
+  # TODO: ip should be in config
   con  = Server.create(ip"127.0.0.1", port)
   Event.on(con.observer, Server.EVENT_COMMAND, _onRemoteCommand)
   con

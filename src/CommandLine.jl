@@ -35,7 +35,8 @@ module CommandLine
   # @return {Dict{ASCIIString, ASCIIString}}
   #
   function create()
-    args = Dict{ASCIIString, ASCIIString}()
+    local args::Dict{ASCIIString, ASCIIString} = Dict{ASCIIString, ASCIIString}()
+    local a::ASCIIString
 
     for a in ARGS
       arr = split(a, ARG_VAL_SEPARATORS)
@@ -49,7 +50,7 @@ module CommandLine
   # doesn't exist, then returns empty string
   # @param args Arguments object returned by create()
   # @param arg Name of the argument
-  # @return Argument's value or empty string
+  # @return {ASCIIString} Argument's value or empty string
   #
   function val(args::Dict{ASCIIString, ASCIIString}, arg::ASCIIString)
     haskey(args, arg) ? args[arg] : ""
@@ -58,7 +59,7 @@ module CommandLine
   # Checks if specified key (arg) is in command line
   # @param args Arguments object returned by create()
   # @param arg Name of the argument
-  # @return true\false
+  # @return {Bool}
   #
   function has(args::Dict{ASCIIString, ASCIIString}, arg::ASCIIString)
     haskey(args, arg)

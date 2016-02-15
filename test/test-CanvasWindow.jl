@@ -9,7 +9,6 @@ module TestCanvasWindow
   #
   # Shared variables for all facts...
   #
-  global xoffset = 1
   global width   = 234
   global height  = 345
   global r       = FixedPointNumbers.ufixed8(1.0)
@@ -24,9 +23,9 @@ module TestCanvasWindow
     end
     img = Images.load(imgFile)
 
-    img.data[x + xoffset, y].r === r &&
-    img.data[x + xoffset, y].g === g &&
-    img.data[x + xoffset, y].b === b
+    img.data[x, y].r === r &&
+    img.data[x, y].g === g &&
+    img.data[x, y].b === b
   end
 
   facts("create() should create and show window with title") do
@@ -59,9 +58,36 @@ module TestCanvasWindow
     CanvasWindow.dot(win, x, y, UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i))
     Cairo.write_to_png(win.canvas.back, imgFile)
     img = Images.load(imgFile)
-    @fact img.data[x + xoffset, y].r --> r
-    @fact img.data[x + xoffset, y].g --> g
-    @fact img.data[x + xoffset, y].b --> b
+    @fact img.data[x, y].r --> r
+    @fact img.data[x, y].g --> g
+    @fact img.data[x, y].b --> b
+    CanvasWindow.destroy(win)
+    rm(imgFile)
+  end
+  facts("dot(color) should draw pixels correctly on border positions") do
+    col = UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i)
+    win = CanvasWindow.create(width, height)
+
+    CanvasWindow.dot(win, 1, 1, col)
+    CanvasWindow.dot(win, 1, height, col)
+    CanvasWindow.dot(win, width, height, col)
+    CanvasWindow.dot(win, width, 1, col)
+    Cairo.write_to_png(win.canvas.back, imgFile)
+    img = Images.load(imgFile)
+
+    @fact img.data[1, 1].r --> r
+    @fact img.data[1, 1].g --> g
+    @fact img.data[1, 1].b --> b
+    @fact img.data[1, height].r --> r
+    @fact img.data[1, height].g --> g
+    @fact img.data[1, height].b --> b
+    @fact img.data[width, height].r --> r
+    @fact img.data[width, height].g --> g
+    @fact img.data[width, height].b --> b
+    @fact img.data[width, 1].r --> r
+    @fact img.data[width, 1].g --> g
+    @fact img.data[width, 1].b --> b
+
     CanvasWindow.destroy(win)
     rm(imgFile)
   end

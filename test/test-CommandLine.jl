@@ -2,6 +2,13 @@ module TestCommandLine
   using CommandLine
   using FactCheck
 
+  facts("create() method should work if there are no parameters") do
+    empty!(ARGS)
+    args = CommandLine.create()
+
+    @fact length(args)                        --> 0
+  end
+
   facts("create() method should work correctly") do
     empty!(ARGS)
     push!(ARGS, "flag", "name1=val1", "name2:val2", "name3/val3", "name4-val4")

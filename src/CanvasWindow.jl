@@ -55,13 +55,13 @@ module CanvasWindow
   # @param height Window height in pixels
   # @param title Window title
   # @return Window object
-  #
+  # TODO: it looks like here is an error woth zero index. canvas window starts from (0,0) coordinate
   function create(width::Int, height::Int, title::ASCIIString = "")
-    win = Tk.Toplevel(title, width, height)
-    c   = Tk.Canvas(win)
+    local win::Tk.Tk_Toplevel = Tk.Toplevel(title, width, height)
+    local c::Tk.Canvas = Tk.Canvas(win)
     Tk.pack(c, expand=true, fill="both")
-    ctx = Graphics.getgc(c)
-    rgb = convert(Colors.RGB, Colors.RGB24(Config.val(:WORLD_BACK_COLOR)))
+    local ctx::Cairo.CairoContext = Graphics.getgc(c)
+    local rgb::Colors.RGB = convert(Colors.RGB, Colors.RGB24(Config.val(:WORLD_BACK_COLOR)))
     
     Tk.set_antialias(ctx, 1)
     Tk.set_line_width(ctx, 1)
@@ -78,10 +78,11 @@ module CanvasWindow
   # @param color Color of the dot. We use only last three bytes (24bits) of four.
   #
   function dot(win::Window, x::Int, y::Int, color::UInt32)
-    col = convert(Colors.RGB, Colors.RGB24(color))
+    local col::Colors.RGB = convert(Colors.RGB, Colors.RGB24(color))
+
     Tk.set_source_rgb(win.context, col.r, col.g, col.b)
-    Tk.move_to(win.context, x, y)
-    Tk.line_to(win.context, x + 1, y)
+    Tk.move_to(win.context, x - 1, y)
+    Tk.line_to(win.context, x, y)
     Tk.stroke(win.context)
   end
   #
