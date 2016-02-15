@@ -91,6 +91,13 @@ module TestCanvasWindow
     CanvasWindow.destroy(win)
     rm(imgFile)
   end
+  facts("dot(color) should not draw a pixel out from surface") do
+    col = UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i)
+    win = CanvasWindow.create(width, height)
+    CanvasWindow.dot(win, -1, -1, col)
+    CanvasWindow.dot(win, width + 1, height + 1, col)
+    CanvasWindow.destroy(win)
+  end
 
   facts("update() should update front surface") do
     x = rand(1:width)
