@@ -18,6 +18,7 @@
 #     Event.clear(obs)
 #
 # @author DeadbraiN
+#
 # TODO: optimize events from ASCIIString to Int type
 module Event
   export Observer
