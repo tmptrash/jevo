@@ -1,6 +1,7 @@
 push!(LOAD_PATH, "$(pwd())/src")
-using Manager
 
-#data = Manager.Data
-println("Server has run")
+import Manager
+import Helper
+
+Helper.info("Server has run")
 Manager.run()

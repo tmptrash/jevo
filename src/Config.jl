@@ -20,6 +20,8 @@
 # @author DeadbraiN
 #
 module Config
+  import Helper
+
   export save
   export load
   export val
@@ -172,7 +174,7 @@ module Config
       io = open(file, "w")
       serialize(io, _data.d)
     catch(e)
-      println("Config.save(): $e")
+      Helper.warn("Config.save(): $e")
       ret = false
     finally
       if io !== null close(io) end
@@ -193,7 +195,7 @@ module Config
       io = open(file)
       _data.d = deserialize(io)
     catch(e)
-      println("Config.load(): $e")
+      Helper.warn("Config.load(): $e")
       ret = false
     finally
       if io !== null close(io) end
@@ -208,7 +210,13 @@ module Config
   # @return {Any|nothing} Value of key in specified section
   # in case of incorrect section or key returns nothing
   #
-  function val(name::Symbol) try getfield(_data.d, name) end end
+  function val(name::Symbol)
+    try
+      getfield(_data.d, name)
+    catch(e)
+      Helper.warn("Getter Config.val(): $e")
+    end
+  end
   #
   # Sets the value by unique key. Works in pair with getter 
   # val() function
@@ -216,7 +224,13 @@ module Config
   # @param value Value we have to set
   # @return Operation boolean result
   #
-  function val(name::Symbol, value::Any) try setfield!(_data.d, name, value) end end
+  function val(name::Symbol, value::Any)
+    try
+      setfield!(_data.d, name, value)
+    catch(e)
+      Helper.warn("Setter Config.val(): $e")
+    end
+  end
   #
   # Global configuration data
   #

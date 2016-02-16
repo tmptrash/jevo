@@ -6,6 +6,8 @@ module Helper
   export randTrue
   export getProbIndex
   export getSupportedTypes
+  export warn
+  export error
   export SUPPORTED_TYPES
 
   #
@@ -16,6 +18,27 @@ module Helper
     y::Int
   end
   
+  #
+  # Prints warning message with white color
+  # @param msg Text message to show
+  #
+  function warn(msg::AbstractString)
+    print_with_color(:yellow, "WARNING: ", msg, "\n")
+  end
+  #
+  # Print error message with red color and don't stop an application
+  # @param msg Text message to show
+  #
+  function error(msg::AbstractString)
+    print_with_color(:red, "ERROR: ", msg, "\n")
+  end
+  #
+  # Print info message with green color
+  # @param msg Text message to show
+  #
+  function info(msg::AbstractString)
+    print_with_color(:green, "INFO: ", msg, "\n")
+  end
   #
   # Chooses (returns) true or false randomly. Is used to choose between two
   # variants of something. For example + or - sign.

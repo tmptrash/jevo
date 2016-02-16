@@ -1,5 +1,5 @@
-push!(LOAD_PATH, pwd())
-include("Server.jl")
+push!(LOAD_PATH, "$(pwd())/src")
+using Server
 using Config
 
 function onRequest(cmd::Connection.Command, ans::Connection.Answer)

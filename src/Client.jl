@@ -42,6 +42,7 @@
 module Client
   import Connection
   import Event
+  import Helper
 
   export create
   export request
@@ -81,7 +82,7 @@ module Client
           # All other exceptions should be shown in terminal.
           #
           if !isa(e, EOFError)
-            println("Client.create.deserialize() : $e")
+            Helper.warn("Client has disconnected")
           end
           if sock !== null
             close(sock)
@@ -90,7 +91,7 @@ module Client
         end
       end
     catch e
-      println("Client.create.connect(): $e")
+      Helper.error("Client.create.connect(): $e")
       if sock !== null close(sock) end
     end
 
@@ -114,7 +115,7 @@ module Client
     try
       serialize(con.sock, Connection.Command(fn, [i for i in args]))
     catch e
-      println("Client.request(): $e")
+      Helper.error("Client.request(): $e")
       close(con.sock)
       return false
     end

@@ -4,7 +4,9 @@
 #
 # @author DeadbraiN
 #
-using Config
+import Config
+import Helper
+
 #
 # One task related to one organism
 #
@@ -29,7 +31,7 @@ end
 # @param eCounter Increments value for energy decreasing
 # @param mCounter Counter for mtations speed
 #
-@debug function _updateOrganisms(eCounter::Int, mCounter::Int)
+function _updateOrganisms(eCounter::Int, mCounter::Int)
     local len::Int = length(Manager._data.tasks) # length(tasks) === length(organisms)
     local i  ::Int
     local j  ::Int
@@ -69,8 +71,7 @@ end
         #
         if mCounter % (org.energy >= maxEnergy ? 1 : maxEnergy - org.energy) === 0 _onClone(org) end
       catch e
-        @bp
-        println("Manager._updateOrganisms(): $(dump(e))")
+        Helper.error("Manager._updateOrganisms(): $e")
       end
     end
     #
@@ -194,7 +195,7 @@ end
 # @param msg Organism's message
 #
 function _organismMsg(id::UInt, msg::ASCIIString)
-  println("org-$(id) $(msg)")
+  Helper.info("org-$(id) $(msg)")
 end
 #
 # Moves organism to specified position. Updates organism's 

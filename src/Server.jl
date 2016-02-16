@@ -65,6 +65,7 @@
 module Server
   import Event
   import Connection
+  import Helper
 
   export create
   export run
@@ -90,9 +91,9 @@ module Server
     try
       return Connection.ServerConnection(Task[], Base.TCPSocket[], listen(host, port), Event.create())
     catch e
-      println("Server.run(): $e")
-      return false
+      Helper.error("Server.create(): $e")
     end
+    false
   end
   #
   # Runs the server. Starts listening clients connections
@@ -114,19 +115,27 @@ module Server
           #
           push!(con.socks, accept(con.server))
         catch e
-          println("Server.run(): $e")
+          #
+          # Possibly Server.stop() was called.
+          #
           if isopen(con.server) === false
             for sock in con.socks close(sock) end
             break
           end
+          Helper.warn(:white, "Server.run(): $e")
         end
         sock = con.socks[length(con.socks)]
-        push!(con.tasks, @async while isopen(sock) 
+        push!(con.tasks, @async while isopen(sock)
           _answer(sock, con.observer)
           _update(con)
         end)
       end
     end
+    #
+    # This yield() prevents server from error:
+    # ArgumentError("server not connected, make sure \"listen\" has been called")
+    #
+    yield()
   end
   #
   # Stops the server. Stops listening all connections and drops
@@ -172,7 +181,7 @@ module Server
       if isa(e, EOFError)
         close(sock)
       else
-        println("Server._answer(): $e")
+        Helper.error("Server._answer(): $e")
       end
     end
   end

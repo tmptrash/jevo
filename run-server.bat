@@ -1,1 +1,1 @@
-julia --depwarn=no src\AppManager.jl
+julia --color=yes src\AppManager.jl
