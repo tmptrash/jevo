@@ -55,7 +55,7 @@ module CanvasWindow
   # @param height Window height in pixels
   # @param title Window title
   # @return Window object
-  # TODO: it looks like here is an error woth zero index. canvas window starts from (0,0) coordinate
+  #
   function create(width::Int, height::Int, title::ASCIIString = "")
     local win::Tk.Tk_Toplevel = Tk.Toplevel(title, width, height)
     local c::Tk.Canvas = Tk.Canvas(win)

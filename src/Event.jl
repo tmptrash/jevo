@@ -63,7 +63,7 @@ module Event
   # @param {Function}    fn    Event handler
   #
   function off(obs::Observer, event::ASCIIString, fn::Function)
-    index = findfirst(obs.events[event], fn)
+    local index::Int = findfirst(obs.events[event], fn)
     if index > 0 deleteat!(obs.events[event], index) end
   end
   #
@@ -77,7 +77,9 @@ module Event
   #
   function fire(obs::Observer, event::ASCIIString, args...)
     if !haskey(obs.events, event) return nothing end
-    fns = obs.events[event]
+    local fns::Array{Function} = obs.events[event]
+    local i::Function
+    
     for i in fns
       i(args...)
     end
