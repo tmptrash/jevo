@@ -18,20 +18,20 @@ module TestServer
 
   facts("Tests server receiving command") do
     #
-    # server creation
+    # server and client creation
     #
-    answer = nothing
-    scon   = Server.create(IP, PORT)
-    function _onRequest(cmd, ans) answer = Connection.Command(cmd.fn, deepcopy(cmd.args)) end
-    Event.on(scon.observer, Server.EVENT_COMMAND, _onRequest)
+    local answer::Command        = Command(0, Array{Any}())
+    local scon::ServerConnection = Server.create(IP, PORT)
+    local ccon::ClientConnection = Client.create(IP, PORT)
+    local i::Int                 = 0
+
+    Event.on(scon.observer, Server.EVENT_COMMAND, (cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
     Server.run(scon)
+    Client.request(ccon, 0, 1) # function - 0, parameter - 1
     #
-    # client creation
+    # This line is very important. yield() runs the interconnection 
+    # loop between client and server.
     #
-    ccon = Client.create(IP, PORT)
-    
-    Client.request(ccon, 0, 1)
-    i = 0
     Timer((t)->(yield(); if (i+=1) > TIMEOUT || answer !== nothing close(t) end), 0, 1)
     @fact i <= TIMEOUT    --> true
     @fact answer.fn       --> 0
