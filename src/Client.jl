@@ -94,7 +94,7 @@ module Client
       Helper.error("Client.create.connect(): $e")
       if sock !== null close(sock) end
     end
-
+    yield()
     sock !== null ? Connection.ClientConnection(sock, obs) : false
   end
   #
