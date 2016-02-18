@@ -1,3 +1,11 @@
+#
+# TODO: add tests:
+# TODO: - server start and stop without run() call
+# TODO: - server+client start, server stop, send request from client
+# TODO: - server+client start, client stop, create other client
+# TODO: - server start, create two clients
+# TODO: - server start, create two clients, send two messages from two clients
+#
 module TestServer
   using FactCheck
   using Connection
