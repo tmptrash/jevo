@@ -19,8 +19,8 @@ module Connection
   end
   # TODO:
   type ClientConnection
-  	sock    ::Base.TCPSocket
-  	observer::Event.Observer
+    sock    ::Base.TCPSocket
+    observer::Event.Observer
   end
   # TODO:
   type Command

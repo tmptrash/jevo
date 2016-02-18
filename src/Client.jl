@@ -60,7 +60,7 @@ module Client
   # in any case. You have to check this calling isopen() function.
   # @param host Host we are connecting to
   # @param port Port number we are connecting to
-  # @return Client connection object or false if error
+  # @return Client connection object
   #
   function create(host::Base.IPAddr, port::Integer)
     sock = null
@@ -95,7 +95,8 @@ module Client
       if sock !== null close(sock) end
     end
     yield()
-    sock !== null ? Connection.ClientConnection(sock, obs) : false
+
+    sock !== null ? Connection.ClientConnection(sock, obs) : Connection.ClientConnection(Base.TCPSocket(), obs)
   end
   #
   # Makes request to server. This method is not blocking. It returns
@@ -108,7 +109,7 @@ module Client
   # @return true - request was sent, false wasn't
   #
   function request(con::Connection.ClientConnection, fn::Integer, args...)
-    if !isopen(con.sock) return false end
+    try if !isopen(con.sock) return false end catch return false end
     #
     # This line is non blocking one
     #

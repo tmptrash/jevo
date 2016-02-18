@@ -26,6 +26,10 @@ module TestServer
   const PORT    = Config.val(:CONNECTION_SERVER_PORT)
   const TIMEOUT = 30
 
+  facts("Tests server creation and stop without run") do
+    con = Server.create(IP, PORT)
+    Server.stop(con)
+  end
   facts("Tests server creation and start") do
     con = Server.create(IP, PORT)
     Server.run(con)
