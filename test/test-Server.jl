@@ -5,6 +5,14 @@
 # TODO: - server+client start, client stop, create other client
 # TODO: - server start, create two clients
 # TODO: - server start, create two clients, send two messages from two clients
+# TODO: - server start, client start, send big data in both directions
+# TODO: - client start without server
+# TODO: - start two servers on the same ip/port
+# TODO: - start two servers on same port/ip and one client, send data to server, should work only first one
+# TODO: - test pooling
+# TODO: - test pooling from many clients
+# TODO: - test sending request after client stop
+# TODO: - test servers recriation on the same ip/post. port shouldn't be used
 #
 module TestServer
   using FactCheck
