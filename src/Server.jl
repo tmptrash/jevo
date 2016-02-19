@@ -201,7 +201,7 @@ module Server
       if isa(e, EOFError)
         close(sock)
       else
-        Helper.error("Server._answer(): $e")
+        Helper.warn("Server._answer(): $e")
       end
     end
   end

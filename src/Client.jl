@@ -92,7 +92,7 @@ module Client
         end
       end
     catch e
-      Helper.error("Client.create.connect(): $e")
+      Helper.warn("Client.create.connect(): $e")
       if sock !== null close(sock) end
     end
     yield()
@@ -117,7 +117,7 @@ module Client
     try
       serialize(con.sock, Connection.Command(fn, [i for i in args]))
     catch e
-      Helper.error("Client.request(): $e")
+      Helper.warn("Client.request(): $e")
       close(con.sock)
       return false
     end
