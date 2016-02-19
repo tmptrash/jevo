@@ -70,6 +70,7 @@ module Server
   export create
   export run
   export stop
+  export isOk
   export EVENT_COMMAND
   #
   # Name of the event, which is used for our RPC like TCP protocol. If
@@ -85,15 +86,21 @@ module Server
   # it start to listen specified host and port using Base.listen() method.
   # @param host Host we are listening to
   # @param port Port we are listening to
-  # @return Server's related data object or false if error
+  # @return Server's related data object
   #
   function create(host::Base.IPAddr, port::Integer)
+    local tasks::Array{Task, 1} = Task[]
+    local socks::Array{Base.TCPSocket, 1} = Base.TCPSocket[]
+    local obs::Event.Observer = Event.create()
+
     try
-      return Connection.ServerConnection(Task[], Base.TCPSocket[], listen(host, port), Event.create())
+      local server::Base.TCPServer = listen(host, port)
+      return Connection.ServerConnection(tasks, socks, server, obs)
     catch e
-      Helper.error("Server.create(): $e")
+      Helper.warn("Server.create(): $e")
     end
-    false
+    
+    Connection.ServerConnection(tasks, socks, Base.TCPServer(), obs)
   end
   #
   # Runs the server. Starts listening clients connections
@@ -122,7 +129,7 @@ module Server
             for sock in con.socks close(sock) end
             break
           end
-          Helper.warn(:white, "Server.run(): $e")
+          Helper.warn("Server.run(): $e")
         end
         sock = con.socks[length(con.socks)]
         push!(con.tasks, @async while isopen(sock)
@@ -138,12 +145,25 @@ module Server
     yield()
   end
   #
+  # Returns Socket state. true means - created and connected.
+  # @param con Client connection state
+  # @return {Bool}
+  #
+  function isOk(con::Connection.ServerConnection)
+    try return isopen(con.server) end
+    false
+  end
+  #
   # Stops the server. Stops listening all connections and drops
   # existing if exist.
   # @param con Server object returned by create() method.
   #
   function stop(con::Connection.ServerConnection)
-    close(con.server)
+    try
+      close(con.server)
+    catch e
+      Helper.warn("Server.stop(): $e")
+    end
   end
   #
   # This method should be called in main server's loop or code 

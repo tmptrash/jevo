@@ -47,6 +47,7 @@ module Client
   export create
   export request
   export stop
+  export isOk
   export EVENT_ANSWER
 
   #
@@ -124,6 +125,15 @@ module Client
     return true
   end
   #
+  # Returns Socket state. true means - created and connected.
+  # @param con Client connection state
+  # @return {Bool}
+  #
+  function isOk(con::Connection.ClientConnection)
+    try return isopen(con.sock) end
+    false
+  end
+  #
   # Closes client's socket. After this call, we have to call create()
   # method again, if we want to send another request...
   # @param con Client's connection object, returned by create()
@@ -134,6 +144,10 @@ module Client
     # TODO: created inside create() method after closing 
     # TODO: connection. Need to check this...
     #
-    close(con.sock)
+    try
+      close(con.sock)
+    catch e
+      Helper.warn("Client.stop(): $e")
+    end
   end
 end
