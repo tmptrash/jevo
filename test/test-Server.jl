@@ -1,6 +1,5 @@
 #
 # TODO: add tests:
-# TODO: - server start, client start, send big data in both directions
 # TODO: - client start without server
 # TODO: - start two servers on same port/ip and one client, send data to server, should work only first one
 # TODO: - test pooling
@@ -140,7 +139,7 @@ module TestServer
     local scon::ServerConnection = Server.create(IP, PORT)
     local ccon::ClientConnection = Client.create(IP, PORT)
     local i::Int                 = 0
-    local data::Array{Int, 1}    = zeros(Int, 100000)
+    local data::Array{Int, 1}    = zeros(Int, 1000000)
 
     Event.on(scon.observer, Server.EVENT_COMMAND, (cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
     Server.run(scon)
