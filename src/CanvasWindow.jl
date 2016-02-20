@@ -43,7 +43,7 @@ module CanvasWindow
   # Is used in all public methods as a canvas for drawing.
   #
   type Window
-    win::Tk.Tk_Toplevel
+    win::Tk.TkWidget
     canvas::Tk.Canvas
     context::Cairo.CairoContext
   end
@@ -57,7 +57,7 @@ module CanvasWindow
   # @return Window object
   #
   function create(width::Int, height::Int, title::ASCIIString = "")
-    local win::Tk.Tk_Toplevel = Tk.Toplevel(title, width, height)
+    local win::Tk.TkWidget = Tk.Window(title, width, height)
     local c::Tk.Canvas = Tk.Canvas(win)
     Tk.pack(c, expand=true, fill="both")
     local ctx::Cairo.CairoContext = Graphics.getgc(c)
@@ -91,7 +91,7 @@ module CanvasWindow
   # @param title String title
   #
   function title(win::Window, title::ASCIIString)
-    Tk.set_value(win.win, title)
+    Tk.wm(win.win, "title", title)
   end
   #
   # Updates the canvas. It's not nessesary to update it after
@@ -109,6 +109,7 @@ module CanvasWindow
   #
   function destroy(win::Window)
     Cairo.destroy(win.context.surface)
-    Tk.destroy(win.win)
+    #Tk.destroy(win.win)
+    Tk.tcl("destroy", win.win)
   end
 end

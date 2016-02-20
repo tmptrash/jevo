@@ -30,7 +30,7 @@ module TestCanvasWindow
 
   facts("create() should create and show window with title") do
     win = CanvasWindow.create(width, height, title)
-    @fact Tk.get_value(win.win) --> title "Window should be created"
+    @fact Tk.wm(win.win, "title") --> title "Window should be created"
     CanvasWindow.destroy(win)
   end
   facts("create() should create canvas with passed width and height") do
@@ -46,7 +46,7 @@ module TestCanvasWindow
   facts("title() should change the title") do
     win = CanvasWindow.create(width, height, "No title!")
     CanvasWindow.title(win, title)
-    @fact Tk.get_value(win.win) --> title
+    @fact Tk.wm(win.win, "title") --> title
     CanvasWindow.destroy(win)
   end
 
@@ -114,12 +114,12 @@ module TestCanvasWindow
   facts("destroy() should destroy the window") do
     win = CanvasWindow.create(width, height, title)
     CanvasWindow.destroy(win)
-    @fact_throws Tk.get_value(win.win) "Window should be destroyed"
+    @fact_throws Tk.wm(win.win, "title") "Window should be destroyed"
   end
 
   facts("Combined test of all functions") do
     win = CanvasWindow.create(width, height, title)
-    @fact Tk.get_value(win.win) --> title
+    @fact Tk.wm(win.win, "title") --> title
 
     # paint pixel on back surface
     x = 10
