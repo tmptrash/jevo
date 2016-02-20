@@ -27,12 +27,10 @@ module TestServer
     con = Server.create(IP, PORT)
     Server.run(con)
     Server.stop(con)
-    yield()
   end
   facts("Tests server creation and stop without run") do
     con = Server.create(IP, PORT)
     Server.stop(con)
-    yield()
   end
   facts("Tests two servers on the same port creation") do
     con1 = Server.create(IP, PORT)
@@ -43,7 +41,6 @@ module TestServer
 
     Server.stop(con2)
     Server.stop(con1)
-    yield()
   end
   facts("Tests stopping the server and create again") do
     con = Server.create(IP, PORT)
@@ -53,7 +50,6 @@ module TestServer
     con = Server.create(IP, PORT)
     @fact Server.isOk(con) --> true
     Server.stop(con)
-    yield()
   end
   facts("Tests server receiving command") do
     #
@@ -75,11 +71,9 @@ module TestServer
     @fact i <= TIMEOUT   --> true
     @fact answer.fn      --> 1
     @fact answer.args[1] --> 10
-    yield()
 
     Client.stop(ccon)
     Server.stop(scon)
-    yield()
   end
   facts("Tests server receiving commands from two clients") do
     #
@@ -106,11 +100,9 @@ module TestServer
     @fact (answer[1].args[1] === 10 || answer[1].args[1] === 20) --> true
     @fact (answer[2].fn === 1 || answer[2].fn === 2) --> true
     @fact (answer[2].args[1] === 10 || answer[2].args[1] === 20) --> true
-    yield()
 
     Client.stop(ccon2)
     Client.stop(ccon1)
     Server.stop(scon)
-    yield()
   end
 end

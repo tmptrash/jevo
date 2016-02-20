@@ -126,6 +126,7 @@ module Server
           # Possibly Server.stop() was called.
           #
           if isopen(con.server) === false
+            local sock::Base.TCPSocket
             for sock in con.socks close(sock) end
             break
           end
@@ -160,6 +161,8 @@ module Server
   #
   function stop(con::Connection.ServerConnection)
     try
+      local sock::Base.TCPSocket
+      for sock in con.socks close(sock) end
       close(con.server)
     catch e
       Helper.warn("Server.stop(): $e")
@@ -198,9 +201,13 @@ module Server
       Event.fire(obs, EVENT_COMMAND, deserialize(sock), ans)
       serialize(sock, ans)
     catch e
+      #
+      # This yield() updates sockets states
+      #
+      yield()
       if isa(e, EOFError)
         close(sock)
-      else
+      elseif isopen(sock)
         Helper.warn("Server._answer(): $e")
       end
     end
