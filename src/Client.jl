@@ -122,7 +122,7 @@ module Client
       return false
     end
 
-    return true
+    true
   end
   #
   # Returns Socket state. true means - created and connected.
