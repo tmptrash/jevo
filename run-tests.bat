@@ -3,4 +3,5 @@
 @rem The same rule for run-tests.jl
 @rem
 julia --color=yes test\run-tests.jl
-@set /p DUMMY=Hit ENTER to continue...
+exit /b %ERRORLEVEL%
+@rem @set /p DUMMY=Hit ENTER to continue...
