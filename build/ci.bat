@@ -7,7 +7,7 @@ rem
 :loop
     cmd /c run-tests-ci.bat
 	if %ERRORLEVEL% NEQ 0 goto end
-    sleep 60
+    sleep 120
 goto loop
 :end
 cscript build-failed.vbs "The build is failed!"

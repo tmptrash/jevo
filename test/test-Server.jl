@@ -1,6 +1,5 @@
 #
 # TODO: add tests:
-# TODO: - client start without server
 # TODO: - start two servers on same port/ip and one client, send data to server, should work only first one
 # TODO: - test pooling
 # TODO: - test pooling from many clients
@@ -151,5 +150,10 @@ module TestServer
 
     Client.stop(ccon)
     Server.stop(scon)
+  end
+  facts("Tests client without server creation") do
+    con = Client.create(IP, PORT)
+    @fact Client.request(con, 1, 10) --> false
+    Client.stop(con)
   end
 end
