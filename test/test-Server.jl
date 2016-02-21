@@ -1,6 +1,5 @@
 #
 # TODO: add tests:
-# TODO: - start two servers on same port/ip and one client, send data to server, should work only first one
 # TODO: - test pooling
 # TODO: - test pooling from many clients
 # TODO: - test sending request after client stop
