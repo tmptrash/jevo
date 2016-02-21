@@ -8,44 +8,59 @@
 # http://julia.readthedocs.org/en/latest/manual/control-flow/#man-tasks
 # for details regarding coroutines. Because of green threads,
 # it uses "magic" inside: there are two places in this module,
-# where this magic hapens. First place is some main code or 
+# where this magic happens. First place is some main code or 
 # code, which creates the server and run it. It may be any 
 # other module or code. Second place is internal server's event
 # loop machine, which is used for accepting clients connections 
 # and obtaining data (see @async macro in code). So, if you create
 # a server with create() method, it will return Server's data 
 # object imediately. Calling run() method it also returns control
-# back at that moment, but in reality resver starts to listen 
-# clients. After running, server creates one task (green thread)
-# per one connection. See example below for details:
+# back at that moment, but in reality server starts to listen 
+# clients in some loop (in our example this loop is out the run()
+# code - in a parent code). After running, server creates one task 
+# (green thread) per one connection. To run server out you have to 
+# call yield() function in your (parent) code all the time.
+# See example below for details:
 #
-# TODO: check if this example works!!!
+#     #
 #     # This callback function will be called as many times
-#     # as server will obtain client's data (command)
+#     # as server will obtain client's request (command)
+#     #
 #     function onCommand(cmd::Connection.Command, ans::Connection.Answer)
 #       # This is how we create the answer for client.
 #       # ans.data has type Any.
 #       ans.data = "answer"
 #     end
+#     #
 #     # Creation of server doesn't run it
-#     connection = Server.create(ip"127.0.0.1", 2001)
+#     #
+#     connection = Server.create(ip"127.0.0.1", 2016)
+#     #
 #     # Before running we have to bind command event listeners
-#     Event.on(connection.observer, EVENT_COMMAND, onCommand)
+#     #
+#     Event.on(connection.observer, Server.EVENT_COMMAND, onCommand)
+#     #
 #     # This is how our server run itself
+#     #
 #     Server.run(connection)
 #
 #     ...
 #
-#     # This is client's code, which was mentioned before
-#     while true
+#     #
+#     # This is client's (parent) code, which was mentioned before
+#     #
+#     while <condition>
 #       # ...your stuff is here...
 #
+#       #
 #       # This call is used for switching between Tasks (green threads),
-#       # to prevent server blocking if you have many Tasks
+#       # checks new connections, obtaining commands from clients,...
 #       yield()
 #     end
 #     ...
+#     #
 #     # This is how we stop our server
+#     #
 #     Server.stop(connection)
 #
 # You have two possibilities how to run main code: you may have 
