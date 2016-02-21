@@ -36,11 +36,23 @@ module TestServer
     Server.stop(con)
   end
   facts("Tests two servers on the same port creation") do
+    local answer::Command = Command(0, [])
+    msg  = "Hello"
     con1 = Server.create(IP, PORT)
     con2 = Server.create(IP, PORT)
+    con3 = Client.create(IP, PORT)
+    Event.on(con1.observer, Server.EVENT_COMMAND, (cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
 
     @fact Server.isOk(con1) --> true
     @fact Server.isOk(con2) --> false
+
+    Server.run(con1)
+    Server.run(con2)
+    Client.request(con3, 1, msg)
+    wait(()->answer.fn !== 0)
+
+    @fact answer.fn      --> 1
+    @fact answer.args[1] --> msg
 
     Server.stop(con2)
     Server.stop(con1)

@@ -112,8 +112,14 @@ module Server
   # It also calls _update() for removing closed connections
   # ans failed tasks.
   # @param con Server connection object returned by Server.create()
+  # @return {Bool} Run status
   #
   function run(con::Connection.ServerConnection)
+    if !isOk(con)
+      Helper.warn("Server.run(): Server wasn\'t created correctly. Try to change Server.create() arguments.")
+      return false
+    end
+
     @async begin
       while true
         try
@@ -144,6 +150,7 @@ module Server
     # ArgumentError("server not connected, make sure \"listen\" has been called")
     #
     yield()
+    true
   end
   #
   # Returns Socket state. true means - created and connected.
