@@ -30,11 +30,13 @@ module TestCanvasWindow
 
   facts("create() should create and show window with title") do
     win = CanvasWindow.create(width, height, title)
+    Tk.tcl("lower", win.win)
     @fact Tk.wm(win.win, "title") --> title "Window should be created"
     CanvasWindow.destroy(win)
   end
   facts("create() should create canvas with passed width and height") do
     win = CanvasWindow.create(width, height, title)
+    Tk.tcl("lower", win.win)
     Cairo.write_to_png(win.canvas.back, imgFile)
     img = Images.load(imgFile)
     @fact size(img.data)[1] --> width
@@ -45,6 +47,7 @@ module TestCanvasWindow
 
   facts("title() should change the title") do
     win = CanvasWindow.create(width, height, "No title!")
+    Tk.tcl("lower", win.win)
     CanvasWindow.title(win, title)
     @fact Tk.wm(win.win, "title") --> title
     CanvasWindow.destroy(win)
@@ -55,6 +58,7 @@ module TestCanvasWindow
     y = rand(1:height)
 
     win = CanvasWindow.create(width, height)
+    Tk.tcl("lower", win.win)
     CanvasWindow.dot(win, x, y, UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i))
     Cairo.write_to_png(win.canvas.back, imgFile)
     img = Images.load(imgFile)
@@ -67,6 +71,7 @@ module TestCanvasWindow
   facts("dot(color) should draw pixels correctly on border positions") do
     col = UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i)
     win = CanvasWindow.create(width, height)
+    Tk.tcl("lower", win.win)
 
     CanvasWindow.dot(win, 1, 1, col)
     CanvasWindow.dot(win, 1, height, col)
@@ -94,6 +99,7 @@ module TestCanvasWindow
   facts("dot(color) should not draw a pixel out from surface") do
     col = UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i)
     win = CanvasWindow.create(width, height)
+    Tk.tcl("lower", win.win)
     CanvasWindow.dot(win, -1, -1, col)
     CanvasWindow.dot(win, width + 1, height + 1, col)
     CanvasWindow.destroy(win)
@@ -104,6 +110,7 @@ module TestCanvasWindow
     y = rand(1:height)
 
     win = CanvasWindow.create(width, height, title)
+    Tk.tcl("lower", win.win)
     CanvasWindow.dot(win, x, y, UInt32((0xffffff & r.i << 16) | (0xffffffff & g.i << 8) | b.i))
     CanvasWindow.update(win)
     _dotOnFront(win, x, y, r, g, b)
@@ -113,12 +120,14 @@ module TestCanvasWindow
 
   facts("destroy() should destroy the window") do
     win = CanvasWindow.create(width, height, title)
+    Tk.tcl("lower", win.win)
     CanvasWindow.destroy(win)
     @fact_throws Tk.wm(win.win, "title") "Window should be destroyed"
   end
 
   facts("Combined test of all functions") do
     win = CanvasWindow.create(width, height, title)
+    Tk.tcl("lower", win.win)
     @fact Tk.wm(win.win, "title") --> title
 
     # paint pixel on back surface

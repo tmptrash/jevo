@@ -7,7 +7,7 @@ rem
 cd jevo
 if %ERRORLEVEL% NEQ 0 goto end
 :loop
-    git pull .
+    git pull
 	if %ERRORLEVEL% NEQ 0 goto end
 	cd build
     cmd /c run-tests-ci.bat
