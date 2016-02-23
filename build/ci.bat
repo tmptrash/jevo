@@ -12,6 +12,10 @@ if %ERRORLEVEL% NEQ 0 goto end
 	grep -i 'Already up-to-date' pull.txt > grep.txt
 	for %%A in (grep.txt) do set size=%%~zA
 	if "%size%" EQU "0" (
+		rem
+		rem grep, returns 1 in some cases and
+		rem run-tests.bat doesn't reset ERRORLEVEL
+		rem
 	    verify >nul
 		echo %ERRORLEVEL%
 		cmd /c build\run-tests.bat
