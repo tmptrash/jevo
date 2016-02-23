@@ -21,7 +21,7 @@ if %ERRORLEVEL% NEQ 0 goto end
 		cmd /c build\run-tests.bat
 		if %ERRORLEVEL% NEQ 0 goto end
 	)
-    sleep 15
+    sleep 60
 goto loop
 :end
 cscript build\build-failed.vbs "The build is failed!"
