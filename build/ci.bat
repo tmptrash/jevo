@@ -10,14 +10,14 @@ if %ERRORLEVEL% NEQ 0 goto end
     git pull > pull.txt
 	if %ERRORLEVEL% NEQ 0 goto end
 	grep -i 'Already up-to-date' pull.txt > grep.txt
-	set /p status=<grep.txt
-	if "%status%" NEQ "Already up-to-date." (
+	for %%A in (grep.txt) do set size=%%~zA
+	if "%size%" EQU "0" (
 		cd build
 		cmd /c run-tests-ci.bat
 		if %ERRORLEVEL% NEQ 0 goto end
 		cd ..
 	)
-    sleep 10
+    sleep 15
 goto loop
 :end
 cscript build-failed.vbs "The build is failed!"
