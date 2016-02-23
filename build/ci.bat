@@ -13,6 +13,8 @@ if %ERRORLEVEL% NEQ 0 goto end
 	for %%A in (grep.txt) do set size=%%~zA
 	if "%size%" EQU "0" (
 		cmd /c build\run-tests-ci.bat
+		echo ci.bat
+		echo %ERRORLEVEL%
 		if %ERRORLEVEL% NEQ 0 goto end
 	)
     sleep 15
