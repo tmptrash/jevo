@@ -12,8 +12,8 @@ if %ERRORLEVEL% NEQ 0 goto end
 	grep -i 'Already up-to-date' pull.txt > grep.txt
 	for %%A in (grep.txt) do set size=%%~zA
 	if "%size%" EQU "0" (
-		cd build
-		cmd /c run-tests-ci.bat
+		cd jevo
+		cmd /c build\run-tests-ci.bat
 		if %ERRORLEVEL% NEQ 0 goto end
 		cd ..
 	)
