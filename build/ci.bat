@@ -7,21 +7,21 @@ rem
 cd jevo
 if %ERRORLEVEL% NEQ 0 goto end
 :loop
-    git pull > pull.txt
-	if %ERRORLEVEL% NEQ 0 goto end
-	grep -i 'Already up-to-date' pull.txt > grep.txt
-	for %%A in (grep.txt) do set size=%%~zA
-	if "%size%" EQU "0" (
-		rem
-		rem grep, returns 1 in some cases and
-		rem run-tests.bat doesn't reset ERRORLEVEL
-		rem
-	    verify >nul
-		echo %ERRORLEVEL%
-		cmd /c build\run-tests.bat
-		if %ERRORLEVEL% NEQ 0 goto end
-	)
-    sleep 60
+  git pull > pull.txt
+  if %ERRORLEVEL% NEQ 0 goto end
+  grep -i 'Already up-to-date' pull.txt > grep.txt
+  for %%A in (grep.txt) do set size=%%~zA
+  if "%size%" EQU "0" (
+    rem
+    rem grep, returns 1 in some cases and
+    rem run-tests.bat doesn't reset ERRORLEVEL
+    rem
+    verify >nul
+    echo %ERRORLEVEL%
+    cmd /c build\run-tests.bat
+    if %ERRORLEVEL% NEQ 0 goto end
+  )
+  sleep 60
 goto loop
 :end
 cscript build\build-failed.vbs "The build is failed!"
