@@ -10,16 +10,10 @@ if %ERRORLEVEL% NEQ 0 goto end
     git pull > pull.txt
 	if %ERRORLEVEL% NEQ 0 goto end
 	grep -i 'Already up-to-date' pull.txt > grep.txt
-	echo grep
-	echo %ERRORLEVEL%
 	for %%A in (grep.txt) do set size=%%~zA
 	if "%size%" EQU "0" (
-		echo -------
-		echo %ERRORLEVEL%
-		rem cmd /c build\run-tests.bat
-		julia --color=yes test\run-tests.jl
-		echo ci.bat
-		echo %ERRORLEVEL%
+	    set ERRORLEVEL=0
+		cmd /c build\run-tests.bat
 		if %ERRORLEVEL% NEQ 0 goto end
 	)
     sleep 15
