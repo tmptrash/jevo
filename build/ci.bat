@@ -12,6 +12,8 @@ if %ERRORLEVEL% NEQ 0 goto end
 	grep -i 'Already up-to-date' pull.txt > grep.txt
 	for %%A in (grep.txt) do set size=%%~zA
 	if "%size%" EQU "0" (
+		echo -------
+		echo %ERRORLEVEL%
 		rem cmd /c build\run-tests.bat
 		julia --color=yes test\run-tests.jl
 		echo ci.bat
@@ -21,4 +23,4 @@ if %ERRORLEVEL% NEQ 0 goto end
     sleep 15
 goto loop
 :end
-cscript build-failed.vbs "The build is failed!"
+cscript build\build-failed.vbs "The build is failed!"
