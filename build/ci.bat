@@ -18,6 +18,8 @@ if %ERRORLEVEL% NEQ 0 goto end
     rem
     verify >nul
     cmd /c build\run-tests.bat
+    echo ci
+    echo %ERRORLEVEL%
     if %ERRORLEVEL% NEQ 0 goto end
   )
   sleep 60
