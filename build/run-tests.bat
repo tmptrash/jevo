@@ -8,6 +8,6 @@ if not exist test (
   echo ERROR: Wrong run folder! Run this script from root folder.
   exit /b 1
 )
-verify >nul
+set ERRORLEVEL=0
 julia --color=yes test\run-tests.jl
 exit /b %ERRORLEVEL%
