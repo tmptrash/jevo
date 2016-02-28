@@ -31,7 +31,7 @@ module RemoteWorld
   # world's region and shows it on a canvas.
   #
   type RemoteData
-    con::Connection.ClientConnection
+    con::Client.ClientConnection
     win::CanvasWindow.Window
     resp::Function
     delay::Int
@@ -40,7 +40,7 @@ module RemoteWorld
     x1::Int
     y1::Int
 
-    RemoteData(con::Connection.ClientConnection, win::CanvasWindow.Window) = new(con, win)
+    RemoteData(con::Client.ClientConnection, win::CanvasWindow.Window) = new(con, win)
   end
   #
   # Creates connection with remote host for display pixels

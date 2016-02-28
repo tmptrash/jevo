@@ -105,7 +105,7 @@ module Client
     end
     yield()
 
-    sock !== null ? Connection.ClientConnection(sock, obs) : Connection.ClientConnection(Base.TCPSocket(), obs)
+    sock !== null ? Client.ClientConnection(sock, obs) : Client.ClientConnection(Base.TCPSocket(), obs)
   end
   #
   # Makes request to server. This method is not blocking. It returns
@@ -117,7 +117,7 @@ module Client
   # @param args Custom fn arguments
   # @return true - request was sent, false wasn't
   #
-  function request(con::Connection.ClientConnection, fn::Integer, args...)
+  function request(con::Client.ClientConnection, fn::Integer, args...)
     try if !isopen(con.sock) return false end catch return false end
     #
     # This line is non blocking one
@@ -137,7 +137,7 @@ module Client
   # @param con Client connection state
   # @return {Bool}
   #
-  function isOk(con::Connection.ClientConnection)
+  function isOk(con::Client.ClientConnection)
     try return isopen(con.sock) end
     false
   end
@@ -146,7 +146,7 @@ module Client
   # method again, if we want to send another request...
   # @param con Client's connection object, returned by create()
   #
-  function stop(con::Connection.ClientConnection)
+  function stop(con::Client.ClientConnection)
     #
     # TODO: i don't really know if julia GC removes our task
     # TODO: created inside create() method after closing 
