@@ -5,19 +5,7 @@ module TestServer
   using Client
   using Config
   using Event
-
-  const IP      = ip"127.0.0.1"
-  const PORT    = Config.val(:CONNECTION_SERVER_PORT)
-  const TIMEOUT = 30
-
-  #
-  # Waits for timeout or function fn() to return true
-  #
-  function wait(fn::Function)
-    i = 0
-    t = Timer((t)->(yield(); if (i+=1) > TIMEOUT || fn() close(t) end), 0, 1)
-    while isopen(t) yield() end
-  end
+  include("Helper.jl")
 
   facts("Tests server creation and start") do
     con = Server.create(IP, PORT)
