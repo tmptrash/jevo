@@ -1,4 +1,4 @@
-rem @echo off
+rem  @echo off
 rem
 rem This is mega cool Continue Integration script :)
 rem It runs our unit tests all the time with 1 min delay
