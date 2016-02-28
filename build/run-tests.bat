@@ -9,7 +9,5 @@ if not exist test (
   exit /b 1
 )
 set ERRORLEVEL=0
-echo %ERRORLEVEL%
 julia --color=yes test\run-tests.jl
-echo %ERRORLEVEL%
 exit /b %ERRORLEVEL%

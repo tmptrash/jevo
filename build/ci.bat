@@ -17,10 +17,7 @@ if %ERRORLEVEL% NEQ 0 goto end
     rem run-tests.bat doesn't reset ERRORLEVEL
     rem
     set ERRORLEVEL=0
-    echo %ERRORLEVEL%
     cmd /c build\run-tests.bat
-    echo ci
-    echo %ERRORLEVEL%
     if %ERRORLEVEL% NEQ 0 goto end
   )
   sleep 60
