@@ -148,7 +148,6 @@ module TestServer
     local answer::Command        = Command(0, Array{Any}())
     local scon::ServerConnection = Server.create(IP, PORT)
     local ccon::ClientConnection = Client.create(IP, PORT)
-    local i::Int                 = 0
     local data::Array{Int, 1}    = zeros(Int, 1000000)
 
     Event.on(scon.observer, Server.EVENT_COMMAND, (cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
@@ -166,5 +165,68 @@ module TestServer
     con = Client.create(IP, PORT)
     @fact Client.request(con, 1, 10) --> false
     Client.stop(con)
+  end
+  facts("Tests pooling") do
+    local scon::ServerConnection = Server.create(IP, PORT)
+    local ccon::ClientConnection = Client.create(IP, PORT)
+    local result::Int            = 0
+
+    Event.on(scon.observer, Server.EVENT_COMMAND, (cmd, ans)->result += cmd.args[1])
+    Server.run(scon)
+    Client.request(ccon, 1, 1)
+    wait(()->result !== 0)
+    Client.request(ccon, 1, 2)
+    wait(()->result > 1)
+
+    Client.request(ccon, 1, 3)
+    Client.request(ccon, 1, 4)
+    wait(()->result > 5)
+    wait(()->result > 9)
+
+    @fact result --> 10
+
+    Client.stop(ccon)
+    Server.stop(scon)
+  end
+  facts("Tests pooling from many clients") do
+    local scon::ServerConnection  = Server.create(IP, PORT)
+    local ccon1::ClientConnection = Client.create(IP, PORT)
+    local ccon2::ClientConnection = Client.create(IP, PORT)
+    local ccon3::ClientConnection = Client.create(IP, PORT)
+    local ccon4::ClientConnection = Client.create(IP, PORT)
+    local ccon5::ClientConnection = Client.create(IP, PORT)
+    local result::Int             = 0
+
+    Event.on(scon.observer, Server.EVENT_COMMAND, (cmd, ans)->result += cmd.args[1])
+    Server.run(scon)
+    Client.request(ccon1, 1, 1)
+    wait(()->result > 0)
+    Client.request(ccon2, 1, 2)
+    wait(()->result > 2)
+    Client.request(ccon3, 1, 3)
+    wait(()->result > 5)
+    Client.request(ccon4, 1, 1)
+    wait(()->result > 6)
+    Client.request(ccon5, 1, 3)
+    wait(()->result > 9)
+
+    @fact result --> 10
+
+    result = 0
+    Client.request(ccon3, 1, 3)
+    Client.request(ccon5, 1, 4)
+    Client.request(ccon1, 1, 2)
+    Client.request(ccon4, 1, 1)
+    Client.request(ccon2, 1, 1)
+    wait(()->result > 10)
+
+    @fact result --> 11
+
+    Client.stop(ccon5)
+    Client.stop(ccon4)
+    Client.stop(ccon3)
+    Client.stop(ccon2)
+    Client.stop(ccon1)
+    Server.stop(scon)
   end
 end

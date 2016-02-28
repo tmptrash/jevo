@@ -67,7 +67,7 @@
 # a loop (like in example above) or your code may wait for 
 # connection in background (without blocking loop). For example,
 # you may run this example in a REPL without infinite loop at the
-# end. In this case, you have to call yield() manually.
+# end. In this case, you don't need to call yield() manually.
 # 
 # Events:
 #     command{Connection.Command, Connection.Answer} Fires if new 
@@ -88,8 +88,8 @@ module Server
   export isOk
   export EVENT_COMMAND
   #
-  # Name of the event, which is used for our RPC like TCP protocol. If
-  # this command fires, then specified command should be runned here, on
+  # Name of the event, which is fired if client sent us a command. If
+  # this event fires, then specified command should be runned here - on
   # server side.
   #
   const EVENT_COMMAND = "command"
@@ -101,7 +101,7 @@ module Server
   # it start to listen specified host and port using Base.listen() method.
   # @param host Host we are listening to
   # @param port Port we are listening to
-  # @return Server's related data object
+  # @return {Connection.ServerConnection} Server's related data object
   #
   function create(host::Base.IPAddr, port::Integer)
     local tasks::Array{Task, 1} = Task[]
@@ -168,7 +168,7 @@ module Server
     true
   end
   #
-  # Returns Socket state. true means - created and connected.
+  # Returns server's state. true means - created and run.
   # @param con Client connection state
   # @return {Bool}
   #
@@ -192,9 +192,9 @@ module Server
   end
   #
   # This method should be called in main server's loop or code 
-  # for removing tasks and sockets (connections) between clients 
-  # and this server. See an example at the beginning of this module 
-  # for details.
+  # for removing stopped tasks and sockets (connections) between  
+  # clients and this server. See an example at the beginning of 
+  # this module for details.
   # @param con Connection object returned by create() method
   #
   function _update(con::Connection.ServerConnection)
