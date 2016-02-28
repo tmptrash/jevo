@@ -1,9 +1,3 @@
-#
-# TODO: add tests:
-# TODO: - test pooling
-# TODO: - test pooling from many clients
-# TODO: - test sending request after client stop
-#
 module TestServer
   using FactCheck
   using Connection
@@ -227,6 +221,22 @@ module TestServer
     Client.stop(ccon3)
     Client.stop(ccon2)
     Client.stop(ccon1)
+    Server.stop(scon)
+  end
+  facts("Tests rending a request after client has stopped") do
+    local result::Int = 0
+    local res::Bool
+    scon = Server.create(IP, PORT)
+    ccon = Client.create(IP, PORT)
+
+    Event.on(scon.observer, Server.EVENT_COMMAND, (cmd, ans)->result = cmd.args[1])
+    Server.run(scon)
+    Client.stop(ccon)
+    res = Client.request(ccon, 1, 10)
+
+    @fact res    --> false
+    @fact result --> 0
+
     Server.stop(scon)
   end
 end
