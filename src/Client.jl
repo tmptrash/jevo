@@ -49,12 +49,20 @@ module Client
   export stop
   export isOk
   export EVENT_ANSWER
+  export ClientConnection
 
   #
   # Name of the event, which is fired if answer from client's 
   # request is obtained.
   #
   const EVENT_ANSWER = "answer"
+  #
+  # Describes one connected client. Contains socket and observer.
+  #
+  type ClientConnection
+    sock    ::Base.TCPSocket
+    observer::Event.Observer
+  end
   #
   # Creates client and it's possibility to send requests to server.
   # In case of connection errors connection object will be created
