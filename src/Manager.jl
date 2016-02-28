@@ -79,7 +79,7 @@ module Manager
     local mCounter::Int = 0
     local ips     ::Int = 0
     local stamp   ::Float64 = time()
-    local server  ::Connection.ServerConnection = _createServer()
+    local server  ::Server.ServerConnection = _createServer()
 
     #
     # This server is listening for all other managers and remote

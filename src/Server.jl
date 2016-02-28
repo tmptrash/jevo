@@ -87,21 +87,32 @@ module Server
   export stop
   export isOk
   export EVENT_COMMAND
+  export ServerConnection
   #
   # Name of the event, which is fired if client sent us a command. If
   # this event fires, then specified command should be runned here - on
   # server side.
   #
   const EVENT_COMMAND = "command"
+  #
+  # Describes a server. It contains clients sockets, tasks, server object
+  # and it's observer. 
+  #
+  type ServerConnection
+    tasks   ::Array{Task}
+    socks   ::Array{Base.TCPSocket}
+    server  ::Base.TCPServer
+    observer::Event.Observer
+  end
   # 
   # Creates a server. Returns special server's data object, which identifies
   # this server and takes an ability to listen it events. It also contains
-  # server's related tasks. See Connection.ServerConnection type for
+  # server's related tasks. See Server.ServerConnection type for
   # details. It doesn't run the server (use run() method for this), but
   # it start to listen specified host and port using Base.listen() method.
   # @param host Host we are listening to
   # @param port Port we are listening to
-  # @return {Connection.ServerConnection} Server's related data object
+  # @return {Server.ServerConnection} Server's related data object
   #
   function create(host::Base.IPAddr, port::Integer)
     local tasks::Array{Task, 1} = Task[]
@@ -110,12 +121,12 @@ module Server
 
     try
       local server::Base.TCPServer = listen(host, port)
-      return Connection.ServerConnection(tasks, socks, server, obs)
+      return Server.ServerConnection(tasks, socks, server, obs)
     catch e
       Helper.warn("Server.create(): $e")
     end
     
-    Connection.ServerConnection(tasks, socks, Base.TCPServer(), obs)
+    Server.ServerConnection(tasks, socks, Base.TCPServer(), obs)
   end
   #
   # Runs the server. Starts listening clients connections
@@ -129,7 +140,7 @@ module Server
   # @param con Server connection object returned by Server.create()
   # @return {Bool} Run status
   #
-  function run(con::Connection.ServerConnection)
+  function run(con::Server.ServerConnection)
     if !isOk(con)
       Helper.warn("Server.run(): Server wasn\'t created correctly. Try to change Server.create() arguments.")
       return false
@@ -172,7 +183,7 @@ module Server
   # @param con Client connection state
   # @return {Bool}
   #
-  function isOk(con::Connection.ServerConnection)
+  function isOk(con::Server.ServerConnection)
     try return isopen(con.server) end
     false
   end
@@ -181,7 +192,7 @@ module Server
   # existing if exist.
   # @param con Server object returned by create() method.
   #
-  function stop(con::Connection.ServerConnection)
+  function stop(con::Server.ServerConnection)
     try
       local sock::Base.TCPSocket
       for sock in con.socks close(sock) end
@@ -197,7 +208,7 @@ module Server
   # this module for details.
   # @param con Connection object returned by create() method
   #
-  function _update(con::Connection.ServerConnection)
+  function _update(con::Server.ServerConnection)
     i::Int = 1
 
     while i <= length(con.socks)
