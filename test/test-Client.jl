@@ -1,6 +1,5 @@
 #
 # TODO: add tests:
-# TODO: - send small and big data
 # TODO: - send huge data
 # TODO: - two clients for same server should work ok
 # TODO: - two clients for different servers should work ok
@@ -66,7 +65,7 @@ module TestClient
     Server.stop(scon)
   end
   facts("Tests pooling") do
-    answer = 0
+    answer = Connection.Command(0, [])
     local scon::ServerConnection = Server.create(IP, PORT)
     local ccon::ClientConnection = Client.create(IP, PORT)
 
@@ -103,6 +102,25 @@ module TestClient
       @fact answer.args[1]      --> i
       @fact answer.args[2]      --> i
     end
+
+    Client.stop(ccon)
+    Server.stop(scon)
+  end
+  facts("Tests sending huge data") do
+    answer = Connection.Command(0, [])
+    local scon::ServerConnection = Server.create(IP, PORT)
+    local ccon::ClientConnection = Client.create(IP, PORT)
+    local data::Array{Int, 1}    = zeros(Int, 5000000)
+
+    Event.on(scon.observer, Server.EVENT_COMMAND, (cmd, ans)->ans.data = cmd)
+    Event.on(ccon.observer, Client.EVENT_ANSWER, (ans::Connection.Answer)->answer = ans.data)
+
+    Server.run(scon)
+    Client.request(ccon, 1, data)
+    wait(()->answer.fn === 1)
+
+    @fact answer.fn --> 1
+    @fact answer.args[1] == data --> true
 
     Client.stop(ccon)
     Server.stop(scon)
