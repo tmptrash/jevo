@@ -13,6 +13,6 @@ const TIMEOUT = 30
 #
 function wait(fn::Function)
   i = 0
-  t = Timer((t)->(yield(); if (i+=1) > TIMEOUT || fn() close(t) end), 0, 1)
+  t = Timer((t)->(yield(); if (i+=1) > TIMEOUT || fn() close(t) end), 0.0, 0.2)
   while isopen(t) yield() end
 end
