@@ -1,6 +1,5 @@
 #
 # TODO: add tests:
-# TODO: - send huge data
 # TODO: - two clients for same server should work ok
 # TODO: - two clients for different servers should work ok
 # TODO: - create two servers. stop first. second should work
@@ -123,6 +122,28 @@ module TestClient
     @fact answer.args[1] == data --> true
 
     Client.stop(ccon)
+    Server.stop(scon)
+  end
+  facts("Tests two clients for one server") do
+    answer = 0
+    local scon::ServerConnection = Server.create(IP, PORT)
+    local ccon1::ClientConnection = Client.create(IP, PORT)
+    local ccon2::ClientConnection = Client.create(IP, PORT)
+
+    Event.on(scon.observer, Server.EVENT_COMMAND, (cmd, ans)->ans.data = cmd)
+    Event.on(ccon1.observer, Client.EVENT_ANSWER, (ans::Connection.Answer)->answer += ans.data.args[1])
+    Event.on(ccon2.observer, Client.EVENT_ANSWER, (ans::Connection.Answer)->answer += ans.data.args[1])
+
+    Server.run(scon)
+    for i=1:10
+      Client.request(ccon1, i, i)
+      Client.request(ccon2, i, i)
+    end
+    wait(()->answer > 109)
+    @fact answer --> 110 # summa of requests
+
+    Client.stop(ccon1)
+    Client.stop(ccon2)
     Server.stop(scon)
   end
 end
