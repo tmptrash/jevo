@@ -1,9 +1,3 @@
-#
-# TODO: add tests:
-# TODO: - two clients for same server should work ok
-# TODO: - two clients for different servers should work ok
-# TODO: - create two servers. stop first. second should work
-#
 module TestClient
   using FactCheck
   using Connection
@@ -145,5 +139,57 @@ module TestClient
     Client.stop(ccon1)
     Client.stop(ccon2)
     Server.stop(scon)
+  end
+  facts("Tests two clients for two servers") do
+    answer = 0
+    local scon1::ServerConnection = Server.create(IP, PORT)
+    local scon2::ServerConnection = Server.create(IP, PORT + 1)
+    local ccon1::ClientConnection = Client.create(IP, PORT)
+    local ccon2::ClientConnection = Client.create(IP, PORT + 1)
+
+    Event.on(scon1.observer, Server.EVENT_COMMAND, (cmd, ans)->ans.data = cmd)
+    Event.on(scon2.observer, Server.EVENT_COMMAND, (cmd, ans)->ans.data = cmd)
+    Event.on(ccon1.observer, Client.EVENT_ANSWER, (ans::Connection.Answer)->answer += ans.data.args[1])
+    Event.on(ccon2.observer, Client.EVENT_ANSWER, (ans::Connection.Answer)->answer += ans.data.args[1])
+
+    Server.run(scon1)
+    Server.run(scon2)
+    for i=1:10
+      Client.request(ccon1, i, i)
+      Client.request(ccon2, i, i + 1)
+    end
+    wait(()->answer > 119)
+    @fact answer --> 120 # summa of requests
+
+    Client.stop(ccon1)
+    Client.stop(ccon2)
+    Server.stop(scon2)
+    Server.stop(scon1)
+  end
+  facts("Tests two clients for two servers, but one stopped") do
+    answer = 0
+    local scon1::ServerConnection = Server.create(IP, PORT)
+    local scon2::ServerConnection = Server.create(IP, PORT + 1)
+    local ccon1::ClientConnection = Client.create(IP, PORT)
+    local ccon2::ClientConnection = Client.create(IP, PORT + 1)
+
+    Event.on(scon1.observer, Server.EVENT_COMMAND, (cmd, ans)->ans.data = cmd)
+    Event.on(scon2.observer, Server.EVENT_COMMAND, (cmd, ans)->ans.data = cmd)
+    Event.on(ccon1.observer, Client.EVENT_ANSWER, (ans::Connection.Answer)->answer += ans.data.args[1])
+    Event.on(ccon2.observer, Client.EVENT_ANSWER, (ans::Connection.Answer)->answer += ans.data.args[1])
+
+    Server.run(scon1)
+    Server.run(scon2)
+    Server.stop(scon2)
+    for i=1:10
+      Client.request(ccon1, i, i)
+      Client.request(ccon2, i, i + 1)
+    end
+    wait(()->answer > 54)
+    @fact answer --> 55
+
+    Client.stop(ccon1)
+    Client.stop(ccon2)
+    Server.stop(scon1)
   end
 end
