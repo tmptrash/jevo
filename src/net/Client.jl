@@ -18,20 +18,30 @@
 #
 # See example below for details:
 #
-# TODO: check if this example work!!!
+#     #
 #     # This callback will be called as many times
 #     # as many answers will be obtained from server.
+#     #
 #     function onAnswer(ans::Connection.Answer)
-#       # do something with answer
+#       # do something with ans.data
 #     end
-#
+#     #
 #     # Creates the client and connects to server
+#     #
 #     connection = Client.create(ip"127.0.0.1", 2001)
+#     #
 #     # Starts to listen EVENT_ANSWER event
+#     #
 #     Event.on(connection.observer, EVENT_ANSWER, onAnswer)
+#     #
 #     # Makes a request to the server. An answer will
 #     # be obtained in onAnswer() callback.
-#     Client.request(connection, rand, 2, 3)
+#     #
+#     Client.request(connection, FUNCTION_ID, arg1, arg2)
+#     #
+#     # ...
+#     #
+#     Client.stop(conneciton)
 #
 # Events:
 #     answer{Connection.Answer} Answer object with data
@@ -50,7 +60,6 @@ module Client
   export isOk
   export EVENT_ANSWER
   export ClientConnection
-
   #
   # Name of the event, which is fired if answer from client's 
   # request is obtained.
@@ -147,11 +156,6 @@ module Client
   # @param con Client's connection object, returned by create()
   #
   function stop(con::Client.ClientConnection)
-    #
-    # TODO: i don't really know if julia GC removes our task
-    # TODO: created inside create() method after closing 
-    # TODO: connection. Need to check this...
-    #
     try
       close(con.sock)
     catch e
