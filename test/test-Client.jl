@@ -192,4 +192,28 @@ module TestClient
     Client.stop(ccon2)
     Server.stop(scon1)
   end
+  facts("Tests isOk() function works fine") do
+    local answer = 0
+    local scon::ServerConnection = Server.create(IP, PORT)
+    local ccon::ClientConnection = Client.create(IP, PORT)
+
+    @fact Client.isOk(ccon) --> true
+    Event.on(scon.observer, Server.EVENT_COMMAND, (cmd, ans)->ans.data = cmd)
+    Event.on(ccon.observer, Client.EVENT_ANSWER, (ans::Connection.Answer)->answer = ans.data)
+
+    Server.run(scon)
+    @fact Client.isOk(ccon) --> true
+    Client.request(ccon, 1, 10) # function - 1, parameter - 10
+    wait(()->answer !== 0)
+
+    @fact Client.isOk(ccon) --> true
+    @fact answer.fn         --> 1
+    @fact answer.args[1]    --> 10
+
+    Client.stop(ccon)
+    Server.stop(scon)
+
+    wait(()->!Client.isOk(ccon))
+    @fact Client.isOk(ccon) --> false
+  end
 end

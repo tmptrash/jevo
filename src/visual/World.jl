@@ -1,14 +1,18 @@
 #
-# 2D space, where all organisms are live.
-# TODO: describe update event
+# 2D space, where all organisms are live. In reality this is
+# just a peace of memory, where all organisms are located. It
+# doesn't contain organisms codes, only rectangular with points.
+# It's possible to run our application only in memory. In this
+# case only this 2D world will be used (without visual 
+# presentation).
 #
 # @author DeadbraiN
 #
 module World
-  import Creature
   import Helper
-  import Event
-  using Config
+  import Config
+
+  export Plane
 
   export create
   export setEnergy
@@ -16,7 +20,6 @@ module World
   export getFreePos
   export grabEnergy
   export getNearFreePos
-
   #
   # 2D plane for living
   #
@@ -33,19 +36,16 @@ module World
     # Array of pixels (RGB+8b)
     #
     data::Array{UInt32, 2}
-    #
-    # {Event.Observer} Adds events listening/firing logic to the World.
-    #
-    observer::Event.Observer
   end
 
   #
   # Creates the world
   # @param width World width
   # @param height World height
+  # @return {Plane} filled by zero values Plane
   #
   function create(width::Int = Config.val(:WORLD_WIDTH), height::Int = Config.val(:WORLD_HEIGHT))
-    Plane(width, height, fill(UInt32(0), height, width), Event.create())
+    Plane(width, height, fill(UInt32(0), height, width))
   end
   #
   # Adds energy point by specified coordinates
@@ -56,7 +56,6 @@ module World
   function setEnergy(plane::Plane, pos::Helper.Point, energy::UInt32)
     if pos.x < 1 || pos.x > plane.width || pos.y < 1 || pos.y > plane.height return nothing end
     plane.data[pos.y, pos.x] = energy
-    #Event.fire(plane.observer, "update", pos.x, pos.y, energy, plane)
   end
   #
   # Returns amount of energy in a point with
@@ -100,7 +99,6 @@ module World
     energy = energy > amount ? amount : energy
     if energy > 0
       plane.data[pos.y, pos.x] -= energy
-      #Event.fire(plane.observer, "update", pos.x, pos.y, plane.data[pos.y, pos.x], plane)
     end
     energy
   end
@@ -143,4 +141,7 @@ module World
 
     false
   end
+  #
+  # Destroys a world
+  #
 end

@@ -1,4 +1,5 @@
 # TODO: two separate servers should work okay
+# TODO: test isOk() function
 module TestServer
   using FactCheck
   using Connection
