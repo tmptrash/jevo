@@ -6,6 +6,16 @@
 # case only this 2D world will be used (without visual 
 # presentation).
 #
+# Usage:
+#     import World
+#     import Helper
+#     ...
+#     world = World.create()
+#     World.setEnergy(world, Helper.Point(30, 40), UInt32(123456))
+#     World.getEnergy(world, Helper.Point(30, 40)) # returns UInt32(123456))
+#     ...
+#     World.destroy(world)
+#
 # @author DeadbraiN
 #
 module World
@@ -142,6 +152,12 @@ module World
     false
   end
   #
-  # Destroys a world
+  # Destroys world and it's data
+  # @param plane
   #
+  function destroy(plane::Plane)
+    plane.data   = Array{UInt32, 2}()
+    plane.width  = 0
+    plane.height = 0
+  end
 end
