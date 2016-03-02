@@ -62,6 +62,7 @@ module World
   # @param plane World's plane
   # @param pos Position of the energy point
   # @param energy Amount of energy to add
+  # @return {nothing|UInt32}
   #
   function setEnergy(plane::Plane, pos::Helper.Point, energy::UInt32)
     if pos.x < 1 || pos.x > plane.width || pos.y < 1 || pos.y > plane.height return nothing end
@@ -83,16 +84,20 @@ module World
   # with zero energy. It randomly finds the point in a world
   # and checks it's energy. If this point already has an energy
   # it finds another point randomly.
-  # @return {Helper.Point}
-  # TODO: possible infinite loop, if all point are full
+  # @return {Helper.Point|Bool}
   #
   function getFreePos(plane::Plane)
-    local pos::Helper.Point = Helper.Point(round(Int, plane.width / 2), round(Int, plane.height / 2))
-    while World.getEnergy(plane, pos) > UInt32(0)
-      pos.x = rand(1:plane.width)
-      pos.y = rand(1:plane.height)
+    local pos::Helper.Point = Helper.Point(ceil(Int, plane.width / 2), ceil(Int, plane.height / 2))
+    local width::Int = plane.width
+    local height::Int = plane.height
+    local i::Int = width * height < 1000 ? 100 : width * height / 10
+
+    while World.getEnergy(plane, pos) > UInt32(0) && i > 0
+      pos.x = rand(1:width)
+      pos.y = rand(1:height)
+      i -= 1
     end
-    pos
+    i > 0 ? pos : false
   end
   #
   # Grabs energy in specified point in a world. If this point
