@@ -56,6 +56,20 @@ module TestWorld
     World.setEnergy(plane, Helper.Point(1, 1), UInt32(1))
     pos = World.getFreePos(plane)
     @fact (pos.x === 2 && pos.y === 1) --> true
+    #every point are full
+    World.setEnergy(plane, Helper.Point(2, 1), UInt32(1))
+    @fact World.getFreePos(plane) --> false
+
+    World.destroy(plane)
+  end
+  facts("Tests grabbing energy") do
+    plane = World.create(3, 3)
+    World.setEnergy(plane, Helper.Point(2, 2), UInt32(10))
+    @fact World.grabEnergy(plane, Helper.Point(2, 2), UInt32(5)) --> UInt32(5)
+    @fact World.getEnergy(plane, Helper.Point(2, 2)) --> UInt32(5)
+    @fact World.grabEnergy(plane, Helper.Point(2, 2), UInt32(10)) --> UInt32(5)
+    @fact World.getEnergy(plane, Helper.Point(2, 2)) --> UInt32(0)
+
     World.destroy(plane)
   end
 end
