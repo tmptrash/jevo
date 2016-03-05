@@ -145,7 +145,7 @@ module World
     pos = Helper.Point(0, 0)
 
     j = 1
-    for i = 1:4
+    for i = 1:8
       pos.x = positions[j]
       pos.y = positions[j + 1]
       if plane.width >= pos.x && plane.height >= pos.y && World.getEnergy(plane, pos) === UInt32(0)
