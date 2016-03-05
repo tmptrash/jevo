@@ -69,7 +69,7 @@ module TestWorld
     @fact World.getEnergy(plane, Helper.Point(2, 2)) --> UInt32(5)
     @fact World.grabEnergy(plane, Helper.Point(2, 2), UInt32(10)) --> UInt32(5)
     @fact World.getEnergy(plane, Helper.Point(2, 2)) --> UInt32(0)
-
+    @fact World.grabEnergy(plane, Helper.Point(2, 2), UInt32(5)) --> UInt32(0)
     World.destroy(plane)
   end
 end
