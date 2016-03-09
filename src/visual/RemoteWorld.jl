@@ -78,7 +78,7 @@ module RemoteWorld
     Client.stop(rd.con)
     CanvasWindow.destroy(rd.win)
   end
-  # TODO: describe format of the answer:2 dimentional array
+  #
   # Handler of server answer
   # @param rd remote data for specified server
   # @param ans Answer object with region data

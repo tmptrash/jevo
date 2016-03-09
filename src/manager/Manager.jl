@@ -27,6 +27,8 @@ module Manager
 
   using Config
   using Debug
+
+  export run
   #
   # This is how we collect Manager module from it's parts
   #

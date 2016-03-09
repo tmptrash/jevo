@@ -6,7 +6,7 @@
 # @author DeadbraiN
 # TODO: describe annotations: @rpc (RPC function)
 #
-using RpcApi
+import RpcApi
 #
 # @rpc
 # Grabs world's rectangle region and returns it

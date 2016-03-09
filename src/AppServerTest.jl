@@ -1,5 +1,5 @@
 #
-# TODO:
+# TODO: should be moved to tmp folder
 #
 include("RemoteWorld.jl")
 
