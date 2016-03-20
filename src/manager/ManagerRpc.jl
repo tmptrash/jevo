@@ -208,17 +208,17 @@ end
 # you have to use "Client" module.
 #
 _rpcApi = Dict{Integer, Function}(
-  RPC_GET_REGION        => getRegion,
-  RPC_CREATE_ORGANISMS  => createOrganisms,
-  RPC_CREATE_ORGANISM   => createOrganism,
-  RPC_SET_CONFIG        => setConfig,
-  RPC_GET_CONFIG        => getConfig,
-  RPC_MUTATE            => mutate,
-  RPC_GET_IPS           => getIps,
-  RPC_GET_ORGANISM      => getOrganism,
-  RPC_GET_AMOUNT        => getAmount,
-  RPC_GET_ORGANISMS     => getOrganisms,
-  RPC_SET_ENERGY        => setEnergy,
-  RPC_SET_ENERGY_RND    => setEnergyRandom,
-  RPC_DEBUG_GC          => debugGc
+  RpcApi.RPC_GET_REGION        => getRegion,
+  RpcApi.RPC_CREATE_ORGANISMS  => createOrganisms,
+  RpcApi.RPC_CREATE_ORGANISM   => createOrganism,
+  RpcApi.RPC_SET_CONFIG        => setConfig,
+  RpcApi.RPC_GET_CONFIG        => getConfig,
+  RpcApi.RPC_MUTATE            => mutate,
+  RpcApi.RPC_GET_IPS           => getIps,
+  RpcApi.RPC_GET_ORGANISM      => getOrganism,
+  RpcApi.RPC_GET_AMOUNT        => getAmount,
+  RpcApi.RPC_GET_ORGANISMS     => getOrganisms,
+  RpcApi.RPC_SET_ENERGY        => setEnergy,
+  RpcApi.RPC_SET_ENERGY_RND    => setEnergyRandom,
+  RpcApi.RPC_DEBUG_GC          => debugGc
 )

@@ -71,7 +71,7 @@ module Creature
     vars::Dict{DataType, Array{Symbol, 1}}
     #
     # All blocks within one (current) function. Blocks are belong
-    # to if, for, function and other operators. All mtations shouls 
+    # to if, for, function and other operators. All mutations should 
     # be done within blocks
     #
     blocks::Array{Expr, 1}

@@ -25,11 +25,14 @@ module Manager
   import Connection
   import CommandLine
   import RpcApi
+  import Backup
 
   using Config
   using Debug
 
   export run
+  export recover
+  export backup
   #
   # This is how we collect Manager module from it's parts
   #
@@ -75,7 +78,41 @@ module Manager
     organismId::UInt
   end
   #
-  # Runs everything. Blocking function.
+  # This function is used for recovering running. It means that 
+  # an application was crashed before and now we have to run
+  # it with last correct backup. After recovery run() function
+  # will be called.
+  #
+  function recover()
+    local data::Data = Backup.load()
+    local i::Int
+    local t::OrganismTask
+
+    for i = 1:length(data.tasks)
+      t = data.tasks[i]
+      t.task = Task(Creature.born(t.organism, t.id))
+    end
+  end
+  #
+  # Makes a dump of Manager data and backups it into the file.
+  # Works in pair with recover().
+  #
+  function backup()
+    local tasks::Array{OrganismTask, 1} = deepcopy(_data.tasks)
+    local task::Task = Task(()->0)
+    local i::Int
+    #
+    # This is a small trick. We have to set all tasks in waiting
+    # state for serializing into the file. Julia can't save active
+    # tasks.
+    #
+    for i = 1:length(_data.tasks) _data.tasks[i].task = task end
+    Backup.save(_data)
+    for i = 1:length(tasks) _data.tasks[i].task = tasks[i].task end
+  end
+  #
+  # Runs Manager instance, one world, server an so on... Blocking 
+  # function.
   #
   function run()
     local eCounter::Int = 0
@@ -90,6 +127,7 @@ module Manager
     # In other words, it works like RPC runner...
     #
     Server.run(server)
+    Helper.info("Server has run")
     #
     # If user set up some amount of organisms they will be created
     # in this call.

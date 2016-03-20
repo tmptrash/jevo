@@ -54,26 +54,6 @@ module Code
   end
   #
   # @cmd
-  # Creates a for loop. We have to create small loops, because they
-  # affects entire speed.
-  # @param org Organism we are working with
-  # @param fn Parent(current) function unique name 
-  # we are working in
-  # @param block Current flock within fn function
-  #
-  function loop(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    @inFuncBlock(org, fn, block)
-    local v::Symbol = @getVar(org, fn, Int8)
-    if v === :nothing return Expr(:nothing) end
-    local i::Symbol = @getNewVar(org)
-    local loopEx    = :(local $i::Int8; for $i=1:$v end)
-
-    push!(org.vars[fn].blocks, loopEx.args[2].args[2])
-
-    loopEx
-  end
-  #
-  # @cmd
   # Creates custom function with unique name, random arguments with
   # default values. By default it returns first parameter as local 
   # variable
@@ -178,6 +158,26 @@ module Code
     push!(org.vars[fn].blocks, ifEx.args[2])
 
     ifEx
+  end
+  #
+  # @cmd
+  # Creates a for loop. We have to create small loops, because they
+  # affects entire speed.
+  # @param org Organism we are working with
+  # @param fn Parent(current) function unique name 
+  # we are working in
+  # @param block Current flock within fn function
+  #
+  function loop(org::Creature.Organism, fn::ASCIIString, block::Expr)
+    @inFuncBlock(org, fn, block)
+    local v::Symbol = @getVar(org, fn, Int8)
+    if v === :nothing return Expr(:nothing) end
+    local i::Symbol = @getNewVar(org)
+    local loopEx    = :(local $i::Int8; for $i=1:$v end)
+
+    push!(org.vars[fn].blocks, loopEx.args[2].args[2])
+
+    loopEx
   end
 
   #
