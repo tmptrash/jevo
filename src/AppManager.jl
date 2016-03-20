@@ -21,6 +21,5 @@ args = CommandLine.create()
 if CommandLine.has(args, RECOVER_ARG)
   Helper.info(string("Recovering from last backup: ", Backup.lastFile()))
   Manager.recover()
-else
-  Manager.run()
 end
+Manager.run()
