@@ -78,10 +78,9 @@ module Manager
     organismId::UInt
   end
   #
-  # This function is used for recovering running. It means that 
-  # an application was crashed before and now we have to run
-  # it with last correct backup. After recovery run() function
-  # will be called.
+  # This function is used for recovering a manager. It means that 
+  # an application was crashed before and now we have to recover
+  # it with last correct backup.
   #
   function recover()
     local data::Data = Backup.load()
