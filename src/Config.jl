@@ -167,20 +167,7 @@ module Config
   # @return {Bool} saving result
   #
   function save(file::ASCIIString = "config.data")
-    local io  = null
-    local ret = true
-
-    try
-      io = open(file, "w")
-      serialize(io, _data.d)
-    catch(e)
-      Helper.warn("Config.save(): $e")
-      ret = false
-    finally
-      if io !== null close(io) end
-    end
-
-    ret
+    Helper.save(_data.d, file)
   end
   #
   # Loads all data from the file
@@ -188,20 +175,14 @@ module Config
   # @return {Bool} loading result
   #
   function load(file::ASCIIString = "config.data")
-    local io  = null
-    local ret = true
+      try
+        _data.d = Helper.load(file)
+      catch e
+        Helper.warn("Config.load(): $e")
+        return false
+      end
 
-    try
-      io = open(file)
-      _data.d = deserialize(io)
-    catch(e)
-      Helper.warn("Config.load(): $e")
-      ret = false
-    finally
-      if io !== null close(io) end
-    end
-    
-    ret
+      true
   end
   #
   # Returns configuration value according to unique key. In

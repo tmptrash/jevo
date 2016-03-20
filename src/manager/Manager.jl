@@ -13,6 +13,7 @@
 # TODO: add support of serverPort cmd line argument
 # TODO: add remote functions for changing period and probs
 # TODO: add command line parameter for creating default config file
+# TODO: add create method. It should returm Data() type
 #
 module Manager
   import Creature
@@ -135,7 +136,7 @@ module Manager
   #
   # Manager related data. See Data type for details. It's global, because
   # Manager is a singleton.
-  #
+  # TODO: this type should be stored outside of this module in AppManager.jl
   global _data = Data(
     World.create(),
     Dict{Int, Creature.Organism}(),

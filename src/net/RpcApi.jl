@@ -23,6 +23,7 @@ module RpcApi
   export RPC_DEBUG_GC
   
   export Region
+  export SimpleOrganism
   #
   # Describes 2D region in a world
   #

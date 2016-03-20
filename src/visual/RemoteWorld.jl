@@ -19,13 +19,12 @@ module RemoteWorld
   import Connection
   import Client
   import CanvasWindow
-  using Config
+  import RpcApi
+  import Config
 
   export create
   export display
   export stop
-
-  using RpcApi
   #
   # Contains data of for remote host, from where we displaying
   # world's region and shows it on a canvas.
@@ -56,8 +55,14 @@ module RemoteWorld
     con !== false ? RemoteData(con, CanvasWindow.create(width, height)) : false
   end
   #
-  #
-  # @param delay Delay between requests 
+  # Start displaying remote area. It makes requests to remote 
+  # server, which answers/retuns us frames of pixels of size (x,y)-(x1,y1).
+  # @param rd Remote world data object. See create()
+  # @param delay Delay between requests
+  # @param x Left top X coordinate
+  # @param y Left top Y coordinate
+  # @param x1 Right down X coordinate
+  # @param y1 Right down Y coordinate
   #
   function display(rd::RemoteData, delay::Int = Config.val(:WORLD_FRAME_DELAY), x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
     rd.delay = delay
@@ -71,7 +76,8 @@ module RemoteWorld
     Client.request(rd.con, RPC_GET_REGION, x, y, x1, y1)
   end
   #
-  # Stops displaying organism's world
+  # Stops displaying organism's world. Closes the connection.
+  # @param rd Remote world data object
   #
   function stop(rd::RemoteData)
     Event.off(rd.con.observer, Client.EVENT_ANSWER, rd.resp)

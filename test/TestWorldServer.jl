@@ -32,9 +32,9 @@ module TestWorldServer
     #
     if     cmd.fn === 1 ans.data = getRegion(cmd.args[1], cmd.args[2], cmd.args[3], cmd.args[4])
     #
-    # 2 - 
+    # 2 - setEnergy()
     #
-    elseif cmd.fn === 2 ans.data = getRegion(cmd.args[1], cmd.args[2], cmd.args[3], cmd.args[4])
+    elseif cmd.fn === 2 World.setEnergy(_world, Helper.Point(cmd.args[1], cmd.args[2]), cmd.args[3])
     end
   end
   #

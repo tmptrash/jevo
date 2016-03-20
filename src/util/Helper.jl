@@ -89,9 +89,53 @@ module Helper
   function getSupportedTypes(fn::Function = (t) -> t)
     map(fn, SUPPORTED_TYPES)
   end
+  #
+  # Saves custom data into the file. If file exists, it will
+  # be overrided
+  # @param data Data to save
+  # @param file File name
+  # @return {Bool} saving result
+  #
+  function save(data::Any, file::ASCIIString = "backup.data")
+    local io  = null
+    local ret = true
+
+    try
+      io = open(file, "w")
+      serialize(io, data)
+    catch(e)
+      warn("Helper.save(): $e")
+      ret = false
+    finally
+      if io !== null close(io) end
+    end
+
+    ret
+  end
+  #
+  # Loads custom data from the file
+  # @param file File name
+  # @return {Any|null} loading result or null
+  #
+  function load(file::ASCIIString = "backup.data")
+    local io  = null
+    local ret = null
+
+    try
+      io  = open(file)
+      ret = deserialize(io)
+    catch(e)
+      warn("Helper.load(): $e")
+      ret = null
+    finally
+      if io !== null close(io) end
+    end
+    
+    ret
+  end
 
   #
-  # Supported type of code inside organism
+  # Supported types of code inside organism
   #
   const SUPPORTED_TYPES = [ASCIIString, Bool, Int8, Int16, Int]
 end

@@ -36,7 +36,7 @@ module Mutator
       result &= res
       #
       # Updates compiled version of the code. Only valid code will be applied,
-      # because exception will be fired in case of error organismcode.
+      # because exception will be fired in case of error organism code.
       #
       if pIndex < 5 && res
         try
