@@ -148,6 +148,16 @@ module Config
     #
     WORLD_MAX_ORGANISMS::Int
     #
+    # Amount of energy blocks in a world. Blocks will be placed in a
+    # random way...
+    #
+    WORLD_START_ENERGY_BLOCKS::Int
+    #
+    # Amount of energy in every block. See WORLD_START_ENERGY_BLOCKS
+    # config for details.
+    #
+    WORLD_START_ENERGY_AMOUNT::UInt32
+    #
     # Starting number for TCP/IP listening
     #
     CONNECTION_SERVER_PORT::Int
@@ -220,14 +230,14 @@ module Config
       [5,50,100,4,1,1,1],        # ORGANISM_MUTATION_PROBABILITIES (add,change,small-change,del,clone,period,amount)
       1,                         # ORGANISM_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      10000000,                  # ORGANISM_MUTATION_PERIOD
+      300,                       # ORGANISM_MUTATION_PERIOD
       100000,                    # ORGANISM_MAX_MUTATION_PERIOD
       1,                         # ORGANISM_MUTATION_AMOUNT
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT
       300,                       # ORGANISM_START_AMOUNT
-      64000,                     # ORGANISM_START_ENERGY
-      100000,                    # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
-      10000000,                  # ORGANISM_ENERGY_DECREASE_PERIOD
+      4000,                      # ORGANISM_START_ENERGY
+      5000,                      # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
+      20,                        # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                         # ORGANISM_ENERGY_DECREASE_VALUE
       4,                         # CODE_MAX_FUNC_PARAMS
       300,                       # WORLD_WIDTH
@@ -236,6 +246,8 @@ module Config
       UInt32(0),                 # WORLD_BACK_COLOR
       0,                         # WORLD_IPS
       500,                       # WORLD_MAX_ORGANISMS
+      5000,                      # WORLD_START_ENERGY_BLOCKS
+      UInt32(1000),              # WORLD_START_ENERGY_AMOUNT
       2000                       # CONNECTION_SERVER_PORT
     )
   )

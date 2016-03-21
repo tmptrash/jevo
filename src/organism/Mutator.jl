@@ -222,8 +222,8 @@ module Mutator
  #    " ASCIIString "," UTF8String "," ByteString "," Array "," BitArray "," Range ",
  #    " Tuple "," Symbol "," Function "," Type "," Any "," String "," Signed "," Dict ",
  #    # organism api
- #    ";clone(o);",";getEnergy(o,",";energyLeft(o);",";energyRight(o);",";energyUp(o);",
- #    ";energyDown(o);",";stepLeft(o);",";stepRight(o);",";stepUp(o);",";stepDown(o);"
+ #    ";clone(o);",";getEnergy(o,",";eatLeft(o);",";eatRight(o);",";eatUp(o);",
+ #    ";eatDown(o);",";stepLeft(o);",";stepRight(o);",";stepUp(o);",";stepDown(o);"
  #    # TODO: here should be a buildin functions from Base, Core and Main modules
  #    # math/geom functions
  #    # "round","iround","floor","ifloor","ceil","iceil","trunc","itrunc","div","fld",

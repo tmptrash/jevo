@@ -172,6 +172,13 @@ function setEnergyRandom(amount::Int, energy::UInt32)
 end
 #
 # @rpc
+# Makes a backup of currect app instance
+#
+function doBackup()
+  Manager.backup()
+end
+#
+# @rpc
 # Calls Garbage Collector in current process
 #
 function debugGc()
@@ -220,5 +227,6 @@ _rpcApi = Dict{Integer, Function}(
   RpcApi.RPC_GET_ORGANISMS     => getOrganisms,
   RpcApi.RPC_SET_ENERGY        => setEnergy,
   RpcApi.RPC_SET_ENERGY_RND    => setEnergyRandom,
+  RpcApi.RPC_BACKUP            => doBackup,
   RpcApi.RPC_DEBUG_GC          => debugGc
 )

@@ -20,6 +20,7 @@ module RpcApi
   export RPC_GET_ORGANISMS
   export RPC_SET_ENERGY
   export RPC_SET_ENERGY_RND
+  export RPC_BACKUP
   export RPC_DEBUG_GC
   
   export Region
@@ -104,5 +105,6 @@ module RpcApi
   const RPC_GET_ORGANISMS     = 10
   const RPC_SET_ENERGY        = 11
   const RPC_SET_ENERGY_RND    = 12
-  const RPC_DEBUG_GC          = 13
+  const RPC_BACKUP            = 13
+  const RPC_DEBUG_GC          = 14
 end

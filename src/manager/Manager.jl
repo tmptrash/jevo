@@ -148,7 +148,10 @@ module Manager
     # in this call. If we are in recover mode, then this step should
     # be skipped.
     #
-    if !CommandLine.has(params, RECOVER_ARG) createOrganisms() end
+    if !CommandLine.has(params, RECOVER_ARG)
+      setEnergyRandom(Config.val(:WORLD_START_ENERGY_BLOCKS), Config.val(:WORLD_START_ENERGY_AMOUNT))
+      createOrganisms()
+    end
     #
     # This is main infinite loop. It manages input connections
     # and organism's tasks switching.

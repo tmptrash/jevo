@@ -46,10 +46,10 @@ module Creature
   export create
   export born
   export getEnergy
-  export energyLeft
-  export energyRight
-  export energyUp
-  export energyDown
+  export eatLeft
+  export eatRight
+  export eatUp
+  export eatDown
   export stepLeft
   export stepRight
   export stepUp
@@ -290,7 +290,7 @@ module Creature
   # @param amount Amount of energy organism wants to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function energyLeft(org::Organism, amount::Int) _grabEnergy(org, left, amount) end
+  function eatLeft(org::Organism, amount::Int) _grabEnergy(org, left, amount) end
   #
   # @oapi
   # er - means get Energy Right. Short name to help organism find this name faster.
@@ -299,7 +299,7 @@ module Creature
   # @param amount Amount of energy organism wants to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function energyRight(org::Organism, amount::Int) _grabEnergy(org, right, amount) end
+  function eatRight(org::Organism, amount::Int) _grabEnergy(org, right, amount) end
   #
   # @oapi
   # eu - means get Energy Up. Short name to help organism find this name faster.

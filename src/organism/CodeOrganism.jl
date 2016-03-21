@@ -42,7 +42,7 @@ function eatLeft(org::Creature.Organism, fn::ASCIIString, block::Expr)
 
   if amount === :nothing return Expr(:nothing) end
 
-  :(Creature.energyLeft(o, Int($(amount))))
+  :(Creature.eatLeft(o, Int($(amount))))
 end
 #
 # @cmd
@@ -56,7 +56,7 @@ function eatRight(org::Creature.Organism, fn::ASCIIString, block::Expr)
 
   if amount === :nothing return Expr(:nothing) end
 
-  :(Creature.energyRight(o, Int($(amount))))
+  :(Creature.eatRight(o, Int($(amount))))
 end
 #
 # @cmd

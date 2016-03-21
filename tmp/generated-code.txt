@@ -82,7 +82,7 @@ RpcApi.SimpleOrganism(0x00000000000009f9,[5,50,100,4,1,1,1],:(function (o::Creat
         Creature.energyDown(o)
         Creature.energyUp(o)
         Creature.energyDown(o)
-        Creature.energyLeft(o)
+        Creature.eatLeft(o)
         var_8 = Bool(abs(var_8 - var_8))
         var_8 = func_1(var_8,var_8)
         var_3 = var_3 * var_3
@@ -218,7 +218,7 @@ RpcApi.SimpleOrganism(0x0000000000000a02,[5,50,100,4,1,1,1],:(function (o::Creat
             return var_5
         end
         o.mem[var_6] = var_6
-        Creature.energyRight(o)
+        Creature.eatRight(o)
         Creature.energyUp(o)
         Creature.stepRight(o)
         Creature.stepDown(o)
@@ -230,9 +230,9 @@ RpcApi.SimpleOrganism(0x0000000000000a02,[5,50,100,4,1,1,1],:(function (o::Creat
 RpcApi.SimpleOrganism(0x0000000000000a03,[5,50,100,4,1,1,1],:(function (o::Creature.Organism,)
         o.mem[var_2] = var_2
         local var_2::Int16 = -5900
-        Creature.energyRight(o)
+        Creature.eatRight(o)
         Creature.stepDown(o)
-        Creature.energyLeft(o)
+        Creature.eatLeft(o)
         Creature.stepUp(o)
         Creature.stepDown(o)
         Creature.energyUp(o)
@@ -300,7 +300,7 @@ RpcApi.SimpleOrganism(0x0000000000000a08,[5,50,100,4,1,1,1],:(function (o::Creat
 RpcApi.SimpleOrganism(0x0000000000000a09,[5,50,100,4,1,1,1],:(function (o::Creature.Organism,)
         o.mem[var_2] = var_2
         local var_2::Int16 = -5900
-        Creature.energyRight(o)
+        Creature.eatRight(o)
         Creature.stepDown(o)
         Creature.stepUp(o)
         Creature.stepDown(o)
@@ -308,7 +308,7 @@ RpcApi.SimpleOrganism(0x0000000000000a09,[5,50,100,4,1,1,1],:(function (o::Creat
         Creature.energyUp(o)
     end),1,1000,1,100093,Dict{Int16,Int16}(),[24,56])
 RpcApi.SimpleOrganism(0x0000000000000a0a,[5,50,100,4,1,1,1],:(function (o::Creature.Organism,)
-        Creature.energyLeft(o)
+        Creature.eatLeft(o)
         Creature.stepDown(o)
         Creature.stepUp(o)
         Creature.stepLeft(o)
@@ -330,23 +330,23 @@ RpcApi.SimpleOrganism(0x0000000000000a0b,[5,50,100,4,1,1,1],:(function (o::Creat
                     Creature.energyUp(o)
                     var_7 = var_7 - var_7
                     var_5 = var_5 | var_4
-                    Creature.energyLeft(o)
+                    Creature.eatLeft(o)
                 end
             end
             local var_7::Int8 = 72
-            Creature.energyLeft(o)
+            Creature.eatLeft(o)
             Creature.stepDown(o)
             if var_7 !== var_7
                 Creature.stepUp(o)
             end
             var_7 = var_7 * var_7
-            Creature.energyLeft(o)
+            Creature.eatLeft(o)
             Creature.energyUp(o)
-            Creature.energyLeft(o)
+            Creature.eatLeft(o)
             var_7 = var_7 + var_7
             return var_4
         end
-        Creature.energyRight(o)
+        Creature.eatRight(o)
         Creature.stepUp(o)
         Creature.energyDown(o)
         var_8 = var_8 | var_8
@@ -369,21 +369,21 @@ RpcApi.SimpleOrganism(0x0000000000000a0d,[5,50,100,4,1,1,1],:(function (o::Creat
         function func_1(var_4::Bool=true,var_5::Bool=false)
             var_7 = var_7 / var_7
             local var_7::Int8 = 72
-            Creature.energyLeft(o)
+            Creature.eatLeft(o)
             Creature.stepDown(o)
             Creature.stepDown(o)
             if var_7 !== var_7
-                Creature.energyLeft(o)
+                Creature.eatLeft(o)
                 local var_9::Bool = true
             end
             var_7 = var_7 * var_7
-            Creature.energyLeft(o)
+            Creature.eatLeft(o)
             Creature.energyUp(o)
-            Creature.energyLeft(o)
+            Creature.eatLeft(o)
             var_7 = var_7 + var_7
             return var_4
         end
-        Creature.energyRight(o)
+        Creature.eatRight(o)
         Creature.stepUp(o)
         Creature.energyDown(o)
         var_8 = var_8 | var_8
@@ -394,14 +394,14 @@ RpcApi.SimpleOrganism(0x0000000000000a0d,[5,50,100,4,1,1,1],:(function (o::Creat
         var_8 = Bool(abs(var_8 - var_8))
         Creature.stepDown(o)
         local var_8::Bool = false
-        Creature.energyRight(o)
+        Creature.eatRight(o)
     end),15,59392,63,99993,Dict(-5900=>-5900),[42,28])
 RpcApi.SimpleOrganism(0x0000000000000a0e,[5,50,100,4,1,1,1],:(function (o::Creature.Organism,)
         o.mem[var_2] = var_2
         local var_2::Int16 = -5900
-        Creature.energyRight(o)
+        Creature.eatRight(o)
         Creature.stepDown(o)
-        Creature.energyLeft(o)
+        Creature.eatLeft(o)
         Creature.stepUp(o)
         Creature.stepDown(o)
         Creature.energyUp(o)

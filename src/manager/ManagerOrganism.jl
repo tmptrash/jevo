@@ -250,7 +250,13 @@ function _onClone(organism::Creature.Organism)
   pos = World.getNearFreePos(Manager._data.world, organism.pos)
   if pos === false return false end
   #
-  # Creates new organism and applies mutations to him.
+  # Total amount of energy should be the same, so we have to
+  # split energy between old and new organisms 50/50 after
+  # clonning. 
+  #
+  organism.energy = Int(div(organism.energy, 2))
+  #
+  # Creates new organism and apply mutations to him.
   #
   crTask = Manager._createOrganism(organism, pos)
   if crTask === false return false end

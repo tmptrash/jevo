@@ -14,10 +14,10 @@ import CommandLine
 # runs in a common mode.
 #
 function main()
-  args = CommandLine.create()
+  local args = CommandLine.create()
 
   if CommandLine.has(args, Manager.RECOVER_ARG)
-    Helper.info(string("Recovering from last backup: ", Backup.lastFile()))
+    Helper.info(string("Recovering from backup: ", Backup.lastFile()))
     Manager.recover()
   end
   Manager.run()
