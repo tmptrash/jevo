@@ -99,11 +99,7 @@ module Client
           # This exception means, that client has disconnected.
           # All other exceptions should be shown in terminal.
           #
-          if !isa(e, EOFError)
-            Helper.warn("Client has disconnected")
-          else
-            Helper.error("Client error: $e")
-          end
+          Helper.warn("Client has disconnected: $e")
           if sock !== null
             close(sock)
             break
@@ -111,7 +107,7 @@ module Client
         end
       end
     catch e
-      Helper.warn("Client.create.connect(): $e")
+      Helper.warn("Client.create(): $e")
       if sock !== null close(sock) end
     end
     yield()
