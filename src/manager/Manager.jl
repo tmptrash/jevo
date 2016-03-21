@@ -33,6 +33,7 @@ module Manager
   export run
   export recover
   export backup
+  export RECOVER_ARG
   #
   # This is how we collect Manager module from it's parts
   #
@@ -46,8 +47,14 @@ module Manager
   #
   const PARAM_SERVER_PORT = "serverPort"
   #
+  # Name of the command line argument, which tells the application
+  # to recover itself from last backup.
+  #
+  const RECOVER_ARG = "recover"
+  #
   # Manager's related type. Contains world, command line parameters,
-  # organisms map and so on...
+  # organisms map and so on... If some fields will be changed, don't
+  # forget to change them in recover() function.
   #
   type Data
     #
@@ -78,9 +85,10 @@ module Manager
     organismId::UInt
   end
   #
-  # This function is used for recovering a manager. It means that 
-  # an application was crashed before and now we have to recover
-  # it with last correct backup.
+  # This function is used for recovering a manager's data from 
+  # backup file. It means that an application was crashed before 
+  # and now we have to recover it with last correct backup. Works
+  # in pair with backup() function.
   #
   function recover()
     local data::Data = Backup.load()
@@ -91,9 +99,16 @@ module Manager
       t = data.tasks[i]
       t.task = Task(Creature.born(t.organism, t.id))
     end
+
+    _data.world      = data.world
+    _data.positions  = data.positions
+    _data.organisms  = data.organisms
+    _data.tasks      = data.tasks
+    _data.params     = data.params
+    _data.organismId = data.organismId
   end
   #
-  # Makes a dump of Manager data and backups it into the file.
+  # Makes a dump of Manager data and saves it into the file.
   # Works in pair with recover().
   #
   function backup()
@@ -119,6 +134,7 @@ module Manager
     local ips     ::Int = 0
     local stamp   ::Float64 = time()
     local server  ::Server.ServerConnection = _createServer()
+    local params  ::Dict{ASCIIString, ASCIIString} = CommandLine.create()
 
     #
     # This server is listening for all other managers and remote
@@ -129,9 +145,10 @@ module Manager
     Helper.info("Server has run")
     #
     # If user set up some amount of organisms they will be created
-    # in this call.
+    # in this call. If we are in recover mode, then this step should
+    # be skipped.
     #
-    createOrganisms()
+    if !CommandLine.has(params, RECOVER_ARG) createOrganisms() end
     #
     # This is main infinite loop. It manages input connections
     # and organism's tasks switching.

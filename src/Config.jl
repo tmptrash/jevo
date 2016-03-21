@@ -227,7 +227,7 @@ module Config
       300,                       # ORGANISM_START_AMOUNT
       64000,                     # ORGANISM_START_ENERGY
       100000,                    # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
-      100,                       # ORGANISM_ENERGY_DECREASE_PERIOD
+      10000000,                  # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                         # ORGANISM_ENERGY_DECREASE_VALUE
       4,                         # CODE_MAX_FUNC_PARAMS
       300,                       # WORLD_WIDTH

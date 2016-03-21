@@ -73,7 +73,7 @@ module RemoteWorld
     rd.resp  = (ans::Connection.Answer) -> _onResponse(rd, ans)
 
     Event.on(rd.con.observer, Client.EVENT_ANSWER, rd.resp)
-    Client.request(rd.con, RPC_GET_REGION, x, y, x1, y1)
+    Client.request(rd.con, RpcApi.RPC_GET_REGION, x, y, x1, y1)
   end
   #
   # Stops displaying organism's world. Closes the connection.
@@ -100,6 +100,6 @@ module RemoteWorld
     end
     CanvasWindow.update(rd.win)
     sleep(rd.delay)
-    Client.request(rd.con, RPC_GET_REGION, rd.x, rd.y, rd.x1, rd.y1)
+    Client.request(rd.con, RpcApi.RPC_GET_REGION, rd.x, rd.y, rd.x1, rd.y1)
   end
 end

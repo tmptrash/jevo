@@ -101,6 +101,8 @@ module Client
           #
           if !isa(e, EOFError)
             Helper.warn("Client has disconnected")
+          else
+            Helper.error("Client error: $e")
           end
           if sock !== null
             close(sock)
