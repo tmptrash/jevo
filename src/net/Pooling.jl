@@ -6,12 +6,21 @@
 # create() doesn't start pooling. For this, you have to call start() 
 # function. To stop pooling, call stop().
 #
+# Events:
+#     beforerequest Fired before every request. I used for setting 
+#                   parameters of request. e.g.: [RpcApi.RPC_GET_REGION,
+#                   1, 1, 200, 150]. 
+#     afterresponse Fired after every request. Passes answer object.
+#
 # Usage:
 #     import Pooling
 #
 #     function onBeforeRequest(pObj::PoolingData)
 #         push!(pObj.args, "arg1")
 #         push!(pObj.args, "arg2")
+#     end
+#     function onAfterResponse(pObj::PoolingData, ans::Connection.Answer)
+#         println(ans.data)
 #     end
 #
 #     p = Pooling.create(ip"127.0.0.1", 2000)
@@ -31,6 +40,13 @@ module Pooling
   export create
   export start
   export stop
+  export EVENT_BEFORE_REQUEST
+  export EVENT_AFTER_RESPONSE
+  #
+  # Name of the events, which are fired before and after each request.
+  #
+  const EVENT_BEFORE_REQUEST = "beforerequest"
+  const EVENT_AFTER_RESPONSE = "afterresponse"
   #
   # Contains pooling data. Is used in all functions as 
   # first parameter.
@@ -69,14 +85,14 @@ module Pooling
     # Here user should fill pd.args parameter. These arguments
     # will be passed to the remote server with request.
     #
-    Event.fire(pd.obs, "beforerequest", pd)
+    Event.fire(pd.obs, EVENT_BEFORE_REQUEST, pd)
     Client.request(pd.con, pd.args...)
   end
   #
   # Stops pooling and closes connection.
   # @param pd Pooling data object
   #
-  function stop(pd::RemoteData)
+  function stop(pd::PoolingData)
     Event.off(pd.con.observer, Client.EVENT_ANSWER, pd.resp)
     Client.stop(pd.con)
   end
@@ -85,13 +101,17 @@ module Pooling
   # @param pd remote data for specified server
   # @param ans Answer object with custom data
   #
-  function _onResponse(pd::RemoteData, ans::Connection.Answer)
+  function _onResponse(pd::PoolingData, ans::Connection.Answer)
+    #
+    # Here we pass response answer outside the Pooling module
+    #
+    Event.fire(pd.obs, EVENT_AFTER_RESPONSE, pd, ans)
     sleep(pd.delay)
     #
     # Here user should fill pd.args parameter. These arguments
     # will be passed to the remote server with request.
     #
-    Event.fire(pd.obs, "beforerequest", pd)
+    Event.fire(pd.obs, EVENT_BEFORE_REQUEST, pd)
     Client.request(pd.con, pd.args...)
   end
 end
