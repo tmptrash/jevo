@@ -1,1 +1,1 @@
-julia --quiet -i -e "include(\"src\\AppClientTest.jl\")"
+julia --color=yes -i -e "include(\"src\\AppClientTest.jl\")"
