@@ -70,7 +70,7 @@ function eatUp(org::Creature.Organism, fn::ASCIIString, block::Expr)
 
   if amount === :nothing return Expr(:nothing) end
 
-  :(Creature.energyUp(o, Int($(amount))))
+  :(Creature.eatUp(o, Int($(amount))))
 end
 #
 # @cmd
@@ -84,7 +84,7 @@ function eatDown(org::Creature.Organism, fn::ASCIIString, block::Expr)
 
   if amount === :nothing return Expr(:nothing) end
 
-  :(Creature.energyDown(o, Int($(amount))))
+  :(Creature.eatDown(o, Int($(amount))))
 end
 #
 # @cmd

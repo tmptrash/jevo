@@ -308,7 +308,7 @@ module Creature
   # @param amount Amount of energy organism wants to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function energyUp(org::Organism, amount::Int) _grabEnergy(org, up, amount) end
+  function eatUp(org::Organism, amount::Int) _grabEnergy(org, up, amount) end
   #
   # @oapi
   # ed - means get Energy Down. Short name to help organism find this name faster.
@@ -317,7 +317,7 @@ module Creature
   # @param amount Amount of energy organism wants to grab
   # @return {Int} Amount of grabbed energy
   #
-  function energyDown(org::Organism, amount::Int) _grabEnergy(org, down, amount) end
+  function eatDown(org::Organism, amount::Int) _grabEnergy(org, down, amount) end
   #
   # @oapi
   # @param org Current organism
