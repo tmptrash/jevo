@@ -16,9 +16,8 @@
 #
 module RemoteWorld
   import Event
-  import Connection
-  import Client
   import CanvasWindow
+  import Pooling
   import RpcApi
   import Config
 
@@ -30,16 +29,14 @@ module RemoteWorld
   # world's region and shows it on a canvas.
   #
   type RemoteData
-    con::Client.ClientConnection
+    pd::Pooling.PoolingData
     win::CanvasWindow.Window
-    resp::Function
-    delay::Int
     x::Int
     y::Int
     x1::Int
     y1::Int
 
-    RemoteData(con::Client.ClientConnection, win::CanvasWindow.Window) = new(con, win)
+    RemoteData(pd::Pooling.PoolingData, win::CanvasWindow.Window) = new(pd, win)
   end
   #
   # Creates connection with remote host for display pixels
@@ -51,8 +48,8 @@ module RemoteWorld
   # @return RemoteData
   #
   function create(host::Base.IPAddr, port::Integer, width::Int = Config.val(:WORLD_WIDTH), height::Int = Config.val(:WORLD_HEIGHT))
-    con = Client.create(host, port)
-    con !== false ? RemoteData(con, CanvasWindow.create(width, height)) : false
+    pd = Pooling.create(host, port)
+    con ? RemoteData(pd, CanvasWindow.create(width, height)) : false
   end
   #
   # Start displaying remote area. It makes requests to remote 
