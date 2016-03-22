@@ -93,7 +93,6 @@ module RemoteWorld
   # @param rd RemoteData object
   #
   function _onBeforeRequest(rd::RemoteData)
-    println("before")
     rd.pd.args = [RpcApi.RPC_GET_REGION, rd.x, rd.y, rd.x1, rd.y1]
   end
   #
@@ -104,7 +103,6 @@ module RemoteWorld
   function _onAfterResponse(rd::RemoteData, ans::Connection.Answer)
     local region = ans.data.reg
 
-    println("after")
     CanvasWindow.title(rd.win, string("ips: ", ans.data.ips))
     for x in 1:size(region)[2]
       for y in 1:size(region)[1]
