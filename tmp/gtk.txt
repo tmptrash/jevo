@@ -1,0 +1,6 @@
+w = Gtk.@Window("test")
+l = Gtk.@Label("Label")
+push!(w, l)
+showall(w)
+setproperty!(l, :label, "werwer\nsdfsdf")
+destroy(w)
