@@ -1,0 +1,20 @@
+AST(:($(Expr(:lambda, Any[:(o::(top(getfield))(Creature,:Organism))], Any[Any[Any[:o,:Any,18],Any[:func_1,:Any,3],Any[:var_1,:Any,18]],Any[],0,Any[]], :(begin
+        NewvarNode(:func_1)
+        o = (top(typeassert))(o,Creature.Organism)
+        $(Expr(:method, :func_1, :((top(svec))((top(apply_type))(Main.Tuple),(top(svec))())), AST(:($(Expr(:lambda, Any[], Any[Any[],Any[Any[:func_1,:Any,3]],0,Any[]], :(begin
+        return func_1(-9218538778157063673,3792506346164769994,634505418221785954)
+    end))))), false))
+        $(Expr(:method, :func_1, :((top(svec))((top(apply_type))(Main.Tuple,Int64),(top(svec))())), AST(:($(Expr(:lambda, Any[:var_2], Any[Any[Any[:var_2,:Any,0]],Any[Any[:func_1,:Any,3]],0,Any[]], :(begin
+        return func_1(var_2,3792506346164769994,634505418221785954)
+    end))))), false))
+        $(Expr(:method, :func_1, :((top(svec))((top(apply_type))(Main.Tuple,Int64,Int64),(top(svec))())), AST(:($(Expr(:lambda, Any[:var_2,:var_3], Any[Any[Any[:var_2,:Any,0],Any[:var_3,:Any,0]],Any[Any[:func_1,:Any,3]],0,Any[]], :(begin
+        return func_1(var_2,var_3,634505418221785954)
+    end))))), false))
+        $(Expr(:method, :func_1, :((top(svec))((top(apply_type))(Main.Tuple,Int64,Int64,Int64),(top(svec))())), AST(:($(Expr(:lambda, Any[:var_2,:var_3,:var_4], Any[Any[Any[:var_2,:Any,0],Any[:var_3,:Any,0],Any[:var_4,:Any,0]],Any[],0,Any
+, :(begin
+        return var_2
+    end))))), false))
+        (Creature.stepRight)(o)
+        var_1 = var_1 / var_1
+        return (Creature.stepLeft)(o)
+    end)))))
