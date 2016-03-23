@@ -21,6 +21,7 @@ module RpcApi
   export RPC_SET_ENERGY
   export RPC_SET_ENERGY_RND
   export RPC_BACKUP
+  export RPC_GET_STATISTICS
   export RPC_DEBUG_GC
   
   export Region
@@ -90,6 +91,39 @@ module RpcApi
     pos::Array{Int}
   end
   #
+  # Structure of world statistics
+  #
+  type Statistics
+    #
+    # Amount of alive organisms
+    #
+    orgAmount::Int
+    #
+    # Iterations(cicles) per second
+    #
+    ips::Int
+    #
+    # Total amount of organisms: alive+dead
+    #
+    orgTotalAmount::Int
+    #
+    # Size of the world: [width, height]
+    #
+    worldSize::Array{Int, 1}
+    #
+    # Global configuration in string representation
+    #
+    cfg::Array{ASCIIString, 1}
+    #
+    # An organism with minimum energy
+    #
+    minOrg::SimpleOrganism
+    #
+    # An organism with maximum energy
+    #
+    maxOrg::SimpleOrganism
+  end
+  #
   # RPC API unique identifiers. Only these functions may be called
   # remotely on the server.
   #
@@ -106,5 +140,6 @@ module RpcApi
   const RPC_SET_ENERGY        = 11
   const RPC_SET_ENERGY_RND    = 12
   const RPC_BACKUP            = 13
-  const RPC_DEBUG_GC          = 14
+  const RPC_GET_STATISTICS    = 14
+  const RPC_DEBUG_GC          = 15
 end

@@ -8,5 +8,13 @@ l = Gtk.@Label("Label")
 push!(w, l)
 showall(w)
 #setproperty!(l, :label, "werwer\nsdfsdf")
-markup(l, "<span size=\"12800\" face=\"Corbel\" foreground=\"blue\">Blue text</span>\n<span face=\"Corbel\" size=\"12800\">is cool!</span>")
+markup(l, "<span size=\"12800\" face=\"Lucida Console\" foreground=\"blue\">Blue text</span>\n<span face=\"Lucida Console\" size=\"12800\">is cool!</span>")
 destroy(w)
+
+i need:
+- amount of organisms
+- min\max energy + SimpleOrganism data
+- IPS
+- total amount (alive+dead)
+- world size
+- Config

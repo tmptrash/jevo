@@ -179,6 +179,44 @@ function doBackup()
 end
 #
 # @rpc
+# Returns world statistics
+#
+function getStatistics()
+  RpcApi.Statistics(
+    length(Manager._data.organisms),
+    Config.val(:WORLD_IPS),
+    # TODO
+    100,
+    [300, 200],
+    ["test-config: 123", "second-cfg: 234"],
+    # TODO
+    RpcApi.SimpleOrganism(
+      UInt(1),
+      [1],
+      :(function f() 1 end),
+      1,
+      1,
+      1,
+      100,
+      Dict{Int16, Int16}(),
+      [100, 150]
+    ),
+    # TODO:
+    RpcApi.SimpleOrganism(
+      UInt(2),
+      [2],
+      :(function f() 2 end),
+      2,
+      2,
+      2,
+      100,
+      Dict{Int16, Int16}(),
+      [200, 150]
+    )
+  )
+end
+#
+# @rpc
 # Calls Garbage Collector in current process
 #
 function debugGc()
@@ -228,5 +266,6 @@ _rpcApi = Dict{Integer, Function}(
   RpcApi.RPC_SET_ENERGY        => setEnergy,
   RpcApi.RPC_SET_ENERGY_RND    => setEnergyRandom,
   RpcApi.RPC_BACKUP            => doBackup,
+  RpcApi.RPC_GET_STATISTICS    => getStatistics,
   RpcApi.RPC_DEBUG_GC          => debugGc
 )

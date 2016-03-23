@@ -2,6 +2,8 @@
 # @author DeadbraiN
 #
 module Helper
+  import Gtk
+  
   export Point
   export randTrue
   export getProbIndex
@@ -46,6 +48,13 @@ module Helper
   #
   function randTrue()
     rand(1:2) === 1
+  end
+  #
+  # This function is not presented in Julis Gtk package
+  #
+  function gtk_markup(label::Gtk.GtkLabel,str)
+    ccall((:gtk_label_set_markup,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{UInt8}),label,str)
+    return label
   end
   #
   # It calculates probability index from variable amount of components.

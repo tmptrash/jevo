@@ -158,6 +158,22 @@ module Config
     #
     WORLD_START_ENERGY_AMOUNT::UInt32
     #
+    # Width of statistics window
+    #
+    STAT_WIDTH::Int
+    #
+    # Height of statistics window
+    #
+    STAT_HEIGHT::Int
+    #
+    # Delay between requests for obtaining remote statistics.
+    # This parameter affects frames per second in a window label.
+    # Value in seconds. It's possible to have zero based value. In
+    # this case requests will be posted one by one without delays.
+    # So the speed for 0 delay depends only on network speed.
+    #
+    STAT_FRAME_DELAY::Int
+    #
     # Starting number for TCP/IP listening
     #
     CONNECTION_SERVER_PORT::Int
@@ -248,6 +264,9 @@ module Config
       500,                       # WORLD_MAX_ORGANISMS
       5000,                      # WORLD_START_ENERGY_BLOCKS
       UInt32(1000),              # WORLD_START_ENERGY_AMOUNT
+      650,                       # STAT_WIDTH
+      500,                       # STAT_HEIGHT
+      5,                         # STAT_FRAME_DELAY
       2000                       # CONNECTION_SERVER_PORT
     )
   )
