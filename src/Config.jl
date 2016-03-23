@@ -110,6 +110,16 @@ module Config
     #
     ORGANISM_ENERGY_DECREASE_VALUE::Int
     #
+    # After this amount of iterations we have to kill ORGANISM_REMOVE_AMOUNT
+    # organisms with minimum energy
+    #
+    ORGANISM_REMOVE_AFTER_TIMES::Int
+    #
+    # Amount of organisms, which we have to remove after every
+    # ORGANISM_REMOVE_AFTER_TIMES iterations
+    #
+    ORGANISM_REMOVE_AMOUNT::Int
+    #
     # Maximum amount of arguments in custom functions
     #
     CODE_MAX_FUNC_PARAMS::Int
@@ -159,11 +169,11 @@ module Config
     WORLD_START_ENERGY_AMOUNT::UInt32
     #
     # Width of statistics window
-    #
+    # TODO: should be removed from here. It doesn't related to Manager
     STAT_WIDTH::Int
     #
     # Height of statistics window
-    #
+    #  TODO: should be removed from here. It doesn't related to Manager
     STAT_HEIGHT::Int
     #
     # Delay between requests for obtaining remote statistics.
@@ -171,7 +181,7 @@ module Config
     # Value in seconds. It's possible to have zero based value. In
     # this case requests will be posted one by one without delays.
     # So the speed for 0 delay depends only on network speed.
-    #
+    # TODO: should be removed from here. It doesn't related to Manager
     STAT_FRAME_DELAY::Int
     #
     # Starting number for TCP/IP listening
@@ -209,6 +219,21 @@ module Config
       end
 
       true
+  end
+  #
+  # Formats configuration for usable user's view
+  # @return {ASCIIString}
+  #
+  function format()
+    local fields::Array{Symbol, 1} = fieldnames(Data)
+    local i::Symbol
+    local arr::Array{ASCIIString, 1} = []
+
+    for i in fields
+      push!(arr, string(i) * ": " * string(getfield(_data.d, i)))
+    end
+
+    arr
   end
   #
   # Returns configuration value according to unique key. In
@@ -255,6 +280,8 @@ module Config
       5000,                      # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
       20,                        # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                         # ORGANISM_ENERGY_DECREASE_VALUE
+      500,                       # ORGANISM_REMOVE_AFTER_TIMES
+      10,                        # ORGANISM_REMOVE_AMOUNT
       4,                         # CODE_MAX_FUNC_PARAMS
       300,                       # WORLD_WIDTH
       200,                       # WORLD_HEIGHT

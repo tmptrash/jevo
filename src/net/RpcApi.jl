@@ -107,9 +107,13 @@ module RpcApi
     #
     orgTotalAmount::Int
     #
-    # Size of the world: [width, height]
+    # Width of the world
     #
-    worldSize::Array{Int, 1}
+    worldWidth::Int
+    #
+    # Height of the world
+    #
+    worldHeight::Int
     #
     # Global configuration in string representation
     #

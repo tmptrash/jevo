@@ -6,7 +6,6 @@
 #
 import Config
 import Helper
-
 #
 # One task related to one organism
 #
@@ -29,7 +28,7 @@ end
 # update organisms life in memory world. Decreases energy and
 # provides rare mutations.
 # @param eCounter Increments value for energy decreasing
-# @param mCounter Counter for mtations speed
+# @param mCounter Counter for mutations speed
 #
 function _updateOrganisms(eCounter::Int, mCounter::Int)
     local len::Int = length(Manager._data.tasks) # length(tasks) === length(organisms)
@@ -37,7 +36,8 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     local j  ::Int
     local dPeriod::Int
     local org::Creature.Organism
-    local maxEnergy::Int = Config.val(:ORGANISM_MAX_ENERGY)
+    local maxEnergy::Int = Manager._data.maxOrg.energy #Config.val(:ORGANISM_MAX_ENERGY)
+    local removeAfter::Int = Config.val(:ORGANISM_REMOVE_AFTER_TIMES)
 
     eCounter += 1
     mCounter += 1
@@ -83,9 +83,38 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
       _updateOrganismsEnergy(eCounter)
       eCounter = 0
     end
+    #
+    # This call removes organisms with minimum energy
+    #
+    if mCounter % removeAfter === 0 _removeMinOrganisms(Manager._data.tasks) end
+    #
+    # This counter should be infinite
+    #
     if mCounter === typemax(Int) mCounter = 0 end
 
     eCounter, mCounter
+end
+#
+# Removes organisms with minimum energy
+# @param tasks Array of tasks with organisms inside
+#
+function _removeMinOrganisms(tasks::Array{OrganismTask, 1})
+  local amount::Int = Config.val(:ORGANISM_REMOVE_AMOUNT)
+  local i::Int
+
+  if length(tasks) <= amount return false end
+
+  sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
+  for i = 1:amount _killOrganism(i) end
+  #
+  # Updates min and max energetic organisms
+  #
+  Manager._data.minOrg = tasks[amount + 1].organism
+  Manager._data.maxOrg = tasks[end].organism
+  Manager._data.minId  = tasks[amount + 1].id
+  Manager._data.maxId  = tasks[end].id
+
+  true
 end
 #
 # Updates energy of all organisms. Decreases their energy according
@@ -186,6 +215,7 @@ function _createOrganism(organism = nothing, pos = nothing)
   Manager._data.organisms[id] = org
   push!(Manager._data.tasks, oTask)
   _organismMsg(id, "run")
+  Manager._data.totalOrganisms += UInt(1)
 
   oTask
 end

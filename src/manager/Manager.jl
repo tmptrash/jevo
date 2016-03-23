@@ -83,6 +83,26 @@ module Manager
     # organism will be created
     #
     organismId::UInt
+    #
+    # Total amount of organisms: alive + dead
+    #
+    totalOrganisms::UInt
+    #
+    # Organism with minimum amount of energy
+    #
+    minOrg::Creature.Organism
+    #
+    # Organism with maximum amount of energy
+    #
+    maxOrg::Creature.Organism
+    #
+    # Id of organism with minimum amount of energy
+    #
+    minId::UInt
+    #
+    # Id of organism with maximum amount of energy
+    #
+    maxId::UInt
   end
   #
   # This function is used for recovering a manager's data from 
@@ -100,12 +120,17 @@ module Manager
       t.task = Task(Creature.born(t.organism, t.id))
     end
 
-    _data.world      = data.world
-    _data.positions  = data.positions
-    _data.organisms  = data.organisms
-    _data.tasks      = data.tasks
-    _data.params     = data.params
-    _data.organismId = data.organismId
+    _data.world          = data.world
+    _data.positions      = data.positions
+    _data.organisms      = data.organisms
+    _data.tasks          = data.tasks
+    _data.params         = data.params
+    _data.organismId     = data.organismId
+    _data.totalOrganisms = data.totalOrganisms
+    _data.minOrg         = data.minOrg
+    _data.maxOrg         = data.maxOrg
+    _data.minId          = data.minId
+    _data.maxId          = data.maxId
   end
   #
   # Makes a dump of Manager data and saves it into the file.
@@ -200,6 +225,11 @@ module Manager
     Dict{UInt, Creature.Organism}(),
     OrganismTask[],
     CommandLine.create(),
+    UInt(0),
+    UInt(0),
+    Creature.create(), # temporary min organism
+    Creature.create(), # temporary max organism
+    UInt(0),
     UInt(0)
   )
 end

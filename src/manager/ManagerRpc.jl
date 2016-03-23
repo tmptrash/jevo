@@ -99,19 +99,7 @@ end
 # TODO: remake to organism id, not position related id
 function getOrganism(id::UInt)
   if !haskey(Manager._data.organisms, id) return false end
-  
-  org = Manager._data.organisms[id]
-  return RpcApi.SimpleOrganism(
-    id,
-    org.mutationProbabilities,
-    org.code,
-    org.mutationsOnClone,
-    org.mutationPeriod,
-    org.mutationAmount,
-    org.energy,
-    org.mem,
-    [org.pos.x, org.pos.y]
-  )
+  _createSimpleOrganism(id, Manager._data.organisms[id])
 end
 #
 # @rpc
@@ -139,7 +127,7 @@ function getOrganisms(from::Int = 1, to::Int = 0)
   from = from < 1 || from > len ? 1 : from
   to   = to === 0 ? len : to
 
-  for i=from:to push!(orgs, getOrganism(Manager._data.tasks[i].id)) end
+  for i = from:to push!(orgs, getOrganism(Manager._data.tasks[i].id)) end
 
   orgs
 end
@@ -185,34 +173,12 @@ function getStatistics()
   RpcApi.Statistics(
     length(Manager._data.organisms),
     Config.val(:WORLD_IPS),
-    # TODO
-    100,
-    [300, 200],
-    ["test-config: 123", "second-cfg: 234"],
-    # TODO
-    RpcApi.SimpleOrganism(
-      UInt(1),
-      [1],
-      :(function f() 1 end),
-      1,
-      1,
-      1,
-      100,
-      Dict{Int16, Int16}(),
-      [100, 150]
-    ),
-    # TODO:
-    RpcApi.SimpleOrganism(
-      UInt(2),
-      [2],
-      :(function f() 2 end),
-      2,
-      2,
-      2,
-      100,
-      Dict{Int16, Int16}(),
-      [200, 150]
-    )
+    Manager._data.totalOrganisms,
+    Manager._data.world.width,
+    Manager._data.world.height,
+    Config.format(),
+    _createSimpleOrganism(Manager._data.minId, Manager._data.minOrg),
+    _createSimpleOrganism(Manager._data.maxId, Manager._data.maxOrg)
   )
 end
 #
@@ -225,6 +191,23 @@ function debugGc()
   true
 end
 
+#
+# Assembles RpcApi.SimpleOrganism type from wider Creature.Organism
+# @return {RpcApi.SimpleOrganism}
+#
+function _createSimpleOrganism(id::UInt, org::Creature.Organism)
+  RpcApi.SimpleOrganism(
+    id,
+    org.mutationProbabilities,
+    org.code,
+    org.mutationsOnClone,
+    org.mutationPeriod,
+    org.mutationAmount,
+    org.energy,
+    org.mem,
+    [org.pos.x, org.pos.y]
+  )
+end
 #
 # Creates server and returns it's ServerConnection type. It 
 # uses porn number provided by "serverPort" command line

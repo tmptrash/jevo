@@ -107,13 +107,14 @@ module RemoteStatistics
     # TODO: on linux we have to use other font name
     Helper.gtk_markup(rs.label,
       """
-      <span size="12800" face="Lucida Console" foreground="blue">Organisms   : </span><span face="Lucida Console" size="12800">$(d.orgAmount)</span>
-      <span size="12800" face="Lucida Console" foreground="blue">IPS         : </span><span face="Lucida Console" size="12800">$(d.ips)</span>
-      <span size="12800" face="Lucida Console" foreground="blue">Total       : </span><span face="Lucida Console" size="12800">$(d.orgTotalAmount)</span>
-      <span size="12800" face="Lucida Console" foreground="blue">World size  : </span><span face="Lucida Console" size="12800">$(d.worldSize)</span>
-      <span size="12800" face="Lucida Console" foreground="blue">Config      : </span><span face="Lucida Console" size="12800">$(d.cfg)</span>
-      <span size="12800" face="Lucida Console" foreground="blue">Min organism: </span><span face="Lucida Console" size="12800">TODO:</span>
-      <span size="12800" face="Lucida Console" foreground="blue">Max organism: </span><span face="Lucida Console" size="12800">TODO:</span>
+<span size="12800" face="Lucida Console" foreground="blue">Organisms   : </span><span face="Lucida Console" size="12800">$(d.orgAmount)</span>
+<span size="12800" face="Lucida Console" foreground="blue">IPS         : </span><span face="Lucida Console" size="12800">$(d.ips)</span>
+<span size="12800" face="Lucida Console" foreground="blue">Total       : </span><span face="Lucida Console" size="12800">$(d.orgTotalAmount)</span>
+<span size="12800" face="Lucida Console" foreground="blue">World width : </span><span face="Lucida Console" size="12800">$(d.worldWidth)</span>
+<span size="12800" face="Lucida Console" foreground="blue">World height: </span><span face="Lucida Console" size="12800">$(d.worldHeight)</span>
+<span size="12800" face="Lucida Console" foreground="blue">Config      : </span><span face="Lucida Console" size="9000">\n$(join(d.cfg, "\n"))</span>
+<span size="12800" face="Lucida Console" foreground="blue">Min organism: </span><span face="Lucida Console" size="9000">$(d.minOrg.code)\nEnergy: $(d.minOrg.energy)</span>
+<span size="12800" face="Lucida Console" foreground="blue">Max organism: </span><span face="Lucida Console" size="9000">$(d.maxOrg.code)\nEnergy: $(d.maxOrg.energy)</span>
       """
     )
   end
