@@ -36,7 +36,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     local j  ::Int
     local dPeriod::Int
     local org::Creature.Organism
-    local maxEnergy::Int = Manager._data.maxOrg.energy #Config.val(:ORGANISM_MAX_ENERGY)
+    local maxEnergy::Int = Manager._data.maxOrg.energy
     local removeAfter::Int = Config.val(:ORGANISM_REMOVE_AFTER_TIMES)
 
     eCounter += 1

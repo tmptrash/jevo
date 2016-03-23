@@ -34,8 +34,6 @@ module Mutator
       pIndex = org.codeSize < 1 ? 1           : Helper.getProbIndex(org.mutationProbabilities)
       res    = org.codeSize < 1 ? _onAdd(org) : _MUTATION_FUNCS[pIndex](org)
       result &= res
-      # TODO: remove this line
-      Helper.save(pIndex, "index.jevo")
       #
       # Updates compiled version of the code. Only valid code will be applied,
       # because exception will be fired in case of error organism code.
@@ -103,8 +101,6 @@ module Mutator
        (cmdEx = cmd(org, fnName, block)).head !== :nothing) # impossible obtain new code line
       return false
     end
-    # TODO: remove this line
-    Helper.save([pos, fnEx, block, cmdEx], "question.jevo")
     Code.onRemoveLine(org, pos, fnEx, block)
     block.args[pos] = cmdEx
     true
