@@ -1,6 +1,7 @@
-push!(LOAD_PATH, "$(pwd())/src")
+include("../src/ImportFolders.jl")
 using Manager
 using Debug
+using Helper
 
 orgs = Creature.Organism[]
 len  = 500
@@ -18,6 +19,7 @@ function run()
       Mutator.mutate(orgs[i])
       orgs[i].codeFn = eval(orgs[i].code)
       try
+	    Helper.save(orgs[i], "code.jevo")
         orgs[i].codeFn(orgs[i])
       catch e
       end

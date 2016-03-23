@@ -1,0 +1,36 @@
+AST(:($(Expr(:lambda, Any[:(o::(top(getfield))(Creature,:Organism))], Any[Any[Any[:o,:Any,19],Any[:func_3,:Any,3],Any[:func_2,:Any,3],Any[:var_2,:Any,18]],Any[],0,Any[]], :
+(begin
+        NewvarNode(:func_3)
+        NewvarNode(:func_2)
+        o = (top(typeassert))(o,Creature.Organism)
+        $(Expr(:method, :func_3, :((top(svec))((top(apply_type))(Main.Tuple),(top(svec))())), AST(:($(Expr(:lambda, Any[], Any[Any[],Any[Any[:func_3,:Any,3]],0,Any[]], :(be
+gin
+        return func_3(5179,-88)
+    end))))), false))
+        $(Expr(:method, :func_3, :((top(svec))((top(apply_type))(Main.Tuple,Int16),(top(svec))())), AST(:($(Expr(:lambda, Any[:var_10], Any[Any[Any[:var_10,:Any,0]],Any[Any
+[:func_3,:Any,3]],0,Any[]], :(begin
+        return func_3(var_10,-88)
+    end))))), false))
+        $(Expr(:method, :func_3, :((top(svec))((top(apply_type))(Main.Tuple,Int16,Int8),(top(svec))())), AST(:($(Expr(:lambda, Any[:var_10,:var_11], Any[Any[Any[:var_10,:An
+y,2],Any[:var_11,:Any,0]],Any[Any[:o,:Any,19]],0,Any[]], :(begin
+        unless (Main.haskey)((top(getfield))(o,:mem),var_10) goto 0
+        var_10 = (Main.getindex)((top(getfield))(o,:mem),var_10)
+        goto 1
+        0:
+        var_10 = var_10
+        1:
+        (Creature.stepUp)(o)
+        return var_10
+    end))))), false))
+        $(Expr(:method, :func_2, :((top(svec))((top(apply_type))(Main.Tuple),(top(svec))())), Type{LabelNode}, false))
+        $(Expr(:method, :func_2, :((top(svec))((top(apply_type))(Main.Tuple,Bool),(top(svec))())), Int64, false))
+        $(Expr(:method, :func_2, :((top(svec))((top(apply_type))(Main.Tuple,Bool,Int64),(top(svec))())), SymbolNode, false))
+        $(Expr(:method, :func_2, :((top(svec))((top(apply_type))(Main.Tuple,Bool,Int64,Int16),(top(svec))())), Type{GenSym}, false))
+        $(Expr(:method, :func_2, :((top(svec))((top(apply_type))(Main.Tuple,Bool,Int64,Int16,Int8),(top(svec))())), Type{GotoNode}, false))
+        (Creature.stepRight)(o)
+        (Creature.stepUp)(o)
+        (Creature.stepDown)(o)
+        var_2 = var_2 / var_2
+        (Creature.stepUp)(o)
+        return (Creature.stepLeft)(o)
+    end)))))
