@@ -275,7 +275,10 @@ function _onClone(organism::Creature.Organism)
   # split energy between old and new organisms 50/50 after
   # clonning. 
   #
-  organism.energy = Int(div(organism.energy, 2))
+  # TODO: i have to solve the problem of entire energy increasing
+  # TODO: because everu clone creates new organism with the same
+  # TODO: amount of energy ane they may eat each other.
+  #organism.energy = Int(div(organism.energy, 2))
   #
   # Creates new organism and apply mutations to him.
   #
