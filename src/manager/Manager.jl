@@ -148,7 +148,8 @@ module Manager
       #
       # This call switches between all non blocking asynchronous
       # functions (see @async macro). For example, it handles all
-      # input connections for current server.
+      # input connections for current server, switches between
+      # organisms Tasks and so on...
       #
       yield()
     end
@@ -173,7 +174,7 @@ module Manager
       Config.val(:WORLD_IPS, trunc(Int, ips / ts))
       return 0, time()
     end
-    
+
     ips + 1, stamp
   end
   #
