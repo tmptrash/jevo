@@ -152,7 +152,7 @@ end
 # @param amount Amount of energy points
 # @param energy Amount of energy within one point
 #
-function setEnergyRandom(amount::Int, energy::UInt32)
+function setRandomEnergy(amount::Int = Config.val(:WORLD_START_ENERGY_BLOCKS), energy::UInt32 = Config.val(:WORLD_START_ENERGY_AMOUNT))
   local i::Int
 
   for i = 1:amount
@@ -248,7 +248,7 @@ _rpcApi = Dict{Integer, Function}(
   RpcApi.RPC_GET_AMOUNT        => getAmount,
   RpcApi.RPC_GET_ORGANISMS     => getOrganisms,
   RpcApi.RPC_SET_ENERGY        => setEnergy,
-  RpcApi.RPC_SET_ENERGY_RND    => setEnergyRandom,
+  RpcApi.RPC_SET_ENERGY_RND    => setRandomEnergy,
   RpcApi.RPC_BACKUP            => doBackup,
   RpcApi.RPC_GET_STATISTICS    => getStatistics,
   RpcApi.RPC_DEBUG_GC          => debugGc

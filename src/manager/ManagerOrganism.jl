@@ -37,7 +37,6 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     local dPeriod::Int
     local org::Creature.Organism
     local maxEnergy::Int = Manager._data.maxOrg.energy
-    local removeAfter::Int = Config.val(:ORGANISM_REMOVE_AFTER_TIMES)
 
     eCounter += 1
     mCounter += 1
@@ -77,8 +76,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     #
     # This block decreases energy from organisms, because they 
     # spend it while leaving.
-    # TODO: this method should be merged with this one, because we
-    # TODO: go through all organisms twice (for, while)
+    #
     if (dPeriod = Config.val(:ORGANISM_ENERGY_DECREASE_PERIOD)) > 0 && eCounter >= dPeriod
       _updateOrganismsEnergy(eCounter)
       eCounter = 0
@@ -86,7 +84,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     #
     # This call removes organisms with minimum energy
     #
-    if mCounter % removeAfter === 0 _removeMinOrganisms(Manager._data.tasks) end
+    if mCounter % Config.val(:ORGANISM_REMOVE_AFTER_TIMES) === 0 _removeMinOrganisms(Manager._data.tasks) end
     #
     # This counter should be infinite
     #
@@ -175,6 +173,7 @@ function _killOrganism(i::Int)
   # "deleted".
   #
   try Base.throwto(Manager._data.tasks[i].task, null) end
+  _moveOrganism(org.pos, org)
   Manager.msg(Manager._data.tasks[i].id, "die")
 end
 #

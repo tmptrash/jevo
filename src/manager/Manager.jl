@@ -38,6 +38,7 @@ module Manager
   #
   include("ManagerRpc.jl")
   include("ManagerOrganism.jl")
+  include("ManagerBackup.jl")
   #
   # This manager is also a server for all other remote managers. These
   # remote managers are clients for current and may use "Client" module
@@ -128,7 +129,7 @@ module Manager
     # be skipped.
     #
     if !CommandLine.has(params, ARG_RECOVER)
-      setEnergyRandom(Config.val(:WORLD_START_ENERGY_BLOCKS), Config.val(:WORLD_START_ENERGY_AMOUNT))
+      setRandomEnergy()
       createOrganisms()
     end
     #
@@ -170,9 +171,9 @@ module Manager
 
     if ts >= 1.0
       Config.val(:WORLD_IPS, trunc(Int, ips / ts))
-      stamp = time()
-      ips   = 0
+      return 0, time()
     end
+    
     ips + 1, stamp
   end
   #
