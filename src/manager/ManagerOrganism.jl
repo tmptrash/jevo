@@ -175,7 +175,7 @@ function _killOrganism(i::Int)
   # "deleted".
   #
   try Base.throwto(Manager._data.tasks[i].task, null) end
-  _organismMsg(Manager._data.tasks[i].id, "die")
+  Manager.msg(Manager._data.tasks[i].id, "die")
 end
 #
 # Creates new organism and binds event handlers to him. It also
@@ -214,18 +214,10 @@ function _createOrganism(organism = nothing, pos = nothing)
   Manager._data.organismId += UInt(1)
   Manager._data.organisms[id] = org
   push!(Manager._data.tasks, oTask)
-  _organismMsg(id, "run")
+  Manager.msg(id, "run")
   Manager._data.totalOrganisms += UInt(1)
 
   oTask
-end
-#
-# Shows organism related message
-# @param id Unique orgainsm identifier
-# @param msg Organism's message
-#
-function _organismMsg(id::UInt, msg::ASCIIString)
-  Helper.info("org-$(id) $(msg)")
 end
 #
 # Moves organism to specified position. Updates organism's 

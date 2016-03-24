@@ -7,6 +7,7 @@
 # TODO: describe annotations: @rpc (RPC function)
 #
 import RpcApi
+import Config
 #
 # @rpc
 # Grabs world's rectangle region and returns it
@@ -215,7 +216,7 @@ end
 # @return Connection object
 #
 function _createServer()
-  port = CommandLine.val(Manager._data.params, Manager.PARAM_SERVER_PORT)
+  port = CommandLine.val(Manager._data.params, Manager.ARG_SERVER_PORT)
   port = port == "" ? Config.val(:CONNECTION_SERVER_PORT) : Int(port)
   # TODO: ip should be in config
   con  = Server.create(ip"127.0.0.1", port)

@@ -13,7 +13,7 @@
 # TODO: add support of serverPort cmd line argument
 # TODO: add remote functions for changing period and probs
 # TODO: add command line parameter for creating default config file
-# TODO: add create method. It should returm Data() type
+# TODO: add create method. It should returm ManagerData() type
 #
 module Manager
   import Creature
@@ -25,38 +25,39 @@ module Manager
   import Connection
   import CommandLine
   import RpcApi
-  import Backup
-
-  using Config
+  import Config
+  # TODO: This line should be removed
   using Debug
 
   export run
   export recover
   export backup
-  export RECOVER_ARG
+  export ARG_RECOVER
   #
-  # This is how we collect Manager module from it's parts
+  # This is how we collect Manager module from it's parts(files)
   #
   include("ManagerRpc.jl")
   include("ManagerOrganism.jl")
   #
   # This manager is also a server for all other remote managers. These
   # remote managers are clients for current and may use "Client" module
-  # to send commands and obtain results. So, this port will be used for
-  # current manager(server) for listening clients.
+  # to send commands and obtain results. So, this command line property
+  # will be used for current manager(server) for listening clients. For
+  # this you have to run Manager like this:
+  # >julia AppManager.jl serverPort=2000
   #
-  const PARAM_SERVER_PORT = "serverPort"
+  const ARG_SERVER_PORT = "serverPort"
   #
   # Name of the command line argument, which tells the application
   # to recover itself from last backup.
   #
-  const RECOVER_ARG = "recover"
+  const ARG_RECOVER = "recover"
   #
   # Manager's related type. Contains world, command line parameters,
   # organisms map and so on... If some fields will be changed, don't
   # forget to change them in recover() function.
   #
-  type Data
+  type ManagerData
     #
     # Instance of the world
     #
@@ -105,51 +106,6 @@ module Manager
     maxId::UInt
   end
   #
-  # This function is used for recovering a manager's data from 
-  # backup file. It means that an application was crashed before 
-  # and now we have to recover it with last correct backup. Works
-  # in pair with backup() function.
-  #
-  function recover()
-    local data::Data = Backup.load()
-    local i::Int
-    local t::OrganismTask
-
-    for i = 1:length(data.tasks)
-      t = data.tasks[i]
-      t.task = Task(Creature.born(t.organism, t.id))
-    end
-
-    _data.world          = data.world
-    _data.positions      = data.positions
-    _data.organisms      = data.organisms
-    _data.tasks          = data.tasks
-    _data.params         = data.params
-    _data.organismId     = data.organismId
-    _data.totalOrganisms = data.totalOrganisms
-    _data.minOrg         = data.minOrg
-    _data.maxOrg         = data.maxOrg
-    _data.minId          = data.minId
-    _data.maxId          = data.maxId
-  end
-  #
-  # Makes a dump of Manager data and saves it into the file.
-  # Works in pair with recover().
-  #
-  function backup()
-    local tasks::Array{OrganismTask, 1} = deepcopy(_data.tasks)
-    local task::Task = Task(()->0)
-    local i::Int
-    #
-    # This is a small trick. We have to set all tasks in waiting
-    # state for serializing into the file. Julia can't save active
-    # tasks.
-    #
-    for i = 1:length(_data.tasks) _data.tasks[i].task = task end
-    Backup.save(_data)
-    for i = 1:length(tasks) _data.tasks[i].task = tasks[i].task end
-  end
-  #
   # Runs Manager instance, one world, server an so on... Blocking 
   # function.
   #
@@ -160,20 +116,18 @@ module Manager
     local stamp   ::Float64 = time()
     local server  ::Server.ServerConnection = _createServer()
     local params  ::Dict{ASCIIString, ASCIIString} = CommandLine.create()
-
     #
     # This server is listening for all other managers and remote
     # terminal. It runs obtained commands and send answers back.
     # In other words, it works like RPC runner...
     #
     Server.run(server)
-    Helper.info("Server has run")
     #
     # If user set up some amount of organisms they will be created
     # in this call. If we are in recover mode, then this step should
     # be skipped.
     #
-    if !CommandLine.has(params, RECOVER_ARG)
+    if !CommandLine.has(params, ARG_RECOVER)
       setEnergyRandom(Config.val(:WORLD_START_ENERGY_BLOCKS), Config.val(:WORLD_START_ENERGY_AMOUNT))
       createOrganisms()
     end
@@ -198,6 +152,12 @@ module Manager
       yield()
     end
   end
+  #
+  # Shows organism related message
+  # @param id Unique orgainsm identifier
+  # @param msg Organism's message
+  #
+  function msg(id::UInt, msg::ASCIIString) Helper.info(string("org-", id, " ", msg)) end
 
   #
   # Updates IPS (Iterations Per second) counter and stores it in config
@@ -216,10 +176,10 @@ module Manager
     ips + 1, stamp
   end
   #
-  # Manager related data. See Data type for details. It's global, because
+  # Manager related data. See ManagerData type for details. It's global, because
   # Manager is a singleton.
   # TODO: this type should be stored outside of this module in AppManager.jl
-  global _data = Data(
+  global _data = ManagerData(
     World.create(),
     Dict{Int, Creature.Organism}(),
     Dict{UInt, Creature.Organism}(),

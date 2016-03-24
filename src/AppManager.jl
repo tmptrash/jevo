@@ -16,7 +16,7 @@ import CommandLine
 function main()
   local args = CommandLine.create()
 
-  if CommandLine.has(args, Manager.RECOVER_ARG)
+  if CommandLine.has(args, Manager.ARG_RECOVER)
     Helper.info(string("Recovering from backup: ", Backup.lastFile()))
     Manager.recover()
   end

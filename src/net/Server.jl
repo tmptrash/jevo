@@ -103,6 +103,8 @@ module Server
     socks   ::Array{Base.TCPSocket}
     server  ::Base.TCPServer
     observer::Event.Observer
+    host    ::Base.IPAddr
+    port    ::Int
   end
   # 
   # Creates a server. Returns special server's data object, which identifies
@@ -118,15 +120,18 @@ module Server
     local tasks::Array{Task, 1} = Task[]
     local socks::Array{Base.TCPSocket, 1} = Base.TCPSocket[]
     local obs::Event.Observer = Event.create()
+    local serCon::ServerConnection
 
     try
       local server::Base.TCPServer = listen(host, port)
-      return Server.ServerConnection(tasks, socks, server, obs)
+      serCon = ServerConnection(tasks, socks, server, obs, host, port)
+      Helper.info(string("Server created: ", host, ":", port))
+      return serCon
     catch e
       Helper.warn("Server.create(): $e")
     end
     
-    Server.ServerConnection(tasks, socks, Base.TCPServer(), obs)
+    ServerConnection(tasks, socks, Base.TCPServer(), obs, host, port)
   end
   #
   # Runs the server. Starts listening clients connections
@@ -146,6 +151,7 @@ module Server
       return false
     end
 
+    Helper.info(string("Server has run: ", con.host, ":", con.port))
     @async begin
       while true
         try
@@ -197,6 +203,7 @@ module Server
       local sock::Base.TCPSocket
       for sock in con.socks close(sock) end
       close(con.server)
+      Helper.info(string("Server has stopped: ", con.host, ":", con.port))
     catch e
       Helper.warn("Server.stop(): $e")
     end
