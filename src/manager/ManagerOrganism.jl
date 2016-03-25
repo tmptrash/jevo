@@ -397,7 +397,12 @@ function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, re
   #
   if haskey(Manager._data.positions, id) 
     org = Manager._data.positions[id]
-    if org.energy > amount
+    #
+    # Current organism want's give an energy
+    #
+    if amount < 0
+      org.energy = min(org.energy + amount, Config.val(:ORGANISM_MAX_ENERGY))
+    elseif org.energy > amount
       org.energy -= amount
       retObj.ret  = amount
     else
