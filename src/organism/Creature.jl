@@ -41,7 +41,6 @@ module Creature
   using Debug
 
   export Organism
-  export RetObj
 
   export create
   export born
@@ -151,6 +150,11 @@ module Creature
     #
     energy::Int
     #
+    # Color of organism. Similar colors means relative organisms.
+    # Example: 0x00RRGGBB - first two digits are skipped.
+    #
+    color::UInt32
+    #
     # Organism's personal memory. Is used in any possible way.
     #
     mem::Dict{Int16, Int16}
@@ -163,24 +167,6 @@ module Creature
     # Adds events listening/firing logic to the organism.
     #
     observer::Event.Observer
-  end
-  #
-  # Universal structure for returning a value from event handlers.
-  # See "beforeclone", "getenergy" and other events for details.
-  #
-  type RetObj
-    #
-    # Return value
-    #
-    ret::Any
-    #
-    # Position in a world
-    #
-    pos::Helper.Point
-    #
-    # ctor
-    #
-    RetObj(r = nothing, p = nothing) = (x = new(r); p === nothing ? x : (x.pos = p;x))
   end
   #
   # Creates new organism with default settings. New code should contain
@@ -217,6 +203,7 @@ module Creature
       min(Config.val(:ORGANISM_MUTATION_PERIOD), Config.val(:ORGANISM_MAX_MUTATION_PERIOD)), # mutationPeriod
       min(Config.val(:ORGANISM_MUTATION_AMOUNT), Config.val(:ORGANISM_MAX_MUTATION_AMOUNT)), # mutationAmount
       Config.val(:ORGANISM_START_ENERGY),                                                    # energy
+      Config.val(:ORGANISM_START_COLOR),                                                     # color
       Dict{Int16, Int16}(),                                                                  # mem
       pos,                                                                                   # pos
       Event.create()                                                                         # observer
@@ -270,7 +257,7 @@ module Creature
     # This map will be used for communication between this organism and
     # some outside object. "ret" will be contained amount of energy.
     #
-    retObj = RetObj()
+    retObj = Helper.RetObj()
     #
     # Listener of "getenergy" should set amount of energy in retObj.ret
     # Possible values [0...typemax(Int)]
@@ -362,25 +349,25 @@ module Creature
   #
   # Universal method for grabbing energy from the world. It grabs at
   # the position up, left, bottom or right from current organism.
-  # @param creature Current organism
+  # @param org      Current organism
   # @param dir      Direction Enum(left, right, up, down)
   # @param amount   Amount of grabbed energy
   # @param amount   Amount of energy to grab
   #
-  function _grabEnergy(creature::Organism, dir::DIRECTION, amount::Int)
+  function _grabEnergy(org::Organism, dir::DIRECTION, amount::Int)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
     #
-    local retObj::RetObj = RetObj()
+    local retObj::Helper.RetObj = Helper.RetObj()
     #
     # Listener of "grab$dir" should set amount of energy in retObj.ret
     # Possible values [0...amount]
     #
-    Event.fire(creature.observer, string("grab", dir), creature, amount, retObj)
+    Event.fire(org.observer, string("grab", dir), org, amount, retObj)
     #
     # We can't exceed max amount of energy
     #
-    creature.energy = min(creature.energy + retObj.ret, Config.val(:ORGANISM_MAX_ENERGY))
+    org.energy = min(org.energy + retObj.ret, Config.val(:ORGANISM_MAX_ENERGY))
   end
 end

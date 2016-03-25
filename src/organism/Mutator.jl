@@ -47,6 +47,7 @@ module Mutator
           # @param o Associated with this code organism
           #
           org.codeFn = eval(org.code)
+          _changeColor(org)
         catch e
           # TODO: here fault script statictics should be collected
         end
@@ -54,6 +55,18 @@ module Mutator
     end
 
     result
+  end
+  #
+  # Changes organism's color a little bit
+  # @param org Organism whom color we have to change
+  #
+  function _changeColor(org::Creature.Organism)
+    local pattern::Array{UInt32, 1} = [0x00100000, 0x00010000, 0x00001000, 0x00000100, 0x00000010, 0x00000001]
+    local index::Int = rand(0:2)
+
+    org.color -= pattern[index * 2 + 1]
+    org.color -= pattern[index * 2 + 2]
+    org.color &= 0x00FFFFFF
   end
   #
   # Adds one line of code into existing code blocks including all
@@ -187,7 +200,7 @@ module Mutator
   # All available functions for mutation types: change, add, del,...
   #
   const _MUTATION_FUNCS = [
-    _onAdd, _onChange, _onSmallChange, _onDel, _onClone, _onPeriod, _onAmount
+    _onAdd, _onChange, _onDel, _onSmallChange, _onClone, _onPeriod, _onAmount
   ]
  #  #
  #  # TODO:

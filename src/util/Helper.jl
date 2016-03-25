@@ -5,11 +5,14 @@ module Helper
   import Gtk
   
   export Point
+  export RetObj
+
   export randTrue
   export getProbIndex
   export getSupportedTypes
   export warn
   export error
+  
   export SUPPORTED_TYPES
 
   #
@@ -19,7 +22,24 @@ module Helper
     x::Int
     y::Int
   end
-  
+  #
+  # Universal structure for returning a value from event handlers.
+  # See "beforeclone", "getenergy" and other events for details.
+  #
+  type RetObj
+    #
+    # Return value
+    #
+    ret::Any
+    #
+    # Position in a world
+    #
+    pos::Helper.Point
+    #
+    # ctor
+    #
+    RetObj(r = nothing, p = nothing) = (x = new(r); p === nothing ? x : (x.pos = p;x))
+  end
   #
   # Prints warning message with white color
   # @param msg Text message to show

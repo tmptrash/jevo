@@ -6,6 +6,10 @@
 #
 import Config
 import Helper
+import Creature
+import Mutator
+import Event
+import World
 #
 # One task related to one organism
 #
@@ -93,7 +97,8 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     eCounter, mCounter
 end
 #
-# Removes organisms with minimum energy
+# Removes organisms with minimum energy. Amount of removed
+# organisms is set in ORGANISM_REMOVE_AMOUNT config.
 # @param tasks Array of tasks with organisms inside
 #
 function _removeMinOrganisms(tasks::Array{OrganismTask, 1})
@@ -243,7 +248,7 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   # organism.pos - old organism position
   #
   World.setEnergy(Manager._data.world, organism.pos, UInt32(0))
-  World.setEnergy(Manager._data.world, pos, UInt32(organism.energy))
+  World.setEnergy(Manager._data.world, pos, UInt32(organism.color))
   organism.pos = pos
 
   true
@@ -292,8 +297,19 @@ end
 # @param pos Position to check
 # @param retObj Special object for return value
 #
-function _onGetEnergy(organism::Creature.Organism, pos::Helper.Point, retObj::Creature.RetObj)
-  retObj.ret = World.getEnergy(Manager._data.world, pos)
+function _onGetEnergy(organism::Creature.Organism, pos::Helper.Point, retObj::Helper.RetObj)
+  local id::Int = _getOrganismId(pos)
+  #
+  # Other organism at this position
+  #
+  if haskey(Manager._data.positions, id)
+    retObj.ret = Manager._data.positions[id].energy
+  #
+  # Energy block at this position
+  #
+  else
+    retObj.ret = World.getEnergy(Manager._data.world, pos)
+  end
 end
 #
 # Grabs energy on the left side of the organism
@@ -301,7 +317,7 @@ end
 # @param amount Amount of energy we want to grab
 # @param retObj Special object for return value
 #
-function _onGrabLeft(organism::Creature.Organism, amount::Int, retObj::Creature.RetObj)
+function _onGrabLeft(organism::Creature.Organism, amount::Int, retObj::Helper.RetObj)
   _onGrab(organism, amount, Helper.Point(organism.pos.x - 1, organism.pos.y), retObj)
 end
 #
@@ -310,7 +326,7 @@ end
 # @param amount Amount of energy we want to grab
 # @param retObj Special object for return value
 #
-function _onGrabRight(organism::Creature.Organism, amount::Int, retObj::Creature.RetObj)
+function _onGrabRight(organism::Creature.Organism, amount::Int, retObj::Helper.RetObj)
   _onGrab(organism, amount, Helper.Point(organism.pos.x + 1, organism.pos.y), retObj)
 end
 #
@@ -319,7 +335,7 @@ end
 # @param amount Amount of energy we want to grab
 # @param retObj Special object for return value
 #
-function _onGrabUp(organism::Creature.Organism, amount::Int, retObj::Creature.RetObj)
+function _onGrabUp(organism::Creature.Organism, amount::Int, retObj::Helper.RetObj)
   _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y - 1), retObj)
 end
 #
@@ -328,7 +344,7 @@ end
 # @param amount Amount of energy we want to grab
 # @param retObj Special object for return value
 #
-function _onGrabDown(organism::Creature.Organism, amount::Int, retObj::Creature.RetObj)
+function _onGrabDown(organism::Creature.Organism, amount::Int, retObj::Helper.RetObj)
   _onGrab(organism, amount, Helper.Point(organism.pos.x, organism.pos.y + 1), retObj)
 end
 #
@@ -372,24 +388,26 @@ end
 # @param pos Point where we should check the energy
 # @param retObj Special object for return value
 #
-function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, retObj::Creature.RetObj)
-  retObj.ret = World.grabEnergy(Manager._data.world, pos, UInt32(amount))
+function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, retObj::Helper.RetObj)
   local id::Int = _getOrganismId(pos)
+  local org::Creature.Organism
   #
   # If other organism at the position of the check, 
   # then grab energy from it
   #
   if haskey(Manager._data.positions, id) 
     org = Manager._data.positions[id]
-    if org.energy > retObj.ret
-      org.energy -= retObj.ret
+    if org.energy > amount
+      org.energy -= amount
+      retObj.ret  = amount
     else
       # TODO: possibly, slow code. To fix this we have to
       # TODO: use map instead array for tasks (Manager._data.tasks)
       _killOrganism(findfirst((t) -> t.organism === org, Manager._data.tasks))
-      _moveOrganism(org.pos, org)
-      _moveOrganism(organism.pos, organism)
+      retObj.ret = org.energy
     end
+  else
+    retObj.ret = World.grabEnergy(Manager._data.world, pos, UInt32(amount))
   end
 
   retObj.ret

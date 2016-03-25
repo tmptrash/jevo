@@ -120,6 +120,10 @@ module Config
     #
     ORGANISM_REMOVE_AMOUNT::Int
     #
+    # Begin color of "empty" organism (organism without code).
+    #
+    ORGANISM_START_COLOR::UInt32
+    #
     # Maximum amount of arguments in custom functions
     #
     CODE_MAX_FUNC_PARAMS::Int
@@ -139,11 +143,6 @@ module Config
     # So the speed for 0 delay depends only on network speed.
     #
     WORLD_FRAME_DELAY::Int
-    #
-    # RGB, background color of the canvas, where organisms will be 
-    # shown. First byte is unused.
-    #
-    WORLD_BACK_COLOR::UInt32
     #
     # IPS (Iteration Per Second). Amount of iterations, which were
     # occures within one second. One iteration means one for all 
@@ -268,7 +267,7 @@ module Config
   #
   global _data = GData(
     Data(
-      [10,30,0,9,1,1,1],         # ORGANISM_MUTATION_PROBABILITIES (add,change,small-change,del,clone,period,amount)
+      [10,30,9,0,1,1,1],         # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
       2,                         # ORGANISM_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MUTATION_PERIOD
@@ -281,12 +280,12 @@ module Config
       50,                        # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                         # ORGANISM_ENERGY_DECREASE_VALUE
       400,                       # ORGANISM_REMOVE_AFTER_TIMES
-      10,                        # ORGANISM_REMOVE_AMOUNT
+      5,                         # ORGANISM_REMOVE_AMOUNT
+      UInt32(0x00FFFFFF),        # ORGANISM_START_COLOR
       2,                         # CODE_MAX_FUNC_PARAMS
       300,                       # WORLD_WIDTH
       200,                       # WORLD_HEIGHT
       1,                         # WORLD_FRAME_DELAY
-      UInt32(0),                 # WORLD_BACK_COLOR
       0,                         # WORLD_IPS
       400,                       # WORLD_MAX_ORGANISMS
       5000,                      # WORLD_START_ENERGY_BLOCKS

@@ -13,7 +13,7 @@ import Creature
 # in pair with backup() function.
 #
 function recover()
-  local data::ManagerData = Backup.load()
+  local data::Manager.ManagerData = Backup.load()
   local i::Int
   local t::OrganismTask
 
