@@ -62,10 +62,8 @@ module Mutator
   #
   function _changeColor(org::Creature.Organism)
     local pattern::Array{UInt32, 1} = [0x00100000, 0x00010000, 0x00001000, 0x00000100, 0x00000010, 0x00000001]
-    local index::Int = rand(0:2)
 
-    org.color -= pattern[index * 2 + 1]
-    org.color -= pattern[index * 2 + 2]
+    org.color -= pattern[rand(1:6)]
     org.color &= 0x00FFFFFF
   end
   #

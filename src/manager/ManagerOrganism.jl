@@ -40,7 +40,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     local j  ::Int
     local dPeriod::Int
     local org::Creature.Organism
-    local maxEnergy::Int = Manager._data.maxOrg.energy
+    local maxRange::Int = Manager._data.maxOrg.energy
 
     eCounter += 1
     mCounter += 1
@@ -72,7 +72,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
         # If organism has high energy value, then it will produce
         # more copies and these copies will supplant other organisms. 
         #
-        if mCounter % (org.energy >= maxEnergy ? 1 : maxEnergy - org.energy) === 0 _onClone(org) end
+        if mCounter % (Config.val(:WORLD_IPS) + 1) === 0 && rand(0:maxRange) < org.energy _onClone(org) end
       catch e
         Helper.error("Manager._updateOrganisms(): $e")
       end
@@ -276,20 +276,19 @@ function _onClone(organism::Creature.Organism)
   pos = World.getNearFreePos(Manager._data.world, organism.pos)
   if pos === false return false end
   #
-  # Total amount of energy should be the same, so we have to
-  # split energy between old and new organisms 50/50 after
-  # clonning. 
-  #
-  # TODO: i have to solve the problem of entire energy increasing
-  # TODO: because everu clone creates new organism with the same
-  # TODO: amount of energy ane they may eat each other.
-  #organism.energy = Int(div(organism.energy, 2))
-  #
   # Creates new organism and apply mutations to him.
   #
   crTask = Manager._createOrganism(organism, pos)
   if crTask === false return false end
-  return Mutator.mutate(crTask.organism, crTask.organism.mutationsOnClone)
+  #
+  # Total amount of energy should be the same, so we have to
+  # split energy between old and new organisms 50/50 after
+  # clonning. 
+  #
+  local energy::Int = Int(div(organism.energy, 10)) # TODO: why 10th part?
+  organism.energy       -= energy
+  crTask.organism.energy = energy
+  Mutator.mutate(crTask.organism, crTask.organism.mutationsOnClone)
 end
 #
 # Returns an energy amount in specified point in a world.
