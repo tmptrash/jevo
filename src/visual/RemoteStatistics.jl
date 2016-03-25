@@ -113,8 +113,8 @@ module RemoteStatistics
 <span size="12800" face="Lucida Console" foreground="blue">World width : </span><span face="Lucida Console" size="12800">$(d.worldWidth)</span>
 <span size="12800" face="Lucida Console" foreground="blue">World height: </span><span face="Lucida Console" size="12800">$(d.worldHeight)</span>
 <span size="12800" face="Lucida Console" foreground="blue">Config      : </span><span face="Lucida Console" size="9000">\n$(join(d.cfg, "\n"))</span>
-<span size="12800" face="Lucida Console" foreground="blue">Min organism: </span><span face="Lucida Console" size="9000">\nId: $(d.minOrg.id)\nEnergy: $(d.minOrg.energy)</span>
-<span size="12800" face="Lucida Console" foreground="blue">Max organism: </span><span face="Lucida Console" size="9000">\nId: $(d.maxOrg.id)\nEnergy: $(d.maxOrg.energy)</span>
+<span size="12800" face="Lucida Console" foreground="blue">Min organism: </span><span face="Lucida Console" size="9000">\nId: $(d.minOrg.id)\nEnergy: $(d.minOrg.energy)\nMutations on clone: $(d.minOrg.mutationsOnClone)\nMutations period: $(d.minOrg.mutationPeriod)\nMutations amount: $(d.minOrg.mutationAmount)</span>
+<span size="12800" face="Lucida Console" foreground="blue">Max organism: </span><span face="Lucida Console" size="9000">\nId: $(d.maxOrg.id)\nEnergy: $(d.maxOrg.energy)\nMutations on clone: $(d.maxOrg.mutationsOnClone)\nMutations period: $(d.maxOrg.mutationPeriod)\nMutations amount: $(d.maxOrg.mutationAmount)</span>
       """
     )
   end

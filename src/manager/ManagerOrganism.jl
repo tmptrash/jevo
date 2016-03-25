@@ -72,7 +72,9 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
         # If organism has high energy value, then it will produce
         # more copies and these copies will supplant other organisms. 
         #
-        if mCounter % (Config.val(:WORLD_IPS) + 1) === 0 && rand(0:maxRange) < org.energy _onClone(org) end
+        if mCounter % (Config.val(:WORLD_IPS) + 1) === 0 && rand(0:maxRange) < org.energy
+          _onClone(org)
+        end
       catch e
         Helper.error("Manager._updateOrganisms(): $e")
       end
