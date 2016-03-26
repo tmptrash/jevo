@@ -6,6 +6,9 @@
 #
 import Backup
 import Creature
+
+export recover
+export backup
 #
 # This function is used for recovering a manager's data from 
 # backup file. It means that an application was crashed before 

@@ -1,2 +1,2 @@
 #!/bin/bash
-julia src/AppManager.jl
+julia --color=yes src/AppSatellite src/AppManager.jl

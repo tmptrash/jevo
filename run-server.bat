@@ -1,1 +1,1 @@
-julia --color=yes src\AppManager.jl
+julia --color=yes src\AppSatellite.jl src\AppManager.jl

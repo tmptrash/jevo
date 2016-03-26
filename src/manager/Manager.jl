@@ -30,8 +30,6 @@ module Manager
   using Debug
 
   export run
-  export recover
-  export backup
   export ARG_RECOVER
   #
   # This is how we collect Manager module from it's parts(files)

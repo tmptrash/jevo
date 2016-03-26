@@ -295,7 +295,7 @@ module Config
       400,                       # WORLD_MAX_ORGANISMS
       2000,                      # WORLD_START_ENERGY_BLOCKS
       UInt32(100),               # WORLD_START_ENERGY_AMOUNT
-      4,                         # WORLD_SCALE
+      3,                         # WORLD_SCALE
       650,                       # STAT_WIDTH
       500,                       # STAT_HEIGHT
       5,                         # STAT_FRAME_DELAY
