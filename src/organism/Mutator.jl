@@ -145,7 +145,7 @@ module Mutator
 
     if length(block.args) < 1 || block.args[pos].head === :return return false end
 
-    Code.onRemoveLine(org, pos, fnEx, block)
+    Code.onRemoveLine(org, pos, fnEx, block, true)
     deleteat!(block.args, pos)
     true
   end

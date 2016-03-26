@@ -171,7 +171,7 @@ module Manager
   function _updateIps(ips::Int, stamp::Float64)
     local ts::Float64 = time() - stamp
 
-    if ts >= 1.0
+    if ts >= 5.0
       Config.val(:WORLD_IPS, trunc(Int, ips / ts))
       return 0, time()
     end

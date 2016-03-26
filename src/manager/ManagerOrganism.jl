@@ -149,8 +149,8 @@ function _updateOrganismsEnergy(counter::Int)
     #
     # if the energy of the organism is zero, we have to remove it
     #
-    if org.energy > decVal
-      org.energy -= decVal
+    if org.energy > decVal + org.codeSize
+      org.energy -= (decVal + org.codeSize)
     else
       _killOrganism(i)
     end

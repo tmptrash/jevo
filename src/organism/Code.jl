@@ -192,8 +192,9 @@ module Code
   # @param pos Remove position
   # @param fnEx Expressiom of function body, we are deleting in
   # @param block Current block, where mutation occures
+  # @param del true means that code is deleting now, false - changing
   #
-  function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr, block::Expr)
+  function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr, block::Expr, del::Bool = false)
     local lineEx::Expr = block.args[pos] # line we want to remove
     local ex::Expr
     local i::Int
@@ -201,11 +202,35 @@ module Code
     #
     # Finds block of current "if" operator and removes it from 
     # Organism.vars[fn].blocks array
-    #
-    if lineEx.head === :comparison || lineEx.head === :for
-      i = findfirst(org.vars[fn].blocks, block)
+    # TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # TODO: on blocks remove we have to remove block variables
+    # TODO: from org.vars[fn].vars
+    # TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    if lineEx.head === :comparison || lineEx.head === :if  # TODO: why :comparison and not :if
+      println(lineEx, " ", fn)
+      i = findfirst(org.vars[fn].blocks, lineEx.args[2])
       if i > 0 deleteat!(org.vars[fn].blocks, i) end
-      org.codeSize -= length(block.args)
+      #
+      # This size reduce should not depend on del parameter, 
+      # because in case of change of block based line we are
+      # changing one line into 1 + block lines. Block lines
+      # should be used in org.codeSize.
+      #
+      org.codeSize -= length(lineEx.args[2].args)
+    #
+    # "for" operator is wrapped by block ... end
+    #
+    elseif lineEx.head === :block # for loop
+      println(lineEx, " ", fn)
+      i = findfirst(org.vars[fn].blocks, lineEx.args[2].args[2])
+      if i > 0 deleteat!(org.vars[fn].blocks, i) end
+      #
+      # This size reduce should not depend on del parameter, 
+      # because in case of change of block based line we are
+      # changing one line into 1 + block lines. Block lines
+      # should be used in org.codeSize.
+      #
+      org.codeSize -= length(lineEx.args[2].args[2].args)
     #
     # Finds currently removed variable within it's function and
     # removes it from Creature.Organism.vars map
@@ -227,11 +252,22 @@ module Code
         deleteat!(org.funcs, i)
       end
       #
-      # -1, because we don't calc return operator
+      # -1, because we don't calc return operator. This size reduce
+      # should not depend on del parameter, because in case of change
+      # of block based line we are changing one line into 1 + block
+      # lines. Block lines should be used in org.codeSize.
       #
       org.codeSize -= (length(lineEx.args[2].args) - 1)
+    elseif lineEx.head === :if
+      #
+      # This size reduce should not depend on del parameter, 
+      # because in case of change of block based line we are
+      # changing one line into 1 + block lines. Block lines
+      # should be used in org.codeSize.
+      #
+      org.codeSize -= length(block.args)
     end
-    org.codeSize -= 1
+    if del org.codeSize -= 1 end
   end
   #
   # Returns random position in a code (including all custom 

@@ -89,6 +89,10 @@ module RpcApi
     # ends with (WORLD_WIDTH, WORLD_HEIGHT) configurations.
     #
     pos::Array{Int}
+    #
+    # Organism code size in lines
+    #
+    codeSize::Int
   end
   #
   # Structure of world statistics

@@ -212,7 +212,8 @@ function _createSimpleOrganism(id::UInt, org::Creature.Organism)
     org.mutationAmount,
     org.energy,
     org.mem,
-    [org.pos.x, org.pos.y]
+    [org.pos.x, org.pos.y],
+    org.codeSize
   )
 end
 #
