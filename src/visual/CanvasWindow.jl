@@ -46,6 +46,7 @@ module CanvasWindow
     win::Tk.TkWidget
     canvas::Tk.Canvas
     context::Cairo.CairoContext
+    scale::Int
   end
   #
   # Creates window and shows it on the screen. Returns window related 
@@ -53,11 +54,12 @@ module CanvasWindow
   # Sets default background color according to global configuration.
   # @param width Window width in pixels
   # @param height Window height in pixels
+  # @param scale Scale of canvas 1:1 by default
   # @param title Window title
   # @return Window object
   #
-  function create(width::Int, height::Int, title::ASCIIString = "")
-    local win::Tk.TkWidget = Tk.Window(title, width, height)
+  function create(width::Int, height::Int, scale::Int = Config.val(:WORLD_SCALE), title::ASCIIString = "")
+    local win::Tk.TkWidget = Tk.Window(title, width * scale, height * scale)
     local c::Tk.Canvas = Tk.Canvas(win)
     Tk.pack(c, expand=true, fill="both")
     local ctx::Cairo.CairoContext = Graphics.getgc(c)
@@ -68,7 +70,7 @@ module CanvasWindow
     Tk.set_source_rgb(ctx, rgb.r, rgb.g, rgb.b)
     Tk.paint(ctx)
 
-    Window(win, c, ctx)
+    Window(win, c, ctx, scale)
   end
   #
   # Draws one dot (point) on the canvas with specified color
@@ -79,10 +81,15 @@ module CanvasWindow
   #
   function dot(win::Window, x::Int, y::Int, color::UInt32)
     local col::Colors.RGB = convert(Colors.RGB, Colors.RGB24(color))
-
     Tk.set_source_rgb(win.context, col.r, col.g, col.b)
-    Tk.move_to(win.context, x - 1, y)
-    Tk.line_to(win.context, x, y)
+
+    if win.scale > 1
+      Cairo.rectangle(win.context, (x - 1) * win.scale + 1, (y - 1) * win.scale + 1, win.scale, win.scale)
+      Cairo.fill_preserve(win.context)
+    else
+      Tk.move_to(win.context, x - 1, y)
+      Tk.line_to(win.context, x, y)
+    end
     Tk.stroke(win.context)
   end
   #
@@ -109,7 +116,6 @@ module CanvasWindow
   #
   function destroy(win::Window)
     Cairo.destroy(win.context.surface)
-    #Tk.destroy(win.win)
     Tk.tcl("destroy", win.win)
   end
 end

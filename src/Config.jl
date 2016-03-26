@@ -167,6 +167,11 @@ module Config
     #
     WORLD_START_ENERGY_AMOUNT::UInt32
     #
+    # World scaling. On todays monitors pixel are so small, so we have
+    # to zoom them with a coefficient.
+    #
+    WORLD_SCALE::Int
+    #
     # Width of statistics window
     # TODO: should be removed from here. It doesn't related to Manager
     STAT_WIDTH::Int
@@ -290,6 +295,7 @@ module Config
       400,                       # WORLD_MAX_ORGANISMS
       2000,                      # WORLD_START_ENERGY_BLOCKS
       UInt32(100),               # WORLD_START_ENERGY_AMOUNT
+      3,                         # WORLD_SCALE
       650,                       # STAT_WIDTH
       500,                       # STAT_HEIGHT
       5,                         # STAT_FRAME_DELAY

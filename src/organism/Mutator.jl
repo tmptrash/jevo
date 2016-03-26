@@ -159,7 +159,7 @@ module Mutator
     true
   end
   #
-  # mutationPeriod property mutation handler. It changes this 
+  # mutationPeriod property mutation handler. It changes this
   # property randomly. 0 means disable property.
   # @param org Organism we are working with
   #
