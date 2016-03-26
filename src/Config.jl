@@ -172,6 +172,10 @@ module Config
     #
     WORLD_SCALE::Int
     #
+    # Period of making automatic backup of application. In minutes
+    #
+    BACKUP_PERIOD::Int
+    #
     # Width of statistics window
     # TODO: should be removed from here. It doesn't related to Manager
     STAT_WIDTH::Int
@@ -296,6 +300,7 @@ module Config
       2000,                      # WORLD_START_ENERGY_BLOCKS
       UInt32(100),               # WORLD_START_ENERGY_AMOUNT
       3,                         # WORLD_SCALE
+      2,                         # BACKUP_PERIOD
       650,                       # STAT_WIDTH
       500,                       # STAT_HEIGHT
       5,                         # STAT_FRAME_DELAY

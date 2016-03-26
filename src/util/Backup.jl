@@ -40,16 +40,16 @@ module Backup
   # @return {Any|null} Loaded data or null if error
   #
   function load(file::ASCIIString = "")
-    local oldFile::ASCIIString = file
-
     if !isdir(FOLDER_NAME)
       Helper.warn("Backup folder doesn't exist: $FOLDER_NAME")
       return null
     end
-    if isempty(file) file = _getOldestFile(FOLDER_NAME) end
     if isempty(file)
-      Helper.warn("Backup file doesn't exist: $oldFile")
-      return null
+      file = _getOldestFile(FOLDER_NAME)
+      if isempty(file)
+        Helper.warn("No backup files")  
+        return null
+      end
     end
 
     Helper.load(FOLDER_NAME * "/" * file)
@@ -70,14 +70,12 @@ module Backup
   #
   function _getOldestFile(folder::ASCIIString)
     try
-      if !isdir(folder)
-        Helper.warn("Backup folder not found in Backup._getOldestFile(): $folder")
-        return ""
-      end
+      if !isdir(folder) return "" end
       local rd::Array{AbstractString} = readdir(folder)
+      if length(rd) < 1 return "" end
       return rd[indmax(map((f) -> mtime(string(folder, "/", f)), rd))]
     catch e
-      Helper.warn("Error in Backup._getOldestFile(): $e")
+      Helper.warn("Backup._getOldestFile(): $e")
     end
     ""
   end

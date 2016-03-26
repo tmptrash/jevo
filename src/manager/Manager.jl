@@ -26,11 +26,8 @@ module Manager
   import CommandLine
   import RpcApi
   import Config
-  # TODO: This line should be removed
-  using Debug
 
   export run
-  export ARG_RECOVER
   #
   # This is how we collect Manager module from it's parts(files)
   #
@@ -46,11 +43,6 @@ module Manager
   # >julia AppManager.jl serverPort=2000
   #
   const ARG_SERVER_PORT = "serverPort"
-  #
-  # Name of the command line argument, which tells the application
-  # to recover itself from last backup.
-  #
-  const ARG_RECOVER = "recover"
   #
   # Manager's related type. Contains world, command line parameters,
   # organisms map and so on... If some fields will be changed, don't
@@ -107,12 +99,15 @@ module Manager
   #
   # Runs Manager instance, one world, server an so on... Blocking 
   # function.
+  # @param recover true if we have to recover from last backup
+  # @return {Bool} run status
   #
-  function run()
+  function run(recover::Bool = false)
     local eCounter::Int = 0
     local mCounter::Int = 0
     local ips     ::Int = 0
     local stamp   ::Float64 = time()
+    local bstamp  ::Float64 = time()
     local server  ::Server.ServerConnection = _createServer()
     local params  ::Dict{ASCIIString, ASCIIString} = CommandLine.create()
     #
@@ -126,7 +121,7 @@ module Manager
     # in this call. If we are in recover mode, then this step should
     # be skipped.
     #
-    if !CommandLine.has(params, ARG_RECOVER)
+    if recover === false
       setRandomEnergy()
       createOrganisms()
     end
@@ -144,6 +139,10 @@ module Manager
       #
       ips, stamp = _updateIps(ips, stamp)
       #
+      # Here we make auto-backup of application if there is a time
+      #
+      bstamp = _updateBackup(bstamp)
+      #
       # This call switches between all non blocking asynchronous
       # functions (see @async macro). For example, it handles all
       # input connections for current server, switches between
@@ -151,6 +150,8 @@ module Manager
       #
       yield()
     end
+
+    true
   end
   #
   # Shows organism related message
@@ -174,6 +175,19 @@ module Manager
     end
 
     ips + 1, stamp
+  end
+  #
+  # Checks if it's a time to make application backup
+  # @param stamp Current UNIX timestamp
+  #
+  function _updateBackup(stamp::Float64)
+    if (time() - stamp) > Config.val(:BACKUP_PERIOD) * 3600.0
+      backup()
+      Helper.info(string("Backup has created: ", Backup.lastFile()))
+      return time()
+    end
+
+    stamp
   end
   #
   # Manager related data. See ManagerData type for details. It's global, because

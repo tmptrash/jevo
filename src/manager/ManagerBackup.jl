@@ -16,9 +16,11 @@ export backup
 # in pair with backup() function.
 #
 function recover()
-  local data::Manager.ManagerData = Backup.load()
+  local data = Backup.load()
   local i::Int
   local t::OrganismTask
+
+  if data === null return false end
 
   for i = 1:length(data.tasks)
     t = data.tasks[i]
@@ -36,6 +38,8 @@ function recover()
   Manager._data.maxOrg         = data.maxOrg
   Manager._data.minId          = data.minId
   Manager._data.maxId          = data.maxId
+
+  true
 end
 #
 # Makes a dump of Manager data and saves it into the file.

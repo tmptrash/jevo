@@ -9,6 +9,11 @@ import Helper
 import Backup
 import CommandLine
 #
+# Name of the command line argument, which tells the application
+# to recover itself from last backup.
+#
+const ARG_RECOVER = "recover"
+#
 # This function starts the manager, world, organisms, server etc...
 # It checks "recover" argument for recovering from last backup or
 # runs in a common mode.
@@ -16,10 +21,14 @@ import CommandLine
 function main()
   local args = CommandLine.create()
 
-  if CommandLine.has(args, Manager.ARG_RECOVER)
+  if CommandLine.has(args, ARG_RECOVER)
     Helper.info(string("Recovering from backup: ", Backup.lastFile()))
-    Manager.recover()
+    if Manager.recover()
+      Manager.run(true)
+      quit()
+    end
   end
+  Helper.info("Running from scratch...")
   Manager.run()
 end
 #
