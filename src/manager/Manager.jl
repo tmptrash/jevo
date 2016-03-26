@@ -161,14 +161,6 @@ module Manager
 
     true
   end
-  #
-  # Shows organism related message
-  # @param id Unique orgainsm identifier
-  # @param msg Organism's message
-  #
-  function msg(id::UInt, msg::ASCIIString)
-    if !Manager._data.quiet Helper.info(string("org-", id, " ", msg)) end
-  end
 
   #
   # Updates IPS (Iterations Per second) counter and stores it in config

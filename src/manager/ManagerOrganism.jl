@@ -28,6 +28,14 @@ type OrganismTask
   organism::Creature.Organism
 end
 #
+# Shows organism related message
+# @param id Unique orgainsm identifier
+# @param msg Organism's message
+#
+function msg(id::UInt, msg::ASCIIString)
+  if !Manager._data.quiet Helper.info(string("org-", id, " ", msg)) end
+end
+#
 # Updates organisms existances. We have to call this function to
 # update organisms life in memory world. Decreases energy and
 # provides rare mutations.
@@ -90,7 +98,9 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
     #
     # This call removes organisms with minimum energy
     #
-    if mCounter % Config.val(:ORGANISM_REMOVE_AFTER_TIMES) === 0 _removeMinOrganisms(Manager._data.tasks) end
+    if mCounter % Config.val(:ORGANISM_REMOVE_AFTER_TIMES) === 0
+      _removeMinOrganisms(Manager._data.tasks)
+    end
     #
     # This counter should be infinite
     #
