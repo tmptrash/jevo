@@ -290,12 +290,12 @@ module Config
       2,                         # CODE_MAX_FUNC_PARAMS
       300,                       # WORLD_WIDTH
       200,                       # WORLD_HEIGHT
-      1,                         # WORLD_FRAME_DELAY
+      0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
       400,                       # WORLD_MAX_ORGANISMS
       2000,                      # WORLD_START_ENERGY_BLOCKS
       UInt32(100),               # WORLD_START_ENERGY_AMOUNT
-      3,                         # WORLD_SCALE
+      4,                         # WORLD_SCALE
       650,                       # STAT_WIDTH
       500,                       # STAT_HEIGHT
       5,                         # STAT_FRAME_DELAY
