@@ -24,7 +24,7 @@ function main()
   while true
     try
       while true
-        run(`julia --color=yes $(ARGS[1]) recover`)
+        run(`julia --color=yes $(ARGS[1]) recover $(ARGS[2:end])`)
         break
       end
       break

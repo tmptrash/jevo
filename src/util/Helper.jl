@@ -43,21 +43,21 @@ module Helper
   #
   # Prints warning message with white color
   # @param msg Text message to show
-  #
+  # OPT: console output is heavy operation
   function warn(msg::AbstractString)
     print_with_color(:yellow, "WARNING: ", msg, "\n")
   end
   #
   # Print error message with red color and don't stop an application
   # @param msg Text message to show
-  #
+  # OPT: console output is heavy operation
   function error(msg::AbstractString)
     print_with_color(:red, "ERROR: ", msg, "\n")
   end
   #
   # Print info message with green color
   # @param msg Text message to show
-  #
+  # OPT: console output is heavy operation
   function info(msg::AbstractString)
     print_with_color(:green, "INFO: ", msg, "\n")
   end

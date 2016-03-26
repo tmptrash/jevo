@@ -44,6 +44,10 @@ module Manager
   #
   const ARG_SERVER_PORT = "serverPort"
   #
+  # In this mode no terminal output will be produced
+  #
+  const ARG_QUIET = "quiet"
+  #
   # Manager's related type. Contains world, command line parameters,
   # organisms map and so on... If some fields will be changed, don't
   # forget to change them in recover() function.
@@ -95,6 +99,10 @@ module Manager
     # Id of organism with maximum amount of energy
     #
     maxId::UInt
+    #
+    # If true, then minimum terminal messages will be posted
+    #
+    quiet::Bool
   end
   #
   # Runs Manager instance, one world, server an so on... Blocking 
@@ -158,7 +166,9 @@ module Manager
   # @param id Unique orgainsm identifier
   # @param msg Organism's message
   #
-  function msg(id::UInt, msg::ASCIIString) Helper.info(string("org-", id, " ", msg)) end
+  function msg(id::UInt, msg::ASCIIString)
+    if !Manager._data.quiet Helper.info(string("org-", id, " ", msg)) end
+  end
 
   #
   # Updates IPS (Iterations Per second) counter and stores it in config
@@ -204,6 +214,7 @@ module Manager
     Creature.create(), # temporary min organism
     Creature.create(), # temporary max organism
     UInt(0),
-    UInt(0)
+    UInt(0),
+    CommandLine.has(CommandLine.create(), ARG_QUIET)
   )
 end

@@ -5,7 +5,7 @@
 # TODO: describe linear quoted structure of the script we support
 # TODO: describe functions and variables at the top of the code
 # TODO: describe main and custom functions
-#
+# OPT: this module should be optimized!
 module Mutator
   import Config
   import Helper
@@ -46,7 +46,7 @@ module Mutator
           # and they are in the same module, then === operator returns true.
           # @param o Associated with this code organism
           #
-          org.codeFn = eval(org.code)
+          org.codeFn = Creature.eval(org.code)
           _changeColor(org)
         catch e
           # TODO: here fault script statictics should be collected
