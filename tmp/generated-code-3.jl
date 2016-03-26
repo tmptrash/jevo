@@ -114,3 +114,46 @@
         Creature.stepRight(o)
         Creature.eatDown(o,Int(var_17))
         Creature.stepRight(o)
+		
+#-------------------------------------------------------------------
+		
+        Creature.eatUp(o,Int(var_5))
+        Creature.eatRight(o,Int(var_5))
+        Creature.eatDown(o,Int(var_5))
+        Creature.stepRight(o)
+        Creature.eatUp(o,Int(var_5))
+        Creature.stepDown(o)
+        Creature.eatRight(o,Int(var_5))
+        Creature.stepUp(o)
+        Creature.stepLeft(o)
+        Creature.stepRight(o)
+        Creature.stepUp(o)
+        Creature.stepLeft(o)
+        Creature.eatRight(o,Int(var_5))
+        Creature.stepUp(o)
+        Creature.eatLeft(o,Int(var_5))
+        local var_5::Int8 = 17
+        Creature.eatDown(o,Int(var_5))
+        Creature.eatRight(o,Int(var_5))
+        o.mem[var_12] = var_12
+        Creature.eatRight(o,Int(var_5))
+        Creature.eatRight(o,Int(var_5))
+        Creature.eatUp(o,Int(var_5))
+        Creature.stepRight(o)
+        var_5 = var_5 + var_5
+        Creature.eatDown(o,Int(var_5))
+        begin
+            local var_13::Int8
+            for var_13 = 1:var_5
+                Creature.eatDown(o,Int(var_5))
+                Creature.stepLeft(o)
+                Creature.stepUp(o)
+                Creature.stepLeft(o)
+                var_5 = var_5 - var_5
+                Creature.eatLeft(o,Int(var_5))
+            end
+        end
+        Creature.eatRight(o,Int(var_5))
+        Creature.stepUp(o)
+        Creature.stepUp(o)
+    end),2,100,1,17610,Dict{Int16,Int16}(),[1,197]))

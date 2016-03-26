@@ -292,8 +292,8 @@ module Config
       5,                         # ORGANISM_REMOVE_AMOUNT
       UInt32(0x00FFFFFF),        # ORGANISM_START_COLOR
       2,                         # CODE_MAX_FUNC_PARAMS
-      300,                       # WORLD_WIDTH
-      200,                       # WORLD_HEIGHT
+      100,                       # WORLD_WIDTH
+      100,                       # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
       400,                       # WORLD_MAX_ORGANISMS
