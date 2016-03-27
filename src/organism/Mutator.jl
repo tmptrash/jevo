@@ -20,7 +20,7 @@ module Mutator
   # block flag. Function is used for obtaining new block expression
   # (Expr type). isBlock flag is used for changing and removing AST.
   #
-  type BlockPart
+  type CodePart
     fn::Function
     isBlock::Bool
   end
@@ -85,24 +85,29 @@ module Mutator
   # that there were no add or adding was skipped.
   #
   function _onAdd(org::Creature.Organism)
-    pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
-    local cmd::Function       = _CODE_PARTS[rand(1:length(_CODE_PARTS))]
-    local fnName::ASCIIString = fnEx === org.code ? "" : string(fnEx.args[1].args[1])
-    local mainFn::Bool        = isempty(fnName)
+    local pos::Code.Pos = Code.getRandPos()
+    local cmd::CodePart = _CODE_PARTS[rand(1:length(_CODE_PARTS))]
+    local mainFn::Bool  = pos.fnIdx === 1
     local cmdEx::Expr
-
-    if !((!mainFn && cmd !== Code.fn && cmd !== Code.fnCall || mainFn) && (cmdEx = cmd(org, fnName, block)).head !== :nothing) return false end
+    #
+    # We have to prevent: calling function inside custom function
+    # to prevent recursing, creation function inside cusom function,
+    # block operator inside custom function.
+    #
+    if (!mainFn && cmd.isBlock) ||
+       (!mainFn && cmd.fn !== Code.fnCall) ||
+       (cmdEx = cmd(org, pos)).head === :nothing)
+      return false
+    end
     #
     # All new custom functions should be at the beginning
-    # to prevent UndefVarError error in case of calling 
-    # before defining the function.
+    # to prevent UndefVarError error in case of calling
+    # before defining the function. The same for variables.
     #
-    insert!(block.args, cmd === Code.fn || cmd === Code.var ? 1 : pos, cmdEx)
+    insert!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines, cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, cmdEx)
     org.codeSize += 1
+
     true
-
-
-    local pos::Code.Pos = Code.getRandPos()
   end
   #
   # Makes one big change in a code of main and custom functions. Big 
@@ -199,24 +204,24 @@ module Mutator
     #
     # Code
     #
-    BlockPart(Code.var,       false), BlockPart(Code.fn,        true),
-    BlockPart(Code.fnCall,    false), BlockPart(Code.condition, true),
-    BlockPart(Code.loop,      true ),
+    CodePart(Code.var,       false), CodePart(Code.fn,        true),
+    CodePart(Code.fnCall,    false), CodePart(Code.condition, true),
+    CodePart(Code.loop,      true ),
     #
     # CodeMath
     #
-    BlockPart(Code.plus,      false), BlockPart(Code.minus,     false),
-    BlockPart(Code.multiply,  false), BlockPart(Code.divide,    false),
-    BlockPart(Code.reminder,  false),
+    CodePart(Code.plus,      false), CodePart(Code.minus,     false),
+    CodePart(Code.multiply,  false), CodePart(Code.divide,    false),
+    CodePart(Code.reminder,  false),
     #
     # CodeOrganism
     #
-    BlockPart(Code.getEnergy, false), BlockPart(Code.eatLeft,   false),
-    BlockPart(Code.eatRight,  false), BlockPart(Code.eatUp,     false),
-    BlockPart(Code.eatDown,   false), BlockPart(Code.stepLeft,  false),
-    BlockPart(Code.stepRight, false), BlockPart(Code.stepUp,    false),
-    BlockPart(Code.stepDown,  false), BlockPart(Code.toMem,     false),
-    BlockPart(Code.fromMem,   false)
+    CodePart(Code.getEnergy, false), CodePart(Code.eatLeft,   false),
+    CodePart(Code.eatRight,  false), CodePart(Code.eatUp,     false),
+    CodePart(Code.eatDown,   false), CodePart(Code.stepLeft,  false),
+    CodePart(Code.stepRight, false), CodePart(Code.stepUp,    false),
+    CodePart(Code.stepDown,  false), CodePart(Code.toMem,     false),
+    CodePart(Code.fromMem,   false)
   ]
   #
   # All available functions for mutation types: change, add, del,...
