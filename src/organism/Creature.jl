@@ -58,22 +58,33 @@ module Creature
   #
   @enum DIRECTION up=1 down=2 left=3 right=4
   #
-  # Describes one function as a data container. It contains blocks
-  # and variables collected by types. See Creature.Organism.vars
-  # property for details.
+  # Describes one block. Blocks are: "for", "if", "function" and other 
+  # operators. Is a part of "Func" type.
   #
-  type Func
+  type Block
     #
     # Map of available variables separated by types. All these
     # variables belong to one (current) function
     #
     vars::Dict{DataType, Array{Symbol, 1}}
     #
+    # Reference to code lines inside Organism.code AST.
+    #
+    lines::Array{Expr, 1}
+  end
+  #
+  # Describes one function as a data container. It contains blocks
+  # and variables collected by types. See Creature.Organism.vars
+  # property for details.
+  #
+  type Func
+    #
     # All blocks within one (current) function. Blocks are belong
     # to if, for, function and other operators. All mutations should 
-    # be done within blocks
+    # be done within blocks. Block of the parent function should be
+    # first in this array.
     #
-    blocks::Array{Expr, 1}
+    blocks::Array{Block, 1}
   end
   #
   # Describes one organism. In general it consists of energy, world
@@ -81,13 +92,6 @@ module Creature
   # and so on...
   #
   type Organism
-    #
-    # @inheritable
-    # Mutations probability. Add, change, delete. e.g.: [1,10,2]
-    # means, that "add" mutation will be 10 times rare then "change"
-    # and 2 times rare then "delete" mutations.
-    #
-    mutationProbabilities::Array{Int}
     #
     # @inheritable
     # Code in AST format
@@ -98,32 +102,37 @@ module Creature
     #
     codeFn::Function
     #
+    # @inheritable
     # Amount of code lines including lines in functions
     #
     codeSize::Int
     #
     # @inheritable
-    # Counter, which is used for creating unique variable names. e.g.: 
-    # var_12. Increase itself every time, then new variable is created.
+    # Counter, which is used for creating unique variable and function
+    # names. e.g.: var_12, func_34. Increase itself every time, then 
+    # new variable is created.
     #
-    varId::Int
-    #
-    # @inheritable
-    # The same like varId, but for functions.
-    #
-    fnId::Int
+    symbolId::Int
     #
     # @inheritable
     # Map of available variables separated by functions and types. 
     # Function in this case is a parent (container) for variables.
-    #
-    vars::Dict{ASCIIString, Func}
+    # TODO: remove this
+    #vars::Dict{ASCIIString, Func}
     #
     # @inheritable
-    # Map of functions. Is used for finding functions bodies and later
-    # for mutations in these bodies.
+    # Array of code functions. Is used for finding rundom functions 
+    # for future mutations inside them. Main function is also in this
+    # array. Main function should be first in this array.
     #
-    funcs::Array{Expr, 1}
+    funcs::Array{Func, 1}
+    #
+    # @inheritable
+    # Mutations probability. Add, change, delete. e.g.: [1,10,2]
+    # means, that "add" mutation will be 10 times rare then "change"
+    # and 2 times rare then "delete" mutations.
+    #
+    mutationProbabilities::Array{Int}
     #
     # @inheritable
     # Amount of mutations, which will be applied to arganism after
@@ -150,11 +159,13 @@ module Creature
     #
     energy::Int
     #
+    # @inheritable
     # Color of organism. Similar colors means relative organisms.
     # Example: 0x00RRGGBB - first two digits are skipped.
     #
     color::UInt32
     #
+    # @inharitable
     # Organism's personal memory. Is used in any possible way.
     #
     mem::Dict{Int16, Int16}
@@ -169,36 +180,34 @@ module Creature
     observer::Event.Observer
   end
   #
-  # Creates new organism with default settings. New code should contain
-  # variables of all supported types. This is speed optimization feature.
+  # Creates new organism with default settings and empty code.
   # @param pos Position of organism
   # @return {Creature}
   #
   function create(pos::Helper.Point = Helper.Point(1, 1))
     #
-    # Expression below means:
-    # function (o) end
+    # This is main function of current organism. Expression 
+    # below means: function (o) return true end
     #
-    local code::Expr = Expr(:function, Expr(:tuple, Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))), Expr(:block))
+    local code::Expr = Expr(:function, Expr(:tuple, Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))), Expr(:block, Expr(:return, true)))
+    #
+    # Blocks of main function. In this case only one - main block.
+    #
+    local blocks::Array{Block, 1} = [Block(code.args[2].args, Helper.getTypesMap())]
     #
     # This block below, creates variables of main function, which we created
     # in code above (local code::Expr  = ...). It also creates one block,
     # which belong to main function.
     #
-    local vars::Dict{ASCIIString, Func} = Dict{ASCIIString, Func}("" => Func(Helper.getTypesMap(), [code.args[2]]))
+    local funcs::Array{Func, 1} = [Func(blocks)]
 
-    Helper.getSupportedTypes((t) -> vars[""].vars[t] = [])
     Organism(
-      Config.val(:ORGANISM_MUTATION_PROBABILITIES),                                          # mutationProbabilities
       code,                                                                                  # code
       eval(code),                                                                            # codeFn
-      # TODO: change to length(Helper.getSupportedTypes)
       0,                                                                                     # codeSize
-      # TODO: the same like codeSize
-      0,                                                                                     # varId
-      0,                                                                                     # fnId
-      vars,                                                                                  # vars
+      0,                                                                                     # symbolId
       Array{Expr, 1}(),                                                                      # funcs
+      Config.val(:ORGANISM_MUTATION_PROBABILITIES),                                          # mutationProbabilities
       Config.val(:ORGANISM_MUTATIONS_ON_CLONE),                                              # mutationsOnClone
       min(Config.val(:ORGANISM_MUTATION_PERIOD), Config.val(:ORGANISM_MAX_MUTATION_PERIOD)), # mutationPeriod
       min(Config.val(:ORGANISM_MUTATION_AMOUNT), Config.val(:ORGANISM_MAX_MUTATION_AMOUNT)), # mutationAmount

@@ -31,7 +31,7 @@ end
 # @return {Symbol}
 #
 macro getNewVar(org)
-  :(symbol("var_", $org.varId += 1))
+  :(symbol("var_", $org.symbolId += 1))
 end
 #
 # Creates new unique custom function name.
@@ -39,7 +39,7 @@ end
 # @return {ASCIIString}
 #
 macro getNewFunc(org)
-  :(string("func_", $org.fnId += 1))
+  :(string("func_", $org.symbolId += 1))
 end
 #
 # Returns one of supported types. Is used randomizer for choosing type.

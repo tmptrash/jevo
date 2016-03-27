@@ -6,6 +6,7 @@ export reminder
 
 #
 # @cmd
+# @line
 # + operator implementation. Sums two variables. Supports all
 # types: ASCIIString, Int8, Bool,... In case of string uses
 # concatination, for boolean - & operator. If code is empty
@@ -34,6 +35,7 @@ function plus(org::Creature.Organism, fn::ASCIIString, block::Expr)
 end
 #
 # @cmd
+# @line
 # - operator implementation. Minus two variables. Supports all
 # types: ASCIIString, Int8, Bool,... In case of string uses
 # concatination, for boolean - & operator. If code is empty
@@ -72,6 +74,7 @@ function minus(org::Creature.Organism, fn::ASCIIString, block::Expr)
 end
 #
 # @cmd
+# @line
 # * operator implementation. Multiply two variables. Supports all
 # types: ASCIIString, Int8, Bool,... In case of string uses
 # concatination, for boolean - & operator. If code is empty
@@ -94,6 +97,7 @@ function multiply(org::Creature.Organism, fn::ASCIIString, block::Expr)
 end
 #
 # @cmd
+# @line
 # / operator implementation. Divides two variables. Supports all
 # types: ASCIIString, Int8, Bool,... In case of string uses
 # concatination, for boolean - | operator. If code is empty
@@ -125,6 +129,7 @@ function divide(org::Creature.Organism, fn::ASCIIString, block::Expr)
 end
 #
 # @cmd
+# @line
 # Calculates reminder of division of two numbers. For ASCIIString
 # calculates reminder of cutting: "12345" % "23" = "345". It uses
 # length of second string for cut. For Bool uses | operator.

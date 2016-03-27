@@ -15,6 +15,7 @@ export fromMem
 
 #
 # @cmd
+# @line
 # Returns energy amount in specified point in a world
 # @param org Organism we have to mutate
 # @param fn Parent(current) function unique name
@@ -32,6 +33,7 @@ function getEnergy(org::Creature.Organism, fn::ASCIIString, block::Expr)
 end
 #
 # @cmd
+# @line
 # Is called when organism bites on the left
 # @param org Organism we have to mutate
 # @param fn Parent(current) function unique name
@@ -46,6 +48,7 @@ function eatLeft(org::Creature.Organism, fn::ASCIIString, block::Expr)
 end
 #
 # @cmd
+# @line
 # Is called when organism bites on the right
 # @param org Organism we have to mutate
 # @param fn Parent(current) function unique name
@@ -60,6 +63,7 @@ function eatRight(org::Creature.Organism, fn::ASCIIString, block::Expr)
 end
 #
 # @cmd
+# @line
 # Is called when organism bites up
 # @param org Organism we have to mutate
 # @param fn Parent(current) function unique name
@@ -74,6 +78,7 @@ function eatUp(org::Creature.Organism, fn::ASCIIString, block::Expr)
 end
 #
 # @cmd
+# @line
 # Is called when organism bites down
 # @param org Organism we have to mutate
 # @param fn Parent(current) function unique name
@@ -88,6 +93,7 @@ function eatDown(org::Creature.Organism, fn::ASCIIString, block::Expr)
 end
 #
 # @cmd
+# @line
 # Is called when organism make step left
 # @param org Organism we have to mutate
 # @param fn Parent(current) function unique name
@@ -98,6 +104,7 @@ function stepLeft(org::Creature.Organism, fn::ASCIIString, block::Expr)
 end
 #
 # @cmd
+# @line
 # Is called when organism make step right
 # @param org Organism we have to mutate
 # @param fn Parent(current) function unique name
@@ -108,6 +115,7 @@ function stepRight(org::Creature.Organism, fn::ASCIIString, block::Expr)
 end
 #
 # @cmd
+# @line
 # Is called when organism make step up
 # @param org Organism we have to mutate
 # @param fn Parent(current) function unique name
@@ -118,6 +126,7 @@ function stepUp(org::Creature.Organism, fn::ASCIIString, block::Expr)
 end
 #
 # @cmd
+# @line
 # Is called when organism make step down
 # @param org Organism we have to mutate
 # @param fn Parent(current) function unique name
@@ -141,6 +150,7 @@ end
 =#
 #
 # @cmd
+# @line
 # Saves custom value to organism's private memory
 # @param org Organism we are working with
 # @param fn Parent(current) function unique name
@@ -159,6 +169,7 @@ function toMem(org::Creature.Organism, fn::ASCIIString, block::Expr)
 end
 #
 # @cmd
+# @line
 # Extracts custom value from organism's private memory
 # @param org Organism we are working with
 # @param fn Parent(current) function unique name

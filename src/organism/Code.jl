@@ -7,6 +7,8 @@
 # TODO: describe @cmd annotation
 # TODO: describe that return operator inside custom functions don't affect of script size
 # TODO: describe Expr(:nothing) return value
+# TODO: describe @line, @block annotations(they are line and block element). e.g.:
+# TODO: if,for - block elements, var, fnCall - line elements
 #
 # @author DeadbraiN
 #
@@ -20,9 +22,11 @@ module Code
   include("CodeMacros.jl")
   include("CodeOrganism.jl")
   include("CodeMath.jl")
+
+  export Pos
   #
   # Command functions. Amount of these functions will be increased
-  # as many Julia language part i'mgoing to support...
+  # as many Julia language parts i'm going to support...
   #
   export var
   export fn
@@ -34,9 +38,27 @@ module Code
   #
   export onRemoveLine
   export getRandPos
-
+  #
+  # Describes organism's code position. This position is used
+  # for mutations (add, change, del,...)
+  #
+  type Pos
+    #
+    # Index of function in Organism.Creature.funcs array
+    #
+    fnIdx::Int
+    #
+    # Index of block inside Creature.Func function
+    #
+    blockIdx::Int
+    #
+    # Index of code line inside Organism.Block.lines
+    #
+    lineIdx::Int
+  end
   #
   # @cmd
+  # @line
   # Returns AST expression for variable declaration. Format:
   # local name::Type = value
   # @param org Organism we have to mutate
@@ -54,6 +76,7 @@ module Code
   end
   #
   # @cmd
+  # @block
   # Creates custom function with unique name, random arguments with
   # default values. By default it returns first parameter as local 
   # variable
@@ -92,13 +115,14 @@ module Code
     local fnEx::Expr = :(function $(Symbol(fnName))($([(push!(func.vars[p.args[1].args[2]], p.args[1].args[1]);p.head=:kw;p) for p in params]...)) end)
 
     push!(fnEx.args[2].args, :(return $(params[1].args[1].args[1])))
-    push!(org.vars[fnName].blocks, fnEx.args[2])
+    push!(func.blocks, fnEx.args[2])
     push!(org.funcs, fnEx)
 
     fnEx
   end
   #
   # @cmd
+  # @line
   # Calls custom function or do nothing if no available functions.
   # It choose custom function from org.funcs array, fills parameters
   # and call it. It also creates new variable with appropriate type.
@@ -137,6 +161,7 @@ module Code
   end
   #
   # @cmd
+  # @block
   # TODO:
   # if operator implementation. It contains block inside, so it can't be inside
   # other block. For example, it can't be inside body of "for" operator.
@@ -161,6 +186,7 @@ module Code
   end
   #
   # @cmd
+  # block
   # Creates a for loop. We have to create small loops, because they
   # affects entire speed.
   # @param org Organism we are working with
@@ -274,43 +300,21 @@ module Code
   # functions), where we have to insert/change/delete code 
   # line. Position is chose randomly. It takes main function 
   # and all custom functions together, choose one function 
-  # randomly and choose random position inside this function's
-  # block.
+  # randomly and choose random block and position inside this 
+  # block. Every function contains return operator at the end.
+  # So we have to skip it.
   # @param org Organism we are working with
-  # @return {Tuple} (index::Int, fn::Expr, block::Expr)
+  # @return {Pos} Position in a code
   #
   function getRandPos(org::Creature.Organism)
-    #
-    # + 1, because main function exists everytime
-    #
-    local fnIndex::Int = rand(1:length(org.funcs) + 1)
-    local block::Expr
-    local blocks::Array{Expr, 1}
-    local fnName::ASCIIString
-    local i::Int
-    local fnEx::Expr
-    #
-    # fnIndex > 1 means custom function
-    #
-    if fnIndex > 1
-      fnEx   = org.funcs[fnIndex - 1]
-      fnName = string(fnEx.args[1].args[1])
-      blocks = org.vars[fnName].blocks
-      block  = blocks[rand(1:length(blocks))]
-      #
-      # If it's block of the function body, then we have to skip 
-      # return operator.
-      #
-      if block === fnEx.args[2] return (rand(1:((i = length(block.args)) > 1 ? i - 1 : 1)), org.funcs[fnIndex-1], block) end
-      return (rand(1:((i=length(block.args)) > 0 ? i : 1)), org.funcs[fnIndex-1], block)
-    end
-    #
-    # main function
-    #
-    blocks = org.vars[""].blocks
-    block  = blocks[rand(1:length(blocks))]
+    local fnIdx   ::Int = rand(1:length(org.funcs))
+    local blockIdx::Int = rand(1:length(org.funcs[fnIdx].blocks))
 
-    (rand(1:((i=length(block.args)) > 0 ? i : 1)), org.code, block)
+    Pos(
+      fnIdx,
+      blockIdx,
+      rand(1:length(org.funcs[fnIdx].blocks[blockIdx].lines) - (blockIdx === 1 ? 1 : 0)) # skip "return"
+    )
   end
 
   #

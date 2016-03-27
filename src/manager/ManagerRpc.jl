@@ -205,8 +205,8 @@ end
 function _createSimpleOrganism(id::UInt, org::Creature.Organism)
   RpcApi.SimpleOrganism(
     id,
-    org.mutationProbabilities,
     org.code,
+    org.mutationProbabilities,
     org.mutationsOnClone,
     org.mutationPeriod,
     org.mutationAmount,

@@ -15,6 +15,16 @@ module Mutator
 
   export mutate
   #
+  # Describes one code block like "if", "for", "function" and so on.
+  # Is used for mutations of organism's AST. Contains function and
+  # block flag. Function is used for obtaining new block expression
+  # (Expr type). isBlock flag is used for changing and removing AST.
+  #
+  type BlockPart
+    fn::Function
+    isBlock::Bool
+  end
+  #
   # TODO: add description of the method
   # TODO: describe indexes
   # TODO: add org.codeSize += 1 for every adding
@@ -32,7 +42,7 @@ module Mutator
       # If there is no code, we can't mutate it. We may only add code line
       #
       pIndex = org.codeSize < 1 ? 1           : Helper.getProbIndex(org.mutationProbabilities)
-      res    = org.codeSize < 1 ? _onAdd(org) : _MUTATION_FUNCS[pIndex](org)
+      res    = org.codeSize < 1 ? _onAdd(org) : _MUTATION_TYPES[pIndex](org)
       result &= res
       #
       # Updates compiled version of the code. Only valid code will be applied,
@@ -59,7 +69,7 @@ module Mutator
   #
   # Changes organism's color a little bit
   # @param org Organism whom color we have to change
-  #
+  # TODO: this color change algorithm is not effective. Have to change it
   function _changeColor(org::Creature.Organism)
     local pattern::Array{UInt32, 1} = [0x00100000, 0x00010000, 0x00001000, 0x00000100, 0x00000010, 0x00000001]
 
@@ -69,14 +79,14 @@ module Mutator
   #
   # Adds one line of code into existing code blocks including all
   # custom function bodies and their blocks. It shouldn't add function
-  # or function call inside custom function.
+  # or function call inside other function excepts main one.
   # @param org Organism we are working with
   # @return {Bool} true means that add mutation was occured, false
   # that there were no add or adding was skipped.
   #
   function _onAdd(org::Creature.Organism)
     pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
-    local cmd::Function       = _CODE_SNIPPETS[rand(1:length(_CODE_SNIPPETS))]
+    local cmd::Function       = _CODE_PARTS[rand(1:length(_CODE_PARTS))]
     local fnName::ASCIIString = fnEx === org.code ? "" : string(fnEx.args[1].args[1])
     local mainFn::Bool        = isempty(fnName)
     local cmdEx::Expr
@@ -90,6 +100,9 @@ module Mutator
     insert!(block.args, cmd === Code.fn || cmd === Code.var ? 1 : pos, cmdEx)
     org.codeSize += 1
     true
+
+
+    local pos::Code.Pos = Code.getRandPos()
   end
   #
   # Makes one big change in a code of main and custom functions. Big 
@@ -100,7 +113,7 @@ module Mutator
   #
   function _onChange(org::Creature.Organism)
     pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
-    local cmd::Function         = _CODE_SNIPPETS[rand(1:length(_CODE_SNIPPETS))]
+    local cmd::Function         = _CODE_PARTS[rand(1:length(_CODE_PARTS))]
     local fnName::ASCIIString   = fnEx === org.code ? "" : string(fnEx.args[1].args[1])
     local mainFn::Bool          = isempty(fnName)
     local cmdEx::Expr
@@ -182,22 +195,33 @@ module Mutator
   # They are used for generating (add,change) code of organisms. This
   # array can't be empty.
   #
-  const _CODE_SNIPPETS = [
+  const _CODE_PARTS = [
     #
     # Code
     #
-    Code.var, Code.plus, Code.minus, Code.multiply, Code.divide, Code.reminder, Code.fn, 
-    Code.fnCall, Code.condition, Code.toMem, Code.fromMem, Code.loop,
+    BlockPart(Code.var,       false), BlockPart(Code.fn,        true),
+    BlockPart(Code.fnCall,    false), BlockPart(Code.condition, true),
+    BlockPart(Code.loop,      true ),
+    #
+    # CodeMath
+    #
+    BlockPart(Code.plus,      false), BlockPart(Code.minus,     false),
+    BlockPart(Code.multiply,  false), BlockPart(Code.divide,    false),
+    BlockPart(Code.reminder,  false),
     #
     # CodeOrganism
     #
-    Code.getEnergy, Code.eatLeft, Code.eatRight, Code.eatUp, Code.eatDown, 
-    Code.stepLeft, Code.stepRight, Code.stepUp, Code.stepDown#=, Code.clone =#
+    BlockPart(Code.getEnergy, false), BlockPart(Code.eatLeft,   false),
+    BlockPart(Code.eatRight,  false), BlockPart(Code.eatUp,     false),
+    BlockPart(Code.eatDown,   false), BlockPart(Code.stepLeft,  false),
+    BlockPart(Code.stepRight, false), BlockPart(Code.stepUp,    false),
+    BlockPart(Code.stepDown,  false), BlockPart(Code.toMem,     false),
+    BlockPart(Code.fromMem,   false)
   ]
   #
   # All available functions for mutation types: change, add, del,...
   #
-  const _MUTATION_FUNCS = [
+  const _MUTATION_TYPES = [
     _onAdd, _onChange, _onDel, _onSmallChange, _onClone, _onPeriod, _onAmount
   ]
  #  #

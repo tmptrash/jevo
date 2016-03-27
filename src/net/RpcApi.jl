@@ -45,16 +45,16 @@ module RpcApi
     id::UInt
     #
     # @inheritable
+    # Code of organism. Array of atomic string blocks on Julia language.
+    #
+    code::Expr
+    #
+    # @inheritable
     # Mutations probability. Add, change, delete. e.g.: [1,10,2]
     # means, that "add" mutation will be 10 times rare then "change"
     # and 2 times rare then "delete" mutations.
     #
     mutationProbabilities::Array{Int}
-    #
-    # @inheritable
-    # Code of organism. Array of atomic string blocks on Julia language.
-    #
-    code::Expr
     #
     # @inheritable
     # Amount of mutations, which will be applied to arganism after
