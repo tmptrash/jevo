@@ -62,15 +62,14 @@ module Code
   # Returns AST expression for variable declaration. Format:
   # local name::Type = value
   # @param org Organism we have to mutate
-  # @param fn Parent(current) function unique name
-  # @param block Current flock within fn function
+  # @param pos Position for current mutation
   # @return {Expr}
   #
-  function var(org::Creature.Organism, fn::ASCIIString, block::Expr)
+  function var(org::Creature.Organism, pos::Pos)
     local typ::DataType  = @getType()
     local varSym::Symbol = @getNewVar(org)
 
-    push!(org.vars[fn].vars[typ], varSym)
+    push!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].vars[typ], varSym)
 
     :(local $(varSym)::$(typ)=$(@getValue(typ)))
   end

@@ -88,7 +88,7 @@ module Mutator
     local pos::Code.Pos = Code.getRandPos()
     local cmd::CodePart = _CODE_PARTS[rand(1:length(_CODE_PARTS))]
     local mainFn::Bool  = pos.fnIdx === 1
-    local cmdEx::Expr
+    local exp::Expr
     #
     # We have to prevent: calling function inside custom function
     # to prevent recursing, creation function inside cusom function,
@@ -96,7 +96,7 @@ module Mutator
     #
     if (!mainFn && cmd.isBlock) ||
        (!mainFn && cmd.fn !== Code.fnCall) ||
-       (cmdEx = cmd(org, pos)).head === :nothing)
+       (exp = cmd(org, pos)).head === :nothing)
       return false
     end
     #
@@ -104,7 +104,7 @@ module Mutator
     # to prevent UndefVarError error in case of calling
     # before defining the function. The same for variables.
     #
-    insert!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines, cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, cmdEx)
+    insert!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines, cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, exp)
     org.codeSize += 1
 
     true
