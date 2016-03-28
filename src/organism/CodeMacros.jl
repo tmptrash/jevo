@@ -5,32 +5,11 @@
 # @author DeadbraiN
 #
 #
-# Checks if specified block belongs to specified function. We need 
-# this for preventing inline blocks generation. For example if operator
-# inside other if operator is impossible. So, if block belongs to
-# specified function, then we may add other block based operator inside,
-# otherwise we return Expr(:nothing) from current function.
-# @param {Creature.Organism} org Organism we are working with
-# @param {ASCIIString} fn Function String name
-# @param {Expr} block Blockexpression we want to check
-#
-macro inFuncBlock(org, fn, block)
-  :(if $block !== $org.vars[$fn].blocks[1] return Expr(:nothing) end)
-end
-#
-# Checks if secified function is a main one. In other case we return
-# Expr(:nothing) from current function.
-# @param {ASCIIString} fn Function string name
-#
-macro inMainFunc(fn)
-  :(if !isempty($fn) return Expr(:nothing) end)
-end
-#
 # Creates new unique variable name and returns it's symbol
 # @param {Creature.Organism} org Owner of new variable
 # @return {Symbol}
 #
-macro getNewVar(org)
+macro newVar(org)
   :(symbol("var_", $org.symbolId += 1))
 end
 #
@@ -38,27 +17,30 @@ end
 # @param {Creature.Organism} org Organism we are working with
 # @return {ASCIIString}
 #
-macro getNewFunc(org)
+macro newFunc(org)
   :(string("func_", $org.symbolId += 1))
 end
 #
 # Returns one of supported types. Is used randomizer for choosing type.
 # @return {DataType}
 #
-macro getType()
+macro randType()
   local types::Array{DataType} = Helper.SUPPORTED_TYPES
   :($types[rand(1:length($types))])
 end
 #
 # Returns a variable from existing in a code
 # @param {Creature.Organism} org Organism we are mutating
-# @param {ASCIIString} fn An expression of parent(current) function within 
-# we are orking in
+# @param {Code.Pos} pos Code position
 # @param {DataType} typ Type of variable we want to take
 # @return {Symbol}
 #
-macro getVar(org, fn, typ)
-  :(length($org.vars[$fn].vars[$typ]) < 1 ? :nothing : $org.vars[$fn].vars[$typ][rand(1:length($org.vars[$fn].vars[$typ]))])
+macro randVar(org, pos, typ)
+  :(
+    length($org.funcs[$pos.funcIdx].blocks[$pos.blockIdx].vars[$typ]) < 1 ?
+    :nothing :
+    $org.funcs[$pos.funcIdx].blocks[$pos.blockIdx].vars[$typ][rand(1:length($org.vars[$fn].vars[$typ]))]
+  )
 end
 #
 # Returns random value by data type. e.g.: 123 for Int8
@@ -67,4 +49,41 @@ end
 #
 macro getValue(typ)
   :($typ !== ASCIIString ? rand($typ) : randstring())
+end
+#
+# Returns lines property in specified function and block
+# @param {Creature.Organism} org
+# @param {Code.Pos} pos
+# @return {Array{Expr, 1}}
+#
+macro getLines(org, pos)
+  :($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].lines)
+end
+#
+# Returns chosen line in specified function and block
+# @param {Creature.Organism} org
+# @param {Code.Pos} pos
+# @return {Array{Expr, 1}}
+#
+macro getLine(org, pos)
+  :($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].lines[$pos.lineIdx])
+end
+#
+# Returns chosen block of specified function
+# @param {Creature.Organism} org
+# @param {Code.Pos} pos
+# @return {Organism.Creature.Block}
+#
+macro getBlock(org, pos)
+  :($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx])
+end
+#
+# Returns variables of specified block of specified
+# function.
+# @param {Creature.Organism} org
+# @param {Code.Pos} pos
+# @return {Organism.Creature.Block}
+#
+macro getVars(org, pos)
+  :($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars)
 end

@@ -107,7 +107,7 @@ module Helper
   # @return {Dict{DataType, Array{Symbol, 1}}}
   #
   function getTypesMap()
-    Dict{DataType, Array{Symbol, 1}}(getSupportedTypes((typ) -> typ => Symbol[])...)
+    Dict{DataType, Dict{Symbol, Bool}}(getSupportedTypes((typ) -> typ => Dict{Symbol, Bool}())...)
   end
   #
   # Returns supported types array for organism language

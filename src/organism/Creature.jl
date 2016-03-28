@@ -64,9 +64,9 @@ module Creature
   type Block
     #
     # Map of available variables separated by types. All these
-    # variables belong to one (current) function
+    # variables belong to one (current) block
     #
-    vars::Dict{DataType, Array{Symbol, 1}}
+    vars::Dict{DataType, Dict{Symbol, Bool}}
     #
     # Reference to code lines inside Organism.code AST.
     #
@@ -193,7 +193,7 @@ module Creature
     #
     # Blocks of main function. In this case only one - main block.
     #
-    local blocks::Array{Block, 1} = [Block(code.args[2].args, Helper.getTypesMap())]
+    local blocks::Array{Block, 1} = [Block(Helper.getTypesMap(), code.args[2].args)]
     #
     # This block below, creates variables of main function, which we created
     # in code above (local code::Expr  = ...). It also creates one block,

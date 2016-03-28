@@ -124,7 +124,7 @@ module Config
     #
     ORGANISM_START_COLOR::UInt32
     #
-    # Maximum amount of arguments in custom functions
+    # Maximum amount of arguments in custom functions. Minimum 1.
     #
     CODE_MAX_FUNC_PARAMS::Int
     #

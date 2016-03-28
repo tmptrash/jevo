@@ -24,6 +24,7 @@ module Code
   include("CodeMath.jl")
 
   export Pos
+  export CODE_PARTS
   #
   # Command functions. Amount of these functions will be increased
   # as many Julia language parts i'm going to support...
@@ -63,13 +64,13 @@ module Code
   # local name::Type = value
   # @param org Organism we have to mutate
   # @param pos Position for current mutation
-  # @return {Expr}
+  # @return {Expr|Expr(:nothing)}
   #
   function var(org::Creature.Organism, pos::Pos)
     local typ::DataType  = @getType()
-    local varSym::Symbol = @getNewVar(org)
+    local varSym::Symbol = @newVar(org)
 
-    push!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].vars[typ], varSym)
+    @getVars(org, pos)[typ][varSym] = true
 
     :(local $(varSym)::$(typ)=$(@getValue(typ)))
   end
@@ -80,42 +81,37 @@ module Code
   # default values. By default it returns first parameter as local 
   # variable
   # @param org Organism we are working with
-  # @param fn Parent(current) function unique name 
-  # we are working in
-  # @param block Current flock within fn function
-  # @return {Expr}
+  # @param pos Code position
+  # @return {Expr|Expr(:nothing)}
   #
-  function fn(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    #
-    # We may add functions only in main one. Custom functions can't
-    # be used as a container for other custom functions. Also, custom
-    # functions can't be added into blocks. Except main one.
-    #
-    @inMainFunc(fn)
-    @inFuncBlock(org, fn, block)
+  function fn(org::Creature.Organism, pos::Pos)
     local typ::DataType
+    local sym::Symbol
     local i::Int
-    local p::Symbol
-    local fnName::ASCIIString = @getNewFunc(org)
     local paramLen::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
-    local func::Creature.Func = (org.vars[fnName] = Creature.Func(Helper.getTypesMap(), []))
+    local block::Creature.Block = Block(Helper.getTypesMap(), [])
+    local blocks::Array{Creature.Block, 1} = [block]
+    local func::Creature.Func = Func(blocks)
     #
-    # New function parameters in format: [name::Type=val,...]. 
+    # New function parameters in format: [name::Type=val,...].
     # At least one parameter should exist. We choose amount of
-    # parameters randomly. All other parameters will be set by
-    # default values.
+    # parameters randomly. At the same time we set "vars" field
+    # of current function block. Here a small hack. :(=) symbol
+    # switched by :kw. I don't know why, but it doesn't work
+    # without this...
     #
-    local params::Array{Expr, 1} = [:($(typ = @getType();@getNewVar(org))::$(typ)=$(@getValue(typ))) for i=1:paramLen]
+    local params::Array{Expr, 1} = [
+      :(sym=($(typ=@getType();sym=@newVar(org);block.vars[typ][sym]=true;sym)::$(typ)=$(@getValue(typ)));sym.head=:kw;sym) for i=1:paramLen
+    ]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
-    # All parameters will be added as local variables. Here a small hack. :(=) symbol
-    # switched by :kw. I don't know why, but it doesn't work without this...
+    # All parameters will be added as local variables.
     #
-    local fnEx::Expr = :(function $(Symbol(fnName))($([(push!(func.vars[p.args[1].args[2]], p.args[1].args[1]);p.head=:kw;p) for p in params]...)) end)
+    local fnEx::Expr = :(function $(Symbol(@newFunc(org)))($(params...)) end)
 
-    push!(fnEx.args[2].args, :(return $(params[1].args[1].args[1])))
-    push!(func.blocks, fnEx.args[2])
-    push!(org.funcs, fnEx)
+    block.lines = fnEx.args[2].args
+    push!(block.lines, :(return $(params[1].args[1].args[1])))
+    push!(org.funcs, func)
 
     fnEx
   end
@@ -130,7 +126,7 @@ module Code
   # @param fn Parent(current) function unique name
   # we are working in
   # @param block Current flock within fn function
-  # @return {Expr|nothing}
+  # @return {Expr|Expr(:nothing)}
   # TODO: add check if we call a function inside other function
   # 
   function fnCall(org::Creature.Organism, fn::ASCIIString, block::Expr)
@@ -168,10 +164,9 @@ module Code
   # @param fn Parent(current) function unique name
   # we are working in
   # @param block Current flock within fn function
-  # @return {Expr|nothing}
+  # @return {Expr|Expr(:nothing)}
   #
   function condition(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    @inFuncBlock(org, fn, block)
     local typ::DataType = @getType()
     local v1::Symbol    = @getVar(org, fn, typ)
     if v1 === :nothing return Expr(:nothing) end
@@ -192,12 +187,12 @@ module Code
   # @param fn Parent(current) function unique name 
   # we are working in
   # @param block Current flock within fn function
+  # @return {Expr|Expr(:nothing)}
   #
   function loop(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    @inFuncBlock(org, fn, block)
     local v::Symbol = @getVar(org, fn, Int8)
     if v === :nothing return Expr(:nothing) end
-    local i::Symbol = @getNewVar(org)
+    local i::Symbol = @newVar(org)
     local loopEx    = :(local $i::Int8; for $i=1:$v end)
 
     push!(org.vars[fn].blocks, loopEx.args[2].args[2])
@@ -214,84 +209,44 @@ module Code
   # code - array of code lines some AST node, pos - current removing 
   # position in code, fn - parent(current) function.
   # @param org Organism we are working with
-  # @param pos Remove position
-  # @param fnEx Expressiom of function body, we are deleting in
-  # @param block Current block, where mutation occures
+  # @param pos Remove/Change position
   # @param del true means that code is deleting now, false - changing
   #
-  function onRemoveLine(org::Creature.Organism, pos::Int, fnEx::Expr, block::Expr, del::Bool = false)
-    local lineEx::Expr = block.args[pos] # line we want to remove
-    local ex::Expr
+  function onRemoveLine(org::Creature.Organism, pos::Pos, del::Bool = false)
+    local blocks::Array{Expr, 1} = org.funcs[pos.fnIdx].blocks
+    local exp::Expr = blocks[pos.blockIdx].lines[pos.lineIdx]
     local i::Int
-    local vars::Array{Symbol, 1}
+    local bLen::Int
     #
-    # Finds block of current "if" operator and removes it from 
-    # Organism.vars[fn].blocks array
-    # TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # TODO: on blocks remove we have to remove block variables
-    # TODO: from org.vars[fn].vars
-    # TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    if lineEx.head === :comparison || lineEx.head === :if  # TODO: why :comparison and not :if
-      println(lineEx, " ", fn)
-      i = findfirst(org.vars[fn].blocks, lineEx.args[2])
-      if i > 0 deleteat!(org.vars[fn].blocks, i) end
-      #
-      # This size reduce should not depend on del parameter, 
-      # because in case of change of block based line we are
-      # changing one line into 1 + block lines. Block lines
-      # should be used in org.codeSize.
-      #
-      org.codeSize -= length(lineEx.args[2].args)
+    # This is function element. We have to sum amount of code
+    # lines inside function + amount of code lines inside all
+    # function blocks. This is how we calc codeSize of this.
+    # function.
     #
-    # "for" operator is wrapped by block ... end
+    if exp.head === :function
+      org.codeSize -= (length(blocks[1].lines) - 1) # skip "return"
+      bLen = length(blocks)
+      for i = 1:bLen blocks codeSize -= length(blocks[i].lines) end
+      deleteat!(org.funcs, pos.fnIdx)
     #
-    elseif lineEx.head === :block # for loop
-      println(lineEx, " ", fn)
-      i = findfirst(org.vars[fn].blocks, lineEx.args[2].args[2])
-      if i > 0 deleteat!(org.vars[fn].blocks, i) end
-      #
-      # This size reduce should not depend on del parameter, 
-      # because in case of change of block based line we are
-      # changing one line into 1 + block lines. Block lines
-      # should be used in org.codeSize.
-      #
-      org.codeSize -= length(lineEx.args[2].args[2].args)
+    # This is block element, but not a function
     #
-    # Finds currently removed variable within it's function and
-    # removes it from Creature.Organism.vars map
+    elseif haskey(_CODE_PARTS_MAP, exp.head)
+      org.codeSize -= length(blocks[pos.blockIdx].lines)
+      deleteat!(blocks, pos.blockIdx)
     #
-    elseif lineEx.head === :local
-      ex   = lineEx.args[1].args[1]   # shortcut to variable
-      vars = org.vars[fnEx === org.code ? "" : "$(fnEx.args[1].args[1])"].vars[ex.args[2]]
-      i = findfirst(vars, ex.args[1])
-      if i > 0 deleteat!(vars, i) end
+    # For simple line element we do nothing. But we do for 
+    # variable declaration.
     #
-    # Finds currently removed function declaration and remove it
-    # from Creature.Organism.funcs map. We alse have to remove this
-    # function from Creature.Organism.vars map.
-    #
-    elseif lineEx.head === :function
-      i = findfirst(org.funcs, lineEx)
-      if i > 0
-        delete!(org.vars, string(lineEx.args[1].args[1]))
-        deleteat!(org.funcs, i)
-      end
-      #
-      # -1, because we don't calc return operator. This size reduce
-      # should not depend on del parameter, because in case of change
-      # of block based line we are changing one line into 1 + block
-      # lines. Block lines should be used in org.codeSize.
-      #
-      org.codeSize -= (length(lineEx.args[2].args) - 1)
-    elseif lineEx.head === :if
-      #
-      # This size reduce should not depend on del parameter, 
-      # because in case of change of block based line we are
-      # changing one line into 1 + block lines. Block lines
-      # should be used in org.codeSize.
-      #
-      org.codeSize -= length(block.args)
+    elseif exp.head === :local
+      #TODO: check this args[1].args[1]...
+      delete!(blocks[pos.blockIdx].vars[exp.args[2], exp.args[1].args[1].args[1])
     end
+    #
+    # We have to decrease code size only if we remove this line.
+    # In case of changing, we don't need it, because nothing is
+    # changed.
+    #
     if del org.codeSize -= 1 end
   end
   #
@@ -312,10 +267,47 @@ module Code
     Pos(
       fnIdx,
       blockIdx,
-      rand(1:length(org.funcs[fnIdx].blocks[blockIdx].lines) - (blockIdx === 1 ? 1 : 0)) # skip "return"
+      rand(1:length(@getLines(org, pos)) - (blockIdx === 1 ? 1 : 0)) # skip "return"
     )
   end
 
+  #
+  # This map contains only block symbols like: for, if, function,...
+  # This map and _CODE_PARTS should be synchronized.
+  #
+  const _CODE_PARTS_MAP = Dict{Symbol, Bool}(
+    :function  => true,
+    :if        => true, # TODO: do we need "comparison"?
+    :block     => true
+  )
+  #
+  # Array of available functions. Each function should return Expr type.
+  # They are used for generating (add,change) code of organisms. This
+  # array can't be empty.
+  #
+  const CODE_PARTS = [
+    #
+    # Code
+    #
+    CodePart(var,         false), CodePart(fn,        true),
+    CodePart(fnCall,      false), CodePart(condition, true),
+    CodePart(loop,        true ),
+    #
+    # CodeMath
+    #
+    CodePart(plus,        false), CodePart(minus,     false),
+    CodePart(multiply,    false), CodePart(divide,    false),
+    CodePart(reminder,    false),
+    #
+    # CodeOrganism
+    #
+    CodePart(getEnergy,   false), CodePart(eatLeft,   false),
+    CodePart(eatRight,    false), CodePart(eatUp,     false),
+    CodePart(eatDown,     false), CodePart(stepLeft,  false),
+    CodePart(stepRight,   false), CodePart(stepUp,    false),
+    CodePart(stepDown,    false), CodePart(toMem,     false),
+    CodePart(fromMem,     false)
+  ]
   #
   # Available comparison operators. May be used with "if" operator
   #

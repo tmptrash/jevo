@@ -25,6 +25,28 @@ module Mutator
     isBlock::Bool
   end
   #
+  # Checks if specified position in a code is correct. By correct i
+  # mean: follow the rules like block can't be inside other blocks,
+  # except block of function, function declaration can't be inside
+  # other custom function and so on... If something wrong with position
+  # then false will be returned. We have to prevent: calling function 
+  # inside custom function (to prevent recursing), creation function 
+  # inside custom function, block operator inside other blocks, except
+  # blocks of functions. exp variable should be declared outside the 
+  # macros.
+  #
+  macro posCorrect(org, pos, cmd)
+    :(
+      if $cmd.isBlock && $pos.blockIdx !== 1 ||
+         $pos.fnIdx !== 1 && $cmd.fn !== Code.fnCall ||
+         (ex = $cmd.fn($org, $pos)).head === :nothing)
+        return false
+      else
+        ex
+      end
+    )
+  end
+  #
   # TODO: add description of the method
   # TODO: describe indexes
   # TODO: add org.codeSize += 1 for every adding
@@ -86,25 +108,15 @@ module Mutator
   #
   function _onAdd(org::Creature.Organism)
     local pos::Code.Pos = Code.getRandPos()
-    local cmd::CodePart = _CODE_PARTS[rand(1:length(_CODE_PARTS))]
+    local cmd::CodePart = Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))]
     local mainFn::Bool  = pos.fnIdx === 1
-    local exp::Expr
-    #
-    # We have to prevent: calling function inside custom function
-    # to prevent recursing, creation function inside cusom function,
-    # block operator inside custom function.
-    #
-    if (!mainFn && cmd.isBlock) ||
-       (!mainFn && cmd.fn !== Code.fnCall) ||
-       (exp = cmd(org, pos)).head === :nothing)
-      return false
-    end
+    local exp::Expr     = @posCorrect(org, pos, cmd)
     #
     # All new custom functions should be at the beginning
     # to prevent UndefVarError error in case of calling
     # before defining the function. The same for variables.
     #
-    insert!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines, cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, exp)
+    insert!(Code.getLines(org, pos), cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, exp)
     org.codeSize += 1
 
     true
@@ -117,21 +129,36 @@ module Mutator
   # that there were no change or change was skipped.
   #
   function _onChange(org::Creature.Organism)
-    pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
-    local cmd::Function         = _CODE_PARTS[rand(1:length(_CODE_PARTS))]
-    local fnName::ASCIIString   = fnEx === org.code ? "" : string(fnEx.args[1].args[1])
-    local mainFn::Bool          = isempty(fnName)
-    local cmdEx::Expr
+    local pos::Code.Pos = Code.getRandPos()
+    local cmd::CodePart = Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))]
+    local mainFn::Bool  = pos.fnIdx === 1
+    local exp::Expr     = @posCorrect(org, pos, cmd)
+    local lines::Array{Expr, 1} = Code.getLines(org, pos)
+    #
+    # no lines to change
+    #
+    if length(lines) < 1 return false end
 
-    if length(block.args) < 1 ||                            # no lines to change
-       block.args[pos].head === :return ||                  # return is unmutable
-       !(cmd !== Code.fn &&                                 # fn may be only in main function
-       (!mainFn && cmd !== Code.fnCall || mainFn) &&        # fnCall may be only in main function
-       (cmdEx = cmd(org, fnName, block)).head !== :nothing) # impossible obtain new code line
-      return false
-    end
-    Code.onRemoveLine(org, pos, fnEx, block)
-    block.args[pos] = cmdEx
+    Code.onRemoveLine(org, pos)
+    lines[pos.lineIdx] = exp
+
+    true
+  end
+  #
+  # Removes one code line if possible. It can't remove return
+  # operator inside custom functions
+  # @param org Organism we are working with
+  # @return {Bool} true means that there were a delete, false
+  # that there were no delete or delete was skipped.
+  #
+  function _onDel(org::Creature.Organism)
+    local pos::Code.Pos = Code.getRandPos()
+    local lines::Array{Expr, 1} = Code.getLines(org, pos)
+
+    if length(lines) < 1 return false end
+    Code.onRemoveLine(org, pos, true)
+    deleteat!(lines, pos.lineIdx)
+
     true
   end
   #
@@ -144,27 +171,8 @@ module Mutator
   # TODO: implement in future
   #
   function _onSmallChange(org::Creature.Organism)
-    pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
-
-    if length(block.args) < 1 return false end
     # TODO: AST deep analyzing here!
     # TODO: variables and constants should be used here
-    true
-  end
-  #
-  # Removes one code line if possible. It can't remove return
-  # operator inside custom functions
-  # @param org Organism we are working with
-  # @return {Bool} true means that there were a delete, false
-  # that there were no delete or delete was skipped.
-  #
-  function _onDel(org::Creature.Organism)
-    pos::Int, fnEx::Expr, block::Expr = Code.getRandPos(org)
-
-    if length(block.args) < 1 || block.args[pos].head === :return return false end
-
-    Code.onRemoveLine(org, pos, fnEx, block, true)
-    deleteat!(block.args, pos)
     true
   end
   #
@@ -194,35 +202,6 @@ module Mutator
     org.mutationAmount = rand(0:Config.val(:ORGANISM_MAX_MUTATION_AMOUNT))
     true
   end
-
-  #
-  # Array of available functions. Each function should return Expr type.
-  # They are used for generating (add,change) code of organisms. This
-  # array can't be empty.
-  #
-  const _CODE_PARTS = [
-    #
-    # Code
-    #
-    CodePart(Code.var,       false), CodePart(Code.fn,        true),
-    CodePart(Code.fnCall,    false), CodePart(Code.condition, true),
-    CodePart(Code.loop,      true ),
-    #
-    # CodeMath
-    #
-    CodePart(Code.plus,      false), CodePart(Code.minus,     false),
-    CodePart(Code.multiply,  false), CodePart(Code.divide,    false),
-    CodePart(Code.reminder,  false),
-    #
-    # CodeOrganism
-    #
-    CodePart(Code.getEnergy, false), CodePart(Code.eatLeft,   false),
-    CodePart(Code.eatRight,  false), CodePart(Code.eatUp,     false),
-    CodePart(Code.eatDown,   false), CodePart(Code.stepLeft,  false),
-    CodePart(Code.stepRight, false), CodePart(Code.stepUp,    false),
-    CodePart(Code.stepDown,  false), CodePart(Code.toMem,     false),
-    CodePart(Code.fromMem,   false)
-  ]
   #
   # All available functions for mutation types: change, add, del,...
   #
