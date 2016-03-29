@@ -1,7 +1,7 @@
 #
 # TODO: should be moved to tmp folder
 #
-include("RemoteWorld.jl")
+include("ImportFolders.jl")
 
 import Config
 import Server
