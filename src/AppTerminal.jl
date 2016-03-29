@@ -11,7 +11,7 @@ import Client
 import Creature
 import Connection
 import Config
-using Terminal
+import Terminal
 #
 # Answer function. It's called every time on request from server
 # @param ans Server answer

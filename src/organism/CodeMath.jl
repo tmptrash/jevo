@@ -1,9 +1,13 @@
+#
+# This file is a part of Code module. Contains Math functions.
+#
+# @author DeadbraiN
+#
 export plus
 export minus
 export multiply
 export divide
 export reminder
-
 #
 # @cmd
 # @line
@@ -12,16 +16,14 @@ export reminder
 # concatination, for boolean - & operator. If code is empty
 # this function will skip the execution.
 # @param org Organism we have to mutate
-# @param fn Parent(current) function unique name
-# we are working in
-# @param block Current flock within fn function
-# @return {Expr}
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
 #
-function plus(org::Creature.Organism, fn::ASCIIString, block::Expr)
-  local typ::DataType = @getType()
-  local v1::Symbol    = @getVar(org, fn, typ)
-  local v2::Symbol    = @getVar(org, fn, typ)
-  local v3::Symbol    = @getVar(org, fn, typ)
+function plus(org::Creature.Organism, pos::Code.Pos)
+  local typ::DataType = @randType()
+  local v1::Symbol    = @randVar(org, pos, typ)
+  local v2::Symbol    = @randVar(org, pos, typ)
+  local v3::Symbol    = @randVar(org, pos, typ)
 
   if v1 === :nothing return Expr(:nothing) end
 
@@ -41,16 +43,14 @@ end
 # concatination, for boolean - & operator. If code is empty
 # this function will skip the execution.
 # @param org Organism we have to mutate
-# @param fn Parent(current) function unique name
-# we are working in
-# @param block Current flock within fn function
-# @return {Expr}
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
 #
-function minus(org::Creature.Organism, fn::ASCIIString, block::Expr)
-  local typ::DataType = @getType()
-  local v1::Symbol    = @getVar(org, fn, typ)
-  local v2::Symbol    = @getVar(org, fn, typ)
-  local v3::Symbol    = @getVar(org, fn, typ)
+function minus(org::Creature.Organism, pos::Code.Pos)
+  local typ::DataType = @randType()
+  local v1::Symbol    = @randVar(org, pos, typ)
+  local v2::Symbol    = @randVar(org, pos, typ)
+  local v3::Symbol    = @randVar(org, pos, typ)
   local l::Int
 
   if v1 === :nothing return Expr(:nothing) end
@@ -80,16 +80,14 @@ end
 # concatination, for boolean - & operator. If code is empty
 # this function will skip the execution.
 # @param org Organism we have to mutate
-# @param fn Parent(current) function unique name
-# we are working in
-# @param block Current flock within fn function
-# @return {Expr}
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
 #
-function multiply(org::Creature.Organism, fn::ASCIIString, block::Expr)
-  local typ::DataType = @getType()
-  local v1::Symbol    = @getVar(org, fn, typ)
-  local v2::Symbol    = @getVar(org, fn, typ)
-  local v3::Symbol    = @getVar(org, fn, typ)
+function multiply(org::Creature.Organism, pos::Code.Pos)
+  local typ::DataType = @randType()
+  local v1::Symbol    = @randVar(org, pos, typ)
+  local v2::Symbol    = @randVar(org, pos, typ)
+  local v3::Symbol    = @randVar(org, pos, typ)
 
   if v1 === :nothing return Expr(:nothing) end
 
@@ -103,16 +101,14 @@ end
 # concatination, for boolean - | operator. If code is empty
 # this function will skip the execution.
 # @param org Organism we have to mutate
-# @param fn Parent(current) function unique name
-# we are working in
-# @param block Current flock within fn function
-# @return {Expr}
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
 #
-function divide(org::Creature.Organism, fn::ASCIIString, block::Expr)
-  local typ::DataType = @getType()
-  local v1::Symbol    = @getVar(org, fn, typ)
-  local v2::Symbol    = @getVar(org, fn, typ)
-  local v3::Symbol    = @getVar(org, fn, typ)
+function divide(org::Creature.Organism, pos::Code.Pos)
+  local typ::DataType = @randType()
+  local v1::Symbol    = @randVar(org, pos, typ)
+  local v2::Symbol    = @randVar(org, pos, typ)
+  local v3::Symbol    = @randVar(org, pos, typ)
 
   if v1 === :nothing return Expr(:nothing) end
   #
@@ -134,16 +130,14 @@ end
 # calculates reminder of cutting: "12345" % "23" = "345". It uses
 # length of second string for cut. For Bool uses | operator.
 # @param org Organism we have to mutate
-# @param fn Parent(current) function unique name
-# we are working in
-# @param block Current flock within fn function
-# @return {Expr}
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
 #
 function reminder(org::Creature.Organism, fn::ASCIIString, block::Expr)
-  local typ::DataType = @getType()
-  local v1::Symbol    = @getVar(org, fn, typ)
-  local v2::Symbol    = @getVar(org, fn, typ)
-  local v3::Symbol    = @getVar(org, fn, typ)
+  local typ::DataType = @randType()
+  local v1::Symbol    = @randVar(org, pos, typ)
+  local v2::Symbol    = @randVar(org, pos, typ)
+  local v3::Symbol    = @randVar(org, pos, typ)
 
   if v1 === :nothing return Expr(:nothing) end
   #

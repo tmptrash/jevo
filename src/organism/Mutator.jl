@@ -153,7 +153,7 @@ module Mutator
   #
   function _onDel(org::Creature.Organism)
     local pos::Code.Pos = Code.getRandPos()
-    local lines::Array{Expr, 1} = Code.getLines(org, pos)
+    local lines::Array{Expr, 1} = Code.@getLines(org, pos)
 
     if length(lines) < 1 return false end
     Code.onRemoveLine(org, pos, true)

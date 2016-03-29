@@ -70,9 +70,9 @@ module Code
     local typ::DataType  = @getType()
     local varSym::Symbol = @newVar(org)
 
-    @getVars(org, pos)[typ][varSym] = true
+    push!(@getVars(org, pos)[typ], varSym)
 
-    :(local $(varSym)::$(typ)=$(@getValue(typ)))
+    :(local $(varSym)::$(typ)=$(@randValue(typ)))
   end
   #
   # @cmd
@@ -91,7 +91,6 @@ module Code
     local paramLen::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
     local block::Creature.Block = Block(Helper.getTypesMap(), [])
     local blocks::Array{Creature.Block, 1} = [block]
-    local func::Creature.Func = Func(blocks)
     #
     # New function parameters in format: [name::Type=val,...].
     # At least one parameter should exist. We choose amount of
@@ -101,7 +100,7 @@ module Code
     # without this...
     #
     local params::Array{Expr, 1} = [
-      :(sym=($(typ=@getType();sym=@newVar(org);block.vars[typ][sym]=true;sym)::$(typ)=$(@getValue(typ)));sym.head=:kw;sym) for i=1:paramLen
+      :(sym=($(typ=@getType();sym=@newVar(org);push!(block.vars[typ], sym);sym)::$(typ)=$(@getValue(typ)));sym.head=:kw;sym) for i=1:paramLen
     ]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
@@ -111,7 +110,7 @@ module Code
 
     block.lines = fnEx.args[2].args
     push!(block.lines, :(return $(params[1].args[1].args[1])))
-    push!(org.funcs, func)
+    push!(org.funcs, Func(fnEx, blocks))
 
     fnEx
   end
@@ -123,34 +122,29 @@ module Code
   # and call it. It also creates new variable with appropriate type.
   # Example: var_x = func_x(<args>)
   # @param org Organism we are working with
-  # @param fn Parent(current) function unique name
-  # we are working in
-  # @param block Current flock within fn function
+  # @param pos Code position
   # @return {Expr|Expr(:nothing)}
-  # TODO: add check if we call a function inside other function
   # 
-  function fnCall(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    if !isempty(fn) return Expr(:nothing) end
-    local len::Int = length(org.funcs)
-    if len < 1 return Expr(:nothing) end
-    local fnEx::Expr                = org.funcs[rand(1:len)]
-    local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]
-    local varSym::Symbol            = @getVar(org, fn, typ)
-    local args::Array{Any, 1}       = fnEx.args[1].args    # shortcut to func args
-    local types::Array{DataType, 1} = Array{DataType, 1}() # func types only
-    local argsLen::Int = length(args)
+  function fnCall(org::Creature.Organism, pos::Pos)
+    local fnEx::Expr                = org.funcs[rand(2:length(org.funcs))].code # only custom function may be called
+    local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]      # return DataType of Custom function
+    local var::Symbol               = @randVar(org, fn, typ)                    # var = <fn-name>(...)
+    local args::Array{Any, 1}       = fnEx.args[1].args                         # shortcut to func args
+    local types::Array{DataType, 1} = Array{DataType, 1}()                      # func types only
+    local argsLen::Int              = length(args)
 
     if argsLen > 1
-      for i=2:rand(2:argsLen)
+      # TODO: why 2?
+      for i = 2:rand(2:argsLen)
         push!(types, args[i].args[1].args[2])
       end
     end
-    fnEx = :($varSym=$(fnEx.args[1].args[1])($([(ex = @getVar(org, fn, i); if ex === :nothing return Expr(:nothing) end;ex) for i in types]...)))
+    fnEx = :($varSym=$(fnEx.args[1].args[1])($([(ex = @randVar(org, fn, i); if ex === :nothing return Expr(:nothing) end;ex) for i in types]...)))
     #
     # Pushing of new variable should be after function call to prevent
     # error of calling function with argument of just created variable
     #
-    push!(org.vars[fn].vars[typ], varSym)
+    push!(@getVars[typ], var)
 
     fnEx
   end
@@ -161,20 +155,18 @@ module Code
   # if operator implementation. It contains block inside, so it can't be inside
   # other block. For example, it can't be inside body of "for" operator.
   # @param org Organism we are working with
-  # @param fn Parent(current) function unique name
-  # we are working in
-  # @param block Current flock within fn function
+  # @param pos Code position
   # @return {Expr|Expr(:nothing)}
   #
-  function condition(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    local typ::DataType = @getType()
-    local v1::Symbol    = @getVar(org, fn, typ)
+  function condition(org::Creature.Organism, pos::Pos)
+    local typ::DataType = @randType()
+    local v1::Symbol    = @randVar(org, fn, typ)
     if v1 === :nothing return Expr(:nothing) end
-    local v2::Symbol    = @getVar(org, fn, typ)
+    local v2::Symbol    = @randVar(org, fn, typ)
     local op::Symbol    = _COMPARE_OPERATORS[rand(1:length(_COMPARE_OPERATORS))]
     local ifEx          = :(if $(op)($(v1),$(v2)) end) # if v1 comparison v2 end
 
-    push!(org.vars[fn].blocks, ifEx.args[2])
+    push!(@getBlocks(org, pos), ifEx.args[2])
 
     ifEx
   end
@@ -184,18 +176,16 @@ module Code
   # Creates a for loop. We have to create small loops, because they
   # affects entire speed.
   # @param org Organism we are working with
-  # @param fn Parent(current) function unique name 
-  # we are working in
-  # @param block Current flock within fn function
+  # @param pos Position in a code
   # @return {Expr|Expr(:nothing)}
   #
-  function loop(org::Creature.Organism, fn::ASCIIString, block::Expr)
-    local v::Symbol = @getVar(org, fn, Int8)
+  function loop(org::Creature.Organism, pos::Pos)
+    local v::Symbol = @randVar(org, fn, Int8)
     if v === :nothing return Expr(:nothing) end
     local i::Symbol = @newVar(org)
     local loopEx    = :(local $i::Int8; for $i=1:$v end)
 
-    push!(org.vars[fn].blocks, loopEx.args[2].args[2])
+    push!(@getBlocks(org, pos), loopEx.args[2].args[2])
 
     loopEx
   end

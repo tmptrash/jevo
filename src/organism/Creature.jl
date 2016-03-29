@@ -66,7 +66,7 @@ module Creature
     # Map of available variables separated by types. All these
     # variables belong to one (current) block
     #
-    vars::Dict{DataType, Dict{Symbol, Bool}}
+    vars::Dict{DataType, Array{Symbol, 1}}
     #
     # Reference to code lines inside Organism.code AST.
     #
@@ -78,6 +78,10 @@ module Creature
   # property for details.
   #
   type Func
+    #
+    # Reference to the function's Expression
+    #
+    code::Expr
     #
     # All blocks within one (current) function. Blocks are belong
     # to if, for, function and other operators. All mutations should 
@@ -199,7 +203,7 @@ module Creature
     # in code above (local code::Expr  = ...). It also creates one block,
     # which belong to main function.
     #
-    local funcs::Array{Func, 1} = [Func(blocks)]
+    local funcs::Array{Func, 1} = [Func(code, blocks)]
 
     Organism(
       code,                                                                                  # code

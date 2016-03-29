@@ -47,7 +47,7 @@ end
 # @param {DataType} typ Data type
 # @return {Any}
 #
-macro getValue(typ)
+macro randValue(typ)
   :($typ !== ASCIIString ? rand($typ) : randstring())
 end
 #
@@ -78,11 +78,20 @@ macro getBlock(org, pos)
   :($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx])
 end
 #
+# Returns blocks array
+# @param {Creature.Organism} org
+# @param {Code.Pos} pos
+# @return {Array{Organism.Creature.Block, 1}}
+#
+macro getBlocks(org, pos)
+  :($org.funcs[$pos.fnIdx].blocks)
+end
+#
 # Returns variables of specified block of specified
 # function.
 # @param {Creature.Organism} org
 # @param {Code.Pos} pos
-# @return {Organism.Creature.Block}
+# @return {Array{Symbol, 1}}
 #
 macro getVars(org, pos)
   :($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars)

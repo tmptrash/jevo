@@ -4,7 +4,7 @@
 # remote server configuring and requests. 
 #
 # @author DeadbraiN
-#
+# TODO: add somehow REPL help tips for these functions
 module Terminal
   import RpcApi
   import Config
@@ -14,7 +14,7 @@ module Terminal
 
   export init
   export termGetRegion
-
+  # implement all of this
   # const RPC_CREATE_ORGANISMS  = 2
   # const RPC_CREATE_ORGANISM   = 3
   # const RPC_SET_CONFIG        = 4
