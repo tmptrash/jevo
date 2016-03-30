@@ -23,7 +23,7 @@ module Code
   include("CodeOrganism.jl")
   include("CodeMath.jl")
 
-  export Pos
+  export CodePart
   export CODE_PARTS
   #
   # Command functions. Amount of these functions will be increased
@@ -40,22 +40,14 @@ module Code
   export onRemoveLine
   export getRandPos
   #
-  # Describes organism's code position. This position is used
-  # for mutations (add, change, del,...)
+  # Describes one code block like "if", "for", "function" and so on.
+  # Is used for mutations of organism's AST. Contains function and
+  # block flag. Function is used for obtaining new block expression
+  # (Expr type). isBlock flag is used for changing and removing AST.
   #
-  type Pos
-    #
-    # Index of function in Organism.Creature.funcs array
-    #
-    fnIdx::Int
-    #
-    # Index of block inside Creature.Func function
-    #
-    blockIdx::Int
-    #
-    # Index of code line inside Organism.Block.lines
-    #
-    lineIdx::Int
+  type CodePart
+    fn::Function
+    isBlock::Bool
   end
   #
   # @cmd
@@ -66,8 +58,8 @@ module Code
   # @param pos Position for current mutation
   # @return {Expr|Expr(:nothing)}
   #
-  function var(org::Creature.Organism, pos::Pos)
-    local typ::DataType  = @getType()
+  function var(org::Creature.Organism, pos::Helper.Pos)
+    local typ::DataType  = @randType()
     local varSym::Symbol = @newVar(org)
 
     push!(@getVars(org, pos)[typ], varSym)
@@ -84,7 +76,7 @@ module Code
   # @param pos Code position
   # @return {Expr|Expr(:nothing)}
   #
-  function fn(org::Creature.Organism, pos::Pos)
+  function fn(org::Creature.Organism, pos::Helper.Pos)
     local typ::DataType
     local sym::Symbol
     local i::Int
@@ -100,7 +92,7 @@ module Code
     # without this...
     #
     local params::Array{Expr, 1} = [
-      :(sym=($(typ=@getType();sym=@newVar(org);push!(block.vars[typ], sym);sym)::$(typ)=$(@getValue(typ)));sym.head=:kw;sym) for i=1:paramLen
+      :(sym=($(typ=@randType();sym=@newVar(org);push!(block.vars[typ], sym);sym)::$(typ)=$(@randValue(typ)));sym.head=:kw;sym) for i=1:paramLen
     ]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
@@ -125,10 +117,10 @@ module Code
   # @param pos Code position
   # @return {Expr|Expr(:nothing)}
   # 
-  function fnCall(org::Creature.Organism, pos::Pos)
+  function fnCall(org::Creature.Organism, pos::Helper.Pos)
     local fnEx::Expr                = org.funcs[rand(2:length(org.funcs))].code # only custom function may be called
     local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]      # return DataType of Custom function
-    local var::Symbol               = @randVar(org, fn, typ)                    # var = <fn-name>(...)
+    local var::Symbol               = @randVar(org, pos, typ)                   # var = <fn-name>(...)
     local args::Array{Any, 1}       = fnEx.args[1].args                         # shortcut to func args
     local types::Array{DataType, 1} = Array{DataType, 1}()                      # func types only
     local argsLen::Int              = length(args)
@@ -139,12 +131,12 @@ module Code
         push!(types, args[i].args[1].args[2])
       end
     end
-    fnEx = :($varSym=$(fnEx.args[1].args[1])($([(ex = @randVar(org, fn, i); if ex === :nothing return Expr(:nothing) end;ex) for i in types]...)))
+    fnEx = :($varSym=$(fnEx.args[1].args[1])($([(ex = @randVar(org, pos, i); if ex === :nothing return Expr(:nothing) end;ex) for i in types]...)))
     #
     # Pushing of new variable should be after function call to prevent
     # error of calling function with argument of just created variable
     #
-    push!(@getVars[typ], var)
+    push!(@getVars(org, pos)[typ], var)
 
     fnEx
   end
@@ -158,11 +150,11 @@ module Code
   # @param pos Code position
   # @return {Expr|Expr(:nothing)}
   #
-  function condition(org::Creature.Organism, pos::Pos)
+  function condition(org::Creature.Organism, pos::Helper.Pos)
     local typ::DataType = @randType()
-    local v1::Symbol    = @randVar(org, fn, typ)
+    local v1::Symbol    = @randVar(org, pos, typ)
     if v1 === :nothing return Expr(:nothing) end
-    local v2::Symbol    = @randVar(org, fn, typ)
+    local v2::Symbol    = @randVar(org, pos, typ)
     local op::Symbol    = _COMPARE_OPERATORS[rand(1:length(_COMPARE_OPERATORS))]
     local ifEx          = :(if $(op)($(v1),$(v2)) end) # if v1 comparison v2 end
 
@@ -179,8 +171,8 @@ module Code
   # @param pos Position in a code
   # @return {Expr|Expr(:nothing)}
   #
-  function loop(org::Creature.Organism, pos::Pos)
-    local v::Symbol = @randVar(org, fn, Int8)
+  function loop(org::Creature.Organism, pos::Helper.Pos)
+    local v::Symbol = @randVar(org, pos, Int8)
     if v === :nothing return Expr(:nothing) end
     local i::Symbol = @newVar(org)
     local loopEx    = :(local $i::Int8; for $i=1:$v end)
@@ -194,15 +186,12 @@ module Code
   # This method is called before one code line is removed or changed.
   # It checks if removed/changed line is a local variable declaration
   # or function declaration. In this case it clears all related 
-  # structures like org.vars and org.funcs... Remove position in a parameter
-  # is a tuple of three elements: code::Array{Expr},pos::Int,fn::Expr, where
-  # code - array of code lines some AST node, pos - current removing 
-  # position in code, fn - parent(current) function.
+  # structures like org.vars and org.funcs...
   # @param org Organism we are working with
   # @param pos Remove/Change position
   # @param del true means that code is deleting now, false - changing
   #
-  function onRemoveLine(org::Creature.Organism, pos::Pos, del::Bool = false)
+  function onRemoveLine(org::Creature.Organism, pos::Helper.Pos, del::Bool = false)
     local blocks::Array{Expr, 1} = org.funcs[pos.fnIdx].blocks
     local exp::Expr = blocks[pos.blockIdx].lines[pos.lineIdx]
     local i::Int
@@ -216,7 +205,7 @@ module Code
     if exp.head === :function
       org.codeSize -= (length(blocks[1].lines) - 1) # skip "return"
       bLen = length(blocks)
-      for i = 1:bLen blocks codeSize -= length(blocks[i].lines) end
+      for i = 1:bLen codeSize -= length(blocks[i].lines) end
       deleteat!(org.funcs, pos.fnIdx)
     #
     # This is block element, but not a function
@@ -230,7 +219,7 @@ module Code
     #
     elseif exp.head === :local
       #TODO: check this args[1].args[1]...
-      delete!(blocks[pos.blockIdx].vars[exp.args[2], exp.args[1].args[1].args[1])
+      delete!(blocks[pos.blockIdx].vars[exp.args[2]], exp.args[1].args[1].args[1])
     end
     #
     # We have to decrease code size only if we remove this line.
@@ -291,7 +280,7 @@ module Code
     #
     # CodeOrganism
     #
-    CodePart(getEnergy,   false), CodePart(eatLeft,   false),
+    CodePart(lookAt,      false), CodePart(eatLeft,   false),
     CodePart(eatRight,    false), CodePart(eatUp,     false),
     CodePart(eatDown,     false), CodePart(stepLeft,  false),
     CodePart(stepRight,   false), CodePart(stepUp,    false),

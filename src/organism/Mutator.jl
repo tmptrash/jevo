@@ -15,16 +15,6 @@ module Mutator
 
   export mutate
   #
-  # Describes one code block like "if", "for", "function" and so on.
-  # Is used for mutations of organism's AST. Contains function and
-  # block flag. Function is used for obtaining new block expression
-  # (Expr type). isBlock flag is used for changing and removing AST.
-  #
-  type CodePart
-    fn::Function
-    isBlock::Bool
-  end
-  #
   # Checks if specified position in a code is correct. By correct i
   # mean: follow the rules like block can't be inside other blocks,
   # except block of function, function declaration can't be inside
@@ -39,7 +29,7 @@ module Mutator
     :(
       if $cmd.isBlock && $pos.blockIdx !== 1 ||
          $pos.fnIdx !== 1 && $cmd.fn !== Code.fnCall ||
-         (ex = $cmd.fn($org, $pos)).head === :nothing)
+         (ex = $cmd.fn($org, $pos)).head === :nothing
         return false
       else
         ex
@@ -107,7 +97,7 @@ module Mutator
   # that there were no add or adding was skipped.
   #
   function _onAdd(org::Creature.Organism)
-    local pos::Code.Pos = Code.getRandPos()
+    local pos::Helper.Pos = Code.getRandPos()
     local cmd::CodePart = Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))]
     local mainFn::Bool  = pos.fnIdx === 1
     local exp::Expr     = @posCorrect(org, pos, cmd)
@@ -129,7 +119,7 @@ module Mutator
   # that there were no change or change was skipped.
   #
   function _onChange(org::Creature.Organism)
-    local pos::Code.Pos = Code.getRandPos()
+    local pos::Helper.Pos = Code.getRandPos()
     local cmd::CodePart = Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))]
     local mainFn::Bool  = pos.fnIdx === 1
     local exp::Expr     = @posCorrect(org, pos, cmd)
@@ -152,7 +142,7 @@ module Mutator
   # that there were no delete or delete was skipped.
   #
   function _onDel(org::Creature.Organism)
-    local pos::Code.Pos = Code.getRandPos()
+    local pos::Helper.Pos = Code.getRandPos()
     local lines::Array{Expr, 1} = Code.@getLines(org, pos)
 
     if length(lines) < 1 return false end

@@ -19,7 +19,7 @@ export reminder
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
-function plus(org::Creature.Organism, pos::Code.Pos)
+function plus(org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   local v2::Symbol    = @randVar(org, pos, typ)
@@ -46,7 +46,7 @@ end
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
-function minus(org::Creature.Organism, pos::Code.Pos)
+function minus(org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   local v2::Symbol    = @randVar(org, pos, typ)
@@ -83,7 +83,7 @@ end
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
-function multiply(org::Creature.Organism, pos::Code.Pos)
+function multiply(org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   local v2::Symbol    = @randVar(org, pos, typ)
@@ -104,7 +104,7 @@ end
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
-function divide(org::Creature.Organism, pos::Code.Pos)
+function divide(org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   local v2::Symbol    = @randVar(org, pos, typ)
@@ -133,7 +133,7 @@ end
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
-function reminder(org::Creature.Organism, fn::ASCIIString, block::Expr)
+function reminder(org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   local v2::Symbol    = @randVar(org, pos, typ)

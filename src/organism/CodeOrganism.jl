@@ -4,12 +4,13 @@
 #
 # @author DeadbraiN
 #
+import Helper
+
 export lookAt
 export eatLeft
 export eatRight
 export eatUp
 export eatDown
-export clone
 export toMem
 export fromMem
 #
@@ -20,12 +21,12 @@ export fromMem
 # @param pos Position in code
 # @return {Expr} New expression or Expr(:nothing) if skipped
 #
-function lookAt(org::Creature.Organism, pos::Code.Pos)
+function lookAt(org::Creature.Organism, pos::Helper.Pos)
   local varSym::Symbol = @randVar(org, pos, Int)
   local xSym::Symbol   = @randVar(org, pos, Int16)
   local ySym::Symbol   = @randVar(org, pos, Int16)
 
-  if varSym === :nothing || xSym === :nothing return Expr(:nothing) end
+  if (varSym === :nothing || xSym === :nothing) return Expr(:nothing) end
   :($varSym=Int(Creature.getEnergy(o, Int($xSym), Int($ySym))))
 end
 #
@@ -35,7 +36,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function eatLeft(org::Creature.Organism, pos::Code.Pos)
+function eatLeft(org::Creature.Organism, pos::Helper.Pos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
   :(Creature.eatLeft(o, Int($(amount))))
@@ -47,7 +48,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function eatRight(org::Creature.Organism, pos::Code.Pos)
+function eatRight(org::Creature.Organism, pos::Helper.Pos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
   :(Creature.eatRight(o, Int($(amount))))
@@ -59,7 +60,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function eatUp(org::Creature.Organism, pos::Code.Pos)
+function eatUp(org::Creature.Organism, pos::Helper.Pos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
   :(Creature.eatUp(o, Int($(amount))))
@@ -71,7 +72,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function eatDown(org::Creature.Organism, pos::Code.Pos)
+function eatDown(org::Creature.Organism, pos::Helper.Pos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
   :(Creature.eatDown(o, Int($(amount))))
@@ -83,7 +84,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function stepLeft(org::Creature.Organism, pos::Code.Pos)
+function stepLeft(org::Creature.Organism, pos::Helper.Pos)
   :(Creature.stepLeft(o))
 end
 #
@@ -93,7 +94,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function stepRight(org::Creature.Organism, pos::Code.Pos)
+function stepRight(org::Creature.Organism, pos::Helper.Pos)
   :(Creature.stepRight(o))
 end
 #
@@ -103,7 +104,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function stepUp(org::Creature.Organism, pos::Code.Pos)
+function stepUp(org::Creature.Organism, pos::Helper.Pos)
   :(Creature.stepUp(o))
 end
 #
@@ -113,7 +114,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function stepDown(org::Creature.Organism, pos::Code.Pos)
+function stepDown(org::Creature.Organism, pos::Helper.Pos)
   :(Creature.stepDown(o))
 end
 #
@@ -124,7 +125,7 @@ end
 # @param pos Position in code
 # @return {Expr|nothing}
 #
-function toMem(org::Creature.Organism, pos::Code.Pos)
+function toMem(org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local key::Symbol   = @randVar(org, pos, Int16)
   local val::Symbol   = @randVar(org, pos, Int16)
@@ -140,7 +141,7 @@ end
 # @param pos Position in code
 # @return {Expr|nothing}
 #
-function fromMem(org::Creature.Organism, pos::Code.Pos)
+function fromMem(org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local key::Symbol   = @randVar(org, pos, Int16)
   local val::Symbol   = @randVar(org, pos, Int16)

@@ -31,7 +31,7 @@ end
 #
 # Returns a variable from existing in a code
 # @param {Creature.Organism} org Organism we are mutating
-# @param {Code.Pos} pos Code position
+# @param {Helper.Pos} pos Code position
 # @param {DataType} typ Type of variable we want to take
 # @return {Symbol}
 #
@@ -39,7 +39,7 @@ macro randVar(org, pos, typ)
   :(
     length($org.funcs[$pos.funcIdx].blocks[$pos.blockIdx].vars[$typ]) < 1 ?
     :nothing :
-    $org.funcs[$pos.funcIdx].blocks[$pos.blockIdx].vars[$typ][rand(1:length($org.vars[$fn].vars[$typ]))]
+    $org.funcs[$pos.funcIdx].blocks[$pos.blockIdx].vars[$typ][rand(1:length($org.funcs[$pos.funcIdx].blocks[$pos.blockIdx].vars[$typ]))]
   )
 end
 #
@@ -53,7 +53,7 @@ end
 #
 # Returns lines property in specified function and block
 # @param {Creature.Organism} org
-# @param {Code.Pos} pos
+# @param {Helper.Pos} pos
 # @return {Array{Expr, 1}}
 #
 macro getLines(org, pos)
@@ -62,7 +62,7 @@ end
 #
 # Returns chosen line in specified function and block
 # @param {Creature.Organism} org
-# @param {Code.Pos} pos
+# @param {Helper.Pos} pos
 # @return {Array{Expr, 1}}
 #
 macro getLine(org, pos)
@@ -71,7 +71,7 @@ end
 #
 # Returns chosen block of specified function
 # @param {Creature.Organism} org
-# @param {Code.Pos} pos
+# @param {Helper.Pos} pos
 # @return {Organism.Creature.Block}
 #
 macro getBlock(org, pos)
@@ -80,7 +80,7 @@ end
 #
 # Returns blocks array
 # @param {Creature.Organism} org
-# @param {Code.Pos} pos
+# @param {Helper.Pos} pos
 # @return {Array{Organism.Creature.Block, 1}}
 #
 macro getBlocks(org, pos)
@@ -90,7 +90,7 @@ end
 # Returns variables of specified block of specified
 # function.
 # @param {Creature.Organism} org
-# @param {Code.Pos} pos
+# @param {Helper.Pos} pos
 # @return {Array{Symbol, 1}}
 #
 macro getVars(org, pos)

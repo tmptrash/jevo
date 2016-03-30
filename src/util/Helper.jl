@@ -4,6 +4,7 @@
 module Helper
   import Gtk
   
+  export Pos
   export Point
   export RetObj
 
@@ -14,7 +15,24 @@ module Helper
   export error
   
   export SUPPORTED_TYPES
-
+  #
+  # Describes organism's code position. This position is used
+  # for mutations (add, change, del,...)
+  #
+  type Pos
+    #
+    # Index of function in Organism.Creature.funcs array
+    #
+    fnIdx::Int
+    #
+    # Index of block inside Creature.Func function
+    #
+    blockIdx::Int
+    #
+    # Index of code line inside Organism.Block.lines
+    #
+    lineIdx::Int
+  end
   #
   # One point in the world. Is described by two coordinates.
   #
