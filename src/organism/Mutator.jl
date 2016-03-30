@@ -105,6 +105,7 @@ module Mutator
     #
     insert!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines, cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, exp)
     org.codeSize += 1
+    println("added: ", string(cmd.fn))
 
     true
   end

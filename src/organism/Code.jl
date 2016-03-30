@@ -8,7 +8,9 @@
 # TODO: describe that return operator inside custom functions don't affect of script size
 # TODO: describe Expr(:nothing) return value
 # TODO: describe @line, @block annotations(they are line and block element). e.g.:
-# TODO: if,for - block elements, var, fnCall - line elements
+# TODO: if,for - block elements, var, fnCall - line elements, function - 
+# TODO: function element. fnCall has special status (it may be called only
+# TODO: from main function)
 #
 # @author DeadbraiN
 #
@@ -59,12 +61,11 @@ module Code
   # @return {Expr|Expr(:nothing)}
   #
   function var(org::Creature.Organism, pos::Helper.Pos)
-    local typ::DataType  = @randType()
-    local varSym::Symbol = @newVar(org)
+    local typ::DataType = @randType()
+    local var::Symbol   = @newVar(org)
 
-    push!(@getVars(org, pos)[typ], varSym)
-
-    :(local $(varSym)::$(typ)=$(@randValue(typ)))
+    push!(@getVars(org, pos)[typ], var)
+    :(local $(var)::$(typ)=$(@randValue(typ)))
   end
   #
   # @cmd
@@ -104,7 +105,6 @@ module Code
     block.lines = fnEx.args[2].args
     push!(block.lines, :(return $(params[1].args[1].args[1])))
     push!(org.funcs, Creature.Func(fnEx, blocks))
-
     fnEx
   end
   #
@@ -119,7 +119,13 @@ module Code
   # @return {Expr|Expr(:nothing)}
   # 
   function fnCall(org::Creature.Organism, pos::Helper.Pos)
-    local fnEx::Expr                = org.funcs[rand(2:length(org.funcs))].code # only custom function may be called
+    #
+    # Functions calls only possible in main function
+    #
+    if pos.fnIdx !== 1 return Expr(:nothing) end
+    local funcsLen::Int             = length(org.funcs)
+    if funcsLen < 2 return Expr(:nothing) end
+    local fnEx::Expr                = org.funcs[rand(2:funcsLen)].code          # only custom function may be called
     local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]      # return DataType of Custom function
     local var::Symbol               = @randVar(org, pos, typ)                   # var = <fn-name>(...)
     local args::Array{Any, 1}       = fnEx.args[1].args                         # shortcut to func args
@@ -127,24 +133,22 @@ module Code
     local argsLen::Int              = length(args)
 
     if argsLen > 1
-      # TODO: why 2?
-      for i = 2:rand(2:argsLen)
-        push!(types, args[i].args[1].args[2])
-      end
+      #
+      # We start from 2, because first argument is a function symbol
+      #
+      for i = 2:rand(2:argsLen) push!(types, args[i].args[1].args[2]) end
     end
-    fnEx = :($varSym=$(fnEx.args[1].args[1])($([(ex = @randVar(org, pos, i); if ex === :nothing return Expr(:nothing) end;ex) for i in types]...)))
+    fnEx = :($var=$(fnEx.args[1].args[1])($([(ex = @randVar(org, pos, i); if ex === :nothing return Expr(:nothing) end;ex) for i in types]...)))
     #
     # Pushing of new variable should be after function call to prevent
     # error of calling function with argument of just created variable
     #
     push!(@getVars(org, pos)[typ], var)
-
     fnEx
   end
   #
   # @cmd
   # @block
-  # TODO:
   # if operator implementation. It contains block inside, so it can't be inside
   # other block. For example, it can't be inside body of "for" operator.
   # @param org Organism we are working with
@@ -159,8 +163,7 @@ module Code
     local op::Symbol    = _COMPARE_OPERATORS[rand(1:length(_COMPARE_OPERATORS))]
     local ifEx          = :(if $(op)($(v1),$(v2)) end) # if v1 comparison v2 end
 
-    push!(@getBlocks(org, pos), ifEx.args[2])
-
+    push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), ifEx.args[2].args))
     ifEx
   end
   #
@@ -178,8 +181,7 @@ module Code
     local i::Symbol = @newVar(org)
     local loopEx    = :(local $i::Int8; for $i=1:$v end)
 
-    push!(@getBlocks(org, pos), loopEx.args[2].args[2])
-
+    push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), loopEx.args[2].args[2].args))
     loopEx
   end
 
@@ -258,7 +260,7 @@ module Code
   #
   const _CODE_PARTS_MAP = Dict{Symbol, Bool}(
     :function  => true,
-    :if        => true, # TODO: do we need "comparison"?
+    :if        => true,
     :block     => true
   )
   #
