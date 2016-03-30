@@ -194,8 +194,9 @@ module Code
   # @param pos Remove/Change position
   # @param del true means that code is deleting now, false - changing
   #
-  function onRemoveLine(org::Creature.Organism, pos::Helper.Pos, del::Bool = false)
-    local blocks::Array{Expr, 1} = org.funcs[pos.fnIdx].blocks
+  @debug function onRemoveLine(org::Creature.Organism, pos::Helper.Pos, del::Bool = false)
+  @bp
+    local blocks::Array{Creature.Block, 1} = org.funcs[pos.fnIdx].blocks
     local exp::Expr = blocks[pos.blockIdx].lines[pos.lineIdx]
     local i::Int
     local bLen::Int
@@ -261,7 +262,7 @@ module Code
   const _CODE_PARTS_MAP = Dict{Symbol, Bool}(
     :function  => true,
     :if        => true,
-    :block     => true
+    :block     => true  # for operator
   )
   #
   # Array of available functions. Each function should return Expr type.

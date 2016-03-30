@@ -105,7 +105,6 @@ module Mutator
     #
     insert!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines, cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, exp)
     org.codeSize += 1
-    println("added: ", string(cmd.fn))
 
     true
   end
@@ -116,7 +115,8 @@ module Mutator
   # @return {Bool} true means that there were a change, false
   # that there were no change or change was skipped.
   #
-  function _onChange(org::Creature.Organism)
+  @debug function _onChange(org::Creature.Organism)
+  @bp
     local pos::Helper.Pos      = Code.getRandPos(org)
     local cmd::Code.CodePart   = Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))]
     @posCorrect(org, pos, cmd)
