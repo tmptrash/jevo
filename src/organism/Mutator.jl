@@ -26,15 +26,7 @@ module Mutator
   # macros.
   #
   macro posCorrect(org, pos, cmd)
-    :(
-      if $cmd.isBlock && $pos.blockIdx !== 1 ||
-         $pos.fnIdx !== 1 && $cmd.fn !== Code.fnCall ||
-         (ex = $cmd.fn($org, $pos)).head === :nothing
-        return false
-      else
-        ex
-      end
-    )
+    :(if $cmd.isBlock && $pos.blockIdx !== 1 || $pos.fnIdx !== 1 && $cmd.fn !== Code.fnCall return false end)
   end
   #
   # TODO: add description of the method
@@ -97,16 +89,21 @@ module Mutator
   # that there were no add or adding was skipped.
   #
   function _onAdd(org::Creature.Organism)
-    local pos::Helper.Pos = Code.getRandPos()
-    local cmd::CodePart = Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))]
-    local mainFn::Bool  = pos.fnIdx === 1
-    local exp::Expr     = @posCorrect(org, pos, cmd)
+    local pos::Helper.Pos    = Code.getRandPos(org)
+    local cmd::Code.CodePart = Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))]
+    @posCorrect(org, pos, cmd)
+    local exp::Expr          = cmd.fn(org, pos)
+    #
+    # Incorrect position for adding or it's impossible to 
+    # get a command.
+    #
+    if exp.head === :nothing return false end
     #
     # All new custom functions should be at the beginning
     # to prevent UndefVarError error in case of calling
     # before defining the function. The same for variables.
     #
-    insert!(Code.getLines(org, pos), cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, exp)
+    insert!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines, cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, exp)
     org.codeSize += 1
 
     true
@@ -119,15 +116,15 @@ module Mutator
   # that there were no change or change was skipped.
   #
   function _onChange(org::Creature.Organism)
-    local pos::Helper.Pos = Code.getRandPos()
-    local cmd::CodePart = Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))]
-    local mainFn::Bool  = pos.fnIdx === 1
-    local exp::Expr     = @posCorrect(org, pos, cmd)
-    local lines::Array{Expr, 1} = Code.getLines(org, pos)
+    local pos::Helper.Pos      = Code.getRandPos(org)
+    local cmd::Code.CodePart   = Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))]
+    @posCorrect(org, pos, cmd)
+    local lines::Array{Any, 1} = org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines
+    local exp::Expr            = cmd.fn(org, pos)
     #
-    # no lines to change
+    # It's impossible to get a command or no lines to change
     #
-    if length(lines) < 1 return false end
+    if exp.head === :nothing || length(lines) < 1 return false end
 
     Code.onRemoveLine(org, pos)
     lines[pos.lineIdx] = exp
@@ -142,8 +139,8 @@ module Mutator
   # that there were no delete or delete was skipped.
   #
   function _onDel(org::Creature.Organism)
-    local pos::Helper.Pos = Code.getRandPos()
-    local lines::Array{Expr, 1} = Code.@getLines(org, pos)
+    local pos::Helper.Pos      = Code.getRandPos(org)
+    local lines::Array{Any, 1} = org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines
 
     if length(lines) < 1 return false end
     Code.onRemoveLine(org, pos, true)

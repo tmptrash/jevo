@@ -37,9 +37,9 @@ end
 #
 macro randVar(org, pos, typ)
   :(
-    length($org.funcs[$pos.funcIdx].blocks[$pos.blockIdx].vars[$typ]) < 1 ?
+    length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]) < 1 ?
     :nothing :
-    $org.funcs[$pos.funcIdx].blocks[$pos.blockIdx].vars[$typ][rand(1:length($org.funcs[$pos.funcIdx].blocks[$pos.blockIdx].vars[$typ]))]
+    $org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ][rand(1:length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]))]
   )
 end
 #
@@ -49,15 +49,6 @@ end
 #
 macro randValue(typ)
   :($typ !== ASCIIString ? rand($typ) : randstring())
-end
-#
-# Returns lines property in specified function and block
-# @param {Creature.Organism} org
-# @param {Helper.Pos} pos
-# @return {Array{Expr, 1}}
-#
-macro getLines(org, pos)
-  :($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].lines)
 end
 #
 # Returns chosen line in specified function and block

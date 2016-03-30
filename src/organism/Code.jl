@@ -80,8 +80,9 @@ module Code
     local typ::DataType
     local sym::Symbol
     local i::Int
+    local exp::Expr
     local paramLen::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
-    local block::Creature.Block = Block(Helper.getTypesMap(), [])
+    local block::Creature.Block = Creature.Block(Helper.getTypesMap(), [])
     local blocks::Array{Creature.Block, 1} = [block]
     #
     # New function parameters in format: [name::Type=val,...].
@@ -92,17 +93,17 @@ module Code
     # without this...
     #
     local params::Array{Expr, 1} = [
-      :(sym=($(typ=@randType();sym=@newVar(org);push!(block.vars[typ], sym);sym)::$(typ)=$(@randValue(typ)));sym.head=:kw;sym) for i=1:paramLen
+      (exp = :($(typ=@randType();sym=@newVar(org);push!(block.vars[typ], sym);sym)::$(typ)=$(@randValue(typ)));exp.head=:kw;exp) for i=1:paramLen
     ]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
     # All parameters will be added as local variables.
     #
-    local fnEx::Expr = :(function $(Symbol(@newFunc(org)))($(params...)) end)
+    local fnEx::Expr  = :(function $(Symbol(@newFunc(org)))($(params...)) end)
 
     block.lines = fnEx.args[2].args
     push!(block.lines, :(return $(params[1].args[1].args[1])))
-    push!(org.funcs, Func(fnEx, blocks))
+    push!(org.funcs, Creature.Func(fnEx, blocks))
 
     fnEx
   end
@@ -242,11 +243,12 @@ module Code
   function getRandPos(org::Creature.Organism)
     local fnIdx   ::Int = rand(1:length(org.funcs))
     local blockIdx::Int = rand(1:length(org.funcs[fnIdx].blocks))
+    local lines   ::Int = length(org.funcs[fnIdx].blocks[blockIdx].lines) - (blockIdx === 1 ? 1 : 0)
 
-    Pos(
+    Helper.Pos(
       fnIdx,
       blockIdx,
-      rand(1:length(@getLines(org, pos)) - (blockIdx === 1 ? 1 : 0)) # skip "return"
+      rand(1:(lines < 1 ? 1 : lines)) # skip "return"
     )
   end
 

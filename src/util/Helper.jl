@@ -29,7 +29,7 @@ module Helper
     #
     blockIdx::Int
     #
-    # Index of code line inside Organism.Block.lines
+    # Index of code line inside Creature.Block.lines
     #
     lineIdx::Int
   end
@@ -125,7 +125,7 @@ module Helper
   # @return {Dict{DataType, Array{Symbol, 1}}}
   #
   function getTypesMap()
-    Dict{DataType, Dict{Symbol, Bool}}(getSupportedTypes((typ) -> typ => Dict{Symbol, Bool}())...)
+    Dict{DataType, Array{Symbol, 1}}(getSupportedTypes((typ) -> typ => [])...)
   end
   #
   # Returns supported types array for organism language

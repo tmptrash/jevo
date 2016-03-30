@@ -70,7 +70,7 @@ module Creature
     #
     # Reference to code lines inside Organism.code AST.
     #
-    lines::Array{Expr, 1}
+    lines::Array{Any, 1}
   end
   #
   # Describes one function as a data container. It contains blocks
@@ -210,7 +210,7 @@ module Creature
       eval(code),                                                                            # codeFn
       0,                                                                                     # codeSize
       0,                                                                                     # symbolId
-      Array{Expr, 1}(),                                                                      # funcs
+      funcs,                                                                                 # funcs
       Config.val(:ORGANISM_MUTATION_PROBABILITIES),                                          # mutationProbabilities
       Config.val(:ORGANISM_MUTATIONS_ON_CLONE),                                              # mutationsOnClone
       min(Config.val(:ORGANISM_MUTATION_PERIOD), Config.val(:ORGANISM_MAX_MUTATION_PERIOD)), # mutationPeriod
