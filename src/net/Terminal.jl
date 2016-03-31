@@ -14,6 +14,19 @@ module Terminal
 
   export init
   export termGetRegion
+  export termCreateOrganisms
+  export termCreateOrganism
+  export termSetConfig
+  export termGetConfig
+  export termMutate
+  export termGetIps
+  export termGetOrganism
+  export termGetAmount
+  export termGetOrganisms
+  export termSetEnergy
+  export termSetRandomEnergy
+  export termBackup
+  export termGetStatistics
   #
   # Contains connection object for shorthands
   #

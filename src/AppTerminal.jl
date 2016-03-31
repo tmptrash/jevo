@@ -11,13 +11,14 @@ import Client
 import Creature
 import Connection
 import Config
-import Terminal
+importall Terminal
 #
 # Answer function. It's called every time on request from server
 # @param ans Server answer
 #
 function onAnswer(ans::Connection.Answer)
   global answer = ans.data
+  sleep(0.3)
   println(answer)
 end
 #
