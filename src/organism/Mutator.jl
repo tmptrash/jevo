@@ -124,8 +124,11 @@ module Mutator
     #
     # It's impossible to get a command or no lines to change
     #
-    if exp.head === :nothing || length(lines) < 1 return false end
-
+    if exp.head === :nothing ||
+       length(lines) < 1 ||
+       lines[pos.lineIdx].head === :return
+      return false
+    end
     Code.onRemoveLine(org, pos)
     lines[pos.lineIdx] = exp
 
@@ -142,9 +145,13 @@ module Mutator
     local pos::Helper.Pos      = Code.getRandPos(org)
     local lines::Array{Any, 1} = org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines
 
-    if length(lines) < 1 return false end
-    Code.onRemoveLine(org, pos, true)
-    deleteat!(lines, pos.lineIdx)
+    if length(lines) < 1 ||
+       lines[pos.lineIdx].head === :return
+      return false
+    end
+    Code.onRemoveLine(org, pos)
+    deleteat!(lines, pos.lineIdx)    
+    org.codeSize -= 1
 
     true
   end

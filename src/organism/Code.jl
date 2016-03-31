@@ -192,10 +192,8 @@ module Code
   # structures like org.vars and org.funcs...
   # @param org Organism we are working with
   # @param pos Remove/Change position
-  # @param del true means that code is deleting now, false - changing
   #
-  @debug function onRemoveLine(org::Creature.Organism, pos::Helper.Pos, del::Bool = false)
-  @bp
+  function onRemoveLine(org::Creature.Organism, pos::Helper.Pos)
     local blocks::Array{Creature.Block, 1} = org.funcs[pos.fnIdx].blocks
     local exp::Expr = blocks[pos.blockIdx].lines[pos.lineIdx]
     local lines::Array{Any, 1}
@@ -233,12 +231,6 @@ module Code
       vars = blocks[pos.blockIdx].vars[exp.args[1].args[1].args[2]]
       deleteat!(vars, findfirst((s::Symbol) -> s === var, vars))
     end
-    #
-    # We have to decrease code size only if we remove this line.
-    # In case of changing, we don't need it, because nothing is
-    # changed.
-    #
-    if del org.codeSize -= 1 end
   end
   #
   # Returns random position in a code (including all custom 
