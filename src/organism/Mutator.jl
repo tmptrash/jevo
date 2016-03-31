@@ -115,8 +115,7 @@ module Mutator
   # @return {Bool} true means that there were a change, false
   # that there were no change or change was skipped.
   #
-  @debug function _onChange(org::Creature.Organism)
-  @bp
+  function _onChange(org::Creature.Organism)
     local pos::Helper.Pos      = Code.getRandPos(org)
     local cmd::Code.CodePart   = Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))]
     @posCorrect(org, pos, cmd)
