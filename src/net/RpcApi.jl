@@ -22,7 +22,6 @@ module RpcApi
   export RPC_SET_ENERGY_RND
   export RPC_BACKUP
   export RPC_GET_STATISTICS
-  export RPC_DEBUG_GC
   
   export Region
   export SimpleOrganism
@@ -149,5 +148,4 @@ module RpcApi
   const RPC_SET_ENERGY_RND    = 12
   const RPC_BACKUP            = 13
   const RPC_GET_STATISTICS    = 14
-  const RPC_DEBUG_GC          = 15
 end

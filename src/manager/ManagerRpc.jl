@@ -54,7 +54,8 @@ end
 # may be set or random free position will be used.
 # @param pos Position|nothing Position of the organism
 # @return {Int} Organism id or false if organisms limit is riched
-#
+# TODO: change the constructor to support Position() without
+# TODO: parameters for optimization. We have to remove nothing
 function createOrganism(pos = nothing)
   if length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS) return false end
   orgTask = Manager._createOrganism(nothing, pos)
@@ -188,15 +189,6 @@ function getStatistics()
     _createSimpleOrganism(Manager._data.maxId, Manager._data.maxOrg)
   )
 end
-#
-# @rpc
-# Calls Garbage Collector in current process
-#
-function debugGc()
-  Base.gc_enable(true)
-  Base.gc()
-  true
-end
 
 #
 # Assembles RpcApi.SimpleOrganism type from wider Creature.Organism
@@ -257,6 +249,5 @@ _rpcApi = Dict{Integer, Function}(
   RpcApi.RPC_SET_ENERGY        => setEnergy,
   RpcApi.RPC_SET_ENERGY_RND    => setRandomEnergy,
   RpcApi.RPC_BACKUP            => doBackup,
-  RpcApi.RPC_GET_STATISTICS    => getStatistics,
-  RpcApi.RPC_DEBUG_GC          => debugGc
+  RpcApi.RPC_GET_STATISTICS    => getStatistics
 )

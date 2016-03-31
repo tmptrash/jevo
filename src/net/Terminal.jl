@@ -14,21 +14,6 @@ module Terminal
 
   export init
   export termGetRegion
-  # implement all of this
-  # const RPC_CREATE_ORGANISMS  = 2
-  # const RPC_CREATE_ORGANISM   = 3
-  # const RPC_SET_CONFIG        = 4
-  # const RPC_GET_CONFIG        = 5
-  # const RPC_MUTATE            = 6
-  # const RPC_GET_IPS           = 7
-  # const RPC_GET_ORGANISM      = 8
-  # const RPC_GET_AMOUNT        = 9
-  # const RPC_GET_ORGANISMS     = 10
-  # const RPC_SET_ENERGY        = 11
-  # const RPC_SET_ENERGY_RND    = 12
-  # const RPC_BACKUP            = 13
-  # const RPC_GET_STATISTICS    = 14
-  # const RPC_DEBUG_GC          = 15
   #
   # Contains connection object for shorthands
   #
@@ -42,17 +27,105 @@ module Terminal
   # @param con Connection object
   #
   function init(con::Client.ClientConnection)
-  	_termData.con = con
+    _termData.con = con
   end
   #
-  # Shorthand for RpcApi.RPC_GET_REGION
-  # @param x Start X coordinate of region
-  # @param y Start Y coordinate of region
-  # @param x1 End x. 0 means all width
-  # @param y1 End y. 0 means all height
+  # Shorthand for RpcApi.RPC_GET_REGION. See ManagerRpc.getRegion
+  # for details
   #
   function termGetRegion(x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
-  	Client.request(_termData.con, RpcApi.RPC_GET_REGION, x, y, x1, y1)
+    Client.request(_termData.con, RpcApi.RPC_GET_REGION, x, y, x1, y1)
+  end
+  #
+  # Shorthand for RpcApi.RPC_CREATE_ORGANISMS. See 
+  # ManagerRpc.createOrganisms for details
+  #
+  function termCreateOrganisms()
+    Client.request(_termData.con, RpcApi.RPC_CREATE_ORGANISMS)
+  end
+  #
+  # Shorthand for RpcApi.RPC_CREATE_ORGANISM. See 
+  # ManagerRpc.createOrganism for details
+  #
+  function termCreateOrganism(pos = nothing)
+    Client.request(_termData.con, RpcApi.RPC_CREATE_ORGANISM, pos)
+  end
+  #
+  # Shorthand for RpcApi.RPC_SET_CONFIG. See 
+  # ManagerRpc.setConfig for details
+  #
+  function termSetConfig(name::Symbol, value::Any)
+    Client.request(_termData.con, RpcApi.RPC_SET_CONFIG, name, value)
+  end
+  #
+  # Shorthand for RpcApi.RPC_GET_CONFIG. See 
+  # ManagerRpc.getConfig for details
+  #
+  function termGetConfig(name::Symbol)
+    Client.request(_termData.con, RpcApi.RPC_GET_CONFIG, name)
+  end
+  #
+  # Shorthand for RpcApi.RPC_MUTATE. See 
+  # ManagerRpc.mutate for details
+  #
+  function termMutate(orgId::UInt, amount::Int = 1)
+    Client.request(_termData.con, RpcApi.RPC_MUTATE, orgId, amount)
+  end
+  #
+  # Shorthand for RpcApi.RPC_GET_IPS. See 
+  # ManagerRpc.getIps for details
+  #
+  function termGetIps()
+    Client.request(_termData.con, RpcApi.RPC_GET_IPS)
+  end
+  #
+  # Shorthand for RpcApi.RPC_GET_ORGANISM. See 
+  # ManagerRpc.getOrganism for details
+  #
+  function termGetOrganism(id::UInt)
+    Client.request(_termData.con, RpcApi.RPC_GET_ORGANISM, id)
+  end
+  #
+  # Shorthand for RpcApi.RPC_GET_AMOUNT. See 
+  # ManagerRpc.getAmount for details
+  #
+  function termGetAmount()
+    Client.request(_termData.con, RpcApi.RPC_GET_AMOUNT)
+  end
+  #
+  # Shorthand for RpcApi.RPC_GET_ORGANISMS. See 
+  # ManagerRpc.getOrganisms for details
+  #
+  function termGetOrganisms()
+    Client.request(_termData.con, RpcApi.RPC_GET_ORGANISMS)
+  end
+  #
+  # Shorthand for RpcApi.RPC_SET_ENERGY. See 
+  # ManagerRpc.setEnergy for details
+  #
+  function termSetEnergy(x::Int, y::Int, energy::UInt32)
+    Client.request(_termData.con, RpcApi.RPC_SET_ENERGY, x, y, energy)
+  end
+  #
+  # Shorthand for RpcApi.RPC_SET_ENERGY_RND. See 
+  # ManagerRpc.setEnergy for details
+  #
+  function termSetRandomEnergy(amount::Int = Config.val(:WORLD_START_ENERGY_BLOCKS), energy::UInt32 = Config.val(:WORLD_START_ENERGY_AMOUNT))
+    Client.request(_termData.con, RpcApi.RPC_SET_ENERGY_RND, amount, energy)
+  end
+  #
+  # Shorthand for RpcApi.RPC_BACKUP. See 
+  # ManagerRpc.setEnergy for details
+  #
+  function termBackup()
+    Client.request(_termData.con, RpcApi.RPC_BACKUP)
+  end
+  #
+  # Shorthand for RpcApi.RPC_GET_STATISTICS. See 
+  # ManagerRpc.getStatistics for details
+  #
+  function termGetStatistics()
+    Client.request(_termData.con, RpcApi.RPC_GET_STATISTICS)
   end
   #
   # This object is created only for passing connection
