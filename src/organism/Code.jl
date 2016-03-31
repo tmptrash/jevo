@@ -196,10 +196,13 @@ module Code
   #
   @debug function onRemoveLine(org::Creature.Organism, pos::Helper.Pos, del::Bool = false)
   @bp
-    local blocks::Array{Creature.Block, 1} = org.funcs[pos.fnIdx].blocks
+    local blocks::Array{Creature.Block, 1} = org.funcs[idx].blocks
     local exp::Expr = blocks[pos.blockIdx].lines[pos.lineIdx]
+    local lines::Array{Any, 1}
+    local idx::Int
     local i::Int
     local bLen::Int
+    local var::Symbol
     #
     # This is function element. We have to sum amount of code
     # lines inside function + amount of code lines inside all
@@ -207,23 +210,25 @@ module Code
     # function.
     #
     if exp.head === :function
-      org.codeSize -= (length(blocks[1].lines) - 1) # skip "return"
-      bLen = length(blocks)
-      for i = 1:bLen codeSize -= length(blocks[i].lines) end
-      deleteat!(org.funcs, pos.fnIdx)
+      idx = findfirst((f::Creature.Func) -> f.code === exp, org.funcs)
+      for i = 1:length(blocks) org.codeSize -= length(blocks[i].lines) end
+      org.codeSize += 1 # skip "return"
+      deleteat!(org.funcs, idx)
     #
     # This is block element, but not a function
     #
     elseif haskey(_CODE_PARTS_MAP, exp.head)
-      org.codeSize -= length(blocks[pos.blockIdx].lines)
-      deleteat!(blocks, pos.blockIdx)
+      lines = _getLines(exp, _CODE_PARTS_MAP[exp.head])
+      idx = findfirst((b::Creature.Block) -> b.lines === lines, blocks)
+      org.codeSize -= length(lines)
+      deleteat!(blocks, idx)
     #
-    # For simple line element we do nothing. But we do for 
+    # For simple line element we do nothing. But do for 
     # variable declaration.
     #
     elseif exp.head === :local
-      #TODO: check this args[1].args[1]...
-      delete!(blocks[pos.blockIdx].vars[exp.args[2]], exp.args[1].args[1].args[1])
+      var = exp.args[1].args[1].args[1]
+      deleteat!(blocks[pos.blockIdx].vars[exp.args[1].args[1].args[2]], findfirst((s::Symbol) -> s === var, blocks))
     end
     #
     # We have to decrease code size only if we remove this line.
@@ -254,15 +259,31 @@ module Code
       rand(1:(lines < 1 ? 1 : lines)) # skip "return"
     )
   end
+  #
+  # Returns lines array from AST by specified indexes. e.g.:
+  # [2,1] means ex.args[2].args[1].args
+  # @param exp Expression we have to start with
+  # @return {Array{Any, 1}}
+  #
+  function _getLines(exp::Expr, indexes::Array{Int, 1})
+    local i::Int
+    local args::Array{Any, 1} = exp.args
+
+    for i = 1:length(indexes)
+      args = args[indexes[i]].args
+    end
+
+    args
+  end
 
   #
   # This map contains only block symbols like: for, if, function,...
   # This map and _CODE_PARTS should be synchronized.
   #
-  const _CODE_PARTS_MAP = Dict{Symbol, Bool}(
-    :function  => true,
-    :if        => true,
-    :block     => true  # for operator
+  const _CODE_PARTS_MAP = Dict{Symbol, Array{Int, 1}}(
+    :function  => [2],
+    :if        => [2],
+    :block     => [2,2]  # for operator
   )
   #
   # Array of available functions. Each function should return Expr type.
