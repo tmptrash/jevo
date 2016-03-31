@@ -1,9 +1,9 @@
-#
-# TODO: This module has pasponed. It will be continued only after
-# TODO: first stable version will appear.
-#
 module TestMutator
   using FactCheck
   using Mutator
   using Config
+
+  facts("Observer creation should work") do
+    @fact length(Event.create().events) --> 0
+  end
 end

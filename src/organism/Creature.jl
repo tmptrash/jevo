@@ -38,7 +38,6 @@ module Creature
   import Event
   import Helper
   using Config
-  using Debug
 
   export Organism
 

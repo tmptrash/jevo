@@ -19,8 +19,6 @@ module Code
   import Config
   import Helper
 
-  using Debug
-
   include("CodeMacros.jl")
   include("CodeOrganism.jl")
   include("CodeMath.jl")

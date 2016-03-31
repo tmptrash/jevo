@@ -11,7 +11,6 @@ module Mutator
   import Helper
   import Creature
   import Code
-  using Debug
 
   export mutate
   #
