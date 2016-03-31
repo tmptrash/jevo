@@ -196,13 +196,14 @@ module Code
   #
   @debug function onRemoveLine(org::Creature.Organism, pos::Helper.Pos, del::Bool = false)
   @bp
-    local blocks::Array{Creature.Block, 1} = org.funcs[idx].blocks
+    local blocks::Array{Creature.Block, 1} = org.funcs[pos.fnIdx].blocks
     local exp::Expr = blocks[pos.blockIdx].lines[pos.lineIdx]
     local lines::Array{Any, 1}
     local idx::Int
     local i::Int
     local bLen::Int
     local var::Symbol
+    local vars::Array{Symbol, 1}
     #
     # This is function element. We have to sum amount of code
     # lines inside function + amount of code lines inside all
@@ -211,6 +212,7 @@ module Code
     #
     if exp.head === :function
       idx = findfirst((f::Creature.Func) -> f.code === exp, org.funcs)
+      blocks = org.funcs[idx].blocks
       for i = 1:length(blocks) org.codeSize -= length(blocks[i].lines) end
       org.codeSize += 1 # skip "return"
       deleteat!(org.funcs, idx)
@@ -228,7 +230,8 @@ module Code
     #
     elseif exp.head === :local
       var = exp.args[1].args[1].args[1]
-      deleteat!(blocks[pos.blockIdx].vars[exp.args[1].args[1].args[2]], findfirst((s::Symbol) -> s === var, blocks))
+      vars = blocks[pos.blockIdx].vars[exp.args[1].args[1].args[2]]
+      deleteat!(vars, findfirst((s::Symbol) -> s === var, vars))
     end
     #
     # We have to decrease code size only if we remove this line.
