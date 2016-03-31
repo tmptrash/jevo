@@ -18,7 +18,7 @@ module TestMutator
     @fact org.code.args[2].args[1].args[1].args[1].args[1] --> :var_1
 
     Config.val(:ORGANISM_MUTATION_PROBABILITIES, probs)
-    include("../src/organism/Code.jl")
+    include("../src/organism/Mutator.jl")
   end
   facts("Adding function declaration") do
     probs = Config.val(:ORGANISM_MUTATION_PROBABILITIES)
@@ -34,6 +34,6 @@ module TestMutator
 
     Config.val(:CODE_MAX_FUNC_PARAMS, fnMax)
     Config.val(:ORGANISM_MUTATION_PROBABILITIES, probs)
-    include("../src/organism/Code.jl")
+    include("../src/organism/Mutator.jl")
   end
 end
