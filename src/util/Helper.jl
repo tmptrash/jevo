@@ -80,6 +80,22 @@ module Helper
     print_with_color(:green, "INFO: ", msg, "\n")
   end
   #
+  # Returns lines array from AST by specified indexes. e.g.:
+  # [2,1] means ex.args[2].args[1].args
+  # @param exp Expression we have to start with
+  # @return {Array{Any, 1}}
+  #
+  function getLines(exp::Expr, indexes::Array{Int, 1})
+    local i::Int
+    local args::Array{Any, 1} = exp.args
+
+    for i = 1:length(indexes)
+      args = args[indexes[i]].args
+    end
+
+    args
+  end
+  #
   # Chooses (returns) true or false randomly. Is used to choose between two
   # variants of something. For example + or - sign.
   # @return {Bool}

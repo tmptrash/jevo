@@ -216,7 +216,7 @@ module Code
     # This is block element, but not a function
     #
     elseif haskey(_CODE_PARTS_MAP, exp.head)
-      lines = _getLines(exp, _CODE_PARTS_MAP[exp.head])
+      lines = Helper.getLines(exp, _CODE_PARTS_MAP[exp.head])
       idx = findfirst((b::Creature.Block) -> b.lines === lines, blocks)
       org.codeSize -= length(lines)
       deleteat!(blocks, idx)
@@ -251,22 +251,6 @@ module Code
       blockIdx,
       rand(1:(lines < 1 ? 1 : lines)) # skip "return"
     )
-  end
-  #
-  # Returns lines array from AST by specified indexes. e.g.:
-  # [2,1] means ex.args[2].args[1].args
-  # @param exp Expression we have to start with
-  # @return {Array{Any, 1}}
-  #
-  function _getLines(exp::Expr, indexes::Array{Int, 1})
-    local i::Int
-    local args::Array{Any, 1} = exp.args
-
-    for i = 1:length(indexes)
-      args = args[indexes[i]].args
-    end
-
-    args
   end
 
   #
