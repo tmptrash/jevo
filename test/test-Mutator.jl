@@ -16,7 +16,9 @@ module TestMutator
     @fact Mutator._onAdd(org)                         --> true
     @fact org.code.args[2].args[1].head               --> :local
     @fact Helper.getLines(org.code, [2,1,1,1])[1]     --> :var_1
-    #@fact org.funcs[1].blocks[1].vars[]
+    hasType = false
+    for i in Helper.SUPPORTED_TYPES if length(org.funcs[1].blocks[1].vars[i]) > 0 hasType = true end end
+    @fact hasType                                     --> true
 
     Config.val(:ORGANISM_MUTATION_PROBABILITIES, probs)
     include("../src/organism/Mutator.jl")
@@ -32,6 +34,7 @@ module TestMutator
     org = Creature.create()
     @fact Mutator._onAdd(org)                         --> true
     @fact Helper.getLines(org.code, [2,1,1])[1]       --> :func_2
+    println(org.code)
 
     Config.val(:CODE_MAX_FUNC_PARAMS, fnMax)
     Config.val(:ORGANISM_MUTATION_PROBABILITIES, probs)
