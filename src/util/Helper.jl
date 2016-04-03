@@ -83,17 +83,37 @@ module Helper
   # Returns lines array from AST by specified indexes. e.g.:
   # [2,1] means ex.args[2].args[1].args
   # @param exp Expression we have to start with
-  # @return {Array{Any, 1}}
+  # @return {Array{Int, 1}}
   #
   function getLines(exp::Expr, indexes::Array{Int, 1})
-    local i::Int
+    _getArg(exp, indexes).args
+  end
+  #
+  # Returns head of specified AST node. An array of indexes
+  # is used like a node position. For example:
+  # [2,1] means ex.args[2].args[1].head
+  # @param exp Expression we have to start with
+  # @return {Array{Int, 1}}
+  #
+  function getHead(exp::Expr, indexes::Array{Int, 1})
+    getArg(exp, indexes).head
+  end
+  #
+  # Returns argument of specified AST node. An array of indexes
+  # is used like a node position. For example:
+  # [2,1] means ex.args[2].args[1]
+  # @param exp Expression we have to start with
+  # @return {Array{Int, 1}}
+  #
+  function getArg(exp::Expr, indexes::Array{Int, 1})
     local args::Array{Any, 1} = exp.args
+    local len::Int = length(indexes)
 
-    for i = 1:length(indexes)
+    for i = 1:(len-1)
       args = args[indexes[i]].args
     end
 
-    args
+    args[indexes[len]]
   end
   #
   # Chooses (returns) true or false randomly. Is used to choose between two

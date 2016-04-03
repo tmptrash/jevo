@@ -35,23 +35,29 @@ module Mutator
   # TODO: describe return value. false mean no mutation
   #
   function mutate(org::Creature.Organism, amount::Int = 1)
-    local i     ::Int
-    local res   ::Bool
-    local pIndex::Int
-    local result::Bool = true
+    local i         ::Int
+    local res       ::Bool
+    local pIndex    ::Int
+    local result    ::Bool = true
+    local codeChange::Bool
+    local pos       ::Helper.Pos
+    local cmd       ::Code.CodePart
 
     for i = 1:amount
       #
       # If there is no code, we can't mutate it. We may only add code line
       #
-      pIndex = org.codeSize < 1 ? 1           : Helper.getProbIndex(org.mutationProbabilities)
-      res    = org.codeSize < 1 ? _onAdd(org) : _MUTATION_TYPES[pIndex](org)
-      result &= res
+      pIndex     = org.codeSize < 1 ? 1 : Helper.getProbIndex(org.mutationProbabilities)
+      codeChange = pIndex < 5
+      pos        = codeChange ? Code.getRandPos(org) : _posStub
+      cmd        = codeChange ? Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))] : _cmdStub
+      res        = org.codeSize < 1 ? _onAdd(org, pos, cmd) : _MUTATION_TYPES[pIndex](org, pos, cmd)
+      result    &= res
       #
       # Updates compiled version of the code. Only valid code will be applied,
       # because exception will be fired in case of error organism code.
       #
-      if pIndex < 5 && res
+      if codeChange && res
         try
           #
           # This function must be anonymous, because it's used for comparison
@@ -84,14 +90,14 @@ module Mutator
   # custom function bodies and their blocks. It shouldn't add function
   # or function call inside other function excepts main one.
   # @param org Organism we are working with
+  # @param pos Adding code position
+  # @param cmd Command we have to add
   # @return {Bool} true means that add mutation was occured, false
   # that there were no add or adding was skipped.
   #
-  function _onAdd(org::Creature.Organism)
-    local pos::Helper.Pos    = Code.getRandPos(org)
-    local cmd::Code.CodePart = Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))]
+  function _onAdd(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     @posCorrect(org, pos, cmd)
-    local exp::Expr          = cmd.fn(org, pos)
+    local exp::Expr = cmd.fn(org, pos)
     #
     # Incorrect position for adding or it's impossible to 
     # get a command.
@@ -111,12 +117,12 @@ module Mutator
   # Makes one big change in a code of main and custom functions. Big 
   # change means changing one line. It's possible to skip changing.
   # @param org Organism we are working with
+  # @param pos Changing code position
+  # @param cmd Command we have change to
   # @return {Bool} true means that there were a change, false
   # that there were no change or change was skipped.
   #
-  function _onChange(org::Creature.Organism)
-    local pos::Helper.Pos      = Code.getRandPos(org)
-    local cmd::Code.CodePart   = Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))]
+  function _onChange(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     @posCorrect(org, pos, cmd)
     local lines::Array{Any, 1} = org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines
     local exp::Expr            = cmd.fn(org, pos)
@@ -137,11 +143,12 @@ module Mutator
   # Removes one code line if possible. It can't remove return
   # operator inside custom functions
   # @param org Organism we are working with
+  # @param pos Delete code position
+  # @param cmd Unused
   # @return {Bool} true means that there were a delete, false
   # that there were no delete or delete was skipped.
   #
-  function _onDel(org::Creature.Organism)
-    local pos::Helper.Pos      = Code.getRandPos(org)
+  function _onDel(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     local lines::Array{Any, 1} = org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines
 
     if length(lines) < 1 ||
@@ -159,11 +166,13 @@ module Mutator
   # custom functions. Small change it's change of variable
   # or constant to other/same variable or constant.
   # @param org Organism we are working with
+  # @param pos Change code position
+  # @param cmd Unused
   # @return {Bool} true means that there were a change, false
   # that there were no change or change was skipped.
   # TODO: implement in future
   #
-  function _onSmallChange(org::Creature.Organism)
+  function _onSmallChange(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     # TODO: AST deep analyzing here!
     # TODO: variables and constants should be used here
     true
@@ -172,8 +181,11 @@ module Mutator
   # mutationsOnClone property mutation handler. It changes this 
   # property randomly. 0 means disable property.
   # @param org Organism we are working with
+  # @param pos Unused
+  # @param cmd Unused
   #
-  function _onClone(org::Creature.Organism)
+
+  function _onClone(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     org.mutationsOnClone = rand(0:Config.val(:ORGANISM_MAX_MUTATIONS_ON_CLONE))
     true
   end
@@ -181,8 +193,10 @@ module Mutator
   # mutationPeriod property mutation handler. It changes this
   # property randomly. 0 means disable property.
   # @param org Organism we are working with
+  # @param pos Unused
+  # @param cmd Unused
   #
-  function _onPeriod(org::Creature.Organism)
+  function _onPeriod(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     org.mutationPeriod = rand(0:Config.val(:ORGANISM_MAX_MUTATION_PERIOD))
     true
   end
@@ -190,8 +204,10 @@ module Mutator
   # mutationAmount property mutation handler. It changes this 
   # property randomly. 0 means disable property.
   # @param org Organism we are working with
+  # @param pos Unused
+  # @param cmd Unused
   #
-  function _onAmount(org::Creature.Organism)
+  function _onAmount(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     org.mutationAmount = rand(0:Config.val(:ORGANISM_MAX_MUTATION_AMOUNT))
     true
   end
@@ -201,6 +217,16 @@ module Mutator
   const _MUTATION_TYPES = [
     _onAdd, _onChange, _onDel, _onSmallChange, _onClone, _onPeriod, _onAmount
   ]
+  #
+  # "Empty" position. Means no position. Is used only like a stub for 
+  # functions, which don't need code position
+  #
+  const _posStub = Helper.Pos(0,0,0)
+  #
+  # Stub for CodePart type. Is used with functions like: _onPeriod, _onPeriod,..
+  # Which don't need a code part
+  #
+  const _cmdStub = Code.CodePart(Code.var, false)
  #  #
  #  # TODO:
  #  #
