@@ -25,7 +25,13 @@ module Mutator
   # macros.
   #
   macro posCorrect(org, pos, cmd)
-    :(if $cmd.isBlock && $pos.blockIdx !== 1 || $pos.fnIdx > 1 && $cmd.fn === Code.fnCall return false end)
+    :(
+      if $cmd.isBlock   && $pos.blockIdx > 1       ||
+         $pos.fnIdx > 1 && $cmd.fn === Code.fnCall ||
+         $pos.fnIdx > 1 && $cmd.fn === Code.fn
+        return false
+      end
+    )
   end
   #
   # TODO: add description of the method

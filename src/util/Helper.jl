@@ -86,7 +86,7 @@ module Helper
   # @return {Array{Int, 1}}
   #
   function getLines(exp::Expr, indexes::Array{Int, 1})
-    _getArg(exp, indexes).args
+    getArg(exp, indexes).args
   end
   #
   # Returns head of specified AST node. An array of indexes
