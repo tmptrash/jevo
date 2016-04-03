@@ -67,4 +67,14 @@ module TestCode
     @fact Helper.getHead(org.code, [2,1]) --> :function
     @fact Helper.getHead(org.code, [2,2]) --> :function
   end
+  facts("Testing Code.fn() should return the value") do
+    Config.val(:CODE_MAX_FUNC_PARAMS, 1)
+    org = Creature.create()
+    Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
+    Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
+
+    @fact Helper.getHead(org.code, [2,3]) --> :return
+    @fact Helper.getHead(org.code, [2,1,2,1]) --> :return
+    @fact Helper.getHead(org.code, [2,2,2,1]) --> :return
+  end
 end
