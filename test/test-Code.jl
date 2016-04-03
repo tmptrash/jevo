@@ -31,6 +31,5 @@ module TestCode
 
     @fact Helper.getArg(org.code, [2,1,1,1])       --> :func_2
     @fact Helper.getArg(org.code, [2,1,2,1,1,1,1]) --> :var_3
-    #println(Helper.getArg(org.code, [2,1,2,1,1,1,1]))
   end
 end
