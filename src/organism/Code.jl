@@ -117,10 +117,6 @@ module Code
   # @return {Expr|Expr(:nothing)}
   # 
   function fnCall(org::Creature.Organism, pos::Helper.Pos)
-    #
-    # Functions calls only possible in main function
-    #
-    if pos.fnIdx !== 1 return Expr(:nothing) end
     local funcsLen::Int             = length(org.funcs)
     if funcsLen < 2 return Expr(:nothing) end
     local fnEx::Expr                = org.funcs[rand(2:funcsLen)].code          # only custom function may be called
