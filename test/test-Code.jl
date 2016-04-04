@@ -94,6 +94,14 @@ module TestCode
     @fact Helper.getHead(org.code, [2,1]) --> :return
     @fact eval(org.code)(org) --> true
   end
+  facts("Testing Code.fnCall(), but without a function") do
+    org = Creature.create()
+    Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fnCall, false))
+    
+    @fact length(Helper.getLines(org.code, [2])) --> 1
+    @fact Helper.getHead(org.code, [2,1]) --> :return
+    @fact eval(org.code)(org) --> true
+  end
   facts("Testing Code.fnCall() for one Code.fn(), but without variables") do
     org = Creature.create()
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
@@ -104,22 +112,37 @@ module TestCode
     @fact Helper.getHead(org.code, [2,2]) --> :return
     @fact eval(org.code)(org) --> true
   end
-  facts("Testing Code.fnCall() for one Code.fn()") do
+  facts("Testing Code.fnCall() of one Code.fn()") do
     local org   = Creature.create()
     local lines = org.code.args[2].args
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
-    Helper.getSupportedTypes(
-      function (t)
-        var = symbol("var_", org.symbolId += 1)
-        push!(org.funcs[1].blocks[1].vars[t], var)
-        insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
-      end
-    )
+    Helper.getSupportedTypes(function (t)
+      var = symbol("var_", org.symbolId += 1)
+      push!(org.funcs[1].blocks[1].vars[t], var)
+      insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
+    end)
     Mutator._onAdd(org, Helper.Pos(1,1,7), Code.CodePart(Code.fnCall, false))
 
     @fact Helper.getHead(org.code, [2,7]) --> :(=)
     @fact Helper.getArg(org.code, [2,7,2,1]) --> :func_2
     @fact Helper.getArg(org.code, [2,7,1]) --> Helper.getArg(org.code, [2,7,2,2])
+    @fact eval(org.code)(org) --> true
+  end
+  facts("Testing Code.fnCall() after removing Code.fn()") do
+    local org   = Creature.create()
+    local lines = org.code.args[2].args
+    local cp    = Code.CodePart(Code.fn, true)
+
+    Mutator._onAdd(org, Helper.Pos(1,1,1), cp)
+    Helper.getSupportedTypes(function (t)
+      var = symbol("var_", org.symbolId += 1)
+      push!(org.funcs[1].blocks[1].vars[t], var)
+      insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
+    end)
+    Mutator._onDel(org, Helper.Pos(1,1,6), cp)
+    @fact Mutator._onAdd(org, Helper.Pos(1,1,7), Code.CodePart(Code.fnCall, false)) --> false
+
+    @fact length(Helper.getLines(org.code, [2])) --> 6
     @fact eval(org.code)(org) --> true
   end
 end
