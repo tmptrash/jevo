@@ -5,7 +5,9 @@ module TestCode
   import Helper
   import Mutator
   import Config
-
+  #
+  # var
+  #
   facts("Testing Code.var() in empty script") do
     org = Creature.create()
     var = Code.var(org, Helper.Pos(1,1,1))
@@ -35,7 +37,9 @@ module TestCode
     @fact Helper.getArg(org.code, [2,1,2,1,1,1,1]) --> :var_3
     @fact eval(org.code)(org) --> true
   end
-
+  #
+  # fn
+  #
   facts("Testing Code.fn() inside empty script") do
     Config.val(:CODE_MAX_FUNC_PARAMS, 1)
     org = Creature.create()
@@ -85,7 +89,9 @@ module TestCode
     @fact Helper.getHead(org.code, [2,2,2,1]) --> :return
     @fact eval(org.code)(org) --> true
   end
-
+  #
+  # fnCall
+  #
   facts("Testing Code.fnCall() in empty script") do
     org = Creature.create()
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fnCall, false))
@@ -143,6 +149,34 @@ module TestCode
     @fact Mutator._onAdd(org, Helper.Pos(1,1,7), Code.CodePart(Code.fnCall, false)) --> false
 
     @fact length(Helper.getLines(org.code, [2])) --> 6
+    @fact length(org.funcs) --> 1
+    @fact eval(org.code)(org) --> true
+  end
+  #
+  # if
+  #
+  facts("Testing Code.condition() with all variables") do
+    local org   = Creature.create()
+    local lines = org.code.args[2].args
+
+    Helper.getSupportedTypes(function (t)
+      var = symbol("var_", org.symbolId += 1)
+      push!(org.funcs[1].blocks[1].vars[t], var)
+      insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
+    end)
+    Mutator._onAdd(org, Helper.Pos(1,1,6), Code.CodePart(Code.condition, true))
+    
+    @fact length(Helper.getLines(org.code, [2])) --> 7
+    @fact Helper.getHead(org.code, [2,6]) --> :if
+    @fact length(org.funcs[1].blocks) --> 2
+    @fact eval(org.code)(org) --> true
+  end
+  facts("Testing Code.condition() without variables") do
+    local org = Creature.create()
+
+    Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.condition, true))
+    
+    @fact length(Helper.getLines(org.code, [2])) --> 1
     @fact eval(org.code)(org) --> true
   end
 end
