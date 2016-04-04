@@ -126,7 +126,7 @@ module Helper
   #
   # This function is not presented in Julis Gtk package
   #
-  function gtk_markup(label::Gtk.GtkLabel,str)
+  function gtkMarkup(label::Gtk.GtkLabel,str)
     ccall((:gtk_label_set_markup,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{UInt8}),label,str)
     return label
   end

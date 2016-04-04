@@ -105,7 +105,7 @@ module RemoteStatistics
   function _onAfterResponse(rs::RemoteStatData, ans::Connection.Answer)
     local d::RpcApi.Statistics = ans.data
     # TODO: on linux we have to use other font name
-    Helper.gtk_markup(rs.label,
+    Helper.gtkMarkup(rs.label,
       """
 <span size="12800" face="Lucida Console" foreground="blue">Organisms   : </span><span face="Lucida Console" size="12800">$(d.orgAmount)</span>
 <span size="12800" face="Lucida Console" foreground="blue">IPS         : </span><span face="Lucida Console" size="12800">$(d.ips)</span>
