@@ -179,4 +179,29 @@ module TestCode
     @fact length(Helper.getLines(org.code, [2])) --> 1
     @fact eval(org.code)(org) --> true
   end
+  facts("Testing Code.condition() inside function") do
+    local org = Creature.create()
+
+    Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
+    @fact Helper.getArg(org.code, [2,1,1,1]) --> :func_2
+    Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.condition, true))
+    @fact length(Helper.getLines(org.code, [2,1,2])) --> 1
+    @fact eval(org.code)(org) --> true
+  end
+  facts("Testing Code.condition() inside function, with variables") do
+    local org   = Creature.create()
+    local lines
+
+    Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
+    lines = org.code.args[2].args[1].args[2].args
+    @fact Helper.getArg(org.code, [2,1,1,1]) --> :func_2
+    Helper.getSupportedTypes(function (t)
+      var = symbol("var_", org.symbolId += 1)
+      push!(org.funcs[2].blocks[1].vars[t], var)
+      insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
+    end)
+    Mutator._onAdd(org, Helper.Pos(2,1,6), Code.CodePart(Code.condition, true))
+    @fact Helper.getHead(org.code, [2,1,2,6]) --> :if
+    @fact eval(org.code)(org) --> true
+  end
 end

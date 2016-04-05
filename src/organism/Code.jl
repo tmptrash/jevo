@@ -162,9 +162,9 @@ module Code
   end
   #
   # @cmd
-  # block
+  # @block
   # Creates a for loop. We have to create small loops, because they
-  # affects entire speed.
+  # affect entire speed.
   # @param org Organism we are working with
   # @param pos Position in a code
   # @return {Expr|Expr(:nothing)}
