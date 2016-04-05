@@ -241,4 +241,27 @@ module TestCode
     @fact length(Helper.getLines(org.code, [2,6,2])) --> 5
     @fact eval(org.code)(org) --> true
   end
+  #
+  # for
+  #
+  facts("Testing Code.loop() and empty code") do
+    local org   = Creature.create()
+
+    Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.loop, true))
+
+    @fact length(Helper.getLines(org.code, [2])) --> 1
+    @fact eval(org.code)(org) --> true
+  end
+  facts("Testing Code.loop() and one variable") do
+    local org   = Creature.create()
+    local var   = symbol("var_", org.symbolId += 1)
+    local lines = org.code.args[2].args
+
+    push!(org.funcs[1].blocks[1].vars[Int8], var)
+    insert!(lines, 1, :(local $(var)::Int8=12))
+    Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.loop, true))
+
+    @fact Helper.getHead(org.code, [2,2]) --> :for
+    @fact eval(org.code)(org) --> true
+  end
 end

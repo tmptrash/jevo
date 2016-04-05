@@ -172,10 +172,9 @@ module Code
   function loop(org::Creature.Organism, pos::Helper.Pos)
     local v::Symbol = @randVar(org, pos, Int8)
     if v === :nothing return Expr(:nothing) end
-    local i::Symbol = @newVar(org)
-    local loopEx    = :(local $i::Int8; for $i=1:$v end)
+    local loopEx    = :(for i=1:$v end)
 
-    push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), loopEx.args[2].args[2].args))
+    push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), loopEx.args[2].args))
     loopEx
   end
 

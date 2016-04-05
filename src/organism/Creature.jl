@@ -231,8 +231,11 @@ module Creature
     # by mutations. This loop must be after ambedded functions.
     #
     return function ()
-      oldCode = org.codeFn
-      orgId   = "org-$(id)"
+      local oldCode::Function = org.codeFn
+      #
+      # This variable is used inside for loops in organism's code
+      #
+      local i::Int8
       #
       # TODO: describe organism's main loop
       #
