@@ -217,15 +217,28 @@ module TestCode
     end)
     @fact Mutator._onAdd(org, Helper.Pos(2,1,6), Code.CodePart(Code.condition, true)) --> true
     @fact Mutator._onAdd(org, Helper.Pos(2,2,1), Code.CodePart(Code.condition, true)) --> false
-    println(org.code)
     @fact length(Helper.getLines(org.code, [2,1,2,6,2])) --> 0
     @fact eval(org.code)(org) --> true
   end
-  # add test for condition inside the condition and all variables
-  # if v < v
-  #   local v2::Int = 1
-  #   ...
-  #   if v2 !== v2
-  #     ...
-  #
+  facts("Testing Code.condition() inside other Code.condition() with variables") do
+    local org   = Creature.create()
+    local lines = org.code.args[2].args
+
+    Helper.getSupportedTypes(function (t)
+      var = symbol("var_", org.symbolId += 1)
+      push!(org.funcs[1].blocks[1].vars[t], var)
+      insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
+    end)
+    Mutator._onAdd(org, Helper.Pos(1,1,6), Code.CodePart(Code.condition, true))
+
+    lines = Helper.getLines(org.code, [2,6,2])
+    Helper.getSupportedTypes(function (t)
+      var = symbol("var_", org.symbolId += 1)
+      push!(org.funcs[1].blocks[2].vars[t], var)
+      insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
+    end)
+    Mutator._onAdd(org, Helper.Pos(1,2,6), Code.CodePart(Code.condition, true))
+    @fact length(Helper.getLines(org.code, [2,6,2])) --> 5
+    @fact eval(org.code)(org) --> true
+  end
 end
