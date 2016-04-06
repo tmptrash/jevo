@@ -6,6 +6,25 @@ module TestCode
   import Mutator
   import Config
   #
+  # Adds all available variables into specified position
+  #
+  function addVars(org::Creature.Organism, lines::Array{Int, 1}, pos::Helper.Pos)
+    Helper.getSupportedTypes(function (t)
+      var = symbol("var_", org.symbolId += 1)
+      push!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].vars[t], var)
+      insert!(Helper.getLines(org.code, lines), 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
+    end)
+  end
+  #
+  # Adds one variable by type
+  #
+  function addVar(org::Creature.Organism, lines::Array{Int, 1}, pos::Helper.Pos, typ::DataType)
+    var = symbol("var_", org.symbolId += 1)
+    push!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].vars[typ], var)
+    insert!(Helper.getLines(org.code, lines), pos.lineIdx, :(local $(var)::$(typ)=$(typ !== ASCIIString ? rand(typ) : randstring())))
+  end
+
+  #
   # var
   #
   facts("Testing Code.var() in empty script") do
@@ -119,14 +138,10 @@ module TestCode
     @fact eval(org.code)(org) --> true
   end
   facts("Testing Code.fnCall() of one Code.fn()") do
-    local org   = Creature.create()
-    local lines = org.code.args[2].args
+    local org = Creature.create()
+
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
-    Helper.getSupportedTypes(function (t)
-      var = symbol("var_", org.symbolId += 1)
-      push!(org.funcs[1].blocks[1].vars[t], var)
-      insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
-    end)
+    addVars(org, [2], Helper.Pos(1,1,1))
     Mutator._onAdd(org, Helper.Pos(1,1,7), Code.CodePart(Code.fnCall, false))
 
     @fact Helper.getHead(org.code, [2,7]) --> :(=)
@@ -135,16 +150,11 @@ module TestCode
     @fact eval(org.code)(org) --> true
   end
   facts("Testing Code.fnCall() after removing Code.fn()") do
-    local org   = Creature.create()
-    local lines = org.code.args[2].args
-    local cp    = Code.CodePart(Code.fn, true)
+    local org = Creature.create()
+    local cp  = Code.CodePart(Code.fn, true)
 
     Mutator._onAdd(org, Helper.Pos(1,1,1), cp)
-    Helper.getSupportedTypes(function (t)
-      var = symbol("var_", org.symbolId += 1)
-      push!(org.funcs[1].blocks[1].vars[t], var)
-      insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
-    end)
+    addVars(org, [2], Helper.Pos(1,1,1))
     Mutator._onDel(org, Helper.Pos(1,1,6), cp)
     @fact Mutator._onAdd(org, Helper.Pos(1,1,7), Code.CodePart(Code.fnCall, false)) --> false
 
@@ -156,14 +166,9 @@ module TestCode
   # if
   #
   facts("Testing Code.condition() with all variables") do
-    local org   = Creature.create()
-    local lines = org.code.args[2].args
+    local org = Creature.create()
 
-    Helper.getSupportedTypes(function (t)
-      var = symbol("var_", org.symbolId += 1)
-      push!(org.funcs[1].blocks[1].vars[t], var)
-      insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
-    end)
+    addVars(org, [2], Helper.Pos(1,1,1))
     Mutator._onAdd(org, Helper.Pos(1,1,6), Code.CodePart(Code.condition, true))
     
     @fact length(Helper.getLines(org.code, [2])) --> 7
@@ -189,17 +194,12 @@ module TestCode
     @fact eval(org.code)(org) --> true
   end
   facts("Testing Code.condition() inside function, with variables") do
-    local org   = Creature.create()
-    local lines
+    local org = Creature.create()
 
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
-    lines = org.code.args[2].args[1].args[2].args
     @fact Helper.getArg(org.code, [2,1,1,1]) --> :func_2
-    Helper.getSupportedTypes(function (t)
-      var = symbol("var_", org.symbolId += 1)
-      push!(org.funcs[2].blocks[1].vars[t], var)
-      insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
-    end)
+
+    addVars(org, [2,1,2], Helper.Pos(2,1,1))
     Mutator._onAdd(org, Helper.Pos(2,1,6), Code.CodePart(Code.condition, true))
     @fact Helper.getHead(org.code, [2,1,2,6]) --> :if
     @fact eval(org.code)(org) --> true
@@ -208,35 +208,20 @@ module TestCode
     local org = Creature.create()
 
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
-    lines = org.code.args[2].args[1].args[2].args
     @fact Helper.getArg(org.code, [2,1,1,1]) --> :func_2
-    Helper.getSupportedTypes(function (t)
-      var = symbol("var_", org.symbolId += 1)
-      push!(org.funcs[2].blocks[1].vars[t], var)
-      insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
-    end)
+    addVars(org, [2,1,2], Helper.Pos(2,1,1))
     @fact Mutator._onAdd(org, Helper.Pos(2,1,6), Code.CodePart(Code.condition, true)) --> true
     @fact Mutator._onAdd(org, Helper.Pos(2,2,1), Code.CodePart(Code.condition, true)) --> false
     @fact length(Helper.getLines(org.code, [2,1,2,6,2])) --> 0
     @fact eval(org.code)(org) --> true
   end
   facts("Testing Code.condition() inside other Code.condition() with variables") do
-    local org   = Creature.create()
-    local lines = org.code.args[2].args
+    local org = Creature.create()
 
-    Helper.getSupportedTypes(function (t)
-      var = symbol("var_", org.symbolId += 1)
-      push!(org.funcs[1].blocks[1].vars[t], var)
-      insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
-    end)
+    addVars(org, [2], Helper.Pos(1,1,1))
     Mutator._onAdd(org, Helper.Pos(1,1,6), Code.CodePart(Code.condition, true))
 
-    lines = Helper.getLines(org.code, [2,6,2])
-    Helper.getSupportedTypes(function (t)
-      var = symbol("var_", org.symbolId += 1)
-      push!(org.funcs[1].blocks[2].vars[t], var)
-      insert!(lines, 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
-    end)
+    addVars(org, [2,6,2], Helper.Pos(1,2,1))
     Mutator._onAdd(org, Helper.Pos(1,2,6), Code.CodePart(Code.condition, true))
     @fact length(Helper.getLines(org.code, [2,6,2])) --> 5
     @fact eval(org.code)(org) --> true
@@ -262,6 +247,29 @@ module TestCode
     Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.loop, true))
 
     @fact Helper.getHead(org.code, [2,2]) --> :for
+    @fact eval(org.code)(org) --> true
+  end
+  facts("Testing Code.loop() inside other Code.loop() without Code.var()") do
+    local org   = Creature.create()
+    local var   = symbol("var_", org.symbolId += 1)
+    local lines = org.code.args[2].args
+
+    push!(org.funcs[1].blocks[1].vars[Int8], var)
+    insert!(lines, 1, :(local $(var)::Int8=12))
+    Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.loop, true))
+    Mutator._onAdd(org, Helper.Pos(1,2,1), Code.CodePart(Code.loop, true))
+    @fact length(Helper.getLines(org.code, [2,2,2])) --> 0
+    @fact eval(org.code)(org) --> true
+  end
+  facts("Testing Code.loop() inside other Code.loop() with Code.var()") do
+    local org = Creature.create()
+
+    addVar(org, [2], Helper.Pos(1,1,1), Int8)    
+    Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.loop, true))
+    addVar(org, [2,2,2], Helper.Pos(1,2,1), Int8)
+    Mutator._onAdd(org, Helper.Pos(1,2,1), Code.CodePart(Code.loop, true))
+
+    @fact length(Helper.getLines(org.code, [2,2,2])) --> 1
     @fact eval(org.code)(org) --> true
   end
 end
