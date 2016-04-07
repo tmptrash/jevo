@@ -287,4 +287,30 @@ module TestCode
     @fact length(Helper.getLines(org.code, [2])) --> 4
     @fact eval(org.code)(org) --> true
   end
+  #
+  # commands mix
+  #
+  facts("Testing Code.fn() inside Code.loop()") do
+    local org = Creature.create()
+
+    addVars(org, [2], Helper.Pos(1,1,1))
+    Mutator._onAdd(org, Helper.Pos(1,1,6), Code.CodePart(Code.loop, true))
+    Mutator._onAdd(org, Helper.Pos(1,2,1), Code.CodePart(Code.fn, true))
+
+    @fact length(Helper.getLines(org.code, [2])) --> 7
+    @fact length(Helper.getLines(org.code, [2,6,2])) --> 0
+    @fact eval(org.code)(org) --> true
+  end
+  facts("Testing Code.loop() inside Code.fn()") do
+    Config.val(:CODE_MAX_FUNC_PARAMS, 1)
+    org = Creature.create()
+
+    Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
+    addVar(org, [2,1,2], Helper.Pos(2,1,1), Int8)
+    Mutator._onAdd(org, Helper.Pos(2,1,2), Code.CodePart(Code.loop, true))
+
+    @fact length(Helper.getLines(org.code, [2])) --> 2
+    @fact length(Helper.getLines(org.code, [2,1,2])) --> 3
+    @fact eval(org.code)(org) --> true
+  end
 end
