@@ -1,3 +1,6 @@
+#
+# TODO: add combined tests fn+loop, loop+fnCall and so on...
+#
 module TestCode
   using FactCheck
   import Code
@@ -264,12 +267,24 @@ module TestCode
   facts("Testing Code.loop() inside other Code.loop() with Code.var()") do
     local org = Creature.create()
 
-    addVar(org, [2], Helper.Pos(1,1,1), Int8)    
+    addVar(org, [2], Helper.Pos(1,1,1), Int8)
     Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.loop, true))
     addVar(org, [2,2,2], Helper.Pos(1,2,1), Int8)
     Mutator._onAdd(org, Helper.Pos(1,2,1), Code.CodePart(Code.loop, true))
 
     @fact length(Helper.getLines(org.code, [2,2,2])) --> 1
+    @fact eval(org.code)(org) --> true
+  end
+  facts("Testing Code.loop() near other Code.loop()") do
+    local org = Creature.create()
+
+    addVar(org, [2], Helper.Pos(1,1,1), Int8)
+    Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.loop, true))
+    Mutator._onAdd(org, Helper.Pos(1,1,3), Code.CodePart(Code.loop, true))
+
+    @fact Helper.getHead(org.code, [2,2]) --> :for
+    @fact Helper.getHead(org.code, [2,3]) --> :for
+    @fact length(Helper.getLines(org.code, [2])) --> 4
     @fact eval(org.code)(org) --> true
   end
 end

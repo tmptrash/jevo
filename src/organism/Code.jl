@@ -181,7 +181,7 @@ module Code
   #
   # This method is called before one code line is removed or changed.
   # It checks if removed/changed line is a local variable declaration
-  # or function declaration. In this case it clears all related 
+  # or function declaration. In this case it clears all related
   # structures like org.vars and org.funcs...
   # @param org Organism we are working with
   # @param pos Remove/Change position
