@@ -219,7 +219,7 @@ module Code
       blocks = org.funcs[idx].blocks
       for i = 1:length(blocks) org.codeSize -= length(blocks[i].lines) end
       org.codeSize += 1 # skip "return"
-      blocks[pos.blockIdx].defIndex -= 1
+      org.funcs[1].blocks[1].defIndex -= 1
       deleteat!(org.funcs, idx)
     #
     # This is block element, but not a function
@@ -228,6 +228,7 @@ module Code
       lines = Helper.getLines(exp, _CODE_PARTS_MAP[exp.head])
       idx = findfirst((b::Creature.Block) -> b.lines === lines, blocks)
       org.codeSize -= length(lines)
+      org.funcs[pos.fnIdx].blocks[1].defIndex -= 1
       deleteat!(blocks, idx)
     #
     # For simple line element we do nothing. But do for 
