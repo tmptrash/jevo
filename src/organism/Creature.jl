@@ -70,6 +70,18 @@ module Creature
     # Reference to code lines inside Organism.code AST.
     #
     lines::Array{Any, 1}
+    #
+    # An index of code line inside current block, before which all 
+    # variables and functions are defined. We can't add mutations
+    # before this line, because it will produce undefined variable
+    # or function error. With this, all variables/functions will be
+    # defined at the beginning of block.
+    #
+    defIndex::Int
+    #
+    # Constructor. Fills arguments and 0 for defIndex.
+    #
+    Block(vars::Dict{DataType, Array{Symbol, 1}}, lines::Array{Any, 1}) = new(vars, lines, 1)
   end
   #
   # Describes one function as a data container. It contains blocks

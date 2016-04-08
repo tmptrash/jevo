@@ -60,9 +60,16 @@ module Code
   #
   function var(org::Creature.Organism, pos::Helper.Pos)
     local typ::DataType = @randType()
-    local var::Symbol   = @newVar(org)
+    local var::Symbol = @newVar(org)
+    local block::Creature.Block = @getBlock(org, pos)
+    #
+    # This property means that we haven't add mutations
+    # before this line number, because we produce undefined
+    # variable/function error.
+    #
+    block.defIndex += 1
+    push!(block.vars[typ], var)
 
-    push!(@getVars(org, pos)[typ], var)
     :(local $(var)::$(typ)=$(@randValue(typ)))
   end
   #
@@ -99,10 +106,16 @@ module Code
     # All parameters will be added as local variables.
     #
     local fnEx::Expr  = :(function $(Symbol(@newFunc(org)))($(params...)) end)
-
+    #
+    # This property means that we haven't add mutations
+    # before this line number, because we produce undefined
+    # variable/function error.
+    #
+    org.funcs[pos.fnIdx].blocks[pos.blockIdx].defIndex += 1
     block.lines = fnEx.args[2].args
     push!(block.lines, :(return $(params[1].args[1].args[1])))
     push!(org.funcs, Creature.Func(fnEx, blocks))
+
     fnEx
   end
   #
@@ -206,6 +219,7 @@ module Code
       blocks = org.funcs[idx].blocks
       for i = 1:length(blocks) org.codeSize -= length(blocks[i].lines) end
       org.codeSize += 1 # skip "return"
+      blocks[pos.blockIdx].defIndex -= 1
       deleteat!(org.funcs, idx)
     #
     # This is block element, but not a function
@@ -222,6 +236,7 @@ module Code
     elseif exp.head === :local
       var = exp.args[1].args[1].args[1]
       vars = blocks[pos.blockIdx].vars[exp.args[1].args[1].args[2]]
+      blocks[pos.blockIdx].defIndex -= 1
       deleteat!(vars, findfirst((s::Symbol) -> s === var, vars))
     end
   end
@@ -239,12 +254,17 @@ module Code
   function getRandPos(org::Creature.Organism)
     local fnIdx   ::Int = rand(1:length(org.funcs))
     local blockIdx::Int = rand(1:length(org.funcs[fnIdx].blocks))
-    local lines   ::Int = length(org.funcs[fnIdx].blocks[blockIdx].lines) - (blockIdx === 1 ? 1 : 0)
+    local block   ::Creature.Block = org.funcs[fnIdx].blocks[blockIdx]
+    #
+    # In this line we skip "return" operator and lines with variables
+    # and functions declaration.
+    #
+    local lines   ::Int = length(block.lines) - (blockIdx === 1 ? 1 : 0)
 
     Helper.Pos(
       fnIdx,
       blockIdx,
-      rand(1:(lines < 1 ? 1 : lines)) # skip "return"
+      rand(block.defIndex:(lines + 1))
     )
   end
 
