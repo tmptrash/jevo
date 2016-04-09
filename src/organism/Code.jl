@@ -260,12 +260,12 @@ module Code
     # In this line we skip "return" operator and lines with variables
     # and functions declaration.
     #
-    local lines   ::Int = length(block.lines) - (blockIdx === 1 ? 1 : 0)
+    local lines   ::Int = length(block.lines) - (blockIdx === 1 ? 1 : 0) + 1
 
     Helper.Pos(
       fnIdx,
       blockIdx,
-      rand(block.defIndex:(lines + 1))
+      rand(1:lines)
     )
   end
 
@@ -276,7 +276,7 @@ module Code
   const _CODE_PARTS_MAP = Dict{Symbol, Array{Int, 1}}(
     :function  => [2],
     :if        => [2],
-    :block     => [2,2]  # for operator
+    :for       => [2]
   )
   #
   # Array of available functions. Each function should return Expr type.

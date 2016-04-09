@@ -41,7 +41,7 @@ module TestCode
   facts("Testing Code.var() + other Code.var()") do
     org = Creature.create()
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.var, false))
-    Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.var, false))
+    Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.var, false))
     
     @fact Helper.getHead(org.code, [2,1]) --> :local
     @fact Helper.getHead(org.code, [2,2]) --> :local
@@ -92,7 +92,7 @@ module TestCode
     Config.val(:CODE_MAX_FUNC_PARAMS, 1)
     org = Creature.create()
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
-    Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
+    Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.fn, true))
 
     @fact length(org.funcs) --> 3
     @fact length(Helper.getLines(org.code, [2])) --> 3
@@ -104,7 +104,7 @@ module TestCode
     Config.val(:CODE_MAX_FUNC_PARAMS, 1)
     org = Creature.create()
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
-    Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
+    Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.fn, true))
 
     @fact Helper.getHead(org.code, [2,3]) --> :return
     @fact Helper.getHead(org.code, [2,1,2,1]) --> :return

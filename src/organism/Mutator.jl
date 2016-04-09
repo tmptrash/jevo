@@ -12,6 +12,8 @@ module Mutator
   import Creature
   import Code
 
+  using Debug
+
   export mutate
   #
   # Checks if specified position in a code is correct. By correct i
@@ -99,13 +101,18 @@ module Mutator
   # @param pos Adding code position
   # @param cmd Command we have to add
   # @return {Bool} true means that add mutation was occured, false
-  # that there were no add or adding was skipped.
+  # that there where no add or adding was skipped.
   #
   function _onAdd(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     @posCorrect(org, pos, cmd)
+    local block::Creature.Block = org.funcs[pos.fnIdx].blocks[pos.blockIdx]
+    #
+    # We may add a code only after variables/functions declaration
+    #
+    if pos.lineIdx < block.defIndex return false end
     local exp::Expr = cmd.fn(org, pos)
     #
-    # Incorrect position for adding or it's impossible to 
+    # Incorrect position for adding or it's impossible to
     # get a command.
     #
     if exp.head === :nothing return false end
@@ -114,7 +121,7 @@ module Mutator
     # to prevent UndefVarError error in case of calling
     # before defining the function. The same for variables.
     #
-    insert!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines, cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, exp)
+    insert!(block.lines, cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, exp)
     org.codeSize += 1
 
     true
@@ -130,14 +137,21 @@ module Mutator
   #
   function _onChange(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     @posCorrect(org, pos, cmd)
-    local lines::Array{Any, 1} = org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines
-    local exp::Expr            = cmd.fn(org, pos)
+    local block::Creature.Block = org.funcs[pos.fnIdx].blocks[pos.blockIdx]
+    #
+    # We may add a code only after variables/functions declaration
+    #
+    if pos.lineIdx < block.defIndex return false end
+    local lines::Array{Any, 1} = block.lines
+    local len::Int = length(lines)
+    local exp::Expr
     #
     # It's impossible to get a command or no lines to change
     #
-    if exp.head === :nothing ||
-       length(lines) < 1 ||
-       lines[pos.lineIdx].head === :return
+    if len < 1 ||
+       pos.lineIdx >= len ||
+       lines[pos.lineIdx].head === :return ||
+       (exp = cmd.fn(org, pos)).head === :nothing
       return false
     end
     Code.onRemoveLine(org, pos)
@@ -156,8 +170,10 @@ module Mutator
   #
   function _onDel(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     local lines::Array{Any, 1} = org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines
+    local len::Int = length(lines)
 
-    if length(lines) < 1 ||
+    if len < 1 ||
+       pos.lineIdx >= len ||
        lines[pos.lineIdx].head === :return
       return false
     end
