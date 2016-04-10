@@ -228,7 +228,6 @@ module Code
       lines = Helper.getLines(exp, _CODE_PARTS_MAP[exp.head])
       idx = findfirst((b::Creature.Block) -> b.lines === lines, blocks)
       org.codeSize -= length(lines)
-      org.funcs[pos.fnIdx].blocks[1].defIndex -= 1
       deleteat!(blocks, idx)
     #
     # For simple line element we do nothing. But do for 

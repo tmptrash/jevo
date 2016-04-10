@@ -151,11 +151,15 @@ module Mutator
     if len < 1 ||
        pos.lineIdx >= len ||
        lines[pos.lineIdx].head === :return ||
+       (cmd.fn === Code.fn || cmd.fn === Code.var) && pos.lineIdx > block.defIndex ||
        (exp = cmd.fn(org, pos)).head === :nothing
       return false
     end
     Code.onRemoveLine(org, pos)
+    # TODO: remove this
+    #println("---------------------------\n", org.code, "\n",pos.lineIdx, "-", block.defIndex)
     lines[pos.lineIdx] = exp
+    #println(org.code)
 
     true
   end
