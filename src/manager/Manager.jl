@@ -64,7 +64,7 @@ module Manager
     positions::Dict{Int, Creature.Organism}
     #
     # Map of organisms by id
-    # TODO: rename to organisms
+    #
     organisms::Dict{UInt, Creature.Organism}
     #
     # All available organism's tasks
