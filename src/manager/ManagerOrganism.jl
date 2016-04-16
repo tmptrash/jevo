@@ -61,7 +61,6 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
   for i = 1:len
     if istaskdone(Manager._data.tasks[i].task) continue end
     org = Manager._data.tasks[i].organism
-    if mCounter % 100 === 0 print(org.energy, " - ") end
     try
       consume(Manager._data.tasks[i].task)
       #

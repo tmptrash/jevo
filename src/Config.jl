@@ -303,7 +303,7 @@ module Config
       3,                         # BACKUP_PERIOD
       650,                       # STAT_WIDTH
       500,                       # STAT_HEIGHT
-      5,                         # STAT_FRAME_DELAY
+      1,                         # STAT_FRAME_DELAY
       2000                       # CONNECTION_SERVER_PORT
     )
   )
