@@ -178,6 +178,7 @@ function _killOrganism(i::Int)
 
   org = Manager._data.tasks[i].organism
   org.energy = 0
+  org.color  = UInt32(0)
   Event.clear(org.observer)
 
   delete!(Manager._data.positions, _getOrganismId(org.pos))

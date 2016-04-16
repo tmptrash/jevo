@@ -279,7 +279,7 @@ module Config
       [100,300,99,0,1,1,1],      # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
       1,                         # ORGANISM_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      0,                         # ORGANISM_MUTATION_PERIOD
+      800,                       # ORGANISM_MUTATION_PERIOD
       1000,                      # ORGANISM_MAX_MUTATION_PERIOD
       1,                         # ORGANISM_MUTATION_AMOUNT
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT

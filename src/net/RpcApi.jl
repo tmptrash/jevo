@@ -148,4 +148,5 @@ module RpcApi
   const RPC_SET_ENERGY_RND    = 12
   const RPC_BACKUP            = 13
   const RPC_GET_STATISTICS    = 14
+  const RPC_GET_BEST          = 15
 end

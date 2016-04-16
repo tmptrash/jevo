@@ -27,6 +27,7 @@ module Terminal
   export termSetRandomEnergy
   export termBackup
   export termGetStatistics
+  export termGetBest
   #
   # Contains connection object for shorthands
   #
@@ -139,6 +140,13 @@ module Terminal
   #
   function termGetStatistics()
     Client.request(_termData.con, RpcApi.RPC_GET_STATISTICS)
+  end
+  #
+  # Returns best organisms (with maximum energy). See
+  # ManagerRpc.getBest for details
+  #
+  function termGetBest(amount::Int)
+    Client.request(_termData.con, RpcApi.RPC_GET_BEST, amount)
   end
   #
   # This object is created only for passing connection

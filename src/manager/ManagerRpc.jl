@@ -189,6 +189,26 @@ function getStatistics()
     _createSimpleOrganism(Manager._data.maxId, Manager._data.maxOrg)
   )
 end
+#
+# @rpc
+# Returns best organisms (with maximum energy)
+# @param amount amount of best organisms
+# @return {Array{RpcApi.SimpleOrganism, 1}}
+#
+function getBest(amount::Int)
+  local best::Array{RpcApi.SimpleOrganism, 1} = []
+  local i::Int
+  local len::Int = length(Manager._data.tasks)
+
+  amount = getAmount() > amount ? amount : getAmount()
+  
+  for i = 1:amount
+    if istaskdone(Manager._data.tasks[len - i + 1].task) continue end
+    push!(best, _createSimpleOrganism(Manager._data.tasks[len - i + 1].id, Manager._data.tasks[len - i + 1].organism))
+  end
+
+  best
+end
 
 #
 # Assembles RpcApi.SimpleOrganism type from wider Creature.Organism
@@ -249,5 +269,6 @@ _rpcApi = Dict{Integer, Function}(
   RpcApi.RPC_SET_ENERGY        => setEnergy,
   RpcApi.RPC_SET_ENERGY_RND    => setRandomEnergy,
   RpcApi.RPC_BACKUP            => doBackup,
-  RpcApi.RPC_GET_STATISTICS    => getStatistics
+  RpcApi.RPC_GET_STATISTICS    => getStatistics,
+  RpcApi.RPC_GET_BEST          => getBest
 )
