@@ -43,70 +43,71 @@ end
 # @param mCounter Counter for mutations speed
 #
 function _updateOrganisms(eCounter::Int, mCounter::Int)
-    local len::Int = length(Manager._data.tasks) # length(tasks) === length(organisms)
-    local i  ::Int
-    local j  ::Int
-    local dPeriod::Int
-    local org::Creature.Organism
-    local maxRange::Int = Manager._data.maxOrg.energy
+  local len::Int = length(Manager._data.tasks) # length(tasks) === length(organisms)
+  local i  ::Int
+  local j  ::Int
+  local dPeriod::Int
+  local org::Creature.Organism
+  local maxRange::Int = Manager._data.maxOrg.energy
 
-    eCounter += 1
-    mCounter += 1
-    #
-    # This block runs one iteration for all available organisms.
-    # By one iteration i mean that every organism from a list
-    # run peace of it's script - code between two produce() calls.
-    # TODO: optimize this two approaches. We have to have only one
-    # TODO: reverse loop.
-    for i = 1:len
-      if istaskdone(Manager._data.tasks[i].task) continue end
-      org = Manager._data.tasks[i].organism
-      try
-        consume(Manager._data.tasks[i].task)
-        #
-        # This is how we mutate organisms during their life.
-        # Mutations occures according to organisms settings.
-        # If mutationPeriod or mutationAmount set to 0, it 
-        # means that mutations during leaving are disabled.
-        # Mutation will be automatically applied if organism
-        # doesn't contain any code line.
-        #
-        if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0
-          Mutator.mutate(org, org.mutationAmount)
-        end
-        #
-        # Cloning procedure. The meaning of this is in ability to 
-        # produce children as fast as much energy has anorganism.
-        # If organism has high energy value, then it will produce
-        # more copies and these copies will supplant other organisms. 
-        #
-        if mCounter % (Config.val(:WORLD_IPS) + 1) === 0 && rand(0:maxRange) < org.energy
-          _onClone(org)
-        end
-      catch e
-        Helper.error("Manager._updateOrganisms(): $e")
+  eCounter += 1
+  mCounter += 1
+  #
+  # This block runs one iteration for all available organisms.
+  # By one iteration i mean that every organism from a list
+  # run peace of it's script - code between two produce() calls.
+  # TODO: optimize this two approaches. We have to have only one
+  # TODO: reverse loop.
+  for i = 1:len
+    if istaskdone(Manager._data.tasks[i].task) continue end
+    org = Manager._data.tasks[i].organism
+    if mCounter % 100 === 0 print(org.energy, " - ") end
+    try
+      consume(Manager._data.tasks[i].task)
+      #
+      # This is how we mutate organisms during their life.
+      # Mutations occures according to organisms settings.
+      # If mutationPeriod or mutationAmount set to 0, it 
+      # means that mutations during leaving are disabled.
+      # Mutation will be automatically applied if organism
+      # doesn't contain any code line.
+      #
+      if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0
+        Mutator.mutate(org, org.mutationAmount)
       end
+      #
+      # Cloning procedure. The meaning of this is in ability to 
+      # produce children as fast as much energy has anorganism.
+      # If organism has high energy value, then it will produce
+      # more copies and these copies will supplant other organisms. 
+      #
+      if mCounter % (Config.val(:WORLD_IPS) + 1) === 0 && rand(0:maxRange) < org.energy
+        _onClone(org)
+      end
+    catch e
+      Helper.error("Manager._updateOrganisms(): $e")
     end
-    #
-    # This block decreases energy from organisms, because they 
-    # spend it while leaving.
-    #
-    if (dPeriod = Config.val(:ORGANISM_ENERGY_DECREASE_PERIOD)) > 0 && eCounter >= dPeriod
-      _updateOrganismsEnergy(eCounter)
-      eCounter = 0
-    end
-    #
-    # This call removes organisms with minimum energy
-    #
-    if mCounter % Config.val(:ORGANISM_REMOVE_AFTER_TIMES) === 0
-      _removeMinOrganisms(Manager._data.tasks)
-    end
-    #
-    # This counter should be infinite
-    #
-    if mCounter === typemax(Int) mCounter = 0 end
+  end
+  #
+  # This block decreases energy from organisms, because they 
+  # spend it while leaving.
+  #
+  if (dPeriod = Config.val(:ORGANISM_ENERGY_DECREASE_PERIOD)) > 0 && eCounter >= dPeriod
+    _updateOrganismsEnergy(eCounter)
+    eCounter = 0
+  end
+  #
+  # This call removes organisms with minimum energy
+  #
+  if mCounter % Config.val(:ORGANISM_REMOVE_AFTER_TIMES) === 0
+    _removeMinOrganisms(Manager._data.tasks)
+  end
+  #
+  # This counter should be infinite
+  #
+  if mCounter === typemax(Int) mCounter = 0 end
 
-    eCounter, mCounter
+  eCounter, mCounter
 end
 #
 # Removes organisms with minimum energy. Amount of removed

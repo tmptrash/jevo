@@ -57,7 +57,7 @@ end
 # @return {Array{Expr, 1}}
 #
 macro getLine(org, pos)
-  :($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].lines[$pos.lineIdx])
+  :($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].expr.args[$pos.lineIdx])
 end
 #
 # Returns chosen block of specified function

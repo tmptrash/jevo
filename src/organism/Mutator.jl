@@ -12,8 +12,6 @@ module Mutator
   import Creature
   import Code
 
-  using Debug
-
   export mutate
   #
   # Checks if specified position in a code is correct. By correct i
@@ -121,7 +119,7 @@ module Mutator
     # to prevent UndefVarError error in case of calling
     # before defining the function. The same for variables.
     #
-    insert!(block.lines, cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, exp)
+    insert!(block.expr.args, cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, exp)
     org.codeSize += 1
 
     true
@@ -142,7 +140,7 @@ module Mutator
     # We may add a code only after variables/functions declaration
     #
     if pos.lineIdx < block.defIndex return false end
-    local lines::Array{Any, 1} = block.lines
+    local lines::Array{Any, 1} = block.expr.args
     local len::Int = length(lines)
     local exp::Expr
     #
@@ -151,15 +149,17 @@ module Mutator
     if len < 1 ||
        pos.lineIdx >= len ||
        lines[pos.lineIdx].head === :return ||
+       #
+       # Sometimes, we may change a line with var or function and this
+       # change will be after other non declarative(var/func) lines. So
+       # this is how we break the rule vars/funcs declaration at the beginning.
+       #
        (cmd.fn === Code.fn || cmd.fn === Code.var) && pos.lineIdx > block.defIndex ||
        (exp = cmd.fn(org, pos)).head === :nothing
       return false
     end
     Code.onRemoveLine(org, pos)
-    # TODO: remove this
-    #println("---------------------------\n", org.code, "\n",pos.lineIdx, "-", block.defIndex)
     lines[pos.lineIdx] = exp
-    #println(org.code)
 
     true
   end
@@ -173,7 +173,7 @@ module Mutator
   # that there were no delete or delete was skipped.
   #
   function _onDel(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    local lines::Array{Any, 1} = org.funcs[pos.fnIdx].blocks[pos.blockIdx].lines
+    local lines::Array{Any, 1} = org.funcs[pos.fnIdx].blocks[pos.blockIdx].expr.args
     local len::Int = length(lines)
 
     if len < 1 ||

@@ -67,9 +67,9 @@ module Creature
     #
     vars::Dict{DataType, Array{Symbol, 1}}
     #
-    # Reference to code lines inside Organism.code AST.
+    # Reference to Block's code inside Organism.code AST.
     #
-    lines::Array{Any, 1}
+    expr::Expr
     #
     # An index of code line inside current block, before which all 
     # variables and functions are defined. We can't add mutations
@@ -81,7 +81,7 @@ module Creature
     #
     # Constructor. Fills arguments and 0 for defIndex.
     #
-    Block(vars::Dict{DataType, Array{Symbol, 1}}, lines::Array{Any, 1}) = new(vars, lines, 1)
+    Block(vars::Dict{DataType, Array{Symbol, 1}}, expr::Expr) = new(vars, expr, 1)
   end
   #
   # Describes one function as a data container. It contains blocks
@@ -208,7 +208,7 @@ module Creature
     #
     # Blocks of main function. In this case only one - main block.
     #
-    local blocks::Array{Block, 1} = [Block(Helper.getTypesMap(), code.args[2].args)]
+    local blocks::Array{Block, 1} = [Block(Helper.getTypesMap(), code.args[2])]
     #
     # This block below, creates variables of main function, which we created
     # in code above (local code::Expr  = ...). It also creates one block,

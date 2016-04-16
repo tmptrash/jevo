@@ -88,7 +88,7 @@ module Code
     local i::Int
     local exp::Expr
     local paramLen::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
-    local block::Creature.Block = Creature.Block(Helper.getTypesMap(), [])
+    local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing))
     local blocks::Array{Creature.Block, 1} = [block]
     #
     # New function parameters in format: [name::Type=val,...].
@@ -112,8 +112,8 @@ module Code
     # variable/function error.
     #
     org.funcs[pos.fnIdx].blocks[pos.blockIdx].defIndex += 1
-    block.lines = fnEx.args[2].args
-    push!(block.lines, :(return $(params[1].args[1].args[1])))
+    block.expr = fnEx.args[2]
+    push!(block.expr.args, :(return $(params[1].args[1].args[1])))
     push!(org.funcs, Creature.Func(fnEx, blocks))
 
     fnEx
@@ -170,7 +170,7 @@ module Code
     local op::Symbol    = _COMPARE_OPERATORS[rand(1:length(_COMPARE_OPERATORS))]
     local ifEx          = :(if $(op)($(v1),$(v2)) end) # if v1 comparison v2 end
 
-    push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), ifEx.args[2].args))
+    push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), ifEx.args[2]))
     ifEx
   end
   #
@@ -187,7 +187,7 @@ module Code
     if v === :nothing return Expr(:nothing) end
     local loopEx    = :(for i=1:$v end)
 
-    push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), loopEx.args[2].args))
+    push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), loopEx.args[2]))
     loopEx
   end
 
@@ -201,7 +201,7 @@ module Code
   #
   function onRemoveLine(org::Creature.Organism, pos::Helper.Pos)
     local blocks::Array{Creature.Block, 1} = org.funcs[pos.fnIdx].blocks
-    local exp::Expr = blocks[pos.blockIdx].lines[pos.lineIdx]
+    local exp::Expr = blocks[pos.blockIdx].expr.args[pos.lineIdx]
     local lines::Array{Any, 1}
     local idx::Int
     local i::Int
@@ -217,7 +217,7 @@ module Code
     if exp.head === :function
       idx = findfirst((f::Creature.Func) -> f.code === exp, org.funcs)
       blocks = org.funcs[idx].blocks
-      for i = 1:length(blocks) org.codeSize -= length(blocks[i].lines) end
+      for i = 1:length(blocks) org.codeSize -= length(blocks[i].expr.args) end
       org.codeSize += 1 # skip "return"
       org.funcs[1].blocks[1].defIndex -= 1
       deleteat!(org.funcs, idx)
@@ -226,7 +226,7 @@ module Code
     #
     elseif haskey(_CODE_PARTS_MAP, exp.head)
       lines = Helper.getLines(exp, _CODE_PARTS_MAP[exp.head])
-      idx = findfirst((b::Creature.Block) -> b.lines === lines, blocks)
+      idx = findfirst((b::Creature.Block) -> b.expr.args === lines, blocks)
       org.codeSize -= length(lines)
       deleteat!(blocks, idx)
     #
@@ -259,7 +259,7 @@ module Code
     # In this line we skip "return" operator and lines with variables
     # and functions declaration.
     #
-    local lines   ::Int = length(block.lines) - (blockIdx === 1 ? 1 : 0) + 1
+    local lines   ::Int = length(block.expr.args) - (blockIdx === 1 ? 1 : 0) + 1
 
     Helper.Pos(
       fnIdx,
