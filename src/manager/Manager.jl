@@ -120,7 +120,7 @@ module Manager
     local params  ::Dict{ASCIIString, ASCIIString} = CommandLine.create()
     #
     # This server is listening for all other managers and remote
-    # terminal. It runs obtained commands and send answers back.
+    # terminal. It runs obtained commands and send answers back. 
     # In other words, it works like RPC runner...
     #
     Server.run(server)
@@ -138,6 +138,10 @@ module Manager
     # and organism's tasks switching.
     #
     while true
+      #
+      # After all organisms die, we have to create next, new population
+      #
+      if length(Manager._data.tasks) < 1 createOrganisms() end
       #
       # This call runs all organism related tasks one by one
       #
