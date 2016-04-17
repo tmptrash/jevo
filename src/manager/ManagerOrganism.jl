@@ -298,7 +298,7 @@ function _onClone(organism::Creature.Organism)
   # split energy between old and new organisms 50/50 after
   # clonning. 
   #
-  local energy::Int = Int(div(organism.energy, 10)) # TODO: why 10th part?
+  local energy::Int = Int(div(organism.energy, 3)) # TODO: why 3th part?
   organism.energy       -= energy
   crTask.organism.energy = energy
   Mutator.mutate(crTask.organism, crTask.organism.mutationsOnClone)

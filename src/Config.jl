@@ -279,16 +279,16 @@ module Config
       [100,300,99,0,1,1,1],      # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
       1,                         # ORGANISM_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      500,                       # ORGANISM_MUTATION_PERIOD
+      1000,                      # ORGANISM_MUTATION_PERIOD
       1000,                      # ORGANISM_MAX_MUTATION_PERIOD
       1,                         # ORGANISM_MUTATION_AMOUNT
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT
       500,                       # ORGANISM_START_AMOUNT
       5000,                      # ORGANISM_START_ENERGY
       100000,                    # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
-      200,                       # ORGANISM_ENERGY_DECREASE_PERIOD
+      1000,                      # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                         # ORGANISM_ENERGY_DECREASE_VALUE
-      100,                       # ORGANISM_REMOVE_AFTER_TIMES
+      500,                       # ORGANISM_REMOVE_AFTER_TIMES
       10,                        # ORGANISM_REMOVE_AMOUNT
       UInt32(0x00FFFFFF),        # ORGANISM_START_COLOR
       2,                         # CODE_MAX_FUNC_PARAMS
