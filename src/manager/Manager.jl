@@ -69,7 +69,7 @@ module Manager
     #
     # All available organism's tasks
     #
-    tasks::Array{OrganismTask}
+    tasks::Array{OrganismTask, 1}
     #
     # Parameters passed through command line
     #
@@ -131,6 +131,7 @@ module Manager
     #
     if recover === false
       setRandomEnergy()
+      Helper.info(string("Creating new population..."))
       createOrganisms()
     end
     #
@@ -141,7 +142,10 @@ module Manager
       #
       # After all organisms die, we have to create next, new population
       #
-      if length(Manager._data.tasks) < 1 createOrganisms() end
+      if length(Manager._data.tasks) < 1
+        Helper.info(string("Creating new population..."))
+        createOrganisms()
+      end
       #
       # This call runs all organism related tasks one by one
       #

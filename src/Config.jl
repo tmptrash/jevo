@@ -120,6 +120,10 @@ module Config
     #
     ORGANISM_REMOVE_AMOUNT::Int
     #
+    # Amount of iterations before clonning process
+    #
+    ORGANISM_CLONE_AFTER_TIME::Int
+    #
     # Begin color of "empty" organism (organism without code).
     #
     ORGANISM_START_COLOR::UInt32
@@ -156,6 +160,12 @@ module Config
     # this value, then it(clonning) will not happen.
     #
     WORLD_MAX_ORGANISMS::Int
+    #
+    # Minimum amount of orgaisms in a world. If this value riached,
+    # then remove minimum energetic organisms mechanism will be disabled
+    # until total amount will be more then this value.
+    #
+    WORLD_MIN_ORGANISMS::Int
     #
     # Amount of energy blocks in a world. Blocks will be placed in a
     # random way...
@@ -277,9 +287,9 @@ module Config
   global _data = GData(
     Data(
       [100,300,99,0,1,1,1],      # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
-      1,                         # ORGANISM_MUTATIONS_ON_CLONE
+      0,                         # ORGANISM_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      1000,                      # ORGANISM_MUTATION_PERIOD
+      800,                       # ORGANISM_MUTATION_PERIOD
       1000,                      # ORGANISM_MAX_MUTATION_PERIOD
       1,                         # ORGANISM_MUTATION_AMOUNT
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT
@@ -288,15 +298,17 @@ module Config
       100000,                    # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
       1000,                      # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                         # ORGANISM_ENERGY_DECREASE_VALUE
-      500,                       # ORGANISM_REMOVE_AFTER_TIMES
-      10,                        # ORGANISM_REMOVE_AMOUNT
+      50,                        # ORGANISM_REMOVE_AFTER_TIMES
+      20,                        # ORGANISM_REMOVE_AMOUNT
+      20,                        # ORGANISM_CLONE_AFTER_TIME
       UInt32(0x00FFFFFF),        # ORGANISM_START_COLOR
       2,                         # CODE_MAX_FUNC_PARAMS
       100,                       # WORLD_WIDTH
       100,                       # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
-      500,                       # WORLD_MAX_ORGANISMS
+      800,                       # WORLD_MAX_ORGANISMS
+      200,                       # WORLD_MIN_ORGANISMS
       2000,                      # WORLD_START_ENERGY_BLOCKS
       UInt32(100),               # WORLD_START_ENERGY_AMOUNT
       3,                         # WORLD_SCALE

@@ -48,7 +48,10 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
   local j  ::Int
   local dPeriod::Int
   local org::Creature.Organism
-  local maxRange::Int = Manager._data.maxOrg.energy
+  local maxEnergy::Int = Manager._data.maxOrg.energy
+  local cloneAfter::Int = Config.val(:ORGANISM_CLONE_AFTER_TIME)
+  local needClone::Bool = cloneAfter === 0 ? false : mCounter % cloneAfter === 0
+  local tasks::Array{OrganismTask, 1} = Manager._data.tasks
 
   eCounter += 1
   mCounter += 1
@@ -60,9 +63,9 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
   # TODO: reverse loop.
   for i = 1:len
     if istaskdone(Manager._data.tasks[i].task) continue end
-    org = Manager._data.tasks[i].organism
+    org = tasks[i].organism
     try
-      consume(Manager._data.tasks[i].task)
+      consume(tasks[i].task)
       #
       # This is how we mutate organisms during their life.
       # Mutations occures according to organisms settings.
@@ -80,8 +83,9 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
       # If organism has high energy value, then it will produce
       # more copies and these copies will supplant other organisms. 
       #
-      if mCounter % (Config.val(:WORLD_IPS) + 1) === 0 && rand(0:maxRange) < org.energy
-        _onClone(org)
+      if needClone
+        org = tasks[rand(1:len)].organism
+        if rand(0:maxEnergy) < org.energy _onClone(org) end
       end
     catch e
       Helper.error("Manager._updateOrganisms(): $e")
@@ -98,7 +102,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
   #
   # This call removes organisms with minimum energy
   #
-  if mCounter % Config.val(:ORGANISM_REMOVE_AFTER_TIMES) === 0
+  if mCounter % Config.val(:ORGANISM_REMOVE_AFTER_TIMES) === 0 && len > Config.val(:WORLD_MIN_ORGANISMS)
     _removeMinOrganisms(Manager._data.tasks)
   end
   #
