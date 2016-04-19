@@ -191,9 +191,8 @@ module Manager
   # @param stamp Current UNIX timestamp
   #
   function _updateBackup(stamp::Float64)
-    if (time() - stamp) > Config.val(:BACKUP_PERIOD) * 60.0
+    if (time() - stamp) > Float64(Config.val(:BACKUP_PERIOD)) * 60.0
       backup()
-      Helper.info(string("Backup has created: ", Backup.lastFile()))
       return time()
     end
 
