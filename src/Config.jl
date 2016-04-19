@@ -307,7 +307,7 @@ module Config
       100,                       # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
-      3000,                      # WORLD_MAX_ORGANISMS
+      2000,                      # WORLD_MAX_ORGANISMS
       200,                       # WORLD_MIN_ORGANISMS
       2000,                      # WORLD_START_ENERGY_BLOCKS
       UInt32(100),               # WORLD_START_ENERGY_AMOUNT
