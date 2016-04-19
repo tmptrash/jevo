@@ -1,1 +1,1 @@
-julia --color=yes -i -e "include(\"src\\AppTerminal.jl\")"
+julia --color=yes -q -i -e "include(\"src\\AppTerminal.jl\")"

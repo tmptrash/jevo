@@ -1,2 +1,2 @@
 #!/bin/bash
-julia --color=yes -i -e "include(\"src/AppRemoteWorld.jl\")"
+julia --color=yes -q -i -e "include(\"src/AppRemoteWorld.jl\")"

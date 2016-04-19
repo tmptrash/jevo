@@ -13,6 +13,7 @@ module RpcApi
   export RPC_CREATE_ORGANISM
   export RPC_SET_CONFIG
   export RPC_GET_CONFIG
+  export RPC_SET_QUITE
   export RPC_MUTATE
   export RPC_GET_IPS
   export RPC_GET_ORGANISM
@@ -139,14 +140,15 @@ module RpcApi
   const RPC_CREATE_ORGANISM   = 3
   const RPC_SET_CONFIG        = 4
   const RPC_GET_CONFIG        = 5
-  const RPC_MUTATE            = 6
-  const RPC_GET_IPS           = 7
-  const RPC_GET_ORGANISM      = 8
-  const RPC_GET_AMOUNT        = 9
-  const RPC_GET_ORGANISMS     = 10
-  const RPC_SET_ENERGY        = 11
-  const RPC_SET_ENERGY_RND    = 12
-  const RPC_BACKUP            = 13
-  const RPC_GET_STATISTICS    = 14
-  const RPC_GET_BEST          = 15
+  const RPC_SET_QUITE         = 6
+  const RPC_MUTATE            = 7
+  const RPC_GET_IPS           = 8
+  const RPC_GET_ORGANISM      = 9
+  const RPC_GET_AMOUNT        = 10
+  const RPC_GET_ORGANISMS     = 11
+  const RPC_SET_ENERGY        = 12
+  const RPC_SET_ENERGY_RND    = 13
+  const RPC_BACKUP            = 14
+  const RPC_GET_STATISTICS    = 15
+  const RPC_GET_BEST          = 16
 end

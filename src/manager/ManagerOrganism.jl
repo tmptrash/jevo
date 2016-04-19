@@ -49,7 +49,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
   local dPeriod::Int
   local org::Creature.Organism
   local maxEnergy::Int = Manager._data.maxOrg.energy
-  local cloneAfter::Int = Config.val(:ORGANISM_CLONE_AFTER_TIME)
+  local cloneAfter::Int = Config.val(:ORGANISM_CLONE_AFTER_TIMES)
   local needClone::Bool = cloneAfter === 0 ? false : mCounter % cloneAfter === 0
   local tasks::Array{OrganismTask, 1} = Manager._data.tasks
 
@@ -298,11 +298,9 @@ function _onClone(organism::Creature.Organism)
   crTask = Manager._createOrganism(organism, pos)
   if crTask === false return false end
   #
-  # Total amount of energy should be the same, so we have to
-  # split energy between old and new organisms 50/50 after
-  # clonning. 
+  # Clonning means additional energy waste
   #
-  local energy::Int = Int(div(organism.energy, 3)) # TODO: why 3th part?
+  local energy::Int      = div(organism.energy, 100) # minus 1% of energy
   organism.energy       -= energy
   crTask.organism.energy = energy
   Mutator.mutate(crTask.organism, crTask.organism.mutationsOnClone)

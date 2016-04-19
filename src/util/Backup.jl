@@ -9,6 +9,7 @@ module Backup
 
   export save
   export load
+  export FOLDER_NAME
   #
   # Prefix of backup files
   #
@@ -53,6 +54,23 @@ module Backup
     end
 
     Helper.load(FOLDER_NAME * "/" * file)
+  end
+  #
+  # Returns array of backup files
+  # @param folder Folder we are looking in
+  # @return {Array{ASCIIString, 1}}
+  #
+  function getFiles(folder::ASCIIString = FOLDER_NAME)
+    try
+      if !isdir(folder) return "" end
+      local rd::Array{AbstractString} = readdir(folder)
+
+      sort!(rd, alg = QuickSort, lt = (f1, f2) -> f1 < f2)
+      return rd
+    catch e
+      Helper.warn("Backup.getFiles(): $e")
+    end
+    []
   end
   #
   # Returns name of the last modified file in a folder

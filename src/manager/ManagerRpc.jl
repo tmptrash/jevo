@@ -81,6 +81,15 @@ function getConfig(name::Symbol)
 end
 #
 # @rpc
+# Updates quite mode of manager. In quite mode we don't show
+# info and warning messages to the terminal.
+# @param mode New quite mode
+#
+function setQuite(mode::Bool)
+  Manager._data.quiet = mode
+end
+#
+# @rpc
 # Does one mutation for specified organism
 # @param organismId Unique orgaism's ID
 # @param amount Amount of mutations
@@ -201,7 +210,7 @@ function getBest(amount::Int)
   local len::Int = length(Manager._data.tasks)
 
   amount = getAmount() > amount ? amount : getAmount()
-  
+  sort!(Manager._data.tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
   for i = 1:amount
     if istaskdone(Manager._data.tasks[len - i + 1].task) continue end
     push!(best, _createSimpleOrganism(Manager._data.tasks[len - i + 1].id, Manager._data.tasks[len - i + 1].organism))
@@ -261,6 +270,7 @@ _rpcApi = Dict{Integer, Function}(
   RpcApi.RPC_CREATE_ORGANISM   => createOrganism,
   RpcApi.RPC_SET_CONFIG        => setConfig,
   RpcApi.RPC_GET_CONFIG        => getConfig,
+  RpcApi.RPC_SET_QUITE         => setQuite,
   RpcApi.RPC_MUTATE            => mutate,
   RpcApi.RPC_GET_IPS           => getIps,
   RpcApi.RPC_GET_ORGANISM      => getOrganism,
