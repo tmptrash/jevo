@@ -186,6 +186,10 @@ module Config
     #
     BACKUP_PERIOD::Int
     #
+    # Amount of backup files stored on HDD. Old files will be removed
+    #
+    BACKUP_AMOUNT::Int
+    #
     # Width of statistics window
     # TODO: should be removed from here. It doesn't related to Manager
     STAT_WIDTH::Int
@@ -313,6 +317,7 @@ module Config
       UInt32(100),               # WORLD_START_ENERGY_AMOUNT
       4,                         # WORLD_SCALE
       3,                         # BACKUP_PERIOD
+      5,                         # BACKUP_AMOUNT
       650,                       # STAT_WIDTH
       500,                       # STAT_HEIGHT
       5,                         # STAT_FRAME_DELAY

@@ -11,10 +11,6 @@ import Creature
 export recover
 export backup
 #
-# Amount of stored backup files on HDD
-#
-const BACKUP_AMOUNT = 5
-#
 # This function is used for recovering a manager's data from 
 # backup file. It means that an application was crashed before 
 # and now we have to recover it with last correct backup. Works
@@ -66,6 +62,7 @@ function backup()
   Backup.save(Manager._data)
   _removeOld()
   for t = 1:len Manager._data.tasks[t].task = tasks[t].task end
+  Helper.info(string("Backup has created: ", Backup.lastFile()))
 
   true
 end
@@ -77,8 +74,8 @@ function _removeOld()
   local len::Int = length(files)
   local i::Int
 
-  if len <= BACKUP_AMOUNT return true end
-  for i = 1:(len - BACKUP_AMOUNT)
+  if len <= Config.val(:BACKUP_AMOUNT) return true end
+  for i = 1:(len - Config.val(:BACKUP_AMOUNT))
     rm(Backup.FOLDER_NAME * "/" * files[i])
   end
 
