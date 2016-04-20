@@ -300,7 +300,7 @@ function _onClone(organism::Creature.Organism)
   #
   # Clonning means additional energy waste
   #
-  local energy::Int      = div(organism.energy, 100) # minus 1% of energy
+  local energy::Int      = div(organism.energy, 10) # minus 10% of energy
   organism.energy       -= energy
   crTask.organism.energy = energy
   Mutator.mutate(crTask.organism, crTask.organism.mutationsOnClone)
