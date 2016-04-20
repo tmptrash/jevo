@@ -307,8 +307,8 @@ module Config
       20,                        # ORGANISM_CLONE_AFTER_TIMES
       UInt32(0x00FFFFFF),        # ORGANISM_START_COLOR
       2,                         # CODE_MAX_FUNC_PARAMS
-      100,                       # WORLD_WIDTH
-      100,                       # WORLD_HEIGHT
+      800,                       # WORLD_WIDTH
+      600,                       # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
       2000,                      # WORLD_MAX_ORGANISMS
