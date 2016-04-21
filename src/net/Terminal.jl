@@ -136,7 +136,7 @@ module Terminal
     Client.request(_termData.con, RpcApi.RPC_SET_ENERGY_RND, amount, energy)
   end
   #
-  # Shorthand for RpcApi.RPC_BACKUP. See 
+  # Shorthand for RpcApi.RPC_BACKUP. See
   # ManagerRpc.setEnergy for details
   #
   function termBackup()

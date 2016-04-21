@@ -27,4 +27,13 @@ module TestCodeMath
     @fact length(Helper.getLines(org.code, [2])) --> 1
     @fact eval(org.code)(org) --> true
   end
+  # facts("Testing CodeMath.plus() without variables") do
+  #   org = Creature.create()
+  #   addVar(org, [2], Helper.Pos(1,1,1), Int8)
+  #   Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.plus, false))
+  #   println(org.code)
+
+  #   #@fact length(Helper.getLines(org.code, [2])) --> 1
+  #   #@fact eval(org.code)(org) --> true
+  # end
 end

@@ -86,10 +86,11 @@ module Mutator
   # @param org Organism whom color we have to change
   # TODO: this color change algorithm is not effective. Have to change it
   function _changeColor(org::Creature.Organism)
-    local pattern::Array{UInt32, 1} = [0x00100000, 0x00010000, 0x00001000, 0x00000100, 0x00000010, 0x00000001]
+    #local pattern::Array{UInt32, 1} = [0x00100000, 0x00010000, 0x00001000, 0x00000100, 0x00000010, 0x00000001]
+    #org.color -= pattern[rand(1:6)]
+    #org.color &= 0x00FFFFFF
 
-    org.color -= pattern[rand(1:6)]
-    org.color &= 0x00FFFFFF
+    org.color += div(UInt32(0xffffff), UInt32(Config.val(:WORLD_MAX_ORGANISMS) * 2))
   end
   #
   # Adds one line of code into existing code blocks including all

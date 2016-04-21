@@ -3,6 +3,7 @@
 # This is a part of Manager module.
 # TODO: Dependencies
 # TODO: describe annotations: @rpc (RPC function)
+# TODO: add console message for all commands
 #
 # @author DeadbraiN
 #
@@ -40,6 +41,7 @@ end
 #
 function createOrganisms()
   local i::Int
+  Helper.info("Creating organisms...")
   #
   # Inits available organisms in Tasks
   #
@@ -170,7 +172,7 @@ end
 #
 function setRandomEnergy(amount::Int = Config.val(:WORLD_START_ENERGY_BLOCKS), energy::UInt32 = Config.val(:WORLD_START_ENERGY_AMOUNT))
   local i::Int
-
+  Helper.info("Creating random energy...")
   for i = 1:amount
     setEnergy(rand(1:Manager._data.world.width), rand(1:Manager._data.world.height), energy)
   end

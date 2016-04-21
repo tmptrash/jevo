@@ -83,7 +83,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
       # If organism has high energy value, then it will produce
       # more copies and these copies will supplant other organisms. 
       #
-      if needClone
+      if needClone && maxEnergy > 0
         org = tasks[rand(1:len)].organism
         if rand(0:maxEnergy) < org.energy _onClone(org) end
       end
@@ -153,7 +153,7 @@ function _updateOrganismsEnergy(counter::Int)
     #
     # if the energy of the organism is zero, we have to remove it
     #
-    if org.energy > decVal + org.codeSize
+    if org.energy > (decVal + org.codeSize)
       org.energy -= (decVal + org.codeSize)
     else
       _killOrganism(i)
@@ -303,6 +303,7 @@ function _onClone(organism::Creature.Organism)
   local energy::Int      = div(organism.energy, 10) # minus 10% of energy
   organism.energy       -= energy
   crTask.organism.energy = energy
+  if organism.energy < 0 organism.energy = 0 end
   Mutator.mutate(crTask.organism, crTask.organism.mutationsOnClone)
 end
 #
@@ -416,6 +417,9 @@ function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, re
     #
     if amount < 0
       org.energy = min(org.energy + amount, Config.val(:ORGANISM_MAX_ENERGY))
+      if org.energy < 1
+        _killOrganism(findfirst((t) -> t.organism === org, Manager._data.tasks))
+      end
     elseif org.energy > amount
       org.energy -= amount
       retObj.ret  = amount
