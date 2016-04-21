@@ -36,7 +36,7 @@ module Event
     # {Dict{ASCIIString, Array{Function}}} array of events and they handlers.
     # For example: {"event"=>[fn1, fn2,...],...}
     # 
-    events::Dict{ASCIIString, Array{Function}}
+    events::Dict{ASCIIString, Array{Function, 1}}
   end
 
   #
@@ -44,7 +44,7 @@ module Event
   # @return {Observer}
   #
   function create()
-    Observer(Dict{ASCIIString, Array{Function}}())
+    Observer(Dict{ASCIIString, Array{Function, 1}}())
   end
   #
   # Adds a handler for specified event
@@ -77,7 +77,7 @@ module Event
   #
   function fire(obs::Observer, event::ASCIIString, args...)
     if !haskey(obs.events, event) return nothing end
-    local fns::Array{Function} = obs.events[event]
+    local fns::Array{Function, 1} = obs.events[event]
     local i::Function
     
     for i in fns

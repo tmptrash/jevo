@@ -99,8 +99,8 @@ module Server
   # and it's observer. 
   #
   type ServerConnection
-    tasks   ::Array{Task}
-    socks   ::Array{Base.TCPSocket}
+    tasks   ::Array{Task, 1}
+    socks   ::Array{Base.TCPSocket, 1}
     server  ::Base.TCPServer
     observer::Event.Observer
     host    ::Base.IPAddr

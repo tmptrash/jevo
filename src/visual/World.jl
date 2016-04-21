@@ -129,7 +129,7 @@ module World
     local j::Int
     local x::Int = pos.x
     local y::Int = pos.y
-    local positions::Array{Int} = [
+    local positions::Array{Int, 1} = [
       x + 1, y,     # right
       x + 1, y + 1, # right down
       x    , y + 1, # down

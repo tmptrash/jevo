@@ -147,7 +147,7 @@ module Creature
     # means, that "add" mutation will be 10 times rare then "change"
     # and 2 times rare then "delete" mutations.
     #
-    mutationProbabilities::Array{Int}
+    mutationProbabilities::Array{Int, 1}
     #
     # @inheritable
     # Amount of mutations, which will be applied to arganism after

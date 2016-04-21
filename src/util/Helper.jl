@@ -137,10 +137,10 @@ module Helper
   # For example it may be [3,2]. It means that one should be called
   # in half cases, two in 1/3 cases and three in 1/6 cases. Probabilities
   # should be greated then -1.
-  # @param {Array{Int}} prob Probabilities array. e.g.: [3,2] or [1,3]
+  # @param {Array{Int, 1}} prob Probabilities array. e.g.: [3,2] or [1,3]
   # @return {Int} 0 Means that index is invalid
   #
-  function getProbIndex(prob::Array{Int})
+  function getProbIndex(prob::Array{Int, 1})
     if length(prob) < 1 return 0 end
 
     local s::Int = sum(prob)

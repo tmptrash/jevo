@@ -43,15 +43,17 @@ end
 # @param mCounter Counter for mutations speed
 #
 function _updateOrganisms(eCounter::Int, mCounter::Int)
-  local len::Int = length(Manager._data.tasks) # length(tasks) === length(organisms)
   local i  ::Int
   local j  ::Int
   local dPeriod::Int
   local org::Creature.Organism
-  local maxEnergy::Int = Manager._data.maxOrg.energy
+  local probs::Array{Int, 1}
+  #local maxEnergy::Int = Manager._data.maxOrg.energy # TODO: remove this!!!
   local cloneAfter::Int = Config.val(:ORGANISM_CLONE_AFTER_TIMES)
   local needClone::Bool = cloneAfter === 0 ? false : mCounter % cloneAfter === 0
   local tasks::Array{OrganismTask, 1} = Manager._data.tasks
+  local len::Int = length(tasks)
+  local maxOrgs::Int = Config.val(:WORLD_MAX_ORGANISMS) 
 
   eCounter += 1
   mCounter += 1
@@ -62,8 +64,8 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
   # TODO: optimize this two approaches. We have to have only one
   # TODO: reverse loop.
   for i = 1:len
-    if istaskdone(Manager._data.tasks[i].task) continue end
     org = tasks[i].organism
+    if istaskdone(tasks[i].task) continue end
     try
       consume(tasks[i].task)
       #
@@ -77,19 +79,24 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
       if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0
         Mutator.mutate(org, org.mutationAmount)
       end
-      #
-      # Cloning procedure. The meaning of this is in ability to 
-      # produce children as fast as much energy has anorganism.
-      # If organism has high energy value, then it will produce
-      # more copies and these copies will supplant other organisms. 
-      #
-      if needClone && maxEnergy > 0
-        org = tasks[rand(1:len)].organism
-        if rand(0:maxEnergy) < org.energy _onClone(org) end
-      end
     catch e
       Helper.error("Manager._updateOrganisms(): $e")
     end
+  end
+  #
+  # Cloning procedure. The meaning of this is in ability to 
+  # produce children as fast as much energy has an organism.
+  # If organism has high energy value, then it will produce
+  # more copies and these copies will produce other organisms
+  # and so on and so fourth...
+  # TODO: may be i have to move this code outside the loop
+  # TODO: optimize this array. It should be created only once
+  # TODO: outside the loop.
+  #
+  if needClone && len < maxOrgs
+    probs = Int[]
+    for j = 1:len push!(probs, tasks[j].organism.energy) end
+    _onClone(tasks[Helper.getProbIndex(probs)].organism)
   end
   #
   # This block decreases energy from organisms, because they 
@@ -303,8 +310,7 @@ function _onClone(organism::Creature.Organism)
   local energy::Int      = div(organism.energy, 10) # minus 10% of energy
   organism.energy       -= energy
   crTask.organism.energy = energy
-  if organism.energy < 0 organism.energy = 0 end
-  Mutator.mutate(crTask.organism, crTask.organism.mutationsOnClone)
+  if energy > 0 Mutator.mutate(crTask.organism, crTask.organism.mutationsOnClone) end
 end
 #
 # Returns an energy amount in specified point in a world.
@@ -410,16 +416,14 @@ function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, re
   # If other organism at the position of the check, 
   # then grab energy from it
   #
-  if haskey(Manager._data.positions, id) 
+  if haskey(Manager._data.positions, id)
     org = Manager._data.positions[id]
     #
-    # Current organism want's give an energy
+    # Current organism wants give an energy
     #
-    if amount < 0
-      org.energy = min(org.energy + amount, Config.val(:ORGANISM_MAX_ENERGY))
-      if org.energy < 1
-        _killOrganism(findfirst((t) -> t.organism === org, Manager._data.tasks))
-      end
+    if amount < 1
+      org.energy = min(org.energy + abs(amount), Config.val(:ORGANISM_MAX_ENERGY))
+      retObj.ret = amount
     elseif org.energy > amount
       org.energy -= amount
       retObj.ret  = amount
@@ -427,7 +431,7 @@ function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, re
       # TODO: possibly, slow code. To fix this we have to
       # TODO: use map instead array for tasks (Manager._data.tasks)
       _killOrganism(findfirst((t) -> t.organism === org, Manager._data.tasks))
-      retObj.ret = org.energy
+      retObj.ret = amount - org.energy
     end
   else
     retObj.ret = World.grabEnergy(Manager._data.world, pos, UInt32(amount))

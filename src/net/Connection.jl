@@ -15,7 +15,7 @@ module Connection
   #
   type Command
     fn::Integer
-    args::Array{Any}
+    args::Array{Any, 1}
   end
   #
   # This typeis used for answering from Server to Clients.

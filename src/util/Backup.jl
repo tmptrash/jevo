@@ -63,7 +63,7 @@ module Backup
   function getFiles(folder::ASCIIString = FOLDER_NAME)
     try
       if !isdir(folder) return "" end
-      local rd::Array{AbstractString} = readdir(folder)
+      local rd::Array{AbstractString, 1} = readdir(folder)
 
       sort!(rd, alg = QuickSort, lt = (f1, f2) -> f1 < f2)
       return rd
@@ -89,7 +89,7 @@ module Backup
   function _getOldestFile(folder::ASCIIString)
     try
       if !isdir(folder) return "" end
-      local rd::Array{AbstractString} = readdir(folder)
+      local rd::Array{AbstractString, 1} = readdir(folder)
       if length(rd) < 1 return "" end
       return rd[indmax(map((f) -> mtime(string(folder, "/", f)), rd))]
     catch e

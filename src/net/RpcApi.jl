@@ -54,7 +54,7 @@ module RpcApi
     # means, that "add" mutation will be 10 times rare then "change"
     # and 2 times rare then "delete" mutations.
     #
-    mutationProbabilities::Array{Int}
+    mutationProbabilities::Array{Int, 1}
     #
     # @inheritable
     # Amount of mutations, which will be applied to arganism after
@@ -88,7 +88,7 @@ module RpcApi
     # Organism's position in a 2D world. Starts from (1,1) 
     # ends with (WORLD_WIDTH, WORLD_HEIGHT) configurations.
     #
-    pos::Array{Int}
+    pos::Array{Int, 1}
     #
     # Organism code size in lines
     #

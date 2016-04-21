@@ -52,7 +52,7 @@ module Config
     #     amount       - Probability of amount of mutations per period
     # ]
     #
-    ORGANISM_MUTATION_PROBABILITIES::Array{Int}
+    ORGANISM_MUTATION_PROBABILITIES::Array{Int, 1}
     #
     # Amount of mutations, which will be applied to arganism after clonning.
     # Should be less then ORGANISM_MAX_MUTATIONS_ON_CLONE setting.
