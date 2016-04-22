@@ -315,7 +315,7 @@ module Config
       200,                       # WORLD_MIN_ORGANISMS
       9000,                      # WORLD_START_ENERGY_BLOCKS
       UInt32(635280),            # WORLD_START_ENERGY_AMOUNT
-      1,                         # WORLD_SCALE
+      2,                         # WORLD_SCALE
       3,                         # BACKUP_PERIOD
       5,                         # BACKUP_AMOUNT
       650,                       # STAT_WIDTH
