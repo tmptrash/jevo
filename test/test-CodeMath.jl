@@ -27,13 +27,104 @@ module TestCodeMath
     @fact length(Helper.getLines(org.code, [2])) --> 1
     @fact eval(org.code)(org) --> true
   end
-  # facts("Testing CodeMath.plus() without variables") do
-  #   org = Creature.create()
-  #   addVar(org, [2], Helper.Pos(1,1,1), Int8)
-  #   Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.plus, false))
-  #   println(org.code)
+  facts("Testing CodeMath.plus() with UInt8 variable") do
+    org   = Creature.create()
+    types = deepcopy(Helper.SUPPORTED_TYPES)
+    addVar(org, [2], Helper.Pos(1,1,1), Int8)
+    empty!(Helper.SUPPORTED_TYPES)
+    push!(Helper.SUPPORTED_TYPES, Int8)
+    Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.plus, false))
+    var = Helper.getArg(org.code, [2,1,1,1,1])
 
-  #   #@fact length(Helper.getLines(org.code, [2])) --> 1
-  #   #@fact eval(org.code)(org) --> true
-  # end
+    @fact Helper.getArg(org.code, [2,2,1]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,1]) --> :(+)
+    @fact Helper.getArg(org.code, [2,2,2,2]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,3]) --> var
+    @fact eval(org.code)(org) --> true
+    #
+    # revert supported types
+    #
+    empty!(Helper.SUPPORTED_TYPES)
+    for i=1:length(types) push!(Helper.SUPPORTED_TYPES, types[i]) end
+  end
+  facts("Testing CodeMath.plus() with Int16 variable") do
+    org   = Creature.create()
+    types = deepcopy(Helper.SUPPORTED_TYPES)
+    addVar(org, [2], Helper.Pos(1,1,1), Int16)
+    empty!(Helper.SUPPORTED_TYPES)
+    push!(Helper.SUPPORTED_TYPES, Int16)
+    Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.plus, false))
+    var = Helper.getArg(org.code, [2,1,1,1,1])
+
+    @fact Helper.getArg(org.code, [2,2,1]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,1]) --> :(+)
+    @fact Helper.getArg(org.code, [2,2,2,2]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,3]) --> var
+    @fact eval(org.code)(org) --> true
+    #
+    # revert supported types
+    #
+    empty!(Helper.SUPPORTED_TYPES)
+    for i=1:length(types) push!(Helper.SUPPORTED_TYPES, types[i]) end
+  end
+  facts("Testing CodeMath.plus() with Int variable") do
+    org   = Creature.create()
+    types = deepcopy(Helper.SUPPORTED_TYPES)
+    addVar(org, [2], Helper.Pos(1,1,1), Int)
+    empty!(Helper.SUPPORTED_TYPES)
+    push!(Helper.SUPPORTED_TYPES, Int)
+    Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.plus, false))
+    var = Helper.getArg(org.code, [2,1,1,1,1])
+
+    @fact Helper.getArg(org.code, [2,2,1]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,1]) --> :(+)
+    @fact Helper.getArg(org.code, [2,2,2,2]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,3]) --> var
+    @fact eval(org.code)(org) --> true
+    #
+    # revert supported types
+    #
+    empty!(Helper.SUPPORTED_TYPES)
+    for i=1:length(types) push!(Helper.SUPPORTED_TYPES, types[i]) end
+  end
+  facts("Testing CodeMath.plus() with ASCIIString variable") do
+    org   = Creature.create()
+    types = deepcopy(Helper.SUPPORTED_TYPES)
+    addVar(org, [2], Helper.Pos(1,1,1), ASCIIString)
+    empty!(Helper.SUPPORTED_TYPES)
+    push!(Helper.SUPPORTED_TYPES, ASCIIString)
+    Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.plus, false))
+    var = Helper.getArg(org.code, [2,1,1,1,1])
+
+    @fact Helper.getArg(org.code, [2,2,1]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,1]) --> :(*)
+    @fact Helper.getArg(org.code, [2,2,2,2]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,3]) --> var
+    @fact eval(org.code)(org) --> true
+    #
+    # revert supported types
+    #
+    empty!(Helper.SUPPORTED_TYPES)
+    for i=1:length(types) push!(Helper.SUPPORTED_TYPES, types[i]) end
+  end
+  facts("Testing CodeMath.plus() with Bool variable") do
+    org   = Creature.create()
+    types = deepcopy(Helper.SUPPORTED_TYPES)
+    addVar(org, [2], Helper.Pos(1,1,1), Bool)
+    empty!(Helper.SUPPORTED_TYPES)
+    push!(Helper.SUPPORTED_TYPES, Bool)
+    Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.plus, false))
+    var = Helper.getArg(org.code, [2,1,1,1,1])
+
+    @fact Helper.getArg(org.code, [2,2,1]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,1]) --> :(&)
+    @fact Helper.getArg(org.code, [2,2,2,2]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,3]) --> var
+    @fact eval(org.code)(org) --> true
+    #
+    # revert supported types
+    #
+    empty!(Helper.SUPPORTED_TYPES)
+    for i=1:length(types) push!(Helper.SUPPORTED_TYPES, types[i]) end
+  end
 end
