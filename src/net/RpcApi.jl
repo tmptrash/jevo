@@ -81,6 +81,12 @@ module RpcApi
     #
     energy::Int
     #
+    # @inheritable
+    # Color of organism. Similar colors means relative organisms.
+    # Example: 0x00RRGGBB - first two digits are skipped.
+    #
+    color::UInt32
+    #
     # Organism's personal memory. Is used in any possible way.
     #
     mem::Dict{Int16, Int16}

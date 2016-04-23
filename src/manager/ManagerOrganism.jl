@@ -48,7 +48,6 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
   local dPeriod::Int
   local org::Creature.Organism
   local probs::Array{Int, 1}
-  #local maxEnergy::Int = Manager._data.maxOrg.energy # TODO: remove this!!!
   local cloneAfter::Int = Config.val(:ORGANISM_CLONE_AFTER_TIMES)
   local needClone::Bool = cloneAfter === 0 ? false : mCounter % cloneAfter === 0
   local tasks::Array{OrganismTask, 1} = Manager._data.tasks

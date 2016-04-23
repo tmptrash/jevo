@@ -39,6 +39,7 @@ module RemoteWorld
     y::Int
     x1::Int
     y1::Int
+    ts::Float64
 
     RemoteData(pd::Pooling.PoolingData, win::CanvasWindow.Window) = new(pd, win)
   end
@@ -56,7 +57,7 @@ module RemoteWorld
     pd !== false ? RemoteData(pd, CanvasWindow.create(width, height)) : false
   end
   #
-  # Start displaying remote area. It makes requests to remote 
+  # Start displaying remote area. It makes requests to remote
   # server, which answers/retuns us frames of pixels of size (x,y)-(x1,y1).
   # @param rd Remote world data object. See create()
   # @param delay Delay between requests
@@ -94,6 +95,7 @@ module RemoteWorld
   #
   function _onBeforeRequest(rd::RemoteData)
     rd.pd.args = [RpcApi.RPC_GET_REGION, rd.x, rd.y, rd.x1, rd.y1]
+    rd.ts = time()
   end
   #
   # Handler of server answer
@@ -103,7 +105,7 @@ module RemoteWorld
   function _onAfterResponse(rd::RemoteData, ans::Connection.Answer)
     local region = ans.data.reg
 
-    CanvasWindow.title(rd.win, string("ips: ", ans.data.ips))
+    CanvasWindow.title(rd.win, string("ips: ", ans.data.ips, " - rtime: ", round(time() - rd.ts, 2)))
     for x in 1:size(region)[2]
       for y in 1:size(region)[1]
         CanvasWindow.dot(rd.win, x, y, UInt32(region[y, x]))
