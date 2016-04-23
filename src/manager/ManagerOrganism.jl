@@ -43,9 +43,8 @@ end
 #
 @debug function _updateOrganisms(counter::Int)
   @bp
-  local i  ::Int
-  local j  ::Int
-  local dPeriod::Int
+  local i::Int
+  local j::Int
   local org::Creature.Organism
   local probs::Array{Int, 1}
   local cloneAfter::Int = Config.val(:ORGANISM_CLONE_AFTER_TIMES)
@@ -254,23 +253,17 @@ end
 # @return {Bool}
 #
 function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
-  local id1::Int
-  local id2::Int
   # TODO: this is a place where organism may step to another area (instance).
   # TODO: this functionality will be implemented in future versions...
   if pos.x > Manager._data.world.width  || pos.x < 1 ||
      pos.y > Manager._data.world.height || pos.y < 1 ||
-     World.getEnergy(Manager._data.world, pos) > UInt32(0) && 
-     (pos.x !== organism.pos.x || pos.y !== organism.pos.y)
+     World.getEnergy(Manager._data.world, pos) > UInt32(0) || 
+     (pos.x === organism.pos.x && pos.y === organism.pos.y)
      return false
    end
 
-  id1 = _getOrganismId(organism.pos)
-  id2 = _getOrganismId(pos)
-  if id1 !== id2
-    delete!(Manager._data.positions, id1)
-    Manager._data.positions[id2] = organism
-  end
+  delete!(Manager._data.positions, id1)
+  Manager._data.positions[id2] = organism
   #
   # pos - new organism position
   # organism.pos - old organism position
@@ -451,5 +444,5 @@ end
 # @param pos Point where we should check the energy
 #
 function _onStep(organism::Creature.Organism, pos::Helper.Point)
-  World.getEnergy(Manager._data.world, pos) === UInt32(0) && _moveOrganism(pos, organism)
+  _moveOrganism(pos, organism)
 end
