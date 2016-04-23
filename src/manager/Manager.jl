@@ -28,6 +28,8 @@ module Manager
   import Config
 
   export run
+
+  using Debug
   #
   # This is how we collect Manager module from it's parts(files)
   #
@@ -110,9 +112,9 @@ module Manager
   # @param recover true if we have to recover from last backup
   # @return {Bool} run status
   #
-  function run(recover::Bool = false)
-    local eCounter::Int = 0
-    local mCounter::Int = 0
+  @debug function run(recover::Bool = false)
+    @bp
+    local counter ::Int = 0
     local ips     ::Int = 0
     local stamp   ::Float64 = time()
     local bstamp  ::Float64 = time()
@@ -138,6 +140,7 @@ module Manager
     # and organism's tasks switching.
     #
     while true
+      @bp
       #
       # After all organisms die, we have to create next, new population
       #
@@ -145,7 +148,7 @@ module Manager
       #
       # This call runs all organism related tasks one by one
       #
-      eCounter, mCounter = _updateOrganisms(eCounter, mCounter)
+      counter = _updateOrganisms(counter)
       #
       # We have to update IPS (Iterations Per Second) every second
       #

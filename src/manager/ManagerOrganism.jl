@@ -39,23 +39,22 @@ end
 # Updates organisms existances. We have to call this function to
 # update organisms life in memory world. Decreases energy and
 # provides rare mutations.
-# @param eCounter Increments value for energy decreasing
-# @param mCounter Counter for mutations speed
+# @param counter Counter for mutations speed
 #
-function _updateOrganisms(eCounter::Int, mCounter::Int)
+@debug function _updateOrganisms(counter::Int)
+  @bp
   local i  ::Int
   local j  ::Int
   local dPeriod::Int
   local org::Creature.Organism
   local probs::Array{Int, 1}
   local cloneAfter::Int = Config.val(:ORGANISM_CLONE_AFTER_TIMES)
-  local needClone::Bool = cloneAfter === 0 ? false : mCounter % cloneAfter === 0
+  local needClone::Bool = cloneAfter === 0 ? false : counter % cloneAfter === 0
   local tasks::Array{OrganismTask, 1} = Manager._data.tasks
   local len::Int = length(tasks)
   local maxOrgs::Int = Config.val(:WORLD_MAX_ORGANISMS) 
 
-  eCounter += 1
-  mCounter += 1
+  counter += 1
   #
   # This block runs one iteration for all available organisms.
   # By one iteration i mean that every organism from a list
@@ -75,7 +74,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
       # Mutation will be automatically applied if organism
       # doesn't contain any code line.
       #
-      if org.mutationPeriod > 0 && mCounter % org.mutationPeriod === 0
+      if counter % org.mutationPeriod === 0 && org.mutationPeriod > 0
         Mutator.mutate(org, org.mutationAmount)
       end
     catch e
@@ -92,7 +91,7 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
   # TODO: optimize this array. It should be created only once
   # TODO: outside the loop.
   #
-  if needClone && len < maxOrgs
+  if needClone && len < maxOrgs && len > 0
     probs = Int[]
     for j = 1:len push!(probs, tasks[j].organism.energy) end
     _onClone(tasks[Helper.getProbIndex(probs)].organism)
@@ -101,22 +100,21 @@ function _updateOrganisms(eCounter::Int, mCounter::Int)
   # This block decreases energy from organisms, because they 
   # spend it while leaving.
   #
-  if (dPeriod = Config.val(:ORGANISM_ENERGY_DECREASE_PERIOD)) > 0 && eCounter >= dPeriod
-    _updateOrganismsEnergy(eCounter)
-    eCounter = 0
+  if counter % Config.val(:ORGANISM_ENERGY_DECREASE_PERIOD) === 0
+    _updateOrganismsEnergy()
   end
   #
   # This call removes organisms with minimum energy
   #
-  if mCounter % Config.val(:ORGANISM_REMOVE_AFTER_TIMES) === 0 && len > Config.val(:WORLD_MIN_ORGANISMS)
+  if counter % Config.val(:ORGANISM_REMOVE_AFTER_TIMES) === 0 && len > Config.val(:WORLD_MIN_ORGANISMS)
     _removeMinOrganisms(Manager._data.tasks)
   end
   #
   # This counter should be infinite
   #
-  if mCounter === typemax(Int) mCounter = 0 end
+  if counter === typemax(Int) counter = 0 end
 
-  eCounter, mCounter
+  counter
 end
 #
 # Removes organisms with minimum energy. Amount of removed
@@ -145,9 +143,9 @@ end
 # Updates energy of all organisms. Decreases their energy according
 # to config (ORGANISM, DECREASE_VALUE). Removes marked as "delete"
 # tasks from Manager._data.tasks map.
-# @param counter Current iterator value
 #
-function _updateOrganismsEnergy(counter::Int)
+@debug function _updateOrganismsEnergy()
+@bp
   local decVal::Int = Config.val(:ORGANISM_ENERGY_DECREASE_VALUE)
   #
   # We have to go through tasks in reverse way, because we may
@@ -167,7 +165,7 @@ function _updateOrganismsEnergy(counter::Int)
     #
     # This is how we updates organism's color after energy descreasing.
     # We don't need to check return value, because we don't change organism's
-    # position. Just update it color (energy).
+    # position. Just update it color.
     #
     if istaskdone(Manager._data.tasks[i].task)
       splice!(Manager._data.tasks, i)
@@ -183,7 +181,8 @@ end
 # _updateOrganismsEnergy() function.
 # @param i Index of current task
 #
-function _killOrganism(i::Int)
+@debug function _killOrganism(i::Int)
+@bp
   if i === 0 || istaskdone(Manager._data.tasks[i].task) return false end
 
   org = Manager._data.tasks[i].organism
@@ -255,6 +254,8 @@ end
 # @return {Bool}
 #
 function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
+  local id1::Int
+  local id2::Int
   # TODO: this is a place where organism may step to another area (instance).
   # TODO: this functionality will be implemented in future versions...
   if pos.x > Manager._data.world.width  || pos.x < 1 ||
@@ -264,8 +265,12 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
      return false
    end
 
-  delete!(Manager._data.positions, _getOrganismId(organism.pos))
-  Manager._data.positions[_getOrganismId(pos)] = organism
+  id1 = _getOrganismId(organism.pos)
+  id2 = _getOrganismId(pos)
+  if id1 !== id2
+    delete!(Manager._data.positions, id1)
+    Manager._data.positions[id2] = organism
+  end
   #
   # pos - new organism position
   # organism.pos - old organism position
