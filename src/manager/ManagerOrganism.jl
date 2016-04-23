@@ -253,6 +253,8 @@ end
 # @return {Bool}
 #
 function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
+  local id1::Int
+  local id2::Int
   # TODO: this is a place where organism may step to another area (instance).
   # TODO: this functionality will be implemented in future versions...
   if pos.x > Manager._data.world.width  || pos.x < 1 ||
@@ -262,8 +264,8 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
      return false
    end
 
-  delete!(Manager._data.positions, id1)
-  Manager._data.positions[id2] = organism
+  delete!(Manager._data.positions, _getOrganismId(organism.pos))
+  Manager._data.positions[_getOrganismId(pos)] = organism
   #
   # pos - new organism position
   # organism.pos - old organism position
