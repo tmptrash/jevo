@@ -41,8 +41,7 @@ end
 # provides rare mutations.
 # @param counter Counter for mutations speed
 #
-@debug function _updateOrganisms(counter::Int)
-  @bp
+function _updateOrganisms(counter::Int)
   local i::Int
   local j::Int
   local org::Creature.Organism
@@ -131,9 +130,9 @@ function _removeMinOrganisms(tasks::Array{OrganismTask, 1})
   #
   # Updates min and max energetic organisms
   #
-  Manager._data.minOrg = tasks[amount + 1].organism
+  Manager._data.minOrg = tasks[1].organism
   Manager._data.maxOrg = tasks[end].organism
-  Manager._data.minId  = tasks[amount + 1].id
+  Manager._data.minId  = tasks[1].id
   Manager._data.maxId  = tasks[end].id
 
   true
@@ -143,34 +142,27 @@ end
 # to config (ORGANISM, DECREASE_VALUE). Removes marked as "delete"
 # tasks from Manager._data.tasks map.
 #
-@debug function _updateOrganismsEnergy()
-@bp
+function _updateOrganismsEnergy()
   local decVal::Int = Config.val(:ORGANISM_ENERGY_DECREASE_VALUE)
+  local tasks::Array{OrganismTask, 1} = Manager._data.tasks
   #
   # We have to go through tasks in reverse way, because we may
   # remove some elements inside while loop.
   #
-  local i::Int = length(Manager._data.tasks)
+  local i::Int = length(tasks)
   while i > 0
-    local org::Creature.Organism = Manager._data.tasks[i].organism
+    local org::Creature.Organism = tasks[i].organism
     #
     # if the energy of the organism is zero, we have to remove it
     #
     if org.energy > (decVal + org.codeSize)
       org.energy -= (decVal + org.codeSize)
+      _moveOrganism(org.pos, org)
     else
       _killOrganism(i)
     end
-    #
-    # This is how we updates organism's color after energy descreasing.
-    # We don't need to check return value, because we don't change organism's
-    # position. Just update it color.
-    #
-    if istaskdone(Manager._data.tasks[i].task)
-      splice!(Manager._data.tasks, i)
-    else
-      _moveOrganism(org.pos, org)
-    end
+
+    if istaskdone(tasks[i].task) splice!(tasks, i) end
 
     i -= 1
   end
@@ -180,17 +172,18 @@ end
 # _updateOrganismsEnergy() function.
 # @param i Index of current task
 #
-@debug function _killOrganism(i::Int)
-@bp
+function _killOrganism(i::Int)
   if i === 0 || istaskdone(Manager._data.tasks[i].task) return false end
 
-  org = Manager._data.tasks[i].organism
+  local id::UInt = Manager._data.tasks[i].id
+  local org::Creature.Organism = Manager._data.tasks[i].organism
+
   org.energy = 0
   org.color  = UInt32(0)
   Event.clear(org.observer)
-
+  _moveOrganism(org.pos, org)
   delete!(Manager._data.positions, _getOrganismId(org.pos))
-  delete!(Manager._data.organisms, Manager._data.tasks[i].id)
+  delete!(Manager._data.organisms, id)
   #
   # This is small hack. It stops the task immediately. We 
   # have to do this, because task is a memory leak if we don't
@@ -199,8 +192,7 @@ end
   # "deleted".
   #
   try Base.throwto(Manager._data.tasks[i].task, null) end
-  _moveOrganism(org.pos, org)
-  Manager.msg(Manager._data.tasks[i].id, "die")
+  Manager.msg(id, "die")
 end
 #
 # Creates new organism and binds event handlers to him. It also
@@ -238,6 +230,7 @@ function _createOrganism(organism = nothing, pos = nothing)
   oTask = OrganismTask(id, task, org)
   Manager._data.organismId += UInt(1)
   Manager._data.organisms[id] = org
+  Manager._data.positions[_getOrganismId(org.pos)] = org
   push!(Manager._data.tasks, oTask)
   Manager.msg(id, "run")
   Manager._data.totalOrganisms += UInt(1)
@@ -253,26 +246,31 @@ end
 # @return {Bool}
 #
 function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
-  local id1::Int
-  local id2::Int
+  local idNew::Int = _getOrganismId(pos)
+  local idOld::Int = _getOrganismId(organism.pos)
+  #
   # TODO: this is a place where organism may step to another area (instance).
   # TODO: this functionality will be implemented in future versions...
+  #
   if pos.x > Manager._data.world.width  || pos.x < 1 ||
      pos.y > Manager._data.world.height || pos.y < 1 ||
-     World.getEnergy(Manager._data.world, pos) > UInt32(0) || 
-     (pos.x === organism.pos.x && pos.y === organism.pos.y)
+     idOld !== idNew && (
+       haskey(Manager._data.positions, idNew) || 
+       World.getEnergy(Manager._data.world, pos) > UInt32(0)
+     )
      return false
-   end
-
-  delete!(Manager._data.positions, _getOrganismId(organism.pos))
-  Manager._data.positions[_getOrganismId(pos)] = organism
+  end
   #
   # pos - new organism position
   # organism.pos - old organism position
   #
-  World.setEnergy(Manager._data.world, organism.pos, UInt32(0))
+  if pos.x !== organism.pos.x || pos.y !== organism.pos.y
+    delete!(Manager._data.positions, _getOrganismId(organism.pos))
+    Manager._data.positions[idNew] = organism
+    World.setEnergy(Manager._data.world, organism.pos, UInt32(0))
+    organism.pos = pos
+  end
   World.setEnergy(Manager._data.world, pos, UInt32(organism.color))
-  organism.pos = pos
 
   true
 end
@@ -421,16 +419,17 @@ function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, re
     # Current organism wants give an energy
     #
     if amount < 1
-      org.energy = min(org.energy + abs(amount), Config.val(:ORGANISM_MAX_ENERGY))
-      retObj.ret = amount
+      amount = organism.energy > abs(amount) ? abs(amount) : organism.energy
+      org.energy  = min(org.energy + amount, Config.val(:ORGANISM_MAX_ENERGY))
+      retObj.ret  = -amount
     elseif org.energy > amount
       org.energy -= amount
       retObj.ret  = amount
-    else
+    elseif org.energy <= amount
       # TODO: possibly, slow code. To fix this we have to
       # TODO: use map instead array for tasks (Manager._data.tasks)
       _killOrganism(findfirst((t) -> t.organism === org, Manager._data.tasks))
-      retObj.ret = amount - org.energy
+      retObj.ret = org.energy
     end
   else
     retObj.ret = World.grabEnergy(Manager._data.world, pos, UInt32(amount))

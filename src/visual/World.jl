@@ -123,7 +123,8 @@ module World
   # @param plane Plane
   # @param pos Start position
   # @return {Helper.Point|Bool}
-  #
+  # TODO: this method should return Helper.Point() in any case. Point(0,0)
+  # TODO: should mean no free place
   function getNearFreePos(plane::Plane, pos::Helper.Point)
     local i::Int
     local j::Int

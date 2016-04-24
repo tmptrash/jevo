@@ -112,8 +112,7 @@ module Manager
   # @param recover true if we have to recover from last backup
   # @return {Bool} run status
   #
-  @debug function run(recover::Bool = false)
-    @bp
+  function run(recover::Bool = false)
     local counter ::Int = 0
     local ips     ::Int = 0
     local stamp   ::Float64 = time()
