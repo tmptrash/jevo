@@ -108,6 +108,13 @@ function _updateOrganisms(counter::Int)
     _removeMinOrganisms(Manager._data.tasks)
   end
   #
+  # Checks if total amount of energy in a world is less then
+  # minimum, according to the configuration.
+  #
+  if counter % Config.val(:WORLD_MIN_ENERGY_CHECK_PERIOD) === 0 && Config.val(:WORLD_MIN_ENERGY_CHECK_PERIOD) > 0
+    _updateEnergy()
+  end
+  #
   # This counter should be infinite
   #
   if counter === typemax(Int) counter = 0 end
@@ -165,6 +172,35 @@ function _updateOrganismsEnergy()
     if istaskdone(tasks[i].task) splice!(tasks, i) end
 
     i -= 1
+  end
+end
+#
+# Updates total worlds energy. It shouldn't be less then minimum.
+# Minimum value may be set in config: WORLD_MIN_ENERGY_PERCENT
+#
+function _updateEnergy()
+  local plane::Array{UInt32, 2} = Manager._data.world.data
+  local total::Int = Manager._data.world.width * Manager._data.world.height
+  local energy::Int = 0
+  local positions::Dict{Int, Creature.Organism} = Manager._data.positions
+  local pos::Helper.Point = Helper.Point(0, 0)
+  local x::Int
+  local y::Int
+
+  for x in 1:size(plane)[2]
+    for y in 1:size(plane)[1]
+      pos.x = x
+      pos.y = y
+      if !haskey(positions, _getOrganismId(pos)) && plane[y, x] > 0
+        energy += 1
+      end
+    end
+  end
+  #
+  # Total amount of energy is less then in config
+  #
+  if div(energy * 100, total) <= Config.val(:WORLD_MIN_ENERGY_PERCENT)
+    setRandomEnergy()
   end
 end
 #
