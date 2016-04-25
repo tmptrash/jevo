@@ -116,6 +116,7 @@ function divide(org::Creature.Organism, pos::Helper.Pos)
   # "qwerty" / "111" = "qw"
   #
   if typ === ASCIIString
+    # TODO: error: zero divide is here and zero index!
     return :($v1 = $v2[1:(length($v3) > length($v2) > 0 ? 0 : div(length($v2), length($v3)))])
   elseif typ === Bool
     return :($(v1) = $(v2) | $(v3))

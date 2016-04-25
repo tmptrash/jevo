@@ -175,8 +175,9 @@ function _updateOrganismsEnergy()
   end
 end
 #
-# Updates total worlds energy. It shouldn't be less then minimum.
-# Minimum value may be set in config: WORLD_MIN_ENERGY_PERCENT
+# Updates total world's energy. It shouldn't be less then minimum
+# got from config: WORLD_MIN_ENERGY_PERCENT. We calculate this percent
+# as a ration between whole world (100%) and all energy points together.
 #
 function _updateEnergy()
   local plane::Array{UInt32, 2} = Manager._data.world.data
@@ -191,7 +192,7 @@ function _updateEnergy()
     for y in 1:size(plane)[1]
       pos.x = x
       pos.y = y
-      if !haskey(positions, _getOrganismId(pos)) && plane[y, x] > 0
+      if !haskey(positions, _getOrganismId(pos)) && plane[y, x] > UInt32(0)
         energy += 1
       end
     end
@@ -225,7 +226,7 @@ function _killOrganism(i::Int)
   # have to do this, because task is a memory leak if we don't
   # stop (interrupt) it. Real removing of task from Manager._data.tasks
   # map will be done later. This method only marks the task as 
-  # "deleted".
+  # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
   #
   try Base.throwto(Manager._data.tasks[i].task, null) end
   Manager.msg(id, "die")
