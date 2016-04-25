@@ -9,6 +9,17 @@ export multiply
 export divide
 export reminder
 #
+# Binding of available types and available "plus" operators 
+# for these types. We don't need to export this constant.
+#
+const PLUS_OPERATORS = Dict{DataType, Symbol}(
+  ASCIIString => :(*),
+  Bool        => :(&),
+  Int8        => :(+),
+  Int16       => :(+),
+  Int         => :(+)
+)
+#
 # @cmd
 # @line
 # + operator implementation. Sums two variables. Supports all
@@ -27,13 +38,7 @@ function plus(org::Creature.Organism, pos::Helper.Pos)
 
   if v1 === :nothing return Expr(:nothing) end
 
-  if typ === ASCIIString 
-    return :($v1 = $(v2) * $v3)
-  elseif typ === Bool
-    return :($v1 = $v2 & $v3)
-  end
-
-  :($v1 = $v2 + $v3)
+  return :($v1 = $(PLUS_OPERATORS[typ])($v2, $v3))
 end
 #
 # @cmd
@@ -59,7 +64,7 @@ function minus(org::Creature.Organism, pos::Helper.Pos)
   # "qwerty" - "111" = "qwe"
   #
   if typ === ASCIIString
-    return :($(v1) = $(v2)[1:(length($v3) > length($v2) > 0 ? 0 : length($v2) - length($v3))])
+    return :($v1 = $(v2)[1:(length($v3) > length($v2) ? 0 : length($v2) - length($v3))])
   #
   # true  - true  = false, true  - false = true, 
   # false - false = false, false - true  = true

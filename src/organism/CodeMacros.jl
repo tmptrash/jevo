@@ -25,8 +25,7 @@ end
 # @return {DataType}
 #
 macro randType()
-  local types::Array{DataType, 1} = Helper.SUPPORTED_TYPES
-  :($types[rand(1:length($types))])
+  :($Helper.SUPPORTED_TYPES[rand(1:length($Helper.SUPPORTED_TYPES))])
 end
 #
 # Returns a variable from existing in a code
