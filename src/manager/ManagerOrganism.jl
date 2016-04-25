@@ -28,6 +28,14 @@ type OrganismTask
   organism::Creature.Organism
 end
 #
+# Generates unique id by world position. This macro is
+# private insode Manager module
+# @param {Helper.Point} pos Unique World position
+#
+macro getPosId(pos)
+  :($pos.y * $Manager._data.world.width + $pos.x)
+end
+#
 # Shows organism related message
 # @param id Unique orgainsm identifier
 # @param msg Organism's message
@@ -41,8 +49,7 @@ end
 # provides rare mutations.
 # @param counter Counter for mutations speed
 #
-@debug function _updateOrganisms(counter::Int)
-@bp
+function _updateOrganisms(counter::Int)
   local i::Int
   local j::Int
   local org::Creature.Organism
@@ -52,6 +59,7 @@ end
   local tasks::Array{OrganismTask, 1} = Manager._data.tasks
   local len::Int = length(tasks)
   local maxOrgs::Int = Config.val(:WORLD_MAX_ORGANISMS) 
+  local task::OrganismTask
 
   counter += 1
   #
@@ -61,9 +69,13 @@ end
   # TODO: optimize this two approaches. We have to have only one
   # TODO: reverse loop.
   for i = 1:len
-    if istaskdone(tasks[i].task) continue end
+    task = tasks[i]
+    #
+    # Some organisms may be marked as "died" or "removed"
+    #
+    if istaskdone(task.task) continue end
     try
-      consume(tasks[i].task)
+      consume(task.task)
       #
       # This is how we mutate organisms during their life.
       # Mutations occures according to organisms settings.
@@ -72,7 +84,7 @@ end
       # Mutation will be automatically applied if organism
       # doesn't contain any code line.
       #
-      org = tasks[i].organism
+      org = task.organism
       if counter % org.mutationPeriod === 0 && org.mutationPeriod > 0
         Mutator.mutate(org, org.mutationAmount)
       end
@@ -152,8 +164,7 @@ end
 # to config (ORGANISM, DECREASE_VALUE). Removes marked as "delete"
 # tasks from Manager._data.tasks map.
 #
-@debug function _updateOrganismsEnergy()
-@bp
+function _updateOrganismsEnergy()
   local decVal::Int = Config.val(:ORGANISM_ENERGY_DECREASE_VALUE)
   local tasks::Array{OrganismTask, 1} = Manager._data.tasks
   #
@@ -168,7 +179,6 @@ end
     #
     if org.energy > (decVal + org.codeSize)
       org.energy -= (decVal + org.codeSize)
-      _moveOrganism(org.pos, org)
     else
       _killOrganism(i)
     end
@@ -183,8 +193,7 @@ end
 # got from config: WORLD_MIN_ENERGY_PERCENT. We calculate this percent
 # as a ration between whole world (100%) and all energy points together.
 #
-@debug function _updateWorldEnergy()
-@bp
+function _updateWorldEnergy()
   local plane::Array{UInt32, 2} = Manager._data.world.data
   local total::Int = Manager._data.world.width * Manager._data.world.height
   local energy::Int = 0
@@ -197,7 +206,7 @@ end
     for y in 1:size(plane)[1]
       pos.x = x
       pos.y = y
-      if !haskey(positions, _getOrganismId(pos)) && plane[y, x] > UInt32(0)
+      if !haskey(positions, @getPosId(pos)) && plane[y, x] > UInt32(0)
         energy += 1
       end
     end
@@ -224,7 +233,7 @@ function _killOrganism(i::Int)
   org.color  = UInt32(0)
   Event.clear(org.observer)
   _moveOrganism(org.pos, org)
-  delete!(Manager._data.positions, _getOrganismId(org.pos))
+  delete!(Manager._data.positions, @getPosId(org.pos))
   delete!(Manager._data.organisms, id)
   #
   # This is small hack. It stops the task immediately. We 
@@ -243,8 +252,7 @@ end
 # @param pos Optional. Position of organism.
 # @return {OrganismTask}
 #
-@debug function _createOrganism(organism = nothing, pos = nothing)
-@bp
+function _createOrganism(organism = nothing, pos = nothing)
   pos  = organism !== nothing && pos === nothing ? World.getNearFreePos(Manager._data.world, organism.pos) : (pos === nothing ? World.getFreePos(Manager._data.world) : pos)
   if pos === false return false end
   org  = organism === nothing ? Creature.create(pos) : deepcopy(organism)
@@ -273,10 +281,10 @@ end
   oTask = OrganismTask(id, task, org)
   Manager._data.organismId += UInt(1)
   Manager._data.organisms[id] = org
-  Manager._data.positions[_getOrganismId(org.pos)] = org
+  Manager._data.positions[@getPosId(org.pos)] = org
   push!(Manager._data.tasks, oTask)
-  Manager.msg(id, "run")
   Manager._data.totalOrganisms += UInt(1)
+  Manager.msg(id, "run")
 
   oTask
 end
@@ -289,8 +297,8 @@ end
 # @return {Bool}
 #
 function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
-  local idNew::Int = _getOrganismId(pos)
-  local idOld::Int = _getOrganismId(organism.pos)
+  local idNew::Int = @getPosId(pos)
+  local idOld::Int = @getPosId(organism.pos)
   #
   # TODO: this is a place where organism may step to another area (instance).
   # TODO: this functionality will be implemented in future versions...
@@ -308,7 +316,7 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   # organism.pos - old organism position
   #
   if pos.x !== organism.pos.x || pos.y !== organism.pos.y
-    delete!(Manager._data.positions, _getOrganismId(organism.pos))
+    delete!(Manager._data.positions, @getPosId(organism.pos))
     Manager._data.positions[idNew] = organism
     World.setEnergy(Manager._data.world, organism.pos, UInt32(0))
     organism.pos = pos
@@ -316,13 +324,6 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   World.setEnergy(Manager._data.world, pos, UInt32(organism.color))
 
   true
-end
-#
-# Converts coodinates to the unique UInt id
-# @return {UInt}
-#
-function _getOrganismId(pos::Helper.Point)
-  pos.y * Manager._data.world.width + pos.x
 end
 #
 # Handles "beforeclone" event. Finds free point for new organism
@@ -350,14 +351,7 @@ function _onClone(organism::Creature.Organism)
   local energy::Int      = div(organism.energy, 2) # minus 50% of energy
   organism.energy       -= energy
   crTask.organism.energy = energy
-  #
-  # We have to update color of both parent and child organisms
-  #
-  _moveOrganism(organism.pos, organism)
-  if energy > 0
-    Mutator.mutate(crTask.organism, crTask.organism.mutationsOnClone)
-    _moveOrganism(crTask.organism.pos, crTask.organism)
-  end
+  if energy > 0 Mutator.mutate(crTask.organism, crTask.organism.mutationsOnClone) end
 end
 #
 # Returns an energy amount in specified point in a world.
@@ -366,7 +360,7 @@ end
 # @param retObj Special object for return value
 #
 function _onGetEnergy(organism::Creature.Organism, pos::Helper.Point, retObj::Helper.RetObj)
-  local id::Int = _getOrganismId(pos)
+  local id::Int = @getPosId(pos)
   #
   # Other organism at this position
   #
@@ -457,7 +451,7 @@ end
 # @param retObj Special object for return value
 #
 function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, retObj::Helper.RetObj)
-  local id::Int = _getOrganismId(pos)
+  local id::Int = @getPosId(pos)
   local org::Creature.Organism
   #
   # If other organism at the position of the check, 

@@ -1,6 +1,4 @@
 module Test
-  using Debug
-
   type Organism
     code::Expr
     codeFn::Function

@@ -28,8 +28,6 @@ module Manager
   import Config
 
   export run
-
-  using Debug
   #
   # This is how we collect Manager module from it's parts(files)
   #
@@ -113,12 +111,12 @@ module Manager
   # @return {Bool} run status
   #
   function run(recover::Bool = false)
-    local counter ::Int = 0
-    local ips     ::Int = 0
-    local stamp   ::Float64 = time()
-    local bstamp  ::Float64 = time()
-    local server  ::Server.ServerConnection = _createServer()
-    local params  ::Dict{ASCIIString, ASCIIString} = CommandLine.create()
+    local counter::Int = 0
+    local ips    ::Int = 0
+    local stamp  ::Float64 = time()
+    local bstamp ::Float64 = time()
+    local server ::Server.ServerConnection = _createServer()
+    local params ::Dict{ASCIIString, ASCIIString} = CommandLine.create()
     #
     # This server is listening for all other managers and remote
     # terminal. It runs obtained commands and send answers back. 

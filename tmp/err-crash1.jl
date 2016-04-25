@@ -1,6 +1,5 @@
 include("../src/ImportFolders.jl")
 using Manager
-using Debug
 using Helper
 
 orgs = Creature.Organism[]

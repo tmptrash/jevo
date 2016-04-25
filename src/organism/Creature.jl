@@ -264,6 +264,7 @@ module Creature
           end
         catch e
           # TODO: what we have to do with code errors?
+          # TODO: we have to calculate it for statistics
         end
       end
     end

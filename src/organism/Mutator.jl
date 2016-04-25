@@ -90,7 +90,7 @@ module Mutator
     #org.color -= pattern[rand(1:6)]
     #org.color &= 0x00FFFFFF
 
-    org.color += div(UInt32(0xffffff), UInt32(Config.val(:WORLD_MAX_ORGANISMS) * 2))
+    org.color += div(UInt32(0xffffff), UInt32(Config.val(:WORLD_MAX_ORGANISMS) * 5)) # TODO: why 5?
   end
   #
   # Adds one line of code into existing code blocks including all

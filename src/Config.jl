@@ -305,33 +305,33 @@ module Config
       [100,300,95,0,1,1,1],      # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
       1,                         # ORGANISM_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      1,                         # ORGANISM_MUTATION_PERIOD
-      5000,                      # ORGANISM_MAX_MUTATION_PERIOD
+      5000,                      # ORGANISM_MUTATION_PERIOD
+      10000,                     # ORGANISM_MAX_MUTATION_PERIOD
       1,                         # ORGANISM_MUTATION_AMOUNT
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT
-      1,                         # ORGANISM_START_AMOUNT
-      5,                         # ORGANISM_START_ENERGY
-      900000000,                 # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
-      2,                         # ORGANISM_ENERGY_DECREASE_PERIOD
+      50,                        # ORGANISM_START_AMOUNT
+      500,                       # ORGANISM_START_ENERGY
+      typemax(UInt32),           # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
+      75,                        # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                         # ORGANISM_ENERGY_DECREASE_VALUE
       20000,                     # ORGANISM_REMOVE_AFTER_TIMES
       50,                        # ORGANISM_REMOVE_AMOUNT
-      3,                         # ORGANISM_CLONE_AFTER_TIMES
-      UInt32(0x00FFFFFF),        # ORGANISM_START_COLOR
+      10,                        # ORGANISM_CLONE_AFTER_TIMES
+      UInt32(0xFF0000),          # ORGANISM_START_COLOR
       2,                         # CODE_MAX_FUNC_PARAMS
-      10,                        # WORLD_WIDTH
-      10,                        # WORLD_HEIGHT
+      300,                       # WORLD_WIDTH
+      200,                       # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
       600,                       # WORLD_MAX_ORGANISMS
       200,                       # WORLD_MIN_ORGANISMS
-      2,                         # WORLD_START_ENERGY_BLOCKS
-      UInt32(0xEEEEEE),          # WORLD_START_ENERGY_AMOUNT
+      20000,                     # WORLD_START_ENERGY_BLOCKS
+      UInt32(0x00FF00),          # WORLD_START_ENERGY_AMOUNT
       5,                         # WORLD_MIN_ENERGY_PERCENT
-      5,                         # WORLD_MIN_ENERGY_CHECK_PERIOD
-      3,                         # WORLD_SCALE
-      3,                         # BACKUP_PERIOD
-      5,                         # BACKUP_AMOUNT
+      10000,                     # WORLD_MIN_ENERGY_CHECK_PERIOD
+      4,                         # WORLD_SCALE
+      4,                         # BACKUP_PERIOD
+      7,                         # BACKUP_AMOUNT
       650,                       # STAT_WIDTH
       500,                       # STAT_HEIGHT
       5,                         # STAT_FRAME_DELAY
