@@ -139,7 +139,6 @@ module Manager
     # and organism's tasks switching.
     #
     while true
-      @bp
       #
       # After all organisms die, we have to create next, new population
       #
@@ -160,7 +159,7 @@ module Manager
       # This call switches between all non blocking asynchronous
       # functions (see @async macro). For example, it handles all
       # input connections for current server, switches between
-      # organisms Tasks and so on...
+      # organism Tasks and so on...
       #
       yield()
     end

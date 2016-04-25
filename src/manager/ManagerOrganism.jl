@@ -108,6 +108,13 @@ function _updateOrganisms(counter::Int)
     _removeMinOrganisms(Manager._data.tasks)
   end
   #
+  # Checks if total amount of energy in a world is less then
+  # minimum, according to the configuration.
+  #
+  if counter % Config.val(:WORLD_MIN_ENERGY_CHECK_PERIOD) === 0 && Config.val(:WORLD_MIN_ENERGY_CHECK_PERIOD) > 0
+    _updateEnergy()
+  end
+  #
   # This counter should be infinite
   #
   if counter === typemax(Int) counter = 0 end
@@ -168,6 +175,36 @@ function _updateOrganismsEnergy()
   end
 end
 #
+# Updates total world's energy. It shouldn't be less then minimum
+# got from config: WORLD_MIN_ENERGY_PERCENT. We calculate this percent
+# as a ration between whole world (100%) and all energy points together.
+#
+function _updateEnergy()
+  local plane::Array{UInt32, 2} = Manager._data.world.data
+  local total::Int = Manager._data.world.width * Manager._data.world.height
+  local energy::Int = 0
+  local positions::Dict{Int, Creature.Organism} = Manager._data.positions
+  local pos::Helper.Point = Helper.Point(0, 0)
+  local x::Int
+  local y::Int
+
+  for x in 1:size(plane)[2]
+    for y in 1:size(plane)[1]
+      pos.x = x
+      pos.y = y
+      if !haskey(positions, _getOrganismId(pos)) && plane[y, x] > UInt32(0)
+        energy += 1
+      end
+    end
+  end
+  #
+  # Total amount of energy is less then in config
+  #
+  if div(energy * 100, total) <= Config.val(:WORLD_MIN_ENERGY_PERCENT)
+    setRandomEnergy()
+  end
+end
+#
 # Marks one organism as "removed". Deletion will be done in 
 # _updateOrganismsEnergy() function.
 # @param i Index of current task
@@ -189,7 +226,7 @@ function _killOrganism(i::Int)
   # have to do this, because task is a memory leak if we don't
   # stop (interrupt) it. Real removing of task from Manager._data.tasks
   # map will be done later. This method only marks the task as 
-  # "deleted".
+  # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
   #
   try Base.throwto(Manager._data.tasks[i].task, null) end
   Manager.msg(id, "die")

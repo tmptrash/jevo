@@ -177,6 +177,18 @@ module Config
     #
     WORLD_START_ENERGY_AMOUNT::UInt32
     #
+    # Minimum percent of energy in current world. Under percent i mean
+    # percent from entire world area (100%). If the energy will be less
+    # or equal then this percent, then new random energy should be added.
+    #
+    WORLD_MIN_ENERGY_PERCENT::Int
+    #
+    # An amount of iteration, after which we have to check world energy
+    # amount. Works in pair with WORLD_MIN_ENERGY_PERCENT. May be 0 if
+    # you want to disable it
+    #
+    WORLD_MIN_ENERGY_CHECK_PERIOD::Int
+    #
     # World scaling. On todays monitors pixel are so small, so we have
     # to zoom them with a coefficient.
     #
@@ -300,7 +312,7 @@ module Config
       90,                        # ORGANISM_START_AMOUNT
       5000,                      # ORGANISM_START_ENERGY
       900000000,                 # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
-      50,                        # ORGANISM_ENERGY_DECREASE_PERIOD
+      100,                       # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                         # ORGANISM_ENERGY_DECREASE_VALUE
       20000,                     # ORGANISM_REMOVE_AFTER_TIMES
       50,                        # ORGANISM_REMOVE_AMOUNT
@@ -315,7 +327,9 @@ module Config
       200,                       # WORLD_MIN_ORGANISMS
       90000,                     # WORLD_START_ENERGY_BLOCKS
       UInt32(635280),            # WORLD_START_ENERGY_AMOUNT
-      1,                         # WORLD_SCALE
+      5,                         # WORLD_MIN_ENERGY_PERCENT
+      5000,                      # WORLD_MIN_ENERGY_CHECK_PERIOD
+      3,                         # WORLD_SCALE
       3,                         # BACKUP_PERIOD
       5,                         # BACKUP_AMOUNT
       650,                       # STAT_WIDTH
