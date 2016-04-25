@@ -127,4 +127,15 @@ module TestCodeMath
     empty!(Helper.SUPPORTED_TYPES)
     for i=1:length(types) push!(Helper.SUPPORTED_TYPES, types[i]) end
   end
+  #
+  # minus
+  #
+  facts("Testing CodeMath.minus() with different variable types") do
+    org = Creature.create()
+    addVars(org, [2], Helper.Pos(1,1,1))
+    Mutator._onAdd(org, Helper.Pos(1,1,6), Code.CodePart(Code.minus, false))
+
+    @fact length(Helper.getLines(org.code, [2])) --> 7
+    @fact eval(org.code)(org) --> true
+  end
 end

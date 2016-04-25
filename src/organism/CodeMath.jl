@@ -25,7 +25,8 @@ const PLUS_OPERATORS = Dict{DataType, Symbol}(
 # + operator implementation. Sums two variables. Supports all
 # types: ASCIIString, Int8, Bool,... In case of string uses
 # concatination, for boolean - & operator. If code is empty
-# this function will skip the execution.
+# this function will skip the execution. We don't check the 
+# position, because of performance issues.
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
@@ -62,6 +63,7 @@ function minus(org::Creature.Organism, pos::Helper.Pos)
   #
   # "1234"   - "85"  = "12" (just cut v1 by length of v2)
   # "qwerty" - "111" = "qwe"
+  # "123"[1:0] === ""
   #
   if typ === ASCIIString
     return :($v1 = $(v2)[1:(length($v3) > length($v2) ? 0 : length($v2) - length($v3))])
