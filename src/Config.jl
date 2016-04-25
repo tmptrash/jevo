@@ -299,23 +299,23 @@ module Config
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT
       90,                        # ORGANISM_START_AMOUNT
       5000,                      # ORGANISM_START_ENERGY
-      100000000,                 # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
-      100,                       # ORGANISM_ENERGY_DECREASE_PERIOD
+      900000000,                 # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
+      50,                        # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                         # ORGANISM_ENERGY_DECREASE_VALUE
       20000,                     # ORGANISM_REMOVE_AFTER_TIMES
       50,                        # ORGANISM_REMOVE_AMOUNT
       20,                        # ORGANISM_CLONE_AFTER_TIMES
       UInt32(0x00FFFFFF),        # ORGANISM_START_COLOR
       2,                         # CODE_MAX_FUNC_PARAMS
-      400,                       # WORLD_WIDTH
-      210,                       # WORLD_HEIGHT
+      1910,                      # WORLD_WIDTH
+      1000,                      # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
       600,                       # WORLD_MAX_ORGANISMS
       200,                       # WORLD_MIN_ORGANISMS
-      9000,                      # WORLD_START_ENERGY_BLOCKS
+      90000,                     # WORLD_START_ENERGY_BLOCKS
       UInt32(635280),            # WORLD_START_ENERGY_AMOUNT
-      3,                         # WORLD_SCALE
+      1,                         # WORLD_SCALE
       3,                         # BACKUP_PERIOD
       5,                         # BACKUP_AMOUNT
       650,                       # STAT_WIDTH

@@ -190,7 +190,7 @@ module Manager
   #
   function _updateBackup(stamp::Float64)
     if (time() - stamp) > Float64(Config.val(:BACKUP_PERIOD)) * 60.0
-      backup()
+      if length(Manager._data.tasks) > 0 backup() end
       return time()
     end
 
