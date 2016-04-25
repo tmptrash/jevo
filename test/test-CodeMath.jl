@@ -138,4 +138,11 @@ module TestCodeMath
     @fact length(Helper.getLines(org.code, [2])) --> 7
     @fact eval(org.code)(org) --> true
   end
+  facts("Testing CodeMath.ьштгы() without variables") do
+    org = Creature.create()
+    Mutator._onAdd(org, Helper.Pos(1,1,6), Code.CodePart(Code.minus, false))
+
+    @fact length(Helper.getLines(org.code, [2])) --> 1
+    @fact eval(org.code)(org) --> true
+  end
 end
