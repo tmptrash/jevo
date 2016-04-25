@@ -41,7 +41,8 @@ end
 # provides rare mutations.
 # @param counter Counter for mutations speed
 #
-function _updateOrganisms(counter::Int)
+@debug function _updateOrganisms(counter::Int)
+@bp
   local i::Int
   local j::Int
   local org::Creature.Organism
@@ -60,7 +61,6 @@ function _updateOrganisms(counter::Int)
   # TODO: optimize this two approaches. We have to have only one
   # TODO: reverse loop.
   for i = 1:len
-    org = tasks[i].organism
     if istaskdone(tasks[i].task) continue end
     try
       consume(tasks[i].task)
@@ -72,11 +72,13 @@ function _updateOrganisms(counter::Int)
       # Mutation will be automatically applied if organism
       # doesn't contain any code line.
       #
+      org = tasks[i].organism
       if counter % org.mutationPeriod === 0 && org.mutationPeriod > 0
         Mutator.mutate(org, org.mutationAmount)
       end
     catch e
       Helper.error("Manager._updateOrganisms(): $e")
+      showerror(STDOUT, e, catch_backtrace())
     end
   end
   #
@@ -92,7 +94,8 @@ function _updateOrganisms(counter::Int)
   if needClone && len < maxOrgs && len > 0
     probs = Int[]
     for j = 1:len push!(probs, tasks[j].organism.energy) end
-    _onClone(tasks[Helper.getProbIndex(probs)].organism)
+    org = tasks[Helper.getProbIndex(probs)].organism
+    if org.energy > 0 _onClone(org) end
   end
   #
   # This block decreases energy from organisms, because they 
@@ -102,17 +105,17 @@ function _updateOrganisms(counter::Int)
     _updateOrganismsEnergy()
   end
   #
-  # This call removes organisms with minimum energy
-  #
-  if counter % Config.val(:ORGANISM_REMOVE_AFTER_TIMES) === 0 && len > Config.val(:WORLD_MIN_ORGANISMS)
-    _removeMinOrganisms(Manager._data.tasks)
-  end
-  #
   # Checks if total amount of energy in a world is less then
   # minimum, according to the configuration.
   #
   if counter % Config.val(:WORLD_MIN_ENERGY_CHECK_PERIOD) === 0 && Config.val(:WORLD_MIN_ENERGY_CHECK_PERIOD) > 0
-    _updateEnergy()
+    _updateWorldEnergy()
+  end
+  #
+  # This call removes organisms with minimum energy
+  #
+  if counter % Config.val(:ORGANISM_REMOVE_AFTER_TIMES) === 0 && len > Config.val(:WORLD_MIN_ORGANISMS)
+    _removeMinOrganisms(Manager._data.tasks)
   end
   #
   # This counter should be infinite
@@ -149,7 +152,8 @@ end
 # to config (ORGANISM, DECREASE_VALUE). Removes marked as "delete"
 # tasks from Manager._data.tasks map.
 #
-function _updateOrganismsEnergy()
+@debug function _updateOrganismsEnergy()
+@bp
   local decVal::Int = Config.val(:ORGANISM_ENERGY_DECREASE_VALUE)
   local tasks::Array{OrganismTask, 1} = Manager._data.tasks
   #
@@ -179,7 +183,8 @@ end
 # got from config: WORLD_MIN_ENERGY_PERCENT. We calculate this percent
 # as a ration between whole world (100%) and all energy points together.
 #
-function _updateEnergy()
+@debug function _updateWorldEnergy()
+@bp
   local plane::Array{UInt32, 2} = Manager._data.world.data
   local total::Int = Manager._data.world.width * Manager._data.world.height
   local energy::Int = 0
@@ -238,7 +243,8 @@ end
 # @param pos Optional. Position of organism.
 # @return {OrganismTask}
 #
-function _createOrganism(organism = nothing, pos = nothing)
+@debug function _createOrganism(organism = nothing, pos = nothing)
+@bp
   pos  = organism !== nothing && pos === nothing ? World.getNearFreePos(Manager._data.world, organism.pos) : (pos === nothing ? World.getFreePos(Manager._data.world) : pos)
   if pos === false return false end
   org  = organism === nothing ? Creature.create(pos) : deepcopy(organism)
@@ -341,10 +347,17 @@ function _onClone(organism::Creature.Organism)
   #
   # Clonning means additional energy waste
   #
-  local energy::Int      = div(organism.energy, 10) # minus 10% of energy
+  local energy::Int      = div(organism.energy, 2) # minus 50% of energy
   organism.energy       -= energy
   crTask.organism.energy = energy
-  if energy > 0 Mutator.mutate(crTask.organism, crTask.organism.mutationsOnClone) end
+  #
+  # We have to update color of both parent and child organisms
+  #
+  _moveOrganism(organism.pos, organism)
+  if energy > 0
+    Mutator.mutate(crTask.organism, crTask.organism.mutationsOnClone)
+    _moveOrganism(crTask.organism.pos, crTask.organism)
+  end
 end
 #
 # Returns an energy amount in specified point in a world.
