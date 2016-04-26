@@ -260,6 +260,10 @@ function _createOrganism(organism = nothing, pos = nothing)
   task = Task(Creature.born(org, id))
 
   org.pos = pos
+  #
+  # Because of deepcopy(), we have to remove copyed handlers
+  #
+  Event.clear(org.observer)
   Event.on(org.observer, "getenergy", _onGetEnergy)
   Event.on(org.observer, "grableft",  _onGrabLeft )
   Event.on(org.observer, "grabright", _onGrabRight)
@@ -463,9 +467,12 @@ function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, re
     # Current organism wants give an energy
     #
     if amount < 1
-      amount = organism.energy > abs(amount) ? abs(amount) : organism.energy
-      org.energy  = min(org.energy + amount, Config.val(:ORGANISM_MAX_ENERGY))
-      retObj.ret  = -amount
+      if organism.energy <= abs(amount)
+        _killOrganism(findfirst((t) -> t.organism === organism, Manager._data.tasks))
+        amount = -organism.energy
+      end
+      org.energy  = min(org.energy - amount, Config.val(:ORGANISM_MAX_ENERGY))
+      retObj.ret  = amount
     elseif org.energy > amount
       org.energy -= amount
       retObj.ret  = amount

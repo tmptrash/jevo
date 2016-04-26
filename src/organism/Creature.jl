@@ -397,6 +397,5 @@ module Creature
     # We can't exceed max amount of energy
     #
     org.energy = min(org.energy + retObj.ret, Config.val(:ORGANISM_MAX_ENERGY))
-    if org.energy < 0 org.energy = 0 end
   end
 end
