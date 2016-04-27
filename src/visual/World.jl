@@ -90,7 +90,7 @@ module World
     local pos::Helper.Point = Helper.Point(ceil(Int, plane.width / 2), ceil(Int, plane.height / 2))
     local width::Int = plane.width
     local height::Int = plane.height
-    local i::Int = width * height < 1000 ? 100 : width * height / 10
+    local i::Int = width * height < 1000 ? 100 : div(width * height, 10)
 
     while World.getEnergy(plane, pos) > UInt32(0) && i > 0
       pos.x = rand(1:width)
