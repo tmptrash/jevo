@@ -3,6 +3,9 @@
 #
 # @author DeadbraiN
 #
+import Creature
+import Helper
+
 const IP      = ip"127.0.0.1"
 const PORT    = Config.val(:CONNECTION_SERVER_PORT)
 const TIMEOUT = 30

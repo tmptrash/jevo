@@ -305,7 +305,7 @@ module Config
       [100,300,95,0,1,1,1],      # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
       1,                         # ORGANISM_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      5000,                      # ORGANISM_MUTATION_PERIOD
+      500,                       # ORGANISM_MUTATION_PERIOD
       10000,                     # ORGANISM_MAX_MUTATION_PERIOD
       1,                         # ORGANISM_MUTATION_AMOUNT
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT
@@ -325,7 +325,7 @@ module Config
       0,                         # WORLD_IPS
       600,                       # WORLD_MAX_ORGANISMS
       200,                       # WORLD_MIN_ORGANISMS
-      10000,                     # WORLD_START_ENERGY_BLOCKS
+      1000,                      # WORLD_START_ENERGY_BLOCKS
       UInt32(0x00FF00),          # WORLD_START_ENERGY_AMOUNT
       1,                         # WORLD_MIN_ENERGY_PERCENT
       5000,                      # WORLD_MIN_ENERGY_CHECK_PERIOD

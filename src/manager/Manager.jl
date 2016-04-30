@@ -105,7 +105,7 @@ module Manager
     quiet::Bool
   end
   #
-  # Runs Manager instance, one world, server an so on... Blocking 
+  # Runs Manager instance, one world, server an so on... Blocking
   # function.
   # @param recover true if we have to recover from last backup
   # @return {Bool} run status
@@ -119,7 +119,7 @@ module Manager
     local params ::Dict{ASCIIString, ASCIIString} = CommandLine.create()
     #
     # This server is listening for all other managers and remote
-    # terminal. It runs obtained commands and send answers back. 
+    # terminal. It runs obtained commands and send answers back.
     # In other words, it works like RPC runner...
     #
     Server.run(server)

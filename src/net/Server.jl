@@ -8,17 +8,17 @@
 # http://julia.readthedocs.org/en/latest/manual/control-flow/#man-tasks
 # for details regarding coroutines. Because of green threads,
 # it uses "magic" inside: there are two places in this module,
-# where this magic happens. First place is some main code or 
-# code, which creates the server and run it. It may be any 
+# where this magic happens. First place is some main code or
+# code, which creates the server and run it. It may be any
 # other module or code. Second place is internal server's event
-# loop machine, which is used for accepting clients connections 
+# loop machine, which is used for accepting clients connections
 # and obtaining data (see @async macro in code). So, if you create
-# a server with create() method, it will return Server's data 
+# a server with create() method, it will return Server's data
 # object imediately. Calling run() method it also returns control
-# back at that moment, but in reality server starts to listen 
+# back at that moment, but in reality server starts to listen
 # clients in some loop (in our example this loop is out the run()
-# code - in a parent code). After running, server creates one task 
-# (green thread) per one connection. To run server out you have to 
+# code - in a parent code). After running, server creates one task
+# (green thread) per one connection. To run server out you have to
 # call yield() function in your (parent) code all the time.
 # See example below for details:
 #
@@ -63,20 +63,20 @@
 #     #
 #     Server.stop(connection)
 #
-# You have two possibilities how to run main code: you may have 
-# a loop (like in example above) or your code may wait for 
+# You have two possibilities how to run main code: you may have
+# a loop (like in example above) or your code may wait for
 # connection in background (without blocking loop). For example,
 # you may run this example in a REPL without infinite loop at the
 # end. In this case, you don't need to call yield() manually.
-# 
+#
 # Events:
-#     command{Connection.Command, Connection.Answer} Fires if new 
+#     command{Connection.Command, Connection.Answer} Fires if new
 #            command was obtained from client. Contains command
 #            itself and special answer object, where you may set your
 #            custom data.
 #
 # @author DeadbraiN
-#
+# TODO: add EVENT_ANSWER logic description
 module Server
   import Event
   import Connection
@@ -87,7 +87,13 @@ module Server
   export stop
   export isOk
   export EVENT_COMMAND
+  export EVENT_ANSWER
   export ServerConnection
+  #
+  # Name of the event, which is fired if answer from client's
+  # request is obtained.
+  #
+  const EVENT_ANSWER  = "answer"
   #
   # Name of the event, which is fired if client sent us a command. If
   # this event fires, then specified command should be runned here - on
@@ -96,7 +102,7 @@ module Server
   const EVENT_COMMAND = "command"
   #
   # Describes a server. It contains clients sockets, tasks, server object
-  # and it's observer. 
+  # and it's observer.
   #
   type ServerConnection
     tasks   ::Array{Task, 1}
@@ -106,7 +112,7 @@ module Server
     host    ::Base.IPAddr
     port    ::Int
   end
-  # 
+  #
   # Creates a server. Returns special server's data object, which identifies
   # this server and takes an ability to listen it events. It also contains
   # server's related tasks. See Server.ServerConnection type for
@@ -130,7 +136,7 @@ module Server
     catch e
       Helper.warn("Server.create(): $e")
     end
-    
+
     ServerConnection(tasks, socks, Base.TCPServer(), obs, host, port)
   end
   #
@@ -185,6 +191,31 @@ module Server
     true
   end
   #
+  # Makes request to client. This method is not blocking. It returns
+  # just after the call. Answer will be obtained in run() method
+  # async loop.
+  # @param con Connection object returned by create() method
+  # @param fn Callback function id, which will be called if answer
+  #           will be obtained from client.
+  # @param args Custom fn arguments
+  # @return true - request was sent, false wasn't
+  #
+  function request(con::ServerConnection, fn::Integer, args...)
+    try if !isopen(con.sock) return false end catch return false end
+    #
+    # This line is non blocking one
+    #
+    try
+      serialize(con.sock, Connection.Command(fn, [i for i in args]))
+    catch e
+      Helper.warn("Server.request(): $e")
+      close(con.sock)
+      return false
+    end
+
+    true
+  end
+  #
   # Returns server's state. true means - created and run.
   # @param con Client connection state
   # @return {Bool}
@@ -209,10 +240,10 @@ module Server
     end
   end
   #
-  # This method should be called in main server's loop or code 
-  # for removing stopped tasks and sockets (connections) between  
-  # clients and this server. See an example at the beginning of 
-  # this module for details.
+  # This method should be called in main server's loop or outside
+  # code for removing stopped tasks and sockets (connections)
+  # between clients and this server. See an example at the beginning
+  # of this module for details.
   # @param con Connection object returned by create() method
   #
   function _update(con::Server.ServerConnection)
@@ -228,18 +259,29 @@ module Server
     end
   end
   #
-  # Reads one command from client's socket and creates an answer 
-  # object. After that, it fires an event to main code, where an
-  # answer should be added to special Answer type. After that,
-  # writes an answer into the socket back.
+  # Reads one command from client's socket and fires an event
+  # to main code. After that, writes an answer into the socket
+  # back.
   # @param sock Client's socket
   # @param obs Observer for firing an event to "parent" code
   #
   function _answer(sock::Base.TCPSocket, obs::Event.Observer)
-    ans = Connection.Answer(null)
+    local data::Any = null
+
     try
-      Event.fire(obs, EVENT_COMMAND, deserialize(sock), ans)
-      serialize(sock, ans)
+      #
+      # Right now, only two types of responses are supported:
+      # answers after server request(Connection.Answer) and
+      # client requests (Connection.Command).
+      #
+      data = deserialize(sock)
+      if typeof(data) === Connection.Answer
+        Event.fire(obs, EVENT_ANSWER, data)
+      else # Connection.Command
+        local ans::Connection.Answer = Connection.Answer(null)
+        Event.fire(obs, EVENT_COMMAND, data, ans)
+        serialize(sock, ans)
+      end
     catch e
       #
       # This yield() updates sockets states
