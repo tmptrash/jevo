@@ -261,12 +261,19 @@ end
 # @param side Server side ("left", "right",...)
 # @return ClientConnection object
 #
-@debug function _createClient(side::ASCIIString)
-  @bp
-  local con::Client.ClientConnection = Client.create(
-    _getIp(  getfield(Manager, symbol("ARG_", side, "_SERVER_IP")),   symbol("CONNECTION_", side, "_SERVER_IP")),
-    _getPort(getfield(Manager, symbol("ARG_", side, "_SERVER_PORT")), symbol("CONNECTION_", side, "_SERVER_PORT"))
-  )
+function _createClient(side::ASCIIString)
+  local con::Client.ClientConnection
+  local serverPort::Int = _getPort(getfield(Manager, symbol("ARG_", side, "_SERVER_PORT")), symbol("CONNECTION_", side, "_SERVER_PORT"))
+  local serverIp::IPv4  = _getIp(getfield(Manager, symbol("ARG_", side, "_SERVER_IP")), symbol("CONNECTION_", side, "_SERVER_IP"))
+  local thisPort::Int   = _getPort(Manager.ARG_SERVER_PORT, :CONNECTION_SERVER_PORT)
+  local thisIp::IPv4    = _getIp(Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP)
+
+  if serverPort === thisPort && serverIp === thisIp
+    Helper.error(string("Error creating Client for ", side, " server. Remote port and IP are similar to current. Port: ", thisPort, ", IP: ", thisIp))
+    con = Client.create(IPv4(0), 0)
+  else
+    con = Client.create(serverIp, serverPort)
+  end
   if Client.isOk(con)
     Event.on(con.observer, Client.EVENT_ANSWER, (ans::Connection.Answer)->_onServerAnswer(side, ans))
     Event.on(con.observer, Client.EVENT_REQUEST, (data::Connection.Command, ans::Connection.Answer)->_onServerRequest(side, data, ans))
