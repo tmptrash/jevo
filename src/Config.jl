@@ -1,8 +1,8 @@
 #
-# Applcation wide configuration. It contains default values for 
+# Applcation wide configuration. It contains default values for
 # different settings. You may change these settings using val()
 # function. Also may be used like intermodule data sharing mechanism.
-# One module may set a value and other module may read it later. 
+# One module may set a value and other module may read it later.
 # Every configuration value may be obtained by unique key. Some
 # settings are used like data containers in sense that, they
 # just store the values, which may be changed many times during
@@ -35,12 +35,12 @@ module Config
   type Data
     #
     # Probabilities with which mutator decides what to do: add,
-    # change, delete character of the code; change amount of 
+    # change, delete character of the code; change amount of
     # mutations or change mutations period... Depending on these
     # values, organism may have different strategies of living.
-    # For example: if add value is bigger then del and change, 
-    # then code size will be grow up all the time. If del value is 
-    # bigger then other, then it will be decreased to zero lines 
+    # For example: if add value is bigger then del and change,
+    # then code size will be grow up all the time. If del value is
+    # bigger then other, then it will be decreased to zero lines
     # of code and will die.
     # Format: [
     #     add          - Probability of adding of new character to the code
@@ -63,7 +63,7 @@ module Config
     #
     ORGANISM_MAX_MUTATIONS_ON_CLONE::Int
     #
-    # Amount of iterations within organism's life loop, after that we 
+    # Amount of iterations within organism's life loop, after that we
     # do mutations according to ORGANISM_MUTATION_AMOUNT config. If 0, then
     # mutations will be disabled. Should be less then ORGANISM_MAX_MUTATION_PERIOD
     #
@@ -73,7 +73,7 @@ module Config
     #
     ORGANISM_MAX_MUTATION_PERIOD::Int
     #
-    # Value, which will be used like amount of mutations per 
+    # Value, which will be used like amount of mutations per
     # ORGANISM_MUTATION_PERIOD iterations. 0 is a possible value if
     # we want to disable mutations. Should be less then config
     # ORGANISM_MAX_MUTATION_AMOUNT.
@@ -89,8 +89,8 @@ module Config
     #
     ORGANISM_START_AMOUNT::Int
     #
-    # Amount of energy for first organisms. They are like Adam and 
-    # Eve. It means that these empty (without code) organism were created 
+    # Amount of energy for first organisms. They are like Adam and
+    # Eve. It means that these empty (without code) organism were created
     # by operator and not by evolution.
     #
     ORGANISM_START_ENERGY::Int
@@ -101,7 +101,7 @@ module Config
     ORGANISM_MAX_ENERGY::Int
     #
     # Amount of iterations within organism's life loop, after that we decrease
-    # amount of energy into ORGANISM_ENERGY_DECREASE_VALUE points. If 0, then energy 
+    # amount of energy into ORGANISM_ENERGY_DECREASE_VALUE points. If 0, then energy
     # decreasing will be disabled.
     #
     ORGANISM_ENERGY_DECREASE_PERIOD::Int
@@ -149,7 +149,7 @@ module Config
     WORLD_FRAME_DELAY::Int
     #
     # IPS (Iteration Per Second). Amount of iterations, which were
-    # occures within one second. One iteration means one for all 
+    # occures within one second. One iteration means one for all
     # organisms in a World. This value will be set many times in main
     # Manager's loop.
     #
@@ -221,6 +221,51 @@ module Config
     # Starting number for TCP/IP listening
     #
     CONNECTION_SERVER_PORT::Int
+    #
+    # Works in pair with CONNECTION_SERVER_PORT. An IP of current
+    # server/instance.
+    # TODO: IPv6?
+    CONNECTION_SERVER_IP::IPv4
+    #
+    # Left side server's (instance) port we want connect to. May be
+    # zero (0) if no left side server available.
+    #
+    CONNECTION_LEFT_SERVER_PORT::Int
+    #
+    # Left server(instance) IP address. Works in pair with
+    # CONNECTION_LEFT_SERVER_PORT
+    #
+    CONNECTION_LEFT_SERVER_IP::IPv4
+    #
+    # Right side server's (instance) port we want connect to. May be
+    # zero (0) if no right side server available.
+    #
+    CONNECTION_RIGHT_SERVER_PORT::Int
+    #
+    # Right server(instance) IP address. Works in pair with
+    # CONNECTION_RIGHT_SERVER_PORT
+    #
+    CONNECTION_RIGHT_SERVER_IP::IPv4
+    #
+    # Left up server's (instance) port we want connect to. May be
+    # zero (0) if no up side server available.
+    #
+    CONNECTION_UP_SERVER_PORT::Int
+    #
+    # Up server(instance) IP address. Works in pair with
+    # CONNECTION_UP_SERVER_PORT
+    #
+    CONNECTION_UP_SERVER_IP::IPv4
+    #
+    # Left down server's (instance) port we want connect to. May be
+    # zero (0) if no down side server available.
+    #
+    CONNECTION_DOWN_SERVER_PORT::Int
+    #
+    # Down server(instance) IP address. Works in pair with
+    # CONNECTION_DOWN_SERVER_PORT
+    #
+    CONNECTION_DOWN_SERVER_IP::IPv4
   end
   #
   # Just a wrapper for Data type to have an ability to update
@@ -284,7 +329,7 @@ module Config
     end
   end
   #
-  # Sets the value by unique key. Works in pair with getter 
+  # Sets the value by unique key. Works in pair with getter
   # val() function
   # @param key Unique key of the value
   # @param value Value we have to set
@@ -335,7 +380,16 @@ module Config
       650,                       # STAT_WIDTH
       500,                       # STAT_HEIGHT
       5,                         # STAT_FRAME_DELAY
-      2000                       # CONNECTION_SERVER_PORT
+      2000,                      # CONNECTION_SERVER_PORT (current server port)
+      ip"127.0.0.1",             # CONNECTION_SERVER_IP
+      2000,                      # CONNECTION_LEFT_SERVER_PORT
+      ip"127.0.0.1",             # CONNECTION_LEFT_SERVER_IP
+      2000,                      # CONNECTION_RIGHT_SERVER_PORT
+      ip"127.0.0.1",             # CONNECTION_RIGHT_SERVER_IP
+      2000,                      # CONNECTION_UP_SERVER_PORT
+      ip"127.0.0.1",             # CONNECTION_UP_SERVER_IP
+      2000,                      # CONNECTION_DOWN_SERVER_PORT
+      ip"127.0.0.1"              # CONNECTION_DOWN_SERVER_IP
     )
   )
 end

@@ -30,8 +30,8 @@ function getRegion(x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
   if (x1 < 1 || x1 > maxWidth)  x1 = maxWidth  end
   if (y1 < 1 || y1 > maxHeight) y1 = maxHeight end
   if (x  < 1 || x  > maxWidth)  x  = 1 end
-  if (y  < 1 || y  > maxHeight) y  = 1 end 
-  
+  if (y  < 1 || y  > maxHeight) y  = 1 end
+
   RpcApi.Region(Manager._data.world.data[y:y1, x:x1], Config.val(:WORLD_IPS))
 end
 #
@@ -52,7 +52,7 @@ end
 #
 # @rpc
 # Creates one task and organism inside this task. Created
-# task will be added to Manager._data.tasks array. Position 
+# task will be added to Manager._data.tasks array. Position
 # may be set or random free position will be used.
 # @param pos Position|nothing Position of the organism
 # @return {Int} Organism id or false if organisms limit is riched
@@ -241,25 +241,81 @@ function _createSimpleOrganism(id::UInt, org::Creature.Organism)
   )
 end
 #
-# Creates server and returns it's ServerConnection type. It 
-# uses porn number provided by "serverPort" command line
+# Creates server and returns it's ServerConnection type. It
+# uses port number provided by "port" command line
 # argument or default one from Config module.
-# @return Connection object
+# @return Server.ServerConnection object
 #
 function _createServer()
-  port = CommandLine.val(Manager._data.params, Manager.ARG_SERVER_PORT)
-  port = port == "" ? Config.val(:CONNECTION_SERVER_PORT) : Int(port)
-  # TODO: ip should be in config
-  con  = Server.create(ip"127.0.0.1", port)
-  Event.on(con.observer, Server.EVENT_COMMAND, _onRemoteCommand)
+  local con::Server.ServerConnection = Server.create(
+    _getIp(Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP),
+    _getPort(Manager.ARG_SERVER_PORT, :CONNECTION_SERVER_PORT)
+  )
+  Event.on(con.observer, Server.EVENT_COMMAND, _onClientCommand)
   con
+end
+#
+# Creates client and returns it's ClientConnection type. It
+# uses port number provided by "XXXport" command line
+# argument or default one from Config module.
+# @param side Server side ("left", "right",...)
+# @return ClientConnection object
+#
+@debug function _createClient(side::ASCIIString)
+  @bp
+  local con::Client.ClientConnection = Client.create(
+    _getIp(  getfield(Manager, symbol("ARG_", side, "_SERVER_IP")),   symbol("CONNECTION_", side, "_SERVER_IP")),
+    _getPort(getfield(Manager, symbol("ARG_", side, "_SERVER_PORT")), symbol("CONNECTION_", side, "_SERVER_PORT"))
+  )
+  if Client.isOk(con)
+    Event.on(con.observer, Client.EVENT_ANSWER, (ans::Connection.Answer)->_onServerAnswer(side, ans))
+    Event.on(con.observer, Client.EVENT_REQUEST, (data::Connection.Command, ans::Connection.Answer)->_onServerRequest(side, data, ans))
+  end
+  con
+end
+#
+# Creates all available server\instance connections data objects
+# and returns them. They are: self server, left, right, up, and
+# down clients.
+# @return Manager.Connections object
+#
+function _createConnections()
+  Manager.Connections(
+    _createServer(),
+    _createClient("LEFT"),
+    _createClient("RIGHT"),
+    _createClient("UP"),
+    _createClient("DOWN")
+  )
+end
+#
+# Handler of answer from remote server(instance) as a result on
+# our request to it.
+# @param side Side name of answering server
+# @param ans Answer data object
+#
+function _onServerAnswer(side::ASCIIString, ans::Connection.Answer)
+  # TODO:
+  println("answer from \"", side, "\" server: ", ans)
+end
+#
+# Handler of input request from remote server to current client.
+# Should fill answer data structure.
+# @param side Remote server side
+# @param data Input comand object
+# @param ans Answer data object we have to fill
+#
+function _onServerRequest(side::ASCIIString, data::Connection.Command, ans::Connection.Answer)
+  # TODO:
+  println("request from \"", side, "\" server: ", data)
+  ans.data = data
 end
 #
 # Handler for commands obtained from all connected clients. All supported
 # commands are in _rpcApi dictionary. If current command is undefinedin _rpcApi
 # then, false will be returned.
 #
-function _onRemoteCommand(cmd::Connection.Command, ans::Connection.Answer)
+function _onClientCommand(cmd::Connection.Command, ans::Connection.Answer)
   ans.data = haskey(_rpcApi, cmd.fn) ? _rpcApi[cmd.fn](cmd.args...) : false
 end
 #

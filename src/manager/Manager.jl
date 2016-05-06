@@ -10,7 +10,6 @@
 # TOSO:   - If file calls Manager function it hould add Manager. before calling
 # TODO: describe that manager is a mediator between all other objects
 # TODO: like world, terminal and so on.
-# TODO: add support of serverPort cmd line argument
 # TODO: add remote functions for changing period and probs
 # TODO: add command line parameter for creating default config file
 # TODO: add create method. It should returm ManagerData() type
@@ -22,10 +21,13 @@ module Manager
   import Helper
   import Event
   import Server
+  import Client
   import Connection
   import CommandLine
   import RpcApi
   import Config
+  # TODO: remove this!
+  using Debug
 
   export run
   #
@@ -34,19 +36,18 @@ module Manager
   include("ManagerRpc.jl")
   include("ManagerOrganism.jl")
   include("ManagerBackup.jl")
+  include("ManagerParams.jl")
   #
-  # This manager is also a server for all other remote managers. These
-  # remote managers are clients for current and may use "Client" module
-  # to send commands and obtain results. So, this command line property
-  # will be used for current manager(server) for listening clients. For
-  # this you have to run Manager like this:
-  # >julia AppManager.jl serverPort=2000
+  # Current Manager connection objects. They are: server and
+  # all four clients
   #
-  const ARG_SERVER_PORT = "serverPort"
-  #
-  # In this mode no terminal output will be produced
-  #
-  const ARG_QUIET = "quiet"
+  type Connections
+    server::Server.ServerConnection
+    left  ::Client.ClientConnection
+    right ::Client.ClientConnection
+    up    ::Client.ClientConnection
+    down  ::Client.ClientConnection
+  end
   #
   # Manager's related type. Contains world, command line parameters,
   # organisms map and so on... If some fields will be changed, don't
@@ -115,14 +116,14 @@ module Manager
     local ips    ::Int = 0
     local stamp  ::Float64 = time()
     local bstamp ::Float64 = time()
-    local server ::Server.ServerConnection = _createServer()
+    local con    ::Connections = _createConnections()
     local params ::Dict{ASCIIString, ASCIIString} = CommandLine.create()
     #
     # This server is listening for all other managers and remote
     # terminal. It runs obtained commands and send answers back.
     # In other words, it works like RPC runner...
     #
-    Server.run(server)
+    Server.run(con.server)
     #
     # If user set up some amount of organisms they will be created
     # in this call. If we are in recover mode, then this step should
