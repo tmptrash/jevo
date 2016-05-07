@@ -3,7 +3,7 @@
 #
 module Helper
   import Gtk
-  
+
   export Pos
   export Point
   export RetObj
@@ -13,7 +13,7 @@ module Helper
   export getSupportedTypes
   export warn
   export error
-  
+
   export SUPPORTED_TYPES
   #
   # Describes organism's code position. This position is used
@@ -132,7 +132,7 @@ module Helper
   end
   #
   # It calculates probability index from variable amount of components.
-  # Let's imagine we have three actions: one, two and three. We want 
+  # Let's imagine we have three actions: one, two and three. We want
   # these actions to be called randomly, but with different probabilities.
   # For example it may be [3,2]. It means that one should be called
   # in half cases, two in 1/3 cases and three in 1/6 cases. Probabilities
@@ -171,6 +171,13 @@ module Helper
   #
   function getSupportedTypes(fn::Function = (t) -> t)
     map(fn, SUPPORTED_TYPES)
+  end
+  #
+  # Checks if position is empty. x == y == 0 - this is empty
+  # @param pos Position to check
+  #
+  function empty(pos::Point)
+    pos.x === pos.y === 0
   end
   #
   # Saves custom data into the file. If file exists, it will
@@ -213,7 +220,7 @@ module Helper
     finally
       if io !== null close(io) end
     end
-    
+
     ret
   end
 

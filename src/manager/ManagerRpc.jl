@@ -296,7 +296,8 @@ function _createConnections()
     _createClient("LEFT"),
     _createClient("RIGHT"),
     _createClient("UP"),
-    _createClient("DOWN")
+    _createClient("DOWN"),
+    Dict{UInt, Creature.Organism}()
   )
 end
 #
@@ -346,9 +347,9 @@ function _onServerRequest(side::ASCIIString, data::Connection.Command, ans::Conn
     return false
   end
   #
-  # Everything is okay
+  # Everything is okay, let's add an organism to the pool
   #
-  Manager._createOrganism(org, )
+  Manager._createOrganism(org, org.pos, true)
   ans.id = RpcApi.RPC_ORG_STEP_OK
 
   true

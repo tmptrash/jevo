@@ -107,8 +107,9 @@ function _updateOrganisms(counter::Int)
   if needClone && len < maxOrgs && len > 0
     probs = Int[]
     for j = 1:len push!(probs, tasks[j].organism.energy) end
-    org = tasks[Helper.getProbIndex(probs)].organism
-    if org.energy > 0 _onClone(org) end
+    j = Helper.getProbIndex(probs)
+    org = tasks[j].organism
+    if org.energy > 0 && !istaskdone(Manager._data.tasks[j].task) _onClone(org) end
   end
   #
   # This block decreases energy from organisms, because they
@@ -149,7 +150,10 @@ function _removeMinOrganisms(tasks::Array{OrganismTask, 1})
   if length(tasks) <= amount return false end
 
   sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
-  for i = 1:amount _killOrganism(i) end
+  for i = 1:amount
+    if istaskdone(task[i].task) continue end
+    _killOrganism(i)
+  end
   #
   # Updates min and max energetic organisms
   #
@@ -178,10 +182,12 @@ function _updateOrganismsEnergy()
     #
     # if the energy of the organism is zero, we have to remove it
     #
-    if org.energy > (decVal + org.codeSize)
-      org.energy -= (decVal + org.codeSize)
-    else
-      _killOrganism(i)
+    if !istaskdone(tasks[i].task)
+      if org.energy > (decVal + org.codeSize)
+        org.energy -= (decVal + org.codeSize)
+      else
+        _killOrganism(i)
+      end
     end
 
     if istaskdone(tasks[i].task) splice!(tasks, i) end
@@ -239,12 +245,38 @@ function _killOrganism(i::Int)
   #
   # This is small hack. It stops the task immediately. We
   # have to do this, because task is a memory leak if we don't
-  # stop (interrupt) it. Real removing of task from Manager._data.tasks
-  # map will be done later. This method only marks the task as
+  # stop (interrupt) it. This method only marks the task as
   # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
   #
   try Base.throwto(Manager._data.tasks[i].task, null) end
   Manager.msg(id, "die")
+end
+#
+# Marks one organism as "frozen". It means that it will be hidden
+# and all other organisms will no ability to interact with him.
+# Removing from tasks pool will be provided in _updateOrganismsEnergy()
+# @param i Index of organism's task
+#
+function _freezeOrganism(i::Int)
+  local id::UInt = Manager._data.tasks[i].id
+  local org::Creature.Organism = Manager._data.tasks[i].organism
+  local oldColor::UInt32 = org.color
+
+  org.color = UInt32(0)
+  Event.clear(org.observer)
+  _moveOrganism(org.pos, org)
+  org.color = oldColor
+  delete!(Manager._data.positions, @getPosId(org.pos))
+  delete!(Manager._data.organisms, id)
+  #
+  # This is small hack. It stops the task immediately. We
+  # have to do this, because task is a memory leak if we don't
+  # stop (interrupt) it. This method only marks the task as
+  # "frozen". Real deletion will be provided in _updateOrganismsEnergy().
+  #
+  try Base.throwto(Manager._data.tasks[i].task, null) end
+  Manager._cons.frozen[org.id] = org
+  Manager.msg(id, "frozen")
 end
 #
 # Creates new organism and binds event handlers to him. It also
@@ -255,12 +287,13 @@ end
 # @param add We need just add existing organism to the world
 # @return {OrganismTask}
 # TODO: set type for arguments
-function _createOrganism(organism = nothing, pos = nothing, add::Bool = false)
-  pos  = organism !== nothing && pos === nothing ? World.getNearFreePos(Manager._data.world, organism.pos) : (pos === nothing ? World.getFreePos(Manager._data.world) : pos)
+function _createOrganism(organism = nothing, pos::Helper.Point = Helper.Point(0,0), add::Bool = false)
+  pos = organism !== nothing && Helper.empty(pos) ? World.getNearFreePos(Manager._data.world, organism.pos) : (Helper.empty(pos) ? World.getFreePos(Manager._data.world) : pos)
   if pos === false return false end
-  id   = Manager._data.organismId
-  org  = organism === nothing ? Creature.create(id, pos) : deepcopy(organism)
-  task = Task(Creature.born(org, id))
+  local id::UInt = Manager._data.organismId
+  local org::Creature.Organism = organism === nothing ? Creature.create(id, pos) : add ? organism : deepcopy(organism)
+  local task::Task = Task(Creature.born(org, id))
+  local oTask::OrganismTask = OrganismTask(id, task, org)
 
   org.pos = pos
   #
@@ -285,7 +318,6 @@ function _createOrganism(organism = nothing, pos = nothing, add::Bool = false)
   #
   # Adds organism to organisms pool
   #
-  oTask = OrganismTask(id, task, org)
   Manager._data.organismId += 1
   Manager._data.organisms[id] = org
   Manager._data.positions[@getPosId(org.pos)] = org
@@ -315,25 +347,17 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   # kill him in current Manager/instance.
   #
   if pos.x < 1
-    if !Client.isOk(Manager._cons.left) return false end
-    if Client.request(Manager._cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism)
-      _killOrganism(findfirst((t) -> t.organism === organism, Manager._data.tasks))
-    end
+    if !Client.isOk(Manager._cons.left)  || !Client.request(Manager._cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism) return false end
+    Manager._cons.frozen[organism.id] = organism
   elseif pos.x > Manager._data.world.width
-    if !Client.isOk(Manager._cons.right) return false end
-    if Client.request(Manager._cons.right, RpcApi.RPC_ORG_STEP_RIGHT, organism)
-      _killOrganism(findfirst((t) -> t.organism === organism, Manager._data.tasks))
-    end
+    if !Client.isOk(Manager._cons.right) || !Client.request(Manager._cons.right, RpcApi.RPC_ORG_STEP_RIGHT, organism) return false end
+    Manager._cons.frozen[organism.id] = organism
   elseif pos.y < 1
-    if !Client.isOk(Manager._cons.up) return false end
-    if Client.request(Manager._cons.up, RpcApi.RPC_ORG_STEP_UP, organism)
-      _killOrganism(findfirst((t) -> t.organism === organism, Manager._data.tasks))
-    end
+    if !Client.isOk(Manager._cons.up)    || !Client.request(Manager._cons.up, RpcApi.RPC_ORG_STEP_UP, organism) return false end
+    Manager._cons.frozen[organism.id] = organism
   elseif pos.y > Manager._data.world.height
-    if !Client.isOk(Manager._cons.down) return false end
-    if Client.request(Manager._cons.down, RpcApi.RPC_ORG_STEP_DOWN, organism)
-      _killOrganism(findfirst((t) -> t.organism === organism, Manager._data.tasks))
-    end
+    if !Client.isOk(Manager._cons.down)  || !Client.request(Manager._cons.down, RpcApi.RPC_ORG_STEP_DOWN, organism) return false end
+    Manager._cons.frozen[organism.id] = organism
   end
   #
   # Destination position, where organism wants step to is not
@@ -484,6 +508,10 @@ end
 function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, retObj::Helper.RetObj)
   local id::Int = @getPosId(pos)
   local org::Creature.Organism
+
+  if haskey(Manager._cons.frozen, org.id)
+    return retObj.ret = 0
+  end
   #
   # If other organism at the position of the check,
   # then grab energy from it
@@ -524,5 +552,7 @@ end
 # @param pos Point where we should check the energy
 #
 function _onStep(organism::Creature.Organism, pos::Helper.Point)
-  _moveOrganism(pos, organism)
+  if !haskey(Manager._cons.frozen, org.id)
+    _moveOrganism(pos, organism)
+  end
 end

@@ -7,12 +7,13 @@
 # TODO: describe included files and how to split Manager on files.
 # TODO:   - Manager may call every function from any file
 # TODO:   - File may call every function except other files
-# TOSO:   - If file calls Manager function it hould add Manager. before calling
+# TODO:   - If file calls Manager function it hould add Manager. before calling
 # TODO: describe that manager is a mediator between all other objects
 # TODO: like world, terminal and so on.
 # TODO: add remote functions for changing period and probs
 # TODO: add command line parameter for creating default config file
 # TODO: add create method. It should returm ManagerData() type
+# TODO: describe frozen organisms conception
 #
 module Manager
   import Creature
@@ -39,7 +40,9 @@ module Manager
   include("ManagerParams.jl")
   #
   # Current Manager connection objects. They are: server and
-  # all four clients
+  # all four clients. "frozen" field is used for storing "frozen"
+  # organisms (which are transferring from current Manager to
+  # another one by network).
   #
   type Connections
     server::Server.ServerConnection
@@ -47,6 +50,7 @@ module Manager
     right ::Client.ClientConnection
     up    ::Client.ClientConnection
     down  ::Client.ClientConnection
+    frozen::Dict{UInt, Creature.Organism}
   end
   #
   # Manager's related type. Contains world, command line parameters,
