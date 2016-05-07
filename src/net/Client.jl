@@ -83,6 +83,8 @@ module Client
   # Creates client and it's possibility to send requests to server.
   # In case of connection errors connection object will be created
   # in any case. You have to check this calling isopen() function.
+  # Using zero port you may create "empty" connection. In fact,
+  # client will not be created/started.
   # @param host Host we are connecting to
   # @param port Port number we are connecting to
   # @return Client connection object
@@ -91,19 +93,21 @@ module Client
     local sock::Any = null
     local obs::Event.Observer = Event.create()
 
-    try
-      sock = Base.connect(host, port)
-      #
-      # All "magic" occures here. This is how we start answers
-      # handling. It listens clients responses all the time
-      # using green thread (Task).
-      #
-      @async while _answer(sock, obs) end
-    catch e
-      Helper.warn("Client.create(): $e")
-      if sock !== null close(sock) end
+    if port > 0
+      try
+        sock = Base.connect(host, port)
+        #
+        # All "magic" occures here. This is how we start answers
+        # handling. It listens clients responses all the time
+        # using green thread (Task).
+        #
+        @async while _answer(sock, obs) end
+      catch e
+        Helper.warn("Client.create(): $e")
+        if sock !== null close(sock) end
+      end
+      yield()
     end
-    yield()
 
     sock !== null ? Client.ClientConnection(sock, obs) : Client.ClientConnection(Base.TCPSocket(), obs)
   end

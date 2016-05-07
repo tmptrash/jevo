@@ -382,13 +382,13 @@ module Config
       5,                         # STAT_FRAME_DELAY
       2000,                      # CONNECTION_SERVER_PORT (current server port)
       ip"127.0.0.1",             # CONNECTION_SERVER_IP
-      2000,                      # CONNECTION_LEFT_SERVER_PORT
+      0,                         # CONNECTION_LEFT_SERVER_PORT
       ip"127.0.0.1",             # CONNECTION_LEFT_SERVER_IP
-      2000,                      # CONNECTION_RIGHT_SERVER_PORT
+      0,                         # CONNECTION_RIGHT_SERVER_PORT
       ip"127.0.0.1",             # CONNECTION_RIGHT_SERVER_IP
-      2000,                      # CONNECTION_UP_SERVER_PORT
+      0,                         # CONNECTION_UP_SERVER_PORT
       ip"127.0.0.1",             # CONNECTION_UP_SERVER_IP
-      2000,                      # CONNECTION_DOWN_SERVER_PORT
+      0,                         # CONNECTION_DOWN_SERVER_PORT
       ip"127.0.0.1"              # CONNECTION_DOWN_SERVER_IP
     )
   )

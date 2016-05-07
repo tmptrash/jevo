@@ -1,5 +1,5 @@
 #
-# This is a part of Manager module. This part is related to 
+# This is a part of Manager module. This part is related to
 # organisms logic and behavior.
 #
 # @author DeadbraiN
@@ -10,6 +10,7 @@ import Creature
 import Mutator
 import Event
 import World
+import RpcApi
 #
 # One task related to one organism
 #
@@ -58,7 +59,7 @@ function _updateOrganisms(counter::Int)
   local needClone::Bool = cloneAfter === 0 ? false : counter % cloneAfter === 0
   local tasks::Array{OrganismTask, 1} = Manager._data.tasks
   local len::Int = length(tasks)
-  local maxOrgs::Int = Config.val(:WORLD_MAX_ORGANISMS) 
+  local maxOrgs::Int = Config.val(:WORLD_MAX_ORGANISMS)
   local task::OrganismTask
 
   counter += 1
@@ -79,7 +80,7 @@ function _updateOrganisms(counter::Int)
       #
       # This is how we mutate organisms during their life.
       # Mutations occures according to organisms settings.
-      # If mutationPeriod or mutationAmount set to 0, it 
+      # If mutationPeriod or mutationAmount set to 0, it
       # means that mutations during leaving are disabled.
       # Mutation will be automatically applied if organism
       # doesn't contain any code line.
@@ -94,7 +95,7 @@ function _updateOrganisms(counter::Int)
     end
   end
   #
-  # Cloning procedure. The meaning of this is in ability to 
+  # Cloning procedure. The meaning of this is in ability to
   # produce children as fast as much energy has an organism.
   # If organism has high energy value, then it will produce
   # more copies and these copies will produce other organisms
@@ -110,7 +111,7 @@ function _updateOrganisms(counter::Int)
     if org.energy > 0 _onClone(org) end
   end
   #
-  # This block decreases energy from organisms, because they 
+  # This block decreases energy from organisms, because they
   # spend it while leaving.
   #
   if counter % Config.val(:ORGANISM_ENERGY_DECREASE_PERIOD) === 0
@@ -219,9 +220,9 @@ function _updateWorldEnergy()
   end
 end
 #
-# Marks one organism as "removed". Deletion will be done in 
+# Marks one organism as "removed". Deletion will be done in
 # _updateOrganismsEnergy() function.
-# @param i Index of current task
+# @param i Index of organism's task
 #
 function _killOrganism(i::Int)
   if i === 0 || istaskdone(Manager._data.tasks[i].task) return false end
@@ -236,10 +237,10 @@ function _killOrganism(i::Int)
   delete!(Manager._data.positions, @getPosId(org.pos))
   delete!(Manager._data.organisms, id)
   #
-  # This is small hack. It stops the task immediately. We 
+  # This is small hack. It stops the task immediately. We
   # have to do this, because task is a memory leak if we don't
   # stop (interrupt) it. Real removing of task from Manager._data.tasks
-  # map will be done later. This method only marks the task as 
+  # map will be done later. This method only marks the task as
   # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
   #
   try Base.throwto(Manager._data.tasks[i].task, null) end
@@ -248,15 +249,17 @@ end
 #
 # Creates new organism and binds event handlers to him. It also
 # finds free point in a world, where organism will start living.
+# If add === true, we have to add it to organisms pool.
 # @param org Organism we have to copy. Optional.
 # @param pos Optional. Position of organism.
+# @param add We need just add existing organism to the world
 # @return {OrganismTask}
-#
-function _createOrganism(organism = nothing, pos = nothing)
+# TODO: set type for arguments
+function _createOrganism(organism = nothing, pos = nothing, add::Bool = false)
   pos  = organism !== nothing && pos === nothing ? World.getNearFreePos(Manager._data.world, organism.pos) : (pos === nothing ? World.getFreePos(Manager._data.world) : pos)
   if pos === false return false end
-  org  = organism === nothing ? Creature.create(pos) : deepcopy(organism)
   id   = Manager._data.organismId
+  org  = organism === nothing ? Creature.create(id, pos) : deepcopy(organism)
   task = Task(Creature.born(org, id))
 
   org.pos = pos
@@ -283,18 +286,18 @@ function _createOrganism(organism = nothing, pos = nothing)
   # Adds organism to organisms pool
   #
   oTask = OrganismTask(id, task, org)
-  Manager._data.organismId += UInt(1)
+  Manager._data.organismId += 1
   Manager._data.organisms[id] = org
   Manager._data.positions[@getPosId(org.pos)] = org
   push!(Manager._data.tasks, oTask)
-  Manager._data.totalOrganisms += UInt(1)
-  Manager.msg(id, "run")
+  Manager._data.totalOrganisms += 1
+  Manager.msg(id, "born")
 
   oTask
 end
 #
-# Moves organism to specified position. Updates organism's 
-# position and set new one into the Manager._data.positions. Removes 
+# Moves organism to specified position. Updates organism's
+# position and set new one into the Manager._data.positions. Removes
 # organism's previous position from Manager._data.positions.
 # @param pos New position
 # @param organism Organism to move
@@ -304,15 +307,39 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   local idNew::Int = @getPosId(pos)
   local idOld::Int = @getPosId(organism.pos)
   #
-  # TODO: this is a place where organism may step to another area (instance).
-  # TODO: this functionality will be implemented in future versions...
+  # Organism try step outside of current instance. If near
+  # instance is ready, we may teleport him there. We also
+  # have to decrease energy to prevent network overload.
+  # Energy decrease should be provided on destination Manager.
+  # If network is ok and we may send an organism, we have to
+  # kill him in current Manager/instance.
   #
-  if pos.x > Manager._data.world.width  || pos.x < 1 ||
-     pos.y > Manager._data.world.height || pos.y < 1 ||
-     idOld !== idNew && (
-       haskey(Manager._data.positions, idNew) || 
-       World.getEnergy(Manager._data.world, pos) > UInt32(0)
-     )
+  if pos.x < 1
+    if !Client.isOk(Manager._cons.left) return false end
+    if Client.request(Manager._cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism)
+      _killOrganism(findfirst((t) -> t.organism === organism, Manager._data.tasks))
+    end
+  elseif pos.x > Manager._data.world.width
+    if !Client.isOk(Manager._cons.right) return false end
+    if Client.request(Manager._cons.right, RpcApi.RPC_ORG_STEP_RIGHT, organism)
+      _killOrganism(findfirst((t) -> t.organism === organism, Manager._data.tasks))
+    end
+  elseif pos.y < 1
+    if !Client.isOk(Manager._cons.up) return false end
+    if Client.request(Manager._cons.up, RpcApi.RPC_ORG_STEP_UP, organism)
+      _killOrganism(findfirst((t) -> t.organism === organism, Manager._data.tasks))
+    end
+  elseif pos.y > Manager._data.world.height
+    if !Client.isOk(Manager._cons.down) return false end
+    if Client.request(Manager._cons.down, RpcApi.RPC_ORG_STEP_DOWN, organism)
+      _killOrganism(findfirst((t) -> t.organism === organism, Manager._data.tasks))
+    end
+  end
+  #
+  # Destination position, where organism wants step to is not
+  # empty. Other organism or an energy block is there.
+  #
+  if idOld !== idNew && (haskey(Manager._data.positions, idNew) || World.getEnergy(Manager._data.world, pos) > UInt32(0))
      return false
   end
   #
@@ -446,8 +473,8 @@ function _onStepDown(organism::Creature.Organism)
   _onStep(organism, Helper.Point(organism.pos.x, organism.pos.y + 1))
 end
 #
-# Grabs energy on specified point. It grabs the energy and 
-# checks if other organism was at that position. If so, then 
+# Grabs energy on specified point. It grabs the energy and
+# checks if other organism was at that position. If so, then
 # it decrease an energy of this other organism.
 # @param organism Organism who grabs
 # @param amount Amount of energy he wants to grab
@@ -458,7 +485,7 @@ function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, re
   local id::Int = @getPosId(pos)
   local org::Creature.Organism
   #
-  # If other organism at the position of the check, 
+  # If other organism at the position of the check,
   # then grab energy from it
   #
   if haskey(Manager._data.positions, id)
@@ -468,6 +495,7 @@ function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, re
     #
     if amount < 1
       if organism.energy <= abs(amount)
+        # TODO: possibly slow code!
         _killOrganism(findfirst((t) -> t.organism === organism, Manager._data.tasks))
         amount = -organism.energy
       end

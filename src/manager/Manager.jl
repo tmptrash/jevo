@@ -116,14 +116,13 @@ module Manager
     local ips    ::Int = 0
     local stamp  ::Float64 = time()
     local bstamp ::Float64 = time()
-    local con    ::Connections = _createConnections()
     local params ::Dict{ASCIIString, ASCIIString} = CommandLine.create()
     #
     # This server is listening for all other managers and remote
     # terminal. It runs obtained commands and send answers back.
     # In other words, it works like RPC runner...
     #
-    Server.run(con.server)
+    Server.run(_cons.server)
     #
     # If user set up some amount of organisms they will be created
     # in this call. If we are in recover mode, then this step should
@@ -212,4 +211,8 @@ module Manager
     UInt(0),
     CommandLine.has(CommandLine.create(), ARG_QUIET)
   )
+  #
+  # Current Manager/instance all available connections
+  #
+  global _cons = _createConnections()
 end

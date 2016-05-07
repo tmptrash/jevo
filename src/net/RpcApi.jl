@@ -23,7 +23,7 @@ module RpcApi
   export RPC_SET_ENERGY_RND
   export RPC_BACKUP
   export RPC_GET_STATISTICS
-  
+
   export Region
   export SimpleOrganism
   #
@@ -34,7 +34,7 @@ module RpcApi
     ips::Int
   end
   #
-  # This is an analog of Creature.Organism type. It's used for 
+  # This is an analog of Creature.Organism type. It's used for
   # transporting more simple version of organism data through
   # network.
   #
@@ -63,14 +63,14 @@ module RpcApi
     mutationsOnClone::Int
     #
     # @inheritable
-    # Amount of iterations within organism's life loop, after that we 
+    # Amount of iterations within organism's life loop, after that we
     # do mutations according to MUTATE_AMOUNT config amount. If 0, then
     # mutations will be disabled.
     #
     mutationPeriod::Int
     #
     # @inheritable
-    # Value, which will be used like amount of mutations per 
+    # Value, which will be used like amount of mutations per
     # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
     # we want to disable mutations.
     #
@@ -91,7 +91,7 @@ module RpcApi
     #
     mem::Dict{Int16, Int16}
     #
-    # Organism's position in a 2D world. Starts from (1,1) 
+    # Organism's position in a 2D world. Starts from (1,1)
     # ends with (WORLD_WIDTH, WORLD_HEIGHT) configurations.
     #
     pos::Array{Int, 1}
@@ -157,4 +157,17 @@ module RpcApi
   const RPC_BACKUP            = 14
   const RPC_GET_STATISTICS    = 15
   const RPC_GET_BEST          = 16
+  #
+  # These IDs are for inter-instances communication. This is
+  # something like internal protocol between Managers/servers.
+  #
+  const RPC_ORG_STEP_LEFT     = 1001
+  const RPC_ORG_STEP_RIGHT    = 1002
+  const RPC_ORG_STEP_UP       = 1003
+  const RPC_ORG_STEP_DOWN     = 1004
+  #
+  # Means that step from one instance to another has finished
+  #
+  const RPC_ORG_STEP_OK       = 1005
+  const RPC_ORG_STEP_FAIL     = 1006
 end

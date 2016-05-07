@@ -1,7 +1,7 @@
 #
 # Client/Server common declarations. Is used in Client, Server
 # and parent code.
-# 
+#
 # @author DeadbraiN
 #
 module Connection
@@ -22,6 +22,7 @@ module Connection
   # data property contains Server response value.
   #
   type Answer
+    id::Int
     data::Any
   end
 end

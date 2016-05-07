@@ -270,6 +270,10 @@ function _createClient(side::ASCIIString)
 
   if serverPort === thisPort && serverIp === thisIp
     Helper.error(string("Error creating Client for ", side, " server. Remote port and IP are similar to current. Port: ", thisPort, ", IP: ", thisIp))
+    # TODO: is zero based address + port correct?
+    con = Client.create(IPv4(0), 0)
+  elseif serverPort === 0
+    # TODO: is zero based address + port correct?
     con = Client.create(IPv4(0), 0)
   else
     con = Client.create(serverIp, serverPort)
@@ -313,9 +317,41 @@ end
 # @param ans Answer data object we have to fill
 #
 function _onServerRequest(side::ASCIIString, data::Connection.Command, ans::Connection.Answer)
-  # TODO:
-  println("request from \"", side, "\" server: ", data)
-  ans.data = data
+  local org::Creature.Organism
+  local pos::Helper.Point
+  #
+  # This request means, that one organism wants to step outside
+  # of it's current Manager/instance into this one. We have
+  # to send OK response, which means, that we obtain an organism
+  # and added him into the organisms pool. data.args[1] contains
+  # organism. We also have to decrease organism's energy, because
+  # moving between instances it's network performance issue.
+  #
+  ans.data = org.id
+  org      = data.args[1]
+  pos      = org.pos
+  if     data.fn === RpcApi.RPC_ORG_STEP_RIGHT && side === "LEFT"  pos.x = 1
+  elseif data.fn === RpcApi.RPC_ORG_STEP_LEFT  && side === "RIGHT" pos.x = Manager._data.world.width
+  elseif data.fn === RpcApi.RPC_ORG_STEP_DOWN  && side === "UP"    pos.y = 1
+  elseif data.fn === RpcApi.RPC_ORG_STEP_UP    && side === "DOWN"  pos.y = Manager._data.world.height
+  end
+  #
+  # Something on a way of organism or maximum amount of organisms
+  # were reached. So he can't move there at the moment.
+  #
+  if haskey(Manager._data.positions, @getPosId(pos))       ||
+     World.getEnergy(Manager._data.world, pos) > UInt32(0) ||
+     length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS)
+    ans.id = RpcApi.RPC_ORG_STEP_FAIL
+    return false
+  end
+  #
+  # Everything is okay
+  #
+  Manager._createOrganism(org, )
+  ans.id = RpcApi.RPC_ORG_STEP_OK
+
+  true
 end
 #
 # Handler for commands obtained from all connected clients. All supported

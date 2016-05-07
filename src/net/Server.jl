@@ -118,6 +118,8 @@ module Server
   # server's related tasks. See Server.ServerConnection type for
   # details. It doesn't run the server (use run() method for this), but
   # it start to listen specified host and port using Base.listen() method.
+  # Setting port to zero you may create "empty" connection. In fact, in
+  # this case, server will not be created and will not work.
   # @param host Host we are listening to
   # @param port Port we are listening to
   # @return {Server.ServerConnection} Server's related data object
@@ -126,15 +128,17 @@ module Server
     local tasks::Array{Task, 1} = Task[]
     local socks::Array{Base.TCPSocket, 1} = Base.TCPSocket[]
     local obs::Event.Observer = Event.create()
-    local serCon::ServerConnection
+    local con::ServerConnection
 
-    try
-      local server::Base.TCPServer = listen(host, port)
-      serCon = ServerConnection(tasks, socks, server, obs, host, port)
-      Helper.info(string("Server created: ", host, ":", port))
-      return serCon
-    catch e
-      Helper.warn("Server.create(): $e")
+    if port > 0
+      try
+        local server::Base.TCPServer = listen(host, port)
+        con = ServerConnection(tasks, socks, server, obs, host, port)
+        Helper.info(string("Server created: ", host, ":", port))
+        return con
+      catch e
+        Helper.warn("Server.create(): $e")
+      end
     end
 
     ServerConnection(tasks, socks, Base.TCPServer(), obs, host, port)
