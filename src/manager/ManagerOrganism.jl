@@ -338,6 +338,7 @@ end
 function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   local idNew::Int = @getPosId(pos)
   local idOld::Int = @getPosId(organism.pos)
+  local freeze::Bool = false
   #
   # Organism try step outside of current instance. If near
   # instance is ready, we may teleport him there. We also
@@ -348,16 +349,25 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   #
   if pos.x < 1
     if !Client.isOk(Manager._cons.left)  || !Client.request(Manager._cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism) return false end
-    Manager._cons.frozen[organism.id] = organism
+    freeze = true
   elseif pos.x > Manager._data.world.width
     if !Client.isOk(Manager._cons.right) || !Client.request(Manager._cons.right, RpcApi.RPC_ORG_STEP_RIGHT, organism) return false end
-    Manager._cons.frozen[organism.id] = organism
+    freeze = true
   elseif pos.y < 1
     if !Client.isOk(Manager._cons.up)    || !Client.request(Manager._cons.up, RpcApi.RPC_ORG_STEP_UP, organism) return false end
-    Manager._cons.frozen[organism.id] = organism
+    freeze = true
   elseif pos.y > Manager._data.world.height
     if !Client.isOk(Manager._cons.down)  || !Client.request(Manager._cons.down, RpcApi.RPC_ORG_STEP_DOWN, organism) return false end
-    Manager._cons.frozen[organism.id] = organism
+    freeze = true
+  end
+  #
+  # We have to freeze the organism and throw an error to interrupt
+  # organism's code running
+  #
+  if freeze
+    # TODO: possibly slow code!
+    _freezeOrganism(findfirst((t) -> t.organism === organism, Manager._data.tasks))
+    error("Organism is interrupted, because of freeze")
   end
   #
   # Destination position, where organism wants step to is not

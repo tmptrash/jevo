@@ -218,6 +218,11 @@ module Config
     # TODO: should be removed from here. It doesn't related to Manager
     STAT_FRAME_DELAY::Int
     #
+    # Percent of energy, which will be minused from organism after
+    # stepping from one instance to another.
+    #
+    CONNECTION_STEP_ENERGY_PERCENT::Int
+    #
     # Starting number for TCP/IP listening
     #
     CONNECTION_SERVER_PORT::Int
@@ -380,6 +385,7 @@ module Config
       650,                       # STAT_WIDTH
       500,                       # STAT_HEIGHT
       5,                         # STAT_FRAME_DELAY
+      20,                        # CONNECTION_STEP_ENERGY_PERCENT
       2000,                      # CONNECTION_SERVER_PORT (current server port)
       ip"127.0.0.1",             # CONNECTION_SERVER_IP
       0,                         # CONNECTION_LEFT_SERVER_PORT

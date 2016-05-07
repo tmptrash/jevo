@@ -302,13 +302,28 @@ function _createConnections()
 end
 #
 # Handler of answer from remote server(instance) as a result on
-# our request to it.
+# our request to it. ans.id contains success code, ans.data contains
+# organism unique id.
 # @param side Side name of answering server
 # @param ans Answer data object
 #
 function _onServerAnswer(side::ASCIIString, ans::Connection.Answer)
-  # TODO:
-  println("answer from \"", side, "\" server: ", ans)
+  local org::Creature.Organism = Manager._cons.frozen[ans.data]
+
+  delete!(Manager._cons.frozen, ans.data)
+  if ans.id !== RpcApi.RPC_ORG_STEP_OK
+    if World.getEnergy(Manager._data.world, pos) > UInt32(0)
+      pos = World.getNearFreePos(Manager._data.world, org.pos)
+      #
+      # If there is no free space, we have to kill this frozen organism
+      #
+      if pos === false return false end
+    else
+      Manager._createOrganism(org, org.pos, true)
+    end
+  end
+
+  true
 end
 #
 # Handler of input request from remote server to current client.
@@ -350,6 +365,7 @@ function _onServerRequest(side::ASCIIString, data::Connection.Command, ans::Conn
   # Everything is okay, let's add an organism to the pool
   #
   Manager._createOrganism(org, org.pos, true)
+  org.energy -= div(org.energy * Config.val(:CONNECTION_STEP_ENERGY_PERCENT), 100)
   ans.id = RpcApi.RPC_ORG_STEP_OK
 
   true
