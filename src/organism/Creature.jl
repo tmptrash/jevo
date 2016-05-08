@@ -198,7 +198,7 @@ module Creature
   # @param pos Position of organism
   # @return {Creature}
   #
-  function create(id::UInt = 0, pos::Helper.Point = Helper.Point(1, 1))
+  function create(id::UInt = UInt(0), pos::Helper.Point = Helper.Point(1, 1))
     #
     # This is main function of current organism. Expression
     # below means: function (o) return true end

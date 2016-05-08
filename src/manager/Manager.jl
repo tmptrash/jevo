@@ -34,8 +34,8 @@ module Manager
   #
   # This is how we collect Manager module from it's parts(files)
   #
-  include("ManagerRpc.jl")
   include("ManagerOrganism.jl")
+  include("ManagerRpc.jl")
   include("ManagerBackup.jl")
   include("ManagerParams.jl")
   #

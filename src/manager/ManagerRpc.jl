@@ -58,7 +58,7 @@ end
 # @return {Int} Organism id or false if organisms limit is riched
 # TODO: change the constructor to support Position() without
 # TODO: parameters for optimization. We have to remove nothing
-function createOrganism(pos = nothing)
+function createOrganism(pos::Helper.Point = Helper.Point(0, 0))
   if length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS) return false end
   orgTask = Manager._createOrganism(nothing, pos)
   orgTask === false ? false : orgTask.id
