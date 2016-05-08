@@ -9,6 +9,7 @@ module Terminal
   import RpcApi
   import Config
   import Client
+  import Helper
   import Connection
   import Creature
 

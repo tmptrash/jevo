@@ -151,7 +151,7 @@ function _removeMinOrganisms(tasks::Array{OrganismTask, 1})
 
   sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
   for i = 1:amount
-    if istaskdone(task[i].task) continue end
+    if istaskdone(tasks[i].task) continue end
     _killOrganism(i)
   end
   #

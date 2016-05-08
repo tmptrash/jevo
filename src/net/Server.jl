@@ -282,7 +282,7 @@ module Server
       if typeof(data) === Connection.Answer
         Event.fire(obs, EVENT_ANSWER, data)
       else # Connection.Command
-        local ans::Connection.Answer = Connection.Answer(null)
+        local ans::Connection.Answer = Connection.Answer(0, null)
         Event.fire(obs, EVENT_COMMAND, data, ans)
         serialize(sock, ans)
       end
