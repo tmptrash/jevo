@@ -27,6 +27,7 @@ module Manager
   import CommandLine
   import RpcApi
   import Config
+  import ManagerTypes
   # TODO: remove this!
   using Debug
 
@@ -74,7 +75,7 @@ module Manager
     #
     # All available organism's tasks
     #
-    tasks::Array{OrganismTask, 1}
+    tasks::Array{ManagerTypes.OrganismTask, 1}
     #
     # Parameters passed through command line
     #
@@ -120,7 +121,6 @@ module Manager
     local ips    ::Int = 0
     local stamp  ::Float64 = time()
     local bstamp ::Float64 = time()
-    local params ::Dict{ASCIIString, ASCIIString} = CommandLine.create()
     #
     # This server is listening for all other managers and remote
     # terminal. It runs obtained commands and send answers back.
@@ -205,7 +205,7 @@ module Manager
     World.create(),
     Dict{Int, Creature.Organism}(),
     Dict{UInt, Creature.Organism}(),
-    OrganismTask[],
+    ManagerTypes.OrganismTask[],
     CommandLine.create(),
     UInt(0),
     UInt(0),

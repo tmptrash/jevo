@@ -11,23 +11,7 @@ import Mutator
 import Event
 import World
 import RpcApi
-#
-# One task related to one organism
-#
-type OrganismTask
-  #
-  # Organism unique id
-  #
-  id::UInt
-  #
-  # Task object. With it we may use green
-  #
-  task::Task
-  #
-  # One organism
-  #
-  organism::Creature.Organism
-end
+import ManagerTypes
 #
 # Generates unique id by world position. This macro is
 # private insode Manager module
@@ -57,10 +41,10 @@ function _updateOrganisms(counter::Int)
   local probs::Array{Int, 1}
   local cloneAfter::Int = Config.val(:ORGANISM_CLONE_AFTER_TIMES)
   local needClone::Bool = cloneAfter === 0 ? false : counter % cloneAfter === 0
-  local tasks::Array{OrganismTask, 1} = Manager._data.tasks
+  local tasks::Array{ManagerTypes.OrganismTask, 1} = Manager._data.tasks
   local len::Int = length(tasks)
   local maxOrgs::Int = Config.val(:WORLD_MAX_ORGANISMS)
-  local task::OrganismTask
+  local task::ManagerTypes.OrganismTask
 
   counter += 1
   #
@@ -143,7 +127,7 @@ end
 # organisms is set in ORGANISM_REMOVE_AMOUNT config.
 # @param tasks Array of tasks with organisms inside
 #
-function _removeMinOrganisms(tasks::Array{OrganismTask, 1})
+function _removeMinOrganisms(tasks::Array{ManagerTypes.OrganismTask, 1})
   local amount::Int = Config.val(:ORGANISM_REMOVE_AMOUNT)
   local i::Int
 
@@ -171,7 +155,7 @@ end
 #
 function _updateOrganismsEnergy()
   local decVal::Int = Config.val(:ORGANISM_ENERGY_DECREASE_VALUE)
-  local tasks::Array{OrganismTask, 1} = Manager._data.tasks
+  local tasks::Array{ManagerTypes.OrganismTask, 1} = Manager._data.tasks
   #
   # We have to go through tasks in reverse way, because we may
   # remove some elements inside while loop.
@@ -285,7 +269,7 @@ end
 # @param org Organism we have to copy. Optional.
 # @param pos Optional. Position of organism.
 # @param add We need just add existing organism to the world
-# @return {OrganismTask}
+# @return {ManagerTypes.OrganismTask}
 # TODO: set type for arguments
 function _createOrganism(organism = nothing, pos::Helper.Point = Helper.Point(0,0), add::Bool = false)
   pos = organism !== nothing && Helper.empty(pos) ? World.getNearFreePos(Manager._data.world, organism.pos) : (Helper.empty(pos) ? World.getFreePos(Manager._data.world) : pos)
@@ -293,7 +277,7 @@ function _createOrganism(organism = nothing, pos::Helper.Point = Helper.Point(0,
   local id::UInt = Manager._data.organismId
   local org::Creature.Organism = organism === nothing ? Creature.create(id, pos) : add ? organism : deepcopy(organism)
   local task::Task = Task(Creature.born(org, id))
-  local oTask::OrganismTask = OrganismTask(id, task, org)
+  local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, task, org)
 
   org.pos = pos
   #
