@@ -15,6 +15,7 @@ import CommandLine
 import Event
 import Server
 import Connection
+import ManagerTypes
 #
 # @rpc
 # Grabs world's rectangle region and returns it
@@ -40,12 +41,11 @@ end
 # will be in Manager._data.tasks field.
 #
 function createOrganisms()
-  local i::Int
   Helper.info("Creating organisms...")
   #
   # Inits available organisms in Tasks
   #
-  for i = 1:Config.val(:ORGANISM_START_AMOUNT) createOrganism() end
+  for i::Int = 1:Config.val(:ORGANISM_START_AMOUNT) createOrganism() end
 
   true
 end
@@ -171,9 +171,8 @@ end
 # @param energy Amount of energy within one point
 #
 function setRandomEnergy(amount::Int = Config.val(:WORLD_START_ENERGY_BLOCKS), energy::UInt32 = Config.val(:WORLD_START_ENERGY_AMOUNT))
-  local i::Int
   Helper.info("Creating random energy...")
-  for i = 1:amount
+  for i::Int = 1:amount
     setEnergy(rand(1:Manager._data.world.width), rand(1:Manager._data.world.height), energy)
   end
 end
@@ -241,20 +240,6 @@ function _createSimpleOrganism(id::UInt, org::Creature.Organism)
   )
 end
 #
-# Creates server and returns it's ServerConnection type. It
-# uses port number provided by "port" command line
-# argument or default one from Config module.
-# @return Server.ServerConnection object
-#
-function _createServer()
-  local con::Server.ServerConnection = Server.create(
-    _getIp(Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP),
-    _getPort(Manager.ARG_SERVER_PORT, :CONNECTION_SERVER_PORT)
-  )
-  Event.on(con.observer, Server.EVENT_COMMAND, _onClientCommand)
-  con
-end
-#
 # Creates client and returns it's ClientConnection type. It
 # uses port number provided by "XXXport" command line
 # argument or default one from Config module.
@@ -263,8 +248,8 @@ end
 #
 function _createClient(side::ASCIIString)
   local con::Client.ClientConnection
-  local serverPort::Int = _getPort(getfield(Manager, symbol("ARG_", side, "_SERVER_PORT")), symbol("CONNECTION_", side, "_SERVER_PORT"))
-  local serverIp::IPv4  = _getIp(getfield(Manager, symbol("ARG_", side, "_SERVER_IP")), symbol("CONNECTION_", side, "_SERVER_IP"))
+  local serverPort::Int = _getPort(getfield(Manager, Symbol("ARG_", side, "_SERVER_PORT")), Symbol("CONNECTION_", side, "_SERVER_PORT"))
+  local serverIp::IPv4  = _getIp(getfield(Manager, Symbol("ARG_", side, "_SERVER_IP")), Symbol("CONNECTION_", side, "_SERVER_IP"))
   local thisPort::Int   = _getPort(Manager.ARG_SERVER_PORT, :CONNECTION_SERVER_PORT)
   local thisIp::IPv4    = _getIp(Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP)
 
@@ -312,7 +297,7 @@ function _onServerAnswer(side::ASCIIString, ans::Connection.Answer)
 
   delete!(Manager._cons.frozen, ans.data)
   if ans.id !== RpcApi.RPC_ORG_STEP_OK
-    if World.getEnergy(Manager._data.world, pos) > UInt32(0)
+    if World.getEnergy(Manager._data.world, org.pos) > UInt32(0)
       pos = World.getNearFreePos(Manager._data.world, org.pos)
       #
       # If there is no free space, we have to kill this frozen organism
@@ -355,7 +340,7 @@ function _onServerRequest(side::ASCIIString, data::Connection.Command, ans::Conn
   # Something on a way of organism or maximum amount of organisms
   # were reached. So he can't move there at the moment.
   #
-  if haskey(Manager._data.positions, @getPosId(pos))       ||
+  if haskey(Manager._data.positions, ManagerTypes.@getPosId(pos)) ||
      World.getEnergy(Manager._data.world, pos) > UInt32(0) ||
      length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS)
     ans.id = RpcApi.RPC_ORG_STEP_FAIL
@@ -377,6 +362,20 @@ end
 #
 function _onClientCommand(cmd::Connection.Command, ans::Connection.Answer)
   ans.data = haskey(_rpcApi, cmd.fn) ? _rpcApi[cmd.fn](cmd.args...) : false
+end
+#
+# Creates server and returns it's ServerConnection type. It
+# uses port number provided by "port" command line
+# argument or default one from Config module.
+# @return Server.ServerConnection object
+#
+function _createServer()
+  local con::Server.ServerConnection = Server.create(
+    _getIp(Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP),
+    _getPort(Manager.ARG_SERVER_PORT, :CONNECTION_SERVER_PORT)
+  )
+  Event.on(con.observer, Server.EVENT_COMMAND, _onClientCommand)
+  con
 end
 #
 # An API for remove clients. This manager will be a server for them.

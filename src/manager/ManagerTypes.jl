@@ -10,6 +10,7 @@ module ManagerTypes
   import Creature
 
   export OrganismTask
+  export @getPosId
   #
   # One task related to one organism
   #
@@ -26,5 +27,13 @@ module ManagerTypes
     # One organism
     #
     organism::Creature.Organism
+  end
+  #
+  # Generates unique id by world position. This macro is
+  # private insode Manager module
+  # @param {Helper.Point} pos Unique World position
+  #
+  macro getPosId(pos)
+    :($pos.y * $Manager._data.world.width + $pos.x)
   end
 end

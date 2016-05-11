@@ -1,3 +1,4 @@
+import CommandLine
 #
 # This manager is also a server for all other remote managers. These
 # remote managers are clients for current and may use "Client" module

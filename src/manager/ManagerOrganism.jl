@@ -8,18 +8,11 @@ import Config
 import Helper
 import Creature
 import Mutator
+import Client
 import Event
 import World
 import RpcApi
 import ManagerTypes
-#
-# Generates unique id by world position. This macro is
-# private insode Manager module
-# @param {Helper.Point} pos Unique World position
-#
-macro getPosId(pos)
-  :($pos.y * $Manager._data.world.width + $pos.x)
-end
 #
 # Shows organism related message
 # @param id Unique orgainsm identifier
@@ -197,7 +190,7 @@ function _updateWorldEnergy()
     for y in 1:size(plane)[1]
       pos.x = x
       pos.y = y
-      if !haskey(positions, @getPosId(pos)) && plane[y, x] > UInt32(0)
+      if !haskey(positions, ManagerTypes.@getPosId(pos)) && plane[y, x] > UInt32(0)
         energy += 1
       end
     end
@@ -208,32 +201,6 @@ function _updateWorldEnergy()
   if div(energy * 100, total) <= Config.val(:WORLD_MIN_ENERGY_PERCENT)
     setRandomEnergy()
   end
-end
-#
-# Marks one organism as "removed". Deletion will be done in
-# _updateOrganismsEnergy() function.
-# @param i Index of organism's task
-#
-function _killOrganism(i::Int)
-  if i === 0 || istaskdone(Manager._data.tasks[i].task) return false end
-
-  local id::UInt = Manager._data.tasks[i].id
-  local org::Creature.Organism = Manager._data.tasks[i].organism
-
-  org.energy = 0
-  org.color  = UInt32(0)
-  Event.clear(org.observer)
-  _moveOrganism(org.pos, org)
-  delete!(Manager._data.positions, @getPosId(org.pos))
-  delete!(Manager._data.organisms, id)
-  #
-  # This is small hack. It stops the task immediately. We
-  # have to do this, because task is a memory leak if we don't
-  # stop (interrupt) it. This method only marks the task as
-  # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
-  #
-  try Base.throwto(Manager._data.tasks[i].task, null) end
-  Manager.msg(id, "die")
 end
 #
 # Marks one organism as "frozen". It means that it will be hidden
@@ -250,7 +217,7 @@ function _freezeOrganism(i::Int)
   Event.clear(org.observer)
   _moveOrganism(org.pos, org)
   org.color = oldColor
-  delete!(Manager._data.positions, @getPosId(org.pos))
+  delete!(Manager._data.positions, ManagerTypes.@getPosId(org.pos))
   delete!(Manager._data.organisms, id)
   #
   # This is small hack. It stops the task immediately. We
@@ -260,56 +227,35 @@ function _freezeOrganism(i::Int)
   #
   try Base.throwto(Manager._data.tasks[i].task, null) end
   Manager._cons.frozen[org.id] = org
-  Manager.msg(id, "frozen")
+  msg(id, "frozen")
 end
 #
-# Creates new organism and binds event handlers to him. It also
-# finds free point in a world, where organism will start living.
-# If add === true, we have to add it to organisms pool.
-# @param org Organism we have to copy. Optional.
-# @param pos Optional. Position of organism.
-# @param add We need just add existing organism to the world
-# @return {ManagerTypes.OrganismTask}
-# TODO: set type for arguments
-function _createOrganism(organism = nothing, pos::Helper.Point = Helper.Point(0,0), add::Bool = false)
-  pos = organism !== nothing && Helper.empty(pos) ? World.getNearFreePos(Manager._data.world, organism.pos) : (Helper.empty(pos) ? World.getFreePos(Manager._data.world) : pos)
-  if pos === false return false end
-  local id::UInt = Manager._data.organismId
-  local org::Creature.Organism = organism === nothing ? Creature.create(id, pos) : add ? organism : deepcopy(organism)
-  local task::Task = Task(Creature.born(org, id))
-  local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, task, org)
+# Marks one organism as "removed". Deletion will be done in
+# _updateOrganismsEnergy() function.
+# @param i Index of organism's task
+#
+function _killOrganism(i::Int)
+  if i === 0 || istaskdone(Manager._data.tasks[i].task) return false end
 
-  org.pos = pos
-  #
-  # Because of deepcopy(), we have to remove copyed handlers
-  #
+  local id::UInt = Manager._data.tasks[i].id
+  local org::Creature.Organism = Manager._data.tasks[i].organism
+
+  org.energy = 0
+  org.color  = UInt32(0)
   Event.clear(org.observer)
-  Event.on(org.observer, "getenergy", _onGetEnergy)
-  Event.on(org.observer, "grableft",  _onGrabLeft )
-  Event.on(org.observer, "grabright", _onGrabRight)
-  Event.on(org.observer, "grabup",    _onGrabUp   )
-  Event.on(org.observer, "grabdown",  _onGrabDown )
-  Event.on(org.observer, "stepleft",  _onStepLeft )
-  Event.on(org.observer, "stepright", _onStepRight)
-  Event.on(org.observer, "stepup",    _onStepUp   )
-  Event.on(org.observer, "stepdown",  _onStepDown )
-  # TODO: clonning is under question now...
-  #Event.on(org.observer, "clone",     _onClone    )
+  _moveOrganism(org.pos, org)
+  delete!(Manager._data.positions, ManagerTypes.@getPosId(org.pos))
+  delete!(Manager._data.organisms, id)
   #
-  # Shows organism
+  # This is small hack. It stops the task immediately. We
+  # have to do this, because task is a memory leak if we don't
+  # stop (interrupt) it. This method only marks the task as
+  # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
   #
-  _moveOrganism(pos, org)
-  #
-  # Adds organism to organisms pool
-  #
-  Manager._data.organismId += 1
-  Manager._data.organisms[id] = org
-  Manager._data.positions[@getPosId(org.pos)] = org
-  push!(Manager._data.tasks, oTask)
-  Manager._data.totalOrganisms += 1
-  Manager.msg(id, "born")
+  try Base.throwto(Manager._data.tasks[i].task, null) end
+  msg(id, "die")
 
-  oTask
+  true
 end
 #
 # Moves organism to specified position. Updates organism's
@@ -320,8 +266,8 @@ end
 # @return {Bool}
 #
 function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
-  local idNew::Int = @getPosId(pos)
-  local idOld::Int = @getPosId(organism.pos)
+  local idNew::Int = ManagerTypes.@getPosId(pos)
+  local idOld::Int = ManagerTypes.@getPosId(organism.pos)
   local freeze::Bool = false
   #
   # Organism try step outside of current instance. If near
@@ -365,7 +311,7 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   # organism.pos - old organism position
   #
   if pos.x !== organism.pos.x || pos.y !== organism.pos.y
-    delete!(Manager._data.positions, @getPosId(organism.pos))
+    delete!(Manager._data.positions, ManagerTypes.@getPosId(organism.pos))
     Manager._data.positions[idNew] = organism
     World.setEnergy(Manager._data.world, organism.pos, UInt32(0))
     organism.pos = pos
@@ -409,7 +355,7 @@ end
 # @param retObj Special object for return value
 #
 function _onGetEnergy(organism::Creature.Organism, pos::Helper.Point, retObj::Helper.RetObj)
-  local id::Int = @getPosId(pos)
+  local id::Int = ManagerTypes.@getPosId(pos)
   #
   # Other organism at this position
   #
@@ -500,7 +446,7 @@ end
 # @param retObj Special object for return value
 #
 function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, retObj::Helper.RetObj)
-  local id::Int = @getPosId(pos)
+  local id::Int = ManagerTypes.@getPosId(pos)
   local org::Creature.Organism
 
   if haskey(Manager._cons.frozen, org.id)
@@ -546,7 +492,56 @@ end
 # @param pos Point where we should check the energy
 #
 function _onStep(organism::Creature.Organism, pos::Helper.Point)
-  if !haskey(Manager._cons.frozen, org.id)
+  if !haskey(Manager._cons.frozen, organism.id)
     _moveOrganism(pos, organism)
   end
+end
+#
+# Creates new organism and binds event handlers to him. It also
+# finds free point in a world, where organism will start living.
+# If add === true, we have to add it to organisms pool.
+# @param org Organism we have to copy. Optional.
+# @param pos Optional. Position of organism.
+# @param add We need just add existing organism to the world
+# @return {ManagerTypes.OrganismTask}
+# TODO: set type for arguments
+function _createOrganism(organism = nothing, pos::Helper.Point = Helper.Point(0,0), add::Bool = false)
+  pos = organism !== nothing && Helper.empty(pos) ? World.getNearFreePos(Manager._data.world, organism.pos) : (Helper.empty(pos) ? World.getFreePos(Manager._data.world) : pos)
+  if pos === false return false end
+  local id::UInt = Manager._data.organismId
+  local org::Creature.Organism = organism === nothing ? Creature.create(id, pos) : add ? organism : deepcopy(organism)
+  local task::Task = Task(Creature.born(org, id))
+  local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, task, org)
+
+  org.pos = pos
+  #
+  # Because of deepcopy(), we have to remove copyed handlers
+  #
+  Event.clear(org.observer)
+  Event.on(org.observer, "getenergy", _onGetEnergy)
+  Event.on(org.observer, "grableft",  _onGrabLeft )
+  Event.on(org.observer, "grabright", _onGrabRight)
+  Event.on(org.observer, "grabup",    _onGrabUp   )
+  Event.on(org.observer, "grabdown",  _onGrabDown )
+  Event.on(org.observer, "stepleft",  _onStepLeft )
+  Event.on(org.observer, "stepright", _onStepRight)
+  Event.on(org.observer, "stepup",    _onStepUp   )
+  Event.on(org.observer, "stepdown",  _onStepDown )
+  # TODO: clonning is under question now...
+  #Event.on(org.observer, "clone",     _onClone    )
+  #
+  # Shows organism
+  #
+  _moveOrganism(pos, org)
+  #
+  # Adds organism to organisms pool
+  #
+  Manager._data.organismId += 1
+  Manager._data.organisms[id] = org
+  Manager._data.positions[ManagerTypes.@getPosId(org.pos)] = org
+  push!(Manager._data.tasks, oTask)
+  Manager._data.totalOrganisms += 1
+  msg(id, "born")
+
+  oTask
 end
