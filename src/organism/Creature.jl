@@ -5,19 +5,19 @@
 #                                        in world contains an energy. Returns amount
 #                                        of energy in "ret" property.
 #   grableft   {Organism, UInt, {ret=>Num}} Fires to obtain energy from the left side of
-#                                        current organism. Second parameter is an 
+#                                        current organism. Second parameter is an
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
 #   grabright  {Organism, UInt, {ret=>Num}} Fires to obtain energy from the right side of
-#                                        current organism. Second parameter is an 
+#                                        current organism. Second parameter is an
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
 #   grabup     {Organism, UInt, {ret=>Num}} Fires to obtain energy from the up side of
-#                                        current organism. Second parameter is an 
+#                                        current organism. Second parameter is an
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
 #   grabdown   {Organism, UInt, {ret=>Num}} Fires to obtain energy from the right side of
-#                                        current organism. Second parameter is an 
+#                                        current organism. Second parameter is an
 #                                        amount of energy to grab. "ret" will contain
 #                                        new organism's position.
 #   stepleft   {Organism, {ret=>Point}}  Fires to make a step left. "ret" will contain
@@ -57,7 +57,7 @@ module Creature
   #
   @enum DIRECTION up=1 down=2 left=3 right=4
   #
-  # Describes one block. Blocks are: "for", "if", "function" and other 
+  # Describes one block. Blocks are: "for", "if", "function" and other
   # operators. Is a part of "Func" type.
   #
   type Block
@@ -71,7 +71,7 @@ module Creature
     #
     expr::Expr
     #
-    # An index of code line inside current block, before which all 
+    # An index of code line inside current block, before which all
     # variables and functions are defined. We can't add mutations
     # before this line, because it will produce undefined variable
     # or function error. With this, all variables/functions will be
@@ -95,7 +95,7 @@ module Creature
     code::Expr
     #
     # All blocks within one (current) function. Blocks are belong
-    # to if, for, function and other operators. All mutations should 
+    # to if, for, function and other operators. All mutations should
     # be done within blocks. Block of the parent function should be
     # first in this array.
     #
@@ -107,6 +107,10 @@ module Creature
   # and so on...
   #
   type Organism
+    #
+    # Unique organism identifier. The same like task id.
+    #
+    id::UInt
     #
     # @inheritable
     # Code in AST format
@@ -124,19 +128,13 @@ module Creature
     #
     # @inheritable
     # Counter, which is used for creating unique variable and function
-    # names. e.g.: var_12, func_34. Increase itself every time, then 
+    # names. e.g.: var_12, func_34. Increase itself every time, then
     # new variable is created.
     #
     symbolId::Int
     #
     # @inheritable
-    # Map of available variables separated by functions and types. 
-    # Function in this case is a parent (container) for variables.
-    # TODO: remove this
-    #vars::Dict{ASCIIString, Func}
-    #
-    # @inheritable
-    # Array of code functions. Is used for finding rundom functions 
+    # Array of code functions. Is used for finding rundom functions
     # for future mutations inside them. Main function is also in this
     # array. Main function should be first in this array.
     #
@@ -156,14 +154,14 @@ module Creature
     mutationsOnClone::Int
     #
     # @inheritable
-    # Amount of iterations within organism's life loop, after that we 
+    # Amount of iterations within organism's life loop, after that we
     # do mutations according to MUTATE_AMOUNT config amount. If 0, then
     # mutations will be disabled.
     #
     mutationPeriod::Int
     #
     # @inheritable
-    # Value, which will be used like amount of mutations per 
+    # Value, which will be used like amount of mutations per
     # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
     # we want to disable mutations.
     #
@@ -185,7 +183,7 @@ module Creature
     #
     mem::Dict{Int16, Int16}
     #
-    # Organism's position in a 2D world. Starts from (1,1) 
+    # Organism's position in a 2D world. Starts from (1,1)
     # ends with (WORLD_WIDTH, WORLD_HEIGHT) configurations.
     #
     pos::Helper.Point
@@ -196,12 +194,13 @@ module Creature
   end
   #
   # Creates new organism with default settings and empty code.
+  # @param id Organism unique id
   # @param pos Position of organism
   # @return {Creature}
   #
-  function create(pos::Helper.Point = Helper.Point(1, 1))
+  function create(id::UInt = UInt(0), pos::Helper.Point = Helper.Point(1, 1))
     #
-    # This is main function of current organism. Expression 
+    # This is main function of current organism. Expression
     # below means: function (o) return true end
     #
     local code::Expr = Expr(:function, Expr(:tuple, Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))), Expr(:block, Expr(:return, true)))
@@ -217,6 +216,7 @@ module Creature
     local funcs::Array{Func, 1} = [Func(code, blocks)]
 
     Organism(
+      id,                                                                                    # id
       code,                                                                                  # code
       eval(code),                                                                            # codeFn
       0,                                                                                     # codeSize

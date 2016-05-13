@@ -15,6 +15,7 @@ import CommandLine
 import Event
 import Server
 import Connection
+import ManagerTypes
 #
 # @rpc
 # Grabs world's rectangle region and returns it
@@ -30,8 +31,8 @@ function getRegion(x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
   if (x1 < 1 || x1 > maxWidth)  x1 = maxWidth  end
   if (y1 < 1 || y1 > maxHeight) y1 = maxHeight end
   if (x  < 1 || x  > maxWidth)  x  = 1 end
-  if (y  < 1 || y  > maxHeight) y  = 1 end 
-  
+  if (y  < 1 || y  > maxHeight) y  = 1 end
+
   RpcApi.Region(Manager._data.world.data[y:y1, x:x1], Config.val(:WORLD_IPS))
 end
 #
@@ -40,25 +41,24 @@ end
 # will be in Manager._data.tasks field.
 #
 function createOrganisms()
-  local i::Int
   Helper.info("Creating organisms...")
   #
   # Inits available organisms in Tasks
   #
-  for i = 1:Config.val(:ORGANISM_START_AMOUNT) createOrganism() end
+  for i::Int = 1:Config.val(:ORGANISM_START_AMOUNT) createOrganism() end
 
   true
 end
 #
 # @rpc
 # Creates one task and organism inside this task. Created
-# task will be added to Manager._data.tasks array. Position 
+# task will be added to Manager._data.tasks array. Position
 # may be set or random free position will be used.
 # @param pos Position|nothing Position of the organism
 # @return {Int} Organism id or false if organisms limit is riched
 # TODO: change the constructor to support Position() without
 # TODO: parameters for optimization. We have to remove nothing
-function createOrganism(pos = nothing)
+function createOrganism(pos::Helper.Point = Helper.Point(0, 0))
   if length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS) return false end
   orgTask = Manager._createOrganism(nothing, pos)
   orgTask === false ? false : orgTask.id
@@ -171,9 +171,8 @@ end
 # @param energy Amount of energy within one point
 #
 function setRandomEnergy(amount::Int = Config.val(:WORLD_START_ENERGY_BLOCKS), energy::UInt32 = Config.val(:WORLD_START_ENERGY_AMOUNT))
-  local i::Int
   Helper.info("Creating random energy...")
-  for i = 1:amount
+  for i::Int = 1:amount
     setEnergy(rand(1:Manager._data.world.width), rand(1:Manager._data.world.height), energy)
   end
 end
@@ -241,26 +240,142 @@ function _createSimpleOrganism(id::UInt, org::Creature.Organism)
   )
 end
 #
-# Creates server and returns it's ServerConnection type. It 
-# uses porn number provided by "serverPort" command line
+# Creates client and returns it's ClientConnection type. It
+# uses port number provided by "XXXport" command line
 # argument or default one from Config module.
-# @return Connection object
+# @param side Server side ("left", "right",...)
+# @return ClientConnection object
 #
-function _createServer()
-  port = CommandLine.val(Manager._data.params, Manager.ARG_SERVER_PORT)
-  port = port == "" ? Config.val(:CONNECTION_SERVER_PORT) : Int(port)
-  # TODO: ip should be in config
-  con  = Server.create(ip"127.0.0.1", port)
-  Event.on(con.observer, Server.EVENT_COMMAND, _onRemoteCommand)
+function _createClient(side::ASCIIString)
+  local con::Client.ClientConnection
+  local serverPort::Int = _getPort(getfield(Manager, Symbol("ARG_", side, "_SERVER_PORT")), Symbol("CONNECTION_", side, "_SERVER_PORT"))
+  local serverIp::IPv4  = _getIp(getfield(Manager, Symbol("ARG_", side, "_SERVER_IP")), Symbol("CONNECTION_", side, "_SERVER_IP"))
+  local thisPort::Int   = _getPort(Manager.ARG_SERVER_PORT, :CONNECTION_SERVER_PORT)
+  local thisIp::IPv4    = _getIp(Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP)
+
+  if serverPort === thisPort && serverIp === thisIp
+    Helper.error(string("Error creating Client for ", side, " server. Remote port and IP are similar to current. Port: ", thisPort, ", IP: ", thisIp))
+    # TODO: is zero based address + port correct?
+    con = Client.create(IPv4(0), 0)
+  elseif serverPort === 0
+    # TODO: is zero based address + port correct?
+    con = Client.create(IPv4(0), 0)
+  else
+    con = Client.create(serverIp, serverPort)
+  end
+  if Client.isOk(con)
+    Event.on(con.observer, Client.EVENT_ANSWER, (ans::Connection.Answer)->_onServerAnswer(side, ans))
+    Event.on(con.observer, Client.EVENT_REQUEST, (data::Connection.Command, ans::Connection.Answer)->_onServerRequest(side, data, ans))
+  end
   con
+end
+#
+# Creates all available server\instance connections data objects
+# and returns them. They are: self server, left, right, up, and
+# down clients.
+# @return Manager.Connections object
+#
+function _createConnections()
+  Manager.Connections(
+    _createServer(),
+    _createClient("LEFT"),
+    _createClient("RIGHT"),
+    _createClient("UP"),
+    _createClient("DOWN"),
+    Dict{UInt, Creature.Organism}()
+  )
+end
+#
+# Handler of answer from remote server(instance) as a result on
+# our request to it. ans.id contains success code, ans.data contains
+# organism unique id.
+# @param side Side name of answering server
+# @param ans Answer data object
+#
+function _onServerAnswer(side::ASCIIString, ans::Connection.Answer)
+  local org::Creature.Organism = Manager._cons.frozen[ans.data]
+
+  delete!(Manager._cons.frozen, ans.data)
+  if ans.id !== RpcApi.RPC_ORG_STEP_OK
+    if World.getEnergy(Manager._data.world, org.pos) > UInt32(0)
+      pos = World.getNearFreePos(Manager._data.world, org.pos)
+      #
+      # If there is no free space, we have to kill this frozen organism
+      #
+      if pos === false return false end
+    else
+      Manager._createOrganism(org, org.pos, true)
+    end
+  end
+
+  true
+end
+#
+# Handler of input request from remote server to current client.
+# Should fill answer data structure.
+# @param side Remote server side
+# @param data Input comand object
+# @param ans Answer data object we have to fill
+#
+function _onServerRequest(side::ASCIIString, data::Connection.Command, ans::Connection.Answer)
+  local org::Creature.Organism
+  local pos::Helper.Point
+  #
+  # This request means, that one organism wants to step outside
+  # of it's current Manager/instance into this one. We have
+  # to send OK response, which means, that we obtain an organism
+  # and added him into the organisms pool. data.args[1] contains
+  # organism. We also have to decrease organism's energy, because
+  # moving between instances it's network performance issue.
+  #
+  ans.data = org.id
+  org      = data.args[1]
+  pos      = org.pos
+  if     data.fn === RpcApi.RPC_ORG_STEP_RIGHT && side === "LEFT"  pos.x = 1
+  elseif data.fn === RpcApi.RPC_ORG_STEP_LEFT  && side === "RIGHT" pos.x = Manager._data.world.width
+  elseif data.fn === RpcApi.RPC_ORG_STEP_DOWN  && side === "UP"    pos.y = 1
+  elseif data.fn === RpcApi.RPC_ORG_STEP_UP    && side === "DOWN"  pos.y = Manager._data.world.height
+  end
+  #
+  # Something on a way of organism or maximum amount of organisms
+  # were reached. So he can't move there at the moment.
+  #
+  if haskey(Manager._data.positions, ManagerTypes.@getPosId(pos)) ||
+     World.getEnergy(Manager._data.world, pos) > UInt32(0) ||
+     length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS)
+    ans.id = RpcApi.RPC_ORG_STEP_FAIL
+    return false
+  end
+  #
+  # Everything is okay, let's add an organism to the pool
+  #
+  Manager._createOrganism(org, org.pos, true)
+  org.energy -= div(org.energy * Config.val(:CONNECTION_STEP_ENERGY_PERCENT), 100)
+  ans.id = RpcApi.RPC_ORG_STEP_OK
+
+  true
 end
 #
 # Handler for commands obtained from all connected clients. All supported
 # commands are in _rpcApi dictionary. If current command is undefinedin _rpcApi
 # then, false will be returned.
 #
-function _onRemoteCommand(cmd::Connection.Command, ans::Connection.Answer)
+function _onClientCommand(cmd::Connection.Command, ans::Connection.Answer)
   ans.data = haskey(_rpcApi, cmd.fn) ? _rpcApi[cmd.fn](cmd.args...) : false
+end
+#
+# Creates server and returns it's ServerConnection type. It
+# uses port number provided by "port" command line
+# argument or default one from Config module.
+# @return Server.ServerConnection object
+#
+function _createServer()
+  local con::Server.ServerConnection = Server.create(
+    _getIp(Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP),
+    _getPort(Manager.ARG_SERVER_PORT, :CONNECTION_SERVER_PORT)
+  )
+  Event.on(con.observer, Server.EVENT_COMMAND, _onClientCommand)
+  con
 end
 #
 # An API for remove clients. This manager will be a server for them.

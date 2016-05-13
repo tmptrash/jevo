@@ -53,10 +53,9 @@ module TestServer
     #
     # server and client creation
     #
-    local answer::Command        = Command(0, Array{Any}())
+    local answer::Command        = Command(0, Array{Any,1}())
     local scon::ServerConnection = Server.create(IP, PORT)
     local ccon::ClientConnection = Client.create(IP, PORT)
-
     Event.on(scon.observer, Server.EVENT_COMMAND, (cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
     Server.run(scon)
     Client.request(ccon, 1, 10) # function - 1, parameter - 10
@@ -78,7 +77,7 @@ module TestServer
     Client.request(ccon1, 1, 10) # function - 1, parameter - 10
     Client.request(ccon2, 2, 20) # function - 2, parameter - 20
     #
-    # This line is very important. yield() runs the interconnection 
+    # This line is very important. yield() runs the interconnection
     # loop between client and server.
     #
     wait(()->length(answer) > 0)
@@ -93,7 +92,7 @@ module TestServer
     Server.stop(scon)
   end
   facts("Tests sending the message to stopped server") do
-    local answer::Command        = Command(0, Array{Any}())
+    local answer::Command        = Command(0, Array{Any,1}())
     local scon::ServerConnection = Server.create(IP, PORT)
     local ccon::ClientConnection = Client.create(IP, PORT)
 
@@ -110,7 +109,7 @@ module TestServer
     Client.stop(ccon)
   end
   facts("Tests client recreation and send a message") do
-    local answer::Command        = Command(0, Array{Any}())
+    local answer::Command        = Command(0, Array{Any,1}())
     local scon::ServerConnection = Server.create(IP, PORT)
     local ccon::ClientConnection = Client.create(IP, PORT)
 
@@ -129,7 +128,7 @@ module TestServer
     Server.stop(scon)
   end
   facts("Tests big data send") do
-    local answer::Command        = Command(0, Array{Any}())
+    local answer::Command        = Command(0, Array{Any,1}())
     local scon::ServerConnection = Server.create(IP, PORT)
     local ccon::ClientConnection = Client.create(IP, PORT)
     local data::Array{Int, 1}    = zeros(Int, 1000000)

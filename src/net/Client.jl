@@ -1,18 +1,19 @@
 #
-# TCP Client implementation. It works in pair with Server 
-# module. It also works in asynchronous way (like a server) 
+# TCP Client implementation. It works in pair with Server
+# module. It also works in asynchronous way (like a server)
 # and implements simple RPC-like logic. All you need to do is
-# create a client, add listeners to EVENT_ANSWER event if needed 
-# and call request() method as many times as needed. The answer 
-# will be obtained through onAnswer() callback. 
-# 
+# create a client, add listeners to EVENT_ANSWER event if needed
+# and call request() method as many times as needed. The answer
+# will be obtained through onAnswer() callback.
+#
 # It uses green threads (or coroutines) inside. See this link
 # http://julia.readthedocs.org/en/latest/manual/control-flow/#man-tasks
-# for more details regarding green threads. Comparing with 
+# for more details regarding green threads. Comparing with
 # server, it has only one place, where "magic" occures. It's
-# request() method. It uses tasks for sending non blocking 
+# request() method. It uses tasks for sending non blocking
 # requests and obtaining answers (see @async macro in code).
-# Every request creates one tasks 
+# Every request creates one tasks
+# TODO: describe server-to-client requests logic Nd EVENT_REQUEST event
 #
 # @author DeadbraiN
 #
@@ -46,9 +47,9 @@
 # Events:
 #     answer{Connection.Answer} Answer object with data
 #           obtained from server. May be empty.
-# 
+#
 # @author DeadbraiN
-# 
+#
 module Client
   import Connection
   import Event
@@ -58,13 +59,19 @@ module Client
   export request
   export stop
   export isOk
+
   export EVENT_ANSWER
+  export EVENT_REQUEST
   export ClientConnection
   #
-  # Name of the event, which is fired if answer from client's 
+  # Name of the event, which is fired if answer from server's
   # request is obtained.
   #
-  const EVENT_ANSWER = "answer"
+  const EVENT_ANSWER  = "answer"
+  #
+  # Name of the event, for requests from server to the client
+  #
+  const EVENT_REQUEST = "request"
   #
   # Describes one connected client. Contains socket and observer.
   #
@@ -76,41 +83,31 @@ module Client
   # Creates client and it's possibility to send requests to server.
   # In case of connection errors connection object will be created
   # in any case. You have to check this calling isopen() function.
+  # Using zero port you may create "empty" connection. In fact,
+  # client will not be created/started.
   # @param host Host we are connecting to
   # @param port Port number we are connecting to
   # @return Client connection object
   #
   function create(host::Base.IPAddr, port::Integer)
-    sock = null
-    obs  = Event.create()
+    local sock::Any = null
+    local obs::Event.Observer = Event.create()
 
-    try
-      sock = Base.connect(host, port)
-      #
-      # All "magic" occures here. This is how we start answers
-      # handling. It listens clients responses all the time
-      # using green thread (Task).
-      #
-      @async while true
-        try
-          Event.fire(obs, EVENT_ANSWER, deserialize(sock))
-        catch e
-          #
-          # This exception means, that client has disconnected.
-          # All other exceptions should be shown in terminal.
-          #
-          Helper.warn("Client has disconnected: $e")
-          if sock !== null
-            close(sock)
-            break
-          end
-        end
+    if port > 0
+      try
+        sock = Base.connect(host, port)
+        #
+        # All "magic" occures here. This is how we start answers
+        # handling. It listens clients responses all the time
+        # using green thread (Task).
+        #
+        @async while _answer(sock, obs) end
+      catch e
+        Helper.warn("Client.create(): $e")
+        if sock !== null close(sock) end
       end
-    catch e
-      Helper.warn("Client.create(): $e")
-      if sock !== null close(sock) end
+      yield()
     end
-    yield()
 
     sock !== null ? Client.ClientConnection(sock, obs) : Client.ClientConnection(Base.TCPSocket(), obs)
   end
@@ -159,5 +156,43 @@ module Client
     catch e
       Helper.warn("Client.stop(): $e")
     end
+  end
+  #
+  # Reads one command from server's socket and fires an event
+  # to main code. After that, writes an answer into the socket
+  # back.
+  # @param sock Client's socket
+  # @param obs Observer for firing an event to "parent" code
+  #
+  function _answer(sock::Base.TCPSocket, obs::Event.Observer)
+    local data::Any = null
+
+    try
+      #
+      # Right now, only two types of responses are supported:
+      # answers after client request(Connection.Answer) and
+      # server requests (Connection.Command).
+      #
+      data = deserialize(sock)
+      if typeof(data) === Connection.Answer
+        Event.fire(obs, EVENT_ANSWER, data)
+      else
+        local ans::Connection.Answer = Connection.Answer(null)
+        Event.fire(obs, EVENT_REQUEST, data, ans)
+        serialize(sock, ans)
+      end
+    catch e
+      #
+      # This exception means, that client has disconnected.
+      # All other exceptions should be shown in terminal.
+      #
+      Helper.warn("Client has disconnected: $e")
+      if sock !== null
+        close(sock)
+        return false
+      end
+    end
+
+    true
   end
 end

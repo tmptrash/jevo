@@ -7,13 +7,13 @@
 # TODO: describe included files and how to split Manager on files.
 # TODO:   - Manager may call every function from any file
 # TODO:   - File may call every function except other files
-# TOSO:   - If file calls Manager function it hould add Manager. before calling
+# TODO:   - If file calls Manager function it hould add Manager. before calling
 # TODO: describe that manager is a mediator between all other objects
 # TODO: like world, terminal and so on.
-# TODO: add support of serverPort cmd line argument
 # TODO: add remote functions for changing period and probs
 # TODO: add command line parameter for creating default config file
 # TODO: add create method. It should returm ManagerData() type
+# TODO: describe frozen organisms conception
 #
 module Manager
   import Creature
@@ -22,31 +22,37 @@ module Manager
   import Helper
   import Event
   import Server
+  import Client
   import Connection
   import CommandLine
   import RpcApi
   import Config
+  import ManagerTypes
+  # TODO: remove this!
+  using Debug
 
   export run
   #
   # This is how we collect Manager module from it's parts(files)
   #
-  include("ManagerRpc.jl")
   include("ManagerOrganism.jl")
+  include("ManagerRpc.jl")
   include("ManagerBackup.jl")
+  include("ManagerParams.jl")
   #
-  # This manager is also a server for all other remote managers. These
-  # remote managers are clients for current and may use "Client" module
-  # to send commands and obtain results. So, this command line property
-  # will be used for current manager(server) for listening clients. For
-  # this you have to run Manager like this:
-  # >julia AppManager.jl serverPort=2000
+  # Current Manager connection objects. They are: server and
+  # all four clients. "frozen" field is used for storing "frozen"
+  # organisms (which are transferring from current Manager to
+  # another one by network).
   #
-  const ARG_SERVER_PORT = "serverPort"
-  #
-  # In this mode no terminal output will be produced
-  #
-  const ARG_QUIET = "quiet"
+  type Connections
+    server::Server.ServerConnection
+    left  ::Client.ClientConnection
+    right ::Client.ClientConnection
+    up    ::Client.ClientConnection
+    down  ::Client.ClientConnection
+    frozen::Dict{UInt, Creature.Organism}
+  end
   #
   # Manager's related type. Contains world, command line parameters,
   # organisms map and so on... If some fields will be changed, don't
@@ -69,7 +75,7 @@ module Manager
     #
     # All available organism's tasks
     #
-    tasks::Array{OrganismTask, 1}
+    tasks::Array{ManagerTypes.OrganismTask, 1}
     #
     # Parameters passed through command line
     #
@@ -105,7 +111,7 @@ module Manager
     quiet::Bool
   end
   #
-  # Runs Manager instance, one world, server an so on... Blocking 
+  # Runs Manager instance, one world, server an so on... Blocking
   # function.
   # @param recover true if we have to recover from last backup
   # @return {Bool} run status
@@ -115,14 +121,12 @@ module Manager
     local ips    ::Int = 0
     local stamp  ::Float64 = time()
     local bstamp ::Float64 = time()
-    local server ::Server.ServerConnection = _createServer()
-    local params ::Dict{ASCIIString, ASCIIString} = CommandLine.create()
     #
     # This server is listening for all other managers and remote
-    # terminal. It runs obtained commands and send answers back. 
+    # terminal. It runs obtained commands and send answers back.
     # In other words, it works like RPC runner...
     #
-    Server.run(server)
+    Server.run(_cons.server)
     #
     # If user set up some amount of organisms they will be created
     # in this call. If we are in recover mode, then this step should
@@ -201,7 +205,7 @@ module Manager
     World.create(),
     Dict{Int, Creature.Organism}(),
     Dict{UInt, Creature.Organism}(),
-    OrganismTask[],
+    ManagerTypes.OrganismTask[],
     CommandLine.create(),
     UInt(0),
     UInt(0),
@@ -211,4 +215,8 @@ module Manager
     UInt(0),
     CommandLine.has(CommandLine.create(), ARG_QUIET)
   )
+  #
+  # Current Manager/instance all available connections
+  #
+  global _cons = _createConnections()
 end

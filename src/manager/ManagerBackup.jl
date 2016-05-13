@@ -1,5 +1,5 @@
 #
-# Part of the Manager module for working with backups. It may 
+# Part of the Manager module for working with backups. It may
 # save and load application state into/from the file.
 # TODO: describe index based saving format
 #
@@ -7,12 +7,13 @@
 #
 import Backup
 import Creature
+import ManagerTypes
 
 export recover
 export backup
 #
-# This function is used for recovering a manager's data from 
-# backup file. It means that an application was crashed before 
+# This function is used for recovering a manager's data from
+# backup file. It means that an application was crashed before
 # and now we have to recover it with last correct backup. Works
 # in pair with backup() function.
 # @return {Bool} recover status
@@ -20,7 +21,7 @@ export backup
 function recover()
   local data = Backup.load()
   local i::Int
-  local t::OrganismTask
+  local t::ManagerTypes.OrganismTask
 
   if data === null return false end
 
@@ -49,7 +50,7 @@ end
 # @return {Bool} Backup status
 #
 function backup()
-  local tasks::Array{OrganismTask, 1} = deepcopy(Manager._data.tasks)
+  local tasks::Array{ManagerTypes.OrganismTask, 1} = deepcopy(Manager._data.tasks)
   local task::Task = Task(()->0)
   local len::Int = length(tasks)
   local t::Int
