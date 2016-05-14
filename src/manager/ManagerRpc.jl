@@ -340,9 +340,7 @@ function _onServerRequest(side::ASCIIString, data::Connection.Command, ans::Conn
   # Something on a way of organism or maximum amount of organisms
   # were reached. So he can't move there at the moment.
   #
-  if haskey(Manager._data.positions, ManagerTypes.@getPosId(pos)) ||
-     World.getEnergy(Manager._data.world, pos) > UInt32(0) ||
-     length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS)
+  if !Manager._isFree(pos) || length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS)
     ans.id = RpcApi.RPC_ORG_STEP_FAIL
     return false
   end

@@ -190,9 +190,7 @@ function _updateWorldEnergy()
     for y in 1:size(plane)[1]
       pos.x = x
       pos.y = y
-      if !haskey(positions, ManagerTypes.@getPosId(pos)) && plane[y, x] > UInt32(0)
-        energy += 1
-      end
+      if !Manager._isFree(pos) energy += 1 end
     end
   end
   #
@@ -303,9 +301,7 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   # Destination position, where organism wants step to is not
   # empty. Other organism or an energy block is there.
   #
-  if idOld !== idNew && (haskey(Manager._data.positions, idNew) || World.getEnergy(Manager._data.world, pos) > UInt32(0))
-     return false
-  end
+  if idOld !== idNew && !Manager._isFree(pos) return false end
   #
   # pos - new organism position
   # organism.pos - old organism position

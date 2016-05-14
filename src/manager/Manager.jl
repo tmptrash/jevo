@@ -170,6 +170,15 @@ module Manager
   end
 
   #
+  # Checks if specified position in a world is free. Other organism
+  # or an energy block may be there at the moment.
+  # @param pos Position we need to check
+  # @return {Bool} true - free point, false - filled point
+  #
+  function _isFree(pos::Helper.Point)
+    !haskey(Manager._data.positions,  ManagerTypes.@getPosId(pos)) && World.getEnergy(Manager._data.world, pos) === UInt32(0)
+  end
+  #
   # Updates IPS (Iterations Per second) counter and stores it in config
   # @param ips IPS
   # @param stamp Current UNIX tame stamp value
