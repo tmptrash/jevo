@@ -176,7 +176,7 @@ module Manager
   # @return {Bool} true - free point, false - filled point
   #
   function _isFree(pos::Helper.Point)
-    !haskey(Manager._data.positions,  ManagerTypes.@getPosId(pos)) && World.getEnergy(Manager._data.world, pos) === UInt32(0)
+    !haskey(Manager._data.positions, @getPosId(pos)) && World.getEnergy(Manager._data.world, pos) === UInt32(0)
   end
   #
   # Updates IPS (Iterations Per second) counter and stores it in config

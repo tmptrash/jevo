@@ -14,6 +14,14 @@ import World
 import RpcApi
 import ManagerTypes
 #
+# Generates unique id by world position. This macro is
+# private insode Manager module
+# @param {Helper.Point} pos Unique World position
+#
+macro getPosId(pos)
+  :($pos.y * $Manager._data.world.width + $pos.x)
+end
+#
 # Shows organism related message
 # @param id Unique orgainsm identifier
 # @param msg Organism's message
@@ -215,7 +223,7 @@ function _freezeOrganism(i::Int)
   Event.clear(org.observer)
   _moveOrganism(org.pos, org)
   org.color = oldColor
-  delete!(Manager._data.positions, ManagerTypes.@getPosId(org.pos))
+  delete!(Manager._data.positions, @getPosId(org.pos))
   delete!(Manager._data.organisms, id)
   #
   # This is small hack. It stops the task immediately. We
@@ -242,7 +250,7 @@ function _killOrganism(i::Int)
   org.color  = UInt32(0)
   Event.clear(org.observer)
   _moveOrganism(org.pos, org)
-  delete!(Manager._data.positions, ManagerTypes.@getPosId(org.pos))
+  delete!(Manager._data.positions, @getPosId(org.pos))
   delete!(Manager._data.organisms, id)
   #
   # This is small hack. It stops the task immediately. We
@@ -264,8 +272,8 @@ end
 # @return {Bool}
 #
 function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
-  local idNew::Int = ManagerTypes.@getPosId(pos)
-  local idOld::Int = ManagerTypes.@getPosId(organism.pos)
+  local idNew::Int = @getPosId(pos)
+  local idOld::Int = @getPosId(organism.pos)
   local freeze::Bool = false
   #
   # Organism try step outside of current instance. If near
@@ -307,7 +315,7 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   # organism.pos - old organism position
   #
   if pos.x !== organism.pos.x || pos.y !== organism.pos.y
-    delete!(Manager._data.positions, ManagerTypes.@getPosId(organism.pos))
+    delete!(Manager._data.positions, @getPosId(organism.pos))
     Manager._data.positions[idNew] = organism
     World.setEnergy(Manager._data.world, organism.pos, UInt32(0))
     organism.pos = pos
@@ -351,7 +359,7 @@ end
 # @param retObj Special object for return value
 #
 function _onGetEnergy(organism::Creature.Organism, pos::Helper.Point, retObj::Helper.RetObj)
-  local id::Int = ManagerTypes.@getPosId(pos)
+  local id::Int = @getPosId(pos)
   #
   # Other organism at this position
   #
@@ -442,7 +450,7 @@ end
 # @param retObj Special object for return value
 #
 function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, retObj::Helper.RetObj)
-  local id::Int = ManagerTypes.@getPosId(pos)
+  local id::Int = @getPosId(pos)
   local org::Creature.Organism
 
   if haskey(Manager._cons.frozen, org.id)
@@ -534,7 +542,7 @@ function _createOrganism(organism = nothing, pos::Helper.Point = Helper.Point(0,
   #
   Manager._data.organismId += 1
   Manager._data.organisms[id] = org
-  Manager._data.positions[ManagerTypes.@getPosId(org.pos)] = org
+  Manager._data.positions[@getPosId(org.pos)] = org
   push!(Manager._data.tasks, oTask)
   Manager._data.totalOrganisms += 1
   msg(id, "born")
