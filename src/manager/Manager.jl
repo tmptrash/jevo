@@ -218,8 +218,8 @@ module Manager
     CommandLine.create(),                            # params
     UInt(2),                                         # organismId
     UInt(0),                                         # totalOrganisms
-    Creature.create(),                               # minOrg
-    Creature.create(),                               # maxOrg
+    Creature.create(UInt(0), Helper.Point(1,1)),     # minOrg
+    Creature.create(UInt(1), Helper.Point(2,1)),     # maxOrg
     UInt(0),                                         # minId
     UInt(0),                                         # maxId
     CommandLine.has(CommandLine.create(), ARG_QUIET) # quiet
