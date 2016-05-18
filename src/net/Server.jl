@@ -205,7 +205,7 @@ module Server
   # @return true - request was sent, false wasn't
   #
   function request(con::ServerConnection, fn::Integer, args...)
-    try if !Helper.isopen(con.sock) return false end catch return false end
+    if !Helper.isopen(con.sock) return false end
     #
     # This line is non blocking one
     #
