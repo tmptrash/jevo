@@ -11,10 +11,20 @@ module Helper
   export randTrue
   export getProbIndex
   export getSupportedTypes
+  export isopen
+  export info
   export warn
   export error
 
   export SUPPORTED_TYPES
+  #
+  # These constants were gotten from julia/base/stream.jl file. They
+  # are used for optimization of isopen() function.
+  #
+  const StatusUninit = 0 # handle is allocated, but not initialized
+  const StatusInit   = 1 # handle is valid, but not connected/active
+  const StatusClosed = 6 # handle is closed
+  const StatusEOF    = 7 # handle is a TTY that has seen an EOF event
   #
   # Describes organism's code position. This position is used
   # for mutations (add, change, del,...)
@@ -78,6 +88,18 @@ module Helper
   # OPT: console output is heavy operation
   function info(msg::AbstractString)
     print_with_color(:green, "INFO: ", msg, "\n")
+  end
+  #
+  # This method is an analog of isopen() from julia/base/stream.jl.
+  # We created this, because it original version is slow, because
+  # of exception inside it. In case if some constants or it's
+  # implementation will be changed, we have to update it.
+  # @param sock Socket we are checking
+  # @return {Bool}
+  #
+  function isopen{SocketType}(sock::SocketType)
+      if sock.status == StatusUninit || sock.status == StatusInit return false end
+      sock.status != StatusClosed && sock.status != StatusEOF
   end
   #
   # Returns lines array from AST by specified indexes. e.g.:

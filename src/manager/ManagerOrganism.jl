@@ -453,7 +453,7 @@ function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, re
   local id::Int = @getPosId(pos)
   local org::Creature.Organism
 
-  if haskey(Manager._cons.frozen, org.id)
+  if haskey(Manager._cons.frozen, organism.id)
     return retObj.ret = 0
   end
   #

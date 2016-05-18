@@ -173,7 +173,7 @@ module Server
           #
           # Possibly Server.stop() was called.
           #
-          if isopen(con.server) === false
+          if Helper.isopen(con.server) === false
             local sock::Base.TCPSocket
             for sock in con.socks close(sock) end
             break
@@ -181,7 +181,7 @@ module Server
           Helper.warn("Server.run(): $e")
         end
         sock = con.socks[length(con.socks)]
-        push!(con.tasks, @async while isopen(sock)
+        push!(con.tasks, @async while Helper.isopen(sock)
           _answer(sock, con.observer)
           _update(con)
         end)
@@ -205,7 +205,7 @@ module Server
   # @return true - request was sent, false wasn't
   #
   function request(con::ServerConnection, fn::Integer, args...)
-    try if !isopen(con.sock) return false end catch return false end
+    try if !Helper.isopen(con.sock) return false end catch return false end
     #
     # This line is non blocking one
     #
@@ -225,8 +225,7 @@ module Server
   # @return {Bool}
   #
   function isOk(con::Server.ServerConnection)
-    try return isopen(con.server) end
-    false
+    Helper.isopen(con.server)
   end
   #
   # Stops the server. Stops listening all connections and drops
@@ -254,7 +253,7 @@ module Server
     i::Int = 1
 
     while i <= length(con.socks)
-      if isopen(con.socks[i])
+      if Helper.isopen(con.socks[i])
        	i += 1
       else
         deleteat!(con.socks, i)
@@ -293,7 +292,7 @@ module Server
       yield()
       if isa(e, EOFError)
         close(sock)
-      elseif isopen(sock)
+      elseif Helper.isopen(sock)
         Helper.warn("Server._answer(): $e")
       end
     end

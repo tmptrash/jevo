@@ -122,7 +122,7 @@ module Client
   # @return true - request was sent, false wasn't
   #
   function request(con::Client.ClientConnection, fn::Integer, args...)
-    try if !isopen(con.sock) return false end catch return false end
+    try if !Helper.isopen(con.sock) return false end catch return false end
     #
     # This line is non blocking one
     #
@@ -142,8 +142,7 @@ module Client
   # @return {Bool}
   #
   function isOk(con::Client.ClientConnection)
-    try return isopen(con.sock) end
-    false
+    Helper.isopen(con.sock)
   end
   #
   # Closes client's socket. After this call, we have to call create()
