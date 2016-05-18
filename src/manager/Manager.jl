@@ -211,18 +211,18 @@ module Manager
   # Manager is a singleton.
   # TODO: this type should be stored outside of this module in AppManager.jl
   global _data = ManagerData(
-    World.create(),
-    Dict{Int, Creature.Organism}(),
-    Dict{UInt, Creature.Organism}(),
-    ManagerTypes.OrganismTask[],
-    CommandLine.create(),
-    UInt(0),
-    UInt(0),
-    Creature.create(), # temporary min organism
-    Creature.create(), # temporary max organism
-    UInt(0),
-    UInt(0),
-    CommandLine.has(CommandLine.create(), ARG_QUIET)
+    World.create(),                                  # world
+    Dict{Int, Creature.Organism}(),                  # positions
+    Dict{UInt, Creature.Organism}(),                 # organisms
+    ManagerTypes.OrganismTask[],                     # tasks
+    CommandLine.create(),                            # params
+    UInt(2),                                         # organismId
+    UInt(0),                                         # totalOrganisms
+    Creature.create(),                               # minOrg
+    Creature.create(),                               # maxOrg
+    UInt(0),                                         # minId
+    UInt(0),                                         # maxId
+    CommandLine.has(CommandLine.create(), ARG_QUIET) # quiet
   )
   #
   # Current Manager/instance all available connections
