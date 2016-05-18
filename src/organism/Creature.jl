@@ -236,7 +236,7 @@ module Creature
   #
   # TODO: describe organism's task function
   #
-  function born(org::Creature.Organism, id::UInt)
+  function born(org::Creature.Organism)
     #
     # -----------------------------------------------------------------------
     # This is main loop, where organism lives. It's body will be changed soon

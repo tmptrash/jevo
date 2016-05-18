@@ -514,7 +514,7 @@ function _createOrganism(organism = nothing, pos::Helper.Point = Helper.Point(0,
   if pos === false return false end
   local id::UInt = Manager._data.organismId
   local org::Creature.Organism = organism === nothing ? Creature.create(id, pos) : add ? organism : deepcopy(organism)
-  local task::Task = Task(Creature.born(org, id))
+  local task::Task = Task(Creature.born(org))
   local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, task, org)
 
   org.pos = pos

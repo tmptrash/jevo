@@ -27,7 +27,7 @@ function recover()
 
   for i = 1:length(data.tasks)
     t = data.tasks[i]
-    t.task = Task(Creature.born(t.organism, t.id))
+    t.task = Task(Creature.born(t.organism))
   end
 
   Manager._data.world          = data.world
