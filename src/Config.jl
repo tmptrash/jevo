@@ -359,7 +359,7 @@ module Config
       10000,                     # ORGANISM_MAX_MUTATION_PERIOD
       1,                         # ORGANISM_MUTATION_AMOUNT
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT
-      50,                        # ORGANISM_START_AMOUNT
+      5,                         # ORGANISM_START_AMOUNT
       5000,                      # ORGANISM_START_ENERGY
       typemax(UInt32),           # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
       20,                        # ORGANISM_ENERGY_DECREASE_PERIOD
@@ -373,8 +373,8 @@ module Config
       322,                       # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
-      600,                       # WORLD_MAX_ORGANISMS
-      200,                       # WORLD_MIN_ORGANISMS
+      10,                        # WORLD_MAX_ORGANISMS
+      2,                         # WORLD_MIN_ORGANISMS
       1000,                      # WORLD_START_ENERGY_BLOCKS
       UInt32(0x00FF00),          # WORLD_START_ENERGY_AMOUNT
       1,                         # WORLD_MIN_ENERGY_PERCENT

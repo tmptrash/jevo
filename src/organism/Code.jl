@@ -8,7 +8,7 @@
 # TODO: describe that return operator inside custom functions don't affect of script size
 # TODO: describe Expr(:nothing) return value
 # TODO: describe @line, @block annotations(they are line and block element). e.g.:
-# TODO: if,for - block elements, var, fnCall - line elements, function - 
+# TODO: if,for - block elements, var, fnCall - line elements, function -
 # TODO: function element. fnCall has special status (it may be called only
 # TODO: from main function)
 #
@@ -39,6 +39,12 @@ module Code
   #
   export onRemoveLine
   export getRandPos
+  #
+  # This value will be used in loop() function as a divider. Maximum
+  # amount of loop steps depends on this value. See loop() function
+  # for details.
+  #
+  const _LOOP_STEPS_DIVIDER = 16
   #
   # Describes one code block like "if", "for", "function" and so on.
   # Is used for mutations of organism's AST. Contains function and
@@ -76,7 +82,7 @@ module Code
   # @cmd
   # @block
   # Creates custom function with unique name, random arguments with
-  # default values. By default it returns first parameter as local 
+  # default values. By default it returns first parameter as local
   # variable
   # @param org Organism we are working with
   # @param pos Code position
@@ -128,7 +134,7 @@ module Code
   # @param org Organism we are working with
   # @param pos Code position
   # @return {Expr|Expr(:nothing)}
-  # 
+  #
   function fnCall(org::Creature.Organism, pos::Helper.Pos)
     local funcsLen::Int             = length(org.funcs)
     if funcsLen < 2 return Expr(:nothing) end
@@ -177,7 +183,8 @@ module Code
   # @cmd
   # @block
   # Creates a for loop. We have to create small loops, because they
-  # affect entire speed.
+  # affect entire speed. This is why we divide amount into 8. So max
+  # loop iterations < 8
   # @param org Organism we are working with
   # @param pos Position in a code
   # @return {Expr|Expr(:nothing)}
@@ -185,7 +192,7 @@ module Code
   function loop(org::Creature.Organism, pos::Helper.Pos)
     local v::Symbol = @randVar(org, pos, Int8)
     if v === :nothing return Expr(:nothing) end
-    local loopEx    = :(for i=1:$v end)
+    local loopEx    = :(for i=1:div($v, _LOOP_STEPS_DIVIDER) end)
 
     push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), loopEx.args[2]))
     loopEx
@@ -230,7 +237,7 @@ module Code
       org.codeSize -= length(lines)
       deleteat!(blocks, idx)
     #
-    # For simple line element we do nothing. But do for 
+    # For simple line element we do nothing. But do for
     # variable declaration.
     #
     elseif exp.head === :local
@@ -241,11 +248,11 @@ module Code
     end
   end
   #
-  # Returns random position in a code (including all custom 
-  # functions), where we have to insert/change/delete code 
-  # line. Position is chose randomly. It takes main function 
-  # and all custom functions together, choose one function 
-  # randomly and choose random block and position inside this 
+  # Returns random position in a code (including all custom
+  # functions), where we have to insert/change/delete code
+  # line. Position is chose randomly. It takes main function
+  # and all custom functions together, choose one function
+  # randomly and choose random block and position inside this
   # block. Every function contains return operator at the end.
   # So we have to skip it.
   # @param org Organism we are working with
