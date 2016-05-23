@@ -38,7 +38,7 @@
 #     #
 #     # Before running we have to bind command event listeners
 #     #
-#     Event.on(connection.observer, Server.EVENT_COMMAND, onCommand)
+#     Event.on(connection.observer, Server.EVENT_BEFORE_RESPONSE, onCommand)
 #     #
 #     # This is how our server run itself
 #     #
@@ -86,20 +86,20 @@ module Server
   export run
   export stop
   export isOk
-  export EVENT_COMMAND
+  export EVENT_BEFORE_RESPONSE
   export EVENT_AFTER_RESPONSE
   export ServerConnection
   #
   # Name of the event, which is fired if answer from client's
   # request is obtained.
   #
-  const EVENT_AFTER_RESPONSE  = "answer"
+  const EVENT_AFTER_RESPONSE  = "after-response"
   #
   # Name of the event, which is fired if client sent us a command. If
   # this event fires, then specified command should be runned here - on
   # server side.
-  # TODO: rename this to EVENT_BEFORE_RESPONSE
-  const EVENT_COMMAND = "command"
+  #
+  const EVENT_BEFORE_RESPONSE = "before-response"
   #
   # Describes a server. It contains clients sockets, tasks, server object
   # and it's observer.
@@ -282,7 +282,7 @@ module Server
         Event.fire(obs, EVENT_AFTER_RESPONSE, data)
       else # Connection.Command
         local ans::Connection.Answer = Connection.Answer(0, null)
-        Event.fire(obs, EVENT_COMMAND, data, ans)
+        Event.fire(obs, EVENT_BEFORE_RESPONSE, data, ans)
         serialize(sock, ans)
       end
     catch e

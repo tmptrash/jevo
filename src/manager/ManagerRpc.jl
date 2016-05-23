@@ -380,7 +380,7 @@ function _createServer()
     _getIp(Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP),
     _getPort(Manager.ARG_SERVER_PORT, :CONNECTION_SERVER_PORT)
   )
-  Event.on(con.observer, Server.EVENT_COMMAND, _onClientCommand)
+  Event.on(con.observer, Server.EVENT_BEFORE_RESPONSE, _onClientCommand)
   con
 end
 #

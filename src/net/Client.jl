@@ -67,11 +67,11 @@ module Client
   # Name of the event, which is fired if answer from server's
   # request is obtained.
   #
-  const EVENT_AFTER_RESPONSE  = "answer"
+  const EVENT_AFTER_RESPONSE  = "after-response"
   #
   # Name of the event, for requests from server to the client
   #
-  const EVENT_BEFORE_RESPONSE = "request"
+  const EVENT_BEFORE_RESPONSE = "before-response"
   #
   # Describes one connected client. Contains socket and observer.
   #
