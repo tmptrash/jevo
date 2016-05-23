@@ -17,6 +17,14 @@ import Server
 import Connection
 import ManagerTypes
 #
+# Sides positions of near instance(server), which is connected
+# to the current one.
+#
+const _SIDE_LEFT  = "LEFT"
+const _SIDE_RIGHT = "RIGHT"
+const _SIDE_UP    = "UP"
+const _SIDE_DOWN  = "DOWN"
+#
 # @rpc
 # Grabs world's rectangle region and returns it
 # @param x Start X coordinate of region
@@ -243,7 +251,7 @@ end
 # Creates client and returns it's ClientConnection type. It
 # uses port number provided by "XXXport" command line
 # argument or default one from Config module.
-# @param side Server side ("left", "right",...)
+# @param side Server side ("LEFT", "RIGHT",...)
 # @return ClientConnection object
 #
 function _createClient(side::ASCIIString)
@@ -264,8 +272,8 @@ function _createClient(side::ASCIIString)
     con = Client.create(serverIp, serverPort)
   end
   if Client.isOk(con)
-    Event.on(con.observer, Client.EVENT_ANSWER, (ans::Connection.Answer)->_onServerAnswer(side, ans))
-    Event.on(con.observer, Client.EVENT_REQUEST, (data::Connection.Command, ans::Connection.Answer)->_onServerRequest(side, data, ans))
+    Event.on(con.observer, Client.EVENT_AFTER_RESPONSE, (ans::Connection.Answer)->_onServerAnswer(side, ans))
+    Event.on(con.observer, Client.EVENT_BEFORE_RESPONSE, (data::Connection.Command, ans::Connection.Answer)->_onServerRequest(side, data, ans))
   end
   con
 end
@@ -278,10 +286,10 @@ end
 function _createConnections()
   Manager.Connections(
     _createServer(),
-    _createClient("LEFT"),
-    _createClient("RIGHT"),
-    _createClient("UP"),
-    _createClient("DOWN"),
+    _createClient(_SIDE_LEFT),
+    _createClient(_SIDE_RIGHT),
+    _createClient(_SIDE_UP),
+    _createClient(_SIDE_DOWN),
     Dict{UInt, Creature.Organism}()
   )
 end
@@ -331,10 +339,10 @@ function _onServerRequest(side::ASCIIString, data::Connection.Command, ans::Conn
   ans.data = org.id
   org      = data.args[1]
   pos      = org.pos
-  if     data.fn === RpcApi.RPC_ORG_STEP_RIGHT && side === "LEFT"  pos.x = 1
-  elseif data.fn === RpcApi.RPC_ORG_STEP_LEFT  && side === "RIGHT" pos.x = Manager._data.world.width
-  elseif data.fn === RpcApi.RPC_ORG_STEP_DOWN  && side === "UP"    pos.y = 1
-  elseif data.fn === RpcApi.RPC_ORG_STEP_UP    && side === "DOWN"  pos.y = Manager._data.world.height
+  if     data.fn === RpcApi.RPC_ORG_STEP_RIGHT && side === _SIDE_LEFT  pos.x = 1
+  elseif data.fn === RpcApi.RPC_ORG_STEP_LEFT  && side === _SIDE_RIGHT pos.x = Manager._data.world.width
+  elseif data.fn === RpcApi.RPC_ORG_STEP_DOWN  && side === _SIDE_UP    pos.y = 1
+  elseif data.fn === RpcApi.RPC_ORG_STEP_UP    && side === _SIDE_DOWN  pos.y = Manager._data.world.height
   end
   #
   # Something on a way of organism or maximum amount of organisms

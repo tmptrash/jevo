@@ -1,15 +1,15 @@
 #
 # Module for requests pooling. Communication works through Client/
-# Server modules. This module works in a simple way: first, you 
+# Server modules. This module works in a simple way: first, you
 # have to create Pooling data object by calling create() function.
 # It returns PoolingData data object, which is used in all functions.
-# create() doesn't start pooling. For this, you have to call start() 
+# create() doesn't start pooling. For this, you have to call start()
 # function. To stop pooling, call stop().
 #
 # Events:
-#     beforerequest Fired before every request. I used for setting 
+#     beforerequest Fired before every request. I used for setting
 #                   parameters of request. e.g.: [RpcApi.RPC_GET_REGION,
-#                   1, 1, 200, 150]. 
+#                   1, 1, 200, 150].
 #     afterresponse Fired after every request. Passes answer object.
 #
 # Usage:
@@ -48,7 +48,7 @@ module Pooling
   const EVENT_BEFORE_REQUEST = "beforerequest"
   const EVENT_AFTER_RESPONSE = "afterresponse"
   #
-  # Contains pooling data. Is used in all functions as 
+  # Contains pooling data. Is used in all functions as
   # first parameter.
   #
   type PoolingData
@@ -80,7 +80,7 @@ module Pooling
     pd.delay = delay
     pd.resp  = (ans::Connection.Answer) -> _onResponse(pd, ans)
 
-    Event.on(pd.con.observer, Client.EVENT_ANSWER, pd.resp)
+    Event.on(pd.con.observer, Client.EVENT_AFTER_RESPONSE, pd.resp)
     #
     # Here user should fill pd.args parameter. These arguments
     # will be passed to the remote server with request.
@@ -93,7 +93,7 @@ module Pooling
   # @param pd Pooling data object
   #
   function stop(pd::PoolingData)
-    Event.off(pd.con.observer, Client.EVENT_ANSWER, pd.resp)
+    Event.off(pd.con.observer, Client.EVENT_AFTER_RESPONSE, pd.resp)
     Client.stop(pd.con)
   end
   #

@@ -2,7 +2,7 @@
 # TCP Client implementation. It works in pair with Server
 # module. It also works in asynchronous way (like a server)
 # and implements simple RPC-like logic. All you need to do is
-# create a client, add listeners to EVENT_ANSWER event if needed
+# create a client, add listeners to EVENT_AFTER_RESPONSE event if needed
 # and call request() method as many times as needed. The answer
 # will be obtained through onAnswer() callback.
 #
@@ -13,7 +13,7 @@
 # request() method. It uses tasks for sending non blocking
 # requests and obtaining answers (see @async macro in code).
 # Every request creates one tasks
-# TODO: describe server-to-client requests logic Nd EVENT_REQUEST event
+# TODO: describe server-to-client requests logic Nd EVENT_BEFORE_RESPONSE event
 #
 # @author DeadbraiN
 #
@@ -31,9 +31,9 @@
 #     #
 #     connection = Client.create(ip"127.0.0.1", 2001)
 #     #
-#     # Starts to listen EVENT_ANSWER event
+#     # Starts to listen EVENT_AFTER_RESPONSE event
 #     #
-#     Event.on(connection.observer, EVENT_ANSWER, onAnswer)
+#     Event.on(connection.observer, EVENT_AFTER_RESPONSE, onAnswer)
 #     #
 #     # Makes a request to the server. An answer will
 #     # be obtained in onAnswer() callback.
@@ -60,18 +60,18 @@ module Client
   export stop
   export isOk
 
-  export EVENT_ANSWER
-  export EVENT_REQUEST
+  export EVENT_AFTER_RESPONSE
+  export EVENT_BEFORE_RESPONSE
   export ClientConnection
   #
   # Name of the event, which is fired if answer from server's
   # request is obtained.
   #
-  const EVENT_ANSWER  = "answer"
+  const EVENT_AFTER_RESPONSE  = "answer"
   #
   # Name of the event, for requests from server to the client
   #
-  const EVENT_REQUEST = "request"
+  const EVENT_BEFORE_RESPONSE = "request"
   #
   # Describes one connected client. Contains socket and observer.
   #
@@ -174,10 +174,10 @@ module Client
       #
       data = deserialize(sock)
       if typeof(data) === Connection.Answer
-        Event.fire(obs, EVENT_ANSWER, data)
+        Event.fire(obs, EVENT_AFTER_RESPONSE, data)
       else
         local ans::Connection.Answer = Connection.Answer(null)
-        Event.fire(obs, EVENT_REQUEST, data, ans)
+        Event.fire(obs, EVENT_BEFORE_RESPONSE, data, ans)
         serialize(sock, ans)
       end
     catch e

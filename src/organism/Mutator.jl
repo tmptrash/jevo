@@ -18,10 +18,10 @@ module Mutator
   # mean: follow the rules like block can't be inside other blocks,
   # except block of function, function declaration can't be inside
   # other custom function and so on... If something wrong with position
-  # then false will be returned. We have to prevent: calling function 
-  # inside custom function (to prevent recursing), creation function 
+  # then false will be returned. We have to prevent: calling function
+  # inside custom function (to prevent recursing), creation function
   # inside custom function, block operator inside other blocks, except
-  # blocks of functions. exp variable should be declared outside the 
+  # blocks of functions. exp variable should be declared outside the
   # macros.
   #
   macro posCorrect(org, pos, cmd)
@@ -126,7 +126,7 @@ module Mutator
     true
   end
   #
-  # Makes one big change in a code of main and custom functions. Big 
+  # Makes one big change in a code of main and custom functions. Big
   # change means changing one line. It's possible to skip changing.
   # @param org Organism we are working with
   # @param pos Changing code position
@@ -183,13 +183,13 @@ module Mutator
       return false
     end
     Code.onRemoveLine(org, pos)
-    deleteat!(lines, pos.lineIdx)    
+    deleteat!(lines, pos.lineIdx)
     org.codeSize -= 1
 
     true
   end
   #
-  # Makes one small change in a code included code of all 
+  # Makes one small change in a code included code of all
   # custom functions. Small change it's change of variable
   # or constant to other/same variable or constant.
   # @param org Organism we are working with
@@ -205,7 +205,7 @@ module Mutator
     true
   end
   #
-  # mutationsOnClone property mutation handler. It changes this 
+  # mutationsOnClone property mutation handler. It changes this
   # property randomly. 0 means disable property.
   # @param org Organism we are working with
   # @param pos Unused
@@ -228,7 +228,7 @@ module Mutator
     true
   end
   #
-  # mutationAmount property mutation handler. It changes this 
+  # mutationAmount property mutation handler. It changes this
   # property randomly. 0 means disable property.
   # @param org Organism we are working with
   # @param pos Unused
@@ -245,7 +245,7 @@ module Mutator
     _onAdd, _onChange, _onDel, _onSmallChange, _onClone, _onPeriod, _onAmount
   ]
   #
-  # "Empty" position. Means no position. Is used only like a stub for 
+  # "Empty" position. Means no position. Is used only like a stub for
   # functions, which don't need code position
   #
   const _posStub = Helper.Pos(0,0,0)

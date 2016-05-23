@@ -30,7 +30,7 @@ function main()
   local con = Client.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT))
 
   if !Client.isOk(con) quit() end
-  Event.on(con.observer, Client.EVENT_ANSWER, onAnswer)
+  Event.on(con.observer, Client.EVENT_AFTER_RESPONSE, onAnswer)
   Terminal.init(con)
 end
 #

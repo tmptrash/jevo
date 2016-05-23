@@ -76,7 +76,7 @@
 #            custom data.
 #
 # @author DeadbraiN
-# TODO: add EVENT_ANSWER logic description
+# TODO: add EVENT_AFTER_RESPONSE logic description
 module Server
   import Event
   import Connection
@@ -87,18 +87,18 @@ module Server
   export stop
   export isOk
   export EVENT_COMMAND
-  export EVENT_ANSWER
+  export EVENT_AFTER_RESPONSE
   export ServerConnection
   #
   # Name of the event, which is fired if answer from client's
   # request is obtained.
   #
-  const EVENT_ANSWER  = "answer"
+  const EVENT_AFTER_RESPONSE  = "answer"
   #
   # Name of the event, which is fired if client sent us a command. If
   # this event fires, then specified command should be runned here - on
   # server side.
-  #
+  # TODO: rename this to EVENT_BEFORE_RESPONSE
   const EVENT_COMMAND = "command"
   #
   # Describes a server. It contains clients sockets, tasks, server object
@@ -279,7 +279,7 @@ module Server
       #
       data = deserialize(sock)
       if typeof(data) === Connection.Answer
-        Event.fire(obs, EVENT_ANSWER, data)
+        Event.fire(obs, EVENT_AFTER_RESPONSE, data)
       else # Connection.Command
         local ans::Connection.Answer = Connection.Answer(0, null)
         Event.fire(obs, EVENT_COMMAND, data, ans)
