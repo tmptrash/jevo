@@ -272,8 +272,8 @@ function _createClient(side::ASCIIString)
     con = Client.create(serverIp, serverPort)
   end
   if Client.isOk(con)
-    Event.on(con.observer, Client.EVENT_AFTER_RESPONSE, (ans::Connection.Answer)->_onServerAnswer(side, ans))
-    Event.on(con.observer, Client.EVENT_BEFORE_RESPONSE, (data::Connection.Command, ans::Connection.Answer)->_onServerRequest(side, data, ans))
+    Event.on(con.observer, Client.EVENT_AFTER_RESPONSE, (ans::Connection.Answer)->_onAfterResponse(side, ans))
+    Event.on(con.observer, Client.EVENT_BEFORE_RESPONSE, (data::Connection.Command, ans::Connection.Answer)->_onBeforeResponse(side, data, ans))
   end
   con
 end
@@ -300,7 +300,7 @@ end
 # @param side Side name of answering server
 # @param ans Answer data object
 #
-function _onServerAnswer(side::ASCIIString, ans::Connection.Answer)
+function _onAfterResponse(side::ASCIIString, ans::Connection.Answer)
   local org::Creature.Organism = Manager._cons.frozen[ans.data]
 
   delete!(Manager._cons.frozen, ans.data)
@@ -311,9 +311,9 @@ function _onServerAnswer(side::ASCIIString, ans::Connection.Answer)
       # If there is no free space, we have to kill this frozen organism
       #
       if pos === false return false end
-    else
-      Manager._createOrganism(org, org.pos, true)
+      org.pos = pos
     end
+    Manager._createOrganism(org, org.pos, true)
   end
 
   true
@@ -325,19 +325,19 @@ end
 # @param data Input comand object
 # @param ans Answer data object we have to fill
 #
-function _onServerRequest(side::ASCIIString, data::Connection.Command, ans::Connection.Answer)
+function _onBeforeResponse(side::ASCIIString, data::Connection.Command, ans::Connection.Answer)
   local org::Creature.Organism
   local pos::Helper.Point
   #
   # This request means, that one organism wants to step outside
   # of it's current Manager/instance into this one. We have
-  # to send OK response, which means, that we obtain an organism
+  # to send OK response, which means, that we obtained an organism
   # and added him into the organisms pool. data.args[1] contains
   # organism. We also have to decrease organism's energy, because
   # moving between instances it's network performance issue.
   #
-  ans.data = org.id
   org      = data.args[1]
+  ans.data = org.id
   pos      = org.pos
   if     data.fn === RpcApi.RPC_ORG_STEP_RIGHT && side === _SIDE_LEFT  pos.x = 1
   elseif data.fn === RpcApi.RPC_ORG_STEP_LEFT  && side === _SIDE_RIGHT pos.x = Manager._data.world.width

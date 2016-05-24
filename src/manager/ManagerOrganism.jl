@@ -298,7 +298,7 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   end
   #
   # We have to freeze the organism and throw an error to interrupt
-  # organism's code running
+  # his current runned code
   #
   if freeze
     # TODO: possibly slow code!
