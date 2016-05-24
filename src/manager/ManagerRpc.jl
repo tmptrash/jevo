@@ -227,6 +227,26 @@ function getBest(amount::Int)
 
   best
 end
+#
+# @rpc
+#
+function setLeftWorld()
+end
+#
+# @rpc
+#
+function setRightWorld()
+end
+#
+# @rpc
+#
+function setUpWorld()
+end
+#
+# @rpc
+#
+function setDownWorld()
+end
 
 #
 # Assembles RpcApi.SimpleOrganism type from wider Creature.Organism
@@ -404,5 +424,9 @@ _rpcApi = Dict{Integer, Function}(
   RpcApi.RPC_SET_ENERGY_RND    => setRandomEnergy,
   RpcApi.RPC_BACKUP            => doBackup,
   RpcApi.RPC_GET_STATISTICS    => getStatistics,
-  RpcApi.RPC_GET_BEST          => getBest
+  RpcApi.RPC_GET_BEST          => getBest,
+  RpcApi.RPC_SET_LEFT_WORLD    => setLeftWorld,
+  RpcApi.RPC_SET_RIGHT_WORLD   => setRightWorld
+  RpcApi.RPC_SET_UP_WORLD      => setUpWorld,
+  RpcApi.RPC_SET_DOWN_WORLD    => setDownWorld
 )

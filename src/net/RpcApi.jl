@@ -157,6 +157,10 @@ module RpcApi
   const RPC_BACKUP            = 14
   const RPC_GET_STATISTICS    = 15
   const RPC_GET_BEST          = 16
+  const RPC_SET_LEFT_WORLD    = 17
+  const RPC_SET_RIGHT_WORLD   = 18
+  const RPC_SET_UP_WORLD      = 19
+  const RPC_SET_DOWN_WORLD    = 20
   #
   # These IDs are for inter-instances communication. This is
   # something like internal protocol between Managers/servers.
