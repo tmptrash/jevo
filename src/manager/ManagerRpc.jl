@@ -271,11 +271,12 @@ function setStreaming(sock::TCPSocket, on::Bool = true)
   Manager._cons.streaming = on ? true : hasStreaming
   if Manager._cons.streaming
     if !Event.has(Manager.world.obs, World.EVENT_DOT, _onWorldDot) Event.on(Manager.world.obs, World.EVENT_DOT, _onWorldDot) end
+    return getRegion()
   else
     Event.off(Manager.world.obs, World.EVENT_DOT, _onWorldDot)
   end
 
-  getRegion()
+  false
 end
 
 #
