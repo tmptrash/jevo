@@ -229,25 +229,66 @@ function getBest(amount::Int)
 end
 #
 # @rpc
-#
+# TODO:
 function setLeftWorld()
 end
 #
 # @rpc
-#
+# TODO:
 function setRightWorld()
 end
 #
 # @rpc
-#
+# TODO:
 function setUpWorld()
 end
 #
 # @rpc
-#
+# TODO:
 function setDownWorld()
 end
+#
+# @rpc
+# Starts/stops world streaming. It streams only differences to the clients.
+# It adds/removes worlds change event handler and every time, when some
+# world change occures, it makes a request to all streamed clients. On
+# first call, it returns whole world (all dots) to synchronize current
+# and remove world planes.
+# @param sock Client's socket
+# @param on Turns streaming on or off
+#
+function setStreaming(sock::TCPSocket, on::Bool = true)
+  local hasStreaming::Bool = false
 
+  for s::Base.TCPSocket in Manager._cons.server.socks
+    if sock === s.sock
+      s.streaming = on
+      if on break end
+    end
+    if s.streaming hasStreaming = true end
+  end
+
+  Manager._cons.streaming = on ? true : hasStreaming
+  if Manager._cons.streaming
+    if !Event.has(Manager.world.obs, World.EVENT_DOT, _onWorldDot) Event.on(Manager.world.obs, World.EVENT_DOT, _onWorldDot) end
+  else
+    Event.off(Manager.world.obs, World.EVENT_DOT, _onWorldDot)
+  end
+
+  getRegion()
+end
+
+#
+# This is a handler on world dot change. It notify remote clients
+# about these changes.
+# @param pos Dot coordinates
+# @param color Dot color
+#
+function _onWorldDot(pos::Helper.Point, color::UInt32)
+  for sock::ServerClientSocket in Manager._cons.socks
+    if sock.streaming Server.request(sock, RpcApi.RPC_WORLD_CHANGE, pos, color) end
+  end
+end
 #
 # Assembles RpcApi.SimpleOrganism type from wider Creature.Organism
 # @return {RpcApi.SimpleOrganism}
@@ -310,7 +351,8 @@ function _createConnections()
     _createClient(_SIDE_RIGHT),
     _createClient(_SIDE_UP),
     _createClient(_SIDE_DOWN),
-    Dict{UInt, Creature.Organism}()
+    Dict{UInt, Creature.Organism}(),
+    false
   )
 end
 #
@@ -385,9 +427,17 @@ end
 # Handler for commands obtained from all connected clients. All supported
 # commands are in _rpcApi dictionary. If current command is undefinedin _rpcApi
 # then, false will be returned.
-#
-function _onClientCommand(cmd::Connection.Command, ans::Connection.Answer)
-  ans.data = haskey(_rpcApi, cmd.fn) ? _rpcApi[cmd.fn](cmd.args...) : false
+# TODO: describe arguments!
+function _onClientCommand(sock::Base.TCPSocket, cmd::Connection.Command, ans::Connection.Answer)
+  if !haskey(_rpcApi, cmd.fn) return nothing end
+
+  if cmd.fn === RpcApi.RPC_SET_WORLD_STREAMING
+    ans.data = _rpcApi[cmd.fn](sock, cmd.args...)
+  else
+    ans.data = _rpcApi[cmd.fn](cmd.args...)
+  end
+
+  nothing
 end
 #
 # Creates server and returns it's ServerConnection type. It
@@ -409,24 +459,25 @@ end
 # you have to use "Client" module.
 #
 _rpcApi = Dict{Integer, Function}(
-  RpcApi.RPC_GET_REGION        => getRegion,
-  RpcApi.RPC_CREATE_ORGANISMS  => createOrganisms,
-  RpcApi.RPC_CREATE_ORGANISM   => createOrganism,
-  RpcApi.RPC_SET_CONFIG        => setConfig,
-  RpcApi.RPC_GET_CONFIG        => getConfig,
-  RpcApi.RPC_SET_QUITE         => setQuite,
-  RpcApi.RPC_MUTATE            => mutate,
-  RpcApi.RPC_GET_IPS           => getIps,
-  RpcApi.RPC_GET_ORGANISM      => getOrganism,
-  RpcApi.RPC_GET_AMOUNT        => getAmount,
-  RpcApi.RPC_GET_ORGANISMS     => getOrganisms,
-  RpcApi.RPC_SET_ENERGY        => setEnergy,
-  RpcApi.RPC_SET_ENERGY_RND    => setRandomEnergy,
-  RpcApi.RPC_BACKUP            => doBackup,
-  RpcApi.RPC_GET_STATISTICS    => getStatistics,
-  RpcApi.RPC_GET_BEST          => getBest,
-  RpcApi.RPC_SET_LEFT_WORLD    => setLeftWorld,
-  RpcApi.RPC_SET_RIGHT_WORLD   => setRightWorld
-  RpcApi.RPC_SET_UP_WORLD      => setUpWorld,
-  RpcApi.RPC_SET_DOWN_WORLD    => setDownWorld
+  RpcApi.RPC_GET_REGION          => getRegion,
+  RpcApi.RPC_CREATE_ORGANISMS    => createOrganisms,
+  RpcApi.RPC_CREATE_ORGANISM     => createOrganism,
+  RpcApi.RPC_SET_CONFIG          => setConfig,
+  RpcApi.RPC_GET_CONFIG          => getConfig,
+  RpcApi.RPC_SET_QUITE           => setQuite,
+  RpcApi.RPC_MUTATE              => mutate,
+  RpcApi.RPC_GET_IPS             => getIps,
+  RpcApi.RPC_GET_ORGANISM        => getOrganism,
+  RpcApi.RPC_GET_AMOUNT          => getAmount,
+  RpcApi.RPC_GET_ORGANISMS       => getOrganisms,
+  RpcApi.RPC_SET_ENERGY          => setEnergy,
+  RpcApi.RPC_SET_ENERGY_RND      => setRandomEnergy,
+  RpcApi.RPC_BACKUP              => doBackup,
+  RpcApi.RPC_GET_STATISTICS      => getStatistics,
+  RpcApi.RPC_GET_BEST            => getBest,
+  RpcApi.RPC_SET_LEFT_WORLD      => setLeftWorld,
+  RpcApi.RPC_SET_RIGHT_WORLD     => setRightWorld,
+  RpcApi.RPC_SET_UP_WORLD        => setUpWorld,
+  RpcApi.RPC_SET_DOWN_WORLD      => setDownWorld,
+  RpcApi.RPC_SET_WORLD_STREAMING => setStreaming
 )

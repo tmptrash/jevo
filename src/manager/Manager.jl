@@ -43,15 +43,17 @@ module Manager
   # Current Manager connection objects. They are: server and
   # all four clients. "frozen" field is used for storing "frozen"
   # organisms (which are transferring from current Manager to
-  # another one by network).
+  # another one by network). "streaming" flag means, that streaming
+  # mode is on or off. Here streaming is a world dots streaming.
   #
   type Connections
-    server::Server.ServerConnection
-    left  ::Client.ClientConnection
-    right ::Client.ClientConnection
-    up    ::Client.ClientConnection
-    down  ::Client.ClientConnection
-    frozen::Dict{UInt, Creature.Organism}
+    server   ::Server.ServerConnection
+    left     ::Client.ClientConnection
+    right    ::Client.ClientConnection
+    up       ::Client.ClientConnection
+    down     ::Client.ClientConnection
+    frozen   ::Dict{UInt, Creature.Organism}
+    streaming::Bool
   end
   #
   # Manager's related type. Contains world, command line parameters,

@@ -1,5 +1,5 @@
 #
-# This module is used only for tests. It doesn't a 
+# This module is used only for tests. It doesn't a
 # part of jevo aplication.
 #
 module TestWorldServer
@@ -19,14 +19,14 @@ module TestWorldServer
     if (x1 < 1 || x1 > maxWidth)  x1 = maxWidth  end
     if (y1 < 1 || y1 > maxHeight) y1 = maxHeight end
     if (x  < 1 || x  > maxWidth)  x  = 1 end
-    if (y  < 1 || y  > maxHeight) y  = 1 end 
-    
+    if (y  < 1 || y  > maxHeight) y  = 1 end
+
     RpcApi.Region(_world.data[y:y1, x:x1], Config.val(:WORLD_IPS))
   end
   #
   # Requests handler
   #
-  function onRequest(cmd::Connection.Command, ans::Connection.Answer)
+  function onRequest(sock::Base.TCPSocket, cmd::Connection.Command, ans::Connection.Answer)
     #
     # 1 - getRegion
     #

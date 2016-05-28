@@ -138,6 +138,14 @@ module RpcApi
     maxOrg::SimpleOrganism
   end
   #
+  # Describes one dot in a world
+  #
+  type Dot
+    x::Int
+    y::Int
+    color::UInt32
+  end
+  #
   # RPC API unique identifiers. Only these functions may be called
   # remotely on the server.
   #
@@ -174,4 +182,8 @@ module RpcApi
   #
   const RPC_ORG_STEP_OK       = 1005
   const RPC_ORG_STEP_FAIL     = 1006
+  #
+  # These id's for request from server to client
+  #
+  const RPC_WORLD_CHANGE      = 2000
 end

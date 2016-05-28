@@ -7,7 +7,7 @@ import Config
 import Server
 import Connection
 
-function onRequest(cmd::Connection.Command, ans::Connection.Answer)
+function onRequest(sock::Base.TCPSocket, cmd::Connection.Command, ans::Connection.Answer)
   println(cmd)
   ans.data = "$(cmd.fn) answer"
 end
