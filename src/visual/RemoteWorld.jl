@@ -1,14 +1,14 @@
 #
 # Module for remote connection with Organisms World. It displays
 # world's state (organisms, energy, ...) in a canvas on a window.
-# Communication works through Pooling module. This module works 
+# Communication works through Pooling module. This module works
 # in a simple way: first, you have to create Remote World object
 # calling create() function. It returns RemoteWorld data object,
 # which is used in all functions. create() doesn't start displaying
 # world. For this, you have to call start() function. To stop
-# displaying, call stop(). Displaying world is a frame based 
-# procedure. It means that, every period of time (see delay 
-# argument of create()) a request will be sent. So amount of 
+# displaying, call stop(). Displaying world is a frame based
+# procedure. It means that, every period of time (see delay
+# argument of create()) a request will be sent. So amount of
 # frames per second depends on delay and network(requests) speed.
 #
 # @author DeadbraiN
@@ -51,7 +51,7 @@ module RemoteWorld
   # @param width  Canvas width in pixels
   # @param height Canvas height in pixels
   # @return {RemoteData|false}
-  #
+  # TODO: return value should be same type
   function create(host::Base.IPAddr, port::Integer, width::Int = Config.val(:WORLD_WIDTH), height::Int = Config.val(:WORLD_HEIGHT))
     pd = Pooling.create(host, port)
     pd !== false ? RemoteData(pd, CanvasWindow.create(width, height)) : false

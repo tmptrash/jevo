@@ -369,8 +369,8 @@ module Config
       5,                         # ORGANISM_CLONE_AFTER_TIMES
       UInt32(0xFF0000),          # ORGANISM_START_COLOR
       2,                         # CODE_MAX_FUNC_PARAMS
-      635,                       # WORLD_WIDTH
-      322,                       # WORLD_HEIGHT
+      200,#635,                       # WORLD_WIDTH
+      180,#322,                       # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
       300,                       # WORLD_MAX_ORGANISMS

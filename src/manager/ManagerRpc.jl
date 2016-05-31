@@ -16,6 +16,8 @@ import Event
 import Server
 import Connection
 import ManagerTypes
+
+using Debug
 #
 # Sides positions of near instance(server), which is connected
 # to the current one.
@@ -260,7 +262,7 @@ end
 function setStreaming(sock::TCPSocket, on::Bool = true)
   local hasStreaming::Bool = false
 
-  for s::Base.TCPSocket in Manager._cons.server.socks
+  for s::Server.ServerClientSocket in Manager._cons.server.socks
     if sock === s.sock
       s.streaming = on
       if on break end
@@ -270,10 +272,12 @@ function setStreaming(sock::TCPSocket, on::Bool = true)
 
   Manager._cons.streaming = on ? true : hasStreaming
   if Manager._cons.streaming
-    if !Event.has(Manager.world.obs, World.EVENT_DOT, _onWorldDot) Event.on(Manager.world.obs, World.EVENT_DOT, _onWorldDot) end
+    if !Event.has(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
+      Event.on(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
+    end
     return getRegion()
   else
-    Event.off(Manager.world.obs, World.EVENT_DOT, _onWorldDot)
+    Event.off(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
   end
 
   false
@@ -286,8 +290,8 @@ end
 # @param color Dot color
 #
 function _onWorldDot(pos::Helper.Point, color::UInt32)
-  for sock::ServerClientSocket in Manager._cons.socks
-    if sock.streaming Server.request(sock, RpcApi.RPC_WORLD_CHANGE, pos, color) end
+  for sock::Server.ServerClientSocket in Manager._cons.server.socks
+    if sock.streaming Server.request(sock.sock, RpcApi.RPC_WORLD_CHANGE, pos, color) end
   end
 end
 #

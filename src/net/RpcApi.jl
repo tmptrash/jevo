@@ -23,6 +23,22 @@ module RpcApi
   export RPC_SET_ENERGY_RND
   export RPC_BACKUP
   export RPC_GET_STATISTICS
+  export RPC_GET_BEST
+  export RPC_SET_LEFT_WORLD
+  export RPC_SET_RIGHT_WORLD
+  export RPC_SET_UP_WORLD
+  export RPC_SET_DOWN_WORLD
+  export RPC_SET_WORLD_STREAMING
+
+  export RPC_ORG_STEP_LEFT
+  export RPC_ORG_STEP_RIGHT
+  export RPC_ORG_STEP_UP
+  export RPC_ORG_STEP_DOWN
+
+  export RPC_ORG_STEP_OK
+  export RPC_ORG_STEP_FAIL
+
+  export RPC_WORLD_CHANGE
 
   export Region
   export SimpleOrganism
@@ -149,41 +165,42 @@ module RpcApi
   # RPC API unique identifiers. Only these functions may be called
   # remotely on the server.
   #
-  const RPC_GET_REGION        = 1
-  const RPC_CREATE_ORGANISMS  = 2
-  const RPC_CREATE_ORGANISM   = 3
-  const RPC_SET_CONFIG        = 4
-  const RPC_GET_CONFIG        = 5
-  const RPC_SET_QUITE         = 6
-  const RPC_MUTATE            = 7
-  const RPC_GET_IPS           = 8
-  const RPC_GET_ORGANISM      = 9
-  const RPC_GET_AMOUNT        = 10
-  const RPC_GET_ORGANISMS     = 11
-  const RPC_SET_ENERGY        = 12
-  const RPC_SET_ENERGY_RND    = 13
-  const RPC_BACKUP            = 14
-  const RPC_GET_STATISTICS    = 15
-  const RPC_GET_BEST          = 16
-  const RPC_SET_LEFT_WORLD    = 17
-  const RPC_SET_RIGHT_WORLD   = 18
-  const RPC_SET_UP_WORLD      = 19
-  const RPC_SET_DOWN_WORLD    = 20
+  const RPC_GET_REGION          = 1
+  const RPC_CREATE_ORGANISMS    = 2
+  const RPC_CREATE_ORGANISM     = 3
+  const RPC_SET_CONFIG          = 4
+  const RPC_GET_CONFIG          = 5
+  const RPC_SET_QUITE           = 6
+  const RPC_MUTATE              = 7
+  const RPC_GET_IPS             = 8
+  const RPC_GET_ORGANISM        = 9
+  const RPC_GET_AMOUNT          = 10
+  const RPC_GET_ORGANISMS       = 11
+  const RPC_SET_ENERGY          = 12
+  const RPC_SET_ENERGY_RND      = 13
+  const RPC_BACKUP              = 14
+  const RPC_GET_STATISTICS      = 15
+  const RPC_GET_BEST            = 16
+  const RPC_SET_LEFT_WORLD      = 17
+  const RPC_SET_RIGHT_WORLD     = 18
+  const RPC_SET_UP_WORLD        = 19
+  const RPC_SET_DOWN_WORLD      = 20
+  const RPC_SET_WORLD_STREAMING = 21
   #
   # These IDs are for inter-instances communication. This is
   # something like internal protocol between Managers/servers.
   #
-  const RPC_ORG_STEP_LEFT     = 1001
-  const RPC_ORG_STEP_RIGHT    = 1002
-  const RPC_ORG_STEP_UP       = 1003
-  const RPC_ORG_STEP_DOWN     = 1004
+  const RPC_ORG_STEP_LEFT       = 1001
+  const RPC_ORG_STEP_RIGHT      = 1002
+  const RPC_ORG_STEP_UP         = 1003
+  const RPC_ORG_STEP_DOWN       = 1004
   #
   # Means that step from one instance to another has finished
   #
-  const RPC_ORG_STEP_OK       = 1005
-  const RPC_ORG_STEP_FAIL     = 1006
+  const RPC_ORG_STEP_OK         = 1005
+  const RPC_ORG_STEP_FAIL       = 1006
   #
   # These id's for request from server to client
   #
-  const RPC_WORLD_CHANGE      = 2000
+  const RPC_WORLD_CHANGE        = 2000
 end

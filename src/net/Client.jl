@@ -176,7 +176,7 @@ module Client
       if typeof(data) === Connection.Answer
         Event.fire(obs, EVENT_AFTER_RESPONSE, data)
       else
-        local ans::Connection.Answer = Connection.Answer(null)
+        local ans::Connection.Answer = Connection.Answer(0, null)
         Event.fire(obs, EVENT_BEFORE_RESPONSE, data, ans)
         serialize(sock, ans)
       end

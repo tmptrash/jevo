@@ -9,7 +9,7 @@ import Connection
 
 function onRequest(sock::Base.TCPSocket, cmd::Connection.Command, ans::Connection.Answer)
   println(cmd)
-  ans.data = "$(cmd.fn) answer"
+  ans.data = rand(1000, 1000)
 end
 
 con = Server.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT))

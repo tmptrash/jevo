@@ -45,8 +45,8 @@ module Pooling
   #
   # Name of the events, which are fired before and after each request.
   #
-  const EVENT_BEFORE_REQUEST = "beforerequest"
-  const EVENT_AFTER_RESPONSE = "afterresponse"
+  const EVENT_BEFORE_REQUEST = "before-request"
+  const EVENT_AFTER_RESPONSE = "after-response"
   #
   # Contains pooling data. Is used in all functions as
   # first parameter.
