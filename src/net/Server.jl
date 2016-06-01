@@ -146,6 +146,7 @@ module Server
         return con
       catch e
         Helper.warn("Server.create(): $e")
+        showerror(STDOUT, e, catch_backtrace())
       end
     end
 
@@ -187,6 +188,7 @@ module Server
             break
           end
           Helper.warn("Server.run(): $e")
+          showerror(STDOUT, e, catch_backtrace())
         end
         sock = con.socks[length(con.socks)]
         push!(con.tasks, @async while Helper.isopen(sock.sock)
@@ -220,6 +222,7 @@ module Server
       serialize(sock, Connection.Command(fn, [i for i in args]))
     catch e
       Helper.warn("Server.request(): $e")
+      showerror(STDOUT, e, catch_backtrace())
       close(sock)
       return false
     end
@@ -247,6 +250,7 @@ module Server
       Helper.info(string("Server has stopped: ", con.host, ":", con.port))
     catch e
       Helper.warn("Server.stop(): $e")
+      showerror(STDOUT, e, catch_backtrace())
     end
   end
   #
@@ -277,6 +281,7 @@ module Server
   #
   function _answer(sock::Base.TCPSocket, obs::Event.Observer)
     local data::Any = null
+    local typ::DataType
 
     try
       #
@@ -285,9 +290,10 @@ module Server
       # client requests (Connection.Command).
       #
       data = deserialize(sock)
-      if typeof(data) === Connection.Answer
+      typ  = typeof(data)
+      if typ === Connection.Answer
         Event.fire(obs, EVENT_AFTER_RESPONSE, data)
-      else # Connection.Command
+      elseif typ === Connection.Command
         local ans::Connection.Answer = Connection.Answer(0, null)
         Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, data, ans)
         serialize(sock, ans)
@@ -301,6 +307,7 @@ module Server
         close(sock)
       elseif Helper.isopen(sock)
         Helper.warn("Server._answer(): $e")
+        showerror(STDOUT, e, catch_backtrace())
       end
     end
   end

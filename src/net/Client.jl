@@ -104,6 +104,7 @@ module Client
         @async while _answer(sock, obs) end
       catch e
         Helper.warn("Client.create(): $e")
+        showerror(STDOUT, e, catch_backtrace())
         if sock !== null close(sock) end
       end
       yield()
@@ -130,6 +131,7 @@ module Client
       serialize(con.sock, Connection.Command(fn, [i for i in args]))
     catch e
       Helper.warn("Client.request(): $e")
+      showerror(STDOUT, e, catch_backtrace())
       close(con.sock)
       return false
     end
@@ -154,6 +156,7 @@ module Client
       close(con.sock)
     catch e
       Helper.warn("Client.stop(): $e")
+      showerror(STDOUT, e, catch_backtrace())
     end
   end
   #
@@ -165,6 +168,7 @@ module Client
   #
   function _answer(sock::Base.TCPSocket, obs::Event.Observer)
     local data::Any = null
+    local typ::DataType
 
     try
       #
@@ -173,9 +177,10 @@ module Client
       # server requests (Connection.Command).
       #
       data = deserialize(sock)
-      if typeof(data) === Connection.Answer
+      typ  = typeof(data)
+      if typ === Connection.Answer
         Event.fire(obs, EVENT_AFTER_RESPONSE, data)
-      else
+      elseif typ === Connection.Command
         local ans::Connection.Answer = Connection.Answer(0, null)
         Event.fire(obs, EVENT_BEFORE_RESPONSE, data, ans)
         serialize(sock, ans)
@@ -186,6 +191,7 @@ module Client
       # All other exceptions should be shown in terminal.
       #
       Helper.warn("Client has disconnected: $e")
+      showerror(STDOUT, e, catch_backtrace())
       if sock !== null
         close(sock)
         return false

@@ -435,7 +435,10 @@ end
 # TODO: describe arguments!
 function _onClientCommand(sock::Base.TCPSocket, cmd::Connection.Command, ans::Connection.Answer)
   if !haskey(_rpcApi, cmd.fn) return nothing end
-
+  #
+  # Only streaming mode needs socket as first parameter. because we
+  # have to know destination client we are working with.
+  #
   if cmd.fn === RpcApi.RPC_SET_WORLD_STREAMING
     ans.data = _rpcApi[cmd.fn](sock, cmd.args...)
   else
