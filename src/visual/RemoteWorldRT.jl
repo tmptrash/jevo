@@ -86,7 +86,6 @@ module RemoteWorldRT
     local color::UInt32 = data.args[2]
     CanvasWindow.dot(rd.win, pos.x, pos.y, color)
     CanvasWindow.update(rd.win)
-    ans.data = true
   end
   #
   # Handler of RpcApi.RPC_SET_WORLD_STREAMING request

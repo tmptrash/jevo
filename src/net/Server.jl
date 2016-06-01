@@ -296,7 +296,7 @@ module Server
       elseif typ === Connection.Command
         local ans::Connection.Answer = Connection.Answer(0, null)
         Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, data, ans)
-        serialize(sock, ans)
+        if ans.id !== 0 || ans.data !== null serialize(sock, ans) end
       end
     catch e
       #
