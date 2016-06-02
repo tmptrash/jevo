@@ -204,7 +204,7 @@ function _updateWorldEnergy()
   #
   # Total amount of energy is less then in config
   #
-  if div(energy * 100, total) <= Config.val(:WORLD_MIN_ENERGY_PERCENT)
+  if div(Float64(energy * 100), total) <= Config.val(:WORLD_MIN_ENERGY_PERCENT)
     setRandomEnergy()
   end
 end

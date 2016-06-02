@@ -180,8 +180,10 @@ module Config
     # Minimum percent of energy in current world. Under percent i mean
     # percent from entire world area (100%). If the energy will be less
     # or equal then this percent, then new random energy should be added.
+    # Should be less then 100.0 and more and equal to 0.0. 0.17 is a
+    # normal percent for this system.
     #
-    WORLD_MIN_ENERGY_PERCENT::Int
+    WORLD_MIN_ENERGY_PERCENT::Float64
     #
     # An amount of iteration, after which we have to check world energy
     # amount. Works in pair with WORLD_MIN_ENERGY_PERCENT. May be 0 if
@@ -369,18 +371,18 @@ module Config
       5,                         # ORGANISM_CLONE_AFTER_TIMES
       UInt32(0xFF0000),          # ORGANISM_START_COLOR
       2,                         # CODE_MAX_FUNC_PARAMS
-      635,                       # WORLD_WIDTH
-      322,                       # WORLD_HEIGHT
+      1916,                      # WORLD_WIDTH
+      1000,                      # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
-      500,                       # WORLD_MAX_ORGANISMS
+      300,                       # WORLD_MAX_ORGANISMS
       5,                         # WORLD_MIN_ORGANISMS
       1000,                      # WORLD_START_ENERGY_BLOCKS
       UInt32(0x00FF00),          # WORLD_START_ENERGY_AMOUNT
-      1,                         # WORLD_MIN_ENERGY_PERCENT
+      0.5,                       # WORLD_MIN_ENERGY_PERCENT
       5000,                      # WORLD_MIN_ENERGY_CHECK_PERIOD
-      2,                         # WORLD_SCALE
-      4,                         # BACKUP_PERIOD
+      1,                         # WORLD_SCALE
+      1,                         # BACKUP_PERIOD
       7,                         # BACKUP_AMOUNT
       650,                       # STAT_WIDTH
       500,                       # STAT_HEIGHT
