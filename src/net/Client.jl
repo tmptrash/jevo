@@ -2,7 +2,7 @@
 # TCP Client implementation. It works in pair with Server
 # module. It also works in asynchronous way (like a server)
 # and implements simple RPC-like logic. All you need to do is
-# create a client, add listeners to EVENT_ANSWER event if needed
+# create a client, add listeners to EVENT_AFTER_RESPONSE event if needed
 # and call request() method as many times as needed. The answer
 # will be obtained through onAnswer() callback.
 #
@@ -13,7 +13,7 @@
 # request() method. It uses tasks for sending non blocking
 # requests and obtaining answers (see @async macro in code).
 # Every request creates one tasks
-# TODO: describe server-to-client requests logic Nd EVENT_REQUEST event
+# TODO: describe server-to-client requests logic Nd EVENT_BEFORE_RESPONSE event
 #
 # @author DeadbraiN
 #
@@ -31,9 +31,9 @@
 #     #
 #     connection = Client.create(ip"127.0.0.1", 2001)
 #     #
-#     # Starts to listen EVENT_ANSWER event
+#     # Starts to listen EVENT_AFTER_RESPONSE event
 #     #
-#     Event.on(connection.observer, EVENT_ANSWER, onAnswer)
+#     Event.on(connection.observer, EVENT_AFTER_RESPONSE, onAnswer)
 #     #
 #     # Makes a request to the server. An answer will
 #     # be obtained in onAnswer() callback.
@@ -60,18 +60,18 @@ module Client
   export stop
   export isOk
 
-  export EVENT_ANSWER
-  export EVENT_REQUEST
+  export EVENT_AFTER_RESPONSE
+  export EVENT_BEFORE_RESPONSE
   export ClientConnection
   #
   # Name of the event, which is fired if answer from server's
   # request is obtained.
   #
-  const EVENT_ANSWER  = "answer"
+  const EVENT_AFTER_RESPONSE  = "after-response"
   #
   # Name of the event, for requests from server to the client
   #
-  const EVENT_REQUEST = "request"
+  const EVENT_BEFORE_RESPONSE = "before-response"
   #
   # Describes one connected client. Contains socket and observer.
   #
@@ -104,6 +104,7 @@ module Client
         @async while _answer(sock, obs) end
       catch e
         Helper.warn("Client.create(): $e")
+        showerror(STDOUT, e, catch_backtrace())
         if sock !== null close(sock) end
       end
       yield()
@@ -130,6 +131,7 @@ module Client
       serialize(con.sock, Connection.Command(fn, [i for i in args]))
     catch e
       Helper.warn("Client.request(): $e")
+      showerror(STDOUT, e, catch_backtrace())
       close(con.sock)
       return false
     end
@@ -154,6 +156,7 @@ module Client
       close(con.sock)
     catch e
       Helper.warn("Client.stop(): $e")
+      showerror(STDOUT, e, catch_backtrace())
     end
   end
   #
@@ -165,6 +168,7 @@ module Client
   #
   function _answer(sock::Base.TCPSocket, obs::Event.Observer)
     local data::Any = null
+    local typ::DataType
 
     try
       #
@@ -173,12 +177,13 @@ module Client
       # server requests (Connection.Command).
       #
       data = deserialize(sock)
-      if typeof(data) === Connection.Answer
-        Event.fire(obs, EVENT_ANSWER, data)
-      else
-        local ans::Connection.Answer = Connection.Answer(null)
-        Event.fire(obs, EVENT_REQUEST, data, ans)
-        serialize(sock, ans)
+      typ  = typeof(data)
+      if typ === Connection.Answer
+        Event.fire(obs, EVENT_AFTER_RESPONSE, data)
+      elseif typ === Connection.Command
+        local ans::Connection.Answer = Connection.Answer(0, null)
+        Event.fire(obs, EVENT_BEFORE_RESPONSE, data, ans)
+        if ans.id !== 0 || ans.data !== null serialize(sock, ans) end
       end
     catch e
       #
@@ -186,6 +191,7 @@ module Client
       # All other exceptions should be shown in terminal.
       #
       Helper.warn("Client has disconnected: $e")
+      showerror(STDOUT, e, catch_backtrace())
       if sock !== null
         close(sock)
         return false

@@ -3,8 +3,11 @@
 # just a peace of memory, where all organisms are located. It
 # doesn't contain organisms codes, only rectangular with points.
 # It's possible to run our application only in memory. In this
-# case only this 2D world will be used (without visual 
+# case only this 2D world will be used (without visual
 # presentation).
+#
+# Events:
+#     dot Fires if new dot was paited.
 #
 # Usage:
 #     import World
@@ -21,8 +24,11 @@
 module World
   import Helper
   import Config
+  import Event
 
   export Plane
+
+  export EVENT_DOT
 
   export create
   export setEnergy
@@ -46,7 +52,15 @@ module World
     # Array of pixels (RGB+8b)
     #
     data::Array{UInt32, 2}
+    #
+    # Observer for sending events
+    #
+    obs::Event.Observer
   end
+  #
+  # Event, which is fired if new dot was painted in a world
+  #
+  const EVENT_DOT = "dot"
 
   #
   # Creates the world
@@ -55,7 +69,7 @@ module World
   # @return {Plane} filled by zero values Plane
   #
   function create(width::Int = Config.val(:WORLD_WIDTH), height::Int = Config.val(:WORLD_HEIGHT))
-    Plane(width, height, fill(UInt32(0), height, width))
+    Plane(width, height, fill(UInt32(0), height, width), Event.create())
   end
   #
   # Adds energy point by specified coordinates
@@ -67,6 +81,7 @@ module World
   function setEnergy(plane::Plane, pos::Helper.Point, energy::UInt32)
     if pos.x < 1 || pos.x > plane.width || pos.y < 1 || pos.y > plane.height return nothing end
     plane.data[pos.y, pos.x] = energy
+    Event.fire(plane.obs, EVENT_DOT, pos, energy)
   end
   #
   # Returns amount of energy in a point with
@@ -113,7 +128,7 @@ module World
 
     energy = energy > amount ? amount : energy
     if energy > 0
-      plane.data[pos.y, pos.x] -= energy
+      Event.fire(plane.obs, EVENT_DOT, pos, (plane.data[pos.y, pos.x] -= energy))
     end
     energy
   end

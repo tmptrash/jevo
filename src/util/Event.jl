@@ -1,8 +1,8 @@
 #
 # Implements Listener\Observer pattern. First, you have to create observer
-# object by calling create(), assign some handlers with on() and after that, 
+# object by calling create(), assign some handlers with on() and after that,
 # you may fire events with parameters.
-# 
+#
 # Usage:
 #     import Event
 #     ...
@@ -35,7 +35,7 @@ module Event
     #
     # {Dict{ASCIIString, Array{Function}}} array of events and they handlers.
     # For example: {"event"=>[fn1, fn2,...],...}
-    # 
+    #
     events::Dict{ASCIIString, Array{Function, 1}}
   end
 
@@ -57,6 +57,17 @@ module Event
     push!(obs.events[event], fn)
   end
   #
+  # Checks if specified event handler is registered
+  # @param obs Observer object
+  # @param event Event name
+  # @param fn Handler function
+  # @return {Bool} handler existance
+  #
+  function has(obs::Observer, event::ASCIIString, fn::Function)
+    if !haskey(obs.events, event) return false end
+    findfirst(obs.events[event], fn) !== 0
+  end
+  #
   # Removed a handler from handlers list for appropriate event
   # @param {Observer}    obs   Events container
   # @param {ASCIIString} event Event name. All in lowercase
@@ -67,7 +78,7 @@ module Event
     if index > 0 deleteat!(obs.events[event], index) end
   end
   #
-  # Fires an event with parameters. User may cancel current action 
+  # Fires an event with parameters. User may cancel current action
   # by returning false in one of event handlers.
   # @param {Observer} obs Events container
   # @param  {ASCIIString} event Event name
@@ -79,7 +90,7 @@ module Event
     if !haskey(obs.events, event) return nothing end
     local fns::Array{Function, 1} = obs.events[event]
     local i::Function
-    
+
     for i in fns
       i(args...)
     end

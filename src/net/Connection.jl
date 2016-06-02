@@ -14,7 +14,7 @@ module Connection
   # arguments. An answer will back in Answer type.
   #
   type Command
-    fn::Integer
+    fn::Int
     args::Array{Any, 1}
   end
   #

@@ -16,6 +16,16 @@ import Event
 import Server
 import Connection
 import ManagerTypes
+
+using Debug
+#
+# Sides positions of near instance(server), which is connected
+# to the current one.
+#
+const _SIDE_LEFT  = "LEFT"
+const _SIDE_RIGHT = "RIGHT"
+const _SIDE_UP    = "UP"
+const _SIDE_DOWN  = "DOWN"
 #
 # @rpc
 # Grabs world's rectangle region and returns it
@@ -219,7 +229,71 @@ function getBest(amount::Int)
 
   best
 end
+#
+# @rpc
+# TODO:
+function setLeftWorld()
+end
+#
+# @rpc
+# TODO:
+function setRightWorld()
+end
+#
+# @rpc
+# TODO:
+function setUpWorld()
+end
+#
+# @rpc
+# TODO:
+function setDownWorld()
+end
+#
+# @rpc
+# Starts/stops world streaming. It streams only differences to the clients.
+# It adds/removes worlds change event handler and every time, when some
+# world change occures, it makes a request to all streamed clients. On
+# first call, it returns whole world (all dots) to synchronize current
+# and remove world planes.
+# @param sock Client's socket
+# @param on Turns streaming on or off
+#
+function setStreaming(sock::TCPSocket, on::Bool = true)
+  local hasStreaming::Bool = false
 
+  for s::Server.ServerClientSocket in Manager._cons.server.socks
+    if sock === s.sock
+      s.streaming = on
+      if on break end
+    end
+    if s.streaming hasStreaming = true end
+  end
+
+  Manager._cons.streaming = on ? true : hasStreaming
+  if Manager._cons.streaming
+    if !Event.has(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
+      Event.on(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
+    end
+    return getRegion()
+  else
+    Event.off(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
+  end
+
+  false
+end
+
+#
+# This is a handler on world dot change. It notify remote clients
+# about these changes.
+# @param pos Dot coordinates
+# @param color Dot color
+#
+function _onWorldDot(pos::Helper.Point, color::UInt32)
+  for sock::Server.ServerClientSocket in Manager._cons.server.socks
+    if sock.streaming Server.request(sock.sock, RpcApi.RPC_WORLD_CHANGE, pos, color) end
+  end
+end
 #
 # Assembles RpcApi.SimpleOrganism type from wider Creature.Organism
 # @return {RpcApi.SimpleOrganism}
@@ -243,7 +317,7 @@ end
 # Creates client and returns it's ClientConnection type. It
 # uses port number provided by "XXXport" command line
 # argument or default one from Config module.
-# @param side Server side ("left", "right",...)
+# @param side Server side ("LEFT", "RIGHT",...)
 # @return ClientConnection object
 #
 function _createClient(side::ASCIIString)
@@ -264,8 +338,8 @@ function _createClient(side::ASCIIString)
     con = Client.create(serverIp, serverPort)
   end
   if Client.isOk(con)
-    Event.on(con.observer, Client.EVENT_ANSWER, (ans::Connection.Answer)->_onServerAnswer(side, ans))
-    Event.on(con.observer, Client.EVENT_REQUEST, (data::Connection.Command, ans::Connection.Answer)->_onServerRequest(side, data, ans))
+    Event.on(con.observer, Client.EVENT_AFTER_RESPONSE, (ans::Connection.Answer)->_onAfterResponse(side, ans))
+    Event.on(con.observer, Client.EVENT_BEFORE_RESPONSE, (data::Connection.Command, ans::Connection.Answer)->_onBeforeResponse(side, data, ans))
   end
   con
 end
@@ -278,11 +352,12 @@ end
 function _createConnections()
   Manager.Connections(
     _createServer(),
-    _createClient("LEFT"),
-    _createClient("RIGHT"),
-    _createClient("UP"),
-    _createClient("DOWN"),
-    Dict{UInt, Creature.Organism}()
+    _createClient(_SIDE_LEFT),
+    _createClient(_SIDE_RIGHT),
+    _createClient(_SIDE_UP),
+    _createClient(_SIDE_DOWN),
+    Dict{UInt, Creature.Organism}(),
+    false
   )
 end
 #
@@ -292,7 +367,7 @@ end
 # @param side Side name of answering server
 # @param ans Answer data object
 #
-function _onServerAnswer(side::ASCIIString, ans::Connection.Answer)
+function _onAfterResponse(side::ASCIIString, ans::Connection.Answer)
   local org::Creature.Organism = Manager._cons.frozen[ans.data]
 
   delete!(Manager._cons.frozen, ans.data)
@@ -303,9 +378,9 @@ function _onServerAnswer(side::ASCIIString, ans::Connection.Answer)
       # If there is no free space, we have to kill this frozen organism
       #
       if pos === false return false end
-    else
-      Manager._createOrganism(org, org.pos, true)
+      org.pos = pos
     end
+    Manager._createOrganism(org, org.pos, true)
   end
 
   true
@@ -317,24 +392,24 @@ end
 # @param data Input comand object
 # @param ans Answer data object we have to fill
 #
-function _onServerRequest(side::ASCIIString, data::Connection.Command, ans::Connection.Answer)
+function _onBeforeResponse(side::ASCIIString, data::Connection.Command, ans::Connection.Answer)
   local org::Creature.Organism
   local pos::Helper.Point
   #
   # This request means, that one organism wants to step outside
   # of it's current Manager/instance into this one. We have
-  # to send OK response, which means, that we obtain an organism
+  # to send OK response, which means, that we obtained an organism
   # and added him into the organisms pool. data.args[1] contains
   # organism. We also have to decrease organism's energy, because
   # moving between instances it's network performance issue.
   #
-  ans.data = org.id
   org      = data.args[1]
+  ans.data = org.id
   pos      = org.pos
-  if     data.fn === RpcApi.RPC_ORG_STEP_RIGHT && side === "LEFT"  pos.x = 1
-  elseif data.fn === RpcApi.RPC_ORG_STEP_LEFT  && side === "RIGHT" pos.x = Manager._data.world.width
-  elseif data.fn === RpcApi.RPC_ORG_STEP_DOWN  && side === "UP"    pos.y = 1
-  elseif data.fn === RpcApi.RPC_ORG_STEP_UP    && side === "DOWN"  pos.y = Manager._data.world.height
+  if     data.fn === RpcApi.RPC_ORG_STEP_RIGHT && side === _SIDE_LEFT  pos.x = 1
+  elseif data.fn === RpcApi.RPC_ORG_STEP_LEFT  && side === _SIDE_RIGHT pos.x = Manager._data.world.width
+  elseif data.fn === RpcApi.RPC_ORG_STEP_DOWN  && side === _SIDE_UP    pos.y = 1
+  elseif data.fn === RpcApi.RPC_ORG_STEP_UP    && side === _SIDE_DOWN  pos.y = Manager._data.world.height
   end
   #
   # Something on a way of organism or maximum amount of organisms
@@ -357,9 +432,20 @@ end
 # Handler for commands obtained from all connected clients. All supported
 # commands are in _rpcApi dictionary. If current command is undefinedin _rpcApi
 # then, false will be returned.
-#
-function _onClientCommand(cmd::Connection.Command, ans::Connection.Answer)
-  ans.data = haskey(_rpcApi, cmd.fn) ? _rpcApi[cmd.fn](cmd.args...) : false
+# TODO: describe arguments!
+function _onClientCommand(sock::Base.TCPSocket, cmd::Connection.Command, ans::Connection.Answer)
+  if !haskey(_rpcApi, cmd.fn) return nothing end
+  #
+  # Only streaming mode needs socket as first parameter. because we
+  # have to know destination client we are working with.
+  #
+  if cmd.fn === RpcApi.RPC_SET_WORLD_STREAMING
+    ans.data = _rpcApi[cmd.fn](sock, cmd.args...)
+  else
+    ans.data = _rpcApi[cmd.fn](cmd.args...)
+  end
+
+  nothing
 end
 #
 # Creates server and returns it's ServerConnection type. It
@@ -372,7 +458,7 @@ function _createServer()
     _getIp(Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP),
     _getPort(Manager.ARG_SERVER_PORT, :CONNECTION_SERVER_PORT)
   )
-  Event.on(con.observer, Server.EVENT_COMMAND, _onClientCommand)
+  Event.on(con.observer, Server.EVENT_BEFORE_RESPONSE, _onClientCommand)
   con
 end
 #
@@ -381,20 +467,25 @@ end
 # you have to use "Client" module.
 #
 _rpcApi = Dict{Integer, Function}(
-  RpcApi.RPC_GET_REGION        => getRegion,
-  RpcApi.RPC_CREATE_ORGANISMS  => createOrganisms,
-  RpcApi.RPC_CREATE_ORGANISM   => createOrganism,
-  RpcApi.RPC_SET_CONFIG        => setConfig,
-  RpcApi.RPC_GET_CONFIG        => getConfig,
-  RpcApi.RPC_SET_QUITE         => setQuite,
-  RpcApi.RPC_MUTATE            => mutate,
-  RpcApi.RPC_GET_IPS           => getIps,
-  RpcApi.RPC_GET_ORGANISM      => getOrganism,
-  RpcApi.RPC_GET_AMOUNT        => getAmount,
-  RpcApi.RPC_GET_ORGANISMS     => getOrganisms,
-  RpcApi.RPC_SET_ENERGY        => setEnergy,
-  RpcApi.RPC_SET_ENERGY_RND    => setRandomEnergy,
-  RpcApi.RPC_BACKUP            => doBackup,
-  RpcApi.RPC_GET_STATISTICS    => getStatistics,
-  RpcApi.RPC_GET_BEST          => getBest
+  RpcApi.RPC_GET_REGION          => getRegion,
+  RpcApi.RPC_CREATE_ORGANISMS    => createOrganisms,
+  RpcApi.RPC_CREATE_ORGANISM     => createOrganism,
+  RpcApi.RPC_SET_CONFIG          => setConfig,
+  RpcApi.RPC_GET_CONFIG          => getConfig,
+  RpcApi.RPC_SET_QUITE           => setQuite,
+  RpcApi.RPC_MUTATE              => mutate,
+  RpcApi.RPC_GET_IPS             => getIps,
+  RpcApi.RPC_GET_ORGANISM        => getOrganism,
+  RpcApi.RPC_GET_AMOUNT          => getAmount,
+  RpcApi.RPC_GET_ORGANISMS       => getOrganisms,
+  RpcApi.RPC_SET_ENERGY          => setEnergy,
+  RpcApi.RPC_SET_ENERGY_RND      => setRandomEnergy,
+  RpcApi.RPC_BACKUP              => doBackup,
+  RpcApi.RPC_GET_STATISTICS      => getStatistics,
+  RpcApi.RPC_GET_BEST            => getBest,
+  RpcApi.RPC_SET_LEFT_WORLD      => setLeftWorld,
+  RpcApi.RPC_SET_RIGHT_WORLD     => setRightWorld,
+  RpcApi.RPC_SET_UP_WORLD        => setUpWorld,
+  RpcApi.RPC_SET_DOWN_WORLD      => setDownWorld,
+  RpcApi.RPC_SET_WORLD_STREAMING => setStreaming
 )

@@ -78,6 +78,12 @@ function _updateOrganisms(counter::Int)
       Helper.error("Manager._updateOrganisms(): $e")
       showerror(STDOUT, e, catch_backtrace())
     end
+    #
+    # This call switches between all non blocking asynchronous
+    # functions (see @async macro). For example, it handles all
+    # input connections for current server and so on...
+    #
+    yield()
   end
   #
   # Cloning procedure. The meaning of this is in ability to
@@ -298,7 +304,7 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   end
   #
   # We have to freeze the organism and throw an error to interrupt
-  # organism's code running
+  # his current runned code
   #
   if freeze
     # TODO: possibly slow code!

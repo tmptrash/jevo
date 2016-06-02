@@ -26,7 +26,7 @@
 #     # This callback function will be called as many times
 #     # as server will obtain client's request (command)
 #     #
-#     function onCommand(cmd::Connection.Command, ans::Connection.Answer)
+#     function onCommand(sock::Base.TCPSocket, cmd::Connection.Command, ans::Connection.Answer)
 #       # This is how we create the answer for client.
 #       # ans.data has type Any.
 #       ans.data = "answer"
@@ -38,7 +38,7 @@
 #     #
 #     # Before running we have to bind command event listeners
 #     #
-#     Event.on(connection.observer, Server.EVENT_COMMAND, onCommand)
+#     Event.on(connection.observer, Server.EVENT_BEFORE_RESPONSE, onCommand)
 #     #
 #     # This is how our server run itself
 #     #
@@ -76,7 +76,7 @@
 #            custom data.
 #
 # @author DeadbraiN
-# TODO: add EVENT_ANSWER logic description
+# TODO: add EVENT_AFTER_RESPONSE logic description
 module Server
   import Event
   import Connection
@@ -86,27 +86,35 @@ module Server
   export run
   export stop
   export isOk
-  export EVENT_COMMAND
-  export EVENT_ANSWER
+  export EVENT_BEFORE_RESPONSE
+  export EVENT_AFTER_RESPONSE
   export ServerConnection
+  export ServerClientSocket
   #
   # Name of the event, which is fired if answer from client's
   # request is obtained.
   #
-  const EVENT_ANSWER  = "answer"
+  const EVENT_AFTER_RESPONSE  = "after-response"
   #
   # Name of the event, which is fired if client sent us a command. If
   # this event fires, then specified command should be runned here - on
   # server side.
   #
-  const EVENT_COMMAND = "command"
+  const EVENT_BEFORE_RESPONSE = "before-response"
+  #
+  # Describes cliet's socket and it's streaming state
+  #
+  type ServerClientSocket
+    sock::Base.TCPSocket
+    streaming::Bool
+  end
   #
   # Describes a server. It contains clients sockets, tasks, server object
   # and it's observer.
   #
   type ServerConnection
     tasks   ::Array{Task, 1}
-    socks   ::Array{Base.TCPSocket, 1}
+    socks   ::Array{ServerClientSocket, 1}
     server  ::Base.TCPServer
     observer::Event.Observer
     host    ::Base.IPAddr
@@ -126,7 +134,7 @@ module Server
   #
   function create(host::Base.IPAddr, port::Integer)
     local tasks::Array{Task, 1} = Task[]
-    local socks::Array{Base.TCPSocket, 1} = Base.TCPSocket[]
+    local socks::Array{ServerClientSocket, 1} = ServerClientSocket[]
     local obs::Event.Observer = Event.create()
     local con::ServerConnection
 
@@ -138,6 +146,7 @@ module Server
         return con
       catch e
         Helper.warn("Server.create(): $e")
+        showerror(STDOUT, e, catch_backtrace())
       end
     end
 
@@ -168,21 +177,22 @@ module Server
           #
           # This line handles new connections
           #
-          push!(con.socks, accept(con.server))
+          push!(con.socks, ServerClientSocket(accept(con.server), false))
         catch e
           #
           # Possibly Server.stop() was called.
           #
           if Helper.isopen(con.server) === false
             local sock::Base.TCPSocket
-            for sock in con.socks close(sock) end
+            for sock in con.socks close(sock.sock) end
             break
           end
           Helper.warn("Server.run(): $e")
+          showerror(STDOUT, e, catch_backtrace())
         end
         sock = con.socks[length(con.socks)]
-        push!(con.tasks, @async while Helper.isopen(sock)
-          _answer(sock, con.observer)
+        push!(con.tasks, @async while Helper.isopen(sock.sock)
+          _answer(sock.sock, con.observer)
           _update(con)
         end)
       end
@@ -198,22 +208,22 @@ module Server
   # Makes request to client. This method is not blocking. It returns
   # just after the call. Answer will be obtained in run() method
   # async loop.
-  # @param con Connection object returned by create() method
-  # @param fn Callback function id, which will be called if answer
-  #           will be obtained from client.
+  # @param sock Client socket returned by accept() function
+  # @param fn Remote function id
   # @param args Custom fn arguments
   # @return true - request was sent, false wasn't
   #
-  function request(con::ServerConnection, fn::Integer, args...)
-    if !Helper.isopen(con.sock) return false end
+  function request(sock::Base.TCPSocket, fn::Integer, args...)
+    if !Helper.isopen(sock) return false end
     #
     # This line is non blocking one
     #
     try
-      serialize(con.sock, Connection.Command(fn, [i for i in args]))
+      serialize(sock, Connection.Command(fn, [i for i in args]))
     catch e
       Helper.warn("Server.request(): $e")
-      close(con.sock)
+      showerror(STDOUT, e, catch_backtrace())
+      close(sock)
       return false
     end
 
@@ -235,11 +245,12 @@ module Server
   function stop(con::Server.ServerConnection)
     try
       local sock::Base.TCPSocket
-      for sock in con.socks close(sock) end
+      for sock in con.socks close(sock.sock) end
       close(con.server)
       Helper.info(string("Server has stopped: ", con.host, ":", con.port))
     catch e
       Helper.warn("Server.stop(): $e")
+      showerror(STDOUT, e, catch_backtrace())
     end
   end
   #
@@ -253,7 +264,7 @@ module Server
     i::Int = 1
 
     while i <= length(con.socks)
-      if Helper.isopen(con.socks[i])
+      if Helper.isopen(con.socks[i].sock)
        	i += 1
       else
         deleteat!(con.socks, i)
@@ -270,6 +281,7 @@ module Server
   #
   function _answer(sock::Base.TCPSocket, obs::Event.Observer)
     local data::Any = null
+    local typ::DataType
 
     try
       #
@@ -278,12 +290,13 @@ module Server
       # client requests (Connection.Command).
       #
       data = deserialize(sock)
-      if typeof(data) === Connection.Answer
-        Event.fire(obs, EVENT_ANSWER, data)
-      else # Connection.Command
+      typ  = typeof(data)
+      if typ === Connection.Answer
+        Event.fire(obs, EVENT_AFTER_RESPONSE, data)
+      elseif typ === Connection.Command
         local ans::Connection.Answer = Connection.Answer(0, null)
-        Event.fire(obs, EVENT_COMMAND, data, ans)
-        serialize(sock, ans)
+        Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, data, ans)
+        if ans.id !== 0 || ans.data !== null serialize(sock, ans) end
       end
     catch e
       #
@@ -294,6 +307,7 @@ module Server
         close(sock)
       elseif Helper.isopen(sock)
         Helper.warn("Server._answer(): $e")
+        showerror(STDOUT, e, catch_backtrace())
       end
     end
   end
