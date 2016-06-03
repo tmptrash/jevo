@@ -5,7 +5,7 @@
 # more...
 #
 # @author DeadbraiN
-#
+# TODO: do we need this at all?!!
 module ManagerTypes
   import Creature
 

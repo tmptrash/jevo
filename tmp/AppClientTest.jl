@@ -4,11 +4,13 @@ import Config
 import Client
 import Connection
 import Event
+import Helper
 
 function _onAfterResponse(ans::Connection.Answer)
   #println("after-response\n", ans)
 end
 function _onBeforeResponse(data::Connection.Command, ans::Connection.Answer)
+  ans.data = Array{Int, 1}(20)
   #println("before-response\n", data, ans)
 end
 

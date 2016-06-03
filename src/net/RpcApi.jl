@@ -40,14 +40,55 @@ module RpcApi
 
   export RPC_WORLD_CHANGE
 
+  export MutatorParams
+  export EnergyParams
+  export RandomEnergyParams
+
   export Region
+  export ConfigVal
   export SimpleOrganism
+  export Statistics
+  export Dot
+  #
+  # Parameters types. Describes parameters of RPC functions
+  # in ManagerRpc module for example. MutatorParams is used
+  # in mutate() function, EnergyParams in getEnergy() ...
+  #
+  type MutatorParams
+    MutatorParams = new()
+    organismId::UInt
+    amount::Int
+  end
+  type EnergyParams
+    EnergyParams = new()
+    x::Int
+    y::Int
+    energy::UInt32
+  end
+  type RandomEnergyParams
+    RandomEnergyParams = new()
+    amount::Int
+    energy::UInt32
+  end
   #
   # Describes 2D region in a world
   #
   type Region
+    Region() = new()
     reg::Array{UInt32, 2}
     ips::Int
+  end
+  #
+  # Parameters for setConfig() and getConfig() functions
+  #
+  type ConfigVal
+    ConfigParams = new()
+    name::Symbol
+    arr::Array{Int, 1}
+    int::Int
+    uint32::UInt32
+    float::Float64
+    ip::ASCIIString # should be converted to IPv4
   end
   #
   # This is an analog of Creature.Organism type. It's used for
@@ -55,6 +96,7 @@ module RpcApi
   # network.
   #
   type SimpleOrganism
+    SimpleOrganism = new()
     #
     # Unique organism id
     #
@@ -120,6 +162,7 @@ module RpcApi
   # Structure of world statistics
   #
   type Statistics
+    Statistics = new()
     #
     # Amount of alive organisms
     #
@@ -157,10 +200,50 @@ module RpcApi
   # Describes one dot in a world
   #
   type Dot
+    Dot = new()
     x::Int
     y::Int
     color::UInt32
   end
+  #
+  # Input DataTypes according to their function ids. DataTypes should
+  # be synchronized with RPC_XXX constants. In simple they are input
+  # parameters of appropriate functions.
+  #
+  const paramTypes = DataType[
+    Array{Int, 1},              # getRegion()
+    Void,                       # createOrganisms()
+    Helper.Point,               # createOrganism()
+    ConfigVal,                  # setConfig()
+    ConfigVal,                  # getConfig()
+    Bool,                       # setQuite()
+    MutatorParams,              # mutate()
+    Void,                       # getIps()
+    UInt,                       # getOrganism()
+    Void,                       # getAmount()
+    Array{Int, 1},              # getOrganisms()
+    EnergyParams,               # setEnergy()
+    RandomEnergyParams,         # setRandomEnergy()
+    Void,                       # doBackup()
+    Void,                       # getStatistics()
+    Int,                        # getBest()
+    Void,                       # setLeftWorld()
+    Void,                       # setRightWorld()
+    Void,                       # setUpWorld()
+    Void,                       # setDownWorld()
+    Bool                        # setStreaming()
+  ]
+  const returnTypes = DataType[
+    Region,                     # getRegion()
+    Void,                       # createOrganisms()
+    Void,                       # createOrganism()
+    Void,                       # setConfig()
+    ConfigVal,                  # getConfig()
+    Void,                       # setQuite()
+    Bool,                       # mutate()
+    Int,                        # getIps()
+    SimpleOrganism,             # getOrganism()
+  ]
   #
   # RPC API unique identifiers. Only these functions may be called
   # remotely on the server.
@@ -190,17 +273,17 @@ module RpcApi
   # These IDs are for inter-instances communication. This is
   # something like internal protocol between Managers/servers.
   #
-  const RPC_ORG_STEP_LEFT       = 1001
-  const RPC_ORG_STEP_RIGHT      = 1002
-  const RPC_ORG_STEP_UP         = 1003
-  const RPC_ORG_STEP_DOWN       = 1004
+  const RPC_ORG_STEP_LEFT       = 22
+  const RPC_ORG_STEP_RIGHT      = 23
+  const RPC_ORG_STEP_UP         = 24
+  const RPC_ORG_STEP_DOWN       = 25
   #
   # Means that step from one instance to another has finished
   #
-  const RPC_ORG_STEP_OK         = 1005
-  const RPC_ORG_STEP_FAIL       = 1006
+  const RPC_ORG_STEP_OK         = 26
+  const RPC_ORG_STEP_FAIL       = 27
   #
   # These id's for request from server to client
   #
-  const RPC_WORLD_CHANGE        = 2000
+  const RPC_WORLD_CHANGE        = 28
 end

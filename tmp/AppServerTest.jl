@@ -8,7 +8,7 @@ import Helper
 
 function onBeforeResponse(sock::Base.TCPSocket, cmd::Connection.Command, ans::Connection.Answer)
   #println("before-response\n", cmd)
-  ans.data = rand(1:300, 30000)
+  ans.data = Array{Float64, 1}(100)#rand(1:300, 30000)
   for i = 1:1000 Server.request(sock, 1, Helper.Point(rand(1:200), rand(1:200))) end
 end
 
