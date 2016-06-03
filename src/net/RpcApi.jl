@@ -42,12 +42,41 @@ module RpcApi
 
   export Region
   export SimpleOrganism
+  export Statistics
+  export Dot
+  #
+  # Parameters for getRegion() function
+  #
+  type RegionParams
+    RegionParams = new()
+    x::Int
+    y::Int
+    x1::Int
+    y1::Int
+  end
   #
   # Describes 2D region in a world
   #
   type Region
+    Region() = new()
     reg::Array{UInt32, 2}
     ips::Int
+  end
+  #
+  # Parameters for setConfig() function
+  #
+  type ConfigParams
+    ConfigParams = new()
+    name::Symbol
+    value::Any
+  end
+  #
+  # PArameters of mutate() function
+  #
+  type MutatorParams
+    MutatorParams = new()
+    organismId::UInt
+    amount::Int
   end
   #
   # This is an analog of Creature.Organism type. It's used for
@@ -55,6 +84,7 @@ module RpcApi
   # network.
   #
   type SimpleOrganism
+    SimpleOrganism = new()
     #
     # Unique organism id
     #
@@ -120,6 +150,7 @@ module RpcApi
   # Structure of world statistics
   #
   type Statistics
+    Statistics = new()
     #
     # Amount of alive organisms
     #
@@ -157,10 +188,27 @@ module RpcApi
   # Describes one dot in a world
   #
   type Dot
+    Dot = new()
     x::Int
     y::Int
     color::UInt32
   end
+  #
+  # DataTypes according to their function ids. DataTypes should
+  # be synchronized with RPC_XXX constants
+  #
+  const inTypes = DataType[
+    RegionParams,
+    Void,
+    Helper.Point,
+    ConfigParams,
+    Symbol,
+    Bool,
+    MutatorParams # TODO: !!!
+  ]
+  const outTypes = DataType[
+
+  ]
   #
   # RPC API unique identifiers. Only these functions may be called
   # remotely on the server.
@@ -190,17 +238,17 @@ module RpcApi
   # These IDs are for inter-instances communication. This is
   # something like internal protocol between Managers/servers.
   #
-  const RPC_ORG_STEP_LEFT       = 1001
-  const RPC_ORG_STEP_RIGHT      = 1002
-  const RPC_ORG_STEP_UP         = 1003
-  const RPC_ORG_STEP_DOWN       = 1004
+  const RPC_ORG_STEP_LEFT       = 22
+  const RPC_ORG_STEP_RIGHT      = 23
+  const RPC_ORG_STEP_UP         = 24
+  const RPC_ORG_STEP_DOWN       = 25
   #
   # Means that step from one instance to another has finished
   #
-  const RPC_ORG_STEP_OK         = 1005
-  const RPC_ORG_STEP_FAIL       = 1006
+  const RPC_ORG_STEP_OK         = 26
+  const RPC_ORG_STEP_FAIL       = 27
   #
   # These id's for request from server to client
   #
-  const RPC_WORLD_CHANGE        = 2000
+  const RPC_WORLD_CHANGE        = 28
 end

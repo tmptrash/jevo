@@ -6,10 +6,10 @@ import Connection
 import Event
 
 function _onAfterResponse(ans::Connection.Answer)
-  #println("after-response\n", ans)
+  println("after-response\n", ans)
 end
 function _onBeforeResponse(data::Connection.Command, ans::Connection.Answer)
-  #println("before-response\n", data, ans)
+  println("before-response\n", data, ans)
 end
 
 con = Client.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT))

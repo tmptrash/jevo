@@ -56,8 +56,7 @@ function createOrganisms()
   # Inits available organisms in Tasks
   #
   for i::Int = 1:Config.val(:ORGANISM_START_AMOUNT) createOrganism() end
-
-  true
+  nothing
 end
 #
 # @rpc
@@ -69,9 +68,10 @@ end
 # TODO: change the constructor to support Position() without
 # TODO: parameters for optimization. We have to remove nothing
 function createOrganism(pos::Helper.Point = Helper.Point(0, 0))
-  if length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS) return false end
+  if length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS) return nothing end
   orgTask = Manager._createOrganism(nothing, pos)
   orgTask === false ? false : orgTask.id
+  nothing
 end
 #
 # @rpc
@@ -81,6 +81,7 @@ end
 #
 function setConfig(name::Symbol, value::Any)
   Config.val(name, value)
+  nothing
 end
 #
 # @rpc
@@ -99,6 +100,7 @@ end
 #
 function setQuite(mode::Bool)
   Manager._data.quiet = mode
+  nothing
 end
 #
 # @rpc
@@ -119,6 +121,7 @@ end
 #
 function getIps()
   Config.val(:WORLD_IPS)
+  nothing
 end
 #
 # @rpc
@@ -173,6 +176,7 @@ function setEnergy(x::Int, y::Int, energy::UInt32)
   if World.getEnergy(Manager._data.world, pos) === UInt32(0)
     World.setEnergy(Manager._data.world, pos, energy)
   end
+  nothing
 end
 #
 # @rpc
@@ -185,6 +189,7 @@ function setRandomEnergy(amount::Int = Config.val(:WORLD_START_ENERGY_BLOCKS), e
   for i::Int = 1:amount
     setEnergy(rand(1:Manager._data.world.width), rand(1:Manager._data.world.height), energy)
   end
+  nothing
 end
 #
 # @rpc
@@ -192,6 +197,7 @@ end
 #
 function doBackup()
   Manager.backup()
+  nothing
 end
 #
 # @rpc
@@ -430,11 +436,11 @@ function _onBeforeResponse(side::ASCIIString, data::Connection.Command, ans::Con
 end
 #
 # Handler for commands obtained from all connected clients. All supported
-# commands are in _rpcApi dictionary. If current command is undefinedin _rpcApi
+# commands are in _rpcApi array. If current command is undefinedin _rpcApi
 # then, false will be returned.
 # TODO: describe arguments!
 function _onClientCommand(sock::Base.TCPSocket, cmd::Connection.Command, ans::Connection.Answer)
-  if !haskey(_rpcApi, cmd.fn) return nothing end
+  if cmd.fn > length(_rpcApi) return nothing end
   #
   # Only streaming mode needs socket as first parameter. because we
   # have to know destination client we are working with.
@@ -466,26 +472,26 @@ end
 # Only these functions may be called by clients. For calling them,
 # you have to use "Client" module.
 #
-_rpcApi = Dict{Integer, Function}(
-  RpcApi.RPC_GET_REGION          => getRegion,
-  RpcApi.RPC_CREATE_ORGANISMS    => createOrganisms,
-  RpcApi.RPC_CREATE_ORGANISM     => createOrganism,
-  RpcApi.RPC_SET_CONFIG          => setConfig,
-  RpcApi.RPC_GET_CONFIG          => getConfig,
-  RpcApi.RPC_SET_QUITE           => setQuite,
-  RpcApi.RPC_MUTATE              => mutate,
-  RpcApi.RPC_GET_IPS             => getIps,
-  RpcApi.RPC_GET_ORGANISM        => getOrganism,
-  RpcApi.RPC_GET_AMOUNT          => getAmount,
-  RpcApi.RPC_GET_ORGANISMS       => getOrganisms,
-  RpcApi.RPC_SET_ENERGY          => setEnergy,
-  RpcApi.RPC_SET_ENERGY_RND      => setRandomEnergy,
-  RpcApi.RPC_BACKUP              => doBackup,
-  RpcApi.RPC_GET_STATISTICS      => getStatistics,
-  RpcApi.RPC_GET_BEST            => getBest,
-  RpcApi.RPC_SET_LEFT_WORLD      => setLeftWorld,
-  RpcApi.RPC_SET_RIGHT_WORLD     => setRightWorld,
-  RpcApi.RPC_SET_UP_WORLD        => setUpWorld,
-  RpcApi.RPC_SET_DOWN_WORLD      => setDownWorld,
-  RpcApi.RPC_SET_WORLD_STREAMING => setStreaming
-)
+const _rpcApi = Function[
+  getRegion,
+  createOrganisms,
+  createOrganism,
+  setConfig,
+  getConfig,
+  setQuite,
+  mutate,
+  getIps,
+  getOrganism,
+  getAmount,
+  getOrganisms,
+  setEnergy,
+  setRandomEnergy,
+  doBackup,
+  getStatistics,
+  getBest,
+  setLeftWorld,
+  setRightWorld,
+  setUpWorld,
+  setDownWorld,
+  setStreaming
+]
