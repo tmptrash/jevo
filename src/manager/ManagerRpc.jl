@@ -109,10 +109,8 @@ end
 # @param amount Amount of mutations
 #
 function mutate(organismId::UInt, amount::Int = 1)
-  if (haskey(Manager._data.organisms, organismId))
-    return Mutator.mutate(Manager._data.organisms[organismId], amount)
-  end
-  false
+  if !haskey(Manager._data.organisms, organismId) return false end
+  Mutator.mutate(Manager._data.organisms[organismId], amount)
 end
 #
 # @rpc
@@ -121,17 +119,16 @@ end
 #
 function getIps()
   Config.val(:WORLD_IPS)
-  nothing
 end
 #
 # @rpc
 # Returns an organism by it's unique id
-# @param id
+# @param organismId
 # @return Creature.Organism or false if no organism with this id
 # TODO: remake to organism id, not position related id
-function getOrganism(id::UInt)
-  if !haskey(Manager._data.organisms, id) return false end
-  _createSimpleOrganism(id, Manager._data.organisms[id])
+function getOrganism(organismId::UInt)
+  if !haskey(Manager._data.organisms, organismId) return false end
+  _createSimpleOrganism(organismId, Manager._data.organisms[organismId])
 end
 #
 # @rpc

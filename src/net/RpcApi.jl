@@ -40,19 +40,35 @@ module RpcApi
 
   export RPC_WORLD_CHANGE
 
+  export MutatorParams
+  export EnergyParams
+  export RandomEnergyParams
+
   export Region
+  export ConfigVal
   export SimpleOrganism
   export Statistics
   export Dot
   #
-  # Parameters for getRegion() function
+  # Parameters types. Describes parameters of RPC functions
+  # in ManagerRpc module for example. MutatorParams is used
+  # in mutate() function, EnergyParams in getEnergy() ...
   #
-  type RegionParams
-    RegionParams = new()
+  type MutatorParams
+    MutatorParams = new()
+    organismId::UInt
+    amount::Int
+  end
+  type EnergyParams
+    EnergyParams = new()
     x::Int
     y::Int
-    x1::Int
-    y1::Int
+    energy::UInt32
+  end
+  type RandomEnergyParams
+    RandomEnergyParams = new()
+    amount::Int
+    energy::UInt32
   end
   #
   # Describes 2D region in a world
@@ -63,20 +79,16 @@ module RpcApi
     ips::Int
   end
   #
-  # Parameters for setConfig() function
+  # Parameters for setConfig() and getConfig() functions
   #
-  type ConfigParams
+  type ConfigVal
     ConfigParams = new()
     name::Symbol
-    value::Any
-  end
-  #
-  # PArameters of mutate() function
-  #
-  type MutatorParams
-    MutatorParams = new()
-    organismId::UInt
-    amount::Int
+    arr::Array{Int, 1}
+    int::Int
+    uint32::UInt32
+    float::Float64
+    ip::ASCIIString # should be converted to IPv4
   end
   #
   # This is an analog of Creature.Organism type. It's used for
@@ -194,20 +206,43 @@ module RpcApi
     color::UInt32
   end
   #
-  # DataTypes according to their function ids. DataTypes should
-  # be synchronized with RPC_XXX constants
+  # Input DataTypes according to their function ids. DataTypes should
+  # be synchronized with RPC_XXX constants. In simple they are input
+  # parameters of appropriate functions.
   #
-  const inTypes = DataType[
-    RegionParams,
-    Void,
-    Helper.Point,
-    ConfigParams,
-    Symbol,
-    Bool,
-    MutatorParams # TODO: !!!
+  const paramTypes = DataType[
+    Array{Int, 1},              # getRegion()
+    Void,                       # createOrganisms()
+    Helper.Point,               # createOrganism()
+    ConfigVal,                  # setConfig()
+    ConfigVal,                  # getConfig()
+    Bool,                       # setQuite()
+    MutatorParams,              # mutate()
+    Void,                       # getIps()
+    UInt,                       # getOrganism()
+    Void,                       # getAmount()
+    Array{Int, 1},              # getOrganisms()
+    EnergyParams,               # setEnergy()
+    RandomEnergyParams,         # setRandomEnergy()
+    Void,                       # doBackup()
+    Void,                       # getStatistics()
+    Int,                        # getBest()
+    Void,                       # setLeftWorld()
+    Void,                       # setRightWorld()
+    Void,                       # setUpWorld()
+    Void,                       # setDownWorld()
+    Bool                        # setStreaming()
   ]
-  const outTypes = DataType[
-
+  const returnTypes = DataType[
+    Region,                     # getRegion()
+    Void,                       # createOrganisms()
+    Void,                       # createOrganism()
+    Void,                       # setConfig()
+    ConfigVal,                  # getConfig()
+    Void,                       # setQuite()
+    Bool,                       # mutate()
+    Int,                        # getIps()
+    SimpleOrganism,             # getOrganism()
   ]
   #
   # RPC API unique identifiers. Only these functions may be called
