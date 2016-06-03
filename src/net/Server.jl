@@ -81,7 +81,6 @@ module Server
   import Event
   import Connection
   import Helper
-  import ProtoBuf
 
   export create
   export run
@@ -211,25 +210,16 @@ module Server
   # async loop.
   # @param sock Client socket returned by accept() function
   # @param fn Remote function id
-  # @param data Custom data type
+  # @param args Custom fn arguments
   # @return true - request was sent, false wasn't
   #
-  function request(sock::Base.TCPSocket, fn::Int, data::Any)
+  function request(sock::Base.TCPSocket, fn::Integer, args...)
     if !Helper.isopen(sock) return false end
     #
     # This line is non blocking one
     #
     try
-      # TODO: this old version should be removed!
-      #serialize(sock, Connection.Command(fn, [i for i in args]))
-      #
-      # These three lines write flag (true), header (fn) and the body
-      # (data) to the socket stream. We have to do so, because original
-      # serializer works with errors on overloaded network.
-      #
-      write(sock, true) # true - request, false - response
-      write(sock, fn)
-      ProtoBuf.writeproto(sock, data)
+      serialize(sock, Connection.Command(fn, [i for i in args]))
     catch e
       Helper.warn("Server.request(): $e")
       showerror(STDOUT, e, catch_backtrace())
@@ -292,20 +282,21 @@ module Server
   function _answer(sock::Base.TCPSocket, obs::Event.Observer)
     local data::Any = null
     local typ::DataType
-    local fn::Int
-    local isCommand::Bool
 
     try
-      # TODO: remove this old code
-      #data = deserialize(sock)
-      isCommand = read(sock, Bool)
-      fn = read(sock, Int)
-      if isCommand # request from remote client
+      #
+      # Right now, only two types of responses are supported:
+      # answers after server request(Connection.Answer) and
+      # client requests (Connection.Command).
+      #
+      data = deserialize(sock)
+      typ  = typeof(data)
+      if typ === Connection.Answer
+        Event.fire(obs, EVENT_AFTER_RESPONSE, data)
+      elseif typ === Connection.Command
         local ans::Connection.Answer = Connection.Answer(0, null)
         Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, data, ans)
         if ans.id !== 0 || ans.data !== null serialize(sock, ans) end
-      else # response from our request
-        Event.fire(obs, EVENT_AFTER_RESPONSE, data)
       end
     catch e
       #

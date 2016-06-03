@@ -47,7 +47,6 @@ module Helper
   # One point in the world. Is described by two coordinates.
   #
   type Point
-    Point = new()
     x::Int
     y::Int
   end
