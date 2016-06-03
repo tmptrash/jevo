@@ -181,9 +181,9 @@ module Client
       if typ === Connection.Answer
         Event.fire(obs, EVENT_AFTER_RESPONSE, data)
       elseif typ === Connection.Command
-        local ans::Connection.Answer = Connection.Answer(0, null)
+        local ans::Connection.Answer = Connection.Answer(Connection.CMD_NO_FUNC, null)
         Event.fire(obs, EVENT_BEFORE_RESPONSE, data, ans)
-        if ans.id !== 0 || ans.data !== null serialize(sock, ans) end
+        if ans.id !== Connection.CMD_NO_FUNC || ans.data !== null serialize(sock, ans) end
       end
     catch e
       #

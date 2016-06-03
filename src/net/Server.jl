@@ -106,7 +106,7 @@ module Server
   #
   type ServerClientSocket
     sock::Base.TCPSocket
-    streaming::Bool
+    streaming::Int
   end
   #
   # Describes a server. It contains clients sockets, tasks, server object
@@ -177,7 +177,7 @@ module Server
           #
           # This line handles new connections
           #
-          push!(con.socks, ServerClientSocket(accept(con.server), false))
+          push!(con.socks, ServerClientSocket(accept(con.server), Connection.STREAMING_OFF))
         catch e
           #
           # Possibly Server.stop() was called.
@@ -294,9 +294,9 @@ module Server
       if typ === Connection.Answer
         Event.fire(obs, EVENT_AFTER_RESPONSE, data)
       elseif typ === Connection.Command
-        local ans::Connection.Answer = Connection.Answer(0, null)
+        local ans::Connection.Answer = Connection.Answer(Connection.CMD_NO_FUNC, null)
         Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, data, ans)
-        if ans.id !== 0 || ans.data !== null serialize(sock, ans) end
+        if ans.id !== Connection.CMD_NO_FUNC || ans.data !== null serialize(sock, ans) end
       end
     catch e
       #

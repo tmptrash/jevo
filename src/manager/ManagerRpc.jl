@@ -56,7 +56,7 @@ function createOrganisms()
   # Inits available organisms in Tasks
   #
   for i::Int = 1:Config.val(:ORGANISM_START_AMOUNT) createOrganism() end
-  nothing
+  null
 end
 #
 # @rpc
@@ -71,7 +71,7 @@ function createOrganism(pos::Helper.Point = Helper.Point(0, 0))
   if length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS) return nothing end
   orgTask = Manager._createOrganism(nothing, pos)
   orgTask === false ? false : orgTask.id
-  nothing
+  null
 end
 #
 # @rpc
@@ -81,7 +81,7 @@ end
 #
 function setConfig(name::Symbol, value::Any)
   Config.val(name, value)
-  nothing
+  null
 end
 #
 # @rpc
@@ -100,7 +100,7 @@ end
 #
 function setQuite(mode::Bool)
   Manager._data.quiet = mode
-  nothing
+  null
 end
 #
 # @rpc
@@ -173,7 +173,7 @@ function setEnergy(x::Int, y::Int, energy::UInt32)
   if World.getEnergy(Manager._data.world, pos) === UInt32(0)
     World.setEnergy(Manager._data.world, pos, energy)
   end
-  nothing
+  null
 end
 #
 # @rpc
@@ -186,7 +186,7 @@ function setRandomEnergy(amount::Int = Config.val(:WORLD_START_ENERGY_BLOCKS), e
   for i::Int = 1:amount
     setEnergy(rand(1:Manager._data.world.width), rand(1:Manager._data.world.height), energy)
   end
-  nothing
+  null
 end
 #
 # @rpc
@@ -194,7 +194,7 @@ end
 #
 function doBackup()
   Manager.backup()
-  nothing
+  null
 end
 #
 # @rpc
@@ -236,54 +236,69 @@ end
 # @rpc
 # TODO:
 function setLeftWorld()
+  null
 end
 #
 # @rpc
 # TODO:
 function setRightWorld()
+  null
 end
 #
 # @rpc
 # TODO:
 function setUpWorld()
+  null
 end
 #
 # @rpc
 # TODO:
 function setDownWorld()
+  null
 end
 #
 # @rpc
-# Starts/stops world streaming. It streams only differences to the clients.
-# It adds/removes worlds change event handler and every time, when some
-# world change occures, it makes a request to all streamed clients. On
-# first call, it returns whole world (all dots) to synchronize current
-# and remove world planes.
+# Inits/Starts/Stops world streaming. It streams only differences to the
+# clients. It adds/removes worlds change event handler and every time,
+# when some world change occures, it makes a request to all streamed
+# clients. First client should initialize streaming by calling this RPC
+# function with state === STREAMING_INIT. In this case it should
+# return Region() data with all dots in a world. After that server should
+# wait next call of this RPC function with state === STREAMING_ON.
+# It means that the client is ready for streaming. When all clients are
+# ready we set Manager._cons.streamRun flag to true and all organisms
+# will be run. If at least one client is waiting(state === STREAMING_INIT)
+# then server should wait (skip running organisms).
 # @param sock Client's socket
-# @param on Turns streaming on or off
+# @param state Streaming state (on,off,init)
 #
-function setStreaming(sock::TCPSocket, on::Bool = true)
-  local hasStreaming::Bool = false
+function setStreaming(sock::TCPSocket, state::Int = Connection.STREAMING_INIT)
+  local hasInit::Bool = false
+  local hasOn::Bool = false
 
   for s::Server.ServerClientSocket in Manager._cons.server.socks
-    if sock === s.sock
-      s.streaming = on
-      if on break end
-    end
-    if s.streaming hasStreaming = true end
+    if sock === s.sock s.streaming = state end
+    if s.streaming === Connection.STREAMING_ON hasOn = true end
+    if s.streaming === Connection.STREAMING_INIT hasInit = true end
   end
 
-  Manager._cons.streaming = on ? true : hasStreaming
-  if Manager._cons.streaming
+  if hasOn && !hasInit
+    Manager._cons.streamInit = false
+    Manager._cons.streamRun  = true
     if !Event.has(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
       Event.on(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
     end
-    return getRegion()
+  elseif hasInit
+    Manager._cons.streamInit = true
+    Manager._cons.streamRun  = false
   else
+    Manager._cons.streamInit = false
+    Manager._cons.streamRun  = false
     Event.off(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
   end
 
-  false
+  if state === Connection.STREAMING_INIT return getRegion() end
+  null
 end
 
 #
@@ -294,7 +309,9 @@ end
 #
 function _onWorldDot(pos::Helper.Point, color::UInt32)
   for sock::Server.ServerClientSocket in Manager._cons.server.socks
-    if sock.streaming Server.request(sock.sock, RpcApi.RPC_WORLD_CHANGE, pos, color) end
+    if sock.streaming === Connection.STREAMING_ON
+      Server.request(sock.sock, RpcApi.RPC_WORLD_CHANGE, pos, color, Config.val(:WORLD_IPS))
+    end
   end
 end
 #
@@ -360,6 +377,7 @@ function _createConnections()
     _createClient(_SIDE_UP),
     _createClient(_SIDE_DOWN),
     Dict{UInt, Creature.Organism}(),
+    false,
     false
   )
 end

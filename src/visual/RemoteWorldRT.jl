@@ -84,6 +84,9 @@ module RemoteWorldRT
   function _onBeforeResponse(rd::RemoteDataRT, data::Connection.Command, ans::Connection.Answer)
     local pos::Helper.Point = data.args[1]
     local color::UInt32 = data.args[2]
+    local ips::Int = data.args[3]
+
+    CanvasWindow.title(rd.win, string("ips: ", ips))
     CanvasWindow.dot(rd.win, pos.x, pos.y, color)
     CanvasWindow.update(rd.win)
   end
@@ -94,12 +97,13 @@ module RemoteWorldRT
   function _onAfterResponse(rd::RemoteDataRT, ans::Connection.Answer)
     local region = ans.data.reg
 
-    #CanvasWindow.title(rd.win, string("ips: ", ans.data.ips, " - rtime: ", round(time() - rd.ts, 2)))
+    CanvasWindow.title(rd.win, string("ips: ", ans.data.ips))
     for x::Int in 1:size(region)[2]
       for y::Int in 1:size(region)[1]
         CanvasWindow.dot(rd.win, x, y, UInt32(region[y, x]))
       end
     end
     CanvasWindow.update(rd.win)
+    Client.request(rd.con, RpcApi.RPC_SET_WORLD_STREAMING, Connection.STREAMING_ON)
   end
 end

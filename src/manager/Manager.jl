@@ -47,13 +47,14 @@ module Manager
   # mode is on or off. Here streaming is a world dots streaming.
   #
   type Connections
-    server   ::Server.ServerConnection
-    left     ::Client.ClientConnection
-    right    ::Client.ClientConnection
-    up       ::Client.ClientConnection
-    down     ::Client.ClientConnection
-    frozen   ::Dict{UInt, Creature.Organism}
-    streaming::Bool
+    server    ::Server.ServerConnection
+    left      ::Client.ClientConnection
+    right     ::Client.ClientConnection
+    up        ::Client.ClientConnection
+    down      ::Client.ClientConnection
+    frozen    ::Dict{UInt, Creature.Organism}
+    streamInit::Bool
+    streamRun ::Bool
   end
   #
   # Manager's related type. Contains world, command line parameters,
@@ -143,6 +144,15 @@ module Manager
     # and organism's tasks switching.
     #
     while true
+      #
+      # We have to wait while all clients are ready for streaming. This
+      # is because the error in serializer. See issue for details:
+      # https://github.com/JuliaLang/julia/issues/16746
+      #
+      if !Manager._cons.streamRun::Bool && Manager._cons.streamInit::Bool
+        yield()
+        continue
+      end
       #
       # After all organisms die, we have to create next, new population
       #

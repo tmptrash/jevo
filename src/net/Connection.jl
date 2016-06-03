@@ -5,8 +5,25 @@
 # @author DeadbraiN
 #
 module Connection
+  export STREAMING_INIT
+  export STREAMING_ON
+  export STREAMING_OFF
+
   export Answer
   export Command
+  export CMD_NO_FUNC
+  #
+  # Three streaming states. Server should wait the client,
+  # to start world streaming, because of serialize issue:
+  # https://github.com/JuliaLang/julia/issues/16746
+  #
+  const STREAMING_INIT    = 0
+  const STREAMING_ON      = 1
+  const STREAMING_OFF     = 2
+  #
+  # Stub if Command.fn is not set
+  #
+  const CMD_NO_FUNC       = 0
 
   #
   # This command is used for sending some data from client
