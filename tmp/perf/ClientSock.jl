@@ -5,6 +5,6 @@ for i=1:1000000
   if i::Int === 1 t::Float64 = time() end
   if i::Int === 1000000
     t::Float64 = time() - t::Float64
-    println("requests: ", i::Int / t::Float64, ", time: ", t::Float64)
+    println("rps: ", i::Int / t::Float64, ", time: ", t::Float64)
   end
 end

@@ -1,7 +1,7 @@
 #
 # Calculates requests per second from client to server without response, but
 # using only naked sockets.
-# Results: rps: 8503.762913021008, time: 117.59500002861023
+# Results: rps: 21135.840060151648, time: 47.312999963760376
 #
 server = listen(2000)
 sock   = accept(server)
