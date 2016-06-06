@@ -36,6 +36,9 @@ module RemoteWorldRT
     win::CanvasWindow.Window
     beforeCb::Function
     afterCb::Function
+    ts::Float64
+    requests::Int
+    oldRequests::Int
 
     RemoteDataRT(con::Client.ClientConnection, win::CanvasWindow.Window) = new(con, win)
   end
@@ -59,8 +62,11 @@ module RemoteWorldRT
   # @param rd Remote world data object. See create()
   #
   function start(rd::RemoteDataRT)
-    rd.beforeCb = (data::Connection.Command, ans::Connection.Answer) -> _onBeforeResponse(rd, data, ans)
-    rd.afterCb  = (ans::Connection.Answer) -> _onAfterResponse(rd, ans)
+    rd.beforeCb    = (data::Connection.Command, ans::Connection.Answer) -> _onBeforeResponse(rd, data, ans)
+    rd.afterCb     = (ans::Connection.Answer) -> _onAfterResponse(rd, ans)
+    rd.ts          = time()
+    rd.requests    = 0
+    rd.oldRequests = 0
     Event.on(rd.con.observer, Client.EVENT_BEFORE_RESPONSE, rd.beforeCb)
     Event.on(rd.con.observer, Client.EVENT_AFTER_RESPONSE, rd.afterCb)
     Client.request(rd.con, RpcApi.RPC_SET_WORLD_STREAMING)
@@ -76,7 +82,8 @@ module RemoteWorldRT
     CanvasWindow.destroy(rd.win)
   end
   #
-  # Handler of remote server request. Handles remote world dots diffs.
+  # Handler of remote server request. Handles remote world dots diffs. The
+  # handler doesn't need to pass response.
   # @param rd Remote Data object
   # @param data Command related data
   # @param ans Server answer
@@ -86,9 +93,15 @@ module RemoteWorldRT
     local color::UInt32 = data.args[2]
     local ips::Int = data.args[3]
 
-    CanvasWindow.title(rd.win, string("ips: ", ips))
+    if time() - rd.ts > 1.0
+      rd.ts = time()
+      rd.oldRequests = rd.requests
+      rd.requests = 0
+    end
+    CanvasWindow.title(rd.win, string("ips: ", ips, ", rps: ", rd.oldRequests))
     CanvasWindow.dot(rd.win, pos.x, pos.y, color)
     CanvasWindow.update(rd.win)
+    rd.requests += 1
   end
   #
   # Handler of RpcApi.RPC_SET_WORLD_STREAMING request
@@ -97,7 +110,7 @@ module RemoteWorldRT
   function _onAfterResponse(rd::RemoteDataRT, ans::Connection.Answer)
     local region = ans.data.reg
 
-    CanvasWindow.title(rd.win, string("ips: ", ans.data.ips))
+    CanvasWindow.title(rd.win, string("ips: ", ans.data.ips, ", rps: 0"))
     for x::Int in 1:size(region)[2]
       for y::Int in 1:size(region)[1]
         CanvasWindow.dot(rd.win, x, y, UInt32(region[y, x]))

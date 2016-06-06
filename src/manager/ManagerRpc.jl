@@ -308,9 +308,12 @@ end
 # @param color Dot color
 #
 function _onWorldDot(pos::Helper.Point, color::UInt32)
-  for sock::Server.ServerClientSocket in Manager._cons.server.socks
-    if sock.streaming === Connection.STREAMING_ON
-      Server.request(sock.sock, RpcApi.RPC_WORLD_CHANGE, pos, color, Config.val(:WORLD_IPS))
+  local socks::Array{Server.ServerClientSocket, 1} = Manager._cons.server.socks
+  local ips::Int = Config.val(:WORLD_IPS)
+
+  for i::Int = 1:length(socks)
+    if socks[i].streaming === Connection.STREAMING_ON
+      Server.request(socks[i].sock, RpcApi.RPC_WORLD_CHANGE, pos, color, ips)
     end
   end
 end
