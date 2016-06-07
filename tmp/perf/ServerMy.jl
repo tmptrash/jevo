@@ -1,6 +1,6 @@
 #
 # Calculates requests per second from client to server without response
-# Results:  requests: 4553.17424843039, time: 219.6269998550415
+# Results: rps: 4553.17424843039, time: 219.6269998550415
 #
 include("../../src/ImportFolders.jl")
 
