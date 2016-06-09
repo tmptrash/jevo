@@ -77,10 +77,12 @@
 #
 # @author DeadbraiN
 # TODO: add EVENT_AFTER_RESPONSE logic description
+# TODO: add description of fast part of this module
 module Server
   import Event
-  import Connection
   import Helper
+  import FastApi
+  using Connection
 
   export create
   export run
@@ -160,24 +162,28 @@ module Server
   # http://julia.readthedocs.org/en/latest/manual/control-flow/#man-tasks
   # Don't remember to call yield() in your main code (or loop).
   # It also calls _update() for removing closed connections
-  # ans failed tasks.
+  # ans failed tasks. It means that
+  # serialize()/deserialize() functions will be used for sending and
+  # receiving data. Otherwise native read()/write() functions will be
+  # used.
   # @param con Server connection object returned by Server.create()
+  # @param fast Turns on serialization mode (slow speed mode).
   # @return {Bool} Run status
   #
-  function run(con::Server.ServerConnection)
+  function run(con::Server.ServerConnection, fast::Bool = false)
     if !isOk(con)
       Helper.warn("Server.run(): Server wasn\'t created correctly. Try to change Server.create() arguments.")
       return false
     end
 
-    Helper.info(string("Server has run: ", con.host, ":", con.port))
+    Helper.info(string(fast ? "Fast" : "Slow", " server has run: ", con.host, ":", con.port))
     @async begin
       while true
         try
           #
           # This line handles new connections
           #
-          push!(con.socks, ServerClientSocket(accept(con.server), Connection.STREAMING_OFF))
+          push!(con.socks, ServerClientSocket(accept(con.server), STREAMING_OFF))
         catch e
           #
           # Possibly Server.stop() was called.
@@ -192,7 +198,7 @@ module Server
         end
         sock = con.socks[length(con.socks)]
         push!(con.tasks, @async while Helper.isopen(sock.sock)
-          _answer(sock.sock, con.observer)
+          fast ? answer(sock.sock, con.observer, _onAnswerException) : fastAnswer(sock.sock, con.observer, _onAnswerException)
           _update(con)
         end)
       end
@@ -213,21 +219,19 @@ module Server
   # @param args Custom fn arguments
   # @return true - request was sent, false wasn't
   #
-  function request(sock::Base.TCPSocket, fn::Integer, args...)
-    if !Helper.isopen(sock) return false end
-    #
-    # This line is non blocking one
-    #
-    try
-      serialize(sock, Connection.Command(fn, [i for i in args]))
-    catch e
-      Helper.warn("Server.request(): $e")
-      showerror(STDOUT, e, catch_backtrace())
-      close(sock)
-      return false
-    end
-
-    true
+  function request(sock::Base.TCPSocket, fn::Int, args...)
+    Connection.request(sock, fn, args...)
+  end
+  #
+  # Fast version of request function. It uses native read()/write()
+  # function for data transfer. This function is non blocking one.
+  # TODO: describe dataIndex and data
+  # @param sock Client socket returned by accept() function
+  # @param dataIndex Index in api array
+  # @param args Data to transfer in request
+  #
+  function request(sock::Base.TCPSocket, dataIndex::UInt8, args...)
+    fastRequest(sock, dataIndex, args...)
   end
   #
   # Returns server's state. true means - created and run.
@@ -273,42 +277,24 @@ module Server
     end
   end
   #
-  # Reads one command from client's socket and fires an event
-  # to main code. After that, writes an answer into the socket
-  # back.
-  # @param sock Client's socket
-  # @param obs Observer for firing an event to "parent" code
+  # Is called when answer() or fastAnswer() catch network
+  # related exception
+  # @param sock Socket we are working with
+  # @param e Exception object
+  # @return true Always true
   #
-  function _answer(sock::Base.TCPSocket, obs::Event.Observer)
-    local data::Any = null
-    local typ::DataType
-
-    try
-      #
-      # Right now, only two types of responses are supported:
-      # answers after server request(Connection.Answer) and
-      # client requests (Connection.Command).
-      #
-      data = deserialize(sock)
-      typ  = typeof(data)
-      if typ === Connection.Answer
-        Event.fire(obs, EVENT_AFTER_RESPONSE, data)
-      elseif typ === Connection.Command
-        local ans::Connection.Answer = Connection.Answer(Connection.CMD_NO_FUNC, null)
-        Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, data, ans)
-        if ans.id !== Connection.CMD_NO_FUNC || ans.data !== null serialize(sock, ans) end
-      end
-    catch e
-      #
-      # This yield() updates sockets states
-      #
-      yield()
-      if isa(e, EOFError)
-        close(sock)
-      elseif Helper.isopen(sock)
-        Helper.warn("Server._answer(): $e")
-        showerror(STDOUT, e, catch_backtrace())
-      end
+  function _onAnswerException(sock::Base.TCPSocket, e::Exception)
+    #
+    # This yield() updates sockets states
+    #
+    yield()
+    if isa(e, EOFError)
+      close(sock)
+    elseif Helper.isopen(sock)
+      Helper.warn("Server._answer(): $e")
+      showerror(STDOUT, e, catch_backtrace())
     end
+
+    true
   end
 end

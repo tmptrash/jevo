@@ -1,8 +1,8 @@
 server to client requests without response tests:
 
 serialize(sock, rand(1:100))                             rps: 29303, time: 34
+write(s, Int64(1))                                       rps: 23255, time: 43
 write(s, Int8(1)),... write(s, Int8(8))                  rps: 21135, time: 47
-write(s, Int64(1))                                       rps: 20785, time: 48
 serialize(s, T(rand(1:100)))                             rps: 13160, time: 75
 serialize(s, T(rand(1:100), rand(1:100), UInt32(1234)))  rps:  8688, time: 115
-Server.request(s, Connection.Command(1, Int64(1)))       rps:  4553, time: 219
+serialize(s, Connection.Command(1, Int64(1)))            rps:  4553, time: 219

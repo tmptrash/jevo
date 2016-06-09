@@ -14,6 +14,7 @@
 # requests and obtaining answers (see @async macro in code).
 # Every request creates one tasks
 # TODO: describe server-to-client requests logic Nd EVENT_BEFORE_RESPONSE event
+# TODO: describe fast mode
 #
 # @author DeadbraiN
 #
@@ -51,9 +52,10 @@
 # @author DeadbraiN
 #
 module Client
-  import Connection
   import Event
   import Helper
+  import FastApi
+  using Connection
 
   export create
   export request
@@ -87,10 +89,11 @@ module Client
   # client will not be created/started.
   # @param host Host we are connecting to
   # @param port Port number we are connecting to
+  # @param fast Turns on serialization mode (slow speed mode).
   # @return Client connection object
   #
-  function create(host::Base.IPAddr, port::Integer)
-    local sock::Any = null
+  function create(host::Base.IPAddr, port::Integer, fast::Bool = false)
+    local sock::Base.TCPSocket = Base.TCPSocket()
     local obs::Event.Observer = Event.create()
 
     if port > 0
@@ -101,16 +104,16 @@ module Client
         # handling. It listens clients responses all the time
         # using green thread (Task).
         #
-        @async while _answer(sock, obs) end
+        @async while fast ? answer(sock, obs, _onAnswerException) : fastAnswer(sock, obs, _onAnswerException) end
       catch e
         Helper.warn("Client.create(): $e")
         showerror(STDOUT, e, catch_backtrace())
-        if sock !== null close(sock) end
+        if Helper.isopen(sock) close(sock) end
       end
       yield()
     end
 
-    sock !== null ? Client.ClientConnection(sock, obs) : Client.ClientConnection(Base.TCPSocket(), obs)
+    Helper.isopen(sock) ? Client.ClientConnection(sock, obs) : Client.ClientConnection(Base.TCPSocket(), obs)
   end
   #
   # Makes request to server. This method is not blocking. It returns
@@ -122,21 +125,19 @@ module Client
   # @param args Custom fn arguments
   # @return true - request was sent, false wasn't
   #
-  function request(con::Client.ClientConnection, fn::Integer, args...)
-    if !Helper.isopen(con.sock) return false end
-    #
-    # This line is non blocking one
-    #
-    try
-      serialize(con.sock, Connection.Command(fn, [i for i in args]))
-    catch e
-      Helper.warn("Client.request(): $e")
-      showerror(STDOUT, e, catch_backtrace())
-      close(con.sock)
-      return false
-    end
-
-    true
+  function request(con::Client.ClientConnection, fn::Int, args...)
+    Connection.request(con.sock, fn, args...)
+  end
+  #
+  # Fast version of request function. It uses native read()/write()
+  # function for data transfer. This function is non blocking one.
+  # TODO: describe dataIndex and data
+  # @param sock Client socket returned by accept() function
+  # @param dataIndex Index in api array
+  # @param args Data to transfer in request
+  #
+  function request(con::Client.ClientConnection, dataIndex::UInt8, args...)
+    fastRequest(con.sock, dataIndex, args...)
   end
   #
   # Returns Socket state. true means - created and connected.
@@ -160,42 +161,18 @@ module Client
     end
   end
   #
-  # Reads one command from server's socket and fires an event
-  # to main code. After that, writes an answer into the socket
-  # back.
-  # @param sock Client's socket
-  # @param obs Observer for firing an event to "parent" code
+  # Shows warning message if socket throws an exception
   #
-  function _answer(sock::Base.TCPSocket, obs::Event.Observer)
-    local data::Any = null
-    local typ::DataType
-
-    try
-      #
-      # Right now, only two types of responses are supported:
-      # answers after client request(Connection.Answer) and
-      # server requests (Connection.Command).
-      #
-      data = deserialize(sock)
-      typ  = typeof(data)
-      if typ === Connection.Answer
-        Event.fire(obs, EVENT_AFTER_RESPONSE, data)
-      elseif typ === Connection.Command
-        local ans::Connection.Answer = Connection.Answer(Connection.CMD_NO_FUNC, null)
-        Event.fire(obs, EVENT_BEFORE_RESPONSE, data, ans)
-        if ans.id !== Connection.CMD_NO_FUNC || ans.data !== null serialize(sock, ans) end
-      end
-    catch e
-      #
-      # This exception means, that client has disconnected.
-      # All other exceptions should be shown in terminal.
-      #
-      Helper.warn("Client has disconnected: $e")
-      showerror(STDOUT, e, catch_backtrace())
-      if sock !== null
-        close(sock)
-        return false
-      end
+  function _onAnswerException(sock::Base.TCPSocket, e::Exception)
+    #
+    # This exception means, that client has disconnected.
+    # All other exceptions should be shown in terminal.
+    #
+    Helper.warn("Client has disconnected: $e")
+    showerror(STDOUT, e, catch_backtrace())
+    if Helper.isopen(sock)
+      close(sock)
+      return false
     end
 
     true
