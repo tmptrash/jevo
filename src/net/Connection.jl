@@ -8,6 +8,9 @@
 module Connection
   import Helper
   import Event
+  import FastApi
+
+  using Debug
 
   export STREAMING_INIT
   export STREAMING_ON
@@ -15,6 +18,9 @@ module Connection
 
   export REQUEST_BIT
   export RESPONSE_BIT
+
+  export EVENT_BEFORE_RESPONSE
+  export EVENT_AFTER_RESPONSE
 
   export Answer
   export Command
@@ -41,6 +47,17 @@ module Connection
   #
   const REQUEST_BIT       = UInt8(0b10000000)
   const RESPONSE_BIT      = UInt8(0b01111111)
+  #
+  # Name of the event, which is fired if answer from client's
+  # request is obtained.
+  #
+  const EVENT_AFTER_RESPONSE  = "after-response"
+  #
+  # Name of the event, which is fired if client sent us a command. If
+  # this event fires, then specified command should be runned here - on
+  # server side.
+  #
+  const EVENT_BEFORE_RESPONSE = "before-response"
   #
   # Stub if Command.fn is not set
   #
@@ -136,11 +153,11 @@ module Connection
         Event.fire(obs, EVENT_AFTER_RESPONSE, data)
       elseif typ === Command
         local ans::Answer = Answer(CMD_NO_FUNC, null)
-        Event.fire(obs, EVENT_BEFORE_RESPONSE, data, ans)
+        Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, data, ans)
         if notEmpty(ans) serialize(sock, ans) end
       end
     catch e
-      return cb(sock, e)
+      return excFn(sock, e)
     end
 
     true
@@ -160,7 +177,8 @@ module Connection
   # @param obs Observer for firing an event to "parent" code
   # @param excFn Callback function for socket exceptions
   #
-  function fastAnswer(sock::Base.TCPSocket, obs::Event.Observer, excFn::Function)
+  @debug function fastAnswer(sock::Base.TCPSocket, obs::Event.Observer, excFn::Function)
+    @bp
     local dataIndex::UInt8
     local isRequest::Bool
 

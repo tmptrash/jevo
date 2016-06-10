@@ -54,7 +54,6 @@
 module Client
   import Event
   import Helper
-  import FastApi
   using Connection
 
   export create
@@ -62,18 +61,7 @@ module Client
   export stop
   export isOk
 
-  export EVENT_AFTER_RESPONSE
-  export EVENT_BEFORE_RESPONSE
   export ClientConnection
-  #
-  # Name of the event, which is fired if answer from server's
-  # request is obtained.
-  #
-  const EVENT_AFTER_RESPONSE  = "after-response"
-  #
-  # Name of the event, for requests from server to the client
-  #
-  const EVENT_BEFORE_RESPONSE = "before-response"
   #
   # Describes one connected client. Contains socket and observer.
   #
@@ -104,7 +92,7 @@ module Client
         # handling. It listens clients responses all the time
         # using green thread (Task).
         #
-        @async while fast ? answer(sock, obs, _onAnswerException) : fastAnswer(sock, obs, _onAnswerException) end
+        @async while (fast ? fastAnswer(sock, obs, _onAnswerException) : answer(sock, obs, _onAnswerException)) end
       catch e
         Helper.warn("Client.create(): $e")
         showerror(STDOUT, e, catch_backtrace())
@@ -162,6 +150,7 @@ module Client
   end
   #
   # Shows warning message if socket throws an exception
+  # TODO: arguments + return
   #
   function _onAnswerException(sock::Base.TCPSocket, e::Exception)
     #
@@ -172,9 +161,8 @@ module Client
     showerror(STDOUT, e, catch_backtrace())
     if Helper.isopen(sock)
       close(sock)
-      return false
     end
 
-    true
+    false
   end
 end

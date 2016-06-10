@@ -81,28 +81,14 @@
 module Server
   import Event
   import Helper
-  import FastApi
   using Connection
 
   export create
   export run
   export stop
   export isOk
-  export EVENT_BEFORE_RESPONSE
-  export EVENT_AFTER_RESPONSE
   export ServerConnection
   export ServerClientSocket
-  #
-  # Name of the event, which is fired if answer from client's
-  # request is obtained.
-  #
-  const EVENT_AFTER_RESPONSE  = "after-response"
-  #
-  # Name of the event, which is fired if client sent us a command. If
-  # this event fires, then specified command should be runned here - on
-  # server side.
-  #
-  const EVENT_BEFORE_RESPONSE = "before-response"
   #
   # Describes cliet's socket and it's streaming state
   #
@@ -198,7 +184,7 @@ module Server
         end
         sock = con.socks[length(con.socks)]
         push!(con.tasks, @async while Helper.isopen(sock.sock)
-          fast ? answer(sock.sock, con.observer, _onAnswerException) : fastAnswer(sock.sock, con.observer, _onAnswerException)
+          fast ? fastAnswer(sock.sock, con.observer, _onAnswerException) : answer(sock.sock, con.observer, _onAnswerException)
           _update(con)
         end)
       end
@@ -291,7 +277,7 @@ module Server
     if isa(e, EOFError)
       close(sock)
     elseif Helper.isopen(sock)
-      Helper.warn("Server._answer(): $e")
+      Helper.warn("Server._onAnswerException(): $e")
       showerror(STDOUT, e, catch_backtrace())
     end
 
