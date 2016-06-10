@@ -118,8 +118,7 @@ module Connection
       # reading of (data) parameters. First bit is used as
       # request bit.
       #
-      write(sock, dataIndex | REQUEST_BIT)
-      fastWrite(sock, args)
+      fastWrite(sock, dataIndex | REQUEST_BIT, args)
     catch e
       Helper.warn("Connection.fastRequest(): $e")
       showerror(STDOUT, e, catch_backtrace())
@@ -177,8 +176,7 @@ module Connection
   # @param obs Observer for firing an event to "parent" code
   # @param excFn Callback function for socket exceptions
   #
-  @debug function fastAnswer(sock::Base.TCPSocket, obs::Event.Observer, excFn::Function)
-    @bp
+  function fastAnswer(sock::Base.TCPSocket, obs::Event.Observer, excFn::Function)
     local dataIndex::UInt8
     local isRequest::Bool
 
@@ -189,13 +187,13 @@ module Connection
       # requests (RESPONSE_BIT).
       #
       isRequest = (dataIndex = read(sock, UInt8)) & REQUEST_BIT > 0
+      println("dataIndex: ", dataIndex)
       dataIndex = dataIndex & RESPONSE_BIT
       if isRequest
         local ans::Answer = Answer(CMD_NO_FUNC, null)
         Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, fastRead(sock, dataIndex), ans)
         if notEmpty(ans)
-          write(sock, UInt8(ans.id) | RESPONSE_BIT)
-          fastWrite(sock, ans.data)
+          fastWrite(sock, UInt8(ans.id) & RESPONSE_BIT, ans.data)
         end
       else
         Event.fire(obs, EVENT_AFTER_RESPONSE, fastRead(sock, dataIndex))
@@ -214,9 +212,11 @@ module Connection
   #
   function fastRead(sock::Base.TCPSocket, dataIndex::UInt8)
     local types::Array{DataType, 1} = FastApi.getTypes()
-    local t::DataType = types[dataIndex]
     local data::Array{Any, 1} = Any[]
+    local t::DataType
 
+    if dataIndex < UInt8(1) || dataIndex > UInt(length(types)) error("Protocol error: invalid dataIndex header") end
+    t = types[dataIndex]
     while t !== Void
       push!(data, t === ASCIIString ? readuntil(sock, '\x0')[1:end-1] : read(sock, t))
       t = types[(dataIndex += 1)]
@@ -227,8 +227,10 @@ module Connection
   #
   # Writes data in a socket in a fast way using native read()
   # and write() functions
+  # TODO: arguments
   #
-  function fastWrite(sock::Base.TCPSocket, data::Any)
+  function fastWrite(sock::Base.TCPSocket, dataIndex::UInt8, data::Any)
+    write(sock, dataIndex)
     for d::Any in data
       write(sock, d)
       #

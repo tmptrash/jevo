@@ -107,6 +107,7 @@ module Server
     observer::Event.Observer
     host    ::Base.IPAddr
     port    ::Int
+    fast    ::Bool
   end
   #
   # Creates a server. Returns special server's data object, which identifies
@@ -118,9 +119,10 @@ module Server
   # this case, server will not be created and will not work.
   # @param host Host we are listening to
   # @param port Port we are listening to
+  # @param fast Turns on serialization mode (slow speed mode).
   # @return {Server.ServerConnection} Server's related data object
   #
-  function create(host::Base.IPAddr, port::Integer)
+  function create(host::Base.IPAddr, port::Integer, fast::Bool = false)
     local tasks::Array{Task, 1} = Task[]
     local socks::Array{ServerClientSocket, 1} = ServerClientSocket[]
     local obs::Event.Observer = Event.create()
@@ -129,7 +131,7 @@ module Server
     if port > 0
       try
         local server::Base.TCPServer = listen(host, port)
-        con = ServerConnection(tasks, socks, server, obs, host, port)
+        con = ServerConnection(tasks, socks, server, obs, host, port, fast)
         Helper.info(string("Server created: ", host, ":", port))
         return con
       catch e
@@ -138,7 +140,7 @@ module Server
       end
     end
 
-    ServerConnection(tasks, socks, Base.TCPServer(), obs, host, port)
+    ServerConnection(tasks, socks, Base.TCPServer(), obs, host, port, fast)
   end
   #
   # Runs the server. Starts listening clients connections
@@ -153,16 +155,15 @@ module Server
   # receiving data. Otherwise native read()/write() functions will be
   # used.
   # @param con Server connection object returned by Server.create()
-  # @param fast Turns on serialization mode (slow speed mode).
   # @return {Bool} Run status
   #
-  function run(con::Server.ServerConnection, fast::Bool = false)
+  function run(con::Server.ServerConnection)
     if !isOk(con)
       Helper.warn("Server.run(): Server wasn\'t created correctly. Try to change Server.create() arguments.")
       return false
     end
 
-    Helper.info(string(fast ? "Fast" : "Slow", " server has run: ", con.host, ":", con.port))
+    Helper.info(string(con.fast ? "Fast" : "Slow", " server has run: ", con.host, ":", con.port))
     @async begin
       while true
         try
@@ -184,7 +185,7 @@ module Server
         end
         sock = con.socks[length(con.socks)]
         push!(con.tasks, @async while Helper.isopen(sock.sock)
-          fast ? fastAnswer(sock.sock, con.observer, _onAnswerException) : answer(sock.sock, con.observer, _onAnswerException)
+          con.fast ? fastAnswer(sock.sock, con.observer, _onAnswerException) : answer(sock.sock, con.observer, _onAnswerException)
           _update(con)
         end)
       end
