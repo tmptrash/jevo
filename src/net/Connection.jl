@@ -187,14 +187,11 @@ module Connection
       # requests (RESPONSE_BIT).
       #
       isRequest = (dataIndex = read(sock, UInt8)) & REQUEST_BIT > 0
-      println("dataIndex: ", dataIndex)
       dataIndex = dataIndex & RESPONSE_BIT
       if isRequest
         local ans::Answer = Answer(CMD_NO_FUNC, null)
         Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, fastRead(sock, dataIndex), ans)
-        if notEmpty(ans)
-          fastWrite(sock, UInt8(ans.id) & RESPONSE_BIT, ans.data)
-        end
+        if notEmpty(ans) fastWrite(sock, UInt8(ans.id) & RESPONSE_BIT, ans.data) end
       else
         Event.fire(obs, EVENT_AFTER_RESPONSE, fastRead(sock, dataIndex))
       end

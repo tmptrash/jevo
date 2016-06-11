@@ -1,6 +1,7 @@
 t = time()
 client = connect(2000)
 for i=1:1000000
+  read(client, UInt8)
   read(client, Int)
   if i::Int === 1 t::Float64 = time() end
   if i::Int === 1000000
