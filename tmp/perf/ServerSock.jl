@@ -8,7 +8,6 @@ sock   = accept(server)
 
 function run()
   for i=1:1000000
-    write(sock, UInt8(1))
     write(sock, Int(1))
   end
 end

@@ -15,7 +15,7 @@ function resp(sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer)
   global con
 
   if i::Int === 1 t::Float64 = time() end
-  if i::Int === 100000
+  if i::Int === 1000000
     t::Float64 = time() - t::Float64
     println("rps: ", i::Int / t::Float64, ", time: ", t::Float64)
   end

@@ -8,6 +8,7 @@ module Helper
   export Point
   export RetObj
 
+  export toBytes
   export randTrue
   export getProbIndex
   export getSupportedTypes
@@ -67,6 +68,19 @@ module Helper
     # ctor
     #
     RetObj(r = nothing, p = nothing) = (x = new(r); p === nothing ? x : (x.pos = p;x))
+  end
+  #
+  # Converts any type to bytes array
+  # @param x Value we have to convert
+  # @return {Vector{UInt8}}
+  #
+  function toBytes(x::Any)
+     local sz::Int = sizeof(x)
+     local ba::Vector{UInt8} = Vector{UInt8}(sz)
+     local ptr::Ptr{UInt8} = convert(Ptr{UInt8}, pointer_from_objref(x))
+     unsafe_copy!(pointer(ba), ptr, sz)
+
+     ba
   end
   #
   # Prints warning message with white color

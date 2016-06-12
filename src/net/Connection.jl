@@ -227,14 +227,16 @@ module Connection
   # TODO: arguments
   #
   function fastWrite(sock::Base.TCPSocket, dataIndex::UInt8, data::Any)
-    write(sock, dataIndex)
+    local vec::Vector{UInt8} = UInt8[dataIndex]
+
     for d::Any in data
-      write(sock, d)
+      append!(vec, Helper.toBytes(d))
       #
       # Every string should be ended with '\x0' - zero character
       #
-      if typeof(d) === ASCIIString write(sock, '\x0') end
+      if typeof(d) === ASCIIString append!(vec, '\x0') end
     end
+    write(sock, vec)
   end
   #
   # Checks if answer is empty - wasn't modified in parent code.

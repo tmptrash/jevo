@@ -10,7 +10,7 @@ import Connection
 import Event
 
 function onBeforeResponse(sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer)
-  for i=1:100000 Server.request(sock, UInt8(1), UInt64(1)) end
+  for i=1:1000000 Server.request(sock, UInt8(1), UInt64(1)) end
 end
 
 con = Server.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT), true)

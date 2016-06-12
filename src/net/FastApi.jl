@@ -18,6 +18,7 @@ module FastApi
   # Available data types with indexes in comments
   #
   const _api = DataType[
-    UInt64, Void             # 0
+    UInt64,      Void,        # 1
+    ASCIIString, Void         # 3
   ]
 end
