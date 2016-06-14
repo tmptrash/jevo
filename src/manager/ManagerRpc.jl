@@ -295,7 +295,6 @@ end
 # @param sock Socket of one ready client
 #
 function _onFastStreaming(sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer)
-  println(data)
   Manager._cons.streamInit = false
   Event.off(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
   if !Event.has(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)

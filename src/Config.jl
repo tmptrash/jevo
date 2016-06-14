@@ -375,8 +375,8 @@ module Config
       5,                         # ORGANISM_CLONE_AFTER_TIMES
       UInt32(0xFF0000),          # ORGANISM_START_COLOR
       2,                         # CODE_MAX_FUNC_PARAMS
-      1270,                      # WORLD_WIDTH
-      650,                       # WORLD_HEIGHT
+      200,#1270,                      # WORLD_WIDTH
+      150,#650,                       # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
       100,                       # WORLD_MAX_ORGANISMS
@@ -385,7 +385,7 @@ module Config
       UInt32(0x00FF00),          # WORLD_START_ENERGY_AMOUNT
       0.5,                       # WORLD_MIN_ENERGY_PERCENT
       5000,                      # WORLD_MIN_ENERGY_CHECK_PERIOD
-      1,                         # WORLD_SCALE
+      4,                         # WORLD_SCALE
       1,                         # BACKUP_PERIOD
       7,                         # BACKUP_AMOUNT
       650,                       # STAT_WIDTH
