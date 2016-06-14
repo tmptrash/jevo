@@ -6,10 +6,12 @@ import CommandLine
 # will be used for current manager(server) for listening clients. For
 # this you have to run Manager like this:
 # >julia AppManager.jl port=2000
+# Fast port is used for "fast" pooling mode.
 # Next const is an IP of server. Is used in pair with ARG_SERVER_PORT
 #
-const ARG_SERVER_PORT = "port"
-const ARG_SERVER_IP   = "ip"
+const ARG_SERVER_PORT      = "port"
+const ARG_FAST_SERVER_PORT = "fastPort"
+const ARG_SERVER_IP        = "ip"
 #
 # Current manager may be connected to the left-sided other server or
 # instance. It means, that current world will be joined with that

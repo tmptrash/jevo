@@ -14,7 +14,7 @@ import RemoteWorldRT
 #
 function main()
   # TODO: should be get from command line parameter or it's local default config
-  if (rw = RemoteWorldRT.create(ip"127.0.0.1", 2000)) === false quit() end
+  rw = RemoteWorldRT.create(ip"127.0.0.1", 2000, 2001)
   RemoteWorldRT.start(rw)
 end
 #

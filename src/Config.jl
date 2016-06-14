@@ -229,6 +229,10 @@ module Config
     #
     CONNECTION_SERVER_PORT::Int
     #
+    # Port number for "fast" mode. It uses, for example, for pooling
+    #
+    CONNECTION_FAST_SERVER_PORT::Int
+    #
     # Works in pair with CONNECTION_SERVER_PORT. An IP of current
     # server/instance.
     # TODO: IPv6?
@@ -389,6 +393,7 @@ module Config
       5,                         # STAT_FRAME_DELAY
       20,                        # CONNECTION_STEP_ENERGY_PERCENT
       2000,                      # CONNECTION_SERVER_PORT (current server port)
+      2001,                      # CONNECTION_FAST_SERVER_PORT (current server "fast" mode port)
       ip"127.0.0.1",             # CONNECTION_SERVER_IP
       0,                         # CONNECTION_LEFT_SERVER_PORT
       ip"127.0.0.1",             # CONNECTION_LEFT_SERVER_IP

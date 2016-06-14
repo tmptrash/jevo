@@ -2,7 +2,7 @@
 # TCP Client implementation. It works in pair with Server
 # module. It also works in asynchronous way (like a server)
 # and implements simple RPC-like logic. All you need to do is
-# create a client, add listeners to EVENT_AFTER_RESPONSE event if needed
+# create a client, add listeners to EVENT_AFTER_REQUEST event if needed
 # and call request() method as many times as needed. The answer
 # will be obtained through onAnswer() callback.
 #
@@ -32,9 +32,9 @@
 #     #
 #     connection = Client.create(ip"127.0.0.1", 2001)
 #     #
-#     # Starts to listen EVENT_AFTER_RESPONSE event
+#     # Starts to listen EVENT_AFTER_REQUEST event
 #     #
-#     Event.on(connection.observer, EVENT_AFTER_RESPONSE, onAnswer)
+#     Event.on(connection.observer, EVENT_AFTER_REQUEST, onAnswer)
 #     #
 #     # Makes a request to the server. An answer will
 #     # be obtained in onAnswer() callback.

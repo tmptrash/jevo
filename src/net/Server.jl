@@ -76,7 +76,7 @@
 #            custom data.
 #
 # @author DeadbraiN
-# TODO: add EVENT_AFTER_RESPONSE logic description
+# TODO: add EVENT_AFTER_REQUEST logic description
 # TODO: add description of fast part of this module
 module Server
   import Event
@@ -88,21 +88,13 @@ module Server
   export stop
   export isOk
   export ServerConnection
-  export ServerClientSocket
-  #
-  # Describes cliet's socket and it's streaming state
-  #
-  type ServerClientSocket
-    sock::Base.TCPSocket
-    streaming::Int
-  end
   #
   # Describes a server. It contains clients sockets, tasks, server object
   # and it's observer.
   #
   type ServerConnection
     tasks   ::Array{Task, 1}
-    socks   ::Array{ServerClientSocket, 1}
+    socks   ::Array{Base.TCPSocket, 1}
     server  ::Base.TCPServer
     observer::Event.Observer
     host    ::Base.IPAddr
@@ -124,7 +116,7 @@ module Server
   #
   function create(host::Base.IPAddr, port::Integer, fast::Bool = false)
     local tasks::Array{Task, 1} = Task[]
-    local socks::Array{ServerClientSocket, 1} = ServerClientSocket[]
+    local socks::Array{Base.TCPSocket, 1} = Base.TCPSocket[]
     local obs::Event.Observer = Event.create()
     local con::ServerConnection
 
@@ -170,22 +162,21 @@ module Server
           #
           # This line handles new connections
           #
-          push!(con.socks, ServerClientSocket(accept(con.server), STREAMING_OFF))
+          push!(con.socks, accept(con.server))
         catch e
           #
           # Possibly Server.stop() was called.
           #
           if Helper.isopen(con.server) === false
-            local sock::Base.TCPSocket
-            for sock in con.socks close(sock.sock) end
+            for s::Base.TCPSocket in con.socks close(s) end
             break
           end
           Helper.warn("Server.run(): $e")
           showerror(STDOUT, e, catch_backtrace())
         end
-        sock = con.socks[length(con.socks)]
-        push!(con.tasks, @async while Helper.isopen(sock.sock)
-          con.fast ? fastAnswer(sock.sock, con.observer, _onAnswerException) : answer(sock.sock, con.observer, _onAnswerException)
+        local sock::Base.TCPSocket = con.socks[length(con.socks)]
+        push!(con.tasks, @async while Helper.isopen(sock)
+          con.fast ? fastAnswer(sock, con.observer, _onAnswerException) : answer(sock, con.observer, _onAnswerException)
           _update(con)
         end)
       end
@@ -235,8 +226,7 @@ module Server
   #
   function stop(con::Server.ServerConnection)
     try
-      local sock::Base.TCPSocket
-      for sock in con.socks close(sock.sock) end
+      for sock::Base.TCPSocket in con.socks close(sock) end
       close(con.server)
       Helper.info(string("Server has stopped: ", con.host, ":", con.port))
     catch e
@@ -255,7 +245,7 @@ module Server
     i::Int = 1
 
     while i <= length(con.socks)
-      if Helper.isopen(con.socks[i].sock)
+      if Helper.isopen(con.socks[i])
        	i += 1
       else
         deleteat!(con.socks, i)

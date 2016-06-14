@@ -72,10 +72,14 @@ module Event
   # @param {Observer}    obs   Events container
   # @param {ASCIIString} event Event name. All in lowercase
   # @param {Function}    fn    Event handler
+  # @return {Bool} off status. false if no such event or handler
   #
   function off(obs::Observer, event::ASCIIString, fn::Function)
+    if !haskey(obs.events, event) return false end
     local index::Int = findfirst(obs.events[event], fn)
-    if index > 0 deleteat!(obs.events[event], index) end
+    if index > 0 return false  end
+    deleteat!(obs.events[event], index)
+    true
   end
   #
   # Fires an event with parameters. User may cancel current action

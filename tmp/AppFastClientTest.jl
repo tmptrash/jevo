@@ -18,4 +18,4 @@ end
 
 con = Client.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT), true)
 Event.on(con.observer, Connection.EVENT_BEFORE_RESPONSE, onBeforeResponse)
-Event.on(con.observer, Connection.EVENT_AFTER_RESPONSE, onAfterResponse)
+Event.on(con.observer, Connection.EVENT_AFTER_REQUEST, onAfterResponse)

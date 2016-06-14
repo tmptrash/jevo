@@ -12,15 +12,11 @@ module Connection
 
   using Debug
 
-  export STREAMING_INIT
-  export STREAMING_ON
-  export STREAMING_OFF
-
   export REQUEST_BIT
   export RESPONSE_BIT
 
   export EVENT_BEFORE_RESPONSE
-  export EVENT_AFTER_RESPONSE
+  export EVENT_AFTER_REQUEST
 
   export Answer
   export Command
@@ -30,17 +26,7 @@ module Connection
   export fastRequest
   export answer
   export fastAnswer
-  export fastRead
-  export fastWrite
   export notEmpty
-  #
-  # Three streaming states. Server should wait the client,
-  # to start world streaming, because of serialize issue:
-  # https://github.com/JuliaLang/julia/issues/16746
-  #
-  const STREAMING_INIT    = 0
-  const STREAMING_ON      = 1
-  const STREAMING_OFF     = 2
   #
   # First bit in fast requests, which shows if current request
   # is a request or response
@@ -51,7 +37,7 @@ module Connection
   # Name of the event, which is fired if answer from client's
   # request is obtained.
   #
-  const EVENT_AFTER_RESPONSE  = "after-response"
+  const EVENT_AFTER_REQUEST  = "after-response"
   #
   # Name of the event, which is fired if client sent us a command. If
   # this event fires, then specified command should be runned here - on
@@ -118,7 +104,7 @@ module Connection
       # reading of (data) parameters. First bit is used as
       # request bit.
       #
-      fastWrite(sock, dataIndex | REQUEST_BIT, args)
+      _fastWrite(sock, dataIndex | REQUEST_BIT, args)
     catch e
       Helper.warn("Connection.fastRequest(): $e")
       showerror(STDOUT, e, catch_backtrace())
@@ -149,7 +135,7 @@ module Connection
       data = deserialize(sock)
       typ  = typeof(data)
       if typ === Answer
-        Event.fire(obs, EVENT_AFTER_RESPONSE, data)
+        Event.fire(obs, EVENT_AFTER_REQUEST, data)
       elseif typ === Command
         local ans::Answer = Answer(CMD_NO_FUNC, null)
         Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, data, ans)
@@ -190,10 +176,10 @@ module Connection
       dataIndex = dataIndex & RESPONSE_BIT
       if isRequest
         local ans::Answer = Answer(CMD_NO_FUNC, null)
-        Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, fastRead(sock, dataIndex), ans)
-        if notEmpty(ans) fastWrite(sock, UInt8(ans.id) & RESPONSE_BIT, ans.data) end
+        Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, _fastRead(sock, dataIndex), ans)
+        if notEmpty(ans) _fastWrite(sock, UInt8(ans.id) & RESPONSE_BIT, ans.data) end
       else
-        Event.fire(obs, EVENT_AFTER_RESPONSE, fastRead(sock, dataIndex))
+        Event.fire(obs, EVENT_AFTER_REQUEST, _fastRead(sock, dataIndex))
       end
     catch e
       return excFn(sock, e)
@@ -207,7 +193,7 @@ module Connection
   # @param dataIndex Index of data in FastApi array
   # @return {Any} read data
   #
-  function fastRead(sock::Base.TCPSocket, dataIndex::UInt8)
+  function _fastRead(sock::Base.TCPSocket, dataIndex::UInt8)
     local types::Array{DataType, 1} = FastApi.getTypes()
     local data::Array{Any, 1} = Any[]
     local t::DataType
@@ -226,7 +212,7 @@ module Connection
   # and write() functions
   # TODO: arguments
   #
-  function fastWrite(sock::Base.TCPSocket, dataIndex::UInt8, data::Any)
+  function _fastWrite(sock::Base.TCPSocket, dataIndex::UInt8, data::Any)
     local vec::Vector{UInt8} = UInt8[dataIndex]
 
     for d::Any in data

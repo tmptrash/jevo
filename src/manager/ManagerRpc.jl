@@ -13,6 +13,7 @@ import Mutator
 import World
 import CommandLine
 import Event
+import FastApi
 import Server
 import Connection
 import ManagerTypes
@@ -271,36 +272,36 @@ end
 # then server should wait (skip running organisms).
 # @param sock Client's socket
 # @param state Streaming state (on,off,init)
-#
-function setStreaming(sock::TCPSocket, state::Int = Connection.STREAMING_INIT)
-  local hasInit::Bool = false
-  local hasOn::Bool = false
+# TODO: rewrite this description
+function setStreaming(sock::Base.TCPSocket)
+  local socks::Array{Base.TCPSocket, 1} = Manager._cons.fastServer.socks
+  local on::Int = 0
 
-  for s::Server.ServerClientSocket in Manager._cons.server.socks
-    if sock === s.sock s.streaming = state end
-    if s.streaming === Connection.STREAMING_ON hasOn = true end
-    if s.streaming === Connection.STREAMING_INIT hasInit = true end
+  for i::Int = 1:length(socks)
+    if Helper.isopen(socks[i]) on += 1 end
   end
+  #
+  # Only one "fast" client is supported at the moment
+  #
+  if on > 1 return false end
 
-  if hasOn && !hasInit
-    Manager._cons.streamInit = false
-    Manager._cons.streamRun  = true
-    if !Event.has(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
-      Event.on(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
-    end
-  elseif hasInit
-    Manager._cons.streamInit = true
-    Manager._cons.streamRun  = false
-  else
-    Manager._cons.streamInit = false
-    Manager._cons.streamRun  = false
-    Event.off(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
-  end
-
-  if state === Connection.STREAMING_INIT return getRegion() end
-  null
+  Manager._cons.streamInit = true
+  getRegion()
 end
 
+#
+# Handler of EVENT_BEFORE_RESPONSE for "fast" pooling mode. Turns
+# on "fast" streaming (pooling).
+# @param sock Socket of one ready client
+#
+function _onFastStreaming(sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer)
+  println(data)
+  Manager._cons.streamInit = false
+  Event.off(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
+  if !Event.has(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
+    Event.on(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
+  end
+end
 #
 # This is a handler on world dot change. It notify remote clients
 # about these changes.
@@ -308,14 +309,23 @@ end
 # @param color Dot color
 #
 function _onWorldDot(pos::Helper.Point, color::UInt32)
-  local socks::Array{Server.ServerClientSocket, 1} = Manager._cons.server.socks
-  local ips::Int = Config.val(:WORLD_IPS)
+  local socks::Array{Base.TCPSocket, 1} = Manager._cons.fastServer.socks
+  local ips::UInt16 = UInt16(Config.val(:WORLD_IPS))
+  local x::UInt16 = UInt16(pos.x)
+  local y::UInt16 = UInt16(pos.y)
+  local dataIndex::UInt8 = UInt8(FastApi.API_DOT_COLOR_IPS)
+  local off::Bool = true
 
   for i::Int = 1:length(socks)
-    if socks[i].streaming === Connection.STREAMING_ON
-      Server.request(socks[i].sock, RpcApi.RPC_WORLD_CHANGE, pos, color, ips)
+    if Helper.isopen(socks[i])
+      off = false
+      Server.request(socks[i], dataIndex, x, y, color, ips)
     end
   end
+  #
+  # All "fast" clients were disconnected
+  #
+  if off Event.off(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot) end
 end
 #
 # Assembles RpcApi.SimpleOrganism type from wider Creature.Organism
@@ -361,7 +371,7 @@ function _createClient(side::ASCIIString)
     con = Client.create(serverIp, serverPort)
   end
   if Client.isOk(con)
-    Event.on(con.observer, Client.EVENT_AFTER_RESPONSE, (ans::Connection.Answer)->_onAfterResponse(side, ans))
+    Event.on(con.observer, Client.EVENT_AFTER_REQUEST, (ans::Connection.Answer)->_onAfterResponse(side, ans))
     Event.on(con.observer, Client.EVENT_BEFORE_RESPONSE, (data::Connection.Command, ans::Connection.Answer)->_onBeforeResponse(side, data, ans))
   end
   con
@@ -375,12 +385,12 @@ end
 function _createConnections()
   Manager.Connections(
     _createServer(),
+    _createServer(true),
     _createClient(_SIDE_LEFT),
     _createClient(_SIDE_RIGHT),
     _createClient(_SIDE_UP),
     _createClient(_SIDE_DOWN),
     Dict{UInt, Creature.Organism}(),
-    false,
     false
   )
 end
@@ -474,15 +484,21 @@ end
 #
 # Creates server and returns it's ServerConnection type. It
 # uses port number provided by "port" command line
-# argument or default one from Config module.
+# argument or default one from Config module. It also may
+# create "fast" server, which uses special "fast" mode for
+# pooling. In this case IP address is the same, but port
+# is different.
+# @param fast Switcher for fast server creation
 # @return Server.ServerConnection object
 #
-function _createServer()
+function _createServer(fast::Bool = false)
   local con::Server.ServerConnection = Server.create(
     _getIp(Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP),
-    _getPort(Manager.ARG_SERVER_PORT, :CONNECTION_SERVER_PORT)
+    _getPort(fast ? Manager.ARG_FAST_SERVER_PORT : Manager.ARG_SERVER_PORT, fast ? :CONNECTION_FAST_SERVER_PORT : :CONNECTION_SERVER_PORT),
+    fast
   )
-  Event.on(con.observer, Server.EVENT_BEFORE_RESPONSE, _onClientCommand)
+  Event.on(con.observer, Server.EVENT_BEFORE_RESPONSE, fast ? _onFastStreaming : _onClientCommand)
+
   con
 end
 #

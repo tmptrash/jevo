@@ -75,7 +75,7 @@ module RemoteWorld
     rd.resCb = (pd::Pooling.PoolingData, ans::Connection.Answer) -> _onAfterResponse(rd, ans)
 
     Event.on(rd.pd.obs, Pooling.EVENT_BEFORE_REQUEST, rd.reqCb)
-    Event.on(rd.pd.obs, Pooling.EVENT_AFTER_RESPONSE, rd.resCb)
+    Event.on(rd.pd.obs, Pooling.EVENT_AFTER_REQUEST, rd.resCb)
 
     Pooling.start(rd.pd, delay)
   end
@@ -85,7 +85,7 @@ module RemoteWorld
   #
   function stop(rd::RemoteData)
     Event.off(rd.pd.obs, Pooling.EVENT_BEFORE_REQUEST, rd.reqCb)
-    Event.off(rd.pd.obs, Pooling.EVENT_AFTER_RESPONSE, rd.resCb)
+    Event.off(rd.pd.obs, Pooling.EVENT_AFTER_REQUEST, rd.resCb)
     Pooling.stop(rd.pd)
     CanvasWindow.destroy(rd.win)
   end

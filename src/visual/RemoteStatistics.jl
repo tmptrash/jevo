@@ -74,7 +74,7 @@ module RemoteStatistics
     rs.resCb = (pd::Pooling.PoolingData, ans::Connection.Answer) -> _onAfterResponse(rs, ans)
 
     Event.on(rs.pd.obs, Pooling.EVENT_BEFORE_REQUEST, rs.reqCb)
-    Event.on(rs.pd.obs, Pooling.EVENT_AFTER_RESPONSE, rs.resCb)
+    Event.on(rs.pd.obs, Pooling.EVENT_AFTER_REQUEST, rs.resCb)
 
     Gtk.showall(rs.win)
     Pooling.start(rs.pd, delay)
@@ -85,7 +85,7 @@ module RemoteStatistics
   #
   function stop(rs::RemoteStatData)
     Event.off(rs.pd.obs, Pooling.EVENT_BEFORE_REQUEST, rs.reqCb)
-    Event.off(rs.pd.obs, Pooling.EVENT_AFTER_RESPONSE, rs.resCb)
+    Event.off(rs.pd.obs, Pooling.EVENT_AFTER_REQUEST, rs.resCb)
     Pooling.stop(rs.pd)
     Gtk.destroy(rs.label)
     Gtk.destroy(rs.win)

@@ -48,13 +48,13 @@ module Manager
   #
   type Connections
     server    ::Server.ServerConnection
+    fastServer::Server.ServerConnection
     left      ::Client.ClientConnection
     right     ::Client.ClientConnection
     up        ::Client.ClientConnection
     down      ::Client.ClientConnection
     frozen    ::Dict{UInt, Creature.Organism}
     streamInit::Bool
-    streamRun ::Bool
   end
   #
   # Manager's related type. Contains world, command line parameters,
@@ -127,9 +127,12 @@ module Manager
     #
     # This server is listening for all other managers and remote
     # terminal. It runs obtained commands and send answers back.
-    # In other words, it works like RPC runner...
+    # In other words, it works like RPC runner... Fast server is
+    # listening for "fast" clients and works in "fast" mode.
     #
     Server.run(_cons.server)
+    # TODO: possibly, we don't need to run this server due to performance issue
+    Server.run(_cons.fastServer)
     #
     # If user set up some amount of organisms they will be created
     # in this call. If we are in recover mode, then this step should
@@ -149,10 +152,7 @@ module Manager
       # is because the error in serializer. See issue for details:
       # https://github.com/JuliaLang/julia/issues/16746
       #
-      if !Manager._cons.streamRun::Bool && Manager._cons.streamInit::Bool
-        yield()
-        continue
-      end
+      if Manager._cons.streamInit::Bool yield(); continue end
       #
       # After all organisms die, we have to create next, new population
       #

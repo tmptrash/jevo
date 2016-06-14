@@ -41,12 +41,12 @@ module Pooling
   export start
   export stop
   export EVENT_BEFORE_REQUEST
-  export EVENT_AFTER_RESPONSE
+  export EVENT_AFTER_REQUEST
   #
   # Name of the events, which are fired before and after each request.
   #
   const EVENT_BEFORE_REQUEST = "before-request"
-  const EVENT_AFTER_RESPONSE = "after-response"
+  const EVENT_AFTER_REQUEST = "after-response"
   #
   # Contains pooling data. Is used in all functions as
   # first parameter.
@@ -80,7 +80,7 @@ module Pooling
     pd.delay = delay
     pd.resp  = (ans::Connection.Answer) -> _onResponse(pd, ans)
 
-    Event.on(pd.con.observer, Client.EVENT_AFTER_RESPONSE, pd.resp)
+    Event.on(pd.con.observer, Client.EVENT_AFTER_REQUEST, pd.resp)
     #
     # Here user should fill pd.args parameter. These arguments
     # will be passed to the remote server with request.
@@ -93,7 +93,7 @@ module Pooling
   # @param pd Pooling data object
   #
   function stop(pd::PoolingData)
-    Event.off(pd.con.observer, Client.EVENT_AFTER_RESPONSE, pd.resp)
+    Event.off(pd.con.observer, Client.EVENT_AFTER_REQUEST, pd.resp)
     Client.stop(pd.con)
   end
   #
@@ -105,7 +105,7 @@ module Pooling
     #
     # Here we pass response answer outside the Pooling module
     #
-    Event.fire(pd.obs, EVENT_AFTER_RESPONSE, pd, ans)
+    Event.fire(pd.obs, EVENT_AFTER_REQUEST, pd, ans)
     sleep(pd.delay)
     #
     # Here user should fill pd.args parameter. These arguments

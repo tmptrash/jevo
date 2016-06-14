@@ -84,6 +84,13 @@ function _updateOrganisms(counter::Int)
     # input connections for current server and so on...
     #
     yield()
+    #
+    # We have to wait while all clients are ready for streaming. This
+    # is because the error in serializer. See issue for details:
+    # https://github.com/JuliaLang/julia/issues/16746. See Manager
+    # main loop for details.
+    #
+    if Manager._cons.streamInit::Bool return counter end
   end
   #
   # Cloning procedure. The meaning of this is in ability to
