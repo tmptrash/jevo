@@ -41,6 +41,12 @@ function recover()
   Manager._data.maxOrg         = data.maxOrg
   Manager._data.minId          = data.minId
   Manager._data.maxId          = data.maxId
+  #
+  # We have to remove all event handlers from observers
+  # after backup loading, because they may be multiplied
+  # on every app running.
+  #
+  Event.clear(Manager._data.world.obs)
 
   true
 end

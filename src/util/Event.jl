@@ -76,9 +76,11 @@ module Event
   #
   function off(obs::Observer, event::ASCIIString, fn::Function)
     if !haskey(obs.events, event) return false end
-    local index::Int = findfirst(obs.events[event], fn)
-    if index > 0 return false  end
+    local index::Int
+
+    if (index = findfirst(obs.events[event], fn)) === 0 return false end
     deleteat!(obs.events[event], index)
+    
     true
   end
   #
