@@ -75,12 +75,12 @@ module Event
   # @return {Bool} off status. false if no such event or handler
   #
   function off(obs::Observer, event::ASCIIString, fn::Function)
-    if !haskey(obs.events, event) return false end
     local index::Int
 
+    if !haskey(obs.events, event) return false end
     if (index = findfirst(obs.events[event], fn)) === 0 return false end
     deleteat!(obs.events[event], index)
-    
+
     true
   end
   #
