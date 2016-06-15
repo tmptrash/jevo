@@ -81,7 +81,7 @@ module Connection
       serialize(sock, Command(fn, [i for i in args]))
     catch e
       Helper.warn("Connection.request(): $e")
-      showerror(STDOUT, e, catch_backtrace())
+      #showerror(STDOUT, e, catch_backtrace())
       close(sock)
       return false
     end
@@ -107,7 +107,7 @@ module Connection
       _fastWrite(sock, dataIndex | REQUEST_BIT, args)
     catch e
       Helper.warn("Connection.fastRequest(): $e")
-      showerror(STDOUT, e, catch_backtrace())
+      #showerror(STDOUT, e, catch_backtrace())
       close(sock)
       return false
     end

@@ -128,7 +128,7 @@ module Server
         return con
       catch e
         Helper.warn("Server.create(): $e")
-        showerror(STDOUT, e, catch_backtrace())
+        #showerror(STDOUT, e, catch_backtrace())
       end
     end
 
@@ -167,12 +167,9 @@ module Server
           #
           # Possibly Server.stop() was called.
           #
-          if Helper.isopen(con.server) === false
-            for s::Base.TCPSocket in con.socks close(s) end
-            break
-          end
+          if !isOk(con) _close(con); break end
           Helper.warn("Server.run(): $e")
-          showerror(STDOUT, e, catch_backtrace())
+          #showerror(STDOUT, e, catch_backtrace())
         end
         local sock::Base.TCPSocket = con.socks[length(con.socks)]
         push!(con.tasks, @async while Helper.isopen(sock)
@@ -226,13 +223,21 @@ module Server
   #
   function stop(con::Server.ServerConnection)
     try
-      for sock::Base.TCPSocket in con.socks close(sock) end
-      close(con.server)
+      _close(con)
       Helper.info(string("Server has stopped: ", con.host, ":", con.port))
     catch e
       Helper.warn("Server.stop(): $e")
-      showerror(STDOUT, e, catch_backtrace())
+      #showerror(STDOUT, e, catch_backtrace())
     end
+  end
+
+  #
+  # Closes all available clients connections and server's one
+  # @param con Server object returned by create() method.
+  #
+  function _close(con::Server.ServerConnection)
+    for sock::Base.TCPSocket in con.socks close(sock) end
+    close(con.server)
   end
   #
   # This method should be called in main server's loop or outside
@@ -269,7 +274,7 @@ module Server
       close(sock)
     elseif Helper.isopen(sock)
       Helper.warn("Server._onAnswerException(): $e")
-      showerror(STDOUT, e, catch_backtrace())
+      #showerror(STDOUT, e, catch_backtrace())
     end
 
     true
