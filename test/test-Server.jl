@@ -48,9 +48,13 @@ module TestServer
 
     @fact answer.fn      --> 1
     @fact answer.args[1] --> msg
-
+    println("1")
+    Client.stop(con3)
+    println("2")
     Server.stop(con2)
+    println("3")
     Server.stop(con1)
+    println("4")
   end
   facts("Tests stopping the server and create again") do
     con = Server.create(IP, PORT)

@@ -143,6 +143,7 @@ module Client
   function stop(con::Client.ClientConnection)
     try
       close(con.sock)
+      yield()
     catch e
       Helper.warn("Client.stop(): $e")
       showerror(STDOUT, e, catch_backtrace())

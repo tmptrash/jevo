@@ -224,6 +224,7 @@ module Server
   function stop(con::Server.ServerConnection)
     try
       _close(con)
+      yield()
       Helper.info(string("Server has stopped: ", con.host, ":", con.port))
     catch e
       Helper.warn("Server.stop(): $e")
@@ -236,8 +237,14 @@ module Server
   # @param con Server object returned by create() method.
   #
   function _close(con::Server.ServerConnection)
-    for sock::Base.TCPSocket in con.socks close(sock) end
+    println("before socks", con.socks)
+    for i::Int = 1:length(con.socks)
+      println("closing socket")
+      close(socks[i])
+    end
+    println("before server")
     close(con.server)
+    println("after server")
   end
   #
   # This method should be called in main server's loop or outside
