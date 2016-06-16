@@ -48,13 +48,9 @@ module TestServer
 
     @fact answer.fn      --> 1
     @fact answer.args[1] --> msg
-    println("1")
     Client.stop(con3)
-    println("2")
     Server.stop(con2)
-    println("3")
     Server.stop(con1)
-    println("4")
   end
   facts("Tests stopping the server and create again") do
     con = Server.create(IP, PORT)
@@ -83,7 +79,7 @@ module TestServer
     Server.stop(scon)
   end
   facts("Tests server receiving commands from two clients") do
-    local answer::Array{Command,1} = Command[]
+    local answer::Array{Command, 1} = Command[]
     local scon::ServerConnection = Server.create(IP, PORT)
     local ccon1::ClientConnection = Client.create(IP, PORT)
     local ccon2::ClientConnection = Client.create(IP, PORT)

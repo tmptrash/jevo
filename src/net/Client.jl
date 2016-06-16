@@ -95,7 +95,6 @@ module Client
         @async while (fast ? fastAnswer(sock, obs, _onAnswerException) : answer(sock, obs, _onAnswerException)) end
       catch e
         Helper.warn("Client.create(): $e")
-        showerror(STDOUT, e, catch_backtrace())
         if Helper.isopen(sock) close(sock) end
       end
       yield()
@@ -143,10 +142,10 @@ module Client
   function stop(con::Client.ClientConnection)
     try
       close(con.sock)
+      Helper.info("Client has stopped")
       yield()
     catch e
       Helper.warn("Client.stop(): $e")
-      showerror(STDOUT, e, catch_backtrace())
     end
   end
   #
@@ -159,10 +158,17 @@ module Client
     # All other exceptions should be shown in terminal.
     #
     Helper.warn("Client has disconnected: $e")
-    showerror(STDOUT, e, catch_backtrace())
     if Helper.isopen(sock)
       close(sock)
     end
+
+    #
+    # This error means that client has disconnected
+    #
+    if !isa(e, EOFError)
+      Helper.warn(string("Server._onAnswerException(): ", e))
+    end
+    if Helper.isopen(sock) close(sock) end
 
     false
   end

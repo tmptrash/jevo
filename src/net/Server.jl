@@ -128,7 +128,6 @@ module Server
         return con
       catch e
         Helper.warn("Server.create(): $e")
-        #showerror(STDOUT, e, catch_backtrace())
       end
     end
 
@@ -169,7 +168,6 @@ module Server
           #
           if !isOk(con) _close(con); break end
           Helper.warn("Server.run(): $e")
-          #showerror(STDOUT, e, catch_backtrace())
         end
         local sock::Base.TCPSocket = con.socks[length(con.socks)]
         push!(con.tasks, @async while Helper.isopen(sock)
@@ -228,7 +226,6 @@ module Server
       Helper.info(string("Server has stopped: ", con.host, ":", con.port))
     catch e
       Helper.warn("Server.stop(): $e")
-      #showerror(STDOUT, e, catch_backtrace())
     end
   end
 
@@ -237,14 +234,8 @@ module Server
   # @param con Server object returned by create() method.
   #
   function _close(con::Server.ServerConnection)
-    println("before socks", con.socks)
-    for i::Int = 1:length(con.socks)
-      println("closing socket")
-      close(socks[i])
-    end
-    println("before server")
+    for i::Int = 1:length(con.socks) close(con.socks[i]) end
     close(con.server)
-    println("after server")
   end
   #
   # This method should be called in main server's loop or outside
@@ -268,21 +259,20 @@ module Server
   #
   # Is called when answer() or fastAnswer() catch network
   # related exception
-  # @param sock Socket we are working with
+  # @param sock Client's socket we are working with
   # @param e Exception object
   # @return true Always true
   #
   function _onAnswerException(sock::Base.TCPSocket, e::Exception)
     #
-    # This yield() updates sockets states
+    # This error means that client has disconnected
     #
-    yield()
     if isa(e, EOFError)
-      close(sock)
-    elseif Helper.isopen(sock)
-      Helper.warn("Server._onAnswerException(): $e")
-      #showerror(STDOUT, e, catch_backtrace())
+      Helper.info("Client has disconnected")
+    else
+      Helper.warn(string("Server._onAnswerException(): ", e))
     end
+    if Helper.isopen(sock) close(sock) end
 
     true
   end
