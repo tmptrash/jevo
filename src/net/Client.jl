@@ -100,7 +100,7 @@ module Client
       yield()
     end
 
-    Helper.isopen(sock) ? Client.ClientConnection(sock, obs) : Client.ClientConnection(Base.TCPSocket(), obs)
+    Client.ClientConnection(sock, obs)
   end
   #
   # Makes request to server. This method is not blocking. It returns
