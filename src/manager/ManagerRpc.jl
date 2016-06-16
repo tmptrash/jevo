@@ -370,8 +370,8 @@ function _createClient(side::ASCIIString)
     con = Client.create(serverIp, serverPort)
   end
   if Client.isOk(con)
-    Event.on(con.observer, Client.EVENT_AFTER_REQUEST, (ans::Connection.Answer)->_onAfterResponse(side, ans))
-    Event.on(con.observer, Client.EVENT_BEFORE_RESPONSE, (data::Connection.Command, ans::Connection.Answer)->_onBeforeResponse(side, data, ans))
+    Event.on(con.observer, Connection.EVENT_AFTER_REQUEST, (ans::Connection.Answer)->_onAfterResponse(side, ans))
+    Event.on(con.observer, Connection.EVENT_BEFORE_RESPONSE, (data::Connection.Command, ans::Connection.Answer)->_onBeforeResponse(side, data, ans))
   end
   con
 end
@@ -496,7 +496,7 @@ function _createServer(fast::Bool = false)
     _getPort(fast ? Manager.ARG_FAST_SERVER_PORT : Manager.ARG_SERVER_PORT, fast ? :CONNECTION_FAST_SERVER_PORT : :CONNECTION_SERVER_PORT),
     fast
   )
-  Event.on(con.observer, Server.EVENT_BEFORE_RESPONSE, fast ? _onFastStreaming : _onClientCommand)
+  Event.on(con.observer, Connection.EVENT_BEFORE_RESPONSE, fast ? _onFastStreaming : _onClientCommand)
 
   con
 end

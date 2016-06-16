@@ -36,7 +36,7 @@ module TestServer
     con1 = Server.create(IP, PORT)
     con2 = Server.create(IP, PORT)
     con3 = Client.create(IP, PORT)
-    Event.on(con1.observer, Server.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
+    Event.on(con1.observer, Connection.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
 
     @fact Server.isOk(con1) --> true
     @fact Server.isOk(con2) --> false
@@ -68,7 +68,7 @@ module TestServer
     local answer::Command        = Command(0, Array{Any,1}())
     local scon::ServerConnection = Server.create(IP, PORT)
     local ccon::ClientConnection = Client.create(IP, PORT)
-    Event.on(scon.observer, Server.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
+    Event.on(scon.observer, Connection.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
     Server.run(scon)
     Client.request(ccon, 1, 10) # function - 1, parameter - 10
     wait(()->answer.fn !== 0)
@@ -84,7 +84,7 @@ module TestServer
     local ccon1::ClientConnection = Client.create(IP, PORT)
     local ccon2::ClientConnection = Client.create(IP, PORT)
 
-    Event.on(scon.observer, Server.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->push!(answer, Command(cmd.fn, deepcopy(cmd.args))))
+    Event.on(scon.observer, Connection.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->push!(answer, Command(cmd.fn, deepcopy(cmd.args))))
     Server.run(scon)
     Client.request(ccon1, 1, 10) # function - 1, parameter - 10
     Client.request(ccon2, 2, 20) # function - 2, parameter - 20
@@ -108,7 +108,7 @@ module TestServer
     local scon::ServerConnection = Server.create(IP, PORT)
     local ccon::ClientConnection = Client.create(IP, PORT)
 
-    Event.on(scon.observer, Server.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
+    Event.on(scon.observer, Connection.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
     Server.run(scon)
     Client.request(ccon, 1, 10) # function - 1, parameter - 10
     Server.stop(scon)
@@ -125,7 +125,7 @@ module TestServer
     local scon::ServerConnection = Server.create(IP, PORT)
     local ccon::ClientConnection = Client.create(IP, PORT)
 
-    Event.on(scon.observer, Server.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
+    Event.on(scon.observer, Connection.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
     Server.run(scon)
     Client.request(ccon, 1, 10)
     Client.stop(ccon)
@@ -145,7 +145,7 @@ module TestServer
     local ccon::ClientConnection = Client.create(IP, PORT)
     local data::Array{Int, 1}    = zeros(Int, 1000000)
 
-    Event.on(scon.observer, Server.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
+    Event.on(scon.observer, Connection.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->answer = Command(cmd.fn, deepcopy(cmd.args)))
     Server.run(scon)
     Client.request(ccon, 1, data)
     wait(()->answer.fn !== 0)
@@ -166,7 +166,7 @@ module TestServer
     local ccon::ClientConnection = Client.create(IP, PORT)
     local result::Int            = 0
 
-    Event.on(scon.observer, Server.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->result += cmd.args[1])
+    Event.on(scon.observer, Connection.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->result += cmd.args[1])
     Server.run(scon)
     Client.request(ccon, 1, 1)
     wait(()->result !== 0)
@@ -192,7 +192,7 @@ module TestServer
     local ccon5::ClientConnection = Client.create(IP, PORT)
     local result::Int             = 0
 
-    Event.on(scon.observer, Server.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->result += cmd.args[1])
+    Event.on(scon.observer, Connection.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->result += cmd.args[1])
     Server.run(scon)
     Client.request(ccon1, 1, 1)
     wait(()->result > 0)
@@ -230,7 +230,7 @@ module TestServer
     scon = Server.create(IP, PORT)
     ccon = Client.create(IP, PORT)
 
-    Event.on(scon.observer, Server.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->result = cmd.args[1])
+    Event.on(scon.observer, Connection.EVENT_BEFORE_RESPONSE, (sock, cmd, ans)->result = cmd.args[1])
     Server.run(scon)
     Client.stop(ccon)
     res = Client.request(ccon, 1, 10)

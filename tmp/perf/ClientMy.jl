@@ -22,4 +22,4 @@ function resp(sock::Base.TCPSocket, data::Connection.Command, ans::Connection.An
   i::Int += 1
 end
 
-Event.on(con.observer, Client.EVENT_BEFORE_RESPONSE, resp)
+Event.on(con.observer, Connection.EVENT_BEFORE_RESPONSE, resp)

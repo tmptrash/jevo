@@ -38,7 +38,7 @@
 #     #
 #     # Before running we have to bind command event listeners
 #     #
-#     Event.on(connection.observer, Server.EVENT_BEFORE_RESPONSE, onCommand)
+#     Event.on(connection.observer, Connection.EVENT_BEFORE_RESPONSE, onCommand)
 #     #
 #     # This is how our server run itself
 #     #
