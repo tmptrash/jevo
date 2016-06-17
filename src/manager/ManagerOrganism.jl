@@ -79,12 +79,6 @@ function _updateOrganisms(counter::Int)
       showerror(STDOUT, e, catch_backtrace())
     end
     #
-    # This call switches between all non blocking asynchronous
-    # functions (see @async macro). For example, it handles all
-    # input connections for current server and so on...
-    #
-    yield()
-    #
     # We have to wait while all clients are ready for streaming. This
     # is because the error in serializer. See issue for details:
     # https://github.com/JuliaLang/julia/issues/16746. See Manager

@@ -322,6 +322,10 @@ function _onWorldDot(pos::Helper.Point, color::UInt32)
     end
   end
   #
+  # This is how we push all active messages to the network
+  #
+  yield()
+  #
   # All "fast" clients were disconnected
   #
   if off Event.off(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot) end
