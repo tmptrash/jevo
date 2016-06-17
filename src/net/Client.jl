@@ -154,15 +154,6 @@ module Client
   #
   function _onAnswerException(sock::Base.TCPSocket, e::Exception)
     #
-    # This exception means, that client has disconnected.
-    # All other exceptions should be shown in terminal.
-    #
-    Helper.warn("Client has disconnected: $e")
-    if Helper.isopen(sock)
-      close(sock)
-    end
-
-    #
     # This error means that client has disconnected
     #
     if !isa(e, EOFError)

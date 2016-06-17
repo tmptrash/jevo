@@ -76,12 +76,14 @@ module World
   # @param plane World's plane
   # @param pos Position of the energy point
   # @param energy Amount of energy to add
-  # @return {nothing|UInt32}
+  # @return {Bool} It's possible, that energy position is not empty.
+  # false in this case. true - if dot was set.
   #
   function setEnergy(plane::Plane, pos::Helper.Point, energy::UInt32)
-    if pos.x < 1 || pos.x > plane.width || pos.y < 1 || pos.y > plane.height return nothing end
+    if pos.x < 1 || pos.x > plane.width || pos.y < 1 || pos.y > plane.height return false end
     plane.data[pos.y, pos.x] = energy
     Event.fire(plane.obs, EVENT_DOT, pos, energy)
+    true
   end
   #
   # Returns amount of energy in a point with

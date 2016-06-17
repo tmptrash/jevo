@@ -11,17 +11,18 @@ module TestWorld
     @fact World.getEnergy(plane, Helper.Point(1,1)) --> UInt32(0)
     World.destroy(plane)
   end
+  # TODO: add test of setting energy into existing dot
   facts("Tests energy reset") do
     plane = World.create(10, 10)
-    @fact World.setEnergy(plane, Helper.Point(5, 3), UInt32(12))  --> UInt32(12)
-    @fact World.setEnergy(plane, Helper.Point(5, 3), UInt32(123)) --> UInt32(123)
+    @fact World.setEnergy(plane, Helper.Point(5, 3), UInt32(12))  --> true
+    @fact World.setEnergy(plane, Helper.Point(5, 3), UInt32(123)) --> true
     @fact World.getEnergy(plane, Helper.Point(5, 3)) --> UInt32(123)
     World.destroy(plane)
   end
   facts("Tests energy set to zero") do
     plane = World.create(10, 10)
-    @fact World.setEnergy(plane, Helper.Point(5, 3), UInt32(12)) --> UInt32(12)
-    @fact World.setEnergy(plane, Helper.Point(5, 3), UInt32(0)) --> UInt32(0)
+    @fact World.setEnergy(plane, Helper.Point(5, 3), UInt32(12)) --> true
+    @fact World.setEnergy(plane, Helper.Point(5, 3), UInt32(0)) --> true
     @fact World.getEnergy(plane, Helper.Point(5, 3)) --> UInt32(0)
     World.destroy(plane)
   end
