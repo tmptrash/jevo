@@ -296,9 +296,9 @@ end
 #
 function _onFastStreaming(sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer)
   Manager._cons.streamInit = false
-  Event.off(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
-  if !Event.has(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
-    Event.on(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot)
+  Event.off(Manager._data.world.obs, World.EVENT_DOT, _onDot)
+  if !Event.has(Manager._data.world.obs, World.EVENT_DOT, _onDot)
+    Event.on(Manager._data.world.obs, World.EVENT_DOT, _onDot)
   end
 end
 #
@@ -306,8 +306,13 @@ end
 # about these changes.
 # @param pos Dot coordinates
 # @param color Dot color
-#
-function _onWorldDot(pos::Helper.Point, color::UInt32)
+# TODO: remove this code
+type Rps
+  ts::Float64
+  req::Int
+end
+_rps = Rps(0.0, 0)
+function _onDot(pos::Helper.Point, color::UInt32)
   local socks::Array{Base.TCPSocket, 1} = Manager._cons.fastServer.socks
   local ips::UInt16 = UInt16(Config.val(:WORLD_IPS))
   local x::UInt16 = UInt16(pos.x)
@@ -319,6 +324,14 @@ function _onWorldDot(pos::Helper.Point, color::UInt32)
     if Helper.isopen(socks[i])
       off = false
       Server.request(socks[i], dataIndex, x, y, color, ips)
+
+      if time() - _rps.ts > 1.0
+        _rps.ts = time()
+        print("rps: ", _rps.req)
+        _rps.req = 0
+      end
+      _rps.req += 1
+
     end
   end
   #
@@ -328,7 +341,7 @@ function _onWorldDot(pos::Helper.Point, color::UInt32)
   #
   # All "fast" clients were disconnected
   #
-  if off Event.off(Manager._data.world.obs, World.EVENT_DOT, _onWorldDot) end
+  if off Event.off(Manager._data.world.obs, World.EVENT_DOT, _onDot) end
 end
 #
 # Assembles RpcApi.SimpleOrganism type from wider Creature.Organism

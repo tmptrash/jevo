@@ -1,6 +1,6 @@
 #
 # Calculates requests per second from client to server without response
-# Results: rps: 4553.17424843039, time: 219.6269998550415
+# Results: rps: 43796.25990550989, time: 22.83299994468689
 #
 include("../../src/ImportFolders.jl")
 
@@ -10,7 +10,7 @@ import Connection
 import Event
 
 function onBeforeResponse(sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer)
-  for i=1:1000000 Server.request(sock, UInt8(1), UInt64(1)) end
+  for i=1:1000000 Server.request(sock, UInt8(7), UInt16(123), UInt16(342), UInt32(123456), UInt16(432)) end
 end
 
 con = Server.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT), true)

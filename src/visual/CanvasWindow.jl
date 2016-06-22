@@ -3,7 +3,7 @@
 # uses Tk and Cairo libraries for that. Has an ability to draw a color pixels
 # on a canvas. Uses RGB color format for drawing. It implements lazy update
 # logic. It means, that canvas will be updated only after calling update()
-# method. So, you may draw many dots, but user will not see them. Only after 
+# method. So, you may draw many dots, but user will not see them. Only after
 # calling update() all dots will appear.
 #
 # Issues:
@@ -49,7 +49,7 @@ module CanvasWindow
     scale::Int
   end
   #
-  # Creates window and shows it on the screen. Returns window related 
+  # Creates window and shows it on the screen. Returns window related
   # data type, which is used in all public methods of current module.
   # Sets default background color according to global configuration.
   # @param width Window width in pixels
@@ -64,7 +64,7 @@ module CanvasWindow
     Tk.pack(c, expand=true, fill="both")
     local ctx::Cairo.CairoContext = Graphics.getgc(c)
     local rgb::Colors.RGB = convert(Colors.RGB, Colors.RGB24(UInt32(0)))
-    
+
     Tk.set_antialias(ctx, 1)
     Tk.set_line_width(ctx, 1)
     Tk.set_source_rgb(ctx, rgb.r, rgb.g, rgb.b)

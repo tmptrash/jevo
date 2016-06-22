@@ -2,6 +2,7 @@ server to client requests without response tests:
 
 write(s, UInt8(rand(1:100))                              rps: 171341, time:  58, bytes: 1
 write(s, UInt8(rand(1:100));write(s, UInt8(rand(1:100))  rps:  89196, time: 112, bytes: 2
+write(s, UInt8, UInt16, UInt16, UInt32, UInt16)          rps:  43796, time:  22, bytes: 11
 serialize(s, rand(1:100))                                rps:  29303, time:  34, bytes: 8
 write(s, Int64(1))                                       rps:  23255, time:  43, bytes: 8
 write(s, Int8(1)),... write(s, Int8(8))                  rps:  21135, time:  47, bytes: 8
@@ -9,4 +10,4 @@ serialize(s, T(rand(1:100)))                             rps:  13160, time:  75,
 serialize(s, T(rand(1:100), rand(1:100), UInt32(1234)))  rps:   8688, time: 115, bytes: > 20
 write(s, UInt8));write(s, Int64(1))                      rps:   6008, time: 166, bytes: 9
 write(s, header);write(s, UInt64(1))                     rps:   4858, time: 205, bytes: 9
-serialize(s, Connection.Command(1, Int64(1)))            rps:   4553, time: 219, bytes: > 8
+serialize(s, Connection.Command(1, Int64(1)))            rps:   4553, time: 219, bytes: > 8	
