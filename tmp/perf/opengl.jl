@@ -20,6 +20,8 @@ x2 = 2.0
 y1 = -2.0
 y2 = 2.0
 
+setcolorrep(1, 1.0, 1.0, 1.0)
+setcolorrep(2, 0.0, 0.0, 0.0)
 # press ctrl-c to stop the demo
 while true
   # calculating ips (Iterations per second)
@@ -32,12 +34,12 @@ while true
 
   #clearws()
   # this code clears previous rect
-  setlinecolorind(1255)
-  setfillcolorind(1255)
+  setlinecolorind(2)
+  setfillcolorind(2)
   fillrect(x1, x2, y1, y2)
   
-  setlinecolorind(123)
-  setfillcolorind(123)
+  setlinecolorind(1)
+  setfillcolorind(1)
   x1 = Float64(rand(-2:2))
   x2 = Float64(rand(-2:2))
   y1 = Float64(rand(-2:2))
