@@ -1,4 +1,3 @@
-
 #
 # Very similar to RemoteWorld module, but works in Real Time. In
 # this case RT - means Real Time. It listens remote server and
@@ -14,7 +13,7 @@
 # TODO: describe two clients here (slow and pooling)
 module RemoteWorldRT
   import Event
-  import CanvasWindow
+  import OpenGlWindow
   import Connection
   import Client
   import RpcApi
@@ -30,6 +29,11 @@ module RemoteWorldRT
 
   export RemoteDataRT
   #
+  # GR library has only 1256 colors. So we have to strict all 16777216
+  # colors into this amount
+  #
+  const _COLOR_DIVIDER = UInt32(3419560)
+  #
   # Contains data of for remote host, from where we displaying
   # world's region and shows it on a canvas.
   #
@@ -39,7 +43,7 @@ module RemoteWorldRT
     #
     cmdCon::Client.ClientConnection
     poolingCon::Client.ClientConnection
-    win::CanvasWindow.Window
+    win::OpenGlWindow.Window
     #
     # Lazy loading fields
     #
@@ -52,7 +56,7 @@ module RemoteWorldRT
     RemoteDataRT(
       cmdCon    ::Client.ClientConnection,
       poolingCon::Client.ClientConnection,
-      win       ::CanvasWindow.Window
+      win       ::OpenGlWindow.Window
     ) = new(cmdCon, poolingCon, win)
   end
   #
@@ -66,7 +70,7 @@ module RemoteWorldRT
     RemoteDataRT(
       Client.create(host, cmdPort),
       Client.create(host, poolingPort, true),
-      CanvasWindow.create(Config.val(:WORLD_WIDTH), Config.val(:WORLD_HEIGHT))
+      OpenGlWindow.create(Config.val(:WORLD_WIDTH), Config.val(:WORLD_HEIGHT))
     )
   end
   #
@@ -95,14 +99,19 @@ module RemoteWorldRT
     Event.off(rd.cmdCon.observer, Connection.EVENT_AFTER_REQUEST, rd.cmdAfterCb)
     Client.stop(rd.cmdCon)
     Client.stop(rd.poolingCon)
-    CanvasWindow.destroy(rd.win)
+    OpenGlWindow.destroy(rd.win)
   end
   #
   # Handler of remote server pooling request. Request's data contains
   # x::Uint16, y::UInt16, color::UInt32, ips::UInt16
   # @param rd Remote Data object
   # @param data Command related data
-  #
+  # TODO remove this
+  type Rps
+    ts::Float64
+    req::Int
+  end
+  _rps = Rps(0.0, 0)
   function _onDotUpdate(rd::RemoteDataRT, data::Array{Any, 1})
     if time() - rd.ts > 1.0
       rd.ts = time()
@@ -111,9 +120,16 @@ module RemoteWorldRT
     end
     rd.poolingRequests += 1
 
-    CanvasWindow.title(rd.win, string("ips: ", data[4], ", rps: ", rd.oldRequests))
-    CanvasWindow.dot(rd.win, Int(data[1]), Int(data[2]), data[3])
-    CanvasWindow.update(rd.win)
+    if time() - _rps.ts > 1.0
+      _rps.ts = time()
+      print("rps: ", _rps.req)
+      _rps.req = 0
+    end
+    _rps.req += 1
+
+    OpenGlWindow.title(rd.win, string("ips: ", data[4], ", rps: ", rd.oldRequests))
+    OpenGlWindow.dot(rd.win, Int(data[1]), Int(data[2]), UInt32(div(data[3], _COLOR_DIVIDER::UInt32)))
+    OpenGlWindow.update(rd.win)
   end
   #
   # Handler of RpcApi.RPC_SET_WORLD_STREAMING request
@@ -123,13 +139,13 @@ module RemoteWorldRT
     if ans.data === false Helper.error("Only one viewer is supported"); return nothing end
     local region::Array{UInt32, 2} = ans.data.reg
 
-    CanvasWindow.title(rd.win, string("ips: ", ans.data.ips, ", rps: 0"))
+    OpenGlWindow.title(rd.win, string("ips: ", ans.data.ips, ", rps: 0"))
     for x::Int in 1:size(region)[2]
       for y::Int in 1:size(region)[1]
-        CanvasWindow.dot(rd.win, x, y, UInt32(region[y, x]))
+        OpenGlWindow.dot(rd.win, x, y, UInt32(div(region[y, x], _COLOR_DIVIDER::UInt32)))
       end
     end
-    CanvasWindow.update(rd.win)
+    OpenGlWindow.update(rd.win)
     #
     # This command means "turn on server pooling"
     #

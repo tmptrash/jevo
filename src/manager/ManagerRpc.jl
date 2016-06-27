@@ -17,6 +17,7 @@ import FastApi
 import Server
 import Connection
 import ManagerTypes
+import DotType
 
 using Debug
 #
@@ -319,7 +320,15 @@ function _onDot(pos::Helper.Point, color::UInt32)
   local y::UInt16 = UInt16(pos.y)
   local dataIndex::UInt8 = UInt8(FastApi.API_DOT_COLOR_IPS)
   local off::Bool = true
-
+  local pos::Helper.Point = Helper::Point(x, y)
+  local posId::Int = @getPosId(pos)
+  local isOrganism::Bool = haskey(Manager._data.positions, posId)
+  #
+  # This is how we get color index of a dot
+  #
+  if color !== DotType.INDEX_EMPTY
+    color = isOrganism ? Manager._data.positions[posId].color : UInt32(DotType.INDEX_ENERGY)
+  end
   for i::Int = 1:length(socks)
     if Helper.isopen(socks[i])
       off = false

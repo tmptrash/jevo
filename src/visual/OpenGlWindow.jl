@@ -25,6 +25,7 @@ module OpenGlWindow
   import GR
   import Colors
   import Config
+  import DotType
 
   export Window
   export create
@@ -39,7 +40,8 @@ module OpenGlWindow
   #
   type Window
     scale::Int
-    dotBuf::Array{Int, 1}
+    xBuf::Array{Int, 1}
+    yBuf::Array{Int, 1}
     width::Int
     height::Int
     running::Bool
@@ -55,6 +57,8 @@ module OpenGlWindow
   # @return Window object
   #
   function create(width::Int, height::Int, scale::Int = Config.val(:WORLD_SCALE), title::ASCIIString = "")
+    local emptyColor::UInt32 = DotType.INDEX_EMPTY)
+
     GR.setwindow(1, width * scale, 1, height * scale)
     GR.setviewport(0, 1, 0, 1)
     #
@@ -68,8 +72,16 @@ module OpenGlWindow
     #
     GR.setmarkertype(GR.MARKERTYPE_DOT)
     GR.setmarkersize(1)
+    #
+    # Fill background with "empty" color
+    #
+    GR.setcolorrep(Int(emptyColor), 0.0, 0.0, 0.0)
+    GR.setlinecolorind(Int(emptyColor))
+    GR.setfillcolorind(Int(emptyColor))
+    GR.fillrect(1, 1, width * scale, height * scale)
+    GR.updatews()
 
-    Window(scale, Int[0, 0], width, height, true)
+    Window(scale, Int[0], Int[0], width, height, true)
   end
   #
   # Draws one dot (point) on the canvas with specified color
@@ -84,10 +96,12 @@ module OpenGlWindow
       y = win.height * win.scale - (y - 1) * win.scale + 1
       GR.setlinecolorind(Int(color))
       GR.setfillcolorind(Int(color))
-      GR.fillrect(x, y, x + win.scale, y + win.scale)
+      GR.fillrect(x, x + win.scale, y, y + win.scale)
     else
       setmarkercolorind(Int(color))
-      GR.polymarker(win.dotBuf[1] = x, win.dotBuf[2] = y)
+      win.xBuf[1] = x
+      win.yBuf[1] = y
+      GR.polymarker(win.xBuf, win.yBuf)
     end
   end
   #
