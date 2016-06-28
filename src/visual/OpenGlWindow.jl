@@ -20,12 +20,14 @@
 #
 # @author DeadbraiN
 # TODO: check if this mosule platform independent
+# TODO: describe 1256 colors limit
 #
 module OpenGlWindow
   import GR
   import Colors
   import Config
-  import DotType
+  import DotColors
+  import Helper
 
   export Window
   export create
@@ -63,7 +65,7 @@ module OpenGlWindow
   # @return Window object
   #
   function create(width::Int, height::Int, scale::Int = Config.val(:WORLD_SCALE), title::ASCIIString = "")
-    local emptyColor::Int = DotType.INDEX_EMPTY
+    local emptyColor::Int = DotColors.INDEX_EMPTY
     local win::Window = Window(scale, Int[0], Int[0], width, height, true)
 
     GR.setwindow(1, width * scale, 1, height * scale + _FOOTER_HEIGHT)
@@ -77,7 +79,7 @@ module OpenGlWindow
     #
     # Text coloring
     #
-    GR.settextcolorind(DotType.INDEX_TEXT)
+    GR.settextcolorind(DotColors.INDEX_TEXT)
     #
     # Settings for dots drawing with polymarker() function
     #
@@ -86,7 +88,7 @@ module OpenGlWindow
     #
     # Fill background with "empty" color
     #
-    GR.setcolorrep(emptyColor, DotType.COLOR_EMPTY...)
+    GR.setcolorrep(emptyColor, DotColors.COLOR_EMPTY...)
     GR.setlinecolorind(emptyColor)
     GR.setfillcolorind(emptyColor)
     GR.clearws()
@@ -113,6 +115,13 @@ module OpenGlWindow
   # @param color Color of the dot. We use only last three bytes (24bits) of four.
   #
   function dot(win::Window, x::Int, y::Int, color::UInt32)
+    #
+    # We use GR library. It supports only 1256 colors. We have to check it
+    #
+    if color > UInt32(DotColors.MAX_COLOR)
+      Helper.warn(string("Unsupported color index ", color))
+      color = UInt32(DotColors.MAX_COLOR)
+    end
     if win.scale > 1
       x = (x - 1) * win.scale + 1
       y = win.height * win.scale - (y - 1) * win.scale + 1
@@ -127,7 +136,9 @@ module OpenGlWindow
     end
   end
   #
-  # Sets title to specified
+  # Sets title to specified string. We can't change real window's title,
+  # so we have to add a header to the window, where all text messages
+  # will be posted. This header is above the world as a part of a canvas.
   # @param win Window data type
   # @param title String title
   #
@@ -135,8 +146,8 @@ module OpenGlWindow
     local ymax::Float64 = Float64(win.height * win.scale + _FOOTER_HEIGHT)
     local ycoef::Float64 = 1.0 / ymax
 
-    GR.setlinecolorind(DotType.INDEX_EMPTY)
-    GR.setfillcolorind(DotType.INDEX_EMPTY)
+    GR.setlinecolorind(DotColors.INDEX_EMPTY)
+    GR.setfillcolorind(DotColors.INDEX_EMPTY)
     GR.fillrect(1, win.width * win.scale, ymax - _FOOTER_HEIGHT + win.scale, ymax)
     GR.text(0.01, 1.0 - (ycoef * _FOOTER_HEIGHT) + ycoef * 17.0, title)
   end

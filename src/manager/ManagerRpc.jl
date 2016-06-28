@@ -17,7 +17,7 @@ import FastApi
 import Server
 import Connection
 import ManagerTypes
-import DotType
+import DotColors
 
 using Debug
 #
@@ -357,8 +357,8 @@ function _getColorIndex(pos::Helper.Point, color::UInt32)
   local posId::Int = @getPosId(pos)
   local isOrganism::Bool = haskey(Manager._data.positions, posId)
 
-  if color !== UInt32(DotType.INDEX_EMPTY)
-    color = UInt32(isOrganism ? Manager._data.positions[posId].color : DotType.INDEX_ENERGY)
+  if color !== UInt32(DotColors.INDEX_EMPTY)
+    color = UInt32(isOrganism ? Manager._data.positions[posId].color : DotColors.INDEX_ENERGY)
   end
 
   color

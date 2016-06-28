@@ -20,7 +20,7 @@ module RemoteWorldRT
   import FastApi
   import Config
   import Helper
-  import DotType
+  import DotColors
 
   using Debug
 
@@ -78,7 +78,7 @@ module RemoteWorldRT
   # @param rd Remote world data object. See create()
   #
   function start(rd::RemoteDataRT)
-    local color::DotType.Color
+    local color::DotColors.Color
 
     rd.poolingBeforeCb = (sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer) -> _onDot(rd, data)
     rd.cmdAfterCb      = (ans::Connection.Answer) -> _onRegion(rd, ans)
@@ -88,7 +88,7 @@ module RemoteWorldRT
     #
     # This is how we redefine colors for world's objects
     #
-    for color in DotType.COLORS OpenGlWindow.setColor(color.index, color.rgb...) end
+    for color in DotColors.COLORS OpenGlWindow.setColor(color.index, color.rgb...) end
 
     Event.on(rd.poolingCon.observer, Connection.EVENT_BEFORE_RESPONSE, rd.poolingBeforeCb)
     Event.on(rd.cmdCon.observer, Connection.EVENT_AFTER_REQUEST, rd.cmdAfterCb)

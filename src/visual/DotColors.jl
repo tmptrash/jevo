@@ -6,8 +6,9 @@
 #
 # @author DeadbraiN
 #
-module DotType
+module DotColors
   export MAX_COLOR
+  export MAX_ORG_COLOR
 
   export COLOR_ENERGY
   export INDEX_ENERGY
@@ -26,22 +27,23 @@ module DotType
   #
   # Maximum index of color we may use
   #
-  const MAX_COLOR    = 1200
+  const MAX_ORG_COLOR = 1200
+  const MAX_COLOR     = 1256
   #
   # Color and index of energy block
   #
-  const COLOR_ENERGY = Float64[0.0, 1.0, 0.0]
-  const INDEX_ENERGY = 1201
+  const COLOR_ENERGY  = Float64[0.0, 1.0, 0.0]
+  const INDEX_ENERGY  = 1201
   #
   # Text coloring
   #
-  const COLOR_TEXT   = Float64[1.0, 1.0, 1.0]
-  const INDEX_TEXT   = 1202
+  const COLOR_TEXT    = Float64[1.0, 1.0, 1.0]
+  const INDEX_TEXT    = 1202
   #
   # Color and index of empty space
   #
-  const COLOR_EMPTY  = Float64[0.0, 0.0, 0.0]
-  const INDEX_EMPTY  = 0
+  const COLOR_EMPTY   = Float64[0.0, 0.0, 0.0]
+  const INDEX_EMPTY   = 0
   #
   # All available colors from above
   #

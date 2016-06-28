@@ -174,7 +174,7 @@ module Creature
     #
     # @inheritable
     # Color index of organism. Similar colors means relative organisms.
-    # Example: 1, 345, 1200. Should be less then DotType.MAX_COLOR
+    # Example: 1, 345, 1200. Should be less then DotColors.MAX_ORG_COLOR
     #
     color::Int
     #

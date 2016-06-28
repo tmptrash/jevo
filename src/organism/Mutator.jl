@@ -11,7 +11,7 @@ module Mutator
   import Helper
   import Creature
   import Code
-  import DotType
+  import DotColors
 
   export mutate
   #
@@ -83,12 +83,15 @@ module Mutator
     result
   end
   #
-  # Changes organism's color a little bit
+  # Changes organism's color a little bit. We use GR library for
+  # visualizing organisms and it supports only 1256 colors. But
+  # they organizer in a gradient way. So we may just increase
+  # color index to obtain smooth color change on organism descendants.
   # @param org Organism whom color we have to change
   #
   function _changeColor(org::Creature.Organism)
     org.color += 1
-    if org.color > DotType.MAX_COLOR org.color = 1 end
+    if org.color > DotColors.MAX_ORG_COLOR org.color = 1 end
   end
   #
   # Adds one line of code into existing code blocks including all
