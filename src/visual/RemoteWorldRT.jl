@@ -79,7 +79,7 @@ module RemoteWorldRT
   function start(rd::RemoteDataRT)
     local color::DotType.Color
 
-    rd.poolingBeforeCb = (sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer) -> _onDotUpdate(rd, data)
+    rd.poolingBeforeCb = (sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer) -> _onDot(rd, data)
     rd.cmdAfterCb      = (ans::Connection.Answer) -> _onRegion(rd, ans)
     rd.ts              = time()
     rd.poolingRequests = 0
@@ -115,7 +115,7 @@ module RemoteWorldRT
     req::Int
   end
   _rps = Rps(0.0, 0)
-  function _onDotUpdate(rd::RemoteDataRT, data::Array{Any, 1})
+  function _onDot(rd::RemoteDataRT, data::Array{Any, 1})
     if time() - rd.ts > 1.0
       rd.ts = time()
       rd.oldRequests = rd.poolingRequests
