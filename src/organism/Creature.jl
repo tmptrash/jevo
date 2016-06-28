@@ -173,10 +173,10 @@ module Creature
     energy::Int
     #
     # @inheritable
-    # Color of organism. Similar colors means relative organisms.
-    # Example: 0x00RRGGBB - first two digits are skipped.
+    # Color index of organism. Similar colors means relative organisms.
+    # Example: 1, 345, 1200. Should be less then DotType.MAX_COLOR
     #
-    color::UInt32
+    color::Int
     #
     # @inharitable
     # Organism's personal memory. Is used in any possible way.

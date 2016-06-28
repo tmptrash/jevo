@@ -37,6 +37,9 @@ const _SIDE_DOWN  = "DOWN"
 # @param y1 End y. 0 means all height
 #
 function getRegion(x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
+  local data::Array{UInt32, 2}
+  local pos::Helper.Point = Helper.Point(0, 0)
+
   maxWidth  = size(Manager._data.world.data)[2]
   maxHeight = size(Manager._data.world.data)[1]
 
@@ -45,7 +48,16 @@ function getRegion(x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
   if (x  < 1 || x  > maxWidth)  x  = 1 end
   if (y  < 1 || y  > maxHeight) y  = 1 end
 
-  RpcApi.Region(Manager._data.world.data[y:y1, x:x1], Config.val(:WORLD_IPS))
+  data = deepcopy(Manager._data.world.data[y:y1, x:x1])
+  for x in 1:size(data)[2]
+    for y in 1:size(data)[1]
+      pos.x = x
+      pos.y = y
+      data[y, x] = _getColorIndex(pos, data[y, x])
+    end
+  end
+
+  RpcApi.Region(data, Config.val(:WORLD_IPS))
 end
 #
 # @rpc
@@ -320,15 +332,10 @@ function _onDot(pos::Helper.Point, color::UInt32)
   local y::UInt16 = UInt16(pos.y)
   local dataIndex::UInt8 = UInt8(FastApi.API_DOT_COLOR_IPS)
   local off::Bool = true
-  local pos::Helper.Point = Helper::Point(x, y)
-  local posId::Int = @getPosId(pos)
-  local isOrganism::Bool = haskey(Manager._data.positions, posId)
   #
   # This is how we get color index of a dot
   #
-  if color !== DotType.INDEX_EMPTY
-    color = isOrganism ? Manager._data.positions[posId].color : UInt32(DotType.INDEX_ENERGY)
-  end
+  color = _getColorIndex(pos, color)
   for i::Int = 1:length(socks)
     if Helper.isopen(socks[i])
       off = false
@@ -351,6 +358,23 @@ function _onDot(pos::Helper.Point, color::UInt32)
   # All "fast" clients were disconnected
   #
   if off Event.off(Manager._data.world.obs, World.EVENT_DOT, _onDot) end
+end
+#
+# Converts color to it's index. This index is used for Visualizer
+# to draw colored dot
+# @param pos Dot coordinates
+# @param color  Dot color
+# @return {UInt32} Color index
+#
+function _getColorIndex(pos::Helper.Point, color::UInt32)
+  local posId::Int = @getPosId(pos)
+  local isOrganism::Bool = haskey(Manager._data.positions, posId)
+
+  if color !== UInt32(DotType.INDEX_EMPTY)
+    color = UInt32(isOrganism ? Manager._data.positions[posId].color : DotType.INDEX_ENERGY)
+  end
+
+  color
 end
 #
 # Assembles RpcApi.SimpleOrganism type from wider Creature.Organism
@@ -428,6 +452,7 @@ end
 #
 function _onAfterResponse(side::ASCIIString, ans::Connection.Answer)
   local org::Creature.Organism = Manager._cons.frozen[ans.data]
+  local pos::Helper.Point
 
   delete!(Manager._cons.frozen, ans.data)
   if ans.id !== RpcApi.RPC_ORG_STEP_OK

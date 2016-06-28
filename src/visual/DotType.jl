@@ -7,6 +7,8 @@
 # @author DeadbraiN
 #
 module DotType
+  export MAX_COLOR
+
   export COLOR_ENERGY
   export INDEX_ENERGY
   export COLOR_EMPTY
@@ -17,8 +19,12 @@ module DotType
   #
   type Color
     index::Int
-    color::Array{Float64, 1}
+    rgb::Array{Float64, 1}
   end
+  #
+  # Maximum index of color we may use
+  #
+  const MAX_COLOR    = 1200
   #
   # Color and index of energy block
   #

@@ -126,7 +126,7 @@ module Config
     #
     # Begin color of "empty" organism (organism without code).
     #
-    ORGANISM_START_COLOR::UInt32
+    ORGANISM_START_COLOR::Int
     #
     # Maximum amount of arguments in custom functions. Minimum 1.
     #
@@ -373,7 +373,7 @@ module Config
       2000,                      # ORGANISM_REMOVE_AFTER_TIMES
       50,                        # ORGANISM_REMOVE_AMOUNT
       5,                         # ORGANISM_CLONE_AFTER_TIMES
-      UInt32(0xFF0000),          # ORGANISM_START_COLOR
+      1,                         # ORGANISM_START_COLOR
       2,                         # CODE_MAX_FUNC_PARAMS
       200,#1270,                      # WORLD_WIDTH
       150,#650,                       # WORLD_HEIGHT

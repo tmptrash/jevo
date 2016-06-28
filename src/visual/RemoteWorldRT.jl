@@ -20,6 +20,7 @@ module RemoteWorldRT
   import FastApi
   import Config
   import Helper
+  import DotType
 
   using Debug
 
@@ -28,11 +29,6 @@ module RemoteWorldRT
   export stop
 
   export RemoteDataRT
-  #
-  # GR library has only 1256 colors. So we have to strict all 16777216
-  # colors into this amount
-  #
-  const _COLOR_DIVIDER = UInt32(3419560)
   #
   # Contains data of for remote host, from where we displaying
   # world's region and shows it on a canvas.
@@ -81,11 +77,18 @@ module RemoteWorldRT
   # @param rd Remote world data object. See create()
   #
   function start(rd::RemoteDataRT)
+    local color::DotType.Color
+
     rd.poolingBeforeCb = (sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer) -> _onDotUpdate(rd, data)
     rd.cmdAfterCb      = (ans::Connection.Answer) -> _onRegion(rd, ans)
     rd.ts              = time()
     rd.poolingRequests = 0
     rd.oldRequests     = 0
+    #
+    # This is how we redefine colors for world's objects
+    #
+    for color in DotType.COLORS OpenGlWindow.setColor(color.index, color.rgb...) end
+
     Event.on(rd.poolingCon.observer, Connection.EVENT_BEFORE_RESPONSE, rd.poolingBeforeCb)
     Event.on(rd.cmdCon.observer, Connection.EVENT_AFTER_REQUEST, rd.cmdAfterCb)
     Client.request(rd.cmdCon, RpcApi.RPC_SET_WORLD_STREAMING)
@@ -128,7 +131,7 @@ module RemoteWorldRT
     _rps.req += 1
 
     OpenGlWindow.title(rd.win, string("ips: ", data[4], ", rps: ", rd.oldRequests))
-    OpenGlWindow.dot(rd.win, Int(data[1]), Int(data[2]), UInt32(div(data[3], _COLOR_DIVIDER::UInt32)))
+    OpenGlWindow.dot(rd.win, Int(data[1]), Int(data[2]), UInt32(data[3]))
     OpenGlWindow.update(rd.win)
   end
   #
@@ -142,7 +145,7 @@ module RemoteWorldRT
     OpenGlWindow.title(rd.win, string("ips: ", ans.data.ips, ", rps: 0"))
     for x::Int in 1:size(region)[2]
       for y::Int in 1:size(region)[1]
-        OpenGlWindow.dot(rd.win, x, y, UInt32(div(region[y, x], _COLOR_DIVIDER::UInt32)))
+        OpenGlWindow.dot(rd.win, x, y, UInt32(region[y, x]))
       end
     end
     OpenGlWindow.update(rd.win)

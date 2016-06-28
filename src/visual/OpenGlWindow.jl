@@ -29,6 +29,7 @@ module OpenGlWindow
 
   export Window
   export create
+  export setColor
   export dot
   export update
   export title
@@ -57,7 +58,7 @@ module OpenGlWindow
   # @return Window object
   #
   function create(width::Int, height::Int, scale::Int = Config.val(:WORLD_SCALE), title::ASCIIString = "")
-    local emptyColor::UInt32 = DotType.INDEX_EMPTY)
+    local emptyColor::Int = DotType.INDEX_EMPTY
 
     GR.setwindow(1, width * scale, 1, height * scale)
     GR.setviewport(0, 1, 0, 1)
@@ -75,9 +76,9 @@ module OpenGlWindow
     #
     # Fill background with "empty" color
     #
-    GR.setcolorrep(Int(emptyColor), 0.0, 0.0, 0.0)
-    GR.setlinecolorind(Int(emptyColor))
-    GR.setfillcolorind(Int(emptyColor))
+    GR.setcolorrep(emptyColor, DotType.COLOR_EMPTY...)
+    GR.setlinecolorind(emptyColor)
+    GR.setfillcolorind(emptyColor)
     GR.fillrect(1, 1, width * scale, height * scale)
     GR.updatews()
 
@@ -103,6 +104,16 @@ module OpenGlWindow
       win.yBuf[1] = y
       GR.polymarker(win.xBuf, win.yBuf)
     end
+  end
+  #
+  # Redefines color index with RGB components.
+  # @param color Color index we want to change
+  # @param r Red component
+  # @param g Green component
+  # @param b Blue component
+  #
+  function setColor(color::Int, r::Float64, g::Float64, b::Float64)
+    GR.setcolorrep(color, r, g, b)
   end
   #
   # Sets title to specified
