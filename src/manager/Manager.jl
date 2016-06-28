@@ -26,6 +26,7 @@ module Manager
   import Connection
   import CommandLine
   import RpcApi
+  import FastApi
   import Config
   import ManagerTypes
   # TODO: remove this!
@@ -197,10 +198,20 @@ module Manager
   # @return {UInt, Float64} new ips and current UNIX time stamp
   #
   function _updateIps(ips::Int, stamp::Float64)
+    local socks::Array{Base.TCPSocket, 1} = Manager._cons.fastServer.socks
     local ts::Float64 = time() - stamp
+    local dataIndex::UInt8 = UInt8(FastApi.API_UINT64)
+    local localIps::Int
+    local i::Int
 
     if ts >= 5.0
-      Config.val(:WORLD_IPS, trunc(Int, ips / ts))
+      localIps = trunc(Int, ips / ts)
+      Config.val(:WORLD_IPS, localIps)
+      for i = 1:length(socks)
+        if Helper.isopen(socks[i])
+          Server.request(socks[i], dataIndex, localIps)
+        end
+      end
       return 0, time()
     end
 

@@ -319,18 +319,13 @@ end
 # about these changes.
 # @param pos Dot coordinates
 # @param color Dot color
-# TODO: remove this code
-type Rps
-  ts::Float64
-  req::Int
-end
-_rps = Rps(0.0, 0)
+#
 function _onDot(pos::Helper.Point, color::UInt32)
   local socks::Array{Base.TCPSocket, 1} = Manager._cons.fastServer.socks
   local ips::UInt16 = UInt16(Config.val(:WORLD_IPS))
   local x::UInt16 = UInt16(pos.x)
   local y::UInt16 = UInt16(pos.y)
-  local dataIndex::UInt8 = UInt8(FastApi.API_DOT_COLOR_IPS)
+  local dataIndex::UInt8 = UInt8(FastApi.API_DOT_COLOR)
   local off::Bool = true
   #
   # This is how we get color index of a dot
@@ -339,15 +334,7 @@ function _onDot(pos::Helper.Point, color::UInt32)
   for i::Int = 1:length(socks)
     if Helper.isopen(socks[i])
       off = false
-      Server.request(socks[i], dataIndex, x, y, color, ips)
-
-      if time() - _rps.ts > 1.0
-        _rps.ts = time()
-        print("rps: ", _rps.req)
-        _rps.req = 0
-      end
-      _rps.req += 1
-
+      Server.request(socks[i], dataIndex, x, y, color)
     end
   end
   #

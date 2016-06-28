@@ -48,6 +48,7 @@ module RemoteWorldRT
     ts::Float64
     poolingRequests::Int
     oldRequests::Int
+    ips::Int
 
     RemoteDataRT(
       cmdCon    ::Client.ClientConnection,
@@ -105,34 +106,30 @@ module RemoteWorldRT
     OpenGlWindow.destroy(rd.win)
   end
   #
-  # Handler of remote server pooling request. Request's data contains
-  # x::Uint16, y::UInt16, color::UInt32, ips::UInt16
+  # Handler of remote server pooling request. It may contain two types
+  # of data:
+  #    x::Uint16, y::UInt16, color::UInt32, ips::UInt16 or
+  #    ips::UInt16
   # @param rd Remote Data object
   # @param data Command related data
-  # TODO remove this
-  type Rps
-    ts::Float64
-    req::Int
-  end
-  _rps = Rps(0.0, 0)
+  #
   function _onDot(rd::RemoteDataRT, data::Array{Any, 1})
     if time() - rd.ts > 1.0
       rd.ts = time()
       rd.oldRequests = rd.poolingRequests
       rd.poolingRequests = 0
-      OpenGlWindow.title(rd.win, string("ips: ", data[4], ", rps: ", rd.oldRequests))
+      OpenGlWindow.title(rd.win, string("ips: ", rd.ips, ", rps: ", rd.oldRequests))
     end
     rd.poolingRequests += 1
-
-    if time() - _rps.ts > 1.0
-      _rps.ts = time()
-      print("rps: ", _rps.req)
-      _rps.req = 0
+    #
+    # if only one item in data array, then it's IPS. if more then it's a dot
+    #
+    if length(data) > 1
+      OpenGlWindow.dot(rd.win, Int(data[1]), Int(data[2]), UInt32(data[3]))
+      OpenGlWindow.update(rd.win)
+    else
+      rd.ips = data[1]
     end
-    _rps.req += 1
-
-    OpenGlWindow.dot(rd.win, Int(data[1]), Int(data[2]), UInt32(data[3]))
-    OpenGlWindow.update(rd.win)
   end
   #
   # Handler of RpcApi.RPC_SET_WORLD_STREAMING request
