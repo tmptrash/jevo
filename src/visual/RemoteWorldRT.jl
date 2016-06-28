@@ -120,6 +120,7 @@ module RemoteWorldRT
       rd.ts = time()
       rd.oldRequests = rd.poolingRequests
       rd.poolingRequests = 0
+      OpenGlWindow.title(rd.win, string("ips: ", data[4], ", rps: ", rd.oldRequests))
     end
     rd.poolingRequests += 1
 
@@ -130,7 +131,6 @@ module RemoteWorldRT
     end
     _rps.req += 1
 
-    OpenGlWindow.title(rd.win, string("ips: ", data[4], ", rps: ", rd.oldRequests))
     OpenGlWindow.dot(rd.win, Int(data[1]), Int(data[2]), UInt32(data[3]))
     OpenGlWindow.update(rd.win)
   end

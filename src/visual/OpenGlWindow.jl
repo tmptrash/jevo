@@ -34,7 +34,12 @@ module OpenGlWindow
   export update
   export title
   export destroy
-
+  #
+  # Height of footer in pixels. Footer is an area for text, because window
+  # title is unaccessible for us :( It should be at the bottom, because it
+  # simplier to draw pixels without adding _FOOTER_HEIGHT all the time.
+  #
+  const _FOOTER_HEIGHT = 50.0
   #
   # Data type, which contains window related data: Window, Canvas, Context,...
   # Is used in all public methods as a canvas for drawing.
@@ -59,15 +64,20 @@ module OpenGlWindow
   #
   function create(width::Int, height::Int, scale::Int = Config.val(:WORLD_SCALE), title::ASCIIString = "")
     local emptyColor::Int = DotType.INDEX_EMPTY
+    local win::Window = Window(scale, Int[0], Int[0], width, height, true)
 
-    GR.setwindow(1, width * scale, 1, height * scale)
-    GR.setviewport(0, 1, 0, 1)
+    GR.setwindow(1, width * scale, 1, height * scale + _FOOTER_HEIGHT)
+    GR.setviewport(0.0, 1.0, 0.0, 1.0)
     #
     # Settings for fillrect() function
     #
     GR.setfillintstyle(GR.INTSTYLE_SOLID)
     GR.setlinetype(GR.LINETYPE_SOLID)
     GR.setlinewidth(1)
+    #
+    # Text coloring
+    #
+    GR.settextcolorind(DotType.INDEX_TEXT)
     #
     # Settings for dots drawing with polymarker() function
     #
@@ -79,10 +89,21 @@ module OpenGlWindow
     GR.setcolorrep(emptyColor, DotType.COLOR_EMPTY...)
     GR.setlinecolorind(emptyColor)
     GR.setfillcolorind(emptyColor)
-    GR.fillrect(1, 1, width * scale, height * scale)
-    GR.updatews()
+    GR.clearws()
+    GR.fillrect(1, 1, width * scale, height * scale + _FOOTER_HEIGHT)
+    update(win)
 
-    Window(scale, Int[0], Int[0], width, height, true)
+    win
+  end
+  #
+  # Redefines color index with RGB components.
+  # @param color Color index we want to change
+  # @param r Red component
+  # @param g Green component
+  # @param b Blue component
+  #
+  function setColor(color::Int, r::Float64, g::Float64, b::Float64)
+    GR.setcolorrep(color, r, g, b)
   end
   #
   # Draws one dot (point) on the canvas with specified color
@@ -106,21 +127,19 @@ module OpenGlWindow
     end
   end
   #
-  # Redefines color index with RGB components.
-  # @param color Color index we want to change
-  # @param r Red component
-  # @param g Green component
-  # @param b Blue component
-  #
-  function setColor(color::Int, r::Float64, g::Float64, b::Float64)
-    GR.setcolorrep(color, r, g, b)
-  end
-  #
   # Sets title to specified
   # @param win Window data type
   # @param title String title
-  # TODO:
-  function title(win::Window, title::ASCIIString) end
+  #
+  function title(win::Window, title::ASCIIString)
+    local ymax::Float64 = Float64(win.height * win.scale + _FOOTER_HEIGHT)
+    local ycoef::Float64 = 1.0 / ymax
+
+    GR.setlinecolorind(DotType.INDEX_EMPTY)
+    GR.setfillcolorind(DotType.INDEX_EMPTY)
+    GR.fillrect(1, win.width * win.scale, ymax - _FOOTER_HEIGHT + win.scale, ymax)
+    GR.text(0.01, 1.0 - (ycoef * _FOOTER_HEIGHT) + ycoef * 17.0, title)
+  end
   #
   # Updates the canvas. It's not nessesary to update it after
   # every drawing. It's better to update it after several dots

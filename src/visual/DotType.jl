@@ -11,6 +11,8 @@ module DotType
 
   export COLOR_ENERGY
   export INDEX_ENERGY
+  export COLOR_TEXT
+  export INDEX_TEXT
   export COLOR_EMPTY
   export INDEX_EMPTY
   export COLORS
@@ -31,6 +33,11 @@ module DotType
   const COLOR_ENERGY = Float64[0.0, 1.0, 0.0]
   const INDEX_ENERGY = 1201
   #
+  # Text coloring
+  #
+  const COLOR_TEXT   = Float64[1.0, 1.0, 1.0]
+  const INDEX_TEXT   = 1202
+  #
   # Color and index of empty space
   #
   const COLOR_EMPTY  = Float64[0.0, 0.0, 0.0]
@@ -40,6 +47,7 @@ module DotType
   #
   const COLORS = Color[
     Color(INDEX_ENERGY, COLOR_ENERGY),
-    Color(INDEX_EMPTY,  COLOR_EMPTY)
+    Color(INDEX_EMPTY,  COLOR_EMPTY),
+    Color(INDEX_TEXT,   COLOR_TEXT)
   ]
 end
