@@ -1,0 +1,9 @@
+every period of time it's good to have these items for later analize:
+
+- 3 backup files
+- code of 5 organisms
+- statistics data
+- average ips
+- average amount of organisms
+- screenshot
+- ~30sec video
