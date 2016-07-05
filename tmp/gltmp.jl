@@ -5,6 +5,7 @@ h = 600
 
 # size of the window (34.54x19.43cm)
 mwidth, mheight, width, height = GR.inqdspsize()
+println(GR.inqdspsize())
 if w >= h
 	ratio = Float64(h) / w
 	msize = mwidth * w / width
