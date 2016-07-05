@@ -1,7 +1,7 @@
 using GR
 # min supportted resolution is: 351x350 (width should be greated then height)
-w = 800
-h = 600
+w = 1280
+h = 720
 
 # size of the window (34.54x19.43cm)
 mwidth, mheight, width, height = GR.inqdspsize()
