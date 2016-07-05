@@ -52,6 +52,7 @@ module OpenGlWindow
     yBuf::Array{Int, 1}
     width::Int
     height::Int
+    ratio::Float64
     running::Bool
   end
   #
@@ -66,10 +67,13 @@ module OpenGlWindow
   #
   function create(width::Int, height::Int, scale::Int = Config.val(:WORLD_SCALE), title::ASCIIString = "")
     local emptyColor::Int = DotColors.INDEX_EMPTY
-    local win::Window = Window(scale, Int[0], Int[0], width, height, true)
+    local win::Window = Window(scale, Int[0], Int[0], width, height, 1.0, true)
+    local wndWidth::Int = width * scale
+    local wndHeight::Int = height * scale + _FOOTER_HEIGHT
+    local ratio::Float64 = _createWindow(win, wndWidth, wndHeight)
 
-    GR.setwindow(1, width * scale, 1, height * scale + _FOOTER_HEIGHT)
-    GR.setviewport(0.0, 1.0, 0.0, 1.0)
+    GR.setwindow(1, wndWidth + 9.5, -12.7, wndHeight)
+    GR.setviewport(0, 1, 0, ratio)
     #
     # Settings for fillrect() function
     #
@@ -92,7 +96,7 @@ module OpenGlWindow
     GR.setlinecolorind(emptyColor)
     GR.setfillcolorind(emptyColor)
     GR.clearws()
-    GR.fillrect(1, 1, width * scale, height * scale + _FOOTER_HEIGHT)
+    GR.fillrect(1, 1, wndWidth, wndHeight)
     update(win)
 
     win
@@ -144,12 +148,13 @@ module OpenGlWindow
   #
   function title(win::Window, title::ASCIIString)
     local ymax::Float64 = Float64(win.height * win.scale + _FOOTER_HEIGHT)
-    local ycoef::Float64 = 1.0 / ymax
+    local ycoef::Float64 = win.ratio / ymax
 
     GR.setlinecolorind(DotColors.INDEX_EMPTY)
     GR.setfillcolorind(DotColors.INDEX_EMPTY)
     GR.fillrect(1, win.width * win.scale, ymax - _FOOTER_HEIGHT + win.scale, ymax)
-    GR.text(0.01, 1.0 - (ycoef * _FOOTER_HEIGHT) + ycoef * 17.0, title)
+    GR.text(0.01, win.ratio - (ycoef * _FOOTER_HEIGHT) + ycoef * 15.0, title)
+    #GR.text(0.01, 0.1, title)
   end
   #
   # Updates the canvas. It's not nessesary to update it after
@@ -164,5 +169,32 @@ module OpenGlWindow
   #
   function destroy(win::Window)
     win.running = false
+  end
+  #
+  # Creates window with specified width and height in pixels.
+  # @param wnd Window data object
+  # @param width Window width
+  # @param height Window height
+  # @return {Float64} ratio
+  #
+  function _createWindow(win::Window, width::Int, height::Int)
+    local mWidth::Float64, mHeight::Float64, scrWidth::Int32, scrHeight::Int32
+    local ratio::Float64
+    local mSize::Float64
+
+    mWidth, mHeight, scrWidth, scrHeight = GR.inqdspsize()
+    if width >= height
+    	ratio = float(height) / width
+    	mSize = mWidth * width / scrWidth
+    	GR.setwsviewport(0, mSize, 0, mSize * ratio)
+    	GR.setwswindow(0, 1, 0, ratio)
+    else
+    	ratio = float(w) / height
+    	mSize = mHeight * height / scrHeight
+    	GR.setwsviewport(0, mSize * ratio, 0, mSize)
+    	GR.setwswindow(0, ratio, 0, 1)
+    end
+
+    (win.ratio = ratio)
   end
 end
