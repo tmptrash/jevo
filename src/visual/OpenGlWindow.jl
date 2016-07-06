@@ -153,7 +153,7 @@ module OpenGlWindow
     GR.setlinecolorind(DotColors.INDEX_EMPTY)
     GR.setfillcolorind(DotColors.INDEX_EMPTY)
     GR.fillrect(1, win.width * win.scale, ymax - _FOOTER_HEIGHT + win.scale, ymax)
-    GR.text(0.01, win.ratio - (ycoef * _FOOTER_HEIGHT) + ycoef * 14.0, title)
+    GR.text(0.01, win.ratio - (ycoef * _FOOTER_HEIGHT) + ycoef * 15.0, title)
     #GR.text(0.01, 0.1, title)
   end
   #

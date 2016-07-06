@@ -8,6 +8,7 @@
 #
 include("ImportFolders.jl")
 import Helper
+import Backup
 #
 # This function starts the satellite and begin watching on
 # Manager application (process).
@@ -17,6 +18,9 @@ function main()
     Helper.warn("Application file required. e.g.: julia AppSatellite.jl App.jl")
     return false
   end
+
+  local lastFile::ASCIIString = Backup.lastFile()
+  local files::Array{ASCIIString, 1}
   #
   # In case of error or if non zero exit code will be returned
   # an exeption will be thrown.
@@ -28,6 +32,16 @@ function main()
         break
       end
       break
+    end
+    #
+    # This is a fix for broken backup files. It's related to issue:
+    # https://github.com/JuliaLang/julia/issues/15017
+    # If new backup file wasn't created, then we have to remove last one
+    # to fix the problem inside it, because it contains some error code :(
+    #
+    if lastFile == Backup.lastFile() && lastFile != ""
+      files = Backup.getFiles()
+      rm(Backup.FOLDER_NAME * "/" * files[length(files)])
     end
   end
 
