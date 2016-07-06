@@ -1,7 +1,7 @@
 using GR
 # min supportted resolution is: 351x350 (width should be greated then height)
-w = 800
-h = 600
+w = 763
+h = 459
 
 # size of the window (34.54x19.43cm)
 mwidth, mheight, width, height = GR.inqdspsize()
@@ -19,6 +19,7 @@ else
 end
 
 setviewport(0, 1, 0, ratio)
+##setwindow(1, w + 9.5, -12.7, h)
 setwindow(1, w, 1, h)
 
 setcolorrep(2, 0.0, 0.0, 0.0)
