@@ -28,6 +28,9 @@ function main()
   while true
     try
       while true
+        # TODO: we have to check if run() returns 0. It means that
+        # TODO: our process exits correctly and we don't need to
+        # TODO: remove last backup file
         run(`julia --color=yes $(ARGS[1]) recover $(ARGS[2:end])`)
         break
       end
@@ -40,8 +43,10 @@ function main()
     # to fix the problem inside it, because it contains some error code :(
     #
     if lastFile == Backup.lastFile() && lastFile != ""
+      Helper.warn("Removing broken backup file $lastFile...")
       files = Backup.getFiles()
       rm(Backup.FOLDER_NAME * "/" * files[length(files)])
+      lastFile = Backup.lastFile()
     end
   end
 
