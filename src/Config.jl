@@ -385,7 +385,7 @@ module Config
       UInt32(0x00FF00),          # WORLD_START_ENERGY_AMOUNT
       0.5,                       # WORLD_MIN_ENERGY_PERCENT
       5000,                      # WORLD_MIN_ENERGY_CHECK_PERIOD
-      3,                         # WORLD_SCALE
+      2,                         # WORLD_SCALE
       1,                         # BACKUP_PERIOD
       7,                         # BACKUP_AMOUNT
       650,                       # STAT_WIDTH
