@@ -18,8 +18,6 @@ function main()
     Helper.warn("Application file required. e.g.: julia AppSatellite.jl App.jl")
     return false
   end
-
-  local lastBackupFile::ASCIIString = Backup.lastFile()
   #
   # In case of error or if non zero exit code will be returned
   # an exeption will be thrown.
@@ -27,18 +25,13 @@ function main()
   while true
     try
       while true
-        # TODO: we have to check if run() returns 0. It means that
-        # TODO: our process exits correctly and we don't need to
-        # TODO: remove last backup file
         run(`julia --color=yes $(ARGS[1]) recover $(ARGS[2:end])`)
-        # TODO: remove this!!!
-        println("Line just after run(...)")
         break
       end
-      println("Line inside \"try\" block")
       break
+    catch e
+      _removeBrokenBackup()
     end
-    lastBackupFile = _checkBrokenBackup(lastBackupFile)
   end
 
   true
@@ -48,25 +41,17 @@ end
 # https://github.com/JuliaLang/julia/issues/15017
 # If new backup file wasn't created, then we have to remove last one
 # to fix the problem inside it, because it contains some error code :(
-# @param file File we have to check
 # @return Updated file name
 #
-function _checkBrokenBackup(file::ASCIIString)
-  local files::Array{ASCIIString, 1}
+function _removeBrokenBackup()
   local last::ASCIIString = Backup.lastFile()
 
-  println("Checking broken backup... file: \"$(file)\", last backup file: \"$(last)\", condition: $(file <= last && file != "")")
-  if file <= last
-    try
-      Helper.warn("Removing broken backup file: $file")
-      files = Backup.getFiles()
-      if length(files) > 0 rm(Backup.FOLDER_NAME * "/" * files[length(files)]) end
-    catch e
-      Helper.error("Something wrong with backup file removing: $file")
-    end
+  try
+    Helper.warn("Removing broken backup file: $last")
+    if last != "" rm(Backup.FOLDER_NAME * "/" * last) end
+  catch e
+    Helper.error("Something wrong with backup file removing: $last")
   end
-
-  Backup.lastFile()
 end
 #
 # Application entry point
