@@ -71,12 +71,8 @@ module OpenGlWindow
     local wndWidth::Int = width * scale
     local wndHeight::Int = height * scale + _FOOTER_HEIGHT
     local ratio::Float64 = _createWindow(win, wndWidth, wndHeight)
-    #
-    # TODO: i don't know what these coefficients(9.5, -12.7) mean. May be
-    # TODO: they are borders and decorations of the window? We have to check
-    # TODO: this on other graphical systems (Gnome, Win10, Win7,...)
-    #
-    GR.setwindow(1, wndWidth + 9.5, -12.7, wndHeight)
+
+    GR.setwindow(1, wndWidth, 1, wndHeight)
     GR.setviewport(0, 1, 0, ratio)
     #
     # Settings for fillrect() function
