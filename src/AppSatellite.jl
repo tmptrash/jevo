@@ -53,9 +53,10 @@ end
 #
 function _checkBrokenBackup(file::ASCIIString)
   local files::Array{ASCIIString, 1}
+  local last::ASCIIString = Backup.lastFile()
 
-  println("Checking broken backup... file: $(file), last backup file: $(Backup.lastFile())")
-  if file <= Backup.lastFile() && file != ""
+  println("Checking broken backup... file: \"$(file)\", last backup file: \"$(last)\", condition: $(file <= last && file != "")")
+  if file <= last && file != ""
     try
       Helper.warn("Removing broken backup file: $file")
       files = Backup.getFiles()
