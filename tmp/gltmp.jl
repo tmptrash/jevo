@@ -2,11 +2,22 @@ using GR
 
 mwidth, mheight, width, height = GR.inqdspsize()
 
+w = 800
+h = 600
+
+setcolorrep(1, 1.0, 1.0, 1.0)
+setcolorrep(2, 0.0, 0.0, 0.0)
+setlinecolorind(2)
+setlinewidth(1)
+setlinetype(GR.LINETYPE_SOLID)
+setfillcolorind(2)
+setfillintstyle(GR.INTSTYLE_SOLID)
+
 while true
     clearws()
 
-    w = 400 + round(Int, rand() * 200)
-    h = 400 + round(Int, rand() * 200)
+    #w = 400 + round(Int, rand() * 200)
+    #h = 400 + round(Int, rand() * 200)
     if w >= h
         ratio = float(h) / w
         msize = mwidth * w / width
@@ -23,9 +34,10 @@ while true
 
     setwindow(1, w, 1, h)
 
-    drawrect(1, w, 1, h)
-    polyline([1,w],[1,h])
-    polyline([1,w],[h,1])
+    #drawrect(1, w, 1, h)
+    fillrect(1, w, 1, h)
+    #polyline([1,w],[1,h])
+    #polyline([1,w],[h,1])
     text(0.05, 0.05, "$w x $h")
 
     updatews()
