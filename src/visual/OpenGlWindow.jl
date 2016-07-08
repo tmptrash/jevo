@@ -62,7 +62,7 @@ module OpenGlWindow
   # @param width Window width in pixels
   # @param height Window height in pixels
   # @param scale Scale of canvas 1:1 by default
-  # TODO: @param title Window title
+  # @param title Window title
   # @return Window object
   #
   function create(width::Int, height::Int, scale::Int = Config.val(:WORLD_SCALE), title::ASCIIString = "")
@@ -100,6 +100,7 @@ module OpenGlWindow
     # TODO: lines "by hands".
     #
     GR.drawrect(1, wndWidth, 1, wndHeight)
+    title(win, title)
     update(win)
 
     win
