@@ -133,9 +133,9 @@ module OpenGlWindow
       GR.setfillcolorind(Int(color))
       GR.fillrect(x, x + win.scale, y, y + win.scale)
     else
-      setmarkercolorind(Int(color))
-      win.xBuf[1] = x
-      win.yBuf[1] = y
+      GR.setmarkercolorind(Int(color))
+      win.xBuf[1] = (x - 1) * win.scale + 1
+      win.yBuf[1] = win.height * win.scale - (y - 1) * win.scale + 1
       GR.polymarker(win.xBuf, win.yBuf)
     end
   end
@@ -152,9 +152,9 @@ module OpenGlWindow
 
     GR.setlinecolorind(DotColors.INDEX_EMPTY)
     GR.setfillcolorind(DotColors.INDEX_EMPTY)
-    GR.fillrect(1, win.width * win.scale, ymax - _FOOTER_HEIGHT + win.scale, ymax)
+    GR.fillrect(1, win.width * win.scale + win.scale, ymax - _FOOTER_HEIGHT + win.scale, ymax)
+    # TODO: fix this hardcode (15.0)
     GR.text(0.01, win.ratio - (ycoef * _FOOTER_HEIGHT) + ycoef * 15.0, title)
-    #GR.text(0.01, 0.1, title)
   end
   #
   # Updates the canvas. It's not nessesary to update it after
@@ -187,7 +187,8 @@ module OpenGlWindow
     	ratio = float(height) / width
     	mSize = mWidth * width / scrWidth
     	GR.setwsviewport(0, mSize, 0, mSize * ratio)
-    	GR.setwswindow(0, 1, 0, ratio)
+      # TODO: why * 2?
+    	GR.setwswindow(0, 1, #=ratio / Float64(height) * Float64(win.scale) * 2=# 0, ratio)
     else
     	ratio = float(w) / height
     	mSize = mHeight * height / scrHeight

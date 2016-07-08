@@ -37,13 +37,15 @@ setcolorrep(1, 1.0, 1.0, 1.0)
 setcolorrep(2, 0.0, 0.0, 0.0)
 setlinecolorind(2)
 setlinewidth(1)
-setfillcolorind(1)
-setfillintstyle(1)
+setlinetype(GR.LINETYPE_SOLID)
+setfillcolorind(2)
+setfillintstyle(GR.INTSTYLE_SOLID)
 
+clearws()
 i = 0
 while i < 200000
   #clearws()
-  drawrect(1, w, 1, h)
+  fillrect(1, w, 1, h)
   updatews()
   i += 1
 end
