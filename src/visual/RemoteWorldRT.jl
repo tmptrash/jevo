@@ -119,6 +119,7 @@ module RemoteWorldRT
       rd.oldRequests = rd.poolingRequests
       rd.poolingRequests = 0
       OpenGlWindow.title(rd.win, string("ips: ", rd.ips, ", rps: ", rd.oldRequests))
+      OpenGlWindow.update(rd.win)
     end
     rd.poolingRequests += 1
     #
