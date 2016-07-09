@@ -100,7 +100,7 @@ module OpenGlWindow
     # TODO: lines "by hands".
     #
     GR.drawrect(1, wndWidth, 1, wndHeight)
-    title(win, title)
+    OpenGlWindow.title(win, title)
     update(win)
 
     win
