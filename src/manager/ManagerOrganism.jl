@@ -332,10 +332,10 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   true
 end
 #
-# Handles "beforeclone" event. Finds free point for new organism
-# and returns these coordinates. If no free space, then returns false.
-# It checks four (4) places around current organism's position: up,
-# down, left and right.
+# Makes orhanism clone and apply mutations to it (child).
+# Finds free point for new organism and returns these coordinates.
+# If no free space, then returns false. It checks four (4) places
+# around current organism's position: up, down, left and right.
 # @param organism Parent organism
 #
 function _onClone(organism::Creature.Organism)
