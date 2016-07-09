@@ -51,6 +51,8 @@ end
 function _removeBrokenBackup(stamp::Float64)
   local last::ASCIIString
 
+  println("_removeBrokenBackup(), time: ", time(), ", stamp: ", stamp, ", period: ", Float64(Config.val(:BACKUP_PERIOD)) * 60.0)
+  println("last file: ", Backup.lastFile())
   if (time() - stamp) < Float64(Config.val(:BACKUP_PERIOD)) * 60.0
     try
       if (last = Backup.lastFile()) != ""
@@ -60,10 +62,9 @@ function _removeBrokenBackup(stamp::Float64)
     catch e
       Helper.error("Something wrong with backup file removing: $last")
     end
-    stamp = time()
   end
 
-  stamp
+  (stamp = time())
 end
 #
 # Application entry point
