@@ -375,17 +375,17 @@ module Config
       5,                         # ORGANISM_CLONE_AFTER_TIMES
       1,                         # ORGANISM_START_COLOR
       2,                         # CODE_MAX_FUNC_PARAMS
-      400,#1270,                      # WORLD_WIDTH
-      300,#650,                       # WORLD_HEIGHT
+      900,                       # WORLD_WIDTH
+      600,                       # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
-      500,                       # WORLD_MAX_ORGANISMS
+      300,                       # WORLD_MAX_ORGANISMS
       50,                        # WORLD_MIN_ORGANISMS
       1000,                      # WORLD_START_ENERGY_BLOCKS
-      UInt32(0x00FF00),          # WORLD_START_ENERGY_AMOUNT
-      0.5,                       # WORLD_MIN_ENERGY_PERCENT
-      5000,                      # WORLD_MIN_ENERGY_CHECK_PERIOD
-      2,                         # WORLD_SCALE
+      UInt32(0x0000FF),          # WORLD_START_ENERGY_AMOUNT
+      0.3,                       # WORLD_MIN_ENERGY_PERCENT
+      500,                       # WORLD_MIN_ENERGY_CHECK_PERIOD
+      1,                         # WORLD_SCALE
       1,                         # BACKUP_PERIOD
       7,                         # BACKUP_AMOUNT
       650,                       # STAT_WIDTH
