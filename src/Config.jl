@@ -382,7 +382,7 @@ module Config
       300,                       # WORLD_MAX_ORGANISMS
       50,                        # WORLD_MIN_ORGANISMS
       1000,                      # WORLD_START_ENERGY_BLOCKS
-      UInt32(0x0000FF),          # WORLD_START_ENERGY_AMOUNT
+      UInt32(0x0001F4),          # WORLD_START_ENERGY_AMOUNT
       0.3,                       # WORLD_MIN_ENERGY_PERCENT
       500,                       # WORLD_MIN_ENERGY_CHECK_PERIOD
       1,                         # WORLD_SCALE

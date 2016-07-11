@@ -258,7 +258,6 @@ module Creature
         # that these errors will be fixed by future mutations.
         #
         try
-          if org.codeFn !== oldCode Helper.save(org, "code-before.jevo") end
           org.codeFn(org)
           if org.codeFn !== oldCode
             oldCode = org.codeFn

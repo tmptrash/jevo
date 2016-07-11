@@ -8,6 +8,8 @@ import Manager
 import Helper
 import Backup
 import CommandLine
+# TODO: remove this
+using ProfileView
 #
 # Name of the command line argument, which tells the application
 # to recover itself from last backup.
@@ -34,4 +36,6 @@ end
 #
 # Application entry point
 #
-main()
+Profile.clear()
+@profile main()
+ProfileView.view()
