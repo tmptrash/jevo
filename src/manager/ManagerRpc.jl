@@ -1,6 +1,6 @@
 #
-# TODO: Description
 # This is a part of Manager module.
+# TODO: Description
 # TODO: Dependencies
 # TODO: describe annotations: @rpc (RPC function)
 # TODO: add console message for all commands
@@ -354,7 +354,7 @@ end
 # @return {UInt32} Color index
 #
 function _getColorIndex(pos::Helper.Point, color::UInt32)
-  local posId::Int = @getPosId(pos)
+  local posId::Int = Manager._getPosId(pos)
   local isOrganism::Bool = haskey(Manager._data.positions, posId)
 
   if color !== UInt32(DotColors.INDEX_EMPTY)

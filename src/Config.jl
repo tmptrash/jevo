@@ -365,12 +365,12 @@ module Config
       10000,                     # ORGANISM_MAX_MUTATION_PERIOD
       2,                         # ORGANISM_MUTATION_AMOUNT
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT
-      10,                        # ORGANISM_START_AMOUNT
+      250,                       # ORGANISM_START_AMOUNT
       5000,                      # ORGANISM_START_ENERGY
       typemax(UInt32),           # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
-      3,                         # ORGANISM_ENERGY_DECREASE_PERIOD
+      50,                        # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                         # ORGANISM_ENERGY_DECREASE_VALUE
-      300,                       # ORGANISM_REMOVE_AFTER_TIMES
+      500,                       # ORGANISM_REMOVE_AFTER_TIMES
       10,                        # ORGANISM_REMOVE_AMOUNT
       5,                         # ORGANISM_CLONE_AFTER_TIMES
       1,                         # ORGANISM_START_COLOR

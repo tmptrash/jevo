@@ -258,6 +258,7 @@ module Creature
         # that these errors will be fixed by future mutations.
         #
         try
+          if org.codeFn !== oldCode Helper.save(org, "code-before.jevo") end
           org.codeFn(org)
           if org.codeFn !== oldCode
             oldCode = org.codeFn
@@ -360,9 +361,7 @@ module Creature
   # sd - means make Step Down. Short name to help organism find this name faster.
   # Makes one step down. It increase organism's y coodinate by 1.
   #
-  function stepDown(org::Organism)
-    Event.fire(org.observer, "stepdown", org)
-  end
+  function stepDown(org::Organism) Event.fire(org.observer, "stepdown", org) end
   #
   # @oapi
   # @param org Current organism

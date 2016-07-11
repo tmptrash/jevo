@@ -14,14 +14,6 @@ import World
 import RpcApi
 import ManagerTypes
 #
-# Generates unique id by world position. This macro is
-# private insode Manager module
-# @param {Helper.Point} pos Unique World position
-#
-macro getPosId(pos)
-  :($pos.y * $Manager._data.world.width + $pos.x)
-end
-#
 # Shows organism related message
 # @param id Unique orgainsm identifier
 # @param msg Organism's message
@@ -169,20 +161,17 @@ function _updateOrganismsEnergy()
   # remove some elements inside while loop.
   #
   local i::Int = length(tasks)
+  local org::Creature.Organism
   while i > 0
-    local org::Creature.Organism = tasks[i].organism
     #
-    # if the energy of the organism is zero, we have to remove it
+    # if the organism is marked as "removed", we have to delete it
     #
-    if !istaskdone(tasks[i].task)
-      if org.energy > (decVal + org.codeSize)
-        org.energy -= (decVal + org.codeSize)
-      else
-        _killOrganism(i)
-      end
+    org = tasks[i].organism
+    org.energy -= (decVal + org.codeSize)
+    if org.energy <= 0
+      _killOrganism(i)
+      splice!(tasks, i)
     end
-
-    if istaskdone(tasks[i].task) splice!(tasks, i) end
 
     i -= 1
   end
@@ -230,15 +219,9 @@ function _freezeOrganism(i::Int)
   Event.clear(org.observer)
   _moveOrganism(org.pos, org)
   org.color = oldColor
-  delete!(Manager._data.positions, @getPosId(org.pos))
+  delete!(Manager._data.positions, Manager._getPosId(org.pos))
   delete!(Manager._data.organisms, id)
-  #
-  # This is small hack. It stops the task immediately. We
-  # have to do this, because task is a memory leak if we don't
-  # stop (interrupt) it. This method only marks the task as
-  # "frozen". Real deletion will be provided in _updateOrganismsEnergy().
-  #
-  try Base.throwto(Manager._data.tasks[i].task, null) end
+  _stopTask(Manager._data.tasks[i].task)
   Manager._cons.frozen[org.id] = org
   msg(id, "frozen")
 end
@@ -257,18 +240,23 @@ function _killOrganism(i::Int)
   org.color  = UInt32(0)
   Event.clear(org.observer)
   _moveOrganism(org.pos, org)
-  delete!(Manager._data.positions, @getPosId(org.pos))
+  delete!(Manager._data.positions, Manager._getPosId(org.pos))
   delete!(Manager._data.organisms, id)
-  #
-  # This is small hack. It stops the task immediately. We
-  # have to do this, because task is a memory leak if we don't
-  # stop (interrupt) it. This method only marks the task as
-  # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
-  #
-  try Base.throwto(Manager._data.tasks[i].task, null) end
+  _stopTask(Manager._data.tasks[i].task)
   msg(id, "die")
 
   true
+end
+#
+# This is small hack. It stops the task immediately. We
+# have to do this, because task is a memory leak if we don't
+# stop (interrupt) it. This method only marks the task as
+# "deleted". Real deletion will be provided in _updateOrganismsEnergy().
+# @param task Task
+#
+function _stopTask(task::Task)
+  try Base.throwto(task, null) end
+  #task.state = :failed
 end
 #
 # Moves organism to specified position. Updates organism's
@@ -279,8 +267,8 @@ end
 # @return {Bool}
 #
 function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
-  local idNew::Int = @getPosId(pos)
-  local idOld::Int = @getPosId(organism.pos)
+  local idNew::Int = Manager._getPosId(pos)
+  local idOld::Int = Manager._getPosId(organism.pos)
   local freeze::Bool = false
   #
   # Organism try step outside of current instance. If near
@@ -322,7 +310,7 @@ function _moveOrganism(pos::Helper.Point, organism::Creature.Organism)
   # organism.pos - old organism position
   #
   if pos.x !== organism.pos.x || pos.y !== organism.pos.y
-    delete!(Manager._data.positions, @getPosId(organism.pos))
+    delete!(Manager._data.positions, Manager._getPosId(organism.pos))
     Manager._data.positions[idNew] = organism
     World.setEnergy(Manager._data.world, organism.pos, UInt32(0))
     organism.pos = pos
@@ -366,7 +354,7 @@ end
 # @param retObj Special object for return value
 #
 function _onGetEnergy(organism::Creature.Organism, pos::Helper.Point, retObj::Helper.RetObj)
-  local id::Int = @getPosId(pos)
+  local id::Int = Manager._getPosId(pos)
   #
   # Other organism at this position
   #
@@ -457,7 +445,7 @@ end
 # @param retObj Special object for return value
 #
 function _onGrab(organism::Creature.Organism, amount::Int, pos::Helper.Point, retObj::Helper.RetObj)
-  local id::Int = @getPosId(pos)
+  local id::Int = Manager._getPosId(pos)
   local org::Creature.Organism
 
   if haskey(Manager._cons.frozen, organism.id)
@@ -505,6 +493,8 @@ end
 function _onStep(organism::Creature.Organism, pos::Helper.Point)
   if !haskey(Manager._cons.frozen, organism.id)
     _moveOrganism(pos, organism)
+    # TODO: solve this!!!
+    #produce()
   end
 end
 #
@@ -549,7 +539,7 @@ function _createOrganism(organism = nothing, pos::Helper.Point = Helper.Point(0,
   #
   Manager._data.organismId += 1
   Manager._data.organisms[id] = org
-  Manager._data.positions[@getPosId(org.pos)] = org
+  Manager._data.positions[Manager._getPosId(org.pos)] = org
   push!(Manager._data.tasks, oTask)
   Manager._data.totalOrganisms += 1
   msg(id, "born")
