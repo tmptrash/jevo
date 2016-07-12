@@ -147,8 +147,7 @@ module Manager
     # This is main infinite loop. It manages input connections
     # and organism's tasks switching.
     #
-    #while true
-    for i=1:10000
+    while true
       #
       # We have to wait while all clients are ready for streaming. This
       # is because the error in serializer. See issue for details:

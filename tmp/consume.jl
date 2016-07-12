@@ -26,4 +26,8 @@ function main()
 	end
 end
 
-main()
+@profile main()
+
+
+#g:\my\projects\jevo>julia tmp\\consume.jl
+#failed to get context from main thread. aborting profiling.

@@ -63,7 +63,7 @@ function _updateOrganisms(counter::Int)
       # doesn't contain any code line.
       #
       org = task.organism
-      if counter % org.mutationPeriod === 0 && org.mutationPeriod > 0
+      if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
         Mutator.mutate(org, org.mutationAmount)
       end
     catch e
@@ -539,7 +539,7 @@ function _createOrganism(organism = nothing, pos::Helper.Point = Helper.Point(0,
   #
   Manager._data.organismId += 1
   Manager._data.organisms[id] = org
-  Manager._data.positions[Manager._getPosId(org.pos)] = org
+  Manager._data.positions[_getPosId(org.pos)] = org
   push!(Manager._data.tasks, oTask)
   Manager._data.totalOrganisms += 1
   msg(id, "born")
