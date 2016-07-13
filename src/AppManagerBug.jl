@@ -21,12 +21,12 @@ function main()
   if CommandLine.has(args, ARG_RECOVER)
     Helper.info(string("Recovering from backup: ", Backup.lastFile()))
     if Manager.recover()
-      Manager.run(true)
+      @profile Manager.run(true)
       return true
     end
   end
   Helper.info("Running from scratch...")
-  Manager.run()
+  @profile Manager.run()
 
   return true
 end
@@ -34,5 +34,5 @@ end
 # Application entry point
 #
 Profile.clear()
-@profile main()
+main()
 ProfileView.view()

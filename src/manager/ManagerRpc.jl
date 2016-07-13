@@ -4,6 +4,7 @@
 # TODO: Dependencies
 # TODO: describe annotations: @rpc (RPC function)
 # TODO: add console message for all commands
+# TODO: describe returning null in @rpc functions
 #
 # @author DeadbraiN
 #
@@ -65,11 +66,10 @@ end
 # will be in Manager._data.tasks field.
 #
 function createOrganisms()
+  local i::Int
+
   Helper.info("Creating organisms...")
-  #
-  # Inits available organisms in Tasks
-  #
-  for i::Int = 1:Config.val(:ORGANISM_START_AMOUNT) createOrganism() end
+  for i = 1:Config.val(:ORGANISM_START_AMOUNT) createOrganism() end
   null
 end
 #
@@ -82,7 +82,7 @@ end
 # TODO: change the constructor to support Position() without
 # TODO: parameters for optimization. We have to remove nothing
 function createOrganism(pos::Helper.Point = Helper.Point(0, 0))
-  if length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS) return nothing end
+  if length(Manager._data.tasks) > Config.val(:WORLD_MAX_ORGANISMS) return null end
   orgTask = Manager._createOrganism(nothing, pos)
   orgTask === false ? false : orgTask.id
   null

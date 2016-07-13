@@ -7,6 +7,8 @@
 # settings are used like data containers in sense that, they
 # just store the values, which may be changed many times during
 # application life cicle.
+# TODO: refactor this module to exclude using of global _data object
+# TODO: we have to pass it by first argument instead. It will be 1000 times faster!!!
 #
 # Usage:
 #     import Config
@@ -368,7 +370,7 @@ module Config
       250,                       # ORGANISM_START_AMOUNT
       5000,                      # ORGANISM_START_ENERGY
       typemax(UInt32),           # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
-      100,                       # ORGANISM_ENERGY_DECREASE_PERIOD
+      200,                       # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                         # ORGANISM_ENERGY_DECREASE_VALUE
       500,                       # ORGANISM_REMOVE_AFTER_TIMES
       5,                         # ORGANISM_REMOVE_AMOUNT
@@ -379,9 +381,9 @@ module Config
       600,                       # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
-      300,                       # WORLD_MAX_ORGANISMS
+      400,                       # WORLD_MAX_ORGANISMS
       50,                        # WORLD_MIN_ORGANISMS
-      1000,                      # WORLD_START_ENERGY_BLOCKS
+      10000,                     # WORLD_START_ENERGY_BLOCKS
       UInt32(0x0001F4),          # WORLD_START_ENERGY_AMOUNT
       0.3,                       # WORLD_MIN_ENERGY_PERCENT
       500,                       # WORLD_MIN_ENERGY_CHECK_PERIOD

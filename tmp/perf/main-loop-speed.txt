@@ -1,0 +1,12 @@
+230    - etalon
+
+210382 - disabled _updateOrganisms()
+339    - disabled _updateOrganisms() -> periodic mutations
+465    - disabled _updateOrganisms() -> _onClone()
+259    - disabled _updateOrganisms() -> _updateOrganismsEnergy()
+255    - disabled _updateOrganisms() -> _updateWorldEnergy()
+249    - disabled _updateOrganisms() -> _removeMinOrganisms()
+1836   - disabled _updateOrganisms() -> consume()
+
+242    - disabled _updateBackup()
+249    - disabled yield()

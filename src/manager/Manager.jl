@@ -175,7 +175,8 @@ module Manager
       # functions (see @async macro). For example, it handles all
       # input connections for current server, switches between
       # organism Tasks and so on...
-      #
+      # TODO: this line is slow. we have to use it only if needed!
+      # TODO: if there are no connections we have to skip it
       yield()
     end
 
