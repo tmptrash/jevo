@@ -207,7 +207,7 @@ end
 # @param amount Amount of energy points
 # @param energy Amount of energy within one point
 #
-function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int = Config.val(man.cfg, :WORLD_START_ENERGY_BLOCKS), energy::UInt32 = Config.val(man.cfg, :WORLD_START_ENERGY_AMOUNT))
+function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int, energy::UInt32)
   Helper.info("Creating random energy...")
   for i::Int = 1:amount
     setEnergy(rand(1:man.world.width), rand(1:man.world.height), energy)

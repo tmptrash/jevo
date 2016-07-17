@@ -205,7 +205,7 @@ module Creature
     # below means: function (o) return true end
     #
     local code::Expr = Expr(:function, Expr(:tuple,                      # function paraments
-      Expr(:(::), :cfg, Expr(:., :Config, Expr(:quote, :ConfigData))),   # cfg::Config.ConfigData
+      Expr(:(::), :c, Expr(:., :Config, Expr(:quote, :ConfigData))),     # c::Config.ConfigData
       Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),    # o::Creature.Organism
         Expr(:block, Expr(:return, true))                                # return true
     )
@@ -239,7 +239,8 @@ module Creature
     )
   end
   #
-
+  # TODO: describe this method
+  # TODO: describe org, cfg = produce()
   #
   function born()
     #
@@ -247,11 +248,12 @@ module Creature
     #
     local org::Organism
     local cfg::Config.ConfigData
-    local oldCode::Function = org.codeFn
+    local oldCode::Function
     #
     # We need these instances for events like stepleft, grabup,...
     #
     org, cfg = produce()
+    oldCode = org.codeFn
     #
     # This variable is used inside for loops in organism's code
     # So, don't remove it

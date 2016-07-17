@@ -24,7 +24,8 @@ function main()
 
   if !CommandLine.has(args, ARG_RECOVER)
     Helper.info(string("Recovering from backup: ", Backup.lastFile()))
-    return Manager.recover(man) && Manager.run(man, true)
+    Manager.recover(man)
+    return Manager.run(man, true)
   end
 
   Helper.info("Running from scratch...")

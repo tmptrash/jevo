@@ -208,7 +208,7 @@ function _updateWorldEnergy(man::ManagerTypes.ManagerData)
   # Total amount of energy is less then in config
   #
   if div(Float64(energy * 100), total) <= Config.val(man.cfg, :WORLD_MIN_ENERGY_PERCENT)
-    setRandomEnergy()
+    setRandomEnergy(man, Config.val(man.cfg, :WORLD_START_ENERGY_BLOCKS), Config.val(man.cfg, :WORLD_START_ENERGY_AMOUNT))
   end
 end
 #

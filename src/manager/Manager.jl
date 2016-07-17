@@ -86,17 +86,17 @@ module Manager
     # In other words, it works like RPC runner... Fast server is
     # listening for "fast" clients and works in "fast" mode.
     #
-    Server.run(_cons.server)
+    Server.run(man.cons.server)
     # TODO: possibly, we don't need to run this server due to performance issue
-    Server.run(_cons.fastServer)
+    Server.run(man.cons.fastServer)
     #
     # If user set up some amount of organisms they will be created
     # in this call. If we are in recover mode, then this step should
     # be skipped.
     #
     if recover === false
-      setRandomEnergy()
-      createOrganisms()
+      setRandomEnergy(Config.val(man.cfg, :WORLD_START_ENERGY_BLOCKS), Config.val(man.cfg, :WORLD_START_ENERGY_AMOUNT))
+      createOrganisms(man)
     end
     #
     # This is main infinite loop. It manages input connections
@@ -113,7 +113,7 @@ module Manager
       #
       # After all organisms die, we have to create next, new population
       #
-      if length(man.tasks) < 1 createOrganisms() end
+      if length(man.tasks) < 1 createOrganisms(man) end
       #
       # This call runs all organism related tasks one by one
       #

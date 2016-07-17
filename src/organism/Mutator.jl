@@ -58,7 +58,7 @@ module Mutator
       codeChange = pIndex < 5
       pos        = codeChange ? Code.getRandPos(org) : _posStub
       cmd        = codeChange ? Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))] : _cmdStub
-      res        = org.codeSize < 1 ? _onAdd(org, pos, cmd) : _MUTATION_TYPES[pIndex](org, pos, cmd)
+      res        = org.codeSize < 1 ? _onAdd(cfg, org, pos, cmd) : _MUTATION_TYPES[pIndex](cfg, org, pos, cmd)
       result    &= res
       #
       # Updates compiled version of the code. Only valid code will be applied,
