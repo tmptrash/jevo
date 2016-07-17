@@ -1,14 +1,14 @@
 #
 # Module for remote connection with Organisms server. It displays
 # world's statistics (amount of organisms, config, ...) in a window.
-# Communication works through Pooling module. This module works 
+# Communication works through Pooling module. This module works
 # in a simple way: first, you have to create RemoteStatistics object
 # calling create() function. It returns RemoteStatistics data object,
 # which is used in all functions. create() doesn't start displaying
 # data. For this, you have to call start() function. To stop
-# displaying, call stop(). Displaying statistics is a frame based 
-# procedure. It means that, every period of time (see delay 
-# argument of create()) a request will be sent. So amount of 
+# displaying, call stop(). Displaying statistics is a frame based
+# procedure. It means that, every period of time (see delay
+# argument of create()) a request will be sent. So amount of
 # frames per second depends on delay and network(requests) speed.
 #
 # @author DeadbraiN
@@ -20,7 +20,6 @@ module RemoteStatistics
   import Connection
   import RpcApi
   import Helper
-  import Config
 
   export create
   export start
@@ -48,7 +47,7 @@ module RemoteStatistics
   # @param height Window height in pixels
   # @return {RemoteStatData|false}
   #
-  function create(host::Base.IPAddr, port::Integer, width::Int = Config.val(:STAT_WIDTH), height::Int = Config.val(:STAT_HEIGHT))
+  function create(host::Base.IPAddr, port::Integer, width::Int, height::Int)
     pd = Pooling.create(host, port)
     if pd !== false
       label = Gtk.@Label("")
@@ -60,7 +59,7 @@ module RemoteStatistics
     false
   end
   #
-  # Start displaying statistics It makes requests to remote 
+  # Start displaying statistics It makes requests to remote
   # server, which answers/retuns us statistics data.
   # @param rs Remote world data object. See create()
   # @param delay Delay between requests

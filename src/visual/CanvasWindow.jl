@@ -29,7 +29,6 @@ module CanvasWindow
   import Cairo
   import Tk
   import Colors
-  import Config
   import DotColors
 
   export Window
@@ -59,7 +58,7 @@ module CanvasWindow
   # @param title Window title
   # @return Window object
   #
-  function create(width::Int, height::Int, scale::Int = Config.val(:WORLD_SCALE), title::ASCIIString = "")
+  function create(width::Int, height::Int, scale::Int, title::ASCIIString = "")
     local win::Tk.TkWidget = Tk.Window(title, width * scale, height * scale)
     local c::Tk.Canvas = Tk.Canvas(win)
     Tk.pack(c, expand=true, fill="both")

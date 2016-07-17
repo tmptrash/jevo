@@ -1,4 +1,5 @@
 import CommandLine
+import ManagerTypes
 #
 # This manager is also a server for all other remote managers. These
 # remote managers are clients for current and may use "Client" module
@@ -50,21 +51,23 @@ const ARG_DOWN_SERVER_IP   = "downIp"
 const ARG_QUIET            = "quiet"
 #
 # Returns port number set in command line or in Config object (default)
+# @param man Manager data type
 # @param cmdParam Name of command line parameter
 # @param cfgParam Name of configuration parameter if cmdParam wasn't set
 # @return {Int} Port number or 0 if no port available
 #
-function _getPort(cmdParam::ASCIIString, cfgParam::Symbol)
-  local port::ASCIIString = CommandLine.val(Manager._data.params, cmdParam)
-  port == "" ? Config.val(cfgParam) : parse(Int, port)
+function _getPort(man::ManagerTypes.ManagerData, cmdParam::ASCIIString, cfgParam::Symbol)
+  local port::ASCIIString = CommandLine.val(man.cfg, cmdParam)
+  port == "" ? Config.val(man.cfg, cfgParam) : parse(Int, port)
 end
 #
 # Returns IP address of current server. See ARG_SERVER_IP for details
+# @param man Managerdata type
 # @param cmdParam Name of command line parameter
 # @param cfgParam Name of configuration parameter if cmdParam wasn't set
 # @return {IPv4} IP address
 #
-function _getIp(cmdParam::ASCIIString, cfgParam::Symbol)
-  local ip::ASCIIString = CommandLine.val(Manager._data.params, cmdParam)
-  ip == "" ? Config.val(cfgParam) : IPv4(ip)
+function _getIp(man::ManagerTypes.ManagerData, cmdParam::ASCIIString, cfgParam::Symbol)
+  local ip::ASCIIString = CommandLine.val(man.cfg, cmdParam)
+  ip == "" ? Config.val(man.cfg, cfgParam) : IPv4(ip)
 end

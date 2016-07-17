@@ -33,7 +33,7 @@ module TestCode
     @fact Code.eval(org.code)(org) --> true
   end
   facts("Testing Code.var() inside Code.fn()") do
-    Config.val(:CODE_MAX_FUNC_PARAMS, 1)
+    Config.val(Config.create(), :CODE_MAX_FUNC_PARAMS, 1)
     org = Creature.create()
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
     Mutator._onAdd(org, Helper.Pos(2,1,1), Code.CodePart(Code.var, false))
@@ -46,7 +46,7 @@ module TestCode
   # fn
   #
   facts("Testing Code.fn() inside empty script") do
-    Config.val(:CODE_MAX_FUNC_PARAMS, 1)
+    Config.val(Config.create(), :CODE_MAX_FUNC_PARAMS, 1)
     org = Creature.create()
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
 
@@ -55,14 +55,14 @@ module TestCode
   end
   facts("Testing Code.fn() arguments") do
     org = Creature.create()
-    Config.val(:CODE_MAX_FUNC_PARAMS, 1)
+    Config.val(Config.create(), :CODE_MAX_FUNC_PARAMS, 1)
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
 
     @fact Helper.getArg(org.code, [2,1,1,2,1,1]) --> :var_1
     @fact Code.eval(org.code)(org) --> true
   end
   facts("Testing Code.fn() outside main function") do
-    Config.val(:CODE_MAX_FUNC_PARAMS, 1)
+    Config.val(Config.create(), :CODE_MAX_FUNC_PARAMS, 1)
     org = Creature.create()
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
     Mutator._onAdd(org, Helper.Pos(2,1,1), Code.CodePart(Code.fn, true))
@@ -72,7 +72,7 @@ module TestCode
     @fact Code.eval(org.code)(org) --> true
   end
   facts("Testing Code.fn() + Code.fn()") do
-    Config.val(:CODE_MAX_FUNC_PARAMS, 1)
+    Config.val(Config.create(), :CODE_MAX_FUNC_PARAMS, 1)
     org = Creature.create()
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
     Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.fn, true))
@@ -84,7 +84,7 @@ module TestCode
     @fact Code.eval(org.code)(org) --> true
   end
   facts("Testing Code.fn() should return the value") do
-    Config.val(:CODE_MAX_FUNC_PARAMS, 1)
+    Config.val(Config.create(), :CODE_MAX_FUNC_PARAMS, 1)
     org = Creature.create()
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))
     Mutator._onAdd(org, Helper.Pos(1,1,2), Code.CodePart(Code.fn, true))
@@ -285,7 +285,7 @@ module TestCode
     @fact Code.eval(org.code)(org) --> true
   end
   facts("Testing Code.loop() inside Code.fn()") do
-    Config.val(:CODE_MAX_FUNC_PARAMS, 1)
+    Config.val(Config.create(), :CODE_MAX_FUNC_PARAMS, 1)
     org = Creature.create()
 
     Mutator._onAdd(org, Helper.Pos(1,1,1), Code.CodePart(Code.fn, true))

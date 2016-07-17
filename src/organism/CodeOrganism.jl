@@ -1,10 +1,11 @@
 #
-# This file is a part of Code module. Contains Code functions related 
+# This file is a part of Code module. Contains Code functions related
 # to Organism. For example eating, moving, working with memory,...
 #
 # @author DeadbraiN
 #
 import Helper
+import Config
 
 export lookAt
 export eatLeft
@@ -17,11 +18,12 @@ export fromMem
 # @cmd
 # @line
 # Returns energy amount in specified point in a world
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr} New expression or Expr(:nothing) if skipped
 #
-function lookAt(org::Creature.Organism, pos::Helper.Pos)
+function lookAt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local varSym::Symbol = @randVar(org, pos, Int)
   local xSym::Symbol   = @randVar(org, pos, Int16)
   local ySym::Symbol   = @randVar(org, pos, Int16)
@@ -33,99 +35,108 @@ end
 # @cmd
 # @line
 # Is called when organism bites on the left
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function eatLeft(org::Creature.Organism, pos::Helper.Pos)
+function eatLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
-  :(Creature.eatLeft(o, Int($(amount))))
+  :(Creature.eatLeft(cfg, o, Int($(amount))))
 end
 #
 # @cmd
 # @line
 # Is called when organism bites on the right
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function eatRight(org::Creature.Organism, pos::Helper.Pos)
+function eatRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
-  :(Creature.eatRight(o, Int($(amount))))
+  :(Creature.eatRight(cfg, o, Int($(amount))))
 end
 #
 # @cmd
 # @line
 # Is called when organism bites up
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function eatUp(org::Creature.Organism, pos::Helper.Pos)
+function eatUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
-  :(Creature.eatUp(o, Int($(amount))))
+  :(Creature.eatUp(cfg, o, Int($(amount))))
 end
 #
 # @cmd
 # @line
 # Is called when organism bites down
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function eatDown(org::Creature.Organism, pos::Helper.Pos)
+function eatDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
-  :(Creature.eatDown(o, Int($(amount))))
+  :(Creature.eatDown(cfg, o, Int($(amount))))
 end
 #
 # @cmd
 # @line
 # Is called when organism make step left
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function stepLeft(org::Creature.Organism, pos::Helper.Pos)
+function stepLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   :(Creature.stepLeft(o))
 end
 #
 # @cmd
 # @line
 # Is called when organism make step right
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function stepRight(org::Creature.Organism, pos::Helper.Pos)
+function stepRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   :(Creature.stepRight(o))
 end
 #
 # @cmd
 # @line
 # Is called when organism make step up
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function stepUp(org::Creature.Organism, pos::Helper.Pos)
+function stepUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   :(Creature.stepUp(o))
 end
 #
 # @cmd
 # @line
 # Is called when organism make step down
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function stepDown(org::Creature.Organism, pos::Helper.Pos)
+function stepDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   :(Creature.stepDown(o))
 end
 #
 # @cmd
 # @line
 # Saves custom value to organism's private memory
+# @param cfg Global configuration type
 # @param org Organism we are working with
 # @param pos Position in code
 # @return {Expr|nothing}
 #
-function toMem(org::Creature.Organism, pos::Helper.Pos)
+function toMem(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local key::Symbol   = @randVar(org, pos, Int16)
   local val::Symbol   = @randVar(org, pos, Int16)
@@ -137,11 +148,12 @@ end
 # @cmd
 # @line
 # Extracts custom value from organism's private memory
+# @param cfg Global configuration type
 # @param org Organism we are working with
 # @param pos Position in code
 # @return {Expr|nothing}
 #
-function fromMem(org::Creature.Organism, pos::Helper.Pos)
+function fromMem(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local key::Symbol   = @randVar(org, pos, Int16)
   local val::Symbol   = @randVar(org, pos, Int16)

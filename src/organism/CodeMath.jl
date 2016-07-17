@@ -3,13 +3,15 @@
 #
 # @author DeadbraiN
 #
+import Config
+
 export plus
 export minus
 export multiply
 export divide
 export reminder
 #
-# Binding of available types and available "plus" operators 
+# Binding of available types and available "plus" operators
 # for these types. We don't need to export this constant.
 #
 const PLUS_OPERATORS = Dict{DataType, Symbol}(
@@ -25,13 +27,14 @@ const PLUS_OPERATORS = Dict{DataType, Symbol}(
 # + operator implementation. Sums two variables. Supports all
 # types: ASCIIString, Int8, Bool,... In case of string uses
 # concatination, for boolean - & operator. If code is empty
-# this function will skip the execution. We don't check the 
+# this function will skip the execution. We don't check the
 # position, because of performance issues.
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
-function plus(org::Creature.Organism, pos::Helper.Pos)
+function plus(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   local v2::Symbol    = @randVar(org, pos, typ)
@@ -48,11 +51,12 @@ end
 # types: ASCIIString, Int8, Bool,... In case of string uses
 # concatination, for boolean - & operator. If code is empty
 # this function will skip the execution.
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
-function minus(org::Creature.Organism, pos::Helper.Pos)
+function minus(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   local v2::Symbol    = @randVar(org, pos, typ)
@@ -68,7 +72,7 @@ function minus(org::Creature.Organism, pos::Helper.Pos)
   if typ === ASCIIString
     return :($v1 = $(v2)[1:(length($v3) > length($v2) ? 0 : length($v2) - length($v3))])
   #
-  # true  - true  = false, true  - false = true, 
+  # true  - true  = false, true  - false = true,
   # false - false = false, false - true  = true
   #
   elseif typ === Bool
@@ -86,11 +90,12 @@ end
 # types: ASCIIString, Int8, Bool,... In case of string uses
 # concatination, for boolean - & operator. If code is empty
 # this function will skip the execution.
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
-function multiply(org::Creature.Organism, pos::Helper.Pos)
+function multiply(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   local v2::Symbol    = @randVar(org, pos, typ)
@@ -107,11 +112,12 @@ end
 # types: ASCIIString, Int8, Bool,... In case of string uses
 # concatination, for boolean - | operator. If code is empty
 # this function will skip the execution.
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
-function divide(org::Creature.Organism, pos::Helper.Pos)
+function divide(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   local v2::Symbol    = @randVar(org, pos, typ)
@@ -137,11 +143,12 @@ end
 # Calculates reminder of division of two numbers. For ASCIIString
 # calculates reminder of cutting: "12345" % "23" = "345". It uses
 # length of second string for cut. For Bool uses | operator.
+# @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
-function reminder(org::Creature.Organism, pos::Helper.Pos)
+function reminder(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   local v2::Symbol    = @randVar(org, pos, typ)

@@ -7,16 +7,15 @@
 # settings are used like data containers in sense that, they
 # just store the values, which may be changed many times during
 # application life cicle.
-# TODO: refactor this module to exclude using of global _data object
-# TODO: we have to pass it by first argument instead. It will be 1000 times faster!!!
-#
+# TODO: update usage
 # Usage:
 #     import Config
 #     ...
-#     Config.val(:SECTION_ID_KEY_ID)         # returns value or nothing
-#     Config.val(:SECTION_ID_KEY_ID, newVal) # sets new value - newVal
-#     Config.save("config.data")             # saves all to file
-#     Config.load("config.data")             # loads all from file
+#     cfg = Config.create()                       # creates new config instance
+#     Config.val(cfg, :SECTION_ID_KEY_ID)         # returns value or nothing
+#     Config.val(cfg, :SECTION_ID_KEY_ID, newVal) # sets new value - newVal
+#     Config.save(cfg, "config.data")             # saves all to file
+#     Config.load("config.data")                  # loads all from file
 #
 # @singleton
 # @author DeadbraiN
@@ -27,14 +26,15 @@ module Config
   export save
   export load
   export val
+  export isEmpty
 
-  export Data
+  export ConfigData
 
   #
   # Data type for storing configuration data. Is used in pair with GData
-  # type. For accessing use Gonfig.val(:SYMBOL[, value]) function
+  # type. For accessing use Gonfig.val(man.cfg, :SYMBOL[, value]) function
   #
-  type Data
+  type ConfigData
     #
     # Probabilities with which mutator decides what to do: add,
     # change, delete character of the code; change amount of
@@ -281,43 +281,99 @@ module Config
     CONNECTION_DOWN_SERVER_IP::IPv4
   end
   #
-  # Just a wrapper for Data type to have an ability to update
-  # global _data.d field after loading from a file.
+  # Creates configuration object. It will be used in all config
+  # related functions like val(), save(), load(),... We don't need
+  # to use global objects, because they are very very slow!
+  # @param empty Flag to create empty configuration
+  # @return {ConfigData} Data type instance
   #
-  type GData
-    d::Data
+  function create(empty::Bool = false)
+    ConfigData(
+      empty ? [] : [100,300,95,0,1,1,1], # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
+      1,                                 # ORGANISM_MUTATIONS_ON_CLONE
+      100,                               # ORGANISM_MAX_MUTATIONS_ON_CLONE
+      500,                               # ORGANISM_MUTATION_PERIOD
+      10000,                             # ORGANISM_MAX_MUTATION_PERIOD
+      2,                                 # ORGANISM_MUTATION_AMOUNT
+      100,                               # ORGANISM_MAX_MUTATION_AMOUNT
+      250,                               # ORGANISM_START_AMOUNT
+      5000,                              # ORGANISM_START_ENERGY
+      Int(typemax(UInt32)),              # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
+      200,                               # ORGANISM_ENERGY_DECREASE_PERIOD
+      1,                                 # ORGANISM_ENERGY_DECREASE_VALUE
+      500,                               # ORGANISM_REMOVE_AFTER_TIMES
+      5,                                 # ORGANISM_REMOVE_AMOUNT
+      5,                                 # ORGANISM_CLONE_AFTER_TIMES
+      1,                                 # ORGANISM_START_COLOR
+      2,                                 # CODE_MAX_FUNC_PARAMS
+      900,                               # WORLD_WIDTH
+      600,                               # WORLD_HEIGHT
+      0,                                 # WORLD_FRAME_DELAY
+      0,                                 # WORLD_IPS
+      400,                               # WORLD_MAX_ORGANISMS
+      50,                                # WORLD_MIN_ORGANISMS
+      10000,                             # WORLD_START_ENERGY_BLOCKS
+      UInt32(0x0001F4),                  # WORLD_START_ENERGY_AMOUNT
+      0.3,                               # WORLD_MIN_ENERGY_PERCENT
+      500,                               # WORLD_MIN_ENERGY_CHECK_PERIOD
+      1,                                 # WORLD_SCALE
+      1,                                 # BACKUP_PERIOD
+      7,                                 # BACKUP_AMOUNT
+      650,                               # STAT_WIDTH
+      500,                               # STAT_HEIGHT
+      5,                                 # STAT_FRAME_DELAY
+      20,                                # CONNECTION_STEP_ENERGY_PERCENT
+      2010,                              # CONNECTION_SERVER_PORT (current server port)
+      2011,                              # CONNECTION_FAST_SERVER_PORT (current server "fast" mode port)
+      ip"127.0.0.1",                     # CONNECTION_SERVER_IP
+      0,                                 # CONNECTION_LEFT_SERVER_PORT
+      ip"127.0.0.1",                     # CONNECTION_LEFT_SERVER_IP
+      0,                                 # CONNECTION_RIGHT_SERVER_PORT
+      ip"127.0.0.1",                     # CONNECTION_RIGHT_SERVER_IP
+      0,                                 # CONNECTION_UP_SERVER_PORT
+      ip"127.0.0.1",                     # CONNECTION_UP_SERVER_IP
+      0,                                 # CONNECTION_DOWN_SERVER_PORT
+      ip"127.0.0.1"                      # CONNECTION_DOWN_SERVER_IP
+    )
   end
-
   #
-  # Saves all data into the file. If file exists, it will
-  # be overrided
+  # Saves all data into the file. If file exists, it will be overriden
+  # @param data Config Data type
   # @param file File name
   # @return {Bool} saving result
   #
-  function save(file::ASCIIString = "config.data")
-    Helper.save(_data.d, file)
+  function save(data::ConfigData, file::ASCIIString = "config.data")
+    Helper.save(data, file)
   end
   #
-  # Loads all data from the file
+  # Loads all data from the file. If something went wrong new,
+  # default configuration data type will be created.
   # @param file File name
-  # @return {Bool} loading result
+  # @return {Tuple{ConfigData, Bool}} loading result
   #
   function load(file::ASCIIString = "config.data")
       try
-        _data.d = Helper.load(file)
+        return Helper.load(file)
       catch e
         Helper.warn("Config.load(): $e")
-        return false
       end
 
-      true
+      ConfigData()
+  end
+  #
+  # Checks if config data type is empty
+  # @param data Config Data type
+  # @return {Bool}
+  #
+  function isEmpty(data::ConfigData)
+    length(data.ORGANISM_MUTATION_PROBABILITIES) == 0
   end
   #
   # Formats configuration for usable user's view
   # @return {ASCIIString}
   #
   function format()
-    local fields::Array{Symbol, 1} = fieldnames(Data)
+    local fields::Array{Symbol, 1} = fieldnames(ConfigData)
     local i::Symbol
     local arr::Array{ASCIIString, 1} = []
 
@@ -330,81 +386,36 @@ module Config
   #
   # Returns configuration value according to unique key. In
   # case of incorrect key nothing will be returned.
+  # @param data Config Data type
   # @param Field's name symbol
   # @return {Any|nothing} Value of key in specified section
   # in case of incorrect section or key returns nothing
   #
-  function val(name::Symbol)
+  function val(data::ConfigData, name::Symbol)
     try
-      getfield(_data.d, name)
+      return getfield(data, name)
     catch(e)
       Helper.warn("Getter Config.val(): $e")
     end
+
+    nothing
   end
   #
   # Sets the value by unique key. Works in pair with getter
   # val() function
+  # @param data Config Data type
   # @param key Unique key of the value
   # @param value Value we have to set
   # @return Operation boolean result
   #
-  function val(name::Symbol, value::Any)
+  function val(data::ConfigData, name::Symbol, value::Any)
     try
-      setfield!(_data.d, name, value)
+      setfield!(data, name, value)
+      return true
     catch(e)
       Helper.warn("Setter Config.val(): $e")
     end
+
+    false
   end
-  #
-  # Global configuration data
-  #
-  global _data = GData(
-    Data(
-      [100,300,95,0,1,1,1],      # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
-      1,                         # ORGANISM_MUTATIONS_ON_CLONE
-      100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      500,                       # ORGANISM_MUTATION_PERIOD
-      10000,                     # ORGANISM_MAX_MUTATION_PERIOD
-      2,                         # ORGANISM_MUTATION_AMOUNT
-      100,                       # ORGANISM_MAX_MUTATION_AMOUNT
-      250,                       # ORGANISM_START_AMOUNT
-      5000,                      # ORGANISM_START_ENERGY
-      typemax(UInt32),           # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
-      200,                       # ORGANISM_ENERGY_DECREASE_PERIOD
-      1,                         # ORGANISM_ENERGY_DECREASE_VALUE
-      500,                       # ORGANISM_REMOVE_AFTER_TIMES
-      5,                         # ORGANISM_REMOVE_AMOUNT
-      5,                         # ORGANISM_CLONE_AFTER_TIMES
-      1,                         # ORGANISM_START_COLOR
-      2,                         # CODE_MAX_FUNC_PARAMS
-      900,                       # WORLD_WIDTH
-      600,                       # WORLD_HEIGHT
-      0,                         # WORLD_FRAME_DELAY
-      0,                         # WORLD_IPS
-      400,                       # WORLD_MAX_ORGANISMS
-      50,                        # WORLD_MIN_ORGANISMS
-      10000,                     # WORLD_START_ENERGY_BLOCKS
-      UInt32(0x0001F4),          # WORLD_START_ENERGY_AMOUNT
-      0.3,                       # WORLD_MIN_ENERGY_PERCENT
-      500,                       # WORLD_MIN_ENERGY_CHECK_PERIOD
-      1,                         # WORLD_SCALE
-      1,                         # BACKUP_PERIOD
-      7,                         # BACKUP_AMOUNT
-      650,                       # STAT_WIDTH
-      500,                       # STAT_HEIGHT
-      5,                         # STAT_FRAME_DELAY
-      20,                        # CONNECTION_STEP_ENERGY_PERCENT
-      2000,                      # CONNECTION_SERVER_PORT (current server port)
-      2001,                      # CONNECTION_FAST_SERVER_PORT (current server "fast" mode port)
-      ip"127.0.0.1",             # CONNECTION_SERVER_IP
-      0,                         # CONNECTION_LEFT_SERVER_PORT
-      ip"127.0.0.1",             # CONNECTION_LEFT_SERVER_IP
-      0,                         # CONNECTION_RIGHT_SERVER_PORT
-      ip"127.0.0.1",             # CONNECTION_RIGHT_SERVER_IP
-      0,                         # CONNECTION_UP_SERVER_PORT
-      ip"127.0.0.1",             # CONNECTION_UP_SERVER_IP
-      0,                         # CONNECTION_DOWN_SERVER_PORT
-      ip"127.0.0.1"              # CONNECTION_DOWN_SERVER_IP
-    )
-  )
 end

@@ -194,16 +194,21 @@ module Creature
   end
   #
   # Creates new organism with default settings and empty code.
+  # @param cfg Global configuration type
   # @param id Organism unique id
   # @param pos Position of organism
   # @return {Creature}
   #
-  function create(id::UInt = UInt(0), pos::Helper.Point = Helper.Point(1, 1))
+  function create(cfg::Config.ConfigData, id::UInt = UInt(0), pos::Helper.Point = Helper.Point(1, 1))
     #
     # This is main function of current organism. Expression
     # below means: function (o) return true end
     #
-    local code::Expr = Expr(:function, Expr(:tuple, Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))), Expr(:block, Expr(:return, true)))
+    local code::Expr = Expr(:function, Expr(:tuple,                      # function paraments
+      Expr(:(::), :cfg, Expr(:., :Config, Expr(:quote, :ConfigData))),   # cfg::Config.ConfigData
+      Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),    # o::Creature.Organism
+        Expr(:block, Expr(:return, true))                                # return true
+    )
     #
     # Blocks of main function. In this case only one - main block.
     #
@@ -216,56 +221,61 @@ module Creature
     local funcs::Array{Func, 1} = [Func(code, blocks)]
 
     Organism(
-      id,                                                                                    # id
-      code,                                                                                  # code
-      eval(code),                                                                            # codeFn
-      0,                                                                                     # codeSize
-      0,                                                                                     # symbolId
-      funcs,                                                                                 # funcs
-      Config.val(:ORGANISM_MUTATION_PROBABILITIES),                                          # mutationProbabilities
-      Config.val(:ORGANISM_MUTATIONS_ON_CLONE),                                              # mutationsOnClone
-      min(Config.val(:ORGANISM_MUTATION_PERIOD), Config.val(:ORGANISM_MAX_MUTATION_PERIOD)), # mutationPeriod
-      min(Config.val(:ORGANISM_MUTATION_AMOUNT), Config.val(:ORGANISM_MAX_MUTATION_AMOUNT)), # mutationAmount
-      Config.val(:ORGANISM_START_ENERGY),                                                    # energy
-      Config.val(:ORGANISM_START_COLOR),                                                     # color
-      Dict{Int16, Int16}(),                                                                  # mem
-      pos,                                                                                   # pos
-      Event.create()                                                                         # observer
+      id,                                                                                              # id
+      code,                                                                                            # code
+      eval(code),                                                                                      # codeFn
+      0,                                                                                               # codeSize
+      0,                                                                                               # symbolId
+      funcs,                                                                                           # funcs
+      Config.val(cfg, :ORGANISM_MUTATION_PROBABILITIES),                                               # mutationProbabilities
+      Config.val(cfg, :ORGANISM_MUTATIONS_ON_CLONE),                                                   # mutationsOnClone
+      min(Config.val(cfg, :ORGANISM_MUTATION_PERIOD), Config.val(cfg, :ORGANISM_MAX_MUTATION_PERIOD)), # mutationPeriod
+      min(Config.val(cfg, :ORGANISM_MUTATION_AMOUNT), Config.val(cfg, :ORGANISM_MAX_MUTATION_AMOUNT)), # mutationAmount
+      Config.val(cfg, :ORGANISM_START_ENERGY),                                                         # energy
+      Config.val(cfg, :ORGANISM_START_COLOR),                                                          # color
+      Dict{Int16, Int16}(),                                                                            # mem
+      pos,                                                                                             # pos
+      Event.create()                                                                                   # observer
     )
   end
   #
-  # TODO: describe organism's task function
+
   #
-  function born(org::Creature.Organism)
+  function born()
     #
-    # -----------------------------------------------------------------------
-    # This is main loop, where organism lives. It's body will be changed soon
-    # by mutations. This loop must be after ambedded functions.
+    # Parent code should pass an organism instance on start
     #
-    return function ()
-      local oldCode::Function = org.codeFn
+    local org::Organism
+    local cfg::Config.ConfigData
+    local oldCode::Function = org.codeFn
+    #
+    # We need these instances for events like stepleft, grabup,...
+    #
+    org, cfg = produce()
+    #
+    # This variable is used inside for loops in organism's code
+    # So, don't remove it
+    # TODO: check if this variable is used inside the org.codeFn()!!!
+    #
+    local i::Int8
+    #
+    # This is main loop, where organism lives. It's body will be
+    # changed soon by mutations.
+    #
+    while true
+      produce()
       #
-      # This variable is used inside for loops in organism's code
+      # It's okay if organism has errors and throws exceptions. It's possible
+      # that these errors will be fixed by future mutations.
       #
-      local i::Int8
-      #
-      # TODO: describe organism's main loop
-      #
-      while true
-        produce()
-        #
-        # It's okay if organism has errors and throws exceptions. It's possible
-        # that these errors will be fixed by future mutations.
-        #
-        try
-          org.codeFn(org)
-          if org.codeFn !== oldCode
-            oldCode = org.codeFn
-          end
-        catch e
-          # TODO: what we have to do with code errors?
-          # TODO: we have to calculate it for statistics
+      try
+        org.codeFn(cfg, org)
+        if org.codeFn !== oldCode
+          oldCode = org.codeFn
         end
+      catch e
+        # TODO: what we have to do with code errors?
+        # TODO: we have to calculate it for statistics
       end
     end
   end
@@ -301,38 +311,42 @@ module Creature
   # el - means get Energy Left. Short name to help organism find this name faster.
   # Grabs energy from the left point. Grabbibg means decrease energy at point
   # and increase it at organism.
+  # @param cfg Global configuration type
   # @param org Current organism
   # @param amount Amount of energy organism wants to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function eatLeft(org::Organism, amount::Int) _grabEnergy(org, left, amount) end
+  function eatLeft(cfg::Config.ConfigData, org::Organism, amount::Int) _grabEnergy(cfg, org, left, amount) end
   #
   # @oapi
   # er - means get Energy Right. Short name to help organism find this name faster.
   # Grabs energy from the right point.
+  # @param cfg Global configuration type
   # @param org Current organism
   # @param amount Amount of energy organism wants to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function eatRight(org::Organism, amount::Int) _grabEnergy(org, right, amount) end
+  function eatRight(cfg::Config.ConfigData, org::Organism, amount::Int) _grabEnergy(cfg, org, right, amount) end
   #
   # @oapi
   # eu - means get Energy Up. Short name to help organism find this name faster.
   # Grabs energy from the up point.
+  # @param cfg Global configuration type
   # @param org Current organism
   # @param amount Amount of energy organism wants to grab
   # @return {UInt} Amount of grabbed energy
   #
-  function eatUp(org::Organism, amount::Int) _grabEnergy(org, up, amount) end
+  function eatUp(cfg::Config.ConfigData, org::Organism, amount::Int) _grabEnergy(cfg, org, up, amount) end
   #
   # @oapi
   # ed - means get Energy Down. Short name to help organism find this name faster.
   # Grabs energy from the down point.
+  # @param cfg Global configuration type
   # @param org Current organism
   # @param amount Amount of energy organism wants to grab
   # @return {Int} Amount of grabbed energy
   #
-  function eatDown(org::Organism, amount::Int) _grabEnergy(org, down, amount) end
+  function eatDown(cfg::Config.ConfigData, org::Organism, amount::Int) _grabEnergy(cfg, org, down, amount) end
   #
   # @oapi
   # @param org Current organism
@@ -375,12 +389,13 @@ module Creature
   #
   # Universal method for grabbing energy from the world. It grabs at
   # the position up, left, bottom or right from current organism.
+  # @param cfg Global configuration type
   # @param org      Current organism
   # @param dir      Direction Enum(left, right, up, down)
   # @param amount   Amount of grabbed energy
   # @param amount   Amount of energy to grab
   #
-  function _grabEnergy(org::Organism, dir::DIRECTION, amount::Int)
+  function _grabEnergy(cfg::Config.ConfigData, org::Organism, dir::DIRECTION, amount::Int)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
@@ -394,6 +409,6 @@ module Creature
     #
     # We can't exceed max amount of energy
     #
-    org.energy = min(org.energy + retObj.ret, Config.val(:ORGANISM_MAX_ENERGY))
+    org.energy = min(org.energy + retObj.ret, Config.val(cfg, :ORGANISM_MAX_ENERGY))
   end
 end

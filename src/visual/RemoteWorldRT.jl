@@ -58,16 +58,17 @@ module RemoteWorldRT
   end
   #
   # Creates connection with remote host for display pixels from remote world.
+  # @param cfg Global config type
   # @param host Remote host we are connecting to
   # @param cmdPort Remote port for commands
   # @param poolingPort Remote port for pooling requests
   # @return {RemoteDataRT}
   #
-  function create(host::Base.IPAddr, cmdPort::Int, poolingPort::Int)
+  function create(cfg::Config.CofigData, host::Base.IPAddr, cmdPort::Int, poolingPort::Int)
     RemoteDataRT(
       Client.create(host, cmdPort),
       Client.create(host, poolingPort, true),
-      OpenGlWindow.create(Config.val(:WORLD_WIDTH), Config.val(:WORLD_HEIGHT))
+      OpenGlWindow.create(Config.val(cfg, :WORLD_WIDTH), Config.val(cfg, :WORLD_HEIGHT), Config.val(cfg, :WORLD_SCALE))
     )
   end
   #

@@ -60,11 +60,12 @@ module Code
   # @line
   # Returns AST expression for variable declaration. Format:
   # local name::Type = value
+  # @param cfg Global configuration type
   # @param org Organism we have to mutate
   # @param pos Position for current mutation
   # @return {Expr|Expr(:nothing)}
   #
-  function var(org::Creature.Organism, pos::Helper.Pos)
+  function var(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
     local typ::DataType = @randType()
     local var::Symbol = @newVar(org)
     local block::Creature.Block = @getBlock(org, pos)
@@ -84,16 +85,17 @@ module Code
   # Creates custom function with unique name, random arguments with
   # default values. By default it returns first parameter as local
   # variable
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Code position
   # @return {Expr|Expr(:nothing)}
   #
-  function fn(org::Creature.Organism, pos::Helper.Pos)
+  function fn(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
     local typ::DataType
     local sym::Symbol
     local i::Int
     local exp::Expr
-    local paramLen::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
+    local paramLen::Int = rand(1:Config.val(cfg, :CODE_MAX_FUNC_PARAMS))
     local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing))
     local blocks::Array{Creature.Block, 1} = [block]
     #
@@ -131,11 +133,12 @@ module Code
   # It choose custom function from org.funcs array, fills parameters
   # and call it. It also creates new variable with appropriate type.
   # Example: var_x = func_x(<args>)
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Code position
   # @return {Expr|Expr(:nothing)}
   #
-  function fnCall(org::Creature.Organism, pos::Helper.Pos)
+  function fnCall(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
     local funcsLen::Int             = length(org.funcs)
     if funcsLen < 2 return Expr(:nothing) end
     local fnEx::Expr                = org.funcs[rand(2:funcsLen)].code          # only custom function may be called
@@ -164,11 +167,12 @@ module Code
   # @block
   # if operator implementation. It contains block inside, so it can't be inside
   # other block. For example, it can't be inside body of "for" operator.
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Code position
   # @return {Expr|Expr(:nothing)}
   #
-  function condition(org::Creature.Organism, pos::Helper.Pos)
+  function condition(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
     local typ::DataType = @randType()
     local v1::Symbol    = @randVar(org, pos, typ)
     if v1 === :nothing return Expr(:nothing) end
@@ -185,11 +189,12 @@ module Code
   # Creates a for loop. We have to create small loops, because they
   # affect entire speed. This is why we divide amount into 8. So max
   # loop iterations < 8
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Position in a code
   # @return {Expr|Expr(:nothing)}
   #
-  function loop(org::Creature.Organism, pos::Helper.Pos)
+  function loop(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
     local v::Symbol = @randVar(org, pos, Int8)
     if v === :nothing return Expr(:nothing) end
     local loopEx    = :(for i::Int8 = 1:div($v, _LOOP_STEPS_DIVIDER) end)

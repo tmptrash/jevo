@@ -13,8 +13,11 @@ import RemoteWorldRT
 # Analog of main() in C lang
 #
 function main()
+  local cfg::Config.ConfigData = Config.create()
+
+  if Config.isEmpty(cfg) quit() end
   # TODO: should be get from command line parameter or it's local default config
-  rw = RemoteWorldRT.create(ip"127.0.0.1", 2000, 2001)
+  rw = RemoteWorldRT.create(cfg, ip"127.0.0.1", 2000, 2001)
   RemoteWorldRT.start(rw)
 end
 #

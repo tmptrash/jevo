@@ -159,7 +159,6 @@ module RpcApi
   # Describes one dot in a world
   #
   type Dot
-
     x::Int
     y::Int
     color::UInt32

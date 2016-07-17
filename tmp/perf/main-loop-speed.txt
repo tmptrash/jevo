@@ -1,3 +1,5 @@
+[ test should be run without backup files ]
+
 230    - etalon
 
 210382 - disabled _updateOrganisms()

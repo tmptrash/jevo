@@ -41,7 +41,7 @@ module Mutator
   # TODO: describe indexes (add,change,del,...)
   # TODO: describe return value. false mean no mutation
   #
-  function mutate(org::Creature.Organism, amount::Int = 1)
+  function mutate(cfg::Config.ConfigData, org::Creature.Organism, amount::Int = 1)
     local i         ::Int
     local res       ::Bool
     local pIndex    ::Int
@@ -88,6 +88,9 @@ module Mutator
   # they organizer in a gradient way. So we may just increase
   # color index to obtain smooth color change on organism descendants.
   # @param org Organism whom color we have to change
+  # TODO: there is a problem here, that in some peiod of time,
+  # TODO: organisms will be black (invisible). We have to exclude
+  # TODO: black color from the palette
   #
   function _changeColor(org::Creature.Organism)
     org.color += 1
@@ -97,20 +100,21 @@ module Mutator
   # Adds one line of code into existing code blocks including all
   # custom function bodies and their blocks. It shouldn't add function
   # or function call inside other function excepts main one.
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Adding code position
   # @param cmd Command we have to add
   # @return {Bool} true means that add mutation was occured, false
   # that there where no add or adding was skipped.
   #
-  function _onAdd(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+  function _onAdd(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     @posCorrect(org, pos, cmd)
     local block::Creature.Block = org.funcs[pos.fnIdx].blocks[pos.blockIdx]
     #
     # We may add a code only after variables/functions declaration
     #
     if pos.lineIdx < block.defIndex return false end
-    local exp::Expr = cmd.fn(org, pos)
+    local exp::Expr = cmd.fn(cfg, org, pos)
     #
     # Incorrect position for adding or it's impossible to
     # get a command.
@@ -129,13 +133,14 @@ module Mutator
   #
   # Makes one big change in a code of main and custom functions. Big
   # change means changing one line. It's possible to skip changing.
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Changing code position
   # @param cmd Command we have change to
   # @return {Bool} true means that there were a change, false
   # that there were no change or change was skipped.
   #
-  function _onChange(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+  function _onChange(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     @posCorrect(org, pos, cmd)
     local block::Creature.Block = org.funcs[pos.fnIdx].blocks[pos.blockIdx]
     #
@@ -157,7 +162,7 @@ module Mutator
        # this is how we break the rule vars/funcs declaration at the beginning.
        #
        (cmd.fn === Code.fn || cmd.fn === Code.var) && pos.lineIdx > block.defIndex ||
-       (exp = cmd.fn(org, pos)).head === :nothing
+       (exp = cmd.fn(cfg, org, pos)).head === :nothing
       return false
     end
     Code.onRemoveLine(org, pos)
@@ -168,13 +173,14 @@ module Mutator
   #
   # Removes one code line if possible. It can't remove return
   # operator inside custom functions
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Delete code position
   # @param cmd Unused
   # @return {Bool} true means that there were a delete, false
   # that there were no delete or delete was skipped.
   #
-  function _onDel(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+  function _onDel(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     local lines::Array{Any, 1} = org.funcs[pos.fnIdx].blocks[pos.blockIdx].expr.args
     local len::Int = length(lines)
 
@@ -193,6 +199,7 @@ module Mutator
   # Makes one small change in a code included code of all
   # custom functions. Small change it's change of variable
   # or constant to other/same variable or constant.
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Change code position
   # @param cmd Unused
@@ -200,7 +207,7 @@ module Mutator
   # that there were no change or change was skipped.
   # TODO: implement in future
   #
-  function _onSmallChange(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+  function _onSmallChange(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
     # TODO: AST deep analyzing here!
     # TODO: variables and constants should be used here
     true
@@ -208,35 +215,37 @@ module Mutator
   #
   # mutationsOnClone property mutation handler. It changes this
   # property randomly. 0 means disable property.
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Unused
   # @param cmd Unused
   #
-
-  function _onClone(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationsOnClone = rand(0:Config.val(:ORGANISM_MAX_MUTATIONS_ON_CLONE))
+  function _onClone(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+    org.mutationsOnClone = rand(0:Config.val(cfg, :ORGANISM_MAX_MUTATIONS_ON_CLONE))
     true
   end
   #
   # mutationPeriod property mutation handler. It changes this
   # property randomly. 0 means disable property.
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Unused
   # @param cmd Unused
   #
-  function _onPeriod(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationPeriod = rand(0:Config.val(:ORGANISM_MAX_MUTATION_PERIOD))
+  function _onPeriod(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+    org.mutationPeriod = rand(0:Config.val(cfg, :ORGANISM_MAX_MUTATION_PERIOD))
     true
   end
   #
   # mutationAmount property mutation handler. It changes this
   # property randomly. 0 means disable property.
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Unused
   # @param cmd Unused
   #
-  function _onAmount(org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationAmount = rand(0:Config.val(:ORGANISM_MAX_MUTATION_AMOUNT))
+  function _onAmount(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+    org.mutationAmount = rand(0:Config.val(cfg, :ORGANISM_MAX_MUTATION_AMOUNT))
     true
   end
   #

@@ -11,7 +11,7 @@
 # Usage:
 #   import OpenGlWindow
 #   ...
-#   win = OpenGlWindow.create(300, 300)
+#   win = OpenGlWindow.create(300, 300, 3)
 #   CanvasWindow.dot(win, 20, 20, UInt32(11197883)) # R=AA,G=DD,B=BB
 #   OpenGlWindow.dot(win, 30, 30, UInt32(11197883)) # R=AA,G=DD,B=BB
 #   OpenGlWindow.update(win)                        # Two dots will be shown
@@ -25,7 +25,6 @@
 module OpenGlWindow
   import GR
   import Colors
-  import Config
   import DotColors
   import Helper
 
@@ -65,7 +64,7 @@ module OpenGlWindow
   # @param title Window title
   # @return Window object
   #
-  function create(width::Int, height::Int, scale::Int = Config.val(:WORLD_SCALE), title::ASCIIString = "")
+  function create(width::Int, height::Int, scale::Int, title::ASCIIString = "")
     local emptyColor::Int = DotColors.INDEX_EMPTY
     local win::Window = Window(scale, Int[0], Int[0], width, height, 1.0, true)
     local wndWidth::Int = width * scale

@@ -16,9 +16,11 @@ export backup
 # backup file. It means that an application was crashed before
 # and now we have to recover it with last correct backup. Works
 # in pair with backup() function.
+# @param man Manager data type
 # @return {Bool} recover status
 #
-function recover()
+function recover(man::ManagerTypes.ManagerData)
+  # TODO: what about type here?
   local data = Backup.load()
   local i::Int
   local t::ManagerTypes.OrganismTask
@@ -27,26 +29,31 @@ function recover()
 
   for i = 1:length(data.tasks)
     t = data.tasks[i]
-    t.task = Task(Creature.born(t.organism))
+    t.task = Task(Creature.born)
+    #
+    # This is how we pass an organism and config type instances inside organism's code
+    #
+    consume(t.task)
+    consume(t.task, (t.organism, man.cfg))
   end
 
-  Manager._data.world          = data.world
-  Manager._data.positions      = data.positions
-  Manager._data.organisms      = data.organisms
-  Manager._data.tasks          = data.tasks
-  Manager._data.params         = data.params
-  Manager._data.organismId     = data.organismId
-  Manager._data.totalOrganisms = data.totalOrganisms
-  Manager._data.minOrg         = data.minOrg
-  Manager._data.maxOrg         = data.maxOrg
-  Manager._data.minId          = data.minId
-  Manager._data.maxId          = data.maxId
+  man.world          = data.world
+  man.positions      = data.positions
+  man.organisms      = data.organisms
+  man.tasks          = data.tasks
+  man.params         = data.params
+  man.organismId     = data.organismId
+  man.totalOrganisms = data.totalOrganisms
+  man.minOrg         = data.minOrg
+  man.maxOrg         = data.maxOrg
+  man.minId          = data.minId
+  man.maxId          = data.maxId
   #
   # We have to remove all event handlers from observers
   # after backup loading, because they may be multiplied
   # on every app running.
   #
-  Event.clear(Manager._data.world.obs)
+  Event.clear(man.world.obs)
 
   true
 end
@@ -55,8 +62,8 @@ end
 # Works in pair with recover().
 # @return {Bool} Backup status
 #
-function backup()
-  local tasks::Array{ManagerTypes.OrganismTask, 1} = deepcopy(Manager._data.tasks)
+function backup(man::ManagerTypes.ManagerData)
+  local tasks::Array{ManagerTypes.OrganismTask, 1} = deepcopy(man.tasks)
   local task::Task = Task(()->0)
   local len::Int = length(tasks)
   local t::Int
@@ -65,24 +72,25 @@ function backup()
   # state for serializing into the file. Julia can't save active
   # tasks. After storing we have to restore all tasks.
   #
-  for t = 1:len Manager._data.tasks[t].task = task end
-  Backup.save(Manager._data)
-  _removeOld()
-  for t = 1:len Manager._data.tasks[t].task = tasks[t].task end
+  for t = 1:len man.tasks[t].task = task end
+  Backup.save(man)
+  _removeOld(man)
+  for t = 1:len man.tasks[t].task = tasks[t].task end
   Helper.info(string("Backup has created: ", Backup.lastFile()))
 
   true
 end
 #
 # Removes old backup files, because they are big.
+# @param man Manager data type
 #
-function _removeOld()
+function _removeOld(man::ManagerTypes.ManagerData)
   local files::Array{ASCIIString, 1} = Backup.getFiles(Backup.FOLDER_NAME)
   local len::Int = length(files)
   local i::Int
 
-  if len <= Config.val(:BACKUP_AMOUNT) return true end
-  for i = 1:(len - Config.val(:BACKUP_AMOUNT))
+  if len <= Config.val(man.cfg, :BACKUP_AMOUNT) return true end
+  for i = 1:(len - Config.val(man.cfg, :BACKUP_AMOUNT))
     rm(Backup.FOLDER_NAME * "/" * files[i])
   end
 
