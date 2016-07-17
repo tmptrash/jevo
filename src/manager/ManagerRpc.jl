@@ -413,9 +413,9 @@ end
 function _createClient(man::ManagerTypes.ManagerData, side::ASCIIString)
   local con::Client.ClientConnection
   local serverPort::Int = _getPort(man, getfield(Manager, symbol("ARG_", side, "_SERVER_PORT")), symbol("CONNECTION_", side, "_SERVER_PORT"))
-  local serverIp::IPv4  = _getIp(getfield(Manager, symbol("ARG_", side, "_SERVER_IP")), symbol("CONNECTION_", side, "_SERVER_IP"))
+  local serverIp::IPv4  = _getIp(man, getfield(Manager, symbol("ARG_", side, "_SERVER_IP")), symbol("CONNECTION_", side, "_SERVER_IP"))
   local thisPort::Int   = _getPort(man, Manager.ARG_SERVER_PORT, :CONNECTION_SERVER_PORT)
-  local thisIp::IPv4    = _getIp(Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP)
+  local thisIp::IPv4    = _getIp(man, Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP)
 
   if serverPort === thisPort && serverIp === thisIp
     Helper.error(string("Error creating Client for ", side, " server. Remote port and IP are similar to current. Port: ", thisPort, ", IP: ", thisIp))
@@ -441,13 +441,13 @@ end
 # @return Manager.Connections object
 #
 function _createConnections(man::ManagerTypes.ManagerData)
-  Manager.Connections(
+  ManagerTypes.Connections(
     _createServer(man),
     _createServer(man, true),
-    _createClient(_SIDE_LEFT),
-    _createClient(_SIDE_RIGHT),
-    _createClient(_SIDE_UP),
-    _createClient(_SIDE_DOWN),
+    _createClient(man, _SIDE_LEFT),
+    _createClient(man, _SIDE_RIGHT),
+    _createClient(man, _SIDE_UP),
+    _createClient(man, _SIDE_DOWN),
     Dict{UInt, Creature.Organism}(),
     false
   )
@@ -551,7 +551,7 @@ end
 #
 function _createServer(man::ManagerTypes.ManagerData, fast::Bool = false)
   local con::Server.ServerConnection = Server.create(
-    _getIp(Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP),
+    _getIp(man, Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP),
     _getPort(man, fast ? Manager.ARG_FAST_SERVER_PORT : Manager.ARG_SERVER_PORT, fast ? :CONNECTION_FAST_SERVER_PORT : :CONNECTION_SERVER_PORT),
     fast
   )

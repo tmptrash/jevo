@@ -67,7 +67,7 @@ module World
   # @param height World height
   # @return {Plane} filled by zero values Plane
   #
-  function create(width::Int, height::Int
+  function create(width::Int, height::Int)
     Plane(width, height, fill(UInt32(0), height, width), Event.create())
   end
   #

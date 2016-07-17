@@ -47,8 +47,7 @@ module Manager
   #
   function create()
     local cfg::Config.ConfigData = Config.create()
-
-    ManagerTypes.ManagerData(
+    local man::ManagerTypes.ManagerData = ManagerTypes.ManagerData(
       cfg,                                                                           # cfg
       World.create(Config.val(cfg, :WORLD_WIDTH), Config.val(cfg, :WORLD_HEIGHT)),   # world
       Dict{Int, Creature.Organism}(),                                                # positions
@@ -62,9 +61,12 @@ module Manager
       UInt(0),                                                                       # minId
       UInt(0),                                                                       # maxId
       CommandLine.has(CommandLine.create(), ARG_QUIET),                              # quiet
-      _createConnections(),                                                          # cons
       function(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32) end  # dotCallback
     )
+    local cons::ManagerTypes.Connections = _createConnections(man)
+
+    man.cons = cons
+    man
   end
   #
   # Runs Manager instance, one world, server an so on... Blocking

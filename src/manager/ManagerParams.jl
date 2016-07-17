@@ -57,7 +57,7 @@ const ARG_QUIET            = "quiet"
 # @return {Int} Port number or 0 if no port available
 #
 function _getPort(man::ManagerTypes.ManagerData, cmdParam::ASCIIString, cfgParam::Symbol)
-  local port::ASCIIString = CommandLine.val(man.cfg, cmdParam)
+  local port::ASCIIString = CommandLine.val(man.params, cmdParam)
   port == "" ? Config.val(man.cfg, cfgParam) : parse(Int, port)
 end
 #
@@ -68,6 +68,6 @@ end
 # @return {IPv4} IP address
 #
 function _getIp(man::ManagerTypes.ManagerData, cmdParam::ASCIIString, cfgParam::Symbol)
-  local ip::ASCIIString = CommandLine.val(man.cfg, cmdParam)
+  local ip::ASCIIString = CommandLine.val(man.params, cmdParam)
   ip == "" ? Config.val(man.cfg, cfgParam) : IPv4(ip)
 end

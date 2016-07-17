@@ -111,13 +111,83 @@ module ManagerTypes
     #
     quiet::Bool
     #
-    # Manager connections (with other managers, terminals, visualizer etc...)
-    #
-    cons::Connections
-    #
     # Callback, which is called when at least one dot in a
     # world has changed it's color
     #
     dotCallback::Function
+    #
+    # Manager connections (with other managers, terminals, visualizer etc...)
+    #
+    cons::Connections
+    #
+    # Short constructor
+    #
+    ManagerData(
+      cfg::Config.ConfigData,
+      world::World.Plane,
+      positions::Dict{Int, Creature.Organism},
+      organisms::Dict{UInt, Creature.Organism},
+      tasks::Array{OrganismTask, 1},
+      params::Dict{ASCIIString, ASCIIString},
+      organismId::UInt,
+      totalOrganisms::UInt,
+      minOrg::Creature.Organism,
+      maxOrg::Creature.Organism,
+      minId::UInt,
+      maxId::UInt,
+      quiet::Bool,
+      dotCallback::Function
+    ) = new(
+      cfg,
+      world,
+      positions,
+      organisms,
+      tasks,
+      params,
+      organismId,
+      totalOrganisms,
+      minOrg,
+      maxOrg,
+      minId,
+      maxId,
+      quiet,
+      dotCallback
+    )
+    #
+    # Full constructor
+    #
+    ManagerData(
+      cfg::Config.ConfigData,
+      world::World.Plane,
+      positions::Dict{Int, Creature.Organism},
+      organisms::Dict{UInt, Creature.Organism},
+      tasks::Array{OrganismTask, 1},
+      params::Dict{ASCIIString, ASCIIString},
+      organismId::UInt,
+      totalOrganisms::UInt,
+      minOrg::Creature.Organism,
+      maxOrg::Creature.Organism,
+      minId::UInt,
+      maxId::UInt,
+      quiet::Bool,
+      dotCallback::Function,
+      cons::Connections
+    ) = new(
+      cfg,
+      world,
+      positions,
+      organisms,
+      tasks,
+      params,
+      organismId,
+      totalOrganisms,
+      minOrg,
+      maxOrg,
+      minId,
+      maxId,
+      quiet,
+      dotCallback,
+      cons
+    )
   end
 end
