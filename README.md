@@ -3,4 +3,4 @@ Julia language based, digital organisms evolution simulator. This project simila
 
 In progress...
 
-P.S. More details on blog: https://jevosite.wordpress.com/
+P.S. More details on blog: https://jevosite.wordpress.com/ and in chat: jevo.slack.com
