@@ -3,25 +3,25 @@ module TestConfig
   using FactCheck
 
   facts("Read default value") do
-    @fact Config.val(Config.create(), :WORLD_IPS) --> 0
+    @fact Config.create().WORLD_IPS --> 0
   end
   facts("Read default value with incorrect key") do
-    @fact Config.val(Config.create(), :UNKNOWN_KEY) --> nothing
+    @fact Config.create().UNKNOWN_KEY --> nothing
   end
 
   facts("Write value") do
     local cfg::Config.ConfigData = Config.create()
 
-    Config.val(cfg, :WORLD_IPS, 1)
-    @fact Config.val(cfg, :WORLD_IPS) --> 1
-    Config.val(cfg, :WORLD_IPS, 2)
-    @fact Config.val(cfg, :WORLD_IPS) --> 2
+    cfg.WORLD_IPS = 1
+    @fact cfg.WORLD_IPS --> 1
+    cfg.WORLD_IPS = 2
+    @fact cfg.WORLD_IPS --> 2
   end
   facts("Write value in incorrect key") do
     local cfg::Config.ConfigData = Config.create()
 
-    @fact Config.val(cfg, :UNKNOWN_KEY, 1) --> nothing
-    @fact Config.val(cfg, :UNKNOWN_KEY) --> nothing
+    #@fact Config.val(cfg, :UNKNOWN_KEY, 1) --> nothing
+    #@fact Config.val(cfg, :UNKNOWN_KEY) --> nothing
   end
 
   facts("Save configuration into the file") do
@@ -36,11 +36,11 @@ module TestConfig
     local cfgFile::ASCIIString = "config.data"
 
     try rm(cfgFile) end
-    Config.val(cfg, :WORLD_IPS, 666)
+    cfg.WORLD_IPS = 666
     @fact Config.save(cfgFile)   --> true
-    Config.val(cfg, :WORLD_IPS, 777)
+    cfg.WORLD_IPS = 777
     Config.load(cfgFile)
-    @fact Config.val(cfg, :WORLD_IPS) --> 666
+    @fact cfg.WORLD_IPS --> 666
     rm(cfgFile)
   end
   facts("Load configuration from incorrect file") do
@@ -65,26 +65,26 @@ module TestConfig
 
     try rm(cfgFile1) end
     try rm(cfgFile2) end
-    @fact Config.val(cfg, :WORLD_IPS, 666) --> 666
-    @fact Config.save(cfgFile1)       --> true      # IPS === 666
-    @fact Config.val(cfg, :WORLD_IPS)      --> 666
-    @fact Config.val(cfg, :WORLD_IPS, 777) --> 777
-    @fact Config.val(cfg, :WORLD_IPS)      --> 777
-    @fact Config.load(cfgFile1)       --> true
-    @fact Config.val(cfg, :WORLD_IPS)      --> 666
-    @fact Config.val(cfg, :WORLD_IPS, 777) --> 777
-    @fact Config.val(cfg, :WORLD_IPS)      --> 777
+    cfg.WORLD_IPS = 666
+    @fact Config.save(cfgFile1)            --> true # IPS === 666
+    @fact cfg.WORLD_IPS --> 666
+    cfg.WORLD_IPS = 777
+    @fact cfg.WORLD_IPS                    --> 777
+    @fact Config.load(cfgFile1)            --> true
+    @fact cfg.WORLD_IPS                    --> 666
+    cfg.WORLD_IPS = 777
+    @fact cfg.WORLD_IPS                    --> 777
 
-    @fact Config.save(cfgFile2)       --> true      # IPS === 777
-    @fact Config.val(cfg, :WORLD_IPS, 666) --> 666
-    @fact Config.val(cfg, :WORLD_IPS)      --> 666
-    @fact Config.load(cfgFile2)       --> true
-    @fact Config.val(cfg, :WORLD_IPS)      --> 777
+    @fact Config.save(cfgFile2)            --> true      # IPS === 777
+    cfg.WORLD_IPS = 666
+    @fact cfg.WORLD_IPS                    --> 666
+    @fact Config.load(cfgFile2)            --> true
+    @fact cfg.WORLD_IPS                    --> 777
 
-    @fact Config.load(cfgFile1)       --> true      # IPS === 666
-    @fact Config.val(cfg, :WORLD_IPS)      --> 666
-    @fact Config.load(cfgFile2)       --> true      # IPS === 777
-    @fact Config.val(cfg, :WORLD_IPS)      --> 777
+    @fact Config.load(cfgFile1)            --> true      # IPS === 666
+    @fact cfg.WORLD_IPS                    --> 666
+    @fact Config.load(cfgFile2)            --> true      # IPS === 777
+    @fact cfg.WORLD_IPS                    --> 777
 
     rm(cfgFile1)
     rm(cfgFile2)

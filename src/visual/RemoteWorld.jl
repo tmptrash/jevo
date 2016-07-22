@@ -54,7 +54,7 @@ module RemoteWorld
   # TODO: return value should be same type
   function create(cfg::Config.ConfigData, host::Base.IPAddr, port::Integer, width::Int, height::Int
     pd = Pooling.create(host, port)
-    pd !== false ? RemoteData(pd, CanvasWindow.create(width, height, Config.val(cfg, :WORLD_SCALE))) : false
+    pd !== false ? RemoteData(pd, CanvasWindow.create(width, height, cfg.WORLD_SCALE)) : false
   end
   #
   # Start displaying remote area. It makes requests to remote

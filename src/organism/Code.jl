@@ -95,7 +95,7 @@ module Code
     local sym::Symbol
     local i::Int
     local exp::Expr
-    local paramLen::Int = rand(1:Config.val(cfg, :CODE_MAX_FUNC_PARAMS))
+    local paramLen::Int = rand(1:cfg.CODE_MAX_FUNC_PARAMS)
     local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing))
     local blocks::Array{Creature.Block, 1} = [block]
     #

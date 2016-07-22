@@ -58,7 +58,7 @@ const ARG_QUIET            = "quiet"
 #
 function _getPort(man::ManagerTypes.ManagerData, cmdParam::ASCIIString, cfgParam::Symbol)
   local port::ASCIIString = CommandLine.val(man.params, cmdParam)
-  port == "" ? Config.val(man.cfg, cfgParam) : parse(Int, port)
+  port == "" ? getfield(man.cfg, cfgParam) : parse(Int, port)
 end
 #
 # Returns IP address of current server. See ARG_SERVER_IP for details
@@ -69,5 +69,5 @@ end
 #
 function _getIp(man::ManagerTypes.ManagerData, cmdParam::ASCIIString, cfgParam::Symbol)
   local ip::ASCIIString = CommandLine.val(man.params, cmdParam)
-  ip == "" ? Config.val(man.cfg, cfgParam) : IPv4(ip)
+  ip == "" ? getfield(man.cfg, cfgParam) : IPv4(ip)
 end

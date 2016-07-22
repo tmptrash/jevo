@@ -1,6 +1,6 @@
 [ test should be run without backup files ]
 
-230    - etalon
+203    - etalon
 
 210382 - disabled _updateOrganisms()
 339    - disabled _updateOrganisms() -> periodic mutations

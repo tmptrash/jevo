@@ -15,7 +15,7 @@
 # Usage:
 #   import CanvasWindow
 #   ...
-#   win = CanvasWindow.create(300, 300)
+#   win = CanvasWindow.create(cfg, 300, 300)
 #   CanvasWindow.dot(win, 20, 20, UInt32(11197883)) # R=AA,G=DD,B=BB
 #   CanvasWindow.dot(win, 30, 30, UInt32(11197883)) # R=AA,G=DD,B=BB
 #   CanvasWindow.update(win)                        # Two dots will be shown

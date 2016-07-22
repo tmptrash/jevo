@@ -221,21 +221,21 @@ module Creature
     local funcs::Array{Func, 1} = [Func(code, blocks)]
 
     Organism(
-      id,                                                                                              # id
-      code,                                                                                            # code
-      eval(code),                                                                                      # codeFn
-      0,                                                                                               # codeSize
-      0,                                                                                               # symbolId
-      funcs,                                                                                           # funcs
-      Config.val(cfg, :ORGANISM_MUTATION_PROBABILITIES),                                               # mutationProbabilities
-      Config.val(cfg, :ORGANISM_MUTATIONS_ON_CLONE),                                                   # mutationsOnClone
-      min(Config.val(cfg, :ORGANISM_MUTATION_PERIOD), Config.val(cfg, :ORGANISM_MAX_MUTATION_PERIOD)), # mutationPeriod
-      min(Config.val(cfg, :ORGANISM_MUTATION_AMOUNT), Config.val(cfg, :ORGANISM_MAX_MUTATION_AMOUNT)), # mutationAmount
-      Config.val(cfg, :ORGANISM_START_ENERGY),                                                         # energy
-      Config.val(cfg, :ORGANISM_START_COLOR),                                                          # color
-      Dict{Int16, Int16}(),                                                                            # mem
-      pos,                                                                                             # pos
-      Event.create()                                                                                   # observer
+      id,                                                                   # id
+      code,                                                                 # code
+      eval(code),                                                           # codeFn
+      0,                                                                    # codeSize
+      0,                                                                    # symbolId
+      funcs,                                                                # funcs
+      cfg.ORGANISM_MUTATION_PROBABILITIES,                                  # mutationProbabilities
+      cfg.ORGANISM_MUTATIONS_ON_CLONE,                                      # mutationsOnClone
+      min(cfg.ORGANISM_MUTATION_PERIOD, cfg.ORGANISM_MAX_MUTATION_PERIOD),  # mutationPeriod
+      min(cfg.ORGANISM_MUTATION_AMOUNT, cfg.ORGANISM_MAX_MUTATION_AMOUNT),  # mutationAmount
+      cfg.ORGANISM_START_ENERGY,                                            # energy
+      cfg.ORGANISM_START_COLOR,                                             # color
+      Dict{Int16, Int16}(),                                                 # mem
+      pos,                                                                  # pos
+      Event.create()                                                        # observer
     )
   end
   #
@@ -249,10 +249,11 @@ module Creature
     local org::Organism
     local cfg::Config.ConfigData
     local oldCode::Function
+    local manTask::Task
     #
     # We need these instances for events like stepleft, grabup,...
     #
-    org, cfg = produce()
+    org, cfg, manTask = produce()
     oldCode = org.codeFn
     #
     # This variable is used inside for loops in organism's code
@@ -265,7 +266,7 @@ module Creature
     # changed soon by mutations.
     #
     while true
-      produce()
+      yieldto(manTask)
       #
       # It's okay if organism has errors and throws exceptions. It's possible
       # that these errors will be fixed by future mutations.
@@ -411,6 +412,6 @@ module Creature
     #
     # We can't exceed max amount of energy
     #
-    org.energy = min(org.energy + retObj.ret, Config.val(cfg, :ORGANISM_MAX_ENERGY))
+    org.energy = min(org.energy + retObj.ret, cfg.ORGANISM_MAX_ENERGY)
   end
 end

@@ -12,8 +12,8 @@
 #     import Config
 #     ...
 #     cfg = Config.create()                       # creates new config instance
-#     Config.val(cfg, :SECTION_ID_KEY_ID)         # returns value or nothing
-#     Config.val(cfg, :SECTION_ID_KEY_ID, newVal) # sets new value - newVal
+#     cfg.SECTION_ID_KEY_ID                       # returns value or nothing
+#     cfg.SECTION_ID_KEY_ID = newVal              # sets new value - newVal
 #     Config.save(cfg, "config.data")             # saves all to file
 #     Config.load("config.data")                  # loads all from file
 #
@@ -198,7 +198,7 @@ module Config
     #
     WORLD_SCALE::Int
     #
-    # Period of making automatic backup of application. In minutes
+    # Period of making automatic backup of application. In seconds
     #
     BACKUP_PERIOD::Int
     #
@@ -317,7 +317,7 @@ module Config
       0.3,                               # WORLD_MIN_ENERGY_PERCENT
       500,                               # WORLD_MIN_ENERGY_CHECK_PERIOD
       1,                                 # WORLD_SCALE
-      1,                                 # BACKUP_PERIOD
+      60,                                # BACKUP_PERIOD
       7,                                 # BACKUP_AMOUNT
       650,                               # STAT_WIDTH
       500,                               # STAT_HEIGHT
@@ -390,7 +390,7 @@ module Config
   # @param Field's name symbol
   # @return {Any|nothing} Value of key in specified section
   # in case of incorrect section or key returns nothing
-  #
+  # TODO: remove this
   function val(data::ConfigData, name::Symbol)
     try
       return getfield(data, name)
@@ -407,7 +407,7 @@ module Config
   # @param key Unique key of the value
   # @param value Value we have to set
   # @return Operation boolean result
-  #
+  # TODO: remove this
   function val(data::ConfigData, name::Symbol, value::Any)
     try
       setfield!(data, name, value)

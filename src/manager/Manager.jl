@@ -49,7 +49,7 @@ module Manager
     local cfg::Config.ConfigData = Config.create()
     local man::ManagerTypes.ManagerData = ManagerTypes.ManagerData(
       cfg,                                                                           # cfg
-      World.create(Config.val(cfg, :WORLD_WIDTH), Config.val(cfg, :WORLD_HEIGHT)),   # world
+      World.create(cfg.WORLD_WIDTH, cfg.WORLD_HEIGHT),                               # world
       Dict{Int, Creature.Organism}(),                                                # positions
       Dict{UInt, Creature.Organism}(),                                               # organisms
       ManagerTypes.OrganismTask[],                                                   # tasks
@@ -61,7 +61,8 @@ module Manager
       UInt(0),                                                                       # minId
       UInt(0),                                                                       # maxId
       CommandLine.has(CommandLine.create(), ARG_QUIET),                              # quiet
-      function(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32) end  # dotCallback
+      function(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32) end, # dotCallback
+      current_task()                                                                 # task
     )
     local cons::ManagerTypes.Connections = _createConnections(man)
 
@@ -78,8 +79,11 @@ module Manager
   function run(man::ManagerTypes.ManagerData, recover::Bool = false)
     local counter::Int = 0
     local ips    ::Int = 0
-    local stamp  ::Float64 = time()
-    local bstamp ::Float64 = time()
+    local istamp ::Int = round(Int, time())
+    local bstamp ::Int = istamp
+    local cons   ::ManagerTypes.Connections = man.cons
+    local tasks  ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
+    local cfg    ::Config.ConfigData = man.cfg
     #
     # This server is listening for all other managers and remote
     # terminal. It runs obtained commands and send answers back.
@@ -95,7 +99,7 @@ module Manager
     # be skipped.
     #
     if recover === false
-      setRandomEnergy(Config.val(man.cfg, :WORLD_START_ENERGY_BLOCKS), Config.val(man.cfg, :WORLD_START_ENERGY_AMOUNT))
+      setRandomEnergy(man, cfg.WORLD_START_ENERGY_BLOCKS, cfg.WORLD_START_ENERGY_AMOUNT)
       createOrganisms(man)
     end
     #
@@ -109,11 +113,15 @@ module Manager
       # is because the error in serializer. See issue for details:
       # https://github.com/JuliaLang/julia/issues/16746
       #
-      if man.cons.streamInit::Bool yield(); continue end
+      if cons.streamInit::Bool yield(); continue end
+      #
+      # This is global time stamp in seconds
+      #
+      stamp = round(Int, time())
       #
       # After all organisms die, we have to create next, new population
       #
-      if length(man.tasks) < 1 createOrganisms(man) end
+      if length(tasks) < 1 createOrganisms(man) end
       #
       # This call runs all organism related tasks one by one
       #
@@ -121,24 +129,46 @@ module Manager
       #
       # We have to update IPS (Iterations Per Second) every second
       #
-      ips, stamp = _updateIps(man, ips, stamp)
+      ips, istamp = _updateIps(man, ips, stamp, istamp)
       #
       # Here we make auto-backup of application if there is a time
       #
-      bstamp = _updateBackup(man, bstamp)
+      bstamp = _updateBackup(man, cfg, stamp, bstamp)
       #
       # This call switches between all non blocking asynchronous
       # functions (see @async macro). For example, it handles all
       # input connections for current server, switches between
       # organism Tasks and so on...
-      # TODO: this line is slow. we have to use it only if needed!
-      # TODO: if there are no connections we have to skip it
-      yield()
+      #
+      if _needYield(man) yield() end
     end
 
     true
   end
 
+  #
+  # Checks if active servers have bytes to read. It means, that we have to call
+  # yield() for this reading.
+  # @param man Manager data type
+  # @return {Bool}
+  #
+  function _needYield(man::ManagerTypes.ManagerData)
+    local i::Int
+    local cons::ManagerTypes.Connections = man.cons
+    local socks1::Array{Base.TCPSocket, 1} = cons.server.socks
+    local socks2::Array{Base.TCPSocket, 1} = cons.fastServer.socks
+
+    for i = 1:length(socks1)
+      if nb_available(socks1[i]) > 0 return true end
+    end
+    if cons.streamInit
+      for i = 1:length(socks2)
+        if nb_available(socks2[i]) > 0 return true end
+      end
+    end
+
+    false
+  end
   #
   # Generates unique id by world position. This macro is
   # private insode Manager module
@@ -160,41 +190,46 @@ module Manager
   # Updates IPS (Iterations Per second) counter and stores it in config
   # @param man Manager data type
   # @param ips IPS
-  # @param stamp Current UNIX tame stamp value
-  # @return {UInt, Float64} new ips and current UNIX time stamp
+  # @param stamp Current UNIX time stamp value
+  # @param istamp IPS last UNIX time stamp value
+  # @return {Int, Int} new ips and current UNIX time stamp
   #
-  function _updateIps(man::ManagerTypes.ManagerData, ips::Int, stamp::Float64)
-    local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
-    local ts::Float64 = time() - stamp
-    local dataIndex::UInt8 = UInt8(FastApi.API_UINT64)
+  function _updateIps(man::ManagerTypes.ManagerData, ips::Int, stamp::Int, istamp::Int)
+    local ts::Int = stamp - istamp
+    local socks::Array{Base.TCPSocket, 1}
+    local dataIndex::UInt8
     local localIps::Int
     local i::Int
-
-    if ts >= 40.0 #5.0
-      localIps = trunc(Int, ips / ts)
-      print("ips: ", localIps)
-      Config.val(man.cfg, :WORLD_IPS, localIps)
+    # TODO: 5 seconds should be get from config
+    if ts >= 30 #5
+      localIps  = trunc(Int, ips / ts)
+      dataIndex = UInt8(FastApi.API_UINT64)
+      socks     = man.cons.fastServer.socks
+      print("ips: ", localIps); quit()
+      man.cfg.WORLD_IPS = localIps
       for i = 1:length(socks)
         if Helper.isopen(socks[i])
           Server.request(socks[i], dataIndex, localIps)
         end
       end
-      return 0, time()
+      return 0, stamp
     end
 
-    ips + 1, stamp
+    ips + 1, istamp
   end
   #
   # Checks if it's a time to make application backup
   # @param man Manager data type
+  # @param cfg Global configuration type
   # @param stamp Current UNIX timestamp
+  # @param bstamp Backup last UNIX time stamp value
   #
-  function _updateBackup(man::ManagerTypes.ManagerData, stamp::Float64)
-    if (time() - stamp) > Float64(Config.val(man.cfg, :BACKUP_PERIOD)) * 60.0
+  function _updateBackup(man::ManagerTypes.ManagerData, cfg::Config.ConfigData, stamp::Int, bstamp::Int)
+    if stamp - bstamp > cfg.BACKUP_PERIOD
       if length(man.tasks) > 0 backup(man) end
-      return time()
+      return stamp
     end
 
-    stamp
+    bstamp
   end
 end

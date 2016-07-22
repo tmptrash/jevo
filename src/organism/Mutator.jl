@@ -221,7 +221,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onClone(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationsOnClone = rand(0:Config.val(cfg, :ORGANISM_MAX_MUTATIONS_ON_CLONE))
+    org.mutationsOnClone = rand(0:cfg.ORGANISM_MAX_MUTATIONS_ON_CLONE)
     true
   end
   #
@@ -233,7 +233,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onPeriod(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationPeriod = rand(0:Config.val(cfg, :ORGANISM_MAX_MUTATION_PERIOD))
+    org.mutationPeriod = rand(0:cfg.ORGANISM_MAX_MUTATION_PERIOD)
     true
   end
   #
@@ -245,7 +245,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onAmount(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationAmount = rand(0:Config.val(cfg, :ORGANISM_MAX_MUTATION_AMOUNT))
+    org.mutationAmount = rand(0:cfg.ORGANISM_MAX_MUTATION_AMOUNT)
     true
   end
   #

@@ -34,7 +34,7 @@ function recover(man::ManagerTypes.ManagerData)
     # This is how we pass an organism and config type instances inside organism's code
     #
     consume(t.task)
-    consume(t.task, (t.organism, man.cfg))
+    consume(t.task, (t.organism, man.cfg, man.task))
   end
 
   man.world          = data.world
@@ -89,8 +89,8 @@ function _removeOld(man::ManagerTypes.ManagerData)
   local len::Int = length(files)
   local i::Int
 
-  if len <= Config.val(man.cfg, :BACKUP_AMOUNT) return true end
-  for i = 1:(len - Config.val(man.cfg, :BACKUP_AMOUNT))
+  if len <= man.cfg.BACKUP_AMOUNT return true end
+  for i = 1:(len - man.cfg.BACKUP_AMOUNT)
     rm(Backup.FOLDER_NAME * "/" * files[i])
   end
 

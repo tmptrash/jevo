@@ -30,16 +30,16 @@ end
 # @param counter Counter for mutations speed
 #
 function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
-  local cloneAfter::Int = Config.val(man.cfg, :ORGANISM_CLONE_AFTER_TIMES)
-  local needClone ::Bool = cloneAfter === 0 ? false : counter % cloneAfter === 0
+  #local cloneAfter::Int = man.cfg.ORGANISM_CLONE_AFTER_TIMES
+  #local needClone ::Bool = cloneAfter === 0 ? false : counter % cloneAfter === 0
   local tasks     ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
-  local len       ::Int = length(tasks)
-  local maxOrgs   ::Int = Config.val(man.cfg, :WORLD_MAX_ORGANISMS)
+  #local len       ::Int = length(tasks)
+  #local maxOrgs   ::Int = man.cfg.WORLD_MAX_ORGANISMS
   local task      ::ManagerTypes.OrganismTask
-  local org       ::Creature.Organism
-  local probs     ::Array{Int, 1}
+  #local org       ::Creature.Organism
+  #local probs     ::Array{Int, 1}
   local i         ::Int
-  local j         ::Int
+  #local j         ::Int
 
   counter += 1
   #
@@ -48,14 +48,13 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   # run peace of it's script - code between two produce() calls.
   # TODO: optimize this two approaches. We have to have only one
   # TODO: reverse loop.
-  for i = 1:len
-    task = tasks[i]
+  @inbounds for task in man.tasks
     #
     # Some organisms may be marked as "died" or "removed"
     #
-    if istaskdone(task.task) continue end
-    try
-      consume(task.task)
+    #if istaskdone(task.task) continue end
+    #try
+      yieldto(task.task)
       #
       # This is how we mutate organisms during their life.
       # Mutations occures according to organisms settings.
@@ -64,21 +63,21 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
       # Mutation will be automatically applied if organism
       # doesn't contain any code line.
       #
-      org = task.organism
-      if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
-        Mutator.mutate(man.cfg, org, org.mutationAmount)
-      end
-    catch e
-      Helper.error("Manager._updateOrganisms(): $e")
-      showerror(STDOUT, e, catch_backtrace())
-    end
+      # org = task.organism
+      # if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
+      #   Mutator.mutate(man.cfg, org, org.mutationAmount)
+      # end
+    #catch e
+    #  Helper.error("Manager._updateOrganisms(): $e")
+    #  showerror(STDOUT, e, catch_backtrace())
+    #end
     #
     # We have to wait while all clients are ready for streaming. This
     # is because the error in serializer. See issue for details:
     # https://github.com/JuliaLang/julia/issues/16746. See Manager
     # main loop for details.
     #
-    if man.cons.streamInit::Bool return counter end
+    #if man.cons.streamInit::Bool return counter end
   end
 
   return counter
@@ -92,37 +91,37 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   # TODO: optimize this array. It should be created only once
   # TODO: outside the loop.
   #
-  if needClone && len < maxOrgs && len > 0
-    probs = Int[]
-    for j = 1:len push!(probs, tasks[j].organism.energy) end
-    j = Helper.getProbIndex(probs)
-    org = tasks[j].organism
-    if org.energy > 0 && !istaskdone(man.tasks[j].task) _onClone(man, org) end
-  end
-  #
-  # This block decreases energy from organisms, because they
-  # spend it while leaving.
-  #
-  if counter % Config.val(man.cfg, :ORGANISM_ENERGY_DECREASE_PERIOD) === 0
-    _updateOrganismsEnergy(man)
-  end
-  #
-  # Checks if total amount of energy in a world is less then
-  # minimum, according to the configuration.
-  #
-  if counter % Config.val(man.cfg, :WORLD_MIN_ENERGY_CHECK_PERIOD) === 0 && Config.val(man.cfg, :WORLD_MIN_ENERGY_CHECK_PERIOD) > 0
-    _updateWorldEnergy(man)
-  end
-  #
-  # This call removes organisms with minimum energy
-  #
-  if counter % Config.val(man.cfg, :ORGANISM_REMOVE_AFTER_TIMES) === 0 && len > Config.val(man.cfg, :WORLD_MIN_ORGANISMS)
-    _removeMinOrganisms(man.tasks)
-  end
-  #
-  # This counter should be infinite
-  #
-  if counter === typemax(Int) counter = 0 end
+  # if needClone && len < maxOrgs && len > 0
+  #   probs = Int[]
+  #   for j = 1:len push!(probs, tasks[j].organism.energy) end
+  #   j = Helper.getProbIndex(probs)
+  #   org = tasks[j].organism
+  #   if org.energy > 0 && !istaskdone(man.tasks[j].task) _onClone(man, org) end
+  # end
+  # #
+  # # This block decreases energy from organisms, because they
+  # # spend it while leaving.
+  # #
+  # if counter % man.cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0
+  #   _updateOrganismsEnergy(man)
+  # end
+  # #
+  # # Checks if total amount of energy in a world is less then
+  # # minimum, according to the configuration.
+  # #
+  # if counter % man.cfg.WORLD_MIN_ENERGY_CHECK_PERIOD === 0 && man.cfg.WORLD_MIN_ENERGY_CHECK_PERIOD > 0
+  #   _updateWorldEnergy(man)
+  # end
+  # #
+  # # This call removes organisms with minimum energy
+  # #
+  # if counter % man.cfg.ORGANISM_REMOVE_AFTER_TIMES === 0 && len > man.cfg.WORLD_MIN_ORGANISMS
+  #   _removeMinOrganisms(man)
+  # end
+  # #
+  # # This counter should be infinite
+  # #
+  # if counter === typemax(Int) counter = 0 end
 
   counter
 end
@@ -132,8 +131,9 @@ end
 # @param man Manager data type
 # @param tasks Array of tasks with organisms inside
 #
-function _removeMinOrganisms(man::ManagerTypes.ManagerData, tasks::Array{ManagerTypes.OrganismTask, 1})
-  local amount::Int = Config.val(man.cfg, :ORGANISM_REMOVE_AMOUNT)
+function _removeMinOrganisms(man::ManagerTypes.ManagerData)
+  local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
+  local amount::Int = man.cfg.ORGANISM_REMOVE_AMOUNT
   local i::Int
 
   if length(tasks) <= amount return false end
@@ -160,7 +160,7 @@ end
 # @param man Manager data type
 #
 function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
-  local decVal::Int = Config.val(man.cfg, :ORGANISM_ENERGY_DECREASE_VALUE)
+  local decVal::Int = man.cfg.ORGANISM_ENERGY_DECREASE_VALUE
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   #
   # We have to go through tasks in reverse way, because we may
@@ -207,8 +207,8 @@ function _updateWorldEnergy(man::ManagerTypes.ManagerData)
   #
   # Total amount of energy is less then in config
   #
-  if div(Float64(energy * 100), total) <= Config.val(man.cfg, :WORLD_MIN_ENERGY_PERCENT)
-    setRandomEnergy(man, Config.val(man.cfg, :WORLD_START_ENERGY_BLOCKS), Config.val(man.cfg, :WORLD_START_ENERGY_AMOUNT))
+  if div(Float64(energy * 100), total) <= man.cfg.WORLD_MIN_ENERGY_PERCENT
+    setRandomEnergy(man, man.cfg.WORLD_START_ENERGY_BLOCKS, man.cfg.WORLD_START_ENERGY_AMOUNT)
   end
 end
 #
@@ -338,7 +338,7 @@ end
 # @param organism Parent organism
 #
 function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
-  if length(man.tasks) >= Config.val(man.cfg, :WORLD_MAX_ORGANISMS) return nothing end
+  if length(man.tasks) >= man.cfg.WORLD_MAX_ORGANISMS return nothing end
   #
   # First, we have to find free point near the organism to put
   # clone in. It's possible, that all places are filled.
@@ -485,7 +485,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
         _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks))
         amount = -organism.energy
       end
-      org.energy  = min(org.energy - amount, Config.val(man.cfg, :ORGANISM_MAX_ENERGY))
+      org.energy  = min(org.energy - amount, man.cfg.ORGANISM_MAX_ENERGY)
       retObj.ret  = amount
     elseif org.energy > amount
       org.energy -= amount
@@ -515,6 +515,7 @@ function _onStep(man::ManagerTypes.ManagerData, organism::Creature.Organism, pos
     _moveOrganism(man, pos, organism)
     # TODO: solve this!!!
     #produce()
+    #tieldto(man.task)
   end
 end
 #
@@ -538,7 +539,7 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   # This is how we pass an organism and config type instances inside organism's code
   #
   consume(task)
-  consume(task, (org, man.cfg))
+  consume(task, (org, man.cfg, man.task))
   org.pos = pos
   #
   # Because of deepcopy(), we have to remove copied handlers

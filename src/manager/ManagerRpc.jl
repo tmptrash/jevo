@@ -59,7 +59,7 @@ function getRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::In
     end
   end
 
-  RpcApi.Region(data, Config.val(man.cfg, :WORLD_IPS))
+  RpcApi.Region(data, man.cfg.WORLD_IPS)
 end
 #
 # @rpc
@@ -71,7 +71,7 @@ function createOrganisms(man::ManagerTypes.ManagerData)
   local i::Int
 
   Helper.info("Creating organisms...")
-  for i = 1:Config.val(man.cfg, :ORGANISM_START_AMOUNT) createOrganism(man) end
+  for i = 1:man.cfg.ORGANISM_START_AMOUNT createOrganism(man) end
   null
 end
 #
@@ -84,7 +84,7 @@ end
 # @return {Int} Organism id or false if organisms limit is riched
 #
 function createOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point = Helper.Point(0, 0))
-  if length(man.tasks) > Config.val(man.cfg, :WORLD_MAX_ORGANISMS) return null end
+  if length(man.tasks) > man.cfg.WORLD_MAX_ORGANISMS return null end
   orgTask = Manager._createOrganism(man, nothing, pos)
   orgTask === false ? false : orgTask.id
   null
@@ -97,7 +97,7 @@ end
 # @param value Custom value
 #
 function setConfig(man::ManagerTypes.ManagerData, name::Symbol, value::Any)
-  Config.val(man.cfg, name, value)
+  setfield!(man.cfg, name, value)
   null
 end
 #
@@ -108,7 +108,7 @@ end
 # @return {Any|null} value or null if invalid section or key
 #
 function getConfig(man::ManagerTypes.ManagerData, name::Symbol)
-  Config.val(man.cfg, name)
+  getfield(man.cfg, name)
 end
 #
 # @rpc
@@ -139,7 +139,7 @@ end
 # @return Int
 #
 function getIps(man::ManagerTypes.ManagerData)
-  Config.val(man.cfg, :WORLD_IPS)
+  man.cfg.WORLD_IPS
 end
 #
 # @rpc
@@ -210,7 +210,7 @@ end
 function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int, energy::UInt32)
   Helper.info("Creating random energy...")
   for i::Int = 1:amount
-    setEnergy(rand(1:man.world.width), rand(1:man.world.height), energy)
+    setEnergy(man, rand(1:man.world.width), rand(1:man.world.height), energy)
   end
   null
 end
@@ -231,7 +231,7 @@ end
 function getStatistics(man::ManagerTypes.ManagerData)
   RpcApi.Statistics(
     length(man.organisms),
-    Config.val(man.cfg, :WORLD_IPS),
+    man.cfg.WORLD_IPS,
     man.totalOrganisms,
     man.world.width,
     man.world.height,
@@ -341,7 +341,7 @@ end
 #
 function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32)
   local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
-  local ips::UInt16 = UInt16(Config.val(man.cfg, :WORLD_IPS))
+  local ips::UInt16 = UInt16(man.cfg.WORLD_IPS)
   local x::UInt16 = UInt16(pos.x)
   local y::UInt16 = UInt16(pos.y)
   local dataIndex::UInt8 = UInt8(FastApi.API_DOT_COLOR)
@@ -510,7 +510,7 @@ function _onBeforeResponse(man::ManagerTypes.ManagerData, side::ASCIIString, dat
   # Something on a way of organism or maximum amount of organisms
   # were reached. So he can't move there at the moment.
   #
-  if !Manager._isFree(man, pos) || length(man.tasks) > Config.val(man.cfg, :WORLD_MAX_ORGANISMS)
+  if !Manager._isFree(man, pos) || length(man.tasks) > man.cfg.WORLD_MAX_ORGANISMS
     ans.id = RpcApi.RPC_ORG_STEP_FAIL
     return false
   end
@@ -518,7 +518,7 @@ function _onBeforeResponse(man::ManagerTypes.ManagerData, side::ASCIIString, dat
   # Everything is okay, let's add an organism to the pool
   #
   Manager._createOrganism(man, org, org.pos, true)
-  org.energy -= div(org.energy * Config.val(man.cfg, :CONNECTION_STEP_ENERGY_PERCENT), 100)
+  org.energy -= div(org.energy * man.cfg.CONNECTION_STEP_ENERGY_PERCENT, 100)
   ans.id = RpcApi.RPC_ORG_STEP_OK
 
   true

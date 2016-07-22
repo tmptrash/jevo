@@ -55,9 +55,9 @@ end
 function _removeBrokenBackup(stamp::Float64, cfg::Config.ConfigData)
   local last::ASCIIString
 
-  println("_removeBrokenBackup(), time: ", time(), ", stamp: ", stamp, ", period: ", Float64(Config.val(cfg, :BACKUP_PERIOD)) * 60.0)
+  println("_removeBrokenBackup(), time: ", time(), ", stamp: ", stamp, ", period: ", cfg.BACKUP_PERIOD)
   println("last file: ", Backup.lastFile())
-  if (time() - stamp) < Float64(Config.val(cfg, :BACKUP_PERIOD)) * 60.0
+  if (time() - stamp) < cfg.BACKUP_PERIOD
     try
       if (last = Backup.lastFile()) != ""
         Helper.warn("Removing broken backup file: $last")
