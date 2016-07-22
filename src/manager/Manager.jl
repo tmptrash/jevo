@@ -79,8 +79,8 @@ module Manager
   function run(man::ManagerTypes.ManagerData, recover::Bool = false)
     local counter::Int = 0
     local ips    ::Int = 0
-    local istamp ::Int = round(Int, time())
-    local bstamp ::Int = istamp
+    local istamp ::Float64 = time()
+    local bstamp ::Float64 = istamp
     local cons   ::ManagerTypes.Connections = man.cons
     local tasks  ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
     local cfg    ::Config.ConfigData = man.cfg
@@ -113,11 +113,11 @@ module Manager
       # is because the error in serializer. See issue for details:
       # https://github.com/JuliaLang/julia/issues/16746
       #
-      if cons.streamInit::Bool yield(); continue end
+      if cons.streamInit yield(); continue end
       #
       # This is global time stamp in seconds
       #
-      stamp = round(Int, time())
+      stamp = time()
       #
       # After all organisms die, we have to create next, new population
       #
@@ -153,17 +153,15 @@ module Manager
   # @return {Bool}
   #
   function _needYield(man::ManagerTypes.ManagerData)
-    local i::Int
     local cons::ManagerTypes.Connections = man.cons
-    local socks1::Array{Base.TCPSocket, 1} = cons.server.socks
-    local socks2::Array{Base.TCPSocket, 1} = cons.fastServer.socks
+    local sock::Base.TCPSocket
 
-    for i = 1:length(socks1)
-      if nb_available(socks1[i]) > 0 return true end
+    @inbounds for sock in cons.server.socks
+      if nb_available(sock) > 0 return true end
     end
     if cons.streamInit
-      for i = 1:length(socks2)
-        if nb_available(socks2[i]) > 0 return true end
+      @inbounds for sock in cons.fastServer.socks
+        if nb_available(sock) > 0 return true end
       end
     end
 
@@ -194,22 +192,21 @@ module Manager
   # @param istamp IPS last UNIX time stamp value
   # @return {Int, Int} new ips and current UNIX time stamp
   #
-  function _updateIps(man::ManagerTypes.ManagerData, ips::Int, stamp::Int, istamp::Int)
-    local ts::Int = stamp - istamp
-    local socks::Array{Base.TCPSocket, 1}
+  function _updateIps(man::ManagerTypes.ManagerData, ips::Int, stamp::Float64, istamp::Float64)
+    local ts::Float64 = stamp - istamp
+    local sock::Base.TCPSocket
     local dataIndex::UInt8
     local localIps::Int
     local i::Int
-    # TODO: 5 seconds should be get from config
-    if ts >= 30 #5
+    # TODO: 5.0 seconds should be get from config
+    if ts >= 30.0 #5.0
       localIps  = trunc(Int, ips / ts)
       dataIndex = UInt8(FastApi.API_UINT64)
-      socks     = man.cons.fastServer.socks
       print("ips: ", localIps); quit()
       man.cfg.WORLD_IPS = localIps
-      for i = 1:length(socks)
-        if Helper.isopen(socks[i])
-          Server.request(socks[i], dataIndex, localIps)
+      @inbounds for sock in man.cons.fastServer.socks
+        if Helper.isopen(sock)
+          Server.request(sock, dataIndex, localIps)
         end
       end
       return 0, stamp
@@ -224,8 +221,8 @@ module Manager
   # @param stamp Current UNIX timestamp
   # @param bstamp Backup last UNIX time stamp value
   #
-  function _updateBackup(man::ManagerTypes.ManagerData, cfg::Config.ConfigData, stamp::Int, bstamp::Int)
-    if stamp - bstamp > cfg.BACKUP_PERIOD
+  function _updateBackup(man::ManagerTypes.ManagerData, cfg::Config.ConfigData, stamp::Float64, bstamp::Float64)
+    if stamp - bstamp >= cfg.BACKUP_PERIOD
       if length(man.tasks) > 0 backup(man) end
       return stamp
     end

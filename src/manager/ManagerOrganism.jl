@@ -30,16 +30,15 @@ end
 # @param counter Counter for mutations speed
 #
 function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
-  #local cloneAfter::Int = man.cfg.ORGANISM_CLONE_AFTER_TIMES
-  #local needClone ::Bool = cloneAfter === 0 ? false : counter % cloneAfter === 0
+  local cloneAfter::Int = man.cfg.ORGANISM_CLONE_AFTER_TIMES
+  local needClone ::Bool = cloneAfter === 0 ? false : counter % cloneAfter === 0
   local tasks     ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
-  #local len       ::Int = length(tasks)
-  #local maxOrgs   ::Int = man.cfg.WORLD_MAX_ORGANISMS
+  local len       ::Int = length(tasks)
+  local maxOrgs   ::Int = man.cfg.WORLD_MAX_ORGANISMS
   local task      ::ManagerTypes.OrganismTask
-  #local org       ::Creature.Organism
-  #local probs     ::Array{Int, 1}
+  local org       ::Creature.Organism
+  local probs     ::Array{Int, 1}
   local i         ::Int
-  #local j         ::Int
 
   counter += 1
   #
@@ -52,8 +51,8 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
     #
     # Some organisms may be marked as "died" or "removed"
     #
-    #if istaskdone(task.task) continue end
-    #try
+    if istaskdone(task.task) continue end
+    try
       yieldto(task.task)
       #
       # This is how we mutate organisms during their life.
@@ -63,24 +62,22 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
       # Mutation will be automatically applied if organism
       # doesn't contain any code line.
       #
-      # org = task.organism
-      # if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
-      #   Mutator.mutate(man.cfg, org, org.mutationAmount)
-      # end
-    #catch e
-    #  Helper.error("Manager._updateOrganisms(): $e")
-    #  showerror(STDOUT, e, catch_backtrace())
-    #end
+      org = task.organism
+      if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
+        Mutator.mutate(man.cfg, org, org.mutationAmount)
+      end
+    catch e
+     Helper.error("Manager._updateOrganisms(): $e")
+     showerror(STDOUT, e, catch_backtrace())
+    end
     #
     # We have to wait while all clients are ready for streaming. This
     # is because the error in serializer. See issue for details:
     # https://github.com/JuliaLang/julia/issues/16746. See Manager
     # main loop for details.
     #
-    #if man.cons.streamInit::Bool return counter end
+    if man.cons.streamInit::Bool return counter end
   end
-
-  return counter
   #
   # Cloning procedure. The meaning of this is in ability to
   # produce children as fast as much energy has an organism.
@@ -91,37 +88,37 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   # TODO: optimize this array. It should be created only once
   # TODO: outside the loop.
   #
-  # if needClone && len < maxOrgs && len > 0
-  #   probs = Int[]
-  #   for j = 1:len push!(probs, tasks[j].organism.energy) end
-  #   j = Helper.getProbIndex(probs)
-  #   org = tasks[j].organism
-  #   if org.energy > 0 && !istaskdone(man.tasks[j].task) _onClone(man, org) end
-  # end
-  # #
-  # # This block decreases energy from organisms, because they
-  # # spend it while leaving.
-  # #
-  # if counter % man.cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0
-  #   _updateOrganismsEnergy(man)
-  # end
-  # #
-  # # Checks if total amount of energy in a world is less then
-  # # minimum, according to the configuration.
-  # #
-  # if counter % man.cfg.WORLD_MIN_ENERGY_CHECK_PERIOD === 0 && man.cfg.WORLD_MIN_ENERGY_CHECK_PERIOD > 0
-  #   _updateWorldEnergy(man)
-  # end
-  # #
-  # # This call removes organisms with minimum energy
-  # #
-  # if counter % man.cfg.ORGANISM_REMOVE_AFTER_TIMES === 0 && len > man.cfg.WORLD_MIN_ORGANISMS
-  #   _removeMinOrganisms(man)
-  # end
-  # #
-  # # This counter should be infinite
-  # #
-  # if counter === typemax(Int) counter = 0 end
+  if needClone && len < maxOrgs && len > 0
+    probs = Int[]
+    for task in tasks push!(probs, task.organism.energy) end
+    i = Helper.getProbIndex(probs)
+    org = tasks[i].organism
+    if org.energy > 0 && !istaskdone(man.tasks[i].task) _onClone(man, org) end
+  end
+  #
+  # This block decreases energy from organisms, because they
+  # spend it while leaving.
+  #
+  if counter % man.cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0
+    _updateOrganismsEnergy(man)
+  end
+  #
+  # Checks if total amount of energy in a world is less then
+  # minimum, according to the configuration.
+  #
+  if counter % man.cfg.WORLD_MIN_ENERGY_CHECK_PERIOD === 0 && man.cfg.WORLD_MIN_ENERGY_CHECK_PERIOD > 0
+    _updateWorldEnergy(man)
+  end
+  #
+  # This call removes organisms with minimum energy
+  #
+  if counter % man.cfg.ORGANISM_REMOVE_AFTER_TIMES === 0 && len > man.cfg.WORLD_MIN_ORGANISMS
+    _removeMinOrganisms(man)
+  end
+  #
+  # This counter should be infinite
+  #
+  if counter === typemax(Int) counter = 0 end
 
   counter
 end
@@ -264,8 +261,8 @@ end
 # @param task Task
 #
 function _stopTask(task::Task)
-  try Base.throwto(task, null) end
-  #task.state = :failed
+  #try Base.throwto(task, null) end
+  task.state = :failed
 end
 #
 # Moves organism to specified position. Updates organism's
