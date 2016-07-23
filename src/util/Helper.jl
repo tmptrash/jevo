@@ -180,10 +180,10 @@ module Helper
     if length(prob) < 1 return 0 end
 
     local s::Int = sum(prob)
+    local i::Int = 1
     if s < 1 return 0 end
     num = rand(1:s)
     s   = 0
-    i   = 1
 
     for i = 1:length(prob)
       if num <= (s += prob[i]) break end

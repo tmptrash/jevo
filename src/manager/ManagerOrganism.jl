@@ -47,29 +47,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   # run peace of it's script - code between two produce() calls.
   # TODO: optimize this two approaches. We have to have only one
   # TODO: reverse loop.
-  @inbounds for task in man.tasks
-    #
-    # Some organisms may be marked as "died" or "removed"
-    #
-    if istaskdone(task.task) continue end
-    try
-      yieldto(task.task)
-      #
-      # This is how we mutate organisms during their life.
-      # Mutations occures according to organisms settings.
-      # If mutationPeriod or mutationAmount set to 0, it
-      # means that mutations during leaving are disabled.
-      # Mutation will be automatically applied if organism
-      # doesn't contain any code line.
-      #
-      org = task.organism
-      if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
-        Mutator.mutate(man.cfg, org, org.mutationAmount)
-      end
-    catch e
-     Helper.error("Manager._updateOrganisms(): $e")
-     showerror(STDOUT, e, catch_backtrace())
-    end
+  @inbounds for task in tasks
     #
     # We have to wait while all clients are ready for streaming. This
     # is because the error in serializer. See issue for details:
@@ -77,6 +55,24 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
     # main loop for details.
     #
     if man.cons.streamInit::Bool return counter end
+    #
+    # Some organisms may be marked as "died" or "removed"
+    #
+    if istaskdone(task.task) continue end
+    yieldto(task.task)
+    #
+    # This is how we mutate organisms during their life.
+    # Mutations occures according to organisms settings.
+    # If mutationPeriod or mutationAmount set to 0, it
+    # means that mutations during leaving are disabled.
+    # Mutation will be automatically applied if organism
+    # doesn't contain any code line.
+    #
+    org = task.organism
+    if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
+      # TODO: this function is very slow!!! have to be optimized
+      Mutator.mutate(man.cfg, org, org.mutationAmount)
+    end
   end
   #
   # Cloning procedure. The meaning of this is in ability to
@@ -90,6 +86,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   #
   if needClone && len < maxOrgs && len > 0
     probs = Int[]
+    # TODO: these two lines are slow!!! have to be optimized
     for task in tasks push!(probs, task.organism.energy) end
     i = Helper.getProbIndex(probs)
     org = tasks[i].organism
@@ -118,7 +115,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   #
   # This counter should be infinite
   #
-  if counter === typemax(Int) counter = 0 end
+  if counter === typemax(Int) counter = 1 end
 
   counter
 end

@@ -77,70 +77,76 @@ module Manager
   # @return {Bool} run status
   #
   function run(man::ManagerTypes.ManagerData, recover::Bool = false)
-    local counter::Int = 0
+    local counter::Int = 1
     local ips    ::Int = 0
     local istamp ::Float64 = time()
     local bstamp ::Float64 = istamp
     local cons   ::ManagerTypes.Connections = man.cons
     local tasks  ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
     local cfg    ::Config.ConfigData = man.cfg
-    #
-    # This server is listening for all other managers and remote
-    # terminal. It runs obtained commands and send answers back.
-    # In other words, it works like RPC runner... Fast server is
-    # listening for "fast" clients and works in "fast" mode.
-    #
-    Server.run(man.cons.server)
-    # TODO: possibly, we don't need to run this server due to performance issue
-    Server.run(man.cons.fastServer)
-    #
-    # If user set up some amount of organisms they will be created
-    # in this call. If we are in recover mode, then this step should
-    # be skipped.
-    #
-    if recover === false
-      setRandomEnergy(man, cfg.WORLD_START_ENERGY_BLOCKS, cfg.WORLD_START_ENERGY_AMOUNT)
-      createOrganisms(man)
-    end
-    #
-    # This is main infinite loop. It manages input connections
-    # and organism's tasks switching.
-    #
-    while true
-    #for i=1:2000001
+
+    try
       #
-      # We have to wait while all clients are ready for streaming. This
-      # is because the error in serializer. See issue for details:
-      # https://github.com/JuliaLang/julia/issues/16746
+      # This server is listening for all other managers and remote
+      # terminal. It runs obtained commands and send answers back.
+      # In other words, it works like RPC runner... Fast server is
+      # listening for "fast" clients and works in "fast" mode.
       #
-      if cons.streamInit yield(); continue end
+      Server.run(man.cons.server)
+      # TODO: possibly, we don't need to run this server due to performance issue
+      Server.run(man.cons.fastServer)
       #
-      # This is global time stamp in seconds
+      # If user set up some amount of organisms they will be created
+      # in this call. If we are in recover mode, then this step should
+      # be skipped.
       #
-      stamp = time()
+      if recover === false
+        setRandomEnergy(man, cfg.WORLD_START_ENERGY_BLOCKS, cfg.WORLD_START_ENERGY_AMOUNT)
+        createOrganisms(man)
+      end
       #
-      # After all organisms die, we have to create next, new population
+      # This is main infinite loop. It manages input connections
+      # and organism's tasks switching.
       #
-      if length(tasks) < 1 createOrganisms(man) end
-      #
-      # This call runs all organism related tasks one by one
-      #
-      counter = _updateOrganisms(man, counter)
-      #
-      # We have to update IPS (Iterations Per Second) every second
-      #
-      ips, istamp = _updateIps(man, ips, stamp, istamp)
-      #
-      # Here we make auto-backup of application if there is a time
-      #
-      bstamp = _updateBackup(man, cfg, stamp, bstamp)
-      #
-      # This call switches between all non blocking asynchronous
-      # functions (see @async macro). For example, it handles all
-      # input connections for current server, switches between
-      # organism Tasks and so on...
-      #
-      if _needYield(man) yield() end
+      while true
+        #
+        # We have to wait while all clients are ready for streaming. This
+        # is because the error in serializer. See issue for details:
+        # https://github.com/JuliaLang/julia/issues/16746
+        #
+        #if cons.streamInit yield(); continue end
+        #
+        # This is global time stamp in seconds
+        #
+        stamp = time()
+        #
+        # After all organisms die, we have to create next, new population
+        #
+        #if length(tasks) < 1 createOrganisms(man) end
+        #
+        # This call runs all organism related tasks one by one
+        #
+        counter = _updateOrganisms(man, counter)
+        #
+        # We have to update IPS (Iterations Per Second) every second
+        #
+        ips, istamp = _updateIps(man, ips, stamp, istamp)
+        #
+        # Here we make auto-backup of application if there is a time
+        #
+        #bstamp = _updateBackup(man, cfg, stamp, bstamp)
+        #
+        # This call switches between all non blocking asynchronous
+        # functions (see @async macro). For example, it handles all
+        # input connections for current server, switches between
+        # organism Tasks and so on...
+        #
+        #if _needYield(man) yield() end
+      end
+    catch e
+      Helper.error("Manager.run(): $e")
+      showerror(STDOUT, e, catch_backtrace())
+      return false
     end
 
     true
