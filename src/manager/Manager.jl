@@ -214,6 +214,7 @@ module Manager
 
     if ts >= 5.0
       localIps = trunc(Int, ips / ts)
+	  #print("ips: ", localIps); quit()
       Config.val(:WORLD_IPS, localIps)
       for i = 1:length(socks)
         if Helper.isopen(socks[i])
