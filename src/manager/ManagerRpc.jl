@@ -16,6 +16,7 @@ import CommandLine
 import Event
 import FastApi
 import Server
+import Helper
 import Connection
 import ManagerTypes
 import DotColors
@@ -210,7 +211,7 @@ end
 function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int, energy::UInt32)
   Helper.info("Creating random energy...")
   for i::Int = 1:amount
-    setEnergy(man, rand(1:man.world.width), rand(1:man.world.height), energy)
+    setEnergy(man, Helper.fastRand(man.world.width), Helper.fastRand(man.world.height), energy)
   end
   null
 end
@@ -255,7 +256,7 @@ function getBest(man::ManagerTypes.ManagerData, amount::Int)
   amount = getAmount() > amount ? amount : getAmount()
   sort!(man.tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
   for i = 1:amount
-    if istaskdone(man.tasks[len - i + 1].task) continue end
+    if !man.tasks[len - i + 1].organism.alive continue end
     push!(best, _createSimpleOrganism(man.tasks[len - i + 1].id, man.tasks[len - i + 1].organism))
   end
 

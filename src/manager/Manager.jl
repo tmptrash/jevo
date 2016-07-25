@@ -61,8 +61,7 @@ module Manager
       UInt(0),                                                                       # minId
       UInt(0),                                                                       # maxId
       CommandLine.has(CommandLine.create(), ARG_QUIET),                              # quiet
-      function(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32) end, # dotCallback
-      current_task()                                                                 # task
+      function(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32) end  # dotCallback
     )
     local cons::ManagerTypes.Connections = _createConnections(man)
 

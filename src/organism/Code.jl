@@ -95,7 +95,7 @@ module Code
     local sym::Symbol
     local i::Int
     local exp::Expr
-    local paramLen::Int = rand(1:cfg.CODE_MAX_FUNC_PARAMS)
+    local paramLen::Int = Helper.fastRand(cfg.CODE_MAX_FUNC_PARAMS)
     local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing))
     local blocks::Array{Creature.Block, 1} = [block]
     #
@@ -141,18 +141,18 @@ module Code
   function fnCall(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
     local funcsLen::Int             = length(org.funcs)
     if funcsLen < 2 return Expr(:nothing) end
-    local fnEx::Expr                = org.funcs[rand(2:funcsLen)].code          # only custom function may be called
-    local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]      # return DataType of Custom function
-    local var::Symbol               = @randVar(org, pos, typ)                   # var = <fn-name>(...)
-    local args::Array{Any, 1}       = fnEx.args[1].args                         # shortcut to func args
-    local types::Array{DataType, 1} = Array{DataType, 1}()                      # func types only
+    local fnEx::Expr                = org.funcs[Helper.fastRand(:funcsLen)+1].code # only custom function may be called
+    local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]         # return DataType of Custom function
+    local var::Symbol               = @randVar(org, pos, typ)                      # var = <fn-name>(...)
+    local args::Array{Any, 1}       = fnEx.args[1].args                            # shortcut to func args
+    local types::Array{DataType, 1} = Array{DataType, 1}()                         # func types only
     local argsLen::Int              = length(args)
 
     if argsLen > 1
       #
       # We start from 2, because first argument is a function symbol
       #
-      for i = 2:rand(2:argsLen) push!(types, args[i].args[1].args[2]) end
+      for i = 2:(Helper.fastRand(argsLen)+1) push!(types, args[i].args[1].args[2]) end
     end
     fnEx = :($var=$(fnEx.args[1].args[1])($([(ex = @randVar(org, pos, i); if ex === :nothing return Expr(:nothing) end;ex) for i in types]...)))
     #
@@ -177,7 +177,7 @@ module Code
     local v1::Symbol    = @randVar(org, pos, typ)
     if v1 === :nothing return Expr(:nothing) end
     local v2::Symbol    = @randVar(org, pos, typ)
-    local op::Symbol    = _COMPARE_OPERATORS[rand(1:length(_COMPARE_OPERATORS))]
+    local op::Symbol    = _COMPARE_OPERATORS[Helper.fastRand(length(_COMPARE_OPERATORS))]
     local ifEx          = :(if $(op)($(v1),$(v2)) end) # if v1 comparison v2 end
 
     push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), ifEx.args[2]))
@@ -264,8 +264,8 @@ module Code
   # @return {Pos} Position in a code
   #
   function getRandPos(org::Creature.Organism)
-    local fnIdx   ::Int = rand(1:length(org.funcs))
-    local blockIdx::Int = rand(1:length(org.funcs[fnIdx].blocks))
+    local fnIdx   ::Int = Helper.fastRand(length(org.funcs))
+    local blockIdx::Int = Helper.fastRand(length(org.funcs[fnIdx].blocks))
     local block   ::Creature.Block = org.funcs[fnIdx].blocks[blockIdx]
     #
     # In this line we skip "return" operator and lines with variables
@@ -276,7 +276,7 @@ module Code
     Helper.Pos(
       fnIdx,
       blockIdx,
-      rand(1:lines)
+      Helper.fastRand(lines)
     )
   end
 

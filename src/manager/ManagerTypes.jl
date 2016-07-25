@@ -18,16 +18,13 @@ module ManagerTypes
   export ManagerData
   #
   # One task related to one organism
-  #
+  # TODO: do we need this type at all?
+  # TODO: we may use Creature.Organism array only
   type OrganismTask
     #
     # Organism unique id
     #
     id::UInt
-    #
-    # Task object. With it we may use green
-    #
-    task::Task
     #
     # One organism
     #
@@ -116,10 +113,6 @@ module ManagerTypes
     #
     dotCallback::Function
     #
-    # Manager's task (main task)
-    #
-    task::Task
-    #
     # Manager connections (with other managers, terminals, visualizer etc...)
     #
     cons::Connections
@@ -140,8 +133,7 @@ module ManagerTypes
       minId::UInt,
       maxId::UInt,
       quiet::Bool,
-      dotCallback::Function,
-      task::Task
+      dotCallback::Function
     ) = new(
       cfg,
       world,
@@ -156,8 +148,7 @@ module ManagerTypes
       minId,
       maxId,
       quiet,
-      dotCallback,
-      task
+      dotCallback
     )
     #
     # Full constructor
@@ -177,7 +168,6 @@ module ManagerTypes
       maxId::UInt,
       quiet::Bool,
       dotCallback::Function,
-      task::Task,
       cons::Connections
     ) = new(
       cfg,
@@ -194,7 +184,6 @@ module ManagerTypes
       maxId,
       quiet,
       dotCallback,
-      task,
       cons
     )
   end

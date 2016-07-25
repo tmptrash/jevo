@@ -38,6 +38,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   local org       ::Creature.Organism
   local i         ::Int
   local probs     ::Array{Int, 1}
+  local cfg       ::Config.ConfigData = man.cfg
   #
   # This block runs one iteration for all available organisms.
   # By one iteration i mean that every organism from a list
@@ -51,12 +52,21 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
     # https://github.com/JuliaLang/julia/issues/16746. See Manager
     # main loop for details.
     #
-    if man.cons.streamInit::Bool return counter end
+    if man.cons.streamInit::Bool return counter + 1 end
     #
     # Some organisms may be marked as "died" or "removed"
     #
-    if istaskdone(task.task) continue end
-    yieldto(task.task)
+    if !(org = task.organism).alive continue end
+    #
+    # It's okay if organism has errors and throws exceptions. It's possible
+    # that these errors will be fixed by future mutations.
+    #
+    try
+      org.codeFn(cfg, org)
+    catch e
+      # TODO: what we have to do with code errors?
+      # TODO: we have to calculate it for statistics
+    end
     #
     # This is how we mutate organisms during their life.
     # Mutations occures according to organisms settings.
@@ -65,12 +75,13 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
     # Mutation will be automatically applied if organism
     # doesn't contain any code line.
     #
-    # org = task.organism
     # if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
     #   # TODO: this function is very slow!!! have to be optimized
     #   Mutator.mutate(man.cfg, org, org.mutationAmount)
     # end
   end
+
+  return counter + 1
   #
   # Cloning procedure. The meaning of this is in ability to
   # produce children as fast as much energy has an organism.
@@ -86,10 +97,8 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
     for i = 1:len push!(probs, task.organism.energy) end
     i = Helper.getProbIndex(probs)
     org = tasks[i].organism
-    if org.energy > 0 && !istaskdone(tasks[i].task) _onClone(man, org) end
+    if org.energy > 0 && org.alive _onClone(man, org) end
   end
-
-  return counter + 1
   #
   # This block decreases energy from organisms, because they
   # spend it while leaving.
@@ -132,7 +141,7 @@ function _removeMinOrganisms(man::ManagerTypes.ManagerData)
 
   sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
   for i = 1:amount
-    if istaskdone(tasks[i].task) continue end
+    if !tasks[i].organism.alive continue end
     _killOrganism(man, i)
   end
   #
@@ -221,7 +230,7 @@ function _freezeOrganism(man::ManagerTypes.ManagerData, i::Int)
   org.color = oldColor
   delete!(man.positions, Manager._getPosId(man, org.pos))
   delete!(man.organisms, id)
-  _stopTask(man.tasks[i].task)
+  _stopTask(man.tasks[i].organism)
   man.cons.frozen[org.id] = org
   msg(man, id, "frozen")
 end
@@ -232,7 +241,7 @@ end
 # @param i Index of organism's task
 #
 function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
-  if i === 0 || istaskdone(man.tasks[i].task) return false end
+  if i === 0 || !man.tasks[i].organism.alive return false end
 
   local id::UInt = man.tasks[i].id
   local org::Creature.Organism = man.tasks[i].organism
@@ -243,7 +252,7 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   _moveOrganism(man, org.pos, org)
   delete!(man.positions, Manager._getPosId(man, org.pos))
   delete!(man.organisms, id)
-  _stopTask(man.tasks[i].task)
+  _stopTask(man.tasks[i].organism)
   msg(man, id, "die")
 
   true
@@ -254,10 +263,11 @@ end
 # stop (interrupt) it. This method only marks the task as
 # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
 # @param task Task
-#
-function _stopTask(task::Task)
+# TODO: remove this function. _killOrganism() should do the job
+function _stopTask(org::Creature.Organism)
   #try Base.throwto(task, null) end
-  task.state = :failed
+  #task.state = :failed
+  org.alive = false
 end
 #
 # Moves organism to specified position. Updates organism's
@@ -505,7 +515,8 @@ end
 function _onStep(man::ManagerTypes.ManagerData, organism::Creature.Organism, pos::Helper.Point)
   if !haskey(man.cons.frozen, organism.id)
     _moveOrganism(man, pos, organism)
-    # TODO: solve this!!!
+    # TODO: solve this!!! May be it's a problem
+    # TODO: of visualizer to draw all the dots smoothly
     #produce()
     #tieldto(man.task)
   end
@@ -525,13 +536,8 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   if pos === false return false end
   local id::UInt = man.organismId
   local org::Creature.Organism = organism === nothing ? Creature.create(man.cfg, id, pos) : add ? organism : deepcopy(organism)
-  local task::Task = Task(Creature.born)
-  local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, task, org)
-  #
-  # This is how we pass an organism and config type instances inside organism's code
-  #
-  consume(task)
-  consume(task, (org, man.cfg, man.task))
+  local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, org)
+
   org.pos = pos
   #
   # Because of deepcopy(), we have to remove copied handlers

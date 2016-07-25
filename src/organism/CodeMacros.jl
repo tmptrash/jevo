@@ -1,5 +1,5 @@
 #
-# This file is a part of Code module. It contains macroses for 
+# This file is a part of Code module. It contains macroses for
 # organism's code.
 #
 # @author DeadbraiN
@@ -25,7 +25,7 @@ end
 # @return {DataType}
 #
 macro randType()
-  :($Helper.SUPPORTED_TYPES[rand(1:length($Helper.SUPPORTED_TYPES))])
+  :($Helper.SUPPORTED_TYPES[Helper.fastRand(length($Helper.SUPPORTED_TYPES))])
 end
 #
 # Returns a variable from existing in a code
@@ -38,7 +38,7 @@ macro randVar(org, pos, typ)
   :(
     length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]) < 1 ?
     :nothing :
-    $org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ][rand(1:length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]))]
+    $org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ][Helper.fastRand(length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]))]
   )
 end
 #

@@ -109,8 +109,8 @@ module World
     local i::Int = width * height < 1000 ? 100 : div(width * height, 10)
 
     while World.getEnergy(plane, pos) > UInt32(0) && i > 0
-      pos.x = rand(1:width)
-      pos.y = rand(1:height)
+      pos.x = Helper.fastRand(width)
+      pos.y = Helper.fastRand(height)
       i -= 1
     end
     i > 0 ? pos : false

@@ -57,7 +57,7 @@ module Mutator
       pIndex     = org.codeSize < 1 ? 1 : Helper.getProbIndex(org.mutationProbabilities)
       codeChange = pIndex < 5
       pos        = codeChange ? Code.getRandPos(org) : _posStub
-      cmd        = codeChange ? Code.CODE_PARTS[rand(1:length(Code.CODE_PARTS))] : _cmdStub
+      cmd        = codeChange ? Code.CODE_PARTS[Helper.fastRand(length(Code.CODE_PARTS))] : _cmdStub
       res        = org.codeSize < 1 ? _onAdd(cfg, org, pos, cmd) : _MUTATION_TYPES[pIndex](cfg, org, pos, cmd)
       result    &= res
       #
@@ -221,7 +221,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onClone(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationsOnClone = rand(0:cfg.ORGANISM_MAX_MUTATIONS_ON_CLONE)
+    org.mutationsOnClone = Helper.fastRand(cfg.ORGANISM_MAX_MUTATIONS_ON_CLONE) - 1
     true
   end
   #
@@ -233,7 +233,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onPeriod(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationPeriod = rand(0:cfg.ORGANISM_MAX_MUTATION_PERIOD)
+    org.mutationPeriod = Helper.fastRand(cfg.ORGANISM_MAX_MUTATION_PERIOD) - 1
     true
   end
   #
@@ -245,7 +245,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onAmount(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationAmount = rand(0:cfg.ORGANISM_MAX_MUTATION_AMOUNT)
+    org.mutationAmount = Helper.fastRand(cfg.ORGANISM_MAX_MUTATION_AMOUNT) - 1
     true
   end
   #

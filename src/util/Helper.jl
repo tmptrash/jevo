@@ -9,7 +9,6 @@ module Helper
   export RetObj
 
   export toBytes
-  export randTrue
   export fastRand
   export getProbIndex
   export getSupportedTypes
@@ -151,14 +150,6 @@ module Helper
     end
 
     args[indexes[len]]
-  end
-  #
-  # Chooses (returns) true or false randomly. Is used to choose between two
-  # variants of something. For example + or - sign.
-  # @return {Bool}
-  #
-  function randTrue()
-    rand(1:2) === 1
   end
   #
   # This function is not presented in Julis Gtk package
