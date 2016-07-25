@@ -34,13 +34,10 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   local needClone ::Bool = cloneAfter === 0 ? false : counter % cloneAfter === 0
   local tasks     ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   local len       ::Int = length(tasks)
-  local maxOrgs   ::Int = man.cfg.WORLD_MAX_ORGANISMS
   local task      ::ManagerTypes.OrganismTask
   local org       ::Creature.Organism
-  local probs     ::Array{Int, 1}
   local i         ::Int
-
-  counter += 1
+  local probs     ::Array{Int, 1}
   #
   # This block runs one iteration for all available organisms.
   # By one iteration i mean that every organism from a list
@@ -68,11 +65,11 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
     # Mutation will be automatically applied if organism
     # doesn't contain any code line.
     #
-    org = task.organism
-    if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
-      # TODO: this function is very slow!!! have to be optimized
-      Mutator.mutate(man.cfg, org, org.mutationAmount)
-    end
+    # org = task.organism
+    # if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
+    #   # TODO: this function is very slow!!! have to be optimized
+    #   Mutator.mutate(man.cfg, org, org.mutationAmount)
+    # end
   end
   #
   # Cloning procedure. The meaning of this is in ability to
@@ -84,14 +81,15 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   # TODO: optimize this array. It should be created only once
   # TODO: outside the loop.
   #
-  if needClone && len < maxOrgs && len > 0
+  if needClone && len < man.cfg.WORLD_MAX_ORGANISMS && len > 0
     probs = Int[]
-    # TODO: these two lines are slow!!! have to be optimized
-    for task in tasks push!(probs, task.organism.energy) end
+    for i = 1:len push!(probs, task.organism.energy) end
     i = Helper.getProbIndex(probs)
     org = tasks[i].organism
-    if org.energy > 0 && !istaskdone(man.tasks[i].task) _onClone(man, org) end
+    if org.energy > 0 && !istaskdone(tasks[i].task) _onClone(man, org) end
   end
+
+  return counter + 1
   #
   # This block decreases energy from organisms, because they
   # spend it while leaving.
@@ -117,7 +115,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   #
   if counter === typemax(Int) counter = 1 end
 
-  counter
+  counter + 1
 end
 #
 # Removes organisms with minimum energy. Amount of removed

@@ -10,6 +10,7 @@ module Helper
 
   export toBytes
   export randTrue
+  export fastRand
   export getProbIndex
   export getSupportedTypes
   export isopen
@@ -167,6 +168,12 @@ module Helper
     return label
   end
   #
+  # Fast version of rand(n::Range) function. Generates random Int number in
+  # range 1:n
+  # @param n Right number value in a range
+  #
+  function fastRand(n::Int) trunc(Int, rand() * n) + 1 end
+  #
   # It calculates probability index from variable amount of components.
   # Let's imagine we have three actions: one, two and three. We want
   # these actions to be called randomly, but with different probabilities.
@@ -177,16 +184,24 @@ module Helper
   # @return {Int} 0 Means that index is invalid
   #
   function getProbIndex(prob::Array{Int, 1})
-    if length(prob) < 1 return 0 end
-
+    local len::Int = length(prob)
+    if len < 1 return 0 end
     local s::Int = sum(prob)
-    local i::Int = 1
     if s < 1 return 0 end
-    num = rand(1:s)
-    s   = 0
-
-    for i = 1:length(prob)
-      if num <= (s += prob[i]) break end
+    local num::Int = fastRand(s)
+    local i::Int = 1
+    #
+    # This is small optimization algorithm. if random number in
+    # a left part of all numbers sum, the we have to go to it from
+    # left to right, if not - then from right to left. Otherwise,
+    # going every time from left to right will be a little bit
+    # slower then this aproach.
+    #
+    if num < div(s, 2)
+      s = 0
+      for i = 1:len if num <= (s += prob[i]) break end end
+    else
+      for i = len:-1:1 if num > (s -= prob[i]) break end end
     end
 
     i

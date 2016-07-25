@@ -77,7 +77,7 @@ module Manager
   # @return {Bool} run status
   #
   function run(man::ManagerTypes.ManagerData, recover::Bool = false)
-    local counter::Int = 1
+    local counter::Int = 1 # must be started from 1!
     local ips    ::Int = 0
     local istamp ::Float64 = time()
     local bstamp ::Float64 = istamp
