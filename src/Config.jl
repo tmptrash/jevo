@@ -377,8 +377,8 @@ module Config
       5,                         # ORGANISM_CLONE_AFTER_TIMES
       1,                         # ORGANISM_START_COLOR
       2,                         # CODE_MAX_FUNC_PARAMS
-      900,                       # WORLD_WIDTH
-      600,                       # WORLD_HEIGHT
+      1920,                      # WORLD_WIDTH
+      960,                       # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
       400,                       # WORLD_MAX_ORGANISMS
@@ -390,8 +390,8 @@ module Config
       1,                         # WORLD_SCALE
       1,                         # BACKUP_PERIOD
       7,                         # BACKUP_AMOUNT
-      650,                       # STAT_WIDTH
-      500,                       # STAT_HEIGHT
+      1910,                      # STAT_WIDTH
+      1020,                      # STAT_HEIGHT
       5,                         # STAT_FRAME_DELAY
       20,                        # CONNECTION_STEP_ENERGY_PERCENT
       2000,                      # CONNECTION_SERVER_PORT (current server port)
