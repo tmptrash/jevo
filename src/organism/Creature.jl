@@ -42,6 +42,7 @@ module Creature
   export Organism
 
   export create
+  export born
   export getEnergy
   export eatLeft
   export eatRight
@@ -187,10 +188,6 @@ module Creature
     #
     pos::Helper.Point
     #
-    # We don't need to remove the organism. We have to only mark it as "died"
-    # TODO: change it to died
-    alive::Bool
-    #
     # Adds events listening/firing logic to the organism.
     #
     observer::Event.Observer
@@ -238,9 +235,52 @@ module Creature
       cfg.ORGANISM_START_COLOR,                                             # color
       Dict{Int16, Int16}(),                                                 # mem
       pos,                                                                  # pos
-      true,                                                                 # alive
       Event.create()                                                        # observer
     )
+  end
+  #
+  # TODO: describe this method
+  # TODO: describe org, cfg = produce()
+  #
+  function born()
+    #
+    # Parent code should pass an organism instance on start
+    #
+    local org::Organism
+    local cfg::Config.ConfigData
+    local oldCode::Function
+    local manTask::Task
+    #
+    # We need these instances for events like stepleft, grabup,...
+    # TODO: change it to yieldto()
+    org, cfg, manTask = produce()
+    oldCode = org.codeFn
+    #
+    # This variable is used inside for loops in organism's code
+    # So, don't remove it
+    # TODO: check if this variable is used inside the org.codeFn()!!!
+    #
+    local i::Int8
+    #
+    # This is main loop, where organism lives. It's body will be
+    # changed soon by mutations.
+    #
+    while true
+      yieldto(manTask)
+      #
+      # It's okay if organism has errors and throws exceptions. It's possible
+      # that these errors will be fixed by future mutations.
+      #
+      try
+        org.codeFn(cfg, org)
+        if org.codeFn !== oldCode
+          oldCode = org.codeFn
+        end
+      catch e
+        # TODO: what we have to do with code errors?
+        # TODO: we have to calculate it for statistics
+      end
+    end
   end
   #
   # @oapi

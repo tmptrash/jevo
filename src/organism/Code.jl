@@ -141,18 +141,18 @@ module Code
   function fnCall(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
     local funcsLen::Int             = length(org.funcs)
     if funcsLen < 2 return Expr(:nothing) end
-    local fnEx::Expr                = org.funcs[Helper.fastRand(:funcsLen)+1].code # only custom function may be called
-    local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]         # return DataType of Custom function
-    local var::Symbol               = @randVar(org, pos, typ)                      # var = <fn-name>(...)
-    local args::Array{Any, 1}       = fnEx.args[1].args                            # shortcut to func args
-    local types::Array{DataType, 1} = Array{DataType, 1}()                         # func types only
+    local fnEx::Expr                = org.funcs[Helper.fastRand(funcsLen-1)+1].code # only custom function may be called
+    local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]          # return DataType of Custom function
+    local var::Symbol               = @randVar(org, pos, typ)                       # var = <fn-name>(...)
+    local args::Array{Any, 1}       = fnEx.args[1].args                             # shortcut to func args
+    local types::Array{DataType, 1} = Array{DataType, 1}()                          # func types only
     local argsLen::Int              = length(args)
 
     if argsLen > 1
       #
       # We start from 2, because first argument is a function symbol
       #
-      for i = 2:(Helper.fastRand(argsLen)+1) push!(types, args[i].args[1].args[2]) end
+      for i = 2:(Helper.fastRand(argsLen-1)+1) push!(types, args[i].args[1].args[2]) end
     end
     fnEx = :($var=$(fnEx.args[1].args[1])($([(ex = @randVar(org, pos, i); if ex === :nothing return Expr(:nothing) end;ex) for i in types]...)))
     #

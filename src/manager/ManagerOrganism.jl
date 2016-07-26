@@ -56,17 +56,8 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
     #
     # Some organisms may be marked as "died" or "removed"
     #
-    if !(org = task.organism).alive continue end
-    #
-    # It's okay if organism has errors and throws exceptions. It's possible
-    # that these errors will be fixed by future mutations.
-    #
-    try
-      org.codeFn(cfg, org)
-    catch e
-      # TODO: what we have to do with code errors?
-      # TODO: we have to calculate it for statistics
-    end
+    if istaskdone(task.task) continue end
+    yieldto(task.task)
     #
     # This is how we mutate organisms during their life.
     # Mutations occures according to organisms settings.
@@ -75,13 +66,12 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
     # Mutation will be automatically applied if organism
     # doesn't contain any code line.
     #
-    # if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
-    #   # TODO: this function is very slow!!! have to be optimized
-    #   Mutator.mutate(man.cfg, org, org.mutationAmount)
-    # end
+    org = task.organism
+    if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
+      # TODO: this function is very slow!!! have to be optimized
+      #Mutator.mutate(man.cfg, org, org.mutationAmount)
+    end
   end
-
-  return counter + 1
   #
   # Cloning procedure. The meaning of this is in ability to
   # produce children as fast as much energy has an organism.
@@ -97,7 +87,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
     for i = 1:len push!(probs, task.organism.energy) end
     i = Helper.getProbIndex(probs)
     org = tasks[i].organism
-    if org.energy > 0 && org.alive _onClone(man, org) end
+    if org.energy > 0 && !istaskdone(tasks[i].task) _onClone(man, org) end
   end
   #
   # This block decreases energy from organisms, because they
@@ -141,7 +131,7 @@ function _removeMinOrganisms(man::ManagerTypes.ManagerData)
 
   sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
   for i = 1:amount
-    if !tasks[i].organism.alive continue end
+    if istaskdone(tasks[i].task) continue end
     _killOrganism(man, i)
   end
   #
@@ -230,7 +220,7 @@ function _freezeOrganism(man::ManagerTypes.ManagerData, i::Int)
   org.color = oldColor
   delete!(man.positions, Manager._getPosId(man, org.pos))
   delete!(man.organisms, id)
-  _stopTask(man.tasks[i].organism)
+  stopTask(man.tasks[i].task)
   man.cons.frozen[org.id] = org
   msg(man, id, "frozen")
 end
@@ -241,7 +231,7 @@ end
 # @param i Index of organism's task
 #
 function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
-  if i === 0 || !man.tasks[i].organism.alive return false end
+  if i === 0 || istaskdone(man.tasks[i].task) return false end
 
   local id::UInt = man.tasks[i].id
   local org::Creature.Organism = man.tasks[i].organism
@@ -252,7 +242,7 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   _moveOrganism(man, org.pos, org)
   delete!(man.positions, Manager._getPosId(man, org.pos))
   delete!(man.organisms, id)
-  _stopTask(man.tasks[i].organism)
+  _stopTask(man.tasks[i].task)
   msg(man, id, "die")
 
   true
@@ -263,11 +253,10 @@ end
 # stop (interrupt) it. This method only marks the task as
 # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
 # @param task Task
-# TODO: remove this function. _killOrganism() should do the job
-function _stopTask(org::Creature.Organism)
+#
+function _stopTask(task::Task)
   #try Base.throwto(task, null) end
-  #task.state = :failed
-  org.alive = false
+  task.state = :failed
 end
 #
 # Moves organism to specified position. Updates organism's
@@ -340,7 +329,7 @@ end
 # @param organism Parent organism
 #
 function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
-  if length(man.tasks) >= man.cfg.WORLD_MAX_ORGANISMS return nothing end
+  if length(man.tasks) >= man.cfg.WORLD_MAX_ORGANISMS return false end
   #
   # First, we have to find free point near the organism to put
   # clone in. It's possible, that all places are filled.
@@ -359,6 +348,8 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   organism.energy       -= energy
   crTask.organism.energy = energy
   if energy > 0 Mutator.mutate(man.cfg, crTask.organism, crTask.organism.mutationsOnClone) end
+
+  true
 end
 #
 # Returns an energy amount in specified point in a world.
@@ -515,10 +506,7 @@ end
 function _onStep(man::ManagerTypes.ManagerData, organism::Creature.Organism, pos::Helper.Point)
   if !haskey(man.cons.frozen, organism.id)
     _moveOrganism(man, pos, organism)
-    # TODO: solve this!!! May be it's a problem
-    # TODO: of visualizer to draw all the dots smoothly
-    #produce()
-    #tieldto(man.task)
+    yieldto(man.task)
   end
 end
 #
@@ -531,13 +519,19 @@ end
 # @param add We need just add existing organism to the world
 # @return {ManagerTypes.OrganismTask}
 # TODO: set type for arguments
+# TODO: this method is slow! We have to optimize it
 function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos::Helper.Point = Helper.Point(0,0), add::Bool = false)
   pos = organism !== nothing && Helper.empty(pos) ? World.getNearFreePos(man.world, organism.pos) : (Helper.empty(pos) ? World.getFreePos(man.world) : pos)
   if pos === false return false end
   local id::UInt = man.organismId
   local org::Creature.Organism = organism === nothing ? Creature.create(man.cfg, id, pos) : add ? organism : deepcopy(organism)
-  local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, org)
-
+  local task::Task = Task(Creature.born)
+  local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, task, org)
+  #
+  # This is how we pass an organism and config type instances inside organism's code
+  # TODO: change it to yieldto(t.task)
+  consume(task)
+  consume(task, (org, man.cfg, man.task))
   org.pos = pos
   #
   # Because of deepcopy(), we have to remove copied handlers

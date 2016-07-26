@@ -61,7 +61,8 @@ module Manager
       UInt(0),                                                                       # minId
       UInt(0),                                                                       # maxId
       CommandLine.has(CommandLine.create(), ARG_QUIET),                              # quiet
-      function(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32) end  # dotCallback
+      function(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32) end, # dotCallback
+      current_task()
     )
     local cons::ManagerTypes.Connections = _createConnections(man)
 
@@ -113,7 +114,7 @@ module Manager
         # is because the error in serializer. See issue for details:
         # https://github.com/JuliaLang/julia/issues/16746
         #
-        #if cons.streamInit yield(); continue end
+        if cons.streamInit yield(); continue end
         #
         # This is global time stamp in seconds
         #
@@ -121,7 +122,7 @@ module Manager
         #
         # After all organisms die, we have to create next, new population
         #
-        #if length(tasks) < 1 createOrganisms(man) end
+        if length(tasks) < 1 createOrganisms(man) end
         #
         # This call runs all organism related tasks one by one
         #
@@ -133,14 +134,14 @@ module Manager
         #
         # Here we make auto-backup of application if there is a time
         #
-        #bstamp = _updateBackup(man, cfg, stamp, bstamp)
+        bstamp = _updateBackup(man, cfg, stamp, bstamp)
         #
         # This call switches between all non blocking asynchronous
         # functions (see @async macro). For example, it handles all
         # input connections for current server, switches between
         # organism Tasks and so on...
         #
-        #if _needYield(man) yield() end
+        if _needYield(man) yield() end
       end
     catch e
       Helper.error("Manager.run(): $e")

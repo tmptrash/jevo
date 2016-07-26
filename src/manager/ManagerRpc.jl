@@ -256,7 +256,7 @@ function getBest(man::ManagerTypes.ManagerData, amount::Int)
   amount = getAmount() > amount ? amount : getAmount()
   sort!(man.tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
   for i = 1:amount
-    if !man.tasks[len - i + 1].organism.alive continue end
+    if istaskdone(man.tasks[len - i + 1].task) continue end
     push!(best, _createSimpleOrganism(man.tasks[len - i + 1].id, man.tasks[len - i + 1].organism))
   end
 
@@ -359,7 +359,7 @@ function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32)
   end
   #
   # This is how we push all active messages to the network
-  #
+  # TODO: change to yieldto()
   yield()
   #
   # All "fast" clients were disconnected

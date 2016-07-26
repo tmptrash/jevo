@@ -22,8 +22,21 @@ export backup
 function recover(man::ManagerTypes.ManagerData)
   # TODO: what about type here?
   local data = Backup.load()
+  local i::Int
+  local t::ManagerTypes.OrganismTask
 
   if data === null return false end
+
+  for i = 1:length(data.tasks)
+    t = data.tasks[i]
+    t.task = Task(Creature.born)
+    #
+    # This is how we pass an organism and config type instances inside organism's code
+    # TODO: change it to yieldto(t.task)
+    consume(t.task)
+    consume(t.task, (t.organism, man.cfg, man.task))
+  end
+
   man.world          = data.world
   man.positions      = data.positions
   man.organisms      = data.organisms
@@ -50,8 +63,19 @@ end
 # @return {Bool} Backup status
 #
 function backup(man::ManagerTypes.ManagerData)
+  local tasks::Array{ManagerTypes.OrganismTask, 1} = deepcopy(man.tasks)
+  local task::Task = Task(()->0)
+  local len::Int = length(tasks)
+  local t::Int
+  #
+  # This is a small trick. We have to set all tasks in waiting
+  # state for serializing into the file. Julia can't save active
+  # tasks. After storing we have to restore all tasks.
+  #
+  for t = 1:len man.tasks[t].task = task end
   Backup.save(man)
   _removeOld(man)
+  for t = 1:len man.tasks[t].task = tasks[t].task end
   Helper.info(string("Backup has created: ", Backup.lastFile()))
 
   true

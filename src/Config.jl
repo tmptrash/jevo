@@ -303,7 +303,7 @@ module Config
       1,                                 # ORGANISM_ENERGY_DECREASE_VALUE
       500,                               # ORGANISM_REMOVE_AFTER_TIMES
       5,                                 # ORGANISM_REMOVE_AMOUNT
-      5,                                 # ORGANISM_CLONE_AFTER_TIMES
+      10,                                # ORGANISM_CLONE_AFTER_TIMES
       1,                                 # ORGANISM_START_COLOR
       2,                                 # CODE_MAX_FUNC_PARAMS
       900,                               # WORLD_WIDTH

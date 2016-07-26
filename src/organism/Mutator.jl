@@ -221,7 +221,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onClone(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationsOnClone = Helper.fastRand(cfg.ORGANISM_MAX_MUTATIONS_ON_CLONE) - 1
+    org.mutationsOnClone = Helper.fastRand(cfg.ORGANISM_MAX_MUTATIONS_ON_CLONE + 1) - 1
     true
   end
   #
@@ -233,7 +233,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onPeriod(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationPeriod = Helper.fastRand(cfg.ORGANISM_MAX_MUTATION_PERIOD) - 1
+    org.mutationPeriod = Helper.fastRand(cfg.ORGANISM_MAX_MUTATION_PERIOD + 1) - 1
     true
   end
   #
@@ -245,7 +245,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onAmount(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationAmount = Helper.fastRand(cfg.ORGANISM_MAX_MUTATION_AMOUNT) - 1
+    org.mutationAmount = Helper.fastRand(cfg.ORGANISM_MAX_MUTATION_AMOUNT + 1) - 1
     true
   end
   #

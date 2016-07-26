@@ -4,6 +4,7 @@
 #
 # @author DeadbraiN
 #
+import Helper
 #
 # Creates new unique variable name and returns it's symbol
 # @param {Creature.Organism} org Owner of new variable
