@@ -40,7 +40,7 @@ module Mutator
   # TODO: add org.codeSize += 1 for every adding
   # TODO: describe indexes (add,change,del,...)
   # TODO: describe return value. false mean no mutation
-  #
+  # TODO: this function is very slow!!! must be optimized
   function mutate(cfg::Config.ConfigData, org::Creature.Organism, amount::Int = 1)
     local i         ::Int
     local res       ::Bool

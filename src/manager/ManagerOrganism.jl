@@ -69,7 +69,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
     org = task.organism
     if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
       # TODO: this function is very slow!!! have to be optimized
-      #Mutator.mutate(man.cfg, org, org.mutationAmount)
+      Mutator.mutate(man.cfg, org, org.mutationAmount)
     end
   end
   #
@@ -524,6 +524,7 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   pos = organism !== nothing && Helper.empty(pos) ? World.getNearFreePos(man.world, organism.pos) : (Helper.empty(pos) ? World.getFreePos(man.world) : pos)
   if pos === false return false end
   local id::UInt = man.organismId
+  # TODO: deepcopy() call is very slow!!! must be optimized
   local org::Creature.Organism = organism === nothing ? Creature.create(man.cfg, id, pos) : add ? organism : deepcopy(organism)
   local task::Task = Task(Creature.born)
   local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, task, org)
