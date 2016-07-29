@@ -443,14 +443,14 @@ end
 #
 function _createConnections(man::ManagerTypes.ManagerData)
   ManagerTypes.Connections(
+    false,
     _createServer(man),
     _createServer(man, true),
     _createClient(man, _SIDE_LEFT),
     _createClient(man, _SIDE_RIGHT),
     _createClient(man, _SIDE_UP),
     _createClient(man, _SIDE_DOWN),
-    Dict{UInt, Creature.Organism}(),
-    false
+    Dict{UInt, Creature.Organism}()
   )
 end
 #

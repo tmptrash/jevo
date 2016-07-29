@@ -41,6 +41,7 @@ module ManagerTypes
   # mode is on or off. Here streaming is a world dots streaming.
   #
   type Connections
+    streamInit::Bool
     server    ::Server.ServerConnection
     fastServer::Server.ServerConnection
     left      ::Client.ClientConnection
@@ -48,7 +49,17 @@ module ManagerTypes
     up        ::Client.ClientConnection
     down      ::Client.ClientConnection
     frozen    ::Dict{UInt, Creature.Organism}
-    streamInit::Bool
+    Connections() = new()
+    Connections(
+      streamInit::Bool,
+      server    ::Server.ServerConnection,
+      fastServer::Server.ServerConnection,
+      left      ::Client.ClientConnection,
+      right     ::Client.ClientConnection,
+      up        ::Client.ClientConnection,
+      down      ::Client.ClientConnection,
+      frozen    ::Dict{UInt, Creature.Organism}
+    ) = new(streamInit, server, fastServer, left, right, up, down, frozen)
   end
   #
   # Manager's related type. Contains world, command line parameters,

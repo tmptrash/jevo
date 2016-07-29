@@ -29,8 +29,6 @@ module Manager
   import FastApi
   import Config
   import ManagerTypes
-  # TODO: remove this!
-  using Debug
 
   export create
   export run
@@ -62,7 +60,7 @@ module Manager
       UInt(0),                                                                       # maxId
       CommandLine.has(CommandLine.create(), ARG_QUIET),                              # quiet
       function(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32) end, # dotCallback
-      current_task()
+      current_task()                                                                 # task
     )
     local cons::ManagerTypes.Connections = _createConnections(man)
 
@@ -108,8 +106,8 @@ module Manager
       # This is main infinite loop. It manages input connections
       # and organism's tasks switching.
       #
-      #while true
-      for i=1:10000
+      while true
+      #for i=1:10000
         #
         # We have to wait while all clients are ready for streaming. This
         # is because the error in serializer. See issue for details:
@@ -151,6 +149,23 @@ module Manager
     end
 
     true
+  end
+  #
+  # This is small hack. It stops the task immediately. We
+  # have to do this, because task is a memory leak if we don't
+  # stop (interrupt) it. This method only marks the task as
+  # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
+  # @param task Task
+  #
+  function stopTask(task::Task)
+    #try Base.throwto(task, InterruptException()) end
+    #task.state = :failed
+    #
+    # This is how we stop the task. Stop means change it state
+    # to :done by exit from main while loop. See Creature.born()
+    # for details.
+    #
+    yieldto(task, true)
   end
 
   #
@@ -209,7 +224,7 @@ module Manager
     if ts >= 30.0 #5.0
       localIps  = trunc(Int, ips / ts)
       dataIndex = UInt8(FastApi.API_UINT64)
-      #print("ips: ", localIps); quit()
+      print("ips: ", localIps); quit()
       man.cfg.WORLD_IPS = localIps
       @inbounds for sock in man.cons.fastServer.socks
         if Helper.isopen(sock)

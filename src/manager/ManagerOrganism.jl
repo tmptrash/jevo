@@ -220,7 +220,7 @@ function _freezeOrganism(man::ManagerTypes.ManagerData, i::Int)
   org.color = oldColor
   delete!(man.positions, Manager._getPosId(man, org.pos))
   delete!(man.organisms, id)
-  stopTask(man.tasks[i].task)
+  Manager.stopTask(man.tasks[i].task)
   man.cons.frozen[org.id] = org
   msg(man, id, "frozen")
 end
@@ -242,21 +242,10 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   _moveOrganism(man, org.pos, org)
   delete!(man.positions, Manager._getPosId(man, org.pos))
   delete!(man.organisms, id)
-  _stopTask(man.tasks[i].task)
+  Manager.stopTask(man.tasks[i].task)
   msg(man, id, "die")
 
   true
-end
-#
-# This is small hack. It stops the task immediately. We
-# have to do this, because task is a memory leak if we don't
-# stop (interrupt) it. This method only marks the task as
-# "deleted". Real deletion will be provided in _updateOrganismsEnergy().
-# @param task Task
-#
-function _stopTask(task::Task)
-  #try Base.throwto(task, null) end
-  task.state = :failed
 end
 #
 # Moves organism to specified position. Updates organism's
@@ -532,7 +521,7 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   # This is how we pass an organism and config type instances inside organism's code
   # TODO: change it to yieldto(t.task)
   consume(task)
-  consume(task, (org, man.cfg, man.task))
+  consume(task, (org, man.cfg))
   org.pos = pos
   #
   # Because of deepcopy(), we have to remove copied handlers

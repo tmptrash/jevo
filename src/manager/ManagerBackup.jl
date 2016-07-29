@@ -7,6 +7,9 @@
 #
 import Backup
 import Creature
+import Server
+import Client
+import Creature
 import ManagerTypes
 
 export recover
@@ -24,18 +27,22 @@ function recover(man::ManagerTypes.ManagerData)
   local data = Backup.load()
   local i::Int
   local t::ManagerTypes.OrganismTask
+  local curTask::Task = current_task()
 
   if data === null return false end
 
-  for i = 1:length(data.tasks)
-    t = data.tasks[i]
+  for t in data.tasks
     t.task = Task(Creature.born)
+    t.organism.manTask = curTask
     #
     # This is how we pass an organism and config type instances inside organism's code
     # TODO: change it to yieldto(t.task)
     consume(t.task)
-    consume(t.task, (t.organism, man.cfg, man.task))
+    consume(t.task, (t.organism, man.cfg))
   end
+  man.task = curTask
+  man.minOrg.manTask = curTask
+  man.maxOrg.manTask = curTask
 
   man.world          = data.world
   man.positions      = data.positions
@@ -48,6 +55,7 @@ function recover(man::ManagerTypes.ManagerData)
   man.maxOrg         = data.maxOrg
   man.minId          = data.minId
   man.maxId          = data.maxId
+  man.cons           = _createConnections(data)
   #
   # We have to remove all event handlers from observers
   # after backup loading, because they may be multiplied
@@ -63,22 +71,50 @@ end
 # @return {Bool} Backup status
 #
 function backup(man::ManagerTypes.ManagerData)
-  local tasks::Array{ManagerTypes.OrganismTask, 1} = deepcopy(man.tasks)
-  local task::Task = Task(()->0)
+  local tasks::Array{Task, 1} = map((t)->t.task, man.tasks)
+  local cons::ManagerTypes.Connections = man.cons
+  local curTask::Task = current_task()
   local len::Int = length(tasks)
+  local tmpTask::Task = Task(()->0)
+  local task::ManagerTypes.OrganismTask
   local t::Int
+  local ret::Bool
+  #
+  # We have to stop the task before it will be saved into the backup file
+  #
+  yieldto(tmpTask)
   #
   # This is a small trick. We have to set all tasks in waiting
   # state for serializing into the file. Julia can't save active
   # tasks. After storing we have to restore all tasks.
   #
-  for t = 1:len man.tasks[t].task = task end
-  Backup.save(man)
+  for task in man.tasks
+    task.task = tmpTask
+    task.organism.manTask = tmpTask
+  end
+  man.minOrg.manTask = tmpTask
+  man.maxOrg.manTask = tmpTask
+  man.task = tmpTask
+  man.cons = ManagerTypes.Connections()
+  #
+  # These code lines create new backup file and remove last one
+  #
+  ret = Backup.save(man)
   _removeOld(man)
-  for t = 1:len man.tasks[t].task = tasks[t].task end
-  Helper.info(string("Backup has created: ", Backup.lastFile()))
+  #
+  # Reverts workable state back
+  #
+  for t = 1:len
+    man.tasks[t].task = tasks[t]
+    man.tasks[t].organism.manTask = curTask
+  end
+  man.cons = cons
+  man.task = curTask
+  man.minOrg.manTask = curTask
+  man.maxOrg.manTask = curTask
+  if ret Helper.info(string("Backup has created: ", Backup.lastFile())) end
 
-  true
+  ret
 end
 #
 # Removes old backup files, because they are big.

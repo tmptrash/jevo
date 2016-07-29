@@ -37,7 +37,7 @@
 module Creature
   import Event
   import Helper
-  using Config
+  import Config
 
   export Organism
 
@@ -188,6 +188,10 @@ module Creature
     #
     pos::Helper.Point
     #
+    # Reference to parent (manager) task the organism is switching to
+    #
+    manTask::Task
+    #
     # Adds events listening/firing logic to the organism.
     #
     observer::Event.Observer
@@ -235,6 +239,7 @@ module Creature
       cfg.ORGANISM_START_COLOR,                                             # color
       Dict{Int16, Int16}(),                                                 # mem
       pos,                                                                  # pos
+      current_task(),                                                       # manTask
       Event.create()                                                        # observer
     )
   end
@@ -249,11 +254,10 @@ module Creature
     local org::Organism
     local cfg::Config.ConfigData
     local oldCode::Function
-    local manTask::Task
     #
     # We need these instances for events like stepleft, grabup,...
     # TODO: change it to yieldto()
-    org, cfg, manTask = produce()
+    org, cfg = produce()
     oldCode = org.codeFn
     #
     # This variable is used inside for loops in organism's code
@@ -265,8 +269,7 @@ module Creature
     # This is main loop, where organism lives. It's body will be
     # changed soon by mutations.
     #
-    while true
-      yieldto(manTask)
+    while yieldto(org.manTask) === nothing
       #
       # It's okay if organism has errors and throws exceptions. It's possible
       # that these errors will be fixed by future mutations.

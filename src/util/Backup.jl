@@ -21,7 +21,7 @@ module Backup
   #
   # Makes a backup of application and stores it in file
   # @param data Data to save
-  # @return {Bool} SAving status
+  # @return {Bool} Saving status
   #
   function save(data::Any)
     local file::ASCIIString = string(FOLDER_NAME, "/", replace(string(now()), ":", "-"), FILE_POSTFIX)
@@ -48,7 +48,7 @@ module Backup
     if isempty(file)
       file = _getOldestFile(FOLDER_NAME)
       if isempty(file)
-        Helper.warn("No backup files")  
+        Helper.warn("No backup files")
         return null
       end
     end

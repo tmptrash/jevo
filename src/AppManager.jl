@@ -22,7 +22,7 @@ function main()
   local args::Dict{ASCIIString, ASCIIString} = CommandLine.create()
   local man::ManagerTypes.ManagerData = Manager.create()
 
-  if !CommandLine.has(args, ARG_RECOVER)
+  if CommandLine.has(args, ARG_RECOVER)
     Helper.info(string("Recovering from backup: ", Backup.lastFile()))
     Manager.recover(man)
     return Manager.run(man, true)

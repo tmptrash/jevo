@@ -64,7 +64,7 @@ module RemoteWorldRT
   # @param poolingPort Remote port for pooling requests
   # @return {RemoteDataRT}
   #
-  function create(cfg::Config.CofigData, host::Base.IPAddr, cmdPort::Int, poolingPort::Int)
+  function create(cfg::Config.ConfigData, host::Base.IPAddr, cmdPort::Int, poolingPort::Int)
     RemoteDataRT(
       Client.create(host, cmdPort),
       Client.create(host, poolingPort, true),
