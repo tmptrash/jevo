@@ -84,7 +84,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   #
   if needClone && len < man.cfg.WORLD_MAX_ORGANISMS && len > 0
     probs = Int[]
-    for i = 1:len push!(probs, task.organism.energy) end
+    @inbounds for task in tasks push!(probs, task.organism.energy) end
     i = Helper.getProbIndex(probs)
     org = tasks[i].organism
     if org.energy > 0 && !istaskdone(tasks[i].task) _onClone(man, org) end
@@ -129,9 +129,9 @@ function _removeMinOrganisms(man::ManagerTypes.ManagerData)
 
   if length(tasks) <= amount return false end
 
-  sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
+  @inbounds sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
   for i = 1:amount
-    if istaskdone(tasks[i].task) continue end
+    @inbounds if istaskdone(tasks[i].task) continue end
     _killOrganism(man, i)
   end
   #
