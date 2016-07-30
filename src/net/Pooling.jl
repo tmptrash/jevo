@@ -67,7 +67,7 @@ module Pooling
   # @param port Remote port we are connecting to
   # @return {PoolingData|false}
   #
-  function create(host::Base.IPAddr, port::Integer)
+  function create(host::Base.IPAddr, port::Int)
     con = Client.create(host, port)
     Client.isOk(con) ? PoolingData(con, Event.create(), Array{Any, 1}()) : false
   end

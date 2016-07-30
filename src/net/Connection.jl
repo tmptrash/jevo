@@ -78,7 +78,7 @@ module Connection
   function request(sock::Base.TCPSocket, fn::Int, args...)
     if !Helper.isopen(sock) return false end
     try
-      serialize(sock, Command(fn, [i for i in args]))
+      serialize(sock, Command(fn, collect(args)))
     catch e
       Helper.warn("Connection.request(): $e")
       close(sock)

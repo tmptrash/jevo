@@ -47,7 +47,7 @@ module RemoteStatistics
   # @param height Window height in pixels
   # @return {RemoteStatData|false}
   #
-  function create(host::Base.IPAddr, port::Integer, width::Int, height::Int
+  function create(host::Base.IPAddr, port::Int, width::Int, height::Int
     pd = Pooling.create(host, port)
     if pd !== false
       label = Gtk.@Label("")

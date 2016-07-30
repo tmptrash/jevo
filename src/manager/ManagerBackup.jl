@@ -43,7 +43,12 @@ function recover(man::ManagerTypes.ManagerData)
   man.task = curTask
   man.minOrg.manTask = curTask
   man.maxOrg.manTask = curTask
-
+  #
+  # We don't need to load\create servers and clients every
+  # time on load backup. They should be created every time
+  # on Manager application starts. So we have to skip loading
+  # of man.cons property.
+  #
   man.world          = data.world
   man.positions      = data.positions
   man.organisms      = data.organisms
@@ -55,7 +60,6 @@ function recover(man::ManagerTypes.ManagerData)
   man.maxOrg         = data.maxOrg
   man.minId          = data.minId
   man.maxId          = data.maxId
-  man.cons           = _createConnections(data)
   #
   # We have to remove all event handlers from observers
   # after backup loading, because they may be multiplied

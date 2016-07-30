@@ -52,7 +52,7 @@ module RemoteWorld
   # @param height Canvas height in pixels
   # @return {RemoteData|false}
   # TODO: return value should be same type
-  function create(cfg::Config.ConfigData, host::Base.IPAddr, port::Integer, width::Int, height::Int
+  function create(cfg::Config.ConfigData, host::Base.IPAddr, port::Int, width::Int, height::Int
     pd = Pooling.create(host, port)
     pd !== false ? RemoteData(pd, CanvasWindow.create(width, height, cfg.WORLD_SCALE)) : false
   end
