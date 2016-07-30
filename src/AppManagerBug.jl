@@ -20,9 +20,10 @@ function main()
   local args::Dict{ASCIIString, ASCIIString} = CommandLine.create()
   local man::ManagerTypes.ManagerData = Manager.create()
 
-  if !CommandLine.has(args, ARG_RECOVER)
+  if CommandLine.has(args, ARG_RECOVER)
     Helper.info(string("Recovering from backup: ", Backup.lastFile()))
-    return Manager.recover(man) && (@profile Manager.run(man, true))
+    Manager.recover(man)
+    return @profile Manager.run(man, true)
   end
 
   Helper.info("Running from scratch...")

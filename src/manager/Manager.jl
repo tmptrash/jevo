@@ -107,7 +107,7 @@ module Manager
       # and organism's tasks switching.
       #
       while true
-      #for i=1:10000
+      #for i=1:50000
         #
         # We have to wait while all clients are ready for streaming. This
         # is because the error in serializer. See issue for details:
@@ -202,7 +202,7 @@ module Manager
   # or an energy block may be there at the moment.
   # @param pos Position we need to check
   # @return {Bool} true - free point, false - filled point
-  #
+  # TODO: this method is very slow!!!
   function _isFree(man::ManagerTypes.ManagerData, pos::Helper.Point)
     !haskey(man.positions, _getPosId(man, pos)) && World.getEnergy(man.world, pos) === UInt32(0)
   end
@@ -221,10 +221,10 @@ module Manager
     local localIps::Int
     local i::Int
     # TODO: 5.0 seconds should be get from config
-    if ts >= 30.0 #5.0
+    if ts >= 10.0
       localIps  = trunc(Int, ips / ts)
       dataIndex = UInt8(FastApi.API_UINT64)
-      #print("ips: ", localIps); quit()
+      #print(localIps, ", "); #quit()
       man.cfg.WORLD_IPS = localIps
       @inbounds for sock in man.cons.fastServer.socks
         if Helper.isopen(sock)

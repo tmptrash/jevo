@@ -96,6 +96,7 @@ function backup(man::ManagerTypes.ManagerData)
     task.task = tmpTask
     task.organism.manTask = tmpTask
   end
+
   man.minOrg.manTask = tmpTask
   man.maxOrg.manTask = tmpTask
   man.task = tmpTask

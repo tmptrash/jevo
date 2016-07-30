@@ -200,7 +200,7 @@ module Config
     #
     # Period of making automatic backup of application. In seconds
     #
-    BACKUP_PERIOD::Int
+    BACKUP_PERIOD::Float64
     #
     # Amount of backup files stored on HDD. Old files will be removed
     #

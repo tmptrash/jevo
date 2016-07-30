@@ -178,7 +178,7 @@ end
 # got from config: WORLD_MIN_ENERGY_PERCENT. We calculate this percent
 # as a ration between whole world (100%) and all energy points together.
 # @param man Manager data type
-#
+# TODO: this method is very slow!!! should be optimized!
 function _updateWorldEnergy(man::ManagerTypes.ManagerData)
   local plane::Array{UInt32, 2} = man.world.data
   local total::Int = man.world.width * man.world.height
