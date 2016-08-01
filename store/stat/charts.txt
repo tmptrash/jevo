@@ -1,0 +1,26 @@
+[ stat data for analisys ]
+
+organisms code (dynamix values)
+- amount of lines
+- amount of functions declaration
+- amount of function calls
+- mutation probabilities
+- mutations on clone
+- mutations period
+- mutations amount
+- energy
+
+Population (dynamix values)
+- amount
+- ips
+- generation (alive+dead)
+
+World (static values)
+- width\height
+- energy decrease period
+- energy decrease value
+- remove after times
+- remove after times amount
+- clone after times
+- max organisms
+- energy check period
