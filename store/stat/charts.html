@@ -1,0 +1,84 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+		google.charts.load('current', {packages: ['corechart', 'line']});
+		google.charts.setOnLoadCallback(drawLineColors);
+		/**
+		 * Creates as many charts data as many arguments we pass in
+		 * @param {args} Charts data arrays
+		 */
+		function createChart(indexData) {
+			var data = Array.prototype.slice.call(arguments);
+			var result = [];
+			var arr;
+			var i;
+			var j;
+			
+			data.shift();
+			for (i = 0; i < indexData.length; i++) {
+				arr = [indexData[i]];
+				if (arr !== undefined) {
+					for (j = 0; j < data.length; j++) {
+						arr.push(data[j][i]);
+					}
+					result.push(arr);
+				}
+			}
+			return result;
+		}
+		function drawLineColors() {
+			var data = new google.visualization.DataTable();
+			  
+			// Organisms
+			var probs         = [[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1]];
+			var funcs         = [5,     7,     7,      ];
+			var funcCall      = [5,     5,     4,      ];
+			var mutOnClone    = [21,    21,    8,      ];
+			var mutPeriod     = [3276,  5086,  9191,   ];
+			var mutAmount     = [5,     41,    16,     ];
+			var energy        = [772349,941580,1493407,];
+			var lines         = [141,   141,   148,    ];
+			// Population
+			var orgAmount     = [240,   154,   255,    ];
+			var ips           = [6,     14,    6,      ];
+			var genAmount     = [182664,194194,207040, ];
+			// World
+			var widthHeight   = [[400,300]];
+			var enDecPeriod   = [20       ];
+			var enDecAmount   = [1        ];
+			var delAfterTime  = [2000     ];
+			var delAmount     = [50       ];
+			var cloneAfter    = [5        ];
+			var maxOrg        = [500      ];
+			var enCheckPeriod = [5000     ];
+			 
+			  // TODO:
+			data.addColumn('number', 'Population');
+			data.addColumn('number', 'Function amount');
+			//data.addColumn('number', 'Code lines');
+			
+			data.addRows(
+				//[[0, 141, 0],    [1, 10, 5],   [2, 23, 15],  [3, 17, 9],   [4, 18, 10],  [5, 9, 5]]
+				createChart(genAmount, funcs)
+			);
+
+			 var options = {
+				hAxis: {
+					title: 'Population'
+				},
+				vAxis: {
+					title: 'Amount'
+				},
+				colors: ['#a52714', '#097138']
+			};
+
+			var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+			chart.draw(data, options);
+		}
+    </script>
+  </head>
+  <body>
+    <div id="chart_div" style="width: 900px; height: 500px"></div>
+  </body>
+</html>
