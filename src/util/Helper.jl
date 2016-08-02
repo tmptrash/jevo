@@ -10,6 +10,7 @@ module Helper
 
   export toBytes
   export fastRand
+  export fastZRand
   export getProbIndex
   export getSupportedTypes
   export isopen
@@ -164,6 +165,12 @@ module Helper
   # @param n Right number value in a range
   #
   function fastRand(n::Int) trunc(Int, rand() * n) + 1 end
+  #
+  # Fast version of rand(0::Range) function. Generates random Int number in
+  # range 0:n
+  # @param n Right number value in a range
+  #
+  function fastZRand(n::Int) trunc(Int, rand() * (n + 1)) end
   #
   # It calculates probability index from variable amount of components.
   # Let's imagine we have three actions: one, two and three. We want

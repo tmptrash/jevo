@@ -221,7 +221,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onClone(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationsOnClone = Helper.fastRand(cfg.ORGANISM_MAX_MUTATIONS_ON_CLONE + 1) - 1
+    org.mutationsOnClone = Helper.fastZRand(cfg.ORGANISM_MAX_MUTATIONS_ON_CLONE)
     true
   end
   #
@@ -233,7 +233,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onPeriod(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationPeriod = Helper.fastRand(cfg.ORGANISM_MAX_MUTATION_PERIOD + 1) - 1
+    org.mutationPeriod = Helper.fastZRand(cfg.ORGANISM_MAX_MUTATION_PERIOD)
     true
   end
   #
@@ -245,14 +245,26 @@ module Mutator
   # @param cmd Unused
   #
   function _onAmount(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
-    org.mutationAmount = Helper.fastRand(cfg.ORGANISM_MAX_MUTATION_AMOUNT + 1) - 1
+    org.mutationAmount = Helper.fastZRand(cfg.ORGANISM_MAX_MUTATION_AMOUNT)
+    true
+  end
+  #
+  # Mutates "mutation probability" array
+  # @param cfg Global configuration type
+  # @param org Organism we are working with
+  # @param pos Unused
+  # @param cmd Unused
+  #
+  function _onProbs(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+    local probIndex = Helper.fastRand(length(org.mutationProbabilities))
+    org.mutationProbabilities[probIndex] = Helper.fastZRand(cfg.ORGANISM_MUTATION_PROBABILITY_MAX_VALUE)
     true
   end
   #
   # All available functions for mutation types: change, add, del,...
   #
   const _MUTATION_TYPES = [
-    _onAdd, _onChange, _onDel, _onSmallChange, _onClone, _onPeriod, _onAmount
+    _onAdd, _onChange, _onDel, _onSmallChange, _onClone, _onPeriod, _onAmount, _onProbs
   ]
   #
   # "Empty" position. Means no position. Is used only like a stub for

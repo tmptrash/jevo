@@ -130,6 +130,10 @@ module Config
     #
     ORGANISM_START_COLOR::Int
     #
+    # Max value, which we may use in ORGANISM_MUTATION_PROBABILITIES array.
+    #
+    ORGANISM_MUTATION_PROBABILITY_MAX_VALUE::Int
+    #
     # Maximum amount of arguments in custom functions. Minimum 1.
     #
     CODE_MAX_FUNC_PARAMS::Int
@@ -305,6 +309,7 @@ module Config
       5,                                 # ORGANISM_REMOVE_AMOUNT
       10,                                # ORGANISM_CLONE_AFTER_TIMES
       1,                                 # ORGANISM_START_COLOR
+      65536,                             # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
       2,                                 # CODE_MAX_FUNC_PARAMS
       900,                               # WORLD_WIDTH
       600,                               # WORLD_HEIGHT
