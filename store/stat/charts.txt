@@ -1,6 +1,6 @@
 [ stat data for analisys ]
 
-organisms code (dynamix values)
+organisms code (dynamic values)
 - amount of lines
 - amount of functions declaration
 - amount of function calls
@@ -10,7 +10,7 @@ organisms code (dynamix values)
 - mutations amount
 - energy
 
-Population (dynamix values)
+Population (dynamic values)
 - amount
 - ips
 - generation (alive+dead)

@@ -255,8 +255,8 @@ end
 # @param task Task
 #
 function _stopTask(task::Task)
-  #try Base.throwto(task, null) end
-  task.state = :failed
+  try Base.throwto(task, null) end
+  #task.state = :failed
 end
 #
 # Moves organism to specified position. Updates organism's
@@ -494,7 +494,7 @@ function _onStep(organism::Creature.Organism, pos::Helper.Point)
   if !haskey(Manager._cons.frozen, organism.id)
     _moveOrganism(pos, organism)
     # TODO: solve this!!!
-    produce()
+    #produce()
   end
 end
 #
