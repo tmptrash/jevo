@@ -31,18 +31,18 @@
 			var data = new google.visualization.DataTable();
 			  
 			// Organisms
-			var probs         = [[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1]];
-			var funcs         = [5,     7,     7,      6,      ];
-			var funcCall      = [5,     5,     4,      6,      ];
-			var mutOnClone    = [21,    21,    8,      27,     ];
-			var mutPeriod     = [3276,  5086,  9191,   6924,   ];
-			var mutAmount     = [5,     41,    16,     35,     ];
-			var energy        = [772349,941580,1493407,1173252,];
-			var lines         = [141,   141,   148,    149,    ];
+			var probs         = [[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1]];
+			var funcs         = [5,     7,     7,      6,      6,     5,      6,      6,      6,      7,      6,       6,       ];
+			var funcCall      = [5,     5,     4,      6,      7,     8,      6,      6,      6,      8,      11,      11,      ];
+			var mutOnClone    = [21,    21,    8,      27,     4,     10,     7,      7,      7,      7,      7,       0,       ];
+			var mutPeriod     = [3276,  5086,  9191,   6924,   9210,  5269,   9210,   9210,   9210,   9210,   9210,    9210,    ];
+			var mutAmount     = [5,     41,    16,     35,     70,    0,      51,     51,     51,     7,      1,       6,       ];
+			var energy        = [772349,941580,1493407,1173252,211744,1537091,2205868,2682491,6614198,2749709,4307350, 3988756, ];
+			var lines         = [141,   141,   148,    149,    143,   136,    143,    138,    142,    132,    138,     140,     ];
 			// Population
-			var orgAmount     = [240,   154,   255,    264,    ];
-			var ips           = [6,     14,    6,      4,      ];
-			var genAmount     = [182664,194194,207040, 214598, ];
+			var orgAmount     = [240,   154,   255,    264,    86,    256,    499,    500,    500,    488,    500,     498,     ];
+			var ips           = [6,     14,    6,      4,      18,    5,      3,      3,      2,      3,      3,       2,       ];
+			var genAmount     = [182664,194194,207040, 214598, 251679,263857, 270535, 272273, 277160, 282982, 288172,  293660,  ];
 			// World
 			var widthHeight   = [[400,300]];
 			var enDecPeriod   = [20       ];
@@ -55,12 +55,11 @@
 			 
 			  // TODO:
 			data.addColumn('number', 'Population');
-			data.addColumn('number', 'Code lines');
-			data.addColumn('number', 'Organisms amount');
+			data.addColumn('number', 'Mutation on clone');
+			//data.addColumn('number', 'Organisms amount');
 			
 			data.addRows(
-				//[[0, 141, 0],    [1, 10, 5],   [2, 23, 15],  [3, 17, 9],   [4, 18, 10],  [5, 9, 5]]
-				createChart(genAmount, lines, orgAmount)
+				createChart(genAmount, mutOnClone)
 			);
 
 			 var options = {
@@ -79,6 +78,6 @@
     </script>
   </head>
   <body>
-    <div id="chart_div" style="width: 900px; height: 500px"></div>
+    <div id="chart_div" style="width: 1200px; height: 600px"></div>
   </body>
 </html>
