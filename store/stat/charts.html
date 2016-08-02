@@ -31,18 +31,18 @@
 			var data = new google.visualization.DataTable();
 			  
 			// Organisms
-			var probs         = [[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1]];
-			var funcs         = [5,     7,     7,      ];
-			var funcCall      = [5,     5,     4,      ];
-			var mutOnClone    = [21,    21,    8,      ];
-			var mutPeriod     = [3276,  5086,  9191,   ];
-			var mutAmount     = [5,     41,    16,     ];
-			var energy        = [772349,941580,1493407,];
-			var lines         = [141,   141,   148,    ];
+			var probs         = [[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1]];
+			var funcs         = [5,     7,     7,      6,      ];
+			var funcCall      = [5,     5,     4,      6,      ];
+			var mutOnClone    = [21,    21,    8,      27,     ];
+			var mutPeriod     = [3276,  5086,  9191,   6924,   ];
+			var mutAmount     = [5,     41,    16,     35,     ];
+			var energy        = [772349,941580,1493407,1173252,];
+			var lines         = [141,   141,   148,    149,    ];
 			// Population
-			var orgAmount     = [240,   154,   255,    ];
-			var ips           = [6,     14,    6,      ];
-			var genAmount     = [182664,194194,207040, ];
+			var orgAmount     = [240,   154,   255,    264,    ];
+			var ips           = [6,     14,    6,      4,      ];
+			var genAmount     = [182664,194194,207040, 214598, ];
 			// World
 			var widthHeight   = [[400,300]];
 			var enDecPeriod   = [20       ];
@@ -55,12 +55,12 @@
 			 
 			  // TODO:
 			data.addColumn('number', 'Population');
-			data.addColumn('number', 'Function amount');
-			//data.addColumn('number', 'Code lines');
+			data.addColumn('number', 'Code lines');
+			data.addColumn('number', 'Organisms amount');
 			
 			data.addRows(
 				//[[0, 141, 0],    [1, 10, 5],   [2, 23, 15],  [3, 17, 9],   [4, 18, 10],  [5, 9, 5]]
-				createChart(genAmount, funcs)
+				createChart(genAmount, lines, orgAmount)
 			);
 
 			 var options = {
