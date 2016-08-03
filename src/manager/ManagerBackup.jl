@@ -96,7 +96,6 @@ function backup(man::ManagerTypes.ManagerData)
     task.task = tmpTask
     task.organism.manTask = tmpTask
   end
-
   man.minOrg.manTask = tmpTask
   man.maxOrg.manTask = tmpTask
   man.task = tmpTask
@@ -113,6 +112,7 @@ function backup(man::ManagerTypes.ManagerData)
     man.tasks[t].task = tasks[t]
     man.tasks[t].organism.manTask = curTask
   end
+
   man.cons = cons
   man.task = curTask
   man.minOrg.manTask = curTask

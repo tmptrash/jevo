@@ -17,7 +17,7 @@ function main()
 
   if Config.isEmpty(cfg) quit() end
   # TODO: should be get from command line parameter or it's local default config
-  rw = RemoteWorldRT.create(cfg, ip"127.0.0.1", 2000, 2001)
+  rw = RemoteWorldRT.create(cfg, cfg.CONNECTION_SERVER_IP, cfg.CONNECTION_SERVER_PORT, cfg.CONNECTION_FAST_SERVER_PORT)
   RemoteWorldRT.start(rw)
 end
 #

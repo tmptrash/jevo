@@ -224,7 +224,7 @@ module Manager
     if ts >= 10.0
       localIps  = trunc(Int, ips / ts)
       dataIndex = UInt8(FastApi.API_UINT64)
-      #print(localIps, ", "); #quit()
+      print(localIps, ", "); #quit()
       man.cfg.WORLD_IPS = localIps
       @inbounds for sock in man.cons.fastServer.socks
         if Helper.isopen(sock)
