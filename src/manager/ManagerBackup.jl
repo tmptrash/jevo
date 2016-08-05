@@ -23,6 +23,7 @@ export backup
 # @return {Bool} recover status
 #
 function recover(man::ManagerTypes.ManagerData)
+  Helper.info(string("Recovering from backup: ", Backup.lastFile()))
   # TODO: what about type here?
   local data = Backup.load()
   local i::Int
@@ -79,13 +80,18 @@ function backup(man::ManagerTypes.ManagerData)
   local cons::ManagerTypes.Connections = man.cons
   local curTask::Task = current_task()
   local len::Int = length(tasks)
-  local tmpTask::Task = Task(()->0)
+  local tmpTask::Task = Task(()->true)
   local task::ManagerTypes.OrganismTask
   local t::Int
   local ret::Bool
+  local org::Creature.Organism
+  local ui::UInt
   #
-  # We have to stop the task before it will be saved into the backup file
+  # We have to stop the task before it will be saved into the backup file.
+  # yield() call is needed, because Julia has strange issue with yieldto()
+  # or i don't understand it's logic. Anyway, it stucks without this call.
   #
+  yield()
   yieldto(tmpTask)
   #
   # This is a small trick. We have to set all tasks in waiting
@@ -96,6 +102,8 @@ function backup(man::ManagerTypes.ManagerData)
     task.task = tmpTask
     task.organism.manTask = tmpTask
   end
+  for (t, org) in man.organisms org.manTask = tmpTask end
+  for (ui, org) in man.positions org.manTask = tmpTask end
   man.minOrg.manTask = tmpTask
   man.maxOrg.manTask = tmpTask
   man.task = tmpTask

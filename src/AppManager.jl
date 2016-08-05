@@ -23,7 +23,6 @@ function main()
   local man::ManagerTypes.ManagerData = Manager.create()
 
   if CommandLine.has(args, ARG_RECOVER)
-    Helper.info(string("Recovering from backup: ", Backup.lastFile()))
     Manager.recover(man)
     return Manager.run(man, true)
   end
