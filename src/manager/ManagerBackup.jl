@@ -33,8 +33,9 @@ function recover(man::ManagerTypes.ManagerData)
   if data === null return false end
 
   for t in data.tasks
-    t.task = Task(Creature.born)
+    t.organism.codeFn  = Creature.eval(t.organism.code)
     t.organism.manTask = curTask
+    t.task = Task(Creature.born)
     #
     # This is how we pass an organism and config type instances inside organism's code
     # TODO: change it to yieldto(t.task)
@@ -43,7 +44,9 @@ function recover(man::ManagerTypes.ManagerData)
   end
   man.task = curTask
   man.minOrg.manTask = curTask
+  man.minOrg.codeFn  = Creature.eval(man.minOrg.code)
   man.maxOrg.manTask = curTask
+  man.maxOrg.codeFn  = Creature.eval(man.maxOrg.code)
   #
   # We don't need to load\create servers and clients every
   # time on load backup. They should be created every time
@@ -81,11 +84,10 @@ function backup(man::ManagerTypes.ManagerData)
   local curTask::Task = current_task()
   local len::Int = length(tasks)
   local tmpTask::Task = Task(()->true)
+  local tmpFn::Function = function() end
   local task::ManagerTypes.OrganismTask
-  local t::Int
   local ret::Bool
   local org::Creature.Organism
-  local ui::UInt
   #
   # We have to stop the task before it will be saved into the backup file.
   # yield() call is needed, because Julia has strange issue with yieldto()
@@ -101,11 +103,12 @@ function backup(man::ManagerTypes.ManagerData)
   for task in man.tasks
     task.task = tmpTask
     task.organism.manTask = tmpTask
+    task.organism.codeFn = tmpFn
   end
-  for (t, org) in man.organisms org.manTask = tmpTask end
-  for (ui, org) in man.positions org.manTask = tmpTask end
   man.minOrg.manTask = tmpTask
+  man.minOrg.codeFn  = tmpFn
   man.maxOrg.manTask = tmpTask
+  man.maxOrg.codeFn  = tmpFn
   man.task = tmpTask
   man.cons = ManagerTypes.Connections()
   #
@@ -117,14 +120,18 @@ function backup(man::ManagerTypes.ManagerData)
   # Reverts workable state back
   #
   for t = 1:len
-    man.tasks[t].task = tasks[t]
-    man.tasks[t].organism.manTask = curTask
+    task = man.tasks[t]
+    task.task = tasks[t]
+    task.organism.manTask = curTask
+    task.organism.codeFn = Creature.eval(task.organism.code)
   end
 
   man.cons = cons
   man.task = curTask
   man.minOrg.manTask = curTask
+  man.minOrg.codeFn  = Creature.eval(man.minOrg.code)
   man.maxOrg.manTask = curTask
+  man.maxOrg.codeFn  = Creature.eval(man.maxOrg.code)
   if ret Helper.info(string("Backup has created: ", Backup.lastFile())) end
 
   ret
