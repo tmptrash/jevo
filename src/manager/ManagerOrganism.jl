@@ -23,6 +23,23 @@ function msg(man::ManagerTypes.ManagerData, id::UInt, msg::ASCIIString)
   if !man.quiet Helper.info(string("org-", id, " ", msg)) end
 end
 #
+# Binds handlers to organism's events
+# @param man Manager data type
+# @param org Organism we are working with
+#
+function bindEvents(man::ManagerTypes.ManagerData, org::Creature.Organism)
+  Event.clear(org.observer)
+  Event.on(org.observer, "getenergy", (org::Creature.Organism, pos::Helper.Point, retObj::Helper.RetObj)->_onGetEnergy(man, org, pos, retObj))
+  Event.on(org.observer, "grableft",  (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabLeft(man, org, amount, retObj))
+  Event.on(org.observer, "grabright", (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabRight(man, org, amount, retObj))
+  Event.on(org.observer, "grabup",    (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabUp(man, org, amount, retObj))
+  Event.on(org.observer, "grabdown",  (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabDown(man, org, amount, retObj))
+  Event.on(org.observer, "stepleft",  (org::Creature.Organism)->_onStepLeft(man, org))
+  Event.on(org.observer, "stepright", (org::Creature.Organism)->_onStepRight(man, org))
+  Event.on(org.observer, "stepup",    (org::Creature.Organism)->_onStepUp(man, org))
+  Event.on(org.observer, "stepdown",  (org::Creature.Organism)->_onStepDown(man, org))
+end
+#
 # Updates organisms existances. We have to call this function to
 # update organisms life in memory world. Decreases energy and
 # provides rare mutations.
@@ -526,16 +543,7 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   #
   # Because of deepcopy(), we have to remove copied handlers
   #
-  Event.clear(org.observer)
-  Event.on(org.observer, "getenergy", (org::Creature.Organism, pos::Helper.Point, retObj::Helper.RetObj)->_onGetEnergy(man, org, pos, retObj))
-  Event.on(org.observer, "grableft",  (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabLeft(man, org, amount, retObj))
-  Event.on(org.observer, "grabright", (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabRight(man, org, amount, retObj))
-  Event.on(org.observer, "grabup",    (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabUp(man, org, amount, retObj))
-  Event.on(org.observer, "grabdown",  (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabDown(man, org, amount, retObj))
-  Event.on(org.observer, "stepleft",  (org::Creature.Organism)->_onStepLeft(man, org))
-  Event.on(org.observer, "stepright", (org::Creature.Organism)->_onStepRight(man, org))
-  Event.on(org.observer, "stepup",    (org::Creature.Organism)->_onStepUp(man, org))
-  Event.on(org.observer, "stepdown",  (org::Creature.Organism)->_onStepDown(man, org))
+  bindEvents(man, org)
   # TODO: clonning is under question now...
   #Event.on(org.observer, "clone",     _onClone    )
   #
