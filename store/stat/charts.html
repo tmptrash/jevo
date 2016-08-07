@@ -3,33 +3,74 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
 		google.charts.load('current', {packages: ['corechart', 'line']});
-		google.charts.setOnLoadCallback(drawLineColors);
+		google.charts.setOnLoadCallback(drawCharts);
+		/**
+		 * Returns array of two items - min and max values. [min, max].
+		 * Should be applied only to Numbers.
+		 * @param {Array} arr Array of numbers, we are working with
+		 * @return {Array} Array of two numbers - min and max values
+		 */
+		function getMinMax(arr) {
+			return [Math.min(...arr), Math.max(...arr)];
+		}
+		/**
+		 * Changes array values according to minimum and maximum values
+		 * in etalon array.
+		 * @param {Array} minMax Minimum and maximum values from etalon array
+		 * @param {Array} arr Array we need to reformat according to minMax values.
+		 * @return {Array} Reformated array
+		 */
+		function reformatArray(minMax, arr){
+			var arrMinMax = getMinMax(arr); 
+			var coef      = (minMax[1] - minMax[0]) / (arrMinMax[1] - arrMinMax[0]);
+			
+			return arr.map(function (el) {
+				return (el - arrMinMax[0]) * coef + minMax[0];
+			});
+		}
 		/**
 		 * Creates as many charts data as many arguments we pass in
-		 * @param {args} Charts data arrays
+		 * @param {Boolean} trends Show trends only (original values will be changed).
+		 * false - original values will be showed.
+		 * @param {Array} indexArr X coordinate data array
+		 * @param {Array} etalonArr Charts data arrays. First argument should be
+		 * with maximum values comparing with others.
 		 */
-		function createChart(indexData) {
-			var data = Array.prototype.slice.call(arguments);
-			var result = [];
+		function createCharts(trends, indexArr, etalonArr) {
+			var data         = Array.prototype.slice.call(arguments);
+			var result       = [];
+			var etalonMinMax = getMinMax(etalonArr);
+			var minMax;
 			var arr;
 			var i;
 			var j;
 			
-			data.shift();
-			for (i = 0; i < indexData.length; i++) {
-				arr = [indexData[i]];
+			data.shift(); // removes trends
+			data.shift(); // removes indexArr
+			for (i = 0; i < indexArr.length; i++) {
+				//
+				// Value from etalon array. We don't need to change it.
+				//
+				arr = [indexArr[i]];
 				if (arr !== undefined) {
 					for (j = 0; j < data.length; j++) {
-						arr.push(data[j][i]);
+						if (trends) {
+							arr.push(reformatArray(etalonMinMax, [].concat(data[j]))[i]);
+						} else {
+							arr.push(data[j][i]);
+						}
 					}
 					result.push(arr);
 				}
 			}
 			return result;
 		}
-		function drawLineColors() {
+		/**
+		 * Draws charts one by one according to data...
+		 */
+		function drawCharts() {
 			var data = new google.visualization.DataTable();
-			  
+			
 			// Organisms
 			var probs         = [[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1]];
 			var funcs         = [5,     7,     7,      6,      6,     5,      6,      6,      6,      7,      6,       6,       6,      6,      6,      6,       6,       6,       ];
@@ -53,14 +94,19 @@
 			var maxOrg        = [500      ];
 			var enCheckPeriod = [5000     ];
 			 
-			  // TODO:
-			data.addColumn('number', 'Population');
-			data.addColumn('number', 'Mutation on clone');
-			//data.addColumn('number', 'Organisms amount');
+			// TODO:
+			data.addColumn('number', 'Population'); // X coordinate aray
+			data.addColumn('number', 'Energy');     // etalon array
+			data.addColumn('number', 'Functions');
+			data.addColumn('number', 'Function calls');
+			data.addColumn('number', 'Mutations on clone');
+			data.addColumn('number', 'Mutation period');
+			data.addColumn('number', 'Mutation amount');
+			data.addColumn('number', 'Lines');
+			data.addColumn('number', 'Organisms amount');
+			data.addColumn('number', 'IPS');
 			
-			data.addRows(
-				createChart(genAmount, energy)
-			);
+			data.addRows(createCharts(false, genAmount, energy, funcs, funcCall, mutOnClone, mutPeriod, mutAmount, lines, orgAmount, ips));
 
 			 var options = {
 				hAxis: {
@@ -69,7 +115,7 @@
 				vAxis: {
 					title: 'Amount'
 				},
-				colors: ['#a52714', '#097138']
+				lineWidth: 3
 			};
 
 			var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
@@ -78,6 +124,6 @@
     </script>
   </head>
   <body>
-    <div id="chart_div" style="width: 1200px; height: 600px"></div>
+    <div id="chart_div" style="width: 1250px; height: 700px"></div>
   </body>
 </html>
