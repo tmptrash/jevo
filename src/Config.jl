@@ -295,11 +295,11 @@ module Config
     ConfigData(
       empty ? [] : [110,300,95,0,1,1,1], # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
       1,                                 # ORGANISM_MUTATIONS_ON_CLONE
-      100,                               # ORGANISM_MAX_MUTATIONS_ON_CLONE
+      50,                                # ORGANISM_MAX_MUTATIONS_ON_CLONE
       3000,                              # ORGANISM_MUTATION_PERIOD
       10000,                             # ORGANISM_MAX_MUTATION_PERIOD
       4,                                 # ORGANISM_MUTATION_AMOUNT
-      100,                               # ORGANISM_MAX_MUTATION_AMOUNT
+      50,                                # ORGANISM_MAX_MUTATION_AMOUNT
       250,                               # ORGANISM_START_AMOUNT
       7000,                              # ORGANISM_START_ENERGY
       Int(typemax(UInt32)),              # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
