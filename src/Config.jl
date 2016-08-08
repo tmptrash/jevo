@@ -226,6 +226,14 @@ module Config
     # TODO: should be removed from here. It doesn't related to Manager
     STAT_FRAME_DELAY::Int
     #
+    # The period of time between yield() calls in "stand by" mode.
+    # In this mode manager waits for data in sockets and new connections.
+    # In this mode yield() is called only once in a period, because
+    # it eats CPU cicles. In case of data in sockets or new connections
+    # yield() will be called more often.
+    #
+    CONNECTION_TASKS_CHECK_PERIOD::Float64
+    #
     # Percent of energy, which will be minused from organism after
     # stepping from one instance to another.
     #
@@ -327,6 +335,7 @@ module Config
       650,                               # STAT_WIDTH
       500,                               # STAT_HEIGHT
       5,                                 # STAT_FRAME_DELAY
+      0.1,                               # CONNECTION_TASKS_CHECK_PERIOD
       20,                                # CONNECTION_STEP_ENERGY_PERCENT
       2010,                              # CONNECTION_SERVER_PORT (current server port)
       2011,                              # CONNECTION_FAST_SERVER_PORT (current server "fast" mode port)

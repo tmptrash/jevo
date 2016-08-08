@@ -361,7 +361,7 @@ function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32)
   #
   # This is how we push all active messages to the network
   # TODO: change to yieldto()
-  yield()
+  #yield()
   #
   # All "fast" clients were disconnected
   #

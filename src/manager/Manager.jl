@@ -75,13 +75,15 @@ module Manager
   # @return {Bool} run status
   #
   function run(man::ManagerTypes.ManagerData, recover::Bool = false)
-    local counter::Int = 1 # must be started from 1!
-    local ips    ::Int = 0
-    local istamp ::Float64 = time()
-    local bstamp ::Float64 = istamp
-    local cons   ::ManagerTypes.Connections = man.cons
-    local tasks  ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
-    local cfg    ::Config.ConfigData = man.cfg
+    local counter  ::Int = 1 # must be started from 1!
+    local ips      ::Int = 0
+    local istamp   ::Float64 = time()
+    local bstamp   ::Float64 = istamp
+    local ystamp   ::Float64 = istamp
+    local cons     ::ManagerTypes.Connections = man.cons
+    local tasks    ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
+    local cfg      ::Config.ConfigData = man.cfg
+    local needYield::Bool = false
 
     try
       #
@@ -137,10 +139,15 @@ module Manager
         #
         # This call switches between all non blocking asynchronous
         # functions (see @async macro). For example, it handles all
-        # input connections for current server, switches between
-        # organism Tasks and so on...
-        #
-        if _needYield(man) yield() end
+        # input connections for current server. But we don't need to
+        # call yield() every time, because it eats CPU cicles. We
+        # have to wait some period and call yield() to check if
+        # sockets have data.
+        # TODO: this code may be optimized. We already call yield()
+        # TODO: in _onDot() handler. Second idea, that we have to use
+        # TODO: yieldto(), because we know all network related tasks
+        # TODO: created by @async() macro.
+        ystamp, needYield = _updateTasks(man, stamp, ystamp, needYield)
       end
     catch e
       Helper.error("Manager.run(): $e")
@@ -168,27 +175,6 @@ module Manager
     yieldto(task, true)
   end
 
-  #
-  # Checks if active servers have bytes to read. It means, that we have to call
-  # yield() for this reading.
-  # @param man Manager data type
-  # @return {Bool}
-  #
-  function _needYield(man::ManagerTypes.ManagerData)
-    local cons::ManagerTypes.Connections = man.cons
-    local sock::Base.TCPSocket
-
-    @inbounds for sock in cons.server.socks
-      if nb_available(sock) > 0 return true end
-    end
-    if cons.streamInit
-      @inbounds for sock in cons.fastServer.socks
-        if nb_available(sock) > 0 return true end
-      end
-    end
-
-    false
-  end
   #
   # Generates unique id by world position. This macro is
   # private insode Manager module
@@ -224,7 +210,7 @@ module Manager
     if ts >= 5.0
       localIps  = trunc(Int, ips / ts)
       dataIndex = UInt8(FastApi.API_UINT64)
-      #print(" ", localIps, ", "); #quit()
+      print(" ", localIps, ", "); #quit()
       man.cfg.WORLD_IPS = localIps
       @inbounds for sock in man.cons.fastServer.socks
         if Helper.isopen(sock)
@@ -251,4 +237,42 @@ module Manager
 
     bstamp
   end
+  # TODO: describe yield() call logic
+  # Checks if active servers have bytes to read. It means, that we have to call
+  # yield() for this reading.
+  # @param man Manager data type
+  # @param stamp Current UNIX time stamp
+  # @param ystamp yield last UNIX time stamp
+  # @param needYield Flag if we need for yield() call
+  # @return {Bool}
+  #
+  function _updateTasks(man::ManagerTypes.ManagerData, stamp::Float64, ystamp::Float64, needYield::Bool)
+    if needYield yield() end
+    if stamp - ystamp >= man.cfg.CONNECTION_TASKS_CHECK_PERIOD
+      yield()
+      return stamp, (length(man.cons.server.socks) > 0 || man.cons.streamInit)
+    end
+
+    ystamp, needYield
+  end
+  # #
+  # # Checks id data in sockets available for reading
+  # # @param man Manager data type
+  # # @return {Bool}
+  # #
+  # function _dataAvailable(man::ManagerTypes.ManagerData)
+  #   local cons::ManagerTypes.Connections = man.cons
+  #   local sock::Base.TCPSocket
+  #
+  #   @inbounds for sock in cons.server.socks
+  #     if nb_available(sock) > 0 return true end
+  #   end
+  #   if cons.streamInit
+  #     @inbounds for sock in cons.fastServer.socks
+  #       if nb_available(sock) > 0 return true end
+  #     end
+  #   end
+  #
+  #   false
+  # end
 end
