@@ -94,7 +94,7 @@
 			var maxOrg        = [500      ];
 			var enCheckPeriod = [5000     ];
 			 
-			// TODO:
+			/*
 			data.addColumn('number', 'Population'); // X coordinate aray
 			data.addColumn('number', 'Energy');     // etalon array
 			data.addColumn('number', 'Functions');
@@ -105,8 +105,15 @@
 			data.addColumn('number', 'Lines');
 			data.addColumn('number', 'Organisms amount');
 			data.addColumn('number', 'IPS');
+			*/
+			data.addColumn('number', 'Population'); // X coordinate aray
+			data.addColumn('number', 'Energy');     // etalon array
+			data.addColumn('number', 'Mutations on clone');
+			data.addColumn('number', 'Mutation period');
+			data.addColumn('number', 'Mutation amount');
 			
-			data.addRows(createCharts(false, genAmount, energy, funcs, funcCall, mutOnClone, mutPeriod, mutAmount, lines, orgAmount, ips));
+			//data.addRows(createCharts(true, genAmount, energy, funcs, funcCall, mutOnClone, mutPeriod, mutAmount, lines, orgAmount, ips));
+			data.addRows(createCharts(true, genAmount, energy, mutOnClone, mutPeriod, mutAmount));
 
 			 var options = {
 				hAxis: {
@@ -115,7 +122,9 @@
 				vAxis: {
 					title: 'Amount'
 				},
-				lineWidth: 3
+				lineWidth: 3,
+				curveType: 'function',
+				pointsVisible: true
 			};
 
 			var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
