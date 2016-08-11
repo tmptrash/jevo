@@ -86,7 +86,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
     org = task.organism
     if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
       # TODO: this function is very slow!!! have to be optimized
-      Mutator.mutate(man.cfg, org, org.mutationAmount)
+      Mutator.mutate(cfg, org, org.mutationAmount)
     end
   end
   #
@@ -99,7 +99,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   # TODO: optimize this array. It should be created only once
   # TODO: outside the loop.
   #
-  if needClone && len < man.cfg.WORLD_MAX_ORGANISMS && len > 0
+  if needClone && len < cfg.WORLD_MAX_ORGANISMS && len > 0
     probs = Int[]
     @inbounds for task in tasks push!(probs, task.organism.energy) end
     i = Helper.getProbIndex(probs)
@@ -110,20 +110,20 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   # This block decreases energy from organisms, because they
   # spend it while leaving.
   #
-  if counter % man.cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0
+  if counter % cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0 && len > cfg.WORLD_MIN_ORGANISMS
     _updateOrganismsEnergy(man)
   end
   #
   # Checks if total amount of energy in a world is less then
   # minimum, according to the configuration.
   #
-  if counter % man.cfg.WORLD_MIN_ENERGY_CHECK_PERIOD === 0 && man.cfg.WORLD_MIN_ENERGY_CHECK_PERIOD > 0
+  if counter % cfg.WORLD_MIN_ENERGY_CHECK_PERIOD === 0 && cfg.WORLD_MIN_ENERGY_CHECK_PERIOD > 0
     _updateWorldEnergy(man)
   end
   #
   # This call removes organisms with minimum energy
   #
-  if counter % man.cfg.ORGANISM_REMOVE_AFTER_TIMES === 0 && len > man.cfg.WORLD_MIN_ORGANISMS
+  if counter % cfg.ORGANISM_REMOVE_AFTER_TIMES === 0 && len > cfg.WORLD_MIN_ORGANISMS
     _removeMinOrganisms(man)
   end
   #

@@ -210,7 +210,7 @@ module Manager
     if ts >= 5.0
       localIps  = trunc(Int, ips / ts)
       dataIndex = UInt8(FastApi.API_UINT64)
-      print(" ", localIps, ", "); #quit()
+      #print(" ", localIps, ", "); #quit()
       man.cfg.WORLD_IPS = localIps
       @inbounds for sock in man.cons.fastServer.socks
         if Helper.isopen(sock)
@@ -250,6 +250,8 @@ module Manager
     if needYield yield() end
     if stamp - ystamp >= man.cfg.CONNECTION_TASKS_CHECK_PERIOD
       yield()
+      # TODO: potential problem here. this list of sockets may be expanded
+      # TODO: for example in many managers mode
       return stamp, (length(man.cons.server.socks) > 0 || man.cons.streamInit)
     end
 
