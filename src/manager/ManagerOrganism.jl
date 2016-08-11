@@ -110,7 +110,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   # This block decreases energy from organisms, because they
   # spend it while leaving.
   #
-  if counter % cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0 && len > cfg.WORLD_MIN_ORGANISMS
+  if counter % cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0
     _updateOrganismsEnergy(man)
   end
   #
@@ -170,6 +170,7 @@ end
 function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   local decVal::Int = man.cfg.ORGANISM_ENERGY_DECREASE_VALUE
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
+  local minOrgs::Int = man.cfg.WORLD_MIN_ORGANISMS
   #
   # We have to go through tasks in reverse way, because we may
   # remove some elements inside while loop.
@@ -181,7 +182,10 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     # if the organism is marked as "removed", we have to delete it
     #
     org = tasks[i].organism
-    org.energy -= (decVal + org.codeSize)
+    #
+    # If population reaches minimum amount, we should stop killing it
+    #
+    if length(tasks) > minOrgs org.energy -= (decVal + org.codeSize) end
     if org.energy <= 0
       _killOrganism(man, i)
       splice!(tasks, i)
