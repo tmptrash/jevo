@@ -66,6 +66,30 @@
 			return result;
 		}
 		/**
+		 * Prepares data for drawing. dataArr is an array of field names like
+		 * 'Population', 'Energy' and so on... It's important, that first two
+		 * items of this array should be:
+		 * 0 - name of X coordinate
+		 * 1 - etalon array
+		 * 2... - other data arrays
+		 * @param {Boolean} trends true if we want to show a trend charts
+		 * @param {DataTable} dataTable google charts DataTable object
+		 * @param {Object} population One population objects with all the fields
+		 * @param {Array} dataArr Array of field names, which should be in chart
+		 */
+		function initData(trends, dataTable, population, dataArr) {
+			var i;
+			var chartsArr = [trends, population[dataArr[1]]];
+			
+			dataTable.addColumn('number', dataArr[0]);
+			for (i = 2; i < dataArr.length; i++) {
+				dataTable.addColumn('number', dataArr[i]);
+				chartsArr.push(population[dataArr[i]]);
+			}
+			
+			dataTable.addRows(createCharts.apply(null, chartsArr));
+		}
+		/**
 		 * Draws charts one by one according to data...
 		 */
 		function drawCharts() {
@@ -96,37 +120,27 @@
 				'Max arganisms amount'   : [500      ],
 				'Energy check period'    : [5000     ]
 			}]
-			 
-			/*
-			data.addColumn('number', 'Population'); // X coordinate aray
-			data.addColumn('number', 'Energy');     // etalon array
-			data.addColumn('number', 'Functions');
-			data.addColumn('number', 'Function calls');
-			data.addColumn('number', 'Mutations on clone');
-			data.addColumn('number', 'Mutation period');
-			data.addColumn('number', 'Mutation amount');
-			data.addColumn('number', 'Lines');
-			data.addColumn('number', 'Organisms amount');
-			data.addColumn('number', 'IPS');
-			*/
-			data.addColumn('number', 'Population');        // X coordinate aray
-			data.addColumn('number', populations[0].Energy);  // etalon array
-			
-			//data.addRows(createCharts(true, genAmount, energy, funcs, funcCall, mutOnClone, mutPeriod, mutAmount, lines, orgAmount, ips));
-			data.addRows(createCharts(true, populations[0]['Generation number'], populations[0]['Energy']));
-
-			 var options = {
+			//
+			// First two arguments are: X coordinate array and etalon array
+			//
+			initData(true, data, populations[0], ['Population age', 'Generation number', 'Amount of functions', 'Functions calls', 'Mutations amount', 'Amount of lines']);
+			//
+			// Charts related options
+			//
+			var options = {
 				hAxis: {
-					title: 'Population'
+					title: 'Population age'
 				},
-				vAxis: {
+				/*vAxis: {
 					title: 'Amount'
-				},
+				},*/
 				lineWidth: 3,
 				curveType: 'function',
 				pointsVisible: true
 			};
-
+			//
+			// Draw charts in DOM
+			//
 			var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
 			chart.draw(data, options);
 		}
