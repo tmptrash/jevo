@@ -111,19 +111,43 @@
 				'Generation number'      : [182664,194194,207040, 214598, 251679,263857, 270535, 272273, 277160, 282982, 288172,  293660,  303121, 306304, 312713, 319710,  320842,  322013,  ],
 				// World
 				'Name'                   : '00-nb',
-				'Width\Height'           : [[400,300]],
-				'Energy decrease period' : [20       ],
-				'Energy decrease amount' : [1        ],
-				'Remove after time'      : [2000     ],
-				'Remove amount'          : [50       ],
-				'Clone period'           : [5        ],
-				'Max arganisms amount'   : [500      ],
-				'Energy check period'    : [5000     ]
+				'Width\Height'           : [400,300],
+				'Energy decrease period' : [20     ],
+				'Energy decrease amount' : [1      ],
+				'Remove after time'      : [2000   ],
+				'Remove amount'          : [50     ],
+				'Clone period'           : [5      ],
+				'Max arganisms amount'   : [500    ],
+				'Energy check period'    : [5000   ]
+			}, {
+				// Organisms
+				'Probabilities'          : [[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1]],
+				'Amount of functions'    : [3,     2,     3,     1,     1,      1,     2,     ],
+				'Functions calls'        : [4,     11,    6,     11,    9,      6,     12,    ],
+				'Mutations on clone'     : [26,    6,     75,    6,     6,      6,     6,     ],
+				'Mutations period'       : [9345,  2459,  7682,  5532,  5532,   5532,  5532,  ],
+				'Mutations amount'       : [50,    7,     7,     0,     0,      0,     0,     ],
+				'Energy'                 : [67501, 186902,278321,838152,2780779,686922,702214,],
+				'Amount of lines'        : [57,    87,    96,    107,   117,    124,   119,   ],
+				// Population
+				'Amount of organisms'    : [360,   170,   275,   250,   370,    370,   400,   ],
+				'IPS'                    : [15,    15,    11,    7,     7,      4,     5,     ],
+				'Generation number'      : [653433,681659,708507,742929,753377, 760403,788910,],
+				// World
+				'Name'                   : '01-nb',
+				'Width\Height'           : [900, 600],
+				'Energy decrease period' : [200     ],
+				'Energy decrease amount' : [1       ],
+				'Remove after time'      : [500     ],
+				'Remove amount'          : [5       ],
+				'Clone period'           : [5       ],
+				'Max arganisms amount'   : [400     ],
+				'Energy check period'    : [500     ]
 			}]
 			//
 			// First two arguments are: X coordinate array and etalon array
 			//
-			initData(true, data, populations[0], ['Population age', 'Generation number', 'Amount of functions', 'Functions calls', 'Mutations amount', 'Amount of lines']);
+			initData(true, data, populations[1], ['Population age', 'Generation number', 'Amount of functions', 'Functions calls', 'Mutations amount', 'Amount of lines']);
 			//
 			// Charts related options
 			//
