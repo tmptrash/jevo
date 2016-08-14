@@ -399,7 +399,7 @@ module Config
       650,                       # STAT_WIDTH
       500,                       # STAT_HEIGHT
       5,                         # STAT_FRAME_DELAY
-      30.0,                      # STAT_UPDATE_PERIOD
+      5.0,                       # STAT_UPDATE_PERIOD
       20,                        # CONNECTION_STEP_ENERGY_PERCENT
       2000,                      # CONNECTION_SERVER_PORT (current server port)
       2001,                      # CONNECTION_FAST_SERVER_PORT (current server "fast" mode port)

@@ -9,50 +9,37 @@ function _updateStat(stamp::Float64)
   local bestOrgs::Array{RpcApi.SimpleOrganism, 1}
   local org::RpcApi.SimpleOrganism
   local json::ASCIIString
+  local code::ASCIIString
 
-  if (time() - stamp) > Config.val(:STAT_UPDATE_PERIOD)
+  if Config.val(:STAT_UPDATE_PERIOD) > 0 && (time() - stamp) > Config.val(:STAT_UPDATE_PERIOD)
     bestOrgs = Manager.getBest(1)
     if length(bestOrgs) > 0
       org  = bestOrgs[1]
+      code = string(org.code)
       json = string(
         "{",
         string("\"Probabilities\"       : ", org.mutationProbabilities, ",\n"),
-        string("\"Amount of functions\" : ", length(split(string(org.code), "function ")) - 1, ",\n"),
-        string("\"Functions calls\"     : ", length(split(string(org.code), "func_")) - 1, ",\n"),
+        string("\"Amount of functions\" : ", length(split(code, "function ")) - 1, ",\n"),
+        string("\"Functions calls\"     : ", length(split(code, "func_")) - 1, ",\n"),
         string("\"Mutations on clone\"  : ", string(org.mutationsOnClone), ",\n"),
         string("\"Mutations period\"    : ", string(org.mutationPeriod), ",\n"),
         string("\"Mutations amount\"    : ", string(org.mutationAmount), ",\n"),
         string("\"Energy\"              : ", string(org.energy), ",\n"),
+        string("\"for operators\"       : ", length(split(code, "for i::Int8")) - 1, ",\n"),
+        string("\"if operators\"        : ", length(split(code, "if var")) - 1, ",\n"),
+        string("\"if operators\"        : ", length(split(code, "Creature.getEnergy")) - 1, ",\n"),
+        string("\"Memory reading\"      : ", length(split(code, "haskey(o.mem)")) - 1, ",\n"),
+        string("\"Eating\"              : ", length(split(code, "Creature.eat")) - 1, ",\n"),
+        string("\"Moving\"              : ", length(split(code, "Creature.step")) - 1, ",\n"),
         string("\"Amount of lines\"     : ", string(org.codeSize), ",\n"),
         string("\"Amount of organisms\" : ", string(length(Manager._data.tasks)), ",\n"),
         string("\"IPS\"                 : ", string(Config.val(:WORLD_IPS)), ",\n"),
-        string("\"Generation number\"   : ", string(Manager._data.totalOrganisms), "\n"),
+        string("\"Generation number\"   : ", string(Manager._data.totalOrganisms), ",\n"),
+        string("\"Code\"                : \"", code, "\"\n"),
         "},\n"
       )
       _appendToFile(json, "file.json")
     end
-    # 'Probabilities'          : [[100,300,95,0,1,1,1],[100,300,95,0,1,1,1],[100,300,95,0,1,1,1]],
-    # 'Amount of functions'    : [3,     2,     3,     1,     1,      1,     2,     ],
-    # 'Functions calls'        : [4,     11,    6,     11,    9,      6,     12,    ],
-    # 'Mutations on clone'     : [26,    6,     75,    6,     6,      6,     6,     ],
-    # 'Mutations period'       : [9345,  2459,  7682,  5532,  5532,   5532,  5532,  ],
-    # 'Mutations amount'       : [50,    7,     7,     0,     0,      0,     0,     ],
-    # 'Energy'                 : [67501, 186902,278321,838152,2780779,686922,702214,],
-    # 'Amount of lines'        : [57,    87,    96,    107,   117,    124,   119,   ],
-    # // Population
-    # 'Amount of organisms'    : [360,   170,   275,   250,   370,    370,   400,   ],
-    # 'IPS'                    : [15,    15,    11,    7,     7,      4,     5,     ],
-    # 'Generation number'      : [653433,681659,708507,742929,753377, 760403,788910,],
-    # // World
-    # 'Name'                   : '01-nb',
-    # 'Width\Height'           : [900, 600],
-    # 'Energy decrease period' : [200     ],
-    # 'Energy decrease amount' : [1       ],
-    # 'Remove after time'      : [500     ],
-    # 'Remove amount'          : [5       ],
-    # 'Clone period'           : [5       ],
-    # 'Max arganisms amount'   : [400     ],
-    # 'Energy check period'    : [500     ]
     return time()
   end
 
