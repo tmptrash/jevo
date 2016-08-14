@@ -40,6 +40,7 @@ module Manager
   include("ManagerRpc.jl")
   include("ManagerBackup.jl")
   include("ManagerParams.jl")
+  include("ManagerStat.jl")
   #
   # Current Manager connection objects. They are: server and
   # all four clients. "frozen" field is used for storing "frozen"
@@ -125,6 +126,7 @@ module Manager
     local ips    ::Int = 0
     local stamp  ::Float64 = time()
     local bstamp ::Float64 = time()
+    local sstamp ::Float64 = time()
     #
     # This server is listening for all other managers and remote
     # terminal. It runs obtained commands and send answers back.
@@ -170,6 +172,10 @@ module Manager
       # Here we make auto-backup of application if there is a time
       #
       bstamp = _updateBackup(bstamp)
+      #
+      # Here we update statistics data
+      #
+      sstamp = _updateStat(sstamp)
       #
       # This call switches between all non blocking asynchronous
       # functions (see @async macro). For example, it handles all

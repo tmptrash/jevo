@@ -222,6 +222,12 @@ module Config
     # TODO: should be removed from here. It doesn't related to Manager
     STAT_FRAME_DELAY::Int
     #
+    # Amount of iteration between statistics update. Here we are speaking
+    # about statistics collecting and storing it in a file on a disk.
+    # This parameters is represented in seconds.
+    #
+    STAT_UPDATE_PERIOD::Float64
+    #
     # Percent of energy, which will be minused from organism after
     # stepping from one instance to another.
     #
@@ -363,7 +369,7 @@ module Config
       [110,300,95,0,1,1,1],      # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
       4,                         # ORGANISM_MUTATIONS_ON_CLONE
       100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      700,                         # ORGANISM_MUTATION_PERIOD
+      700,                       # ORGANISM_MUTATION_PERIOD
       10000,                     # ORGANISM_MAX_MUTATION_PERIOD
       4,                         # ORGANISM_MUTATION_AMOUNT
       100,                       # ORGANISM_MAX_MUTATION_AMOUNT
@@ -393,6 +399,7 @@ module Config
       650,                       # STAT_WIDTH
       500,                       # STAT_HEIGHT
       5,                         # STAT_FRAME_DELAY
+      30.0,                      # STAT_UPDATE_PERIOD
       20,                        # CONNECTION_STEP_ENERGY_PERCENT
       2000,                      # CONNECTION_SERVER_PORT (current server port)
       2001,                      # CONNECTION_FAST_SERVER_PORT (current server "fast" mode port)
