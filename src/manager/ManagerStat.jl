@@ -19,7 +19,7 @@ function _updateStat(stamp::Float64)
       json = string(
         "{",
         string("\"Probabilities\"       : ", org.mutationProbabilities, ",\n"),
-        string("\"Amount of functions\" : ", length(split(code, "function ")) - 1, ",\n"),
+        string("\"Amount of functions\" : ", length(split(code, "function ")) - 2, ",\n"), # minus main function
         string("\"Functions calls\"     : ", length(split(code, "func_")) - 1, ",\n"),
         string("\"Mutations on clone\"  : ", string(org.mutationsOnClone), ",\n"),
         string("\"Mutations period\"    : ", string(org.mutationPeriod), ",\n"),
