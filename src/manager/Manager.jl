@@ -40,6 +40,7 @@ module Manager
   include("ManagerRpc.jl")
   include("ManagerBackup.jl")
   include("ManagerParams.jl")
+  include("ManagerStat.jl")
   #
   # Current Manager connection objects. They are: server and
   # all four clients. "frozen" field is used for storing "frozen"
@@ -125,6 +126,7 @@ module Manager
     local ips    ::Int = 0
     local stamp  ::Float64 = time()
     local bstamp ::Float64 = time()
+    local sstamp ::Float64 = time()
     #
     # This server is listening for all other managers and remote
     # terminal. It runs obtained commands and send answers back.
@@ -171,6 +173,10 @@ module Manager
       #
       bstamp = _updateBackup(bstamp)
       #
+      # Here we update statistics data
+      #
+      sstamp = _updateStat(sstamp)
+      #
       # This call switches between all non blocking asynchronous
       # functions (see @async macro). For example, it handles all
       # input connections for current server, switches between
@@ -198,6 +204,27 @@ module Manager
   #
   function _isFree(pos::Helper.Point)
     !haskey(Manager._data.positions, _getPosId(pos)) && World.getEnergy(Manager._data.world, pos) === UInt32(0)
+  end
+  #
+  # Returns all energy in a world, except energy of organisms
+  # @return {Int} Amount of energy
+  #
+  function _getWorldEnergy()
+    local plane::Array{UInt32, 2} = Manager._data.world.data
+    local pos::Helper.Point = Helper.Point(0, 0)
+    local energy::Int = 0
+    local x::Int
+    local y::Int
+
+    for x in 1:size(plane)[2]
+      for y in 1:size(plane)[1]
+        pos.x = x
+        pos.y = y
+        if !Manager._isFree(pos) energy += 1 end
+      end
+    end
+
+    energy
   end
   #
   # Updates IPS (Iterations Per second) counter and stores it in config

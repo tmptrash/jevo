@@ -23,3 +23,4 @@ function resp(sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer)
 end
 
 Event.on(con.observer, Connection.EVENT_BEFORE_RESPONSE, resp)
+Client.request(con, UInt8(1), UInt(2))

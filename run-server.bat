@@ -1,1 +1,1 @@
-julia --color=yes src\AppSatellite.jl src\AppManager.jl quite port:2000
+julia --color=yes src\AppSatellite.jl src\AppManager.jl quiet port:2000

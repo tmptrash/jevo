@@ -18,6 +18,7 @@ function resp(sock::Base.TCPSocket, data::Connection.Command, ans::Connection.An
   if i::Int === 1000000
     t::Float64 = time() - t::Float64
     println("rps: ", i::Int / t::Float64, ", time: ", t::Float64)
+	i = 0
   end
   i::Int += 1
 end
