@@ -206,6 +206,27 @@ module Manager
     !haskey(Manager._data.positions, _getPosId(pos)) && World.getEnergy(Manager._data.world, pos) === UInt32(0)
   end
   #
+  # Returns all energy in a world, except energy of organisms
+  # @return {Int} Amount of energy
+  #
+  function _getWorldEnergy()
+    local plane::Array{UInt32, 2} = Manager._data.world.data
+    local pos::Helper.Point = Helper.Point(0, 0)
+    local energy::Int = 0
+    local x::Int
+    local y::Int
+
+    for x in 1:size(plane)[2]
+      for y in 1:size(plane)[1]
+        pos.x = x
+        pos.y = y
+        if !Manager._isFree(pos) energy += 1 end
+      end
+    end
+
+    energy
+  end
+  #
   # Updates IPS (Iterations Per second) counter and stores it in config
   # @param ips IPS
   # @param stamp Current UNIX tame stamp value

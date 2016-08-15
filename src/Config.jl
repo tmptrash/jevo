@@ -391,7 +391,7 @@ module Config
       50,                        # WORLD_MIN_ORGANISMS
       10000,                     # WORLD_START_ENERGY_BLOCKS
       UInt32(0x0001F4),          # WORLD_START_ENERGY_AMOUNT
-      0.1,                       # WORLD_MIN_ENERGY_PERCENT
+      0.05,                      # WORLD_MIN_ENERGY_PERCENT
       400,                       # WORLD_MIN_ENERGY_CHECK_PERIOD
       1,                         # WORLD_SCALE
       1,                         # BACKUP_PERIOD

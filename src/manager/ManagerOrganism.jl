@@ -182,21 +182,8 @@ end
 # as a ration between whole world (100%) and all energy points together.
 #
 function _updateWorldEnergy()
-  local plane::Array{UInt32, 2} = Manager._data.world.data
   local total::Int = Manager._data.world.width * Manager._data.world.height
-  local energy::Int = 0
-  local positions::Dict{Int, Creature.Organism} = Manager._data.positions
-  local pos::Helper.Point = Helper.Point(0, 0)
-  local x::Int
-  local y::Int
-
-  for x in 1:size(plane)[2]
-    for y in 1:size(plane)[1]
-      pos.x = x
-      pos.y = y
-      if !Manager._isFree(pos) energy += 1 end
-    end
-  end
+  local energy::Int = Manager._getWorldEnergy()
   #
   # Total amount of energy is less then in config
   #
