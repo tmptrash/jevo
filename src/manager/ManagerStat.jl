@@ -27,18 +27,18 @@ function _updateStat(stamp::Float64)
         string("\"Energy\"              : ", string(org.energy), ",\n"),
         string("\"for operators\"       : ", length(split(code, "for i::Int8")) - 1, ",\n"),
         string("\"if operators\"        : ", length(split(code, "if var")) - 1, ",\n"),
-        string("\"if operators\"        : ", length(split(code, "Creature.getEnergy")) - 1, ",\n"),
+        string("\"getEnergy\"           : ", length(split(code, "Creature.getEnergy")) - 1, ",\n"),
         string("\"Memory reading\"      : ", length(split(code, "haskey(o.mem)")) - 1, ",\n"),
         string("\"Eating\"              : ", length(split(code, "Creature.eat")) - 1, ",\n"),
         string("\"Moving\"              : ", length(split(code, "Creature.step")) - 1, ",\n"),
         string("\"Amount of lines\"     : ", string(org.codeSize), ",\n"),
         string("\"Amount of organisms\" : ", string(length(Manager._data.tasks)), ",\n"),
         string("\"IPS\"                 : ", string(Config.val(:WORLD_IPS)), ",\n"),
-        string("\"Generation number\"   : ", string(Manager._data.totalOrganisms), ",\n"),
-        string("\"Code\"                : \"", code, "\"\n"),
+        string("\"Generation number\"   : ", string(Manager._data.totalOrganisms), "\n"),
         "},\n"
       )
       _appendToFile(json, "file.json")
+      _appendToFile(string("{\"Code\": \"", code, "\"},\n"), "code.json")
     end
     return time()
   end
