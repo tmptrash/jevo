@@ -244,7 +244,7 @@ module Manager
   # @param stamp Current UNIX time stamp
   # @param ystamp yield last UNIX time stamp
   # @param needYield Flag if we need for yield() call
-  # @return {Bool}
+  # @return {(Float64, Bool)}
   #
   function _updateTasks(man::ManagerTypes.ManagerData, stamp::Float64, ystamp::Float64, needYield::Bool)
     if needYield yield() end
@@ -257,7 +257,7 @@ module Manager
 
     ystamp, needYield
   end
-  # #
+  # # TODO: do i need this?
   # # Checks id data in sockets available for reading
   # # @param man Manager data type
   # # @return {Bool}
