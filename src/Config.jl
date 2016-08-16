@@ -25,7 +25,6 @@ module Config
 
   export save
   export load
-  export val
   export isEmpty
 
   export ConfigData
@@ -366,13 +365,14 @@ module Config
   # @return {Tuple{ConfigData, Bool}} loading result
   #
   function load(file::ASCIIString = "config.data")
-      try
-        return Helper.load(file)
-      catch e
-        Helper.warn("Config.load(): $e")
-      end
+    local ret = null
+    try
+      ret = Helper.load(file)
+    catch e
+      Helper.warn("Config.load(): $e")
+    end
 
-      ConfigData()
+    typeof(ret) !== ConfigData ? create(true) : ret
   end
   #
   # Checks if config data type is empty
@@ -396,40 +396,5 @@ module Config
     end
 
     arr
-  end
-  #
-  # Returns configuration value according to unique key. In
-  # case of incorrect key nothing will be returned.
-  # @param data Config Data type
-  # @param Field's name symbol
-  # @return {Any|nothing} Value of key in specified section
-  # in case of incorrect section or key returns nothing
-  # TODO: remove this
-  function val(data::ConfigData, name::Symbol)
-    try
-      return getfield(data, name)
-    catch(e)
-      Helper.warn("Getter Config.val(): $e")
-    end
-
-    nothing
-  end
-  #
-  # Sets the value by unique key. Works in pair with getter
-  # val() function
-  # @param data Config Data type
-  # @param key Unique key of the value
-  # @param value Value we have to set
-  # @return Operation boolean result
-  # TODO: remove this
-  function val(data::ConfigData, name::Symbol, value::Any)
-    try
-      setfield!(data, name, value)
-      return true
-    catch(e)
-      Helper.warn("Setter Config.val(): $e")
-    end
-
-    false
   end
 end
