@@ -380,18 +380,18 @@ module Config
       1,                         # ORGANISM_ENERGY_DECREASE_VALUE
       700,                       # ORGANISM_REMOVE_AFTER_TIMES
       5,                         # ORGANISM_REMOVE_AMOUNT
-      10,                        # ORGANISM_CLONE_AFTER_TIMES
+      3,                         # ORGANISM_CLONE_AFTER_TIMES
       1,                         # ORGANISM_START_COLOR
-      2,                         # CODE_MAX_FUNC_PARAMS
+      4,                         # CODE_MAX_FUNC_PARAMS
       1920,                      # WORLD_WIDTH
       920,                       # WORLD_HEIGHT
       0,                         # WORLD_FRAME_DELAY
       0,                         # WORLD_IPS
-      400,                       # WORLD_MAX_ORGANISMS
-      50,                        # WORLD_MIN_ORGANISMS
+      500,                       # WORLD_MAX_ORGANISMS
+      100,                       # WORLD_MIN_ORGANISMS
       10000,                     # WORLD_START_ENERGY_BLOCKS
       UInt32(0x0001F4),          # WORLD_START_ENERGY_AMOUNT
-      0.05,                      # WORLD_MIN_ENERGY_PERCENT
+      0.1,                       # WORLD_MIN_ENERGY_PERCENT
       400,                       # WORLD_MIN_ENERGY_CHECK_PERIOD
       1,                         # WORLD_SCALE
       1,                         # BACKUP_PERIOD
