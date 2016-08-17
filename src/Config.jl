@@ -334,7 +334,7 @@ module Config
       650,                               # STAT_WIDTH
       500,                               # STAT_HEIGHT
       5,                                 # STAT_FRAME_DELAY
-      0.1,                               # CONNECTION_TASKS_CHECK_PERIOD
+      0.01,                              # CONNECTION_TASKS_CHECK_PERIOD
       20,                                # CONNECTION_STEP_ENERGY_PERCENT
       2010,                              # CONNECTION_SERVER_PORT (current server port)
       2011,                              # CONNECTION_FAST_SERVER_PORT (current server "fast" mode port)

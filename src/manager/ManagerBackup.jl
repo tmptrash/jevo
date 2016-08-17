@@ -42,8 +42,7 @@ function recover(man::ManagerTypes.ManagerData)
   for t in data.tasks
     t.organism.codeFn  = Creature.eval(t.organism.code)
     bindEvents(man, t.organism)
-    t.organism.manTask = curTask
-    t.task = Task(Creature.born)
+    t.task = Task(() -> Creature.born(t.organism, man.cfg, curTask))
     #
     # This is how we pass an organism and config type instances inside organism's code
     # TODO: change it to yieldto(t.task)
@@ -51,9 +50,7 @@ function recover(man::ManagerTypes.ManagerData)
     consume(t.task, (t.organism, man.cfg))
   end
   man.task = curTask
-  man.minOrg.manTask = curTask
   man.minOrg.codeFn  = Creature.eval(man.minOrg.code)
-  man.maxOrg.manTask = curTask
   man.maxOrg.codeFn  = Creature.eval(man.maxOrg.code)
   #
   # We don't need to load\create servers and clients every
@@ -113,14 +110,11 @@ function backup(man::ManagerTypes.ManagerData)
   for task in man.tasks
     org          = task.organism
     task.task    = tmpTask
-    org.manTask  = tmpTask
     org.codeFn   = tmpFn
     org.observer = tmpObs
   end
-  man.minOrg.manTask  = tmpTask
   man.minOrg.codeFn   = tmpFn
   man.minOrg.observer = tmpObs
-  man.maxOrg.manTask  = tmpTask
   man.maxOrg.codeFn   = tmpFn
   man.maxOrg.observer = tmpObs
   man.task            = tmpTask
@@ -139,16 +133,13 @@ function backup(man::ManagerTypes.ManagerData)
     task.task    = tasks[t].t
     org          = task.organism
     org.observer = tasks[t].o
-    org.manTask  = curTask
     org.codeFn   = Creature.eval(org.code)
     bindEvents(man, org)
   end
 
   man.cons = cons
   man.task = curTask
-  man.minOrg.manTask = curTask
   man.minOrg.codeFn  = Creature.eval(man.minOrg.code)
-  man.maxOrg.manTask = curTask
   man.maxOrg.codeFn  = Creature.eval(man.maxOrg.code)
   man.dotCallback    = dotCb
   if ret Helper.info(string("Backup has created: ", Backup.lastFile())) end

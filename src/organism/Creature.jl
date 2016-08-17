@@ -188,10 +188,6 @@ module Creature
     #
     pos::Helper.Point
     #
-    # Reference to parent (manager) task the organism is switching to
-    #
-    manTask::Task
-    #
     # Adds events listening/firing logic to the organism.
     #
     observer::Event.Observer
@@ -239,7 +235,6 @@ module Creature
       cfg.ORGANISM_START_COLOR,                                             # color
       Dict{Int16, Int16}(),                                                 # mem
       pos,                                                                  # pos
-      current_task(),                                                       # manTask
       Event.create()                                                        # observer
     )
   end
@@ -247,29 +242,21 @@ module Creature
   # TODO: describe this method
   # TODO: describe org, cfg = produce()
   #
-  function born()
-    #
-    # Parent code should pass an organism instance on start
-    #
-    local org::Organism
-    local cfg::Config.ConfigData
-    local oldCode::Function
-    #
-    # We need these instances for events like stepleft, grabup,...
-    # TODO: change it to yieldto()
-    org, cfg = produce()
-    oldCode = org.codeFn
+  function born(org::Organism, cfg::Config.ConfigData, task::Task)
     #
     # This variable is used inside for loops in organism's code
     # So, don't remove it
     # TODO: check if this variable is used inside the org.codeFn()!!!
     #
     local i::Int8
+    local oldCode::Function
+
+    oldCode = org.codeFn
     #
     # This is main loop, where organism lives. It's body will be
     # changed soon by mutations.
     #
-    while yieldto(org.manTask) === nothing
+    while yieldto(task) === nothing
       #
       # It's okay if organism has errors and throws exceptions. It's possible
       # that these errors will be fixed by future mutations.

@@ -536,13 +536,9 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   local id::UInt = man.organismId
   # TODO: deepcopy() call is very slow!!! must be optimized
   local org::Creature.Organism = organism === nothing ? Creature.create(man.cfg, id, pos) : add ? organism : deepcopy(organism)
-  local task::Task = Task(Creature.born)
+  local task::Task = Task(() -> Creature.born(org, man.cfg, man.task))
   local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, task, org)
-  #
-  # This is how we pass an organism and config type instances inside organism's code
-  # TODO: change it to yieldto(t.task)
-  consume(task)
-  consume(task, (org, man.cfg))
+
   org.pos = pos
   #
   # Because of deepcopy(), we have to remove copied handlers

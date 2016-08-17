@@ -140,6 +140,7 @@ module Connection
         if notEmpty(ans) serialize(sock, ans) end
       end
     catch e
+      showerror(STDOUT, e, catch_backtrace())
       return excFn(sock, e)
     end
 

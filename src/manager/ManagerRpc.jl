@@ -88,6 +88,7 @@ function createOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point = Helpe
   if length(man.tasks) > man.cfg.WORLD_MAX_ORGANISMS return null end
   orgTask = Manager._createOrganism(man, nothing, pos)
   orgTask === false ? false : orgTask.id
+
   null
 end
 #
@@ -249,16 +250,23 @@ end
 # @return {Array{RpcApi.SimpleOrganism, 1}}
 #
 function getBest(man::ManagerTypes.ManagerData, amount::Int)
+  println("getBest")
   local best::Array{RpcApi.SimpleOrganism, 1} = []
   local i::Int
   local len::Int = length(man.tasks)
 
   amount = getAmount(man) > amount ? amount : getAmount(man)
-  sort!(man.tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
+  if amount > 0
+    println("in")
+    sort!(man.tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
 
-  for i = 1:amount
-    if istaskdone(man.tasks[len - i + 1].task) continue end
-    push!(best, _createSimpleOrganism(man.tasks[len - i + 1].id, man.tasks[len - i + 1].organism))
+    for i = 1:amount
+      println("beforetask")
+      if istaskdone(man.tasks[len - i + 1].task) continue end
+      println("aftertask")
+      push!(best, _createSimpleOrganism(man.tasks[len - i + 1].id, man.tasks[len - i + 1].organism))
+      println("added")
+    end
   end
 
   best
