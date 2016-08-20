@@ -45,8 +45,10 @@ end
 # provides rare mutations.
 # @param man Manager data type
 # @param counter Counter for mutations speed
+# @param needYield We have to call yield in organisms loop, if
+# this flag is turned on.
 #
-function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
+function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield::Bool)
   local cloneAfter::Int = man.cfg.ORGANISM_CLONE_AFTER_TIMES
   local needClone ::Bool = cloneAfter === 0 ? false : counter % cloneAfter === 0
   local tasks     ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
@@ -63,6 +65,11 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int)
   # TODO: optimize this two approaches. We have to have only one
   # TODO: reverse loop.
   @inbounds for task in tasks
+    #
+    # Because this loop affects porformance, we have call yield()
+    # here and not in main Manager while loop.
+    #
+    if needYield yield() end
     #
     # We have to wait while all clients are ready for streaming. This
     # is because the error in serializer. See issue for details:

@@ -182,7 +182,7 @@ function getOrganisms(man::ManagerTypes.ManagerData, from::Int = 1, to::Int = 0)
   from = from < 1 || from > len ? 1 : from
   to   = to === 0 ? len : to
 
-  for i = from:to push!(orgs, getOrganism(man.tasks[i].id)) end
+  for i = from:to push!(orgs, _createSimpleOrganism(man.tasks[i].id, man.tasks[i].organism)) end
 
   orgs
 end
@@ -237,7 +237,7 @@ function getStatistics(man::ManagerTypes.ManagerData)
     man.totalOrganisms,
     man.world.width,
     man.world.height,
-    Config.format(),
+    Config.format(man.cfg),
     _createSimpleOrganism(man.minId, man.minOrg),
     _createSimpleOrganism(man.maxId, man.maxOrg)
   )
@@ -250,22 +250,17 @@ end
 # @return {Array{RpcApi.SimpleOrganism, 1}}
 #
 function getBest(man::ManagerTypes.ManagerData, amount::Int)
-  println("getBest")
   local best::Array{RpcApi.SimpleOrganism, 1} = []
   local i::Int
-  local len::Int = length(man.tasks)
+  local len::Int = getAmount(man)
+  local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
 
-  amount = getAmount(man) > amount ? amount : getAmount(man)
+  amount = len > amount ? amount : len
   if amount > 0
-    println("in")
-    sort!(man.tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
-
+    sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
     for i = 1:amount
-      println("beforetask")
-      if istaskdone(man.tasks[len - i + 1].task) continue end
-      println("aftertask")
-      push!(best, _createSimpleOrganism(man.tasks[len - i + 1].id, man.tasks[len - i + 1].organism))
-      println("added")
+      if istaskdone(tasks[len - i + 1].task) continue end
+      push!(best, _createSimpleOrganism(tasks[len - i + 1].id, tasks[len - i + 1].organism))
     end
   end
 

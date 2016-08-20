@@ -386,13 +386,13 @@ module Config
   # Formats configuration for usable user's view
   # @return {ASCIIString}
   #
-  function format()
+  function format(data::ConfigData)
     local fields::Array{Symbol, 1} = fieldnames(ConfigData)
     local i::Symbol
     local arr::Array{ASCIIString, 1} = []
 
     for i in fields
-      push!(arr, string(i) * ": " * string(getfield(_data.d, i)))
+      push!(arr, string(i) * ": " * string(getfield(data, i)))
     end
 
     arr

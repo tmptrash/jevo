@@ -109,7 +109,7 @@ module Manager
       # and organism's tasks switching.
       #
       while true
-      #for i=1:50000
+      #for i=1:1000
         #
         # We have to wait while all clients are ready for streaming. This
         # is because the error in serializer. See issue for details:
@@ -127,7 +127,7 @@ module Manager
         #
         # This call runs all organism related tasks one by one
         #
-        counter = _updateOrganisms(man, counter)
+        counter = _updateOrganisms(man, counter, needYield)
         #
         # We have to update IPS (Iterations Per Second) every second
         #
@@ -239,7 +239,8 @@ module Manager
   end
   # TODO: describe yield() call logic
   # Checks if active servers have bytes to read. It means, that we have to call
-  # yield() for this reading.
+  # yield() for this reading. yield() function will be called in organisms
+  # loop in ManagerOrganism.jl file.
   # @param man Manager data type
   # @param stamp Current UNIX time stamp
   # @param ystamp yield last UNIX time stamp
@@ -247,7 +248,6 @@ module Manager
   # @return {(Float64, Bool)}
   #
   function _updateTasks(man::ManagerTypes.ManagerData, stamp::Float64, ystamp::Float64, needYield::Bool)
-    if needYield yield() end
     if stamp - ystamp >= man.cfg.CONNECTION_TASKS_CHECK_PERIOD
       yield()
       # TODO: potential problem here. this list of sockets may be expanded
