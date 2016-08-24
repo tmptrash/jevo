@@ -16,6 +16,7 @@ function _updateStat(stamp::Float64)
     if length(bestOrgs) > 0
       org  = bestOrgs[1]
       code = string(org.code)
+	  # TODO: remove extra string convertion
       json = string(
         "{",
         string("\"Probabilities\"       : ", org.mutationProbabilities, ",\n"),
@@ -39,7 +40,7 @@ function _updateStat(stamp::Float64)
         "},\n"
       )
       _appendToFile(json, "file.json")
-      _appendToFile(string("{\"Code\": \"", code, "\"},\n"), "code.json")
+      _appendToFile(string("{\"Code\": \"", code, "\",\n\"Generation number\": ", Manager._data.totalOrganisms, "},\n"), "code.json")
     end
     return time()
   end
