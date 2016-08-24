@@ -109,7 +109,7 @@ module Manager
       # and organism's tasks switching.
       #
       while true
-      #for i=1:1000
+      #for i=1:1000 # TODO: use macroses here instead of comments
         #
         # We have to wait while all clients are ready for streaming. This
         # is because the error in serializer. See issue for details:

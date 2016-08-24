@@ -192,7 +192,7 @@ module OpenGlWindow
     	GR.setwsviewport(0, mSize, 0, mSize * ratio)
     	GR.setwswindow(0, 1, 0, ratio)
     else
-    	ratio = float(w) / height
+    	ratio = float(width) / height
     	mSize = mHeight * height / scrHeight
     	GR.setwsviewport(0, mSize * ratio, 0, mSize)
     	GR.setwswindow(0, ratio, 0, 1)

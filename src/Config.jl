@@ -145,6 +145,13 @@ module Config
     #
     WORLD_HEIGHT::Int
     #
+    # Turns on ciclic world mode. It means that organisms may go outside
+    # it's border, but still be inside. For example, if the world has 10x10
+    # size and the organism has 10x5 position in it, one step right will move
+    # this organism at the position 1x5. The same scenario regarding Y
+    # coordinate (height).
+    WORLD_CYCLICAL::Bool
+    #
     # Delay between requests for obtaining remote world region.
     # This parameter affects frames per second in a window canvas.
     # Value in seconds. It's possible to have zero based value. In
@@ -318,8 +325,9 @@ module Config
       1,                                 # ORGANISM_START_COLOR
       65536,                             # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
       2,                                 # CODE_MAX_FUNC_PARAMS
-      900,                               # WORLD_WIDTH
-      600,                               # WORLD_HEIGHT
+      200,                               # WORLD_WIDTH
+      200,                               # WORLD_HEIGHT
+      true,                              # WORLD_CYCLICAL
       0,                                 # WORLD_FRAME_DELAY
       0,                                 # WORLD_IPS
       400,                               # WORLD_MAX_ORGANISMS
@@ -328,7 +336,7 @@ module Config
       UInt32(0x0001F4),                  # WORLD_START_ENERGY_AMOUNT
       0.3,                               # WORLD_MIN_ENERGY_PERCENT
       500,                               # WORLD_MIN_ENERGY_CHECK_PERIOD
-      1,                                 # WORLD_SCALE
+      3,                                 # WORLD_SCALE
       60.0,                              # BACKUP_PERIOD
       7,                                 # BACKUP_AMOUNT
       650,                               # STAT_WIDTH

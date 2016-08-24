@@ -296,27 +296,39 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   # If network is ok and we may send an organism, we have to
   # kill him in current Manager/instance.
   #
-  if pos.x < 1
-    if !Client.isOk(man.cons.left)  || !Client.request(man.cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism) return false end
-    freeze = true
-  elseif pos.x > man.world.width
-    if !Client.isOk(man.cons.right) || !Client.request(man.cons.right, RpcApi.RPC_ORG_STEP_RIGHT, organism) return false end
-    freeze = true
-  elseif pos.y < 1
-    if !Client.isOk(man.cons.up)    || !Client.request(man.cons.up, RpcApi.RPC_ORG_STEP_UP, organism) return false end
-    freeze = true
-  elseif pos.y > man.world.height
-    if !Client.isOk(man.cons.down)  || !Client.request(man.cons.down, RpcApi.RPC_ORG_STEP_DOWN, organism) return false end
-    freeze = true
-  end
-  #
-  # We have to freeze the organism and throw an error to interrupt
-  # his current runned code
-  #
-  if freeze
-    # TODO: possibly slow code!
-    _freezeOrganism(man, findfirst((t) -> t.organism === organism, man.tasks))
-    error("Organism is interrupted, because of freeze")
+  if !man.cfg.WORLD_CYCLICAL
+    if pos.x < 1
+      if !Client.isOk(man.cons.left)  || !Client.request(man.cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism) return false end
+      freeze = true
+    elseif pos.x > man.world.width
+      if !Client.isOk(man.cons.right) || !Client.request(man.cons.right, RpcApi.RPC_ORG_STEP_RIGHT, organism) return false end
+      freeze = true
+    elseif pos.y < 1
+      if !Client.isOk(man.cons.up)    || !Client.request(man.cons.up, RpcApi.RPC_ORG_STEP_UP, organism) return false end
+      freeze = true
+    elseif pos.y > man.world.height
+      if !Client.isOk(man.cons.down)  || !Client.request(man.cons.down, RpcApi.RPC_ORG_STEP_DOWN, organism) return false end
+      freeze = true
+    end
+    #
+    # We have to freeze the organism and throw an error to interrupt
+    # his current runned code
+    #
+    if freeze
+      # TODO: possibly slow code!
+      _freezeOrganism(man, findfirst((t) -> t.organism === organism, man.tasks))
+      error("Organism is interrupted, because of freeze")
+    end
+    #
+    # If cyclical mode turned on, then we have to move organisms in a
+    # specific cyclic way from the borders.
+    #
+  else
+    if     pos.x < 1 pos.x = man.world.width
+    elseif pos.x > man.world.width pos.x = 1
+    elseif pos.y < 1 pos.y = man.world.height
+    elseif pos.y > man.world.height man.y = 1
+    end
   end
   #
   # Destination position, where organism wants step to is not
@@ -523,6 +535,12 @@ end
 function _onStep(man::ManagerTypes.ManagerData, organism::Creature.Organism, pos::Helper.Point)
   if !haskey(man.cons.frozen, organism.id)
     _moveOrganism(man, pos, organism)
+    #
+    # We have to explain here a little bit. This yieldto() switches current
+    # context to man.task. It means that not all the code of current organism
+    # will be run. It also solves a problem of parallel organisms runningand
+    # smooth organisms moving in a visualizer.
+    #
     yieldto(man.task)
   end
 end
