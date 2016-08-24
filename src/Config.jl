@@ -325,7 +325,7 @@ module Config
       1,                                 # ORGANISM_START_COLOR
       65536,                             # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
       2,                                 # CODE_MAX_FUNC_PARAMS
-      200,                               # WORLD_WIDTH
+      260,                               # WORLD_WIDTH
       200,                               # WORLD_HEIGHT
       true,                              # WORLD_CYCLICAL
       0,                                 # WORLD_FRAME_DELAY
