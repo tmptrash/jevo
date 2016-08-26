@@ -121,10 +121,6 @@ module Manager
         #
         stamp = time()
         #
-        # After all organisms die, we have to create next, new population
-        #
-        if length(tasks) < 1 createOrganisms(man) end
-        #
         # This call runs all organism related tasks one by one
         #
         counter = _updateOrganisms(man, counter, needYield)

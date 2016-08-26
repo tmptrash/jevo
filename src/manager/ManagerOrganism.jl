@@ -97,6 +97,19 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     end
   end
   #
+  # After all organisms die, we have to create next, new population
+  #
+  if len < 1
+    man.totalOrganisms = 0
+    man.organismId     = UInt(2)
+    man.minOrg         = Creature.create()
+    man.minOrg         = Creature.create(cfg, UInt(0), Helper.Point(1,1))
+    man.maxOrg         = Creature.create(cfg, UInt(1), Helper.Point(2,1))
+    man.minId          = UInt(0)
+    man.maxId          = UInt(0)
+    createOrganisms(man)
+end
+  #
   # Cloning procedure. The meaning of this is in ability to
   # produce children as fast as much energy has an organism.
   # If organism has high energy value, then it will produce
@@ -134,7 +147,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     _removeMinOrganisms(man)
   end
   #
-  # This counter should be infinite
+  # This counter should be infinite, but not zero!
   #
   if counter === typemax(Int) counter = 1 end
 
@@ -289,6 +302,16 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   local idOld::Int = Manager._getPosId(man, organism.pos)
   local freeze::Bool = false
   #
+  # If cyclical mode turned on, then we have to move organisms in a
+  # specific cyclic way from the borders.
+  #
+  if man.cfg.WORLD_CYCLICAL
+    if     pos.x < 1 pos.x = man.world.width
+    elseif pos.x > man.world.width pos.x = 1
+    elseif pos.y < 1 pos.y = man.world.height
+    elseif pos.y > man.world.height man.y = 1
+    end
+  #
   # Organism try step outside of current instance. If near
   # instance is ready, we may teleport him there. We also
   # have to decrease energy to prevent network overload.
@@ -296,7 +319,7 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   # If network is ok and we may send an organism, we have to
   # kill him in current Manager/instance.
   #
-  if !man.cfg.WORLD_CYCLICAL
+  else
     if pos.x < 1
       if !Client.isOk(man.cons.left)  || !Client.request(man.cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism) return false end
       freeze = true
@@ -318,16 +341,6 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
       # TODO: possibly slow code!
       _freezeOrganism(man, findfirst((t) -> t.organism === organism, man.tasks))
       error("Organism is interrupted, because of freeze")
-    end
-    #
-    # If cyclical mode turned on, then we have to move organisms in a
-    # specific cyclic way from the borders.
-    #
-  else
-    if     pos.x < 1 pos.x = man.world.width
-    elseif pos.x > man.world.width pos.x = 1
-    elseif pos.y < 1 pos.y = man.world.height
-    elseif pos.y > man.world.height man.y = 1
     end
   end
   #
