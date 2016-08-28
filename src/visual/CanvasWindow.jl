@@ -29,7 +29,7 @@ module CanvasWindow
   import Cairo
   import Tk
   import Colors
-  import DotColors
+  import Dots
 
   export Window
   export create
@@ -63,7 +63,7 @@ module CanvasWindow
     local c::Tk.Canvas = Tk.Canvas(win)
     Tk.pack(c, expand=true, fill="both")
     local ctx::Cairo.CairoContext = Graphics.getgc(c)
-    local rgb::Colors.RGB = convert(Colors.RGB, Colors.RGB24(UInt32(DotColors.INDEX_EMPTY)))
+    local rgb::Colors.RGB = convert(Colors.RGB, Colors.RGB24(UInt32(Dots.INDEX_EMPTY)))
 
     Tk.set_antialias(ctx, 1)
     Tk.set_line_width(ctx, 1)

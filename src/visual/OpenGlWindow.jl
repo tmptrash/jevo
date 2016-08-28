@@ -25,7 +25,7 @@
 module OpenGlWindow
   import GR
   import Colors
-  import DotColors
+  import Dots
   import Helper
 
   export Window
@@ -65,7 +65,7 @@ module OpenGlWindow
   # @return Window object
   #
   function create(width::Int, height::Int, scale::Int, title::ASCIIString = "")
-    local emptyColor::Int = DotColors.INDEX_EMPTY
+    local emptyColor::Int = Dots.INDEX_EMPTY
     local win::Window = Window(scale, Int[0], Int[0], width, height, 1.0, true)
     local wndWidth::Int = width * scale
     local wndHeight::Int = height * scale + _FOOTER_HEIGHT
@@ -76,11 +76,11 @@ module OpenGlWindow
     #
     # Fill background with "empty" color
     #
-    GR.setcolorrep(emptyColor, DotColors.COLOR_EMPTY...)
+    GR.setcolorrep(emptyColor, Dots.COLOR_EMPTY...)
     GR.setlinewidth(1)
     GR.setlinetype(GR.LINETYPE_SOLID)
     GR.setlinecolorind(emptyColor)
-    GR.settextcolorind(DotColors.INDEX_TEXT)
+    GR.settextcolorind(Dots.INDEX_TEXT)
     #
     # Settings for fillrect() function
     #
@@ -125,9 +125,9 @@ module OpenGlWindow
     #
     # We use GR library. It supports only 1256 colors. We have to check it
     #
-    if color > UInt32(DotColors.MAX_COLOR)
+    if color > UInt32(Dots.MAX_COLOR)
       Helper.warn(string("Unsupported color index ", color))
-      color = UInt32(DotColors.MAX_COLOR)
+      color = UInt32(Dots.MAX_COLOR)
     end
     if win.scale > 1
       x = (x - 1) * win.scale + 1
@@ -153,8 +153,8 @@ module OpenGlWindow
     local ymax::Float64 = Float64(win.height * win.scale + _FOOTER_HEIGHT)
     local ycoef::Float64 = win.ratio / ymax
 
-    GR.setlinecolorind(DotColors.INDEX_EMPTY)
-    GR.setfillcolorind(DotColors.INDEX_EMPTY)
+    GR.setlinecolorind(Dots.INDEX_EMPTY)
+    GR.setfillcolorind(Dots.INDEX_EMPTY)
     GR.fillrect(1, win.width * win.scale + win.scale, ymax - _FOOTER_HEIGHT + win.scale, ymax)
     # TODO: fix this hardcode (15.0)
     GR.text(0.01, win.ratio - (ycoef * _FOOTER_HEIGHT) + ycoef * 15.0, title)

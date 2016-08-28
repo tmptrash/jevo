@@ -19,7 +19,7 @@ import Server
 import Helper
 import Connection
 import ManagerTypes
-import DotColors
+import Dots
 
 using Debug
 #
@@ -331,10 +331,16 @@ end
 #
 function _onFastStreaming(man::ManagerTypes.ManagerData, sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer)
   man.cons.streamInit = false
-  man.dotCallback = (pos::Helper.Point, color::UInt32)->_onDot(man, pos, color)
+  man.dotCallback     = (pos::Helper.Point, color::UInt32)->_onDot(man, pos, color)
+  man.moveCallback    = (pos::Helper.Point, dir::Int, color::UInt32)->_onDot(man, pos, color, dir)
+
   Event.off(man.world.obs, World.EVENT_DOT, man.dotCallback)
   if !Event.has(man.world.obs, World.EVENT_DOT, man.dotCallback)
     Event.on(man.world.obs, World.EVENT_DOT, man.dotCallback)
+  end
+  Event.off(man.world.obs, World.EVENT_MOVE, man.moveCallback)
+  if !Event.has(man.world.obs, World.EVENT_MOVE, man.moveCallback)
+    Event.on(man.world.obs, World.EVENT_MOVE, man.moveCallback)
   end
 end
 #
@@ -344,7 +350,7 @@ end
 # @param pos Dot coordinates
 # @param color Dot color
 #
-function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32)
+function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32, dir::Int = Dots.DIRECTION_NO)
   local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
   local ips::UInt16 = UInt16(man.cfg.WORLD_IPS)
   local x::UInt16 = UInt16(pos.x)
@@ -355,6 +361,12 @@ function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32)
   # This is how we get color index of a dot
   #
   color = _getColorIndex(man, pos, color)
+  #
+  # Encodes direction to the first(unused) byte of color
+  #
+  if dir !== Dots.DIRECTION_NO
+    color |= (UInt32(dir) << 24)
+  end
   for i::Int = 1:length(socks)
     if Helper.isopen(socks[i])
       off = false
@@ -363,12 +375,13 @@ function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32)
   end
   #
   # This is how we push all active messages to the network
-  # TODO: change to yieldto()
+  # TODO: change to yieldto() do we need this?
   #yield()
   #
   # All "fast" clients were disconnected
   #
   if off Event.off(man.world.obs, World.EVENT_DOT, man.dotCallback) end
+  if off Event.off(man.world.obs, World.EVENT_MOVE, man.moveCallback) end
 end
 #
 # Converts color to it's index. This index is used for Visualizer
@@ -382,8 +395,8 @@ function _getColorIndex(man::ManagerTypes.ManagerData, pos::Helper.Point, color:
   local posId::Int = Manager._getPosId(man, pos)
   local isOrganism::Bool = haskey(man.positions, posId)
 
-  if color !== UInt32(DotColors.INDEX_EMPTY)
-    color = UInt32(isOrganism ? man.positions[posId].color : DotColors.INDEX_ENERGY)
+  if color !== UInt32(Dots.INDEX_EMPTY)
+    color = UInt32(isOrganism ? man.positions[posId].color : Dots.INDEX_ENERGY)
   end
 
   color

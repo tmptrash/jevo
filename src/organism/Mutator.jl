@@ -11,7 +11,7 @@ module Mutator
   import Helper
   import Creature
   import Code
-  import DotColors
+  import Dots
 
   export mutate
   #
@@ -94,7 +94,7 @@ module Mutator
   #
   function _changeColor(org::Creature.Organism)
     org.color += 1
-    if org.color > DotColors.MAX_ORG_COLOR org.color = 1 end
+    if org.color > Dots.MAX_ORG_COLOR org.color = 1 end
   end
   #
   # Adds one line of code into existing code blocks including all

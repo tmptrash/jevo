@@ -127,6 +127,12 @@ module ManagerTypes
     #
     dotCallback::Function
     #
+    # Callback, which is called when one dot in a
+    # world has changed it's position (moves from one
+    # position to another).
+    #
+    moveCallback::Function
+    #
     # Manager's task (main task)
     #
     task::Task
@@ -152,6 +158,7 @@ module ManagerTypes
       maxId::UInt,
       quiet::Bool,
       dotCallback::Function,
+      moveCallback::Function,
       task::Task
     ) = new(
       cfg,
@@ -168,6 +175,7 @@ module ManagerTypes
       maxId,
       quiet,
       dotCallback,
+      moveCallback,
       task
     )
     #
@@ -188,6 +196,7 @@ module ManagerTypes
       maxId::UInt,
       quiet::Bool,
       dotCallback::Function,
+      moveCallback::Function,
       task::Task,
       cons::Connections
     ) = new(
@@ -205,6 +214,7 @@ module ManagerTypes
       maxId,
       quiet,
       dotCallback,
+      moveCallback,
       task,
       cons
     )

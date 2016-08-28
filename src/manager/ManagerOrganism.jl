@@ -102,7 +102,6 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   if len < 1
     man.totalOrganisms = 0
     man.organismId     = UInt(2)
-    man.minOrg         = Creature.create()
     man.minOrg         = Creature.create(cfg, UInt(0), Helper.Point(1,1))
     man.maxOrg         = Creature.create(cfg, UInt(1), Helper.Point(2,1))
     man.minId          = UInt(0)
@@ -255,7 +254,7 @@ function _freezeOrganism(man::ManagerTypes.ManagerData, i::Int)
   local org::Creature.Organism = man.tasks[i].organism
   local oldColor::UInt32 = org.color
 
-  org.color = UInt32(0)
+  org.color = UInt32(Dots.INDEX_EMPTY)
   Event.clear(org.observer)
   _moveOrganism(man, org.pos, org)
   org.color = oldColor
@@ -278,7 +277,7 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   local org::Creature.Organism = man.tasks[i].organism
 
   org.energy = 0
-  org.color  = UInt32(0)
+  org.color  = UInt32(Dots.INDEX_EMPTY)
   Event.clear(org.observer)
   _moveOrganism(man, org.pos, org)
   delete!(man.positions, Manager._getPosId(man, org.pos))
@@ -301,15 +300,24 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   local idNew::Int = Manager._getPosId(man, pos)
   local idOld::Int = Manager._getPosId(man, organism.pos)
   local freeze::Bool = false
+  local cyclicMove::Bool = false
   #
   # If cyclical mode turned on, then we have to move organisms in a
   # specific cyclic way from the borders.
   #
   if man.cfg.WORLD_CYCLICAL
-    if     pos.x < 1 pos.x = man.world.width
-    elseif pos.x > man.world.width pos.x = 1
-    elseif pos.y < 1 pos.y = man.world.height
-    elseif pos.y > man.world.height man.y = 1
+    if pos.x < 1
+      pos.x = man.world.width
+      cyclicMove = true
+    elseif pos.x > man.world.width
+      pos.x = 1
+      cyclicMove = true
+    elseif pos.y < 1
+      pos.y = man.world.height
+      cyclicMove = true
+    elseif pos.y > man.world.height
+      man.y = 1
+      cyclicMove = true
     end
   #
   # Organism try step outside of current instance. If near
@@ -355,10 +363,21 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   if pos.x !== organism.pos.x || pos.y !== organism.pos.y
     delete!(man.positions, Manager._getPosId(man, organism.pos))
     man.positions[idNew] = organism
-    World.setEnergy(man.world, organism.pos, UInt32(0))
+    #
+    # Using this command, we optimize amount of transferred data
+    # through network and remove blinks in visualizer, because we
+    # transfet only new coordinates, color and direction
+    #
+    if cyclicMove
+      World.setEnergy(man.world, organism.pos, UInt32(Dots.INDEX_EMPTY))
+      World.setEnergy(man.world, pos, UInt32(organism.color))
+    else
+     World.moveEnergy(man.world, organism.pos, pos, UInt32(organism.color))
+    end
     organism.pos = pos
+  else
+    World.setEnergy(man.world, pos, UInt32(organism.color))
   end
-  World.setEnergy(man.world, pos, UInt32(organism.color))
 
   true
 end
