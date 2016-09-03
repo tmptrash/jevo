@@ -46,7 +46,6 @@ function _updateStat(stamp::Float64)
 
   stamp
 end
-
 #
 # Appends native values to the file.
 # @param data String data to save
