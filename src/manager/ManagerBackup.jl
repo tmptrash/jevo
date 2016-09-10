@@ -15,13 +15,6 @@ import ManagerTypes
 export recover
 export backup
 #
-# Is used for storing organism datas in backup file
-#
-type TmpOrganism
-  t::Task
-  o::Event.Observer
-end
-#
 # This function is used for recovering a manager's data from
 # backup file. It means that an application was crashed before
 # and now we have to recover it with last correct backup. Works
@@ -43,11 +36,6 @@ function recover(man::ManagerTypes.ManagerData)
     t.organism.codeFn  = Creature.eval(t.organism.code)
     bindEvents(man, t.organism)
     t.task = Task(() -> Creature.born(t.organism, man.cfg, curTask))
-    #
-    # This is how we pass an organism and config type instances inside organism's code
-    # TODO: change it to yieldto(t.task)
-    consume(t.task)
-    consume(t.task, (t.organism, man.cfg))
   end
   man.task = curTask
   man.minOrg.codeFn  = Creature.eval(man.minOrg.code)
@@ -79,21 +67,17 @@ function recover(man::ManagerTypes.ManagerData)
   true
 end
 #
-# Makes a dump of Manager data and saves it into the file.
+# Makes a dump of Manager data and saves it into the backup file.
 # Works in pair with recover().
 # @return {Bool} Backup status
 #
 function backup(man::ManagerTypes.ManagerData)
-  local tasks::Array{TmpOrganism, 1} = map((t)->TmpOrganism(t.task, t.organism.observer), man.tasks)
-  local cons::ManagerTypes.Connections = man.cons
-  local curTask::Task = current_task()
-  local len::Int = length(tasks)
+  local manCopy::ManagerTypes.ManagerData = deepcopy(man)
   local tmpTask::Task = Task(()->true)
   local tmpFn::Function = function() end
   local task::ManagerTypes.OrganismTask
   local ret::Bool
   local org::Creature.Organism
-  local dotCb::Function = man.dotCallback
   local tmpObs::Event.Observer = Event.create()
   #
   # We have to stop the task before it will be saved into the backup file.
@@ -107,48 +91,33 @@ function backup(man::ManagerTypes.ManagerData)
   # state for serializing into the file. Julia can't save active
   # tasks. After storing we have to restore all tasks.
   #
-  for task in man.tasks
+  for task in manCopy.tasks
     org          = task.organism
     task.task    = tmpTask
     org.codeFn   = tmpFn
     org.observer = tmpObs
   end
-  man.minOrg.codeFn   = tmpFn
-  man.minOrg.observer = tmpObs
-  man.maxOrg.codeFn   = tmpFn
-  man.maxOrg.observer = tmpObs
-  man.task            = tmpTask
-  man.cons            = ManagerTypes.Connections()
-  man.dotCallback     = tmpFn
+  manCopy.minOrg.codeFn   = tmpFn
+  manCopy.minOrg.observer = tmpObs
+  manCopy.maxOrg.codeFn   = tmpFn
+  manCopy.maxOrg.observer = tmpObs
+  manCopy.task            = tmpTask
+  manCopy.cons            = ManagerTypes.Connections()
+  manCopy.dotCallback     = tmpFn
   #
   # These code lines create new backup file and remove last one
   #
-  ret = Backup.save(man)
-  _removeOld(man)
-  #
-  # Reverts workable state back
-  #
-  for t = 1:len
-    task         = man.tasks[t]
-    task.task    = tasks[t].t
-    org          = task.organism
-    org.observer = tasks[t].o
-    org.codeFn   = Creature.eval(org.code)
-    bindEvents(man, org)
+  if (ret = Backup.save(manCopy))
+    _removeOld(man)
+    Helper.info(string("Backup has created: ", Backup.lastFile()))
   end
-
-  man.cons = cons
-  man.task = curTask
-  man.minOrg.codeFn  = Creature.eval(man.minOrg.code)
-  man.maxOrg.codeFn  = Creature.eval(man.maxOrg.code)
-  man.dotCallback    = dotCb
-  if ret Helper.info(string("Backup has created: ", Backup.lastFile())) end
 
   ret
 end
 #
-# Removes old backup files, because they are big.
-# @param man Manager data type
+# Removes first last backup by date. Only last BACKUP_AMOUNT files are
+# available at the moment.
+# @param man Reference to manager data object
 #
 function _removeOld(man::ManagerTypes.ManagerData)
   local files::Array{ASCIIString, 1} = Backup.getFiles(Backup.FOLDER_NAME)

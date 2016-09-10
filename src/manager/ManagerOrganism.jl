@@ -49,7 +49,7 @@ end
 # this flag is turned on.
 #
 function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield::Bool)
-  local cloneAfter::Int = man.cfg.ORGANISM_CLONE_AFTER_TIMES
+  local cloneAfter::Int  = man.cfg.ORGANISM_CLONE_AFTER_TIMES
   local needClone ::Bool = cloneAfter === 0 ? false : counter % cloneAfter === 0
   local tasks     ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   local len       ::Int = length(tasks)
@@ -107,7 +107,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     man.minId          = UInt(0)
     man.maxId          = UInt(0)
     createOrganisms(man)
-end
+  end
   #
   # Cloning procedure. The meaning of this is in ability to
   # produce children as fast as much energy has an organism.
