@@ -110,8 +110,6 @@ module World
     elseif newPos.y > oldPos.y dir = Dots.DIRECTION_DOWN
     else                       dir = Dots.DIRECTION_UP
     end
-    #println("d-old: x: ", oldPos.x, ", y: ", oldPos.y, ", col: ", hex(0))
-    #println("d-new: x: ", newPos.x, ", y: ", newPos.y, ", col: ", hex(energy), ", dir: ", dir)
     plane.data[oldPos.y, oldPos.x] = UInt32(0)
     plane.data[newPos.y, newPos.x] = energy
     Event.fire(plane.obs, EVENT_MOVE, newPos, dir, energy)

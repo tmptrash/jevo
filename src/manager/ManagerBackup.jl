@@ -29,8 +29,14 @@ function recover(man::ManagerTypes.ManagerData)
   local i::Int
   local t::ManagerTypes.OrganismTask
   local curTask::Task = current_task()
-
-  if data === null return false end
+  #
+  # In case if we haven't recovered from backup file,
+  # we have to remove it, because it's broken
+  #
+  if data === null
+    _removeNew(man)
+    return Backup.lastFile() !== "" ? recover(man) : false
+  end
 
   for t in data.tasks
     t.organism.codeFn  = Creature.eval(t.organism.code)
@@ -125,9 +131,24 @@ function _removeOld(man::ManagerTypes.ManagerData)
   local i::Int
 
   if len <= man.cfg.BACKUP_AMOUNT return true end
+  Helper.info("Removing old backup files...")
   for i = 1:(len - man.cfg.BACKUP_AMOUNT)
     rm(Backup.FOLDER_NAME * "/" * files[i])
   end
+
+  true
+end
+#
+# Removes first new backup by date. It's needed for removing broken
+# backup files.
+# @param man Reference to manager data object
+#
+function _removeNew(man::ManagerTypes.ManagerData)
+  local files::Array{ASCIIString, 1} = Backup.getFiles(Backup.FOLDER_NAME)
+  local file::ASCIIString = files[length(files)]
+
+  Helper.info(string("Backup has removed: ", file))
+  rm(Backup.FOLDER_NAME * "/" * file)
 
   true
 end

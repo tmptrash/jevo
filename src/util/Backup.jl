@@ -42,7 +42,7 @@ module Backup
   #
   function load(file::ASCIIString = "")
     if !isdir(FOLDER_NAME)
-      Helper.warn("Backup folder doesn't exist: $FOLDER_NAME")
+      Helper.warn(string("Backup folder doesn't exist: ", FOLDER_NAME))
       return null
     end
     if isempty(file)

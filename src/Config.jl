@@ -310,7 +310,7 @@ module Config
       empty ? [] : [110,300,95,0,1,1,1], # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
       2,                                 # ORGANISM_MUTATIONS_ON_CLONE
       50,                                # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      10000,                             # ORGANISM_MUTATION_PERIOD
+      9000,                              # ORGANISM_MUTATION_PERIOD
       10000,                             # ORGANISM_MAX_MUTATION_PERIOD
       4,                                 # ORGANISM_MUTATION_AMOUNT
       50,                                # ORGANISM_MAX_MUTATION_AMOUNT
