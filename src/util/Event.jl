@@ -95,8 +95,13 @@ module Event
   function fire(obs::Observer, event::ASCIIString, args...)
     if !haskey(obs.events, event) return nothing end
     local fns::Array{Function, 1} = obs.events[event]
+    local len::Int = length(fns)
     local i::Function
 
+    # for i = 1:length(fns)
+    #   if length(obs.events[event]) !== len break end
+    #   fns[i](args...)
+    # end
     for i in fns
       i(args...)
     end

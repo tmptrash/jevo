@@ -244,6 +244,7 @@ module Helper
       serialize(io, data)
     catch(e)
       warn("Helper.save(): $e")
+      showerror(STDOUT, e, catch_backtrace())
       ret = false
     finally
       if io !== null close(io) end
@@ -265,6 +266,7 @@ module Helper
       ret = deserialize(io)
     catch(e)
       warn("Helper.load(): $e")
+      showerror(STDOUT, e, catch_backtrace())
       ret = null
     finally
       if io !== null close(io) end

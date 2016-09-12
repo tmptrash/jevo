@@ -24,9 +24,7 @@ export backup
 #
 function recover(man::ManagerTypes.ManagerData)
   Helper.info(string("Recovering from backup: ", Backup.lastFile()))
-  # TODO: what about type here?
   local data = Backup.load()
-  local i::Int
   local t::ManagerTypes.OrganismTask
   local curTask::Task = current_task()
   #
@@ -34,24 +32,29 @@ function recover(man::ManagerTypes.ManagerData)
   # we have to remove it, because it's broken
   #
   if data === null
-    _removeNew(man)
+    if !_removeNew(man) return false end
     return Backup.lastFile() !== "" ? recover(man) : false
   end
 
+  man.task = curTask
   for t in data.tasks
-    t.organism.codeFn  = Creature.eval(t.organism.code)
+    t.organism.codeFn = Creature.eval(t.organism.code)
     bindEvents(man, t.organism)
     t.task = Task(() -> Creature.born(t.organism, man.cfg, curTask))
+    #
+    # We must call yieldto(), because born() function parameters
+    # will not be passed into the task and only last organism will
+    # be run.
+    #
+    yieldto(t.task)
   end
-  man.task = curTask
-  man.minOrg.codeFn  = Creature.eval(man.minOrg.code)
-  man.maxOrg.codeFn  = Creature.eval(man.maxOrg.code)
   #
   # We don't need to load\create servers and clients every
   # time on load backup. They should be created every time
   # on Manager application starts. So we have to skip loading
   # of man.cons property.
   #
+  man.cfg            = data.cfg
   man.world          = data.world
   man.positions      = data.positions
   man.organisms      = data.organisms
@@ -59,10 +62,7 @@ function recover(man::ManagerTypes.ManagerData)
   man.params         = data.params
   man.organismId     = data.organismId
   man.totalOrganisms = data.totalOrganisms
-  man.minOrg         = data.minOrg
-  man.maxOrg         = data.maxOrg
-  man.minId          = data.minId
-  man.maxId          = data.maxId
+  man.quiet          = data.quiet
   #
   # We have to remove all event handlers from observers
   # after backup loading, because they may be multiplied
@@ -89,13 +89,13 @@ function backup(man::ManagerTypes.ManagerData)
   # We have to stop the task before it will be saved into the backup file.
   # yield() call is needed, because Julia has strange issue with yieldto()
   # or i don't understand it's logic. Anyway, it stucks without this call.
-  #
+  # TODO: do we need this?
   yield()
   yieldto(tmpTask)
   #
   # This is a small trick. We have to set all tasks in waiting
   # state for serializing into the file. Julia can't save active
-  # tasks. After storing we have to restore all tasks.
+  # tasks. After recover we will rerun them.
   #
   for task in manCopy.tasks
     org          = task.organism
@@ -103,13 +103,10 @@ function backup(man::ManagerTypes.ManagerData)
     org.codeFn   = tmpFn
     org.observer = tmpObs
   end
-  manCopy.minOrg.codeFn   = tmpFn
-  manCopy.minOrg.observer = tmpObs
-  manCopy.maxOrg.codeFn   = tmpFn
-  manCopy.maxOrg.observer = tmpObs
+  manCopy.dotCallback     = tmpFn
+  manCopy.moveCallback    = tmpFn
   manCopy.task            = tmpTask
   manCopy.cons            = ManagerTypes.Connections()
-  manCopy.dotCallback     = tmpFn
   #
   # These code lines create new backup file and remove last one
   #
@@ -145,8 +142,10 @@ end
 #
 function _removeNew(man::ManagerTypes.ManagerData)
   local files::Array{ASCIIString, 1} = Backup.getFiles(Backup.FOLDER_NAME)
-  local file::ASCIIString = files[length(files)]
+  local len::Int = length(files)
+  local file::ASCIIString = len > 0 ? files[len] : ""
 
+  if len < 1 return false end
   Helper.info(string("Backup has removed: ", file))
   rm(Backup.FOLDER_NAME * "/" * file)
 

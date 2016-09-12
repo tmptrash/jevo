@@ -52,12 +52,8 @@ module Manager
       Dict{UInt, Creature.Organism}(),                                               # organisms
       ManagerTypes.OrganismTask[],                                                   # tasks
       CommandLine.create(),                                                          # params
-      UInt(2),                                                                       # organismId
+      UInt(1),                                                                       # organismId
       UInt(0),                                                                       # totalOrganisms
-      Creature.create(cfg, UInt(0), Helper.Point(1,1)),                              # minOrg
-      Creature.create(cfg, UInt(1), Helper.Point(2,1)),                              # maxOrg
-      UInt(0),                                                                       # minId
-      UInt(0),                                                                       # maxId
       CommandLine.has(CommandLine.create(), ARG_QUIET),                              # quiet
       function() end,                                                                # dotCallback
       function() end,                                                                # moveCallback
@@ -204,10 +200,15 @@ module Manager
     local localIps::Int
     local i::Int
     # TODO: 5.0 seconds should be get from config
-    if ts >= 5.0
+    if ts >= 1.0
       localIps  = trunc(Int, ips / ts)
       dataIndex = UInt8(FastApi.API_UINT64)
-      #print(" ", localIps, ", "); #quit()
+      # TODO: remove this block!
+      #println(" ips: ", localIps, ", yield: ", t.count, ", rps: ", t.req, ", syield: ", t.stepReq, ", orgs: ", length(man.tasks)); #quit()
+      #t.count = 0
+      #t.req = 0
+      #t.stepReq = 0
+
       man.cfg.WORLD_IPS = localIps
       @inbounds for sock in man.cons.fastServer.socks
         if Helper.isopen(sock)

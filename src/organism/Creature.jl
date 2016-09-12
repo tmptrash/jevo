@@ -263,9 +263,7 @@ module Creature
       #
       try
         org.codeFn(cfg, org)
-        if org.codeFn !== oldCode
-          oldCode = org.codeFn
-        end
+        if org.codeFn !== oldCode oldCode = org.codeFn end
       catch e
         # TODO: what we have to do with code errors?
         # TODO: we have to calculate it for statistics

@@ -101,11 +101,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   #
   if len < 1
     man.totalOrganisms = 0
-    man.organismId     = UInt(2)
-    man.minOrg         = Creature.create(cfg, UInt(0), Helper.Point(1,1))
-    man.maxOrg         = Creature.create(cfg, UInt(1), Helper.Point(2,1))
-    man.minId          = UInt(0)
-    man.maxId          = UInt(0)
+    man.organismId     = UInt(1)
     createOrganisms(man)
   end
   #
@@ -129,7 +125,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # This block decreases energy from organisms, because they
   # spend it while leaving.
   #
-  if counter % cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0
+  if cfg.ORGANISM_ENERGY_DECREASE_PERIOD > 0 && counter % cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0
     _updateOrganismsEnergy(man)
   end
   #
@@ -142,7 +138,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   #
   # This call removes organisms with minimum energy
   #
-  if counter % cfg.ORGANISM_REMOVE_AFTER_TIMES === 0 && len > cfg.WORLD_MIN_ORGANISMS
+  if cfg.ORGANISM_REMOVE_AFTER_TIMES > 0 && counter % cfg.ORGANISM_REMOVE_AFTER_TIMES === 0 && len > cfg.WORLD_MIN_ORGANISMS
     _removeMinOrganisms(man)
   end
   #
@@ -170,13 +166,6 @@ function _removeMinOrganisms(man::ManagerTypes.ManagerData)
     @inbounds if istaskdone(tasks[i].task) continue end
     _killOrganism(man, i)
   end
-  #
-  # Updates min and max energetic organisms
-  #
-  man.minOrg = tasks[1].organism
-  man.maxOrg = tasks[end].organism
-  man.minId  = tasks[1].id
-  man.maxId  = tasks[end].id
 
   true
 end

@@ -231,6 +231,17 @@ end
 # @param man Manager data type
 #
 function getStatistics(man::ManagerTypes.ManagerData)
+  local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
+  local moreThenOne::Bool = length(tasks) > 1
+  local minOrg::Creature.Organism
+  local maxOrg::Creature.Organism
+
+  if moreThenOne
+    @inbounds sort!(tasks, alg = QuickSort, lt = (t1::ManagerTypes.OrganismTask, t2::ManagerTypes.OrganismTask) -> t1.organism.energy < t2.organism.energy)
+    minOrg = tasks[1].organism
+    maxOrg = tasks[end].organism
+  end
+
   RpcApi.Statistics(
     length(man.organisms),
     man.cfg.WORLD_IPS,
@@ -238,8 +249,8 @@ function getStatistics(man::ManagerTypes.ManagerData)
     man.world.width,
     man.world.height,
     Config.format(man.cfg),
-    _createSimpleOrganism(man.minId, man.minOrg),
-    _createSimpleOrganism(man.maxId, man.maxOrg)
+    _createSimpleOrganism(moreThenOne ? minOrg.id : UInt(0), moreThenOne ? minOrg : Creature.create(man.cfg)),
+    _createSimpleOrganism(moreThenOne ? maxOrg.id : UInt(0), moreThenOne ? maxOrg : Creature.create(man.cfg))
   )
 end
 #
@@ -563,7 +574,7 @@ end
 # create "fast" server, which uses special "fast" mode for
 # pooling. In this case IP address is the same, but port
 # is different.
-# @param man MAnager data type
+# @param man Manager data type
 # @param fast Switcher for fast server creation
 # @return Server.ServerConnection object
 #

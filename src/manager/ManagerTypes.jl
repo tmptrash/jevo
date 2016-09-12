@@ -102,22 +102,6 @@ module ManagerTypes
     #
     totalOrganisms::UInt
     #
-    # Organism with minimum amount of energy
-    #
-    minOrg::Creature.Organism
-    #
-    # Organism with maximum amount of energy
-    #
-    maxOrg::Creature.Organism
-    #
-    # Id of organism with minimum amount of energy
-    #
-    minId::UInt
-    #
-    # Id of organism with maximum amount of energy
-    #
-    maxId::UInt
-    #
     # If true, then minimum terminal messages will be posted
     #
     quiet::Bool
@@ -152,10 +136,6 @@ module ManagerTypes
       params::Dict{ASCIIString, ASCIIString},
       organismId::UInt,
       totalOrganisms::UInt,
-      minOrg::Creature.Organism,
-      maxOrg::Creature.Organism,
-      minId::UInt,
-      maxId::UInt,
       quiet::Bool,
       dotCallback::Function,
       moveCallback::Function,
@@ -169,10 +149,6 @@ module ManagerTypes
       params,
       organismId,
       totalOrganisms,
-      minOrg,
-      maxOrg,
-      minId,
-      maxId,
       quiet,
       dotCallback,
       moveCallback,
@@ -190,10 +166,6 @@ module ManagerTypes
       params::Dict{ASCIIString, ASCIIString},
       organismId::UInt,
       totalOrganisms::UInt,
-      minOrg::Creature.Organism,
-      maxOrg::Creature.Organism,
-      minId::UInt,
-      maxId::UInt,
       quiet::Bool,
       dotCallback::Function,
       moveCallback::Function,
@@ -208,10 +180,6 @@ module ManagerTypes
       params,
       organismId,
       totalOrganisms,
-      minOrg,
-      maxOrg,
-      minId,
-      maxId,
       quiet,
       dotCallback,
       moveCallback,
