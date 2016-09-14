@@ -40,12 +40,12 @@ function recover(man::ManagerTypes.ManagerData)
   for t in data.tasks
     t.organism.codeFn = Creature.eval(t.organism.code)
     bindEvents(man, t.organism)
-    t.task = Task(() -> Creature.born(t.organism, man.cfg, curTask))
     #
     # We must call yieldto(), because born() function parameters
     # will not be passed into the task and only last organism will
     # be run.
     #
+    t.task = Task(() -> Creature.born(t.organism, man.cfg, curTask))
     yieldto(t.task)
   end
   #
