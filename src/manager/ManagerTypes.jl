@@ -17,6 +17,16 @@ module ManagerTypes
   export Connections
   export ManagerData
   #
+  # Contains real time status data like IPS, RPS,...
+  #
+  type ManagerStatus
+    ips::Int
+    rps::Int
+    yield::Int
+    stepRps::Int
+    stepYield::Int
+  end
+  #
   # One task related to one organism
   #
   type OrganismTask

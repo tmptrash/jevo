@@ -29,6 +29,7 @@ module Manager
   import FastApi
   import Config
   import ManagerTypes
+  import CodeConfig
 
   export create
   export run
@@ -39,6 +40,7 @@ module Manager
   include("ManagerRpc.jl")
   include("ManagerBackup.jl")
   include("ManagerParams.jl")
+  include("ManagerStatus.jl")
   #
   # Creates manager related data instance. It will be passed to all
   # manager methods
@@ -203,11 +205,10 @@ module Manager
     if ts >= 1.0
       localIps  = trunc(Int, ips / ts)
       dataIndex = UInt8(FastApi.API_UINT64)
-      # TODO: remove this block!
-      #println(" ips: ", localIps, ", yield: ", t.count, ", rps: ", t.req, ", syield: ", t.stepReq, ", orgs: ", length(man.tasks)); #quit()
-      #t.count = 0
-      #t.req = 0
-      #t.stepReq = 0
+      #
+      # See CodeConfig::showStatus config for details
+      #
+      Helper.@static if CodeConfig.showStatus _showStatus() end
 
       man.cfg.WORLD_IPS = localIps
       @inbounds for sock in man.cons.fastServer.socks
