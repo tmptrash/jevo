@@ -1,6 +1,12 @@
 #
 # This is configuration file for entire application.
-# It turns on or off some code parts according to settings.
+# It turns on or off some code parts according to below constants.
+# The difference between this and Config.jl is in preprocessor.
+# This config uses preprocessor for including/excluding wrapped
+# by @if_xxx macroses code into the final (compiled) application.
+# For example: setting showStatus config to false will physically
+# remove all status related code from all sources. In this case
+# it affects application performance.
 #
 # @author DeadbraiN
 #
@@ -20,7 +26,5 @@ module CodeConfig
   # This macro turns on specified code in case if "showStatus"
   # config is turned on.
   #
-  macro if_status(ex)
-    @static if CodeConfig.showStatus esc(ex) end
-  end
+  macro if_status(ex) @static if CodeConfig.showStatus esc(ex) end end
 end
