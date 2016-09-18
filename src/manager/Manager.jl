@@ -16,6 +16,7 @@
 # TODO: describe frozen organisms conception
 #
 module Manager
+  import CodeConfig.@if_status
   import Creature
   import Mutator
   import World
@@ -29,7 +30,6 @@ module Manager
   import FastApi
   import Config
   import ManagerTypes
-  import CodeConfig
 
   export create
   export run
@@ -40,7 +40,7 @@ module Manager
   include("ManagerRpc.jl")
   include("ManagerBackup.jl")
   include("ManagerParams.jl")
-  include("ManagerStatus.jl")
+  @if_status include("ManagerStatus.jl")
   #
   # Creates manager related data instance. It will be passed to all
   # manager methods
@@ -48,18 +48,19 @@ module Manager
   function create()
     local cfg::Config.ConfigData = Config.create()
     local man::ManagerTypes.ManagerData = ManagerTypes.ManagerData(
-      cfg,                                                                           # cfg
-      World.create(cfg.WORLD_WIDTH, cfg.WORLD_HEIGHT),                               # world
-      Dict{Int, Creature.Organism}(),                                                # positions
-      Dict{UInt, Creature.Organism}(),                                               # organisms
-      ManagerTypes.OrganismTask[],                                                   # tasks
-      CommandLine.create(),                                                          # params
-      UInt(1),                                                                       # organismId
-      UInt(0),                                                                       # totalOrganisms
-      CommandLine.has(CommandLine.create(), ARG_QUIET),                              # quiet
-      function() end,                                                                # dotCallback
-      function() end,                                                                # moveCallback
-      current_task()                                                                 # task
+      cfg,                                                                      # cfg
+      World.create(cfg.WORLD_WIDTH, cfg.WORLD_HEIGHT),                          # world
+      Dict{Int, Creature.Organism}(),                                           # positions
+      Dict{UInt, Creature.Organism}(),                                          # organisms
+      ManagerTypes.OrganismTask[],                                              # tasks
+      CommandLine.create(),                                                     # params
+      UInt(1),                                                                  # organismId
+      UInt(0),                                                                  # totalOrganisms
+      CommandLine.has(CommandLine.create(), ARG_QUIET),                         # quiet
+      function() end,                                                           # dotCallback
+      function() end,                                                           # moveCallback
+      current_task(),                                                           # task
+      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0, 0)                            # status
     )
     local cons::ManagerTypes.Connections = _createConnections(man)
 
@@ -143,6 +144,11 @@ module Manager
         # TODO: yieldto(), because we know all network related tasks
         # TODO: created by @async() macro.
         ystamp, needYield = _updateTasks(man, stamp, ystamp, needYield)
+        #
+        # It's important to skip this function if CodeConfig.showStatus
+        # flag is set to false. See CodeConfig::showStatus for details.
+        #
+        @if_status _updateStatus(man, stamp)
       end
     catch e
       Helper.error("Manager.run(): $e")
@@ -205,11 +211,6 @@ module Manager
     if ts >= 1.0
       localIps  = trunc(Int, ips / ts)
       dataIndex = UInt8(FastApi.API_UINT64)
-      #
-      # See CodeConfig::showStatus config for details
-      #
-      Helper.@static if CodeConfig.showStatus _showStatus() end
-
       man.cfg.WORLD_IPS = localIps
       @inbounds for sock in man.cons.fastServer.socks
         if Helper.isopen(sock)

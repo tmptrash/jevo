@@ -56,8 +56,8 @@ const ARG_QUIET            = "quiet"
 # @param cfgParam Name of configuration parameter if cmdParam wasn't set
 # @return {Int} Port number or 0 if no port available
 #
-function _getPort(man::ManagerTypes.ManagerData, cmdParam::ASCIIString, cfgParam::Symbol)
-  local port::ASCIIString = CommandLine.val(man.params, cmdParam)
+function _getPort(man::ManagerTypes.ManagerData, cmdParam::String, cfgParam::Symbol)
+  local port::String = CommandLine.val(man.params, cmdParam)
   port == "" ? getfield(man.cfg, cfgParam) : parse(Int, port)
 end
 #
@@ -67,7 +67,7 @@ end
 # @param cfgParam Name of configuration parameter if cmdParam wasn't set
 # @return {IPv4} IP address
 #
-function _getIp(man::ManagerTypes.ManagerData, cmdParam::ASCIIString, cfgParam::Symbol)
-  local ip::ASCIIString = CommandLine.val(man.params, cmdParam)
+function _getIp(man::ManagerTypes.ManagerData, cmdParam::String, cfgParam::Symbol)
+  local ip::String = CommandLine.val(man.params, cmdParam)
   ip == "" ? getfield(man.cfg, cfgParam) : IPv4(ip)
 end

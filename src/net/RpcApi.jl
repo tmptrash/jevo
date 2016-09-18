@@ -145,7 +145,7 @@ module RpcApi
     #
     # Global configuration in string representation
     #
-    cfg::Array{ASCIIString, 1}
+    cfg::Array{String, 1}
     #
     # An organism with minimum energy
     #

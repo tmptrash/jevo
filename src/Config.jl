@@ -314,10 +314,10 @@ module Config
       10000,                             # ORGANISM_MAX_MUTATION_PERIOD
       4,                                 # ORGANISM_MUTATION_AMOUNT
       50,                                # ORGANISM_MAX_MUTATION_AMOUNT
-      20,                                # ORGANISM_START_AMOUNT
+      200,                               # ORGANISM_START_AMOUNT
       7000,                              # ORGANISM_START_ENERGY
       Int(typemax(UInt32)),              # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)
-      0,                                 # ORGANISM_ENERGY_DECREASE_PERIOD
+      300,                               # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                                 # ORGANISM_ENERGY_DECREASE_VALUE
       0,                                 # ORGANISM_REMOVE_AFTER_TIMES
       5,                                 # ORGANISM_REMOVE_AMOUNT
@@ -330,7 +330,7 @@ module Config
       true,                              # WORLD_CYCLICAL
       0,                                 # WORLD_FRAME_DELAY
       0,                                 # WORLD_IPS
-      20,                                # WORLD_MAX_ORGANISMS
+      800,                               # WORLD_MAX_ORGANISMS
       50,                                # WORLD_MIN_ORGANISMS
       1000,                              # WORLD_START_ENERGY_BLOCKS
       UInt32(0x0001F4),                  # WORLD_START_ENERGY_AMOUNT
@@ -338,7 +338,7 @@ module Config
       500,                               # WORLD_MIN_ENERGY_CHECK_PERIOD
       3,                                 # WORLD_SCALE
       60.0,                              # BACKUP_PERIOD
-      7,                                 # BACKUP_AMOUNT
+      10,                                # BACKUP_AMOUNT
       650,                               # STAT_WIDTH
       500,                               # STAT_HEIGHT
       5,                                 # STAT_FRAME_DELAY
@@ -363,7 +363,7 @@ module Config
   # @param file File name
   # @return {Bool} saving result
   #
-  function save(data::ConfigData, file::ASCIIString = "config.data")
+  function save(data::ConfigData, file::String = "config.data")
     Helper.save(data, file)
   end
   #
@@ -372,8 +372,8 @@ module Config
   # @param file File name
   # @return {Tuple{ConfigData, Bool}} loading result
   #
-  function load(file::ASCIIString = "config.data")
-    local ret = null
+  function load(file::String = "config.data")
+    local ret = nothing
     try
       ret = Helper.load(file)
     catch e
@@ -392,12 +392,12 @@ module Config
   end
   #
   # Formats configuration for usable user's view
-  # @return {ASCIIString}
+  # @return {String}
   #
   function format(data::ConfigData)
     local fields::Array{Symbol, 1} = fieldnames(ConfigData)
     local i::Symbol
-    local arr::Array{ASCIIString, 1} = []
+    local arr::Array{String, 1} = []
 
     for i in fields
       push!(arr, string(i) * ": " * string(getfield(data, i)))

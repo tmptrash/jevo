@@ -31,7 +31,7 @@ function recover(man::ManagerTypes.ManagerData)
   # In case if we haven't recovered from backup file,
   # we have to remove it, because it's broken
   #
-  if data === null
+  if data === nothing
     if !_removeNew(man) return false end
     return Backup.lastFile() !== "" ? recover(man) : false
   end
@@ -123,7 +123,7 @@ end
 # @param man Reference to manager data object
 #
 function _removeOld(man::ManagerTypes.ManagerData)
-  local files::Array{ASCIIString, 1} = Backup.getFiles(Backup.FOLDER_NAME)
+  local files::Array{String, 1} = Backup.getFiles(Backup.FOLDER_NAME)
   local len::Int = length(files)
   local i::Int
 
@@ -141,9 +141,9 @@ end
 # @param man Reference to manager data object
 #
 function _removeNew(man::ManagerTypes.ManagerData)
-  local files::Array{ASCIIString, 1} = Backup.getFiles(Backup.FOLDER_NAME)
+  local files::Array{String, 1} = Backup.getFiles(Backup.FOLDER_NAME)
   local len::Int = length(files)
-  local file::ASCIIString = len > 0 ? files[len] : ""
+  local file::String = len > 0 ? files[len] : ""
 
   if len < 1 return false end
   Helper.info(string("Backup has removed: ", file))

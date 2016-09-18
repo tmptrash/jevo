@@ -19,7 +19,7 @@ const ARG_RECOVER = "recover"
 # runs in a common mode.
 #
 function main()
-  local args::Dict{ASCIIString, ASCIIString} = CommandLine.create()
+  local args::Dict{String, String} = CommandLine.create()
   local man::ManagerTypes.ManagerData = Manager.create()
 
   if CommandLine.has(args, ARG_RECOVER)

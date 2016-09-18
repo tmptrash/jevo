@@ -38,7 +38,7 @@ module Test
 
       if rand(1:10000) === 1
         id = rand(1:5000)
-        try Base.throwto(tasks[id].task, null) end
+        try Base.throwto(tasks[id].task, nothing) end
         splice!(tasks, id)
 
         org  = Organism(:(function (o) local i::Int=1; function f() return i end; return f()+1 end), function (o) return 1 end)

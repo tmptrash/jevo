@@ -141,7 +141,7 @@ ia> [RpcApi.SimpleOrganism(0x00000000000547c7,:(function (o::Creature.Organism,)
          var_49 = var_49 & var_49
          return var_48
      end
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          Creature.stepRight(o)
          return var_17
      end
@@ -155,7 +155,7 @@ ia> [RpcApi.SimpleOrganism(0x00000000000547c7,:(function (o::Creature.Organism,)
      end
      Creature.eatUp(o,Int(var_1))
      for i = 1:var_1
-         local var_52::ASCIIString = "3Zf0ESw4"
+         local var_52::String = "3Zf0ESw4"
          local var_37::Int8 = 66
          local var_15::Bool = true
          local var_9::Bool = true
@@ -418,7 +418,7 @@ ia> [RpcApi.SimpleOrganism(0x00000000000547c7,:(function (o::Creature.Organism,)
          var_48 = var_48 / var_48
          return var_48
      end
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          var_17 = var_17 * var_17
          return var_17
      end
@@ -428,7 +428,7 @@ ia> [RpcApi.SimpleOrganism(0x00000000000547c7,:(function (o::Creature.Organism,)
          local var_64::Int64 = 1355814455951618323
      end
      for i = 1:var_1
-         local var_52::ASCIIString = "3Zf0ESw4"
+         local var_52::String = "3Zf0ESw4"
          local var_37::Int8 = 66
          local var_15::Bool = true
          local var_9::Bool = true

@@ -32,11 +32,11 @@ module CommandLine
   # Parses command line arguments and returns map of arg
   # names like keys and values like values. Example:
   # "file:test.txt" -> {"file" => "test.txt"}.
-  # @return {Dict{ASCIIString, ASCIIString}}
+  # @return {Dict{String, String}}
   #
   function create()
-    local args::Dict{ASCIIString, ASCIIString} = Dict{ASCIIString, ASCIIString}()
-    local a::ASCIIString
+    local args::Dict{String, String} = Dict{String, String}()
+    local a::String
 
     for a in ARGS
       arr = split(a, ARG_VAL_SEPARATORS)
@@ -50,9 +50,9 @@ module CommandLine
   # doesn't exist, then returns empty string
   # @param args Arguments object returned by create()
   # @param arg Name of the argument
-  # @return {ASCIIString} Argument's value or empty string
+  # @return {String} Argument's value or empty string
   #
-  function val(args::Dict{ASCIIString, ASCIIString}, arg::ASCIIString)
+  function val(args::Dict{String, String}, arg::String)
     haskey(args, arg) ? args[arg] : ""
   end
   #
@@ -61,7 +61,7 @@ module CommandLine
   # @param arg Name of the argument
   # @return {Bool}
   #
-  function has(args::Dict{ASCIIString, ASCIIString}, arg::ASCIIString)
+  function has(args::Dict{String, String}, arg::String)
     haskey(args, arg)
   end
 end

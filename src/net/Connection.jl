@@ -10,8 +10,6 @@ module Connection
   import Event
   import FastApi
 
-  using Debug
-
   export REQUEST_BIT
   export RESPONSE_BIT
 
@@ -121,7 +119,7 @@ module Connection
   # @param excFn Callback function for socket exceptions
   #
   function answer(sock::Base.TCPSocket, obs::Event.Observer, excFn::Function)
-    local data::Any = null
+    local data::Any
     local typ::DataType
 
     try
@@ -135,7 +133,7 @@ module Connection
       if typ === Answer
         Event.fire(obs, EVENT_AFTER_REQUEST, data)
       elseif typ === Command
-        local ans::Answer = Answer(CMD_NO_FUNC, null)
+        local ans::Answer = Answer(CMD_NO_FUNC, nothing)
         Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, data, ans)
         if notEmpty(ans) serialize(sock, ans) end
       end
@@ -174,7 +172,7 @@ module Connection
       isRequest = (dataIndex = read(sock, UInt8)) & REQUEST_BIT > 0
       dataIndex = dataIndex & RESPONSE_BIT
       if isRequest
-        local ans::Answer = Answer(CMD_NO_FUNC, null)
+        local ans::Answer = Answer(CMD_NO_FUNC, nothing)
         Event.fire(obs, EVENT_BEFORE_RESPONSE, sock, _fastRead(sock, dataIndex), ans)
         if notEmpty(ans) _fastWrite(sock, UInt8(ans.id) & RESPONSE_BIT, ans.data) end
       else
@@ -185,6 +183,13 @@ module Connection
     end
 
     true
+  end
+  #
+  # Checks if answer is empty - wasn't modified in parent code.
+  # @return {Bool} empty status
+  #
+  function notEmpty(ans::Answer)
+    ans.id !== CMD_NO_FUNC || ans.data !== nothing
   end
   #
   # Reads data types from socket and returns them in array
@@ -200,7 +205,7 @@ module Connection
     if dataIndex < UInt8(1) || dataIndex > UInt(length(types)) error("Protocol error: invalid dataIndex header") end
     t = types[dataIndex]
     while t !== Void
-      push!(data, t === ASCIIString ? readuntil(sock, '\x0')[1:end-1] : read(sock, t))
+      push!(data, t === String ? readuntil(sock, '\x0')[1:end-1] : read(sock, t))
       t = types[(dataIndex += 1)]
     end
 
@@ -219,15 +224,8 @@ module Connection
       #
       # Every string should be ended with '\x0' - zero character
       #
-      if typeof(d) === ASCIIString append!(vec, '\x0') end
+      if typeof(d) === String append!(vec, '\x0') end
     end
     write(sock, vec)
-  end
-  #
-  # Checks if answer is empty - wasn't modified in parent code.
-  # @return {Bool} empty status
-  #
-  function notEmpty(ans::Answer)
-    ans.id !== CMD_NO_FUNC || ans.data !== null
   end
 end

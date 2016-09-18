@@ -250,7 +250,7 @@ module TestCode
   facts("Testing Code.loop() and one variable") do
     local conf  = Config.create()
     local org   = Creature.create(conf)
-    local var   = symbol("var_", org.symbolId += 1)
+    local var   = Symbol("var_", org.symbolId += 1)
     local lines = org.code.args[2].args
 
     push!(org.funcs[1].blocks[1].vars[Int8], var)
@@ -263,7 +263,7 @@ module TestCode
   facts("Testing Code.loop() inside other Code.loop() without Code.var()") do
     local conf  = Config.create()
     local org   = Creature.create(conf)
-    local var   = symbol("var_", org.symbolId += 1)
+    local var   = Symbol("var_", org.symbolId += 1)
     local lines = org.code.args[2].args
 
     push!(org.funcs[1].blocks[1].vars[Int8], var)

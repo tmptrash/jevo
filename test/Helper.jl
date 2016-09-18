@@ -24,16 +24,16 @@ end
 #
 function addVars(org::Creature.Organism, lines::Array{Int, 1}, pos::Helper.Pos)
   Helper.getSupportedTypes(function (t)
-    var = symbol("var_", org.symbolId += 1)
+    var = Symbol("var_", org.symbolId += 1)
     push!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].vars[t], var)
-    insert!(Helper.getLines(org.code, lines), 1, :(local $(var)::$t=$(t !== ASCIIString ? rand(t) : randstring())))
+    insert!(Helper.getLines(org.code, lines), 1, :(local $(var)::$t=$(t !== String ? rand(t) : randstring())))
   end)
 end
 #
 # Adds one variable by type
 #
 function addVar(org::Creature.Organism, lines::Array{Int, 1}, pos::Helper.Pos, typ::DataType)
-  var = symbol("var_", org.symbolId += 1)
+  var = Symbol("var_", org.symbolId += 1)
   push!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].vars[typ], var)
-  insert!(Helper.getLines(org.code, lines), pos.lineIdx, :(local $(var)::$(typ)=$(typ !== ASCIIString ? rand(typ) : randstring())))
+  insert!(Helper.getLines(org.code, lines), pos.lineIdx, :(local $(var)::$(typ)=$(typ !== String ? rand(typ) : randstring())))
 end

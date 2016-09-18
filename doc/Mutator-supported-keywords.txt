@@ -7,7 +7,7 @@ Unsupported
 
 Supported
 + constants and data types: 
-  "abc"      ASCIIString
+  "abc"      String
   true       Bool
   12         Int8
   129        Int16

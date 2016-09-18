@@ -5,7 +5,7 @@
 # more...
 #
 # @author DeadbraiN
-# TODO: do we need this at all?!!
+# TODO: do we need this module at all?!
 module ManagerTypes
   import Creature
   import Server
@@ -13,13 +13,15 @@ module ManagerTypes
   import Config
   import World
 
+  export ManagerStatus
+  export ManagerData
   export OrganismTask
   export Connections
-  export ManagerData
   #
   # Contains real time status data like IPS, RPS,...
   #
   type ManagerStatus
+    stamp::Float64
     ips::Int
     rps::Int
     yield::Int
@@ -101,7 +103,7 @@ module ManagerTypes
     #
     # Parameters passed through command line
     #
-    params::Dict{ASCIIString, ASCIIString}
+    params::Dict{String, String}
     #
     # Unique id of organism. It's increased every time, when new
     # organism will be created
@@ -131,6 +133,11 @@ module ManagerTypes
     #
     task::Task
     #
+    # This field is optional and will be added only if CodeConfig.showStatus
+    # flag will be set to true.
+    #
+    status::ManagerStatus
+    #
     # Manager connections (with other managers, terminals, visualizer etc...)
     #
     cons::Connections
@@ -143,13 +150,14 @@ module ManagerTypes
       positions::Dict{Int, Creature.Organism},
       organisms::Dict{UInt, Creature.Organism},
       tasks::Array{OrganismTask, 1},
-      params::Dict{ASCIIString, ASCIIString},
+      params::Dict{String, String},
       organismId::UInt,
       totalOrganisms::UInt,
       quiet::Bool,
       dotCallback::Function,
       moveCallback::Function,
-      task::Task
+      task::Task,
+      status::ManagerStatus
     ) = new(
       cfg,
       world,
@@ -162,7 +170,8 @@ module ManagerTypes
       quiet,
       dotCallback,
       moveCallback,
-      task
+      task,
+      status
     )
     #
     # Full constructor
@@ -173,13 +182,14 @@ module ManagerTypes
       positions::Dict{Int, Creature.Organism},
       organisms::Dict{UInt, Creature.Organism},
       tasks::Array{OrganismTask, 1},
-      params::Dict{ASCIIString, ASCIIString},
+      params::Dict{String, String},
       organismId::UInt,
       totalOrganisms::UInt,
       quiet::Bool,
       dotCallback::Function,
       moveCallback::Function,
       task::Task,
+      status::ManagerStatus,
       cons::Connections
     ) = new(
       cfg,
@@ -194,6 +204,7 @@ module ManagerTypes
       dotCallback,
       moveCallback,
       task,
+      status,
       cons
     )
   end

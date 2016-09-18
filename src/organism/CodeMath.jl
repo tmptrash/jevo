@@ -15,7 +15,7 @@ export reminder
 # for these types. We don't need to export this constant.
 #
 const PLUS_OPERATORS = Dict{DataType, Symbol}(
-  ASCIIString => :(*),
+  String => :(*),
   Bool        => :(&),
   Int8        => :(+),
   Int16       => :(+),
@@ -25,7 +25,7 @@ const PLUS_OPERATORS = Dict{DataType, Symbol}(
 # @cmd
 # @line
 # + operator implementation. Sums two variables. Supports all
-# types: ASCIIString, Int8, Bool,... In case of string uses
+# types: String, Int8, Bool,... In case of string uses
 # concatination, for boolean - & operator. If code is empty
 # this function will skip the execution. We don't check the
 # position, because of performance issues.
@@ -48,7 +48,7 @@ end
 # @cmd
 # @line
 # - operator implementation. Minus two variables. Supports all
-# types: ASCIIString, Int8, Bool,... In case of string uses
+# types: String, Int8, Bool,... In case of string uses
 # concatination, for boolean - & operator. If code is empty
 # this function will skip the execution.
 # @param cfg Global configuration type
@@ -69,7 +69,7 @@ function minus(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   # "qwerty" - "111" = "qwe"
   # "123"[1:0] === ""
   #
-  if typ === ASCIIString
+  if typ === String
     return :($v1 = $(v2)[1:(length($v3) > length($v2) ? 0 : length($v2) - length($v3))])
   #
   # true  - true  = false, true  - false = true,
@@ -87,7 +87,7 @@ end
 # @cmd
 # @line
 # * operator implementation. Multiply two variables. Supports all
-# types: ASCIIString, Int8, Bool,... In case of string uses
+# types: String, Int8, Bool,... In case of string uses
 # concatination, for boolean - & operator. If code is empty
 # this function will skip the execution.
 # @param cfg Global configuration type
@@ -109,7 +109,7 @@ end
 # @cmd
 # @line
 # / operator implementation. Divides two variables. Supports all
-# types: ASCIIString, Int8, Bool,... In case of string uses
+# types: String, Int8, Bool,... In case of string uses
 # concatination, for boolean - | operator. If code is empty
 # this function will skip the execution.
 # @param cfg Global configuration type
@@ -128,7 +128,7 @@ function divide(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   # "1234"   / "854" = "1"   (just cut v1 by length of v1 / v2)
   # "qwerty" / "111" = "qw"
   #
-  if typ === ASCIIString
+  if typ === String
     # TODO: error: zero divide is here and zero index!
     return :($v1 = $v2[1:(length($v3) > length($v2) > 0 ? 0 : div(length($v2), length($v3)))])
   elseif typ === Bool
@@ -140,7 +140,7 @@ end
 #
 # @cmd
 # @line
-# Calculates reminder of division of two numbers. For ASCIIString
+# Calculates reminder of division of two numbers. For String
 # calculates reminder of cutting: "12345" % "23" = "345". It uses
 # length of second string for cut. For Bool uses | operator.
 # @param cfg Global configuration type
@@ -159,7 +159,7 @@ function reminder(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Po
   # "1234"   / "854" = "1"   (just cut v1 by length of v1 / v2)
   # "qwerty" / "111" = "qw"
   #
-  if typ === ASCIIString
+  if typ === String
     return :($v1 = $v2[(length($v3) > length($v2) ? 1 : length($v3)):(length($v3) > length($v2) > 0 ? 0 : end)])
   elseif typ === Bool
     return :($v1 = $v2 | $v3)

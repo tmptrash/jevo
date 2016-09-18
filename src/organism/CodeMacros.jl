@@ -11,12 +11,12 @@ import Helper
 # @return {Symbol}
 #
 macro newVar(org)
-  :(symbol("var_", $org.symbolId += 1))
+  :(Symbol("var_", $org.symbolId += 1))
 end
 #
 # Creates new unique custom function name.
 # @param {Creature.Organism} org Organism we are working with
-# @return {ASCIIString}
+# @return {String}
 #
 macro newFunc(org)
   :(string("func_", $org.symbolId += 1))
@@ -48,7 +48,7 @@ end
 # @return {Any}
 #
 macro randValue(typ)
-  :($typ !== ASCIIString ? rand($typ) : randstring())
+  :($typ !== String ? rand($typ) : randstring())
 end
 #
 # Returns chosen line in specified function and block

@@ -53,7 +53,7 @@ end
 # @return Updated last crash timestamp
 #
 function _removeBrokenBackup(stamp::Float64, cfg::Config.ConfigData)
-  local last::ASCIIString
+  local last::String
 
   println("_removeBrokenBackup(), time: ", time(), ", stamp: ", stamp, ", period: ", cfg.BACKUP_PERIOD)
   println("last file: ", Backup.lastFile())

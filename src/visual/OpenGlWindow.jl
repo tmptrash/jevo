@@ -64,7 +64,7 @@ module OpenGlWindow
   # @param title Window title
   # @return Window object
   #
-  function create(width::Int, height::Int, scale::Int, title::ASCIIString = "")
+  function create(width::Int, height::Int, scale::Int, title::String = "")
     local emptyColor::Int = Dots.INDEX_EMPTY
     local win::Window = Window(scale, Int[0], Int[0], width, height, 1.0, true)
     local wndWidth::Int = width * scale
@@ -149,7 +149,7 @@ module OpenGlWindow
   # @param win Window data type
   # @param title String title
   #
-  function title(win::Window, title::ASCIIString)
+  function title(win::Window, title::String)
     local ymax::Float64 = Float64(win.height * win.scale + _FOOTER_HEIGHT)
     local ycoef::Float64 = win.ratio / ymax
 

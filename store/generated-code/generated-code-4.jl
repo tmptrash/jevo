@@ -81,7 +81,7 @@ ia> [RpcApi.SimpleOrganism(0x0000000000014444,:(function (o::Creature.Organism,)
      Creature.eatLeft(o,Int(var_1))
      return true
  end),[100,300,95,0,1,1,1],1,400,1,99262,Dict{Int16,Int16}(),[0,36],5),RpcApi.SimpleOrganism(0x00000000000129e7,:(function (o::Creature.Organism,)
-     function func_3(var_2::ASCIIString="LK2ZxJSv")
+     function func_3(var_2::String="LK2ZxJSv")
          return var_2
      end
      local var_1::Int8 = 99

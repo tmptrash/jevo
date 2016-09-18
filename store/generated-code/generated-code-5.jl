@@ -53,7 +53,7 @@
      var_6 = func_24(var_6)
      return true
  end),[100,300,95,0,1,1,1],52,5000,1,4334135,Dict{Int16,Int16}(),[0,600],15),RpcApi.SimpleOrganism(0x000000000000f4be,:(function (o::Creature.Organism,)
-     local var_26::ASCIIString = "L3pkQQk2"
+     local var_26::String = "L3pkQQk2"
      local var_6::Int8 = 112
      Creature.eatLeft(o,Int(var_6))
      if var_26 !== var_26
@@ -73,7 +73,7 @@
      Creature.eatRight(o,Int(var_6))
      return true
  end),[100,300,95,0,1,1,1],52,5000,1,3911411,Dict{Int16,Int16}(),[0,600],6),RpcApi.SimpleOrganism(0x000000000000f384,:(function (o::Creature.Organism,)
-     local var_26::ASCIIString = "L3pkQQk2"
+     local var_26::String = "L3pkQQk2"
      local var_6::Int8 = 112
      Creature.eatLeft(o,Int(var_6))
      if var_6 <= var_6
@@ -90,10 +90,10 @@
                  end]
      return true
  end),[100,300,95,0,1,1,1],3,5000,1,3639932,Dict{Int16,Int16}(),[779,1],6),RpcApi.SimpleOrganism(0x000000000000ee0b,:(function (o::Creature.Organism,)
-     function func_31(var_30::ASCIIString="pHzsz2Ta")
+     function func_31(var_30::String="pHzsz2Ta")
          return var_30
      end
-     local var_26::ASCIIString = "L3pkQQk2"
+     local var_26::String = "L3pkQQk2"
      function func_24(var_23::Int8=-91)
          local var_29::Int64 = 8605129948671296304
          return var_23

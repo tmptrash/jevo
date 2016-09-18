@@ -25,7 +25,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -175,7 +175,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             var_43 = var_44[1:if length(var_43) > length(var_44)
                             0
                         else
@@ -199,7 +199,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -350,7 +350,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -510,7 +510,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -660,7 +660,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             Creature.stepDown(o)
             Creature.stepDown(o)
             Creature.stepDown(o)
@@ -683,7 +683,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438

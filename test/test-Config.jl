@@ -20,7 +20,7 @@ module TestConfig
   end
   facts("Save/load configuration into/from file with correct data") do
     local cfg::Config.ConfigData = Config.create()
-    local cfgFile::ASCIIString = "config.data"
+    local cfgFile::String = "config.data"
 
     try rm(cfgFile) end
     cfg.WORLD_IPS = 666
@@ -31,7 +31,7 @@ module TestConfig
     rm(cfgFile)
   end
   facts("Load configuration from incorrect file") do
-    local cfgFile::ASCIIString = "config.data"
+    local cfgFile::String = "config.data"
     local conf = Config.create()
 
     try rm(cfgFile) end
@@ -43,15 +43,15 @@ module TestConfig
     rm(cfgFile)
   end
   facts("Load configuration from file, which doesn't exist") do
-    local cfgFile::ASCIIString = "config.data"
+    local cfgFile::String = "config.data"
     try rm(cfgFile) end
     @fact Config.isEmpty(Config.load(cfgFile)) --> true
   end
 
   facts("Combined test of all functions") do
     local cfg::Config.ConfigData = Config.create()
-    local cfgFile1::ASCIIString = "config1.data"
-    local cfgFile2::ASCIIString = "config2.data"
+    local cfgFile1::String = "config1.data"
+    local cfgFile2::String = "config2.data"
 
     try rm(cfgFile1) end
     try rm(cfgFile2) end

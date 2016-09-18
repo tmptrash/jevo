@@ -22,7 +22,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             return var_43
         end
         function func_25(var_24::Int64=5926471544133193903)
@@ -40,7 +40,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -192,7 +192,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             return var_43
         end
         function func_25(var_24::Int64=5926471544133193903)
@@ -210,7 +210,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -359,7 +359,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             return var_43
         end
         function func_25(var_24::Int64=5926471544133193903)
@@ -377,7 +377,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -527,7 +527,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             return var_43
         end
         function func_25(var_24::Int64=5926471544133193903)
@@ -545,7 +545,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -694,7 +694,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             return var_43
         end
         function func_25(var_24::Int64=5926471544133193903)
@@ -712,7 +712,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438

@@ -95,14 +95,14 @@ module TestCodeMath
     empty!(Helper.SUPPORTED_TYPES)
     for i=1:length(types) push!(Helper.SUPPORTED_TYPES, types[i]) end
   end
-  facts("Testing CodeMath.plus() with ASCIIString variable") do
+  facts("Testing CodeMath.plus() with String variable") do
     local conf  = Config.create()
     local org   = Creature.create(conf)
     local types = deepcopy(Helper.SUPPORTED_TYPES)
 
-    addVar(org, [2], Helper.Pos(1,1,1), ASCIIString)
+    addVar(org, [2], Helper.Pos(1,1,1), String)
     empty!(Helper.SUPPORTED_TYPES)
-    push!(Helper.SUPPORTED_TYPES, ASCIIString)
+    push!(Helper.SUPPORTED_TYPES, String)
     Mutator._onAdd(conf, org, Helper.Pos(1,1,2), Code.CodePart(Code.plus, false))
     var = Helper.getArg(org.code, [2,1,1,1,1])
 

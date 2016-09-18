@@ -36,8 +36,8 @@ module TestMutator
   # #
   # # pos - "1,2,3" fn - 1, block - 2, line - 3
   # #
-  # function setMutationPos(pos::ASCIIString) Mutator.Code.eval(parse("function getRandPos(org::Creature.Organism) Helper.Pos(" * pos * ") end")) end
-  # function setCodePart(part::ASCIIString) Mutator.Code.eval(parse("const CODE_PARTS = [CodePart(" * part * ")]")) end
+  # function setMutationPos(pos::String) Mutator.Code.eval(parse("function getRandPos(org::Creature.Organism) Helper.Pos(" * pos * ") end")) end
+  # function setCodePart(part::String) Mutator.Code.eval(parse("const CODE_PARTS = [CodePart(" * part * ")]")) end
   # function restoreMutator() include("../src/organism/Mutator.jl") end
   # #
   # # Checks if one of supported code part types was added into AST

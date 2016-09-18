@@ -5,9 +5,22 @@
 # @author DeadbraiN
 #
 module CodeConfig
+  export if_status
   #
-  # Turns on/off output od real time manager status like
+  # Turns on/off output of real time manager status like
   # amount of organisms, IPS, RPS and so on...
   #
-  const showStatus = false
+  const showStatus       = false
+  #
+  # Status showing period in seconds. Works only if
+  # "showStatus" option is set to true.
+  #
+  const showStatusPeriod = 5.0
+  #
+  # This macro turns on specified code in case if "showStatus"
+  # config is turned on.
+  #
+  macro if_status(ex)
+    @static if CodeConfig.showStatus esc(ex) end
+  end
 end

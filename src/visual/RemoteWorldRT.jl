@@ -22,8 +22,6 @@ module RemoteWorldRT
   import Helper
   import Dots
 
-  using Debug
-
   export create
   export start
   export stop

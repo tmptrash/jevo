@@ -19,7 +19,7 @@ import ManagerTypes
 # @param id Unique orgainsm identifier
 # @param msg Organism's message
 #
-function msg(man::ManagerTypes.ManagerData, id::UInt, msg::ASCIIString)
+function msg(man::ManagerTypes.ManagerData, id::UInt, msg::String)
   if !man.quiet Helper.info(string("org-", id, " ", msg)) end
 end
 #

@@ -4,7 +4,7 @@
 # TODO: Dependencies
 # TODO: describe annotations: @rpc (RPC function)
 # TODO: add console message for all commands
-# TODO: describe returning null in @rpc functions
+# TODO: describe returning nothing in @rpc functions
 #
 # @author DeadbraiN
 #
@@ -20,8 +20,6 @@ import Helper
 import Connection
 import ManagerTypes
 import Dots
-
-using Debug
 #
 # Sides positions of near instance(server), which is connected
 # to the current one.
@@ -73,7 +71,8 @@ function createOrganisms(man::ManagerTypes.ManagerData)
 
   Helper.info("Creating organisms...")
   for i = 1:man.cfg.ORGANISM_START_AMOUNT createOrganism(man) end
-  null
+
+  nothing
 end
 #
 # @rpc
@@ -85,11 +84,11 @@ end
 # @return {Int} Organism id or false if organisms limit is riched
 #
 function createOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point = Helper.Point(0, 0))
-  if length(man.tasks) > man.cfg.WORLD_MAX_ORGANISMS return null end
+  if length(man.tasks) > man.cfg.WORLD_MAX_ORGANISMS return nothing end
   orgTask = Manager._createOrganism(man, nothing, pos)
   orgTask === false ? false : orgTask.id
 
-  null
+  nothing
 end
 #
 # @rpc
@@ -100,14 +99,14 @@ end
 #
 function setConfig(man::ManagerTypes.ManagerData, name::Symbol, value::Any)
   setfield!(man.cfg, name, value)
-  null
+  nothing
 end
 #
 # @rpc
 # Gets configuration value according to it's section and a key
 # @param man Manager data type
 # @param name config symbol
-# @return {Any|null} value or null if invalid section or key
+# @return {Any|nothing} value or nothing if invalid section or key
 #
 function getConfig(man::ManagerTypes.ManagerData, name::Symbol)
   getfield(man.cfg, name)
@@ -121,7 +120,7 @@ end
 #
 function setQuite(man::ManagerTypes.ManagerData, mode::Bool)
   man.quiet = mode
-  null
+  nothing
 end
 #
 # @rpc
@@ -200,7 +199,8 @@ function setEnergy(man::ManagerTypes.ManagerData, x::Int, y::Int, energy::UInt32
   if World.getEnergy(man.world, pos) === UInt32(0)
     World.setEnergy(man.world, pos, energy)
   end
-  null
+
+  nothing
 end
 #
 # @rpc
@@ -214,7 +214,8 @@ function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int, energy::UIn
   for i::Int = 1:amount
     setEnergy(man, Helper.fastRand(man.world.width), Helper.fastRand(man.world.height), energy)
   end
-  null
+
+  nothing
 end
 #
 # @rpc
@@ -223,7 +224,7 @@ end
 #
 function doBackup(man::ManagerTypes.ManagerData)
   Manager.backup(man)
-  null
+  nothing
 end
 #
 # @rpc
@@ -281,25 +282,25 @@ end
 # @rpc
 # TODO:
 function setLeftWorld(man::ManagerTypes.ManagerData)
-  null
 end
+nothing
 #
 # @rpc
 # TODO:
 function setRightWorld(man::ManagerTypes.ManagerData)
-  null
+  nothing
 end
 #
 # @rpc
 # TODO:
 function setUpWorld(man::ManagerTypes.ManagerData)
-  null
+  nothing
 end
 #
 # @rpc
 # TODO:
 function setDownWorld(man::ManagerTypes.ManagerData)
-  null
+  nothing
 end
 #
 # @rpc
@@ -439,10 +440,10 @@ end
 # @param side Server side ("LEFT", "RIGHT",...)
 # @return ClientConnection object
 #
-function _createClient(man::ManagerTypes.ManagerData, side::ASCIIString)
+function _createClient(man::ManagerTypes.ManagerData, side::String)
   local con::Client.ClientConnection
-  local serverPort::Int = _getPort(man, getfield(Manager, symbol("ARG_", side, "_SERVER_PORT")), symbol("CONNECTION_", side, "_SERVER_PORT"))
-  local serverIp::IPv4  = _getIp(man, getfield(Manager, symbol("ARG_", side, "_SERVER_IP")), symbol("CONNECTION_", side, "_SERVER_IP"))
+  local serverPort::Int = _getPort(man, getfield(Manager, Symbol("ARG_", side, "_SERVER_PORT")), Symbol("CONNECTION_", side, "_SERVER_PORT"))
+  local serverIp::IPv4  = _getIp(man, getfield(Manager, Symbol("ARG_", side, "_SERVER_IP")), Symbol("CONNECTION_", side, "_SERVER_IP"))
   local thisPort::Int   = _getPort(man, Manager.ARG_SERVER_PORT, :CONNECTION_SERVER_PORT)
   local thisIp::IPv4    = _getIp(man, Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP)
 
@@ -489,7 +490,7 @@ end
 # @param side Side name of answering server
 # @param ans Answer data object
 #
-function _onAfterResponse(man::ManagerTypes.ManagerData, side::ASCIIString, ans::Connection.Answer)
+function _onAfterResponse(man::ManagerTypes.ManagerData, side::String, ans::Connection.Answer)
   local org::Creature.Organism = man.cons.frozen[ans.data]
   local pos::Helper.Point
 
@@ -516,7 +517,7 @@ end
 # @param data Input comand object
 # @param ans Answer data object we have to fill
 #
-function _onBeforeResponse(man::ManagerTypes.ManagerData, side::ASCIIString, data::Connection.Command, ans::Connection.Answer)
+function _onBeforeResponse(man::ManagerTypes.ManagerData, side::String, data::Connection.Command, ans::Connection.Answer)
   local org::Creature.Organism
   local pos::Helper.Point
   #

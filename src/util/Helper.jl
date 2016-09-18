@@ -8,7 +8,6 @@ module Helper
   export Point
   export RetObj
 
-  export static
   export toBytes
   export fastRand
   export fastZRand
@@ -70,24 +69,6 @@ module Helper
     # ctor
     #
     RetObj(r = nothing, p = nothing) = (x = new(r); p === nothing ? x : (x.pos = p;x))
-  end
-  #
-  # Macro from v0.5. Will be removed after upgrading to v0.5
-  #
-  macro static(ex)
-      if isa(ex, Expr)
-          if ex.head === :if
-              cond = eval(current_module(), ex.args[1])
-              if cond
-                  return esc(ex.args[2])
-              elseif length(ex.args) == 3
-                  return esc(ex.args[3])
-              else
-                  return nothing
-              end
-          end
-      end
-      throw(ArgumentError("invalid @static macro"))
   end
   #
   # Converts any type to bytes array
@@ -254,8 +235,8 @@ module Helper
   # @param file File name
   # @return {Bool} saving result
   #
-  function save(data::Any, file::ASCIIString = "backup.data")
-    local io  = null
+  function save(data::Any, file::String = "backup.data")
+    local io  = nothing
     local ret = true
 
     try
@@ -266,7 +247,7 @@ module Helper
       showerror(STDOUT, e, catch_backtrace())
       ret = false
     finally
-      if io !== null close(io) end
+      if io !== nothing close(io) end
     end
 
     ret
@@ -274,11 +255,11 @@ module Helper
   #
   # Loads custom data from the file
   # @param file File name
-  # @return {Any|null} loading result or null
+  # @return {Any|nothing} loading result or nothing
   #
-  function load(file::ASCIIString = "backup.data")
-    local io  = null
-    local ret = null
+  function load(file::String = "backup.data")
+    local io  = nothing
+    local ret = nothing
 
     try
       io  = open(file)
@@ -286,9 +267,9 @@ module Helper
     catch(e)
       warn("Helper.load(): $e")
       showerror(STDOUT, e, catch_backtrace())
-      ret = null
+      ret = nothing
     finally
-      if io !== null close(io) end
+      if io !== nothing close(io) end
     end
 
     ret
@@ -297,5 +278,5 @@ module Helper
   #
   # Supported types of code inside organism
   #
-  const SUPPORTED_TYPES = [ASCIIString, Bool, Int8, Int16, Int]
+  const SUPPORTED_TYPES = [String, Bool, Int8, Int16, Int]
 end

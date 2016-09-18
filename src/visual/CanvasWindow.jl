@@ -58,7 +58,7 @@ module CanvasWindow
   # @param title Window title
   # @return Window object
   #
-  function create(width::Int, height::Int, scale::Int, title::ASCIIString = "")
+  function create(width::Int, height::Int, scale::Int, title::String = "")
     local win::Tk.TkWidget = Tk.Window(title, width * scale, height * scale)
     local c::Tk.Canvas = Tk.Canvas(win)
     Tk.pack(c, expand=true, fill="both")
@@ -97,7 +97,7 @@ module CanvasWindow
   # @param win Window data type
   # @param title String title
   #
-  function title(win::Window, title::ASCIIString)
+  function title(win::Window, title::String)
     Tk.wm(win.win, "title", title)
   end
   #

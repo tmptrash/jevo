@@ -1,4 +1,4 @@
-statistics> RpcApi.Statistics(127,1,397964,638,335,ASCIIString["ORGANISM_MUTATION_PROBABILITIES: [100,300,95,0,1,1,1]","ORGANISM_MUTATIONS_ON_CLONE: 1","ORGANISM_MAX_MUTATIONS_ON_CLONE: 100","ORGANISM_MUTATION_PERIOD: 500","ORGANISM_MAX_MUTAT
+statistics> RpcApi.Statistics(127,1,397964,638,335,String["ORGANISM_MUTATION_PROBABILITIES: [100,300,95,0,1,1,1]","ORGANISM_MUTATIONS_ON_CLONE: 1","ORGANISM_MAX_MUTATIONS_ON_CLONE: 100","ORGANISM_MUTATION_PERIOD: 500","ORGANISM_MAX_MUTAT
 ION_PERIOD: 10000","ORGANISM_MUTATION_AMOUNT: 1","ORGANISM_MAX_MUTATION_AMOUNT: 100","ORGANISM_START_AMOUNT: 50","ORGANISM_START_ENERGY: 5000","ORGANISM_MAX_ENERGY: 4294967295","ORGANISM_ENERGY_DECREASE_PERIOD: 20","ORGANISM_ENERGY_DECRE
 ASE_VALUE: 1","ORGANISM_REMOVE_AFTER_TIMES: 2000","ORGANISM_REMOVE_AMOUNT: 50","ORGANISM_CLONE_AFTER_TIMES: 5","ORGANISM_START_COLOR: 16711680","CODE_MAX_FUNC_PARAMS: 2","WORLD_WIDTH: 638","WORLD_HEIGHT: 335","WORLD_FRAME_DELAY: 0","WORL
 D_IPS: 1","WORLD_MAX_ORGANISMS: 600","WORLD_MIN_ORGANISMS: 200","WORLD_START_ENERGY_BLOCKS: 100","WORLD_START_ENERGY_AMOUNT: 65280","WORLD_MIN_ENERGY_PERCENT: 1","WORLD_MIN_ENERGY_CHECK_PERIOD: 5000","WORLD_SCALE: 3","BACKUP_PERIOD: 4","
@@ -48,7 +48,7 @@ best10> [RpcApi.SimpleOrganism(0x0000000000061268,:(function (o::Creature.Organi
          Creature.stepDown(o)
      end
      for i = 1:var_1
-         local var_68::ASCIIString = "1kR3kL1t"
+         local var_68::String = "1kR3kL1t"
          local var_15::Bool = true
          local var_8::Int16 = 23832
          local var_6::Int8 = 66
@@ -146,7 +146,7 @@ best10> [RpcApi.SimpleOrganism(0x0000000000061268,:(function (o::Creature.Organi
      end
      local var_1::Int8 = 121
      for i = 1:var_1
-         local var_68::ASCIIString = "1kR3kL1t"
+         local var_68::String = "1kR3kL1t"
          local var_15::Bool = true
          local var_8::Int16 = 23832
          local var_6::Int8 = 66
@@ -240,7 +240,7 @@ best10> [RpcApi.SimpleOrganism(0x0000000000061268,:(function (o::Creature.Organi
      end
      local var_1::Int8 = 121
      for i = 1:var_1
-         local var_68::ASCIIString = "1kR3kL1t"
+         local var_68::String = "1kR3kL1t"
          local var_15::Bool = true
          local var_8::Int16 = 23832
          local var_6::Int8 = 66
@@ -343,7 +343,7 @@ best10> [RpcApi.SimpleOrganism(0x0000000000061268,:(function (o::Creature.Organi
      end
      local var_1::Int8 = 121
      for i = 1:var_1
-         local var_68::ASCIIString = "1kR3kL1t"
+         local var_68::String = "1kR3kL1t"
          local var_15::Bool = true
          local var_8::Int16 = 23832
          local var_6::Int8 = 66
@@ -440,7 +440,7 @@ best10> [RpcApi.SimpleOrganism(0x0000000000061268,:(function (o::Creature.Organi
      end
      local var_1::Int8 = 121
      for i = 1:var_1
-         local var_68::ASCIIString = "1kR3kL1t"
+         local var_68::String = "1kR3kL1t"
          local var_15::Bool = true
          local var_8::Int16 = 23832
          local var_6::Int8 = 66
@@ -534,7 +534,7 @@ best10> [RpcApi.SimpleOrganism(0x0000000000061268,:(function (o::Creature.Organi
      end
      local var_1::Int8 = 121
      for i = 1:var_1
-         local var_68::ASCIIString = "1kR3kL1t"
+         local var_68::String = "1kR3kL1t"
          local var_15::Bool = true
          local var_8::Int16 = 23832
          local var_6::Int8 = 66
@@ -631,7 +631,7 @@ best10> [RpcApi.SimpleOrganism(0x0000000000061268,:(function (o::Creature.Organi
      end
      local var_1::Int8 = 121
      for i = 1:var_1
-         local var_68::ASCIIString = "1kR3kL1t"
+         local var_68::String = "1kR3kL1t"
          local var_15::Bool = true
          local var_8::Int16 = 23832
          local var_6::Int8 = 66
@@ -693,9 +693,9 @@ best10> [RpcApi.SimpleOrganism(0x0000000000061268,:(function (o::Creature.Organi
      end
      return true
  end),[100,300,95,0,1,1,1],7,2622,1,4000386,0x016925a0,Dict(-3304=>-3304,10405=>10405,1=>1,-17872=>-17872,2=>2,23832=>23832,-7040=>-7040),[22,17],70),RpcApi.SimpleOrganism(0x00000000000611c8,:(function (o::Creature.Organism,)
-     local var_87::ASCIIString = "o7IXGFtJ"
-     local var_85::ASCIIString = "uYWnLeWF"
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     local var_87::String = "o7IXGFtJ"
+     local var_85::String = "uYWnLeWF"
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          local var_94::Int64 = 5776005525655568851
          return var_17
      end
@@ -704,7 +704,7 @@ best10> [RpcApi.SimpleOrganism(0x0000000000061268,:(function (o::Creature.Organi
      Creature.stepDown(o)
      for i = 1:var_1
          local var_79::Int64 = 8722268545643689674
-         local var_52::ASCIIString = "3Zf0ESw4"
+         local var_52::String = "3Zf0ESw4"
          local var_37::Int8 = 66
          local var_6::Int8 = 66
          Creature.eatUp(o,Int(var_37))
@@ -846,7 +846,7 @@ best10> [RpcApi.SimpleOrganism(0x0000000000061268,:(function (o::Creature.Organi
          Creature.stepRight(o)
      end
      for i = 1:var_1
-         local var_68::ASCIIString = "1kR3kL1t"
+         local var_68::String = "1kR3kL1t"
          local var_15::Bool = true
          local var_8::Int16 = 23832
          local var_6::Int8 = 66

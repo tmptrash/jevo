@@ -305,7 +305,7 @@ module Mutator
  #    " Number "," Real "," BigInt "," Integer "," UInt "," UInt8 "," UInt16 "," UInt32 ",
  #    " UInt64 "," UInt128 "," Int "," Int8 "," Int16 "," Int32 "," Int64 "," Int128 ",
  #    " BigFloat "," FloatingPoint "," Float16 "," Float32 "," Float64 "," Bool "," Char ",
- #    " ASCIIString "," UTF8String "," ByteString "," Array "," BitArray "," Range ",
+ #    " String "," UTF8String "," ByteString "," Array "," BitArray "," Range ",
  #    " Tuple "," Symbol "," Function "," Type "," Any "," String "," Signed "," Dict ",
  #    # organism api
  #    ";clone(o);",";getEnergy(o,",";eatLeft(o);",";eatRight(o);",";eatUp(o);",
