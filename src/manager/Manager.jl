@@ -60,7 +60,7 @@ module Manager
       function() end,                                                           # dotCallback
       function() end,                                                           # moveCallback
       current_task(),                                                           # task
-      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0, 0)                            # status
+      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0)                               # status
     )
     local cons::ManagerTypes.Connections = _createConnections(man)
 
@@ -115,7 +115,7 @@ module Manager
         # is because the error in serializer. See issue for details:
         # https://github.com/JuliaLang/julia/issues/16746
         #
-        if cons.streamInit yield(); continue end
+        if cons.streamInit yield(); @if_status man.status.yps += 1; continue end
         #
         # This is global time stamp in seconds
         #
@@ -215,6 +215,7 @@ module Manager
       @inbounds for sock in man.cons.fastServer.socks
         if Helper.isopen(sock)
           Server.request(sock, dataIndex, localIps)
+          @if_status man.status.rps += 1
         end
       end
       return 0, stamp
@@ -250,6 +251,7 @@ module Manager
   function _updateTasks(man::ManagerTypes.ManagerData, stamp::Float64, ystamp::Float64, needYield::Bool)
     if stamp - ystamp >= man.cfg.CONNECTION_TASKS_CHECK_PERIOD
       yield()
+      @if_status man.status.yps += 1
       # TODO: potential problem here. this list of sockets may be expanded
       # TODO: for example in many managers mode
       return stamp, (length(man.cons.server.socks) > 0 || man.cons.streamInit)

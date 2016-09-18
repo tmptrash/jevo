@@ -10,7 +10,7 @@ module CodeConfig
   # Turns on/off output of real time manager status like
   # amount of organisms, IPS, RPS and so on...
   #
-  const showStatus       = false
+  const showStatus       = true
   #
   # Status showing period in seconds. Works only if
   # "showStatus" option is set to true.

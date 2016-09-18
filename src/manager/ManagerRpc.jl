@@ -8,6 +8,7 @@
 #
 # @author DeadbraiN
 #
+import CodeConfig.@if_status
 import RpcApi
 import Config
 import Mutator
@@ -383,12 +384,16 @@ function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32,
     if Helper.isopen(socks[i])
       off = false
       Server.request(socks[i], dataIndex, x, y, color)
+      @if_status man.status.rps  += 1
+      @if_status man.status.srps += 1
     end
   end
   #
   # This is how we push all active messages to the network
   # TODO: change to yieldto() do we need this?
-  #yield()
+  yield()
+  @if_status man.status.yps  += 1
+  @if_status man.status.syps += 1
   #
   # All "fast" clients were disconnected
   #

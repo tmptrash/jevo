@@ -21,12 +21,11 @@ module ManagerTypes
   # Contains real time status data like IPS, RPS,...
   #
   type ManagerStatus
-    stamp::Float64
-    ips::Int
-    rps::Int
-    yield::Int
-    stepRps::Int
-    stepYield::Int
+    stamp::Float64    # current UNIX time stamp
+    rps::Int          # all requests per second
+    yps::Int          # all yields per second
+    srps::Int         # moveXXX() related requests per second
+    syps::Int         # moveXXX() related yields per second
   end
   #
   # One task related to one organism
@@ -48,7 +47,7 @@ module ManagerTypes
   #
   # Current Manager connection objects. They are: server and
   # all four clients. "frozen" field is used for storing "frozen"
-  # organisms (which are transferring from current Manager to
+  # organisms (which are transfserring from current Manager to
   # another one by network). "streaming" flag means, that streaming
   # mode is on or off. Here streaming is a world dots streaming.
   #

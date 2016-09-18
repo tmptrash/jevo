@@ -91,6 +91,7 @@ function backup(man::ManagerTypes.ManagerData)
   # or i don't understand it's logic. Anyway, it stucks without this call.
   # TODO: do we need this?
   yield()
+  @if_status man.status.yps += 1
   yieldto(tmpTask)
   #
   # This is a small trick. We have to set all tasks in waiting

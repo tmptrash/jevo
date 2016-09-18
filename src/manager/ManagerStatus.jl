@@ -15,18 +15,17 @@ function _updateStatus(man::ManagerTypes.ManagerData, stamp::Float64)
 
   if stamp - st.stamp >= CodeConfig.showStatusPeriod
     println(
-      "ips: ",      st.ips,
-      ", yield: ",  st.yield,
-      ", syield: ", st.stepYield,
+      "ips: ",      man.cfg.WORLD_IPS,
+      ", yps: ",    st.yps,
+      ", syps: ",   st.syps,
       ", rps: ",    st.rps,
-      ", srps: ",   st.stepRps,
+      ", srps: ",   st.srps,
       ", orgs: ",   length(man.tasks)
     )
-    st.stamp     = stamp
-    st.ips       = 0
-    st.yield     = 0
-    st.stepYield = 0
-    st.rps       = 0
-    st.stepRps   = 0
+    st.stamp = stamp
+    st.yps   = 0
+    st.rps   = 0
+    st.syps  = 0
+    st.srps  = 0
   end
 end

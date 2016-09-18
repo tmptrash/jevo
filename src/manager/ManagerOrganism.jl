@@ -4,6 +4,7 @@
 #
 # @author DeadbraiN
 #
+import CodeConfig.@if_status
 import Config
 import Helper
 import Creature
@@ -69,7 +70,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # Because this loop affects porformance, we have call yield()
     # here and not in main Manager while loop.
     #
-    if needYield yield() end
+    if needYield yield(); @if_status man.status.yps += 1 end
     #
     # We have to wait while all clients are ready for streaming. This
     # is because the error in serializer. See issue for details:
@@ -317,17 +318,19 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   # kill him in current Manager/instance.
   #
   else
+    local st = man.status
+
     if pos.x < 1
-      if !Client.isOk(man.cons.left)  || !Client.request(man.cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism) return false end
+      if !Client.isOk(man.cons.left)  || !Client.request(man.cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism) st.rps +=1; return false end
       freeze = true
     elseif pos.x > man.world.width
-      if !Client.isOk(man.cons.right) || !Client.request(man.cons.right, RpcApi.RPC_ORG_STEP_RIGHT, organism) return false end
+      if !Client.isOk(man.cons.right) || !Client.request(man.cons.right, RpcApi.RPC_ORG_STEP_RIGHT, organism) st.rps +=1; return false end
       freeze = true
     elseif pos.y < 1
-      if !Client.isOk(man.cons.up)    || !Client.request(man.cons.up, RpcApi.RPC_ORG_STEP_UP, organism) return false end
+      if !Client.isOk(man.cons.up)    || !Client.request(man.cons.up, RpcApi.RPC_ORG_STEP_UP, organism) st.rps +=1; return false end
       freeze = true
     elseif pos.y > man.world.height
-      if !Client.isOk(man.cons.down)  || !Client.request(man.cons.down, RpcApi.RPC_ORG_STEP_DOWN, organism) return false end
+      if !Client.isOk(man.cons.down)  || !Client.request(man.cons.down, RpcApi.RPC_ORG_STEP_DOWN, organism) st.rps +=1; return false end
       freeze = true
     end
     #
