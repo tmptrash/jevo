@@ -92,7 +92,7 @@ function backup(man::ManagerTypes.ManagerData)
   # TODO: do we need this?
   yield()
   @if_status man.status.yps += 1
-  yieldto(tmpTask)
+  tmpTask.state = :failed
   #
   # This is a small trick. We have to set all tasks in waiting
   # state for serializing into the file. Julia can't save active

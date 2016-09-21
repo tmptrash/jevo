@@ -256,7 +256,12 @@ module Creature
     # This is main loop, where organism lives. It's body will be
     # changed soon by mutations.
     #
-    while yieldto(task) === nothing
+    while true
+      #
+      # This line switches back to the main task, where Virtual
+      # CPU make it's job
+      #
+      yieldto(task)
       #
       # It's okay if organism has errors and throws exceptions. It's possible
       # that these errors will be fixed by future mutations.

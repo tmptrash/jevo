@@ -159,21 +159,15 @@ module Manager
     true
   end
   #
-  # This is small hack. It stops the task immediately. We
-  # have to do this, because task is a memory leak if we don't
-  # stop (interrupt) it. This method only marks the task as
+  # This is how we stop the task. Stop means run last yieldto()
+  # inside the task, but not more. Otherwise it will stuck inside
+  # the task forever. This method only marks the task as
   # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
   # @param task Task
   #
   function stopTask(task::Task)
     #try Base.throwto(task, InterruptException()) end
     #task.state = :failed
-    #
-    # This is how we stop the task. Stop means change it state
-    # to :done by exit from main while loop. See Creature.born()
-    # for details.
-    #
-    yieldto(task, true)
   end
 
   #
