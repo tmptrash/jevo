@@ -144,6 +144,7 @@ module Code
     local fnEx::Expr                = org.funcs[Helper.fastRand(funcsLen-1)+1].code # only custom function may be called
     local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]          # return DataType of Custom function
     local var::Symbol               = @randVar(org, pos, typ)                       # var = <fn-name>(...)
+    if var === :nothing return Expr(:nothing) end
     local args::Array{Any, 1}       = fnEx.args[1].args                             # shortcut to func args
     local types::Array{DataType, 1} = Array{DataType, 1}()                          # func types only
     local argsLen::Int              = length(args)

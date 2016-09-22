@@ -90,9 +90,11 @@ function backup(man::ManagerTypes.ManagerData)
   # yield() call is needed, because Julia has strange issue with yieldto()
   # or i don't understand it's logic. Anyway, it stucks without this call.
   # TODO: do we need this?
+  # TODO: move this yieldto() and @if_status in separate function
+  # TODO: reuse this approach in every file...
   yield()
   @if_status man.status.yps += 1
-  tmpTask.state = :failed
+  consume(tmpTask)
   #
   # This is a small trick. We have to set all tasks in waiting
   # state for serializing into the file. Julia can't save active
@@ -104,10 +106,11 @@ function backup(man::ManagerTypes.ManagerData)
     org.codeFn   = tmpFn
     org.observer = tmpObs
   end
-  manCopy.dotCallback     = tmpFn
-  manCopy.moveCallback    = tmpFn
-  manCopy.task            = tmpTask
-  manCopy.cons            = ManagerTypes.Connections()
+  manCopy.world.obs    = tmpObs
+  manCopy.dotCallback  = tmpFn
+  manCopy.moveCallback = tmpFn
+  manCopy.task         = tmpTask
+  manCopy.cons         = ManagerTypes.Connections()
   #
   # These code lines create new backup file and remove last one
   #
