@@ -99,6 +99,11 @@ module OpenGlWindow
     # TODO: lines "by hands".
     #
     GR.drawrect(1, wndWidth, 1, wndHeight)
+    #
+    # Sets text height in title, otherwise it will be sized depending
+    # on window size. So now it doesn't depend on window size.
+    #
+    GR.setcharheight(Float64(wndHeight / 1920) * 0.00001)
     OpenGlWindow.title(win, title)
     update(win)
 
@@ -157,7 +162,7 @@ module OpenGlWindow
     GR.setfillcolorind(Dots.INDEX_EMPTY)
     GR.fillrect(1, win.width * win.scale + win.scale, ymax - _FOOTER_HEIGHT + win.scale, ymax)
     # TODO: fix this hardcode (15.0)
-    GR.text(0.01, win.ratio - (ycoef * _FOOTER_HEIGHT) + ycoef * 15.0, title)
+    GR.text(0.01, win.ratio - (ycoef * _FOOTER_HEIGHT) + ycoef * 19.0, title)
   end
   #
   # Updates the canvas. It's not nessesary to update it after
