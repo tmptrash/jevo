@@ -114,6 +114,7 @@ module Code
     # All parameters will be added as local variables.
     #
     local fnEx::Expr  = :(function $(Symbol(@newFunc(org)))($(params...)) end)
+    println(fnEx);
     #
     # This property means that we haven't add mutations
     # before this line number, because we produce undefined
@@ -121,6 +122,13 @@ module Code
     #
     org.funcs[pos.fnIdx].blocks[pos.blockIdx].defIndex += 1
     block.expr = fnEx.args[2]
+    #
+    # This line fixes Julia small issue with additional comment line,
+    # which is added during new function creation. We have to remove
+    # this comment line (head === :line) to prevent incorrect org.codeSize
+    # calculations.
+    #
+    if length(block.expr.args) > 0 deleteat!(block.expr.args, 1) end
     push!(block.expr.args, :(return $(params[1].args[1].args[1])))
     push!(org.funcs, Creature.Func(fnEx, blocks))
 
