@@ -114,7 +114,6 @@ module Code
     # All parameters will be added as local variables.
     #
     local fnEx::Expr  = :(function $(Symbol(@newFunc(org)))($(params...)) end)
-    println(fnEx);
     #
     # This property means that we haven't add mutations
     # before this line number, because we produce undefined
@@ -126,9 +125,9 @@ module Code
     # This line fixes Julia small issue with additional comment line,
     # which is added during new function creation. We have to remove
     # this comment line (head === :line) to prevent incorrect org.codeSize
-    # calculations.
+    # calculation.
     #
-    if length(block.expr.args) > 0 deleteat!(block.expr.args, 1) end
+    _removeCommentLine(block.expr.args)
     push!(block.expr.args, :(return $(params[1].args[1].args[1])))
     push!(org.funcs, Creature.Func(fnEx, blocks))
 
@@ -188,7 +187,13 @@ module Code
     local v2::Symbol    = @randVar(org, pos, typ)
     local op::Symbol    = _COMPARE_OPERATORS[Helper.fastRand(length(_COMPARE_OPERATORS))]
     local ifEx          = :(if $(op)($(v1),$(v2)) end) # if v1 comparison v2 end
-
+    #
+    # This line fixes Julia small issue with additional comment line,
+    # which is added during new condition creation. We have to remove
+    # this comment line (head === :line) to prevent incorrect org.codeSize
+    # calculation.
+    #
+    _removeCommentLine(ifEx.args[2].args)
     push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), ifEx.args[2]))
     ifEx
   end
@@ -207,7 +212,13 @@ module Code
     local v::Symbol = @randVar(org, pos, Int8)
     if v === :nothing return Expr(:nothing) end
     local loopEx    = :(for i::Int8 = 1:div($v, _LOOP_STEPS_DIVIDER) end)
-
+    #
+    # This line fixes Julia small issue with additional comment line,
+    # which is added during new loop creation. We have to remove
+    # this comment line (head === :line) to prevent incorrect org.codeSize
+    # calculation.
+    #
+    _removeCommentLine(loopEx.args[2].args)
     push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), loopEx.args[2]))
     loopEx
   end
@@ -238,7 +249,9 @@ module Code
     if exp.head === :function
       idx = findfirst((f::Creature.Func) -> f.code === exp, org.funcs)
       blocks = org.funcs[idx].blocks
-      for i = 1:length(blocks) org.codeSize -= length(blocks[i].expr.args) end
+      for i = 1:length(blocks)
+        org.codeSize -= length(blocks[i].expr.args)
+      end
       org.codeSize += 1 # skip "return"
       org.funcs[1].blocks[1].defIndex -= 1
       deleteat!(org.funcs, idx)
@@ -287,6 +300,15 @@ module Code
       blockIdx,
       Helper.fastRand(lines)
     )
+  end
+  #
+  # Removes comment line from code expression. Comment line is created
+  # every time if block (quote...end) is created. We have to remove it,
+  # because if affects aon amount of code lines, but does nothing.
+  # @param args Code lines array
+  #
+  function _removeCommentLine(args::Array{Any, 1})
+    if length(args) > 0 && args[1].head === :line deleteat!(args, 1) end
   end
 
   #
