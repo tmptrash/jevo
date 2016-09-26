@@ -11,6 +11,8 @@
 # @author DeadbraiN
 #
 module CodeConfig
+  export showStatus
+  export showStatusPeriod
   export if_status
   #
   # Turns on/off output of real time manager status like
