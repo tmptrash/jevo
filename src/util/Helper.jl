@@ -230,7 +230,11 @@ module Helper
   end
   #
   # Saves custom data into the file. If file exists, it will
-  # be overrided
+  # be overrided. It's only rewrites existing file and not
+  # append it. It also doesn't work with native types, in sense
+  # that you can't save native values into the file without#
+  # meta information. For example, you can't store ascii string
+  # in a file without special prefic before it.
   # @param data Data to save
   # @param file File name
   # @return {Bool} saving result
