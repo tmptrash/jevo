@@ -15,7 +15,7 @@
 # Usage:
 #   import CanvasWindow
 #   ...
-#   win = CanvasWindow.create(300, 300)
+#   win = CanvasWindow.create(cfg, 300, 300)
 #   CanvasWindow.dot(win, 20, 20, UInt32(11197883)) # R=AA,G=DD,B=BB
 #   CanvasWindow.dot(win, 30, 30, UInt32(11197883)) # R=AA,G=DD,B=BB
 #   CanvasWindow.update(win)                        # Two dots will be shown
@@ -29,8 +29,7 @@ module CanvasWindow
   import Cairo
   import Tk
   import Colors
-  import Config
-  import DotColors
+  import Dots
 
   export Window
   export create
@@ -59,12 +58,12 @@ module CanvasWindow
   # @param title Window title
   # @return Window object
   #
-  function create(width::Int, height::Int, scale::Int = Config.val(:WORLD_SCALE), title::ASCIIString = "")
+  function create(width::Int, height::Int, scale::Int, title::String = "")
     local win::Tk.TkWidget = Tk.Window(title, width * scale, height * scale)
     local c::Tk.Canvas = Tk.Canvas(win)
     Tk.pack(c, expand=true, fill="both")
     local ctx::Cairo.CairoContext = Graphics.getgc(c)
-    local rgb::Colors.RGB = convert(Colors.RGB, Colors.RGB24(UInt32(DotColors.INDEX_EMPTY)))
+    local rgb::Colors.RGB = convert(Colors.RGB, Colors.RGB24(UInt32(Dots.INDEX_EMPTY)))
 
     Tk.set_antialias(ctx, 1)
     Tk.set_line_width(ctx, 1)
@@ -98,7 +97,7 @@ module CanvasWindow
   # @param win Window data type
   # @param title String title
   #
-  function title(win::Window, title::ASCIIString)
+  function title(win::Window, title::String)
     Tk.wm(win.win, "title", title)
   end
   #

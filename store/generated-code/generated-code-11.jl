@@ -1,6 +1,6 @@
 ia> [RpcApi.SimpleOrganism(0x000000000005b0cf,:(function (o::Creature.Organism,)
      function func_52(var_51::Int8=-36)
-         local var_74::ASCIIString = "ubD5GK5v"
+         local var_74::String = "ubD5GK5v"
          if var_51 < var_51
          end
          Creature.stepUp(o)
@@ -18,7 +18,7 @@ ia> [RpcApi.SimpleOrganism(0x000000000005b0cf,:(function (o::Creature.Organism,)
      end
      for i = 1:var_1
          local var_76::Int64 = -3451009689120369765
-         local var_68::ASCIIString = "1kR3kL1t"
+         local var_68::String = "1kR3kL1t"
          local var_15::Bool = true
          local var_8::Int16 = 23832
          local var_6::Int8 = 66
@@ -74,7 +74,7 @@ ia> [RpcApi.SimpleOrganism(0x000000000005b0cf,:(function (o::Creature.Organism,)
      function func_71(var_69::Bool=false,var_70::Bool=false)
          return var_69
      end
-     function func_62(var_60::Bool=true,var_61::ASCIIString="alf6iOMU")
+     function func_62(var_60::Bool=true,var_61::String="alf6iOMU")
          Creature.stepUp(o)
          return var_60
      end
@@ -82,7 +82,7 @@ ia> [RpcApi.SimpleOrganism(0x000000000005b0cf,:(function (o::Creature.Organism,)
      function func_52(var_51::Int8=-36)
          Creature.eatLeft(o,Int(var_51))
          for i = 1:var_51
-             local var_72::ASCIIString = "oTexJKZV"
+             local var_72::String = "oTexJKZV"
              Creature.stepUp(o)
          end
          Creature.eatLeft(o,Int(var_51))
@@ -148,7 +148,7 @@ ia> [RpcApi.SimpleOrganism(0x000000000005b0cf,:(function (o::Creature.Organism,)
          local var_74::Int8 = -83
          return var_69
      end
-     function func_62(var_60::Bool=true,var_61::ASCIIString="alf6iOMU")
+     function func_62(var_60::Bool=true,var_61::String="alf6iOMU")
          return var_60
      end
      local var_59::Bool = true
@@ -246,7 +246,7 @@ ia> [RpcApi.SimpleOrganism(0x000000000005b0cf,:(function (o::Creature.Organism,)
          Creature.stepLeft(o)
      end
      for i = 1:var_1
-         local var_68::ASCIIString = "1kR3kL1t"
+         local var_68::String = "1kR3kL1t"
          local var_15::Bool = true
          local var_8::Int16 = 23832
          local var_6::Int8 = 66
@@ -311,7 +311,7 @@ ia> [RpcApi.SimpleOrganism(0x000000000005b0cf,:(function (o::Creature.Organism,)
          Creature.eatDown(o,Int(var_73))
      end
      for i = 1:var_1
-         local var_68::ASCIIString = "1kR3kL1t"
+         local var_68::String = "1kR3kL1t"
          local var_15::Bool = true
          local var_8::Int16 = 23832
          local var_6::Int8 = 66
@@ -388,7 +388,7 @@ ia> [RpcApi.SimpleOrganism(0x000000000005b0cf,:(function (o::Creature.Organism,)
          Creature.stepLeft(o)
      end
      for i = 1:var_1
-         local var_68::ASCIIString = "1kR3kL1t"
+         local var_68::String = "1kR3kL1t"
          local var_15::Bool = true
          local var_8::Int16 = 23832
          local var_6::Int8 = 66
@@ -439,7 +439,7 @@ ia> [RpcApi.SimpleOrganism(0x000000000005b0cf,:(function (o::Creature.Organism,)
      function func_50(var_48::Int64=8246173392054715175,var_49::Bool=false)
          return var_48
      end
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          var_18 = var_18 / var_18
          Creature.stepUp(o)
          return var_17
@@ -460,7 +460,7 @@ ia> [RpcApi.SimpleOrganism(0x000000000005b0cf,:(function (o::Creature.Organism,)
      end
      Creature.stepRight(o)
      for i = 1:var_1
-         local var_52::ASCIIString = "3Zf0ESw4"
+         local var_52::String = "3Zf0ESw4"
          local var_37::Int8 = 66
          local var_15::Bool = true
          local var_9::Bool = true

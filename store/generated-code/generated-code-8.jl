@@ -1,5 +1,5 @@
 ia> [RpcApi.SimpleOrganism(0x00000000000427ea,:(function (o::Creature.Organism,)
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          local var_27::Bool = true
          if var_17 !== var_17
          end
@@ -58,7 +58,7 @@ ia> [RpcApi.SimpleOrganism(0x00000000000427ea,:(function (o::Creature.Organism,)
      end
      return true
  end),[100,300,95,0,1,1,1],1,8534,7,4137644,0x0117ea60,Dict(23832=>23832),[181,326],44),RpcApi.SimpleOrganism(0x0000000000042846,:(function (o::Creature.Organism,)
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          return var_17
      end
      local var_1::Int8 = 121
@@ -113,7 +113,7 @@ ia> [RpcApi.SimpleOrganism(0x00000000000427ea,:(function (o::Creature.Organism,)
      end
      return true
  end),[100,300,95,0,1,1,1],1,8534,1,3555267,0x0117d488,Dict(23832=>23832),[290,328],41),RpcApi.SimpleOrganism(0x00000000000426f1,:(function (o::Creature.Organism,)
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          return var_17
      end
      local var_1::Int8 = 121
@@ -168,7 +168,7 @@ ia> [RpcApi.SimpleOrganism(0x00000000000427ea,:(function (o::Creature.Organism,)
      end
      return true
  end),[100,300,95,0,1,1,1],1,8534,1,3508032,0x0117d488,Dict(23832=>23832),[289,328],41),RpcApi.SimpleOrganism(0x000000000004263e,:(function (o::Creature.Organism,)
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          local var_27::Bool = true
          return var_17
      end
@@ -224,7 +224,7 @@ ia> [RpcApi.SimpleOrganism(0x00000000000427ea,:(function (o::Creature.Organism,)
      end
      return true
  end),[100,300,95,0,1,1,1],1,8534,1,2998839,0x0117beb0,Dict(23832=>23832),[219,333],42),RpcApi.SimpleOrganism(0x0000000000042825,:(function (o::Creature.Organism,)
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          return var_17
      end
      local var_1::Int8 = 121
@@ -279,7 +279,7 @@ ia> [RpcApi.SimpleOrganism(0x00000000000427ea,:(function (o::Creature.Organism,)
      end
      return true
  end),[100,300,95,0,1,1,1],1,8534,1,2978922,0x0117d488,Dict(23832=>23832),[170,330],41),RpcApi.SimpleOrganism(0x00000000000426e9,:(function (o::Creature.Organism,)
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          return var_17
      end
      local var_1::Int8 = 121
@@ -334,7 +334,7 @@ ia> [RpcApi.SimpleOrganism(0x00000000000427ea,:(function (o::Creature.Organism,)
      end
      return true
  end),[100,300,95,0,1,1,1],1,8534,1,2519819,0x0117d488,Dict(23832=>23832),[454,334],41),RpcApi.SimpleOrganism(0x0000000000042740,:(function (o::Creature.Organism,)
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          return var_17
      end
      local var_1::Int8 = 121
@@ -389,7 +389,7 @@ ia> [RpcApi.SimpleOrganism(0x00000000000427ea,:(function (o::Creature.Organism,)
      end
      return true
  end),[100,300,95,0,1,1,1],1,8534,1,2144983,0x0117d488,Dict(23832=>23832),[445,334],41),RpcApi.SimpleOrganism(0x00000000000427f8,:(function (o::Creature.Organism,)
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          return var_17
      end
      local var_1::Int8 = 121
@@ -444,7 +444,7 @@ ia> [RpcApi.SimpleOrganism(0x00000000000427ea,:(function (o::Creature.Organism,)
      end
      return true
  end),[100,300,95,0,1,1,1],1,8534,1,2084712,0x0117d488,Dict(23832=>23832),[194,332],41),RpcApi.SimpleOrganism(0x0000000000042786,:(function (o::Creature.Organism,)
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          return var_17
      end
      local var_1::Int8 = 121
@@ -499,7 +499,7 @@ ia> [RpcApi.SimpleOrganism(0x00000000000427ea,:(function (o::Creature.Organism,)
      end
      return true
  end),[100,300,95,0,1,1,1],1,8534,1,2052945,0x0117d488,Dict(23832=>23832),[499,322],41),RpcApi.SimpleOrganism(0x0000000000042741,:(function (o::Creature.Organism,)
-     function func_19(var_17::ASCIIString="A06aRuJT",var_18::Int64=-4494005246402814635)
+     function func_19(var_17::String="A06aRuJT",var_18::Int64=-4494005246402814635)
          return var_17
      end
      local var_1::Int8 = 121

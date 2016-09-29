@@ -52,9 +52,9 @@ module RemoteWorld
   # @param height Canvas height in pixels
   # @return {RemoteData|false}
   # TODO: return value should be same type
-  function create(host::Base.IPAddr, port::Integer, width::Int = Config.val(:WORLD_WIDTH), height::Int = Config.val(:WORLD_HEIGHT))
+  function create(cfg::Config.ConfigData, host::Base.IPAddr, port::Int, width::Int, height::Int
     pd = Pooling.create(host, port)
-    pd !== false ? RemoteData(pd, CanvasWindow.create(width, height)) : false
+    pd !== false ? RemoteData(pd, CanvasWindow.create(width, height, cfg.WORLD_SCALE)) : false
   end
   #
   # Start displaying remote area. It makes requests to remote
@@ -66,7 +66,7 @@ module RemoteWorld
   # @param x1 Right down X coordinate
   # @param y1 Right down Y coordinate
   #
-  function start(rd::RemoteData, delay::Int = Config.val(:WORLD_FRAME_DELAY), x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
+  function start(rd::RemoteData, delay::Int, x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
     rd.x     = x
     rd.y     = y
     rd.x1    = x1

@@ -20,6 +20,9 @@ function main()
     return false
   end
   local stamp::Float64 = time()
+  local cfg::Config.ConfigData = Config.create()
+
+  if Config.isEmpty(cfg) quit() end
   #
   # In case of error or if non zero exit code will be returned
   # an exeption will be thrown.
@@ -32,7 +35,7 @@ function main()
       end
       break
     catch e
-      stamp = _removeBrokenBackup(stamp)
+      stamp = _removeBrokenBackup(stamp, cfg)
     end
   end
 
@@ -46,14 +49,15 @@ end
 # similar. The fact that we are inside this function means that our
 # application has crashed a moment ago.
 # @param stamp Timestamp of previous crash
+# @param cfg Global configuration object
 # @return Updated last crash timestamp
 #
-function _removeBrokenBackup(stamp::Float64)
-  local last::ASCIIString
+function _removeBrokenBackup(stamp::Float64, cfg::Config.ConfigData)
+  local last::String
 
-  println("_removeBrokenBackup(), time: ", time(), ", stamp: ", stamp, ", period: ", Float64(Config.val(:BACKUP_PERIOD)) * 60.0)
+  println("_removeBrokenBackup(), time: ", time(), ", stamp: ", stamp, ", period: ", cfg.BACKUP_PERIOD)
   println("last file: ", Backup.lastFile())
-  if (time() - stamp) < Float64(Config.val(:BACKUP_PERIOD)) * 60.0
+  if (time() - stamp) < cfg.BACKUP_PERIOD
     try
       if (last = Backup.lastFile()) != ""
         Helper.warn("Removing broken backup file: $last")

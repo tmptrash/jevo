@@ -80,7 +80,7 @@ module Client
   # @param fast Turns on serialization mode (slow speed mode).
   # @return Client connection object
   #
-  function create(host::Base.IPAddr, port::Integer, fast::Bool = false)
+  function create(host::Base.IPAddr, port::Int, fast::Bool = false)
     local sock::Base.TCPSocket = Base.TCPSocket()
     local obs::Event.Observer = Event.create()
 

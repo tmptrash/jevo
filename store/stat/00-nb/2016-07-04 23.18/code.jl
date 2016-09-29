@@ -6,7 +6,7 @@
             return var_136
         end
         local var_125::Bool = true
-        function func_96(var_95::ASCIIString="CMsQ6J5t")
+        function func_96(var_95::String="CMsQ6J5t")
             return var_95
         end
         local var_82::Int16 = -28253
@@ -14,7 +14,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             return var_43
         end
         local var_34::Int64 = -6982312523886405890
@@ -30,7 +30,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -177,7 +177,7 @@
     end),[100,300,95,0,1,1,1],21,5086,41,941580,0x00000250,Dict(0=>0,31438=>-29091,-28253=>-28253,-29091=>31438,-2660=>-29091,1670=>1670,-5320=>-5320,-572=>-572,1=>1),[399,272],141),RpcApi.SimpleOrganism(0x000000000002f4e1,:(function (o::Creature.Organism,)
         local var_131::Int16 = 20703
         local var_125::Bool = true
-        function func_96(var_95::ASCIIString="CMsQ6J5t")
+        function func_96(var_95::String="CMsQ6J5t")
             Creature.stepDown(o)
             Creature.stepRight(o)
             return var_95
@@ -187,7 +187,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             Creature.stepRight(o)
             Creature.stepLeft(o)
             Creature.stepRight(o)
@@ -206,7 +206,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -370,7 +370,7 @@
     end),[100,300,95,0,1,1,1],0,6685,22,612180,0x0000022d,Dict(0=>0,31438=>-29091,-28253=>20703,-29091=>0,-2660=>-29091,20703=>20703,-5320=>-5320,-572=>-572,1=>1),[7,292],146),RpcApi.SimpleOrganism(0x000000000002f3f9,:(function (o::Creature.Organism,)
         local var_131::Int16 = 20703
         local var_125::Bool = true
-        function func_96(var_95::ASCIIString="CMsQ6J5t")
+        function func_96(var_95::String="CMsQ6J5t")
             Creature.stepLeft(o)
             return var_95
         end
@@ -380,7 +380,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             Creature.stepRight(o)
             return var_43
         end
@@ -394,7 +394,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -560,7 +560,7 @@
     end),[100,300,95,0,1,1,1],45,4627,22,594923,0x0000021e,Dict(0=>0,31438=>-29091,-28253=>-28253,-29091=>0,-2660=>-29091,-5320=>-5320,-572=>-572,1=>1),[25,293],140),RpcApi.SimpleOrganism(0x000000000002f49b,:(function (o::Creature.Organism,)
         local var_131::Int16 = 20703
         local var_125::Bool = true
-        function func_96(var_95::ASCIIString="CMsQ6J5t")
+        function func_96(var_95::String="CMsQ6J5t")
             Creature.stepDown(o)
             Creature.stepRight(o)
             return var_95
@@ -570,7 +570,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             Creature.stepRight(o)
             Creature.stepLeft(o)
             Creature.stepRight(o)
@@ -589,7 +589,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -753,7 +753,7 @@
     end),[100,300,95,0,1,1,1],0,6685,22,588206,0x0000022d,Dict(0=>0,31438=>-29091,-28253=>20703,-29091=>0,-2660=>-29091,20703=>20703,-5320=>-5320,-572=>-572,1=>1),[11,275],146),RpcApi.SimpleOrganism(0x000000000002f463,:(function (o::Creature.Organism,)
         local var_131::Int16 = 20703
         local var_125::Bool = true
-        function func_96(var_95::ASCIIString="CMsQ6J5t")
+        function func_96(var_95::String="CMsQ6J5t")
             return var_95
         end
         local var_82::Int16 = -28253
@@ -763,7 +763,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             return var_43
         end
         local var_34::Int64 = -6982312523886405890
@@ -776,7 +776,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -923,7 +923,7 @@
         Creature.stepRight(o)
         var_55 = Int(Creature.getEnergy(o,Int(var_82),Int(var_82)))
         if var_1 != var_1
-            local var_140::ASCIIString = "dc9F5RW7"
+            local var_140::String = "dc9F5RW7"
             Creature.stepUp(o)
         end
         var_55 = Int(Creature.getEnergy(o,Int(var_131),Int(var_131)))

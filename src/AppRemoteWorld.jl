@@ -7,8 +7,10 @@ import RemoteWorld
 # Analog of main() in C language
 #
 function main()
-  if (rw = RemoteWorld.create(ip"127.0.0.1", 2000)) === false quit() end
-  RemoteWorld.start(rw)
+  local cfg::Config.ConfigData = Config.create()
+
+  if Config.isEmpty(cfg) || (rw = RemoteWorld.create(ip"127.0.0.1", 2000, cfg.WORLD_WIDTH, cfg.WORLD_HEIGHT)) === false quit() end
+  RemoteWorld.start(rw, cfg.WORLD_FRAME_DELAY)
 end
 #
 # Application entry point

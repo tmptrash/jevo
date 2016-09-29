@@ -25,7 +25,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             if var_43 === var_43
             end
             Creature.stepLeft(o)
@@ -46,7 +46,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -204,7 +204,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             local var_232::Int16 = -25529
             return var_43
         end
@@ -223,7 +223,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -357,7 +357,7 @@
         local var_229::Int64 = 4656891210541358294
         local var_197::Int8 = 93
         function func_196(var_195::Int8=-12)
-            local var_230::ASCIIString = "hdyM4KMr"
+            local var_230::String = "hdyM4KMr"
             local var_231::Bool = true
             Creature.eatLeft(o,Int(var_195))
             return var_195
@@ -381,7 +381,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             Creature.stepDown(o)
             return var_43
         end
@@ -401,7 +401,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -566,7 +566,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             local var_232::Int16 = -25529
             var_43 = var_44[1:if length(var_44) > length(var_44) > 0
                             0
@@ -590,7 +590,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438
@@ -746,7 +746,7 @@
             return var_62
         end
         local var_55::Int64 = 8062249648076403993
-        function func_45(var_43::ASCIIString="D42FzkNp",var_44::ASCIIString="QVktoUuw")
+        function func_45(var_43::String="D42FzkNp",var_44::String="QVktoUuw")
             if var_43 === var_43
             end
             Creature.stepLeft(o)
@@ -767,7 +767,7 @@
             local var_76::Int64 = -8364194871863581978
             local var_57::Bool = true
             local var_28::Int64 = -5547387289894786475
-            local var_26::ASCIIString = "zSGt1MST"
+            local var_26::String = "zSGt1MST"
             local var_16::Bool = true
             local var_14::Int8 = 115
             local var_13::Int16 = 31438

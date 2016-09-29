@@ -114,7 +114,7 @@ module Server
   # @param fast Turns on serialization mode (slow speed mode).
   # @return {Server.ServerConnection} Server's related data object
   #
-  function create(host::Base.IPAddr, port::Integer, fast::Bool = false)
+  function create(host::Base.IPAddr, port::Int, fast::Bool = false)
     local tasks::Array{Task, 1} = Task[]
     local socks::Array{Base.TCPSocket, 1} = Base.TCPSocket[]
     local obs::Event.Observer = Event.create()

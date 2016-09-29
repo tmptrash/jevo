@@ -19,7 +19,7 @@
 #
 # @author DeadbraiN
 #
-# TODO: optimize events from ASCIIString to Int type
+# TODO: optimize events from String to Int type
 module Event
   export Observer
   export create
@@ -33,10 +33,10 @@ module Event
   #
   type Observer
     #
-    # {Dict{ASCIIString, Array{Function}}} array of events and they handlers.
+    # {Dict{String, Array{Function}}} array of events and they handlers.
     # For example: {"event"=>[fn1, fn2,...],...}
     #
-    events::Dict{ASCIIString, Array{Function, 1}}
+    events::Dict{String, Array{Function, 1}}
   end
 
   #
@@ -44,15 +44,15 @@ module Event
   # @return {Observer}
   #
   function create()
-    Observer(Dict{ASCIIString, Array{Function, 1}}())
+    Observer(Dict{String, Array{Function, 1}}())
   end
   #
   # Adds a handler for specified event
   # @param {Observer}    obs   Events container
-  # @param {ASCIIString} event Event name. All in lowercase
+  # @param {String} event Event name. All in lowercase
   # @param {Function}    fn    Event handler
   #
-  function on(obs::Observer, event::ASCIIString, fn::Function)
+  function on(obs::Observer, event::String, fn::Function)
     if !haskey(obs.events, event) obs.events[event] = Function[] end
     push!(obs.events[event], fn)
   end
@@ -63,18 +63,18 @@ module Event
   # @param fn Handler function
   # @return {Bool} handler existance
   #
-  function has(obs::Observer, event::ASCIIString, fn::Function)
+  function has(obs::Observer, event::String, fn::Function)
     if !haskey(obs.events, event) return false end
     findfirst(obs.events[event], fn) !== 0
   end
   #
   # Removed a handler from handlers list for appropriate event
   # @param {Observer}    obs   Events container
-  # @param {ASCIIString} event Event name. All in lowercase
+  # @param {String} event Event name. All in lowercase
   # @param {Function}    fn    Event handler
   # @return {Bool} off status. false if no such event or handler
   #
-  function off(obs::Observer, event::ASCIIString, fn::Function)
+  function off(obs::Observer, event::String, fn::Function)
     local index::Int
 
     if !haskey(obs.events, event) return false end
@@ -87,16 +87,21 @@ module Event
   # Fires an event with parameters. User may cancel current action
   # by returning false in one of event handlers.
   # @param {Observer} obs Events container
-  # @param  {ASCIIString} event Event name
+  # @param  {String} event Event name
   # @param  {Any} args Other arguments
   # @return {Bool} true means that object, which fired an event
   # may continue it's work. false - otherwise.
   #
-  function fire(obs::Observer, event::ASCIIString, args...)
+  function fire(obs::Observer, event::String, args...)
     if !haskey(obs.events, event) return nothing end
     local fns::Array{Function, 1} = obs.events[event]
+    local len::Int = length(fns)
     local i::Function
 
+    # for i = 1:length(fns)
+    #   if length(obs.events[event]) !== len break end
+    #   fns[i](args...)
+    # end
     for i in fns
       i(args...)
     end

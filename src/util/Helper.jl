@@ -9,7 +9,8 @@ module Helper
   export RetObj
 
   export toBytes
-  export randTrue
+  export fastRand
+  export fastZRand
   export getProbIndex
   export getSupportedTypes
   export isopen
@@ -152,20 +153,24 @@ module Helper
     args[indexes[len]]
   end
   #
-  # Chooses (returns) true or false randomly. Is used to choose between two
-  # variants of something. For example + or - sign.
-  # @return {Bool}
-  #
-  function randTrue()
-    rand(1:2) === 1
-  end
-  #
   # This function is not presented in Julis Gtk package
   #
   function gtkMarkup(label::Gtk.GtkLabel,str)
     ccall((:gtk_label_set_markup,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{UInt8}),label,str)
     return label
   end
+  #
+  # Fast version of rand(n::Range) function. Generates random Int number in
+  # range 1:n
+  # @param n Right number value in a range
+  #
+  function fastRand(n::Int) trunc(Int, rand() * n) + 1 end
+  #
+  # Fast version of rand(0::Range) function. Generates random Int number in
+  # range 0:n
+  # @param n Right number value in a range
+  #
+  function fastZRand(n::Int) trunc(Int, rand() * (n + 1)) end
   #
   # It calculates probability index from variable amount of components.
   # Let's imagine we have three actions: one, two and three. We want
@@ -177,16 +182,24 @@ module Helper
   # @return {Int} 0 Means that index is invalid
   #
   function getProbIndex(prob::Array{Int, 1})
-    if length(prob) < 1 return 0 end
-
+    local len::Int = length(prob)
+    if len < 1 return 0 end
     local s::Int = sum(prob)
     if s < 1 return 0 end
-    num = rand(1:s)
-    s   = 0
-    i   = 1
-
-    for i = 1:length(prob)
-      if num <= (s += prob[i]) break end
+    local num::Int = fastRand(s)
+    local i::Int = 1
+    #
+    # This is small optimization algorithm. if random number in
+    # a left part of all numbers sum, the we have to go to it from
+    # left to right, if not - then from right to left. Otherwise,
+    # going every time from left to right will be a little bit
+    # slower then this aproach.
+    #
+    if num < div(s, 2)
+      s = 0
+      for i = 1:len if num <= (s += prob[i]) break end end
+    else
+      for i = len:-1:1 if num > (s -= prob[i]) break end end
     end
 
     i
@@ -226,8 +239,8 @@ module Helper
   # @param file File name
   # @return {Bool} saving result
   #
-  function save(data::Any, file::ASCIIString = "backup.data")
-    local io  = null
+  function save(data::Any, file::String = "backup.data")
+    local io  = nothing
     local ret = true
 
     try
@@ -235,9 +248,10 @@ module Helper
       serialize(io, data)
     catch(e)
       warn("Helper.save(): $e")
+      showerror(STDOUT, e, catch_backtrace())
       ret = false
     finally
-      if io !== null close(io) end
+      if io !== nothing close(io) end
     end
 
     ret
@@ -245,20 +259,21 @@ module Helper
   #
   # Loads custom data from the file
   # @param file File name
-  # @return {Any|null} loading result or null
+  # @return {Any|nothing} loading result or nothing
   #
-  function load(file::ASCIIString = "backup.data")
-    local io  = null
-    local ret = null
+  function load(file::String = "backup.data")
+    local io  = nothing
+    local ret = nothing
 
     try
       io  = open(file)
       ret = deserialize(io)
     catch(e)
       warn("Helper.load(): $e")
-      ret = null
+      showerror(STDOUT, e, catch_backtrace())
+      ret = nothing
     finally
-      if io !== null close(io) end
+      if io !== nothing close(io) end
     end
 
     ret
@@ -267,5 +282,5 @@ module Helper
   #
   # Supported types of code inside organism
   #
-  const SUPPORTED_TYPES = [ASCIIString, Bool, Int8, Int16, Int]
+  const SUPPORTED_TYPES = [String, Bool, Int8, Int16, Int]
 end

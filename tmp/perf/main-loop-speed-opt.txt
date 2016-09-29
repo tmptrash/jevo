@@ -1,0 +1,14 @@
+[ test should be run without backup files ]
+
+184    - etalon
+
+228353 - disabled _updateOrganisms()
+xxx    - disabled _updateOrganisms() -> periodic mutations
+xxx    - disabled _updateOrganisms() -> _onClone()
+xxx    - disabled _updateOrganisms() -> _updateOrganismsEnergy()
+xxx    - disabled _updateOrganisms() -> _updateWorldEnergy()
+xxx    - disabled _updateOrganisms() -> _removeMinOrganisms()
+xxx    - disabled _updateOrganisms() -> consume()
+
+xxx    - disabled _updateBackup()
+xxx    - disabled yield()

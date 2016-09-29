@@ -2,11 +2,12 @@
 # This module contains predefined colors for elements in a world like energy and
 # nothing. We need this for solving an issue with invisible energy. This is
 # because GR library has only 1256 colors and not 24bit :( Only 56 slots are
-# available for color redefining. Other 1200 colors are for organisms.
+# available for color redefining. Other 1200 colors are for organisms. It also
+# contains dots related constants.
 #
 # @author DeadbraiN
 #
-module DotColors
+module Dots
   export MAX_COLOR
   export MAX_ORG_COLOR
 
@@ -17,6 +18,22 @@ module DotColors
   export COLOR_TEXT
   export INDEX_TEXT
   export COLORS
+  #
+  # Dots directions
+  #
+  export DIRECTION_NO
+  export DIRECTION_LEFT
+  export DIRECTION_UP
+  export DIRECTION_RIGHT
+  export DIRECTION_DOWN
+  #
+  # Evergy move possible directions
+  #
+  const DIRECTION_NO    = 0
+  const DIRECTION_LEFT  = 1
+  const DIRECTION_UP    = 2
+  const DIRECTION_RIGHT = 3
+  const DIRECTION_DOWN  = 4
   #
   # Describes one color and it's index
   #

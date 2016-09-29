@@ -20,9 +20,7 @@ module RemoteWorldRT
   import FastApi
   import Config
   import Helper
-  import DotColors
-
-  using Debug
+  import Dots
 
   export create
   export start
@@ -51,23 +49,24 @@ module RemoteWorldRT
     ips::Int
 
     RemoteDataRT(
-      cmdCon    ::Client.ClientConnection,
+      cmdCon::Client.ClientConnection,
       poolingCon::Client.ClientConnection,
-      win       ::OpenGlWindow.Window
+      win::OpenGlWindow.Window
     ) = new(cmdCon, poolingCon, win)
   end
   #
   # Creates connection with remote host for display pixels from remote world.
+  # @param cfg Global config type
   # @param host Remote host we are connecting to
   # @param cmdPort Remote port for commands
   # @param poolingPort Remote port for pooling requests
   # @return {RemoteDataRT}
   #
-  function create(host::Base.IPAddr, cmdPort::Int, poolingPort::Int)
+  function create(cfg::Config.ConfigData, host::Base.IPAddr, cmdPort::Int, poolingPort::Int)
     RemoteDataRT(
       Client.create(host, cmdPort),
       Client.create(host, poolingPort, true),
-      OpenGlWindow.create(Config.val(:WORLD_WIDTH), Config.val(:WORLD_HEIGHT))
+      OpenGlWindow.create(cfg.WORLD_WIDTH, cfg.WORLD_HEIGHT, cfg.WORLD_SCALE)
     )
   end
   #
@@ -78,7 +77,7 @@ module RemoteWorldRT
   # @param rd Remote world data object. See create()
   #
   function start(rd::RemoteDataRT)
-    local color::DotColors.Color
+    local color::Dots.Color
 
     rd.poolingBeforeCb = (sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer) -> _onDot(rd, data)
     rd.cmdAfterCb      = (ans::Connection.Answer) -> _onRegion(rd, ans)
@@ -88,7 +87,7 @@ module RemoteWorldRT
     #
     # This is how we redefine colors for world's objects
     #
-    for color in DotColors.COLORS OpenGlWindow.setColor(color.index, color.rgb...) end
+    for color in Dots.COLORS OpenGlWindow.setColor(color.index, color.rgb...) end
 
     Event.on(rd.poolingCon.observer, Connection.EVENT_BEFORE_RESPONSE, rd.poolingBeforeCb)
     Event.on(rd.cmdCon.observer, Connection.EVENT_AFTER_REQUEST, rd.cmdAfterCb)
@@ -123,10 +122,28 @@ module RemoteWorldRT
     end
     rd.poolingRequests += 1
     #
-    # if only one item in data array, then it's IPS. if more then it's a dot
+    # if only one item in data array, then it's IPS. if more then it's a dot.
+    # First byte of color is a direction (see DIRECTION_XXX constants). In this
+    # case we have to "move" specified dot to new location and clear previous
+    # position by empty color.
     #
     if length(data) > 1
-      OpenGlWindow.dot(rd.win, Int(data[1]), Int(data[2]), UInt32(data[3]))
+      local color::UInt32 = UInt32(data[3])
+      local dir::Int = color & 0xff000000 >> 24
+      local x::Int = Int(data[1])
+      local y::Int = Int(data[2])
+      #
+      # This is moving of the dot. We have to draw empty dot
+      # on previous dot position and colored dot on new position.
+      #
+      if dir !== Dots.DIRECTION_NO
+        if     dir === Dots.DIRECTION_UP    OpenGlWindow.dot(rd.win, x, y + 1, UInt32(Dots.INDEX_EMPTY))
+        elseif dir === Dots.DIRECTION_RIGHT OpenGlWindow.dot(rd.win, x - 1, y, UInt32(Dots.INDEX_EMPTY))
+        elseif dir === Dots.DIRECTION_DOWN  OpenGlWindow.dot(rd.win, x, y - 1, UInt32(Dots.INDEX_EMPTY))
+        else                                OpenGlWindow.dot(rd.win, x + 1, y, UInt32(Dots.INDEX_EMPTY))
+        end
+      end
+      OpenGlWindow.dot(rd.win, x, y, color << 8 >> 8) # clear first byte with direction
       OpenGlWindow.update(rd.win)
     else
       rd.ips = data[1]

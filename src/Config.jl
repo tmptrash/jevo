@@ -7,16 +7,15 @@
 # settings are used like data containers in sense that, they
 # just store the values, which may be changed many times during
 # application life cicle.
-# TODO: refactor this module to exclude using of global _data object
-# TODO: we have to pass it by first argument instead. It will be 1000 times faster!!!
-#
+# TODO: update usage
 # Usage:
 #     import Config
 #     ...
-#     Config.val(:SECTION_ID_KEY_ID)         # returns value or nothing
-#     Config.val(:SECTION_ID_KEY_ID, newVal) # sets new value - newVal
-#     Config.save("config.data")             # saves all to file
-#     Config.load("config.data")             # loads all from file
+#     cfg = Config.create()                       # creates new config instance
+#     cfg.SECTION_ID_KEY_ID                       # returns value or nothing
+#     cfg.SECTION_ID_KEY_ID = newVal              # sets new value - newVal
+#     Config.save(cfg, "config.data")             # saves all to file
+#     Config.load("config.data")                  # loads all from file
 #
 # @singleton
 # @author DeadbraiN
@@ -26,15 +25,15 @@ module Config
 
   export save
   export load
-  export val
+  export isEmpty
 
-  export Data
+  export ConfigData
 
   #
   # Data type for storing configuration data. Is used in pair with GData
-  # type. For accessing use Gonfig.val(:SYMBOL[, value]) function
+  # type. For accessing use Gonfig.val(man.cfg, :SYMBOL[, value]) function
   #
-  type Data
+  type ConfigData
     #
     # Probabilities with which mutator decides what to do: add,
     # change, delete character of the code; change amount of
@@ -113,7 +112,7 @@ module Config
     ORGANISM_ENERGY_DECREASE_VALUE::Int
     #
     # After this amount of iterations we have to kill ORGANISM_REMOVE_AMOUNT
-    # organisms with minimum energy
+    # organisms with minimum energy. Set to 0 for disabling this config.
     #
     ORGANISM_REMOVE_AFTER_TIMES::Int
     #
@@ -130,6 +129,10 @@ module Config
     #
     ORGANISM_START_COLOR::Int
     #
+    # Max value, which we may use in ORGANISM_MUTATION_PROBABILITIES array.
+    #
+    ORGANISM_MUTATION_PROBABILITY_MAX_VALUE::Int
+    #
     # Maximum amount of arguments in custom functions. Minimum 1.
     #
     CODE_MAX_FUNC_PARAMS::Int
@@ -141,6 +144,13 @@ module Config
     # World height
     #
     WORLD_HEIGHT::Int
+    #
+    # Turns on ciclic world mode. It means that organisms may go outside
+    # it's border, but still be inside. For example, if the world has 10x10
+    # size and the organism has 10x5 position in it, one step right will move
+    # this organism at the position 1x5. The same scenario regarding Y
+    # coordinate (height).
+    WORLD_CYCLICAL::Bool
     #
     # Delay between requests for obtaining remote world region.
     # This parameter affects frames per second in a window canvas.
@@ -198,9 +208,9 @@ module Config
     #
     WORLD_SCALE::Int
     #
-    # Period of making automatic backup of application. In minutes
+    # Period of making automatic backup of application. In seconds
     #
-    BACKUP_PERIOD::Int
+    BACKUP_PERIOD::Float64
     #
     # Amount of backup files stored on HDD. Old files will be removed
     #
@@ -222,11 +232,13 @@ module Config
     # TODO: should be removed from here. It doesn't related to Manager
     STAT_FRAME_DELAY::Int
     #
-    # Amount of iteration between statistics update. Here we are speaking
-    # about statistics collecting and storing it in a file on a disk.
-    # This parameters is represented in seconds.
+    # The period of time between yield() calls in "stand by" mode.
+    # In this mode manager waits for data in sockets and new connections.
+    # In this mode yield() is called only once in a period, because
+    # it eats CPU cicles. In case of data in sockets or new connections
+    # yield() will be called more often.
     #
-    STAT_UPDATE_PERIOD::Float64
+    CONNECTION_TASKS_CHECK_PERIOD::Float64
     #
     # Percent of energy, which will be minused from organism after
     # stepping from one instance to another.
@@ -287,131 +299,110 @@ module Config
     CONNECTION_DOWN_SERVER_IP::IPv4
   end
   #
-  # Just a wrapper for Data type to have an ability to update
-  # global _data.d field after loading from a file.
+  # Creates configuration object. It will be used in all config
+  # related functions like val(), save(), load(),... We don't need
+  # to use global objects, because they are very very slow!
+  # @param empty Flag to create empty configuration
+  # @return {ConfigData} Data type instance
   #
-  type GData
-    d::Data
+  function create(empty::Bool = false)
+    ConfigData(
+      empty ? [] : [110,300,95,0,1,1,1], # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
+      2,                                 # ORGANISM_MUTATIONS_ON_CLONE
+      50,                                # ORGANISM_MAX_MUTATIONS_ON_CLONE
+      900,                               # ORGANISM_MUTATION_PERIOD
+      10000,                             # ORGANISM_MAX_MUTATION_PERIOD
+      4,                                 # ORGANISM_MUTATION_AMOUNT
+      50,                                # ORGANISM_MAX_MUTATION_AMOUNT
+      200,                               # ORGANISM_START_AMOUNT
+      7000,                              # ORGANISM_START_ENERGY
+      Int(typemax(UInt32)),              # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)
+      300,                               # ORGANISM_ENERGY_DECREASE_PERIOD
+      1,                                 # ORGANISM_ENERGY_DECREASE_VALUE
+      0,                                 # ORGANISM_REMOVE_AFTER_TIMES
+      5,                                 # ORGANISM_REMOVE_AMOUNT
+      10,                                # ORGANISM_CLONE_AFTER_TIMES
+      1,                                 # ORGANISM_START_COLOR
+      65536,                             # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
+      2,                                 # CODE_MAX_FUNC_PARAMS
+      260,                               # WORLD_WIDTH
+      200,                               # WORLD_HEIGHT
+      true,                              # WORLD_CYCLICAL
+      0,                                 # WORLD_FRAME_DELAY
+      0,                                 # WORLD_IPS
+      800,                               # WORLD_MAX_ORGANISMS
+      50,                                # WORLD_MIN_ORGANISMS
+      1000,                              # WORLD_START_ENERGY_BLOCKS
+      UInt32(0x0001F4),                  # WORLD_START_ENERGY_AMOUNT
+      0.3,                               # WORLD_MIN_ENERGY_PERCENT
+      500,                               # WORLD_MIN_ENERGY_CHECK_PERIOD
+      3,                                 # WORLD_SCALE
+      60.0,                              # BACKUP_PERIOD
+      10,                                # BACKUP_AMOUNT
+      650,                               # STAT_WIDTH
+      500,                               # STAT_HEIGHT
+      5,                                 # STAT_FRAME_DELAY
+      0.01,                              # CONNECTION_TASKS_CHECK_PERIOD
+      20,                                # CONNECTION_STEP_ENERGY_PERCENT
+      2010,                              # CONNECTION_SERVER_PORT (current server port)
+      2011,                              # CONNECTION_FAST_SERVER_PORT (current server "fast" mode port)
+      ip"127.0.0.1",                     # CONNECTION_SERVER_IP
+      0,                                 # CONNECTION_LEFT_SERVER_PORT
+      ip"127.0.0.1",                     # CONNECTION_LEFT_SERVER_IP
+      0,                                 # CONNECTION_RIGHT_SERVER_PORT
+      ip"127.0.0.1",                     # CONNECTION_RIGHT_SERVER_IP
+      0,                                 # CONNECTION_UP_SERVER_PORT
+      ip"127.0.0.1",                     # CONNECTION_UP_SERVER_IP
+      0,                                 # CONNECTION_DOWN_SERVER_PORT
+      ip"127.0.0.1"                      # CONNECTION_DOWN_SERVER_IP
+    )
   end
-
   #
-  # Saves all data into the file. If file exists, it will
-  # be overrided
+  # Saves all data into the file. If file exists, it will be overriden
+  # @param data Config Data type
   # @param file File name
   # @return {Bool} saving result
   #
-  function save(file::ASCIIString = "config.data")
-    Helper.save(_data.d, file)
+  function save(data::ConfigData, file::String = "config.data")
+    Helper.save(data, file)
   end
   #
-  # Loads all data from the file
+  # Loads all data from the file. If something went wrong new,
+  # default configuration data type will be created.
   # @param file File name
-  # @return {Bool} loading result
+  # @return {Tuple{ConfigData, Bool}} loading result
   #
-  function load(file::ASCIIString = "config.data")
-      try
-        _data.d = Helper.load(file)
-      catch e
-        Helper.warn("Config.load(): $e")
-        return false
-      end
+  function load(file::String = "config.data")
+    local ret = nothing
+    try
+      ret = Helper.load(file)
+    catch e
+      Helper.warn("Config.load(): $e")
+    end
 
-      true
+    typeof(ret) !== ConfigData ? create(true) : ret
+  end
+  #
+  # Checks if config data type is empty
+  # @param data Config Data type
+  # @return {Bool}
+  #
+  function isEmpty(data::ConfigData)
+    length(data.ORGANISM_MUTATION_PROBABILITIES) == 0
   end
   #
   # Formats configuration for usable user's view
-  # @return {ASCIIString}
+  # @return {String}
   #
-  function format()
-    local fields::Array{Symbol, 1} = fieldnames(Data)
+  function format(data::ConfigData)
+    local fields::Array{Symbol, 1} = fieldnames(ConfigData)
     local i::Symbol
-    local arr::Array{ASCIIString, 1} = []
+    local arr::Array{String, 1} = []
 
     for i in fields
-      push!(arr, string(i) * ": " * string(getfield(_data.d, i)))
+      push!(arr, string(i) * ": " * string(getfield(data, i)))
     end
 
     arr
   end
-  #
-  # Returns configuration value according to unique key. In
-  # case of incorrect key nothing will be returned.
-  # @param Field's name symbol
-  # @return {Any|nothing} Value of key in specified section
-  # in case of incorrect section or key returns nothing
-  #
-  function val(name::Symbol)
-    try
-      getfield(_data.d, name)
-    catch(e)
-      Helper.warn("Getter Config.val(): $e")
-    end
-  end
-  #
-  # Sets the value by unique key. Works in pair with getter
-  # val() function
-  # @param key Unique key of the value
-  # @param value Value we have to set
-  # @return Operation boolean result
-  #
-  function val(name::Symbol, value::Any)
-    try
-      setfield!(_data.d, name, value)
-    catch(e)
-      Helper.warn("Setter Config.val(): $e")
-    end
-  end
-  #
-  # Global configuration data
-  #
-  global _data = GData(
-    Data(
-      [110,300,95,0,1,1,1],      # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
-      4,                         # ORGANISM_MUTATIONS_ON_CLONE
-      100,                       # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      700,                       # ORGANISM_MUTATION_PERIOD
-      10000,                     # ORGANISM_MAX_MUTATION_PERIOD
-      4,                         # ORGANISM_MUTATION_AMOUNT
-      100,                       # ORGANISM_MAX_MUTATION_AMOUNT
-      250,                       # ORGANISM_START_AMOUNT
-      7000,                      # ORGANISM_START_ENERGY
-      typemax(UInt32),           # ORGANISM_MAX_ENERGY. Should be less then typemax(UInt32)
-      250,                       # ORGANISM_ENERGY_DECREASE_PERIOD
-      1,                         # ORGANISM_ENERGY_DECREASE_VALUE
-      700,                       # ORGANISM_REMOVE_AFTER_TIMES
-      5,                         # ORGANISM_REMOVE_AMOUNT
-      5,                         # ORGANISM_CLONE_AFTER_TIMES
-      1,                         # ORGANISM_START_COLOR
-      4,                         # CODE_MAX_FUNC_PARAMS
-      1920,                      # WORLD_WIDTH
-      920,                       # WORLD_HEIGHT
-      0,                         # WORLD_FRAME_DELAY
-      0,                         # WORLD_IPS
-      800,                       # WORLD_MAX_ORGANISMS
-      100,                       # WORLD_MIN_ORGANISMS
-      10000,                     # WORLD_START_ENERGY_BLOCKS
-      UInt32(0x000100),          # WORLD_START_ENERGY_AMOUNT
-      0.04,                      # WORLD_MIN_ENERGY_PERCENT
-      400,                       # WORLD_MIN_ENERGY_CHECK_PERIOD
-      1,                         # WORLD_SCALE
-      1,                         # BACKUP_PERIOD
-      7,                         # BACKUP_AMOUNT
-      650,                       # STAT_WIDTH
-      500,                       # STAT_HEIGHT
-      5,                         # STAT_FRAME_DELAY
-      5.0,                       # STAT_UPDATE_PERIOD
-      20,                        # CONNECTION_STEP_ENERGY_PERCENT
-      2000,                      # CONNECTION_SERVER_PORT (current server port)
-      2001,                      # CONNECTION_FAST_SERVER_PORT (current server "fast" mode port)
-      ip"127.0.0.1",             # CONNECTION_SERVER_IP
-      0,                         # CONNECTION_LEFT_SERVER_PORT
-      ip"127.0.0.1",             # CONNECTION_LEFT_SERVER_IP
-      0,                         # CONNECTION_RIGHT_SERVER_PORT
-      ip"127.0.0.1",             # CONNECTION_RIGHT_SERVER_IP
-      0,                         # CONNECTION_UP_SERVER_PORT
-      ip"127.0.0.1",             # CONNECTION_UP_SERVER_IP
-      0,                         # CONNECTION_DOWN_SERVER_PORT
-      ip"127.0.0.1"              # CONNECTION_DOWN_SERVER_IP
-    )
-  )
 end

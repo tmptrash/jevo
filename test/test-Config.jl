@@ -1,83 +1,84 @@
+#
+# TODO: add isEmpty test
+#
 module TestConfig
   using Config
   using FactCheck
 
   facts("Read default value") do
-    @fact Config.val(:WORLD_IPS) --> 0
-  end
-  facts("Read default value with incorrect key") do
-    @fact Config.val(:UNKNOWN_KEY) --> nothing
-  end
-
-  facts("Write value") do
-    Config.val(:WORLD_IPS, 1)
-    @fact Config.val(:WORLD_IPS) --> 1
-    Config.val(:WORLD_IPS, 2)
-    @fact Config.val(:WORLD_IPS) --> 2
-  end
-  facts("Write value in incorrect key") do
-    @fact Config.val(:UNKNOWN_KEY, 1) --> nothing
-    @fact Config.val(:UNKNOWN_KEY) --> nothing
+    @fact Config.create().WORLD_IPS --> 0
   end
 
   facts("Save configuration into the file") do
-    cfgFile = "config.data"
+    local cfgFile = "config.data"
+    local conf    = Config.create()
+
     try rm(cfgFile) end
-    @fact Config.save(cfgFile) --> true
+    @fact Config.save(conf, cfgFile) --> true
     @fact isfile(cfgFile)      --> true
     rm(cfgFile)
   end
   facts("Save/load configuration into/from file with correct data") do
-    cfgFile = "config.data"
+    local cfg::Config.ConfigData = Config.create()
+    local cfgFile::String = "config.data"
+
     try rm(cfgFile) end
-    Config.val(:WORLD_IPS, 666)
-    @fact Config.save(cfgFile)   --> true
-    Config.val(:WORLD_IPS, 777)
-    Config.load(cfgFile)
-    @fact Config.val(:WORLD_IPS) --> 666
+    cfg.WORLD_IPS = 666
+    @fact Config.save(cfg, cfgFile)   --> true
+    cfg.WORLD_IPS = 777
+    cfg = Config.load(cfgFile)
+    @fact cfg.WORLD_IPS --> 666
     rm(cfgFile)
   end
   facts("Load configuration from incorrect file") do
-    cfgFile = "config.data"
+    local cfgFile::String = "config.data"
+    local conf = Config.create()
+
     try rm(cfgFile) end
     io = open(cfgFile, "w")
     write(io, "Hello!")
     close(io)
-    @fact Config.load(cfgFile) --> false
+    println("val: ", typeof(Config.load(cfgFile)))
+    @fact Config.isEmpty(Config.load(cfgFile)) --> true
     rm(cfgFile)
   end
   facts("Load configuration from file, which doesn't exist") do
-    cfgFile = "config.data"
+    local cfgFile::String = "config.data"
     try rm(cfgFile) end
-    @fact Config.load(cfgFile) --> false
+    @fact Config.isEmpty(Config.load(cfgFile)) --> true
   end
 
   facts("Combined test of all functions") do
-    cfgFile1 = "config1.data"
-    cfgFile2 = "config2.data"
+    local cfg::Config.ConfigData = Config.create()
+    local cfgFile1::String = "config1.data"
+    local cfgFile2::String = "config2.data"
 
     try rm(cfgFile1) end
     try rm(cfgFile2) end
-    @fact Config.val(:WORLD_IPS, 666) --> 666
-    @fact Config.save(cfgFile1)       --> true      # IPS === 666
-    @fact Config.val(:WORLD_IPS)      --> 666
-    @fact Config.val(:WORLD_IPS, 777) --> 777
-    @fact Config.val(:WORLD_IPS)      --> 777
-    @fact Config.load(cfgFile1)       --> true
-    @fact Config.val(:WORLD_IPS)      --> 666
-    @fact Config.val(:WORLD_IPS, 777) --> 777
-    @fact Config.val(:WORLD_IPS)      --> 777
+    cfg.WORLD_IPS = 666
+    @fact Config.save(cfg, cfgFile1)       --> true # IPS === 666
+    @fact cfg.WORLD_IPS --> 666
+    cfg.WORLD_IPS = 777
+    @fact cfg.WORLD_IPS                    --> 777
+    cfg = Config.load(cfgFile1)
+    @fact Config.isEmpty(cfg)              --> false
+    @fact cfg.WORLD_IPS                    --> 666
+    cfg.WORLD_IPS = 777
+    @fact cfg.WORLD_IPS                    --> 777
 
-    @fact Config.save(cfgFile2)       --> true      # IPS === 777
-    @fact Config.val(:WORLD_IPS, 666) --> 666
-    @fact Config.val(:WORLD_IPS)      --> 666
-    @fact Config.load(cfgFile2)       --> true
-    @fact Config.val(:WORLD_IPS)      --> 777
-    
-    @fact Config.load(cfgFile1)       --> true      # IPS === 666
-    @fact Config.val(:WORLD_IPS)      --> 666
-    @fact Config.load(cfgFile2)       --> true      # IPS === 777
-    @fact Config.val(:WORLD_IPS)      --> 777
+    @fact Config.save(cfg, cfgFile2)       --> true      # IPS === 777
+    cfg.WORLD_IPS = 666
+    @fact cfg.WORLD_IPS                    --> 666
+    cfg = Config.load(cfgFile2)
+    @fact Config.isEmpty(cfg)              --> false
+    @fact cfg.WORLD_IPS                    --> 777
+
+    cfg = Config.load(cfgFile1)
+    @fact Config.isEmpty(cfg)              --> false     # IPS === 666
+    @fact cfg.WORLD_IPS                    --> 666
+    cfg = Config.load(cfgFile2)
+    @fact Config.isEmpty(cfg)              --> false     # IPS === 777
+    @fact cfg.WORLD_IPS                    --> 777
 
     rm(cfgFile1)
     rm(cfgFile2)

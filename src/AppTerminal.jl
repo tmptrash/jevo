@@ -26,10 +26,11 @@ end
 # server responses and initializes Terinal module.
 #
 function main()
+  local cfg::Config.ConfigData = Config.create()
   # TODO: ip should be get from config
-  local con = Client.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT))
+  local con = Client.create(ip"127.0.0.1", cfg.CONNECTION_SERVER_PORT)
 
-  if !Client.isOk(con) quit() end
+  if !Client.isOk(con) || Config.isEmpty(cfg) quit() end
   Event.on(con.observer, Client.EVENT_AFTER_REQUEST, onAnswer)
   Terminal.init(con)
 end

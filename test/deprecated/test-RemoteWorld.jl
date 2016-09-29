@@ -1,9 +1,9 @@
 module TestRemoteWorld
-  using RemoteWorld
-  using Helper
-  using FactCheck
-  using TestWorldServer
-  using Client
+  #using RemoteWorld
+  #using Helper
+  #using FactCheck
+  #using TestWorldServer
+  #using Client
 
   # facts("Tests...") do
   #   ccon  = Client.create(Helper.IP, Helper.PORT)

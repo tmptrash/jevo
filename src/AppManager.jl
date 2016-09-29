@@ -19,19 +19,16 @@ const ARG_RECOVER = "recover"
 # runs in a common mode.
 #
 function main()
-  local args = CommandLine.create()
+  local args::Dict{String, String} = CommandLine.create()
+  local man::ManagerTypes.ManagerData = Manager.create()
 
   if CommandLine.has(args, ARG_RECOVER)
-    Helper.info(string("Recovering from backup: ", Backup.lastFile()))
-    if Manager.recover()
-      Manager.run(true)
-      return true
-    end
+    Manager.recover(man)
+    return Manager.run(man, true)
   end
-  Helper.info("Running from scratch...")
-  Manager.run()
 
-  return true
+  Helper.info("Running from scratch...")
+  Manager.run(man)
 end
 #
 # Application entry point

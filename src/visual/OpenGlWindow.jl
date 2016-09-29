@@ -11,7 +11,7 @@
 # Usage:
 #   import OpenGlWindow
 #   ...
-#   win = OpenGlWindow.create(300, 300)
+#   win = OpenGlWindow.create(300, 300, 3)
 #   CanvasWindow.dot(win, 20, 20, UInt32(11197883)) # R=AA,G=DD,B=BB
 #   OpenGlWindow.dot(win, 30, 30, UInt32(11197883)) # R=AA,G=DD,B=BB
 #   OpenGlWindow.update(win)                        # Two dots will be shown
@@ -25,8 +25,7 @@
 module OpenGlWindow
   import GR
   import Colors
-  import Config
-  import DotColors
+  import Dots
   import Helper
 
   export Window
@@ -65,8 +64,8 @@ module OpenGlWindow
   # @param title Window title
   # @return Window object
   #
-  function create(width::Int, height::Int, scale::Int = Config.val(:WORLD_SCALE), title::ASCIIString = "")
-    local emptyColor::Int = DotColors.INDEX_EMPTY
+  function create(width::Int, height::Int, scale::Int, title::String = "")
+    local emptyColor::Int = Dots.INDEX_EMPTY
     local win::Window = Window(scale, Int[0], Int[0], width, height, 1.0, true)
     local wndWidth::Int = width * scale
     local wndHeight::Int = height * scale + _FOOTER_HEIGHT
@@ -77,11 +76,11 @@ module OpenGlWindow
     #
     # Fill background with "empty" color
     #
-    GR.setcolorrep(emptyColor, DotColors.COLOR_EMPTY...)
+    GR.setcolorrep(emptyColor, Dots.COLOR_EMPTY...)
     GR.setlinewidth(1)
     GR.setlinetype(GR.LINETYPE_SOLID)
     GR.setlinecolorind(emptyColor)
-    GR.settextcolorind(DotColors.INDEX_TEXT)
+    GR.settextcolorind(Dots.INDEX_TEXT)
     #
     # Settings for fillrect() function
     #
@@ -100,6 +99,11 @@ module OpenGlWindow
     # TODO: lines "by hands".
     #
     GR.drawrect(1, wndWidth, 1, wndHeight)
+    #
+    # Sets text height in title, otherwise it will be sized depending
+    # on window size. So now it doesn't depend on window size.
+    #
+    GR.setcharheight(Float64(wndHeight / 1920) * 0.00001)
     OpenGlWindow.title(win, title)
     update(win)
 
@@ -126,9 +130,9 @@ module OpenGlWindow
     #
     # We use GR library. It supports only 1256 colors. We have to check it
     #
-    if color > UInt32(DotColors.MAX_COLOR)
+    if color > UInt32(Dots.MAX_COLOR)
       Helper.warn(string("Unsupported color index ", color))
-      color = UInt32(DotColors.MAX_COLOR)
+      color = UInt32(Dots.MAX_COLOR)
     end
     if win.scale > 1
       x = (x - 1) * win.scale + 1
@@ -150,15 +154,15 @@ module OpenGlWindow
   # @param win Window data type
   # @param title String title
   #
-  function title(win::Window, title::ASCIIString)
+  function title(win::Window, title::String)
     local ymax::Float64 = Float64(win.height * win.scale + _FOOTER_HEIGHT)
     local ycoef::Float64 = win.ratio / ymax
 
-    GR.setlinecolorind(DotColors.INDEX_EMPTY)
-    GR.setfillcolorind(DotColors.INDEX_EMPTY)
+    GR.setlinecolorind(Dots.INDEX_EMPTY)
+    GR.setfillcolorind(Dots.INDEX_EMPTY)
     GR.fillrect(1, win.width * win.scale + win.scale, ymax - _FOOTER_HEIGHT + win.scale, ymax)
     # TODO: fix this hardcode (15.0)
-    GR.text(0.01, win.ratio - (ycoef * _FOOTER_HEIGHT) + ycoef * 15.0, title)
+    GR.text(0.01, win.ratio - (ycoef * _FOOTER_HEIGHT) + ycoef * 19.0, title)
   end
   #
   # Updates the canvas. It's not nessesary to update it after
@@ -193,7 +197,7 @@ module OpenGlWindow
     	GR.setwsviewport(0, mSize, 0, mSize * ratio)
     	GR.setwswindow(0, 1, 0, ratio)
     else
-    	ratio = float(w) / height
+    	ratio = float(width) / height
     	mSize = mHeight * height / scrHeight
     	GR.setwsviewport(0, mSize * ratio, 0, mSize)
     	GR.setwswindow(0, ratio, 0, 1)

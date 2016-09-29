@@ -7,9 +7,11 @@ import RemoteStatistics
 # Analog of main() in C language
 #
 function main()
+  local cfg::Config.ConfigData = Config.create()
+
   # TODO: ip should be in config
-  if (rs = RemoteStatistics.create(ip"127.0.0.1", 2000)) === false quit() end
-  RemoteStatistics.start(rs)
+  if Config.isEmpty(cfg) || (rs = RemoteStatistics.create(ip"127.0.0.1", 2000, cfg.STAT_WIDTH, cfg.STAT_HEIGHT)) === false quit() end
+  RemoteStatistics.start(rs, cfg.STAT_FRAME_DELAY)
 end
 #
 # Application entry point

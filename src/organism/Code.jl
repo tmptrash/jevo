@@ -60,11 +60,12 @@ module Code
   # @line
   # Returns AST expression for variable declaration. Format:
   # local name::Type = value
+  # @param cfg Global configuration type
   # @param org Organism we have to mutate
   # @param pos Position for current mutation
   # @return {Expr|Expr(:nothing)}
   #
-  function var(org::Creature.Organism, pos::Helper.Pos)
+  function var(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
     local typ::DataType = @randType()
     local var::Symbol = @newVar(org)
     local block::Creature.Block = @getBlock(org, pos)
@@ -84,16 +85,17 @@ module Code
   # Creates custom function with unique name, random arguments with
   # default values. By default it returns first parameter as local
   # variable
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Code position
   # @return {Expr|Expr(:nothing)}
   #
-  function fn(org::Creature.Organism, pos::Helper.Pos)
+  function fn(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
     local typ::DataType
     local sym::Symbol
     local i::Int
     local exp::Expr
-    local paramLen::Int = rand(1:Config.val(:CODE_MAX_FUNC_PARAMS))
+    local paramLen::Int = Helper.fastRand(cfg.CODE_MAX_FUNC_PARAMS)
     local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing))
     local blocks::Array{Creature.Block, 1} = [block]
     #
@@ -119,6 +121,13 @@ module Code
     #
     org.funcs[pos.fnIdx].blocks[pos.blockIdx].defIndex += 1
     block.expr = fnEx.args[2]
+    #
+    # This line fixes Julia small issue with additional comment line,
+    # which is added during new function creation. We have to remove
+    # this comment line (head === :line) to prevent incorrect org.codeSize
+    # calculation.
+    #
+    _removeCommentLine(block.expr.args)
     push!(block.expr.args, :(return $(params[1].args[1].args[1])))
     push!(org.funcs, Creature.Func(fnEx, blocks))
 
@@ -131,25 +140,27 @@ module Code
   # It choose custom function from org.funcs array, fills parameters
   # and call it. It also creates new variable with appropriate type.
   # Example: var_x = func_x(<args>)
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Code position
   # @return {Expr|Expr(:nothing)}
   #
-  function fnCall(org::Creature.Organism, pos::Helper.Pos)
+  function fnCall(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
     local funcsLen::Int             = length(org.funcs)
     if funcsLen < 2 return Expr(:nothing) end
-    local fnEx::Expr                = org.funcs[rand(2:funcsLen)].code          # only custom function may be called
-    local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]      # return DataType of Custom function
-    local var::Symbol               = @randVar(org, pos, typ)                   # var = <fn-name>(...)
-    local args::Array{Any, 1}       = fnEx.args[1].args                         # shortcut to func args
-    local types::Array{DataType, 1} = Array{DataType, 1}()                      # func types only
+    local fnEx::Expr                = org.funcs[Helper.fastRand(funcsLen-1)+1].code # only custom function may be called
+    local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]          # return DataType of Custom function
+    local var::Symbol               = @randVar(org, pos, typ)                       # var = <fn-name>(...)
+    if var === :nothing return Expr(:nothing) end
+    local args::Array{Any, 1}       = fnEx.args[1].args                             # shortcut to func args
+    local types::Array{DataType, 1} = Array{DataType, 1}()                          # func types only
     local argsLen::Int              = length(args)
 
     if argsLen > 1
       #
       # We start from 2, because first argument is a function symbol
       #
-      for i = 2:rand(2:argsLen) push!(types, args[i].args[1].args[2]) end
+      for i = 2:(Helper.fastRand(argsLen-1)+1) push!(types, args[i].args[1].args[2]) end
     end
     fnEx = :($var=$(fnEx.args[1].args[1])($([(ex = @randVar(org, pos, i); if ex === :nothing return Expr(:nothing) end;ex) for i in types]...)))
     #
@@ -164,18 +175,25 @@ module Code
   # @block
   # if operator implementation. It contains block inside, so it can't be inside
   # other block. For example, it can't be inside body of "for" operator.
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Code position
   # @return {Expr|Expr(:nothing)}
   #
-  function condition(org::Creature.Organism, pos::Helper.Pos)
+  function condition(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
     local typ::DataType = @randType()
     local v1::Symbol    = @randVar(org, pos, typ)
     if v1 === :nothing return Expr(:nothing) end
     local v2::Symbol    = @randVar(org, pos, typ)
-    local op::Symbol    = _COMPARE_OPERATORS[rand(1:length(_COMPARE_OPERATORS))]
+    local op::Symbol    = _COMPARE_OPERATORS[Helper.fastRand(length(_COMPARE_OPERATORS))]
     local ifEx          = :(if $(op)($(v1),$(v2)) end) # if v1 comparison v2 end
-
+    #
+    # This line fixes Julia small issue with additional comment line,
+    # which is added during new condition creation. We have to remove
+    # this comment line (head === :line) to prevent incorrect org.codeSize
+    # calculation.
+    #
+    _removeCommentLine(ifEx.args[2].args)
     push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), ifEx.args[2]))
     ifEx
   end
@@ -185,15 +203,22 @@ module Code
   # Creates a for loop. We have to create small loops, because they
   # affect entire speed. This is why we divide amount into 8. So max
   # loop iterations < 8
+  # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Position in a code
   # @return {Expr|Expr(:nothing)}
   #
-  function loop(org::Creature.Organism, pos::Helper.Pos)
+  function loop(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
     local v::Symbol = @randVar(org, pos, Int8)
     if v === :nothing return Expr(:nothing) end
     local loopEx    = :(for i::Int8 = 1:div($v, _LOOP_STEPS_DIVIDER) end)
-
+    #
+    # This line fixes Julia small issue with additional comment line,
+    # which is added during new loop creation. We have to remove
+    # this comment line (head === :line) to prevent incorrect org.codeSize
+    # calculation.
+    #
+    _removeCommentLine(loopEx.args[2].args)
     push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), loopEx.args[2]))
     loopEx
   end
@@ -224,7 +249,9 @@ module Code
     if exp.head === :function
       idx = findfirst((f::Creature.Func) -> f.code === exp, org.funcs)
       blocks = org.funcs[idx].blocks
-      for i = 1:length(blocks) org.codeSize -= length(blocks[i].expr.args) end
+      for i = 1:length(blocks)
+        org.codeSize -= length(blocks[i].expr.args)
+      end
       org.codeSize += 1 # skip "return"
       org.funcs[1].blocks[1].defIndex -= 1
       deleteat!(org.funcs, idx)
@@ -259,8 +286,8 @@ module Code
   # @return {Pos} Position in a code
   #
   function getRandPos(org::Creature.Organism)
-    local fnIdx   ::Int = rand(1:length(org.funcs))
-    local blockIdx::Int = rand(1:length(org.funcs[fnIdx].blocks))
+    local fnIdx   ::Int = Helper.fastRand(length(org.funcs))
+    local blockIdx::Int = Helper.fastRand(length(org.funcs[fnIdx].blocks))
     local block   ::Creature.Block = org.funcs[fnIdx].blocks[blockIdx]
     #
     # In this line we skip "return" operator and lines with variables
@@ -271,8 +298,17 @@ module Code
     Helper.Pos(
       fnIdx,
       blockIdx,
-      rand(1:lines)
+      Helper.fastRand(lines)
     )
+  end
+  #
+  # Removes comment line from code expression. Comment line is created
+  # every time if block (quote...end) is created. We have to remove it,
+  # because if affects aon amount of code lines, but does nothing.
+  # @param args Code lines array
+  #
+  function _removeCommentLine(args::Array{Any, 1})
+    if length(args) > 0 && args[1].head === :line deleteat!(args, 1) end
   end
 
   #

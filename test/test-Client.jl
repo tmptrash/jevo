@@ -1,3 +1,6 @@
+#
+# TODO: add tests for fast mode
+#
 module TestClient
   using FactCheck
   using Connection

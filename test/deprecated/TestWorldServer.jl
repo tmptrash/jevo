@@ -1,7 +1,7 @@
 #
 # This module is used only for tests. It doesn't a
 # part of jevo aplication.
-#
+# TODO: i think this module should be removed
 module TestWorldServer
   import World
   import Helper
@@ -12,9 +12,9 @@ module TestWorldServer
   #
   # An analog of ManagerRpc.getRegion() function
   #
-  function getRegion(x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
-    maxWidth  = size(Manager._data.world.data)[2]
-    maxHeight = size(Manager._data.world.data)[1]
+  function getRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
+    maxWidth  = size(man.world.data)[2]
+    maxHeight = size(man.world.data)[1]
 
     if (x1 < 1 || x1 > maxWidth)  x1 = maxWidth  end
     if (y1 < 1 || y1 > maxHeight) y1 = maxHeight end

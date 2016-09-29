@@ -1,5 +1,5 @@
-        local var_20::ASCIIString = "A2H8mFCS"
-        function func_6(var_14::ASCIIString="qBVS8Sqn")
+        local var_20::String = "A2H8mFCS"
+        function func_6(var_14::String="qBVS8Sqn")
             local var_19::Int16 = 26597
             Creature.stepUp(o)
             Creature.stepRight(o)
@@ -13,7 +13,7 @@
         function func_4(var_11::Int16=-19840)
             Creature.stepDown(o)
             Creature.stepUp(o)
-            local var_17::ASCIIString = "Pb1xwNW4"
+            local var_17::String = "Pb1xwNW4"
             return var_11
         end
         local var_8::Int8 = 71

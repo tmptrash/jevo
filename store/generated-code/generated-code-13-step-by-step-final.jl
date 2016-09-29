@@ -26,7 +26,7 @@ RpcApi.SimpleOrganism(0x0000000000063235,:(function (o::Creature.Organism)
      end
      local var_21::Int8 = 88
      local var_20::Int16 = -11365
-     function func_17(var_15::ASCIIString="Dy4HZerj",var_16::Int16=3937)
+     function func_17(var_15::String="Dy4HZerj",var_16::Int16=3937)
          return var_15
      end
      local var_3::Int16 = 32203
@@ -130,7 +130,7 @@ RpcApi.SimpleOrganism(0x000000000006840b,:(function (o::Creature.Organism,)
      end
      local var_21::Int8 = 88
      local var_20::Int16 = -11365
-     function func_17(var_15::ASCIIString="Dy4HZerj",var_16::Int16=3937)
+     function func_17(var_15::String="Dy4HZerj",var_16::Int16=3937)
          o.mem[var_16] = var_16
          o.mem[var_16] = var_16
          return var_15
@@ -201,7 +201,7 @@ RpcApi.SimpleOrganism(0x000000000006840b,:(function (o::Creature.Organism,)
 
 [RpcApi.SimpleOrganism(0x000000000007c887,:(function (o::Creature.Organism,)
      function func_35(var_33::Bool=false,var_34::Int16=22779)
-         local var_45::ASCIIString = "C5qJrm41"
+         local var_45::String = "C5qJrm41"
          return var_33
      end
      function func_24(var_23::Int8=28)
@@ -239,7 +239,7 @@ RpcApi.SimpleOrganism(0x000000000006840b,:(function (o::Creature.Organism,)
      end
      local var_21::Int8 = 88
      local var_20::Int16 = -11365
-     function func_17(var_15::ASCIIString="Dy4HZerj",var_16::Int16=3937)
+     function func_17(var_15::String="Dy4HZerj",var_16::Int16=3937)
          Creature.stepRight(o)
          Creature.stepUp(o)
          return var_15
@@ -361,7 +361,7 @@ RpcApi.SimpleOrganism(0x000000000006840b,:(function (o::Creature.Organism,)
      end
      local var_21::Int8 = 88
      local var_20::Int16 = -11365
-     function func_17(var_15::ASCIIString="Dy4HZerj",var_16::Int16=3937)
+     function func_17(var_15::String="Dy4HZerj",var_16::Int16=3937)
          var_16 = if haskey(o.mem,var_16)
                  o.mem[var_16]
              else
@@ -482,7 +482,7 @@ RpcApi.SimpleOrganism(0x000000000006840b,:(function (o::Creature.Organism,)
      end
      local var_21::Int8 = 88
      local var_20::Int16 = -11365
-     function func_17(var_15::ASCIIString="Dy4HZerj",var_16::Int16=3937)
+     function func_17(var_15::String="Dy4HZerj",var_16::Int16=3937)
          var_15 = var_15[if length(var_15) > length(var_15)
                          1
                      else
@@ -565,7 +565,7 @@ RpcApi.SimpleOrganism(0x000000000006840b,:(function (o::Creature.Organism,)
          return var_33
      end
      function func_24(var_23::Int8=28)
-         local var_49::ASCIIString = "WlX2dxq4"
+         local var_49::String = "WlX2dxq4"
          local var_44::Int64 = -8745441503928347880
          Creature.eatUp(o,Int(var_23))
          Creature.eatRight(o,Int(var_23))
@@ -610,7 +610,7 @@ RpcApi.SimpleOrganism(0x000000000006840b,:(function (o::Creature.Organism,)
      end
      local var_21::Int8 = 88
      local var_20::Int16 = -11365
-     function func_17(var_15::ASCIIString="Dy4HZerj",var_16::Int16=3937)
+     function func_17(var_15::String="Dy4HZerj",var_16::Int16=3937)
          return var_15
      end
      local var_3::Int16 = 32203
@@ -693,7 +693,7 @@ RpcApi.SimpleOrganism(0x000000000006840b,:(function (o::Creature.Organism,)
         local var_46::Bool = true
         function func_35(var_33::Bool=false,var_34::Int16=22779)
             local var_72::Int16 = -20135
-            local var_52::ASCIIString = "ftwMEhZ0"
+            local var_52::String = "ftwMEhZ0"
             local var_67::Int16 = 32063
             local var_68::Int8 = 92
             Creature.eatDown(o,Int(var_68))
@@ -762,7 +762,7 @@ RpcApi.SimpleOrganism(0x000000000006840b,:(function (o::Creature.Organism,)
                 end
             o.mem[var_64] = var_64
             for i::Int8 = 1:div(var_23,_LOOP_STEPS_DIVIDER)
-                local var_71::ASCIIString = "J0uBz06k"
+                local var_71::String = "J0uBz06k"
             end
             Creature.eatLeft(o,Int(var_23))
             Creature.eatLeft(o,Int(var_23))
@@ -804,7 +804,7 @@ RpcApi.SimpleOrganism(0x000000000006840b,:(function (o::Creature.Organism,)
         Creature.eatDown(o,Int(var_21))
         var_21 = func_24(var_21)
         if var_2 < var_21
-            local var_75::ASCIIString = "k8rd2EVQ"
+            local var_75::String = "k8rd2EVQ"
             Creature.stepRight(o)
         end
         var_21 = func_24(var_21)

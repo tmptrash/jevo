@@ -12,10 +12,11 @@
 # TODO: like world, terminal and so on.
 # TODO: add remote functions for changing period and probs
 # TODO: add command line parameter for creating default config file
-# TODO: add create method. It should returm ManagerData() type
+# TODO: add create method. It should return ManagerData() type
 # TODO: describe frozen organisms conception
 #
 module Manager
+  import CodeConfig.@if_status
   import Creature
   import Mutator
   import World
@@ -29,9 +30,8 @@ module Manager
   import FastApi
   import Config
   import ManagerTypes
-  # TODO: remove this!
-  using Debug
 
+  export create
   export run
   #
   # This is how we collect Manager module from it's parts(files)
@@ -40,251 +40,237 @@ module Manager
   include("ManagerRpc.jl")
   include("ManagerBackup.jl")
   include("ManagerParams.jl")
-  include("ManagerStat.jl")
+  @if_status include("ManagerStatus.jl")
   #
-  # Current Manager connection objects. They are: server and
-  # all four clients. "frozen" field is used for storing "frozen"
-  # organisms (which are transferring from current Manager to
-  # another one by network). "streaming" flag means, that streaming
-  # mode is on or off. Here streaming is a world dots streaming.
+  # Creates manager related data instance. It will be passed to all
+  # manager methods
   #
-  type Connections
-    server    ::Server.ServerConnection
-    fastServer::Server.ServerConnection
-    left      ::Client.ClientConnection
-    right     ::Client.ClientConnection
-    up        ::Client.ClientConnection
-    down      ::Client.ClientConnection
-    frozen    ::Dict{UInt, Creature.Organism}
-    streamInit::Bool
-  end
-  #
-  # Manager's related type. Contains world, command line parameters,
-  # organisms map and so on... If some fields will be changed, don't
-  # forget to change them in recover() function.
-  #
-  type ManagerData
-    #
-    # Instance of the world
-    #
-    world::World.Plane
-    #
-    # Positions map, which stores positions of all organisms. Is used
-    # for fast access to the organism by it's coordinates.
-    #
-    positions::Dict{Int, Creature.Organism}
-    #
-    # Map of organisms by id
-    #
-    organisms::Dict{UInt, Creature.Organism}
-    #
-    # All available organism's tasks
-    #
-    tasks::Array{ManagerTypes.OrganismTask, 1}
-    #
-    # Parameters passed through command line
-    #
-    params::Dict{ASCIIString, ASCIIString}
-    #
-    # Unique id of organism. It's increased every time, when new
-    # organism will be created
-    #
-    organismId::UInt
-    #
-    # Total amount of organisms: alive + dead
-    #
-    totalOrganisms::UInt
-    #
-    # Organism with minimum amount of energy
-    #
-    minOrg::Creature.Organism
-    #
-    # Organism with maximum amount of energy
-    #
-    maxOrg::Creature.Organism
-    #
-    # Id of organism with minimum amount of energy
-    #
-    minId::UInt
-    #
-    # Id of organism with maximum amount of energy
-    #
-    maxId::UInt
-    #
-    # If true, then minimum terminal messages will be posted
-    #
-    quiet::Bool
+  function create()
+    local cfg::Config.ConfigData = Config.create()
+    local man::ManagerTypes.ManagerData = ManagerTypes.ManagerData(
+      cfg,                                                                      # cfg
+      World.create(cfg.WORLD_WIDTH, cfg.WORLD_HEIGHT),                          # world
+      Dict{Int, Creature.Organism}(),                                           # positions
+      Dict{UInt, Creature.Organism}(),                                          # organisms
+      ManagerTypes.OrganismTask[],                                              # tasks
+      CommandLine.create(),                                                     # params
+      UInt(1),                                                                  # organismId
+      UInt(0),                                                                  # totalOrganisms
+      CommandLine.has(CommandLine.create(), ARG_QUIET),                         # quiet
+      function() end,                                                           # dotCallback
+      function() end,                                                           # moveCallback
+      current_task(),                                                           # task
+      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0)                               # status
+    )
+    local cons::ManagerTypes.Connections = _createConnections(man)
+
+    man.cons = cons
+    man
   end
   #
   # Runs Manager instance, one world, server an so on... Blocking
   # function.
+  # @param man Manager data type
   # @param recover true if we have to recover from last backup
   # @return {Bool} run status
   #
-  function run(recover::Bool = false)
-    local counter::Int = 0
-    local ips    ::Int = 0
-    local stamp  ::Float64 = time()
-    local bstamp ::Float64 = time()
-    local sstamp ::Float64 = time()
-    #
-    # This server is listening for all other managers and remote
-    # terminal. It runs obtained commands and send answers back.
-    # In other words, it works like RPC runner... Fast server is
-    # listening for "fast" clients and works in "fast" mode.
-    #
-    Server.run(_cons.server)
-    # TODO: possibly, we don't need to run this server due to performance issue
-    Server.run(_cons.fastServer)
-    #
-    # If user set up some amount of organisms they will be created
-    # in this call. If we are in recover mode, then this step should
-    # be skipped.
-    #
-    if recover === false
-      setRandomEnergy()
-      createOrganisms()
-    end
-    #
-    # This is main infinite loop. It manages input connections
-    # and organism's tasks switching.
-    #
-    while true
+  function run(man::ManagerTypes.ManagerData, recover::Bool = false)
+    local counter  ::Int = 1 # must be started from 1!
+    local ips      ::Int = 0
+    local istamp   ::Float64 = time()
+    local bstamp   ::Float64 = istamp
+    local ystamp   ::Float64 = istamp
+    local cons     ::ManagerTypes.Connections = man.cons
+    local tasks    ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
+    local cfg      ::Config.ConfigData = man.cfg
+    local needYield::Bool = false
+
+    try
       #
-      # We have to wait while all clients are ready for streaming. This
-      # is because the error in serializer. See issue for details:
-      # https://github.com/JuliaLang/julia/issues/16746
+      # This server is listening for all other managers and remote
+      # terminal. It runs obtained commands and send answers back.
+      # In other words, it works like RPC runner... Fast server is
+      # listening for "fast" clients and works in "fast" mode.
       #
-      if Manager._cons.streamInit::Bool yield(); continue end
+      Server.run(man.cons.server)
+      # TODO: possibly, we don't need to run this server due to performance issue
+      Server.run(man.cons.fastServer)
       #
-      # After all organisms die, we have to create next, new population
+      # If user set up some amount of organisms they will be created
+      # in this call. If we are in recover mode, then this step should
+      # be skipped.
       #
-      if length(Manager._data.tasks) < 1 createOrganisms() end
+      if recover === false
+        setRandomEnergy(man, cfg.WORLD_START_ENERGY_BLOCKS, cfg.WORLD_START_ENERGY_AMOUNT)
+        createOrganisms(man)
+      end
       #
-      # This call runs all organism related tasks one by one
+      # This is main infinite loop. It manages input connections
+      # and organism's tasks switching.
       #
-      counter = _updateOrganisms(counter)
-      #
-      # We have to update IPS (Iterations Per Second) every second
-      #
-      ips, stamp = _updateIps(ips, stamp)
-      #
-      # Here we make auto-backup of application if there is a time
-      #
-      bstamp = _updateBackup(bstamp)
-      #
-      # Here we update statistics data
-      #
-      sstamp = _updateStat(sstamp)
-      #
-      # This call switches between all non blocking asynchronous
-      # functions (see @async macro). For example, it handles all
-      # input connections for current server, switches between
-      # organism Tasks and so on...
-      # TODO: this line is slow. we have to use it only if needed!
-      # TODO: if there are no connections we have to skip it
-      yield()
+      while true
+      #for i=1:1000 # TODO: use macroses here instead of comments
+        #
+        # We have to wait while all clients are ready for streaming. This
+        # is because the error in serializer. See issue for details:
+        # https://github.com/JuliaLang/julia/issues/16746
+        #
+        if cons.streamInit yield(); @if_status man.status.yps += 1; continue end
+        #
+        # This is global time stamp in seconds
+        #
+        stamp = time()
+        #
+        # This call runs all organism related tasks one by one
+        #
+        counter = _updateOrganisms(man, counter, needYield)
+        #
+        # We have to update IPS (Iterations Per Second) every second
+        #
+        ips, istamp = _updateIps(man, ips, stamp, istamp)
+        #
+        # Here we make auto-backup of application if there is a time
+        #
+        bstamp = _updateBackup(man, cfg, stamp, bstamp)
+        #
+        # This call switches between all non blocking asynchronous
+        # functions (see @async macro). For example, it handles all
+        # input connections for current server. But we don't need to
+        # call yield() every time, because it eats CPU cicles. We
+        # have to wait some period and call yield() to check if
+        # sockets have data.
+        # TODO: this code may be optimized. We already call yield()
+        # TODO: in _onDot() handler. Second idea, that we have to use
+        # TODO: yieldto(), because we know all network related tasks
+        # TODO: created by @async() macro.
+        ystamp, needYield = _updateTasks(man, stamp, ystamp, needYield)
+        #
+        # It's important to skip this function if CodeConfig.showStatus
+        # flag is set to false. See CodeConfig::showStatus for details.
+        #
+        @if_status _updateStatus(man, stamp)
+      end
+    catch e
+      Helper.error("Manager.run(): $e")
+      showerror(STDOUT, e, catch_backtrace())
+      return false
     end
 
     true
+  end
+  #
+  # This is how we stop the task. Stop means run last yieldto()
+  # inside the task, but not more. Otherwise it will stuck inside
+  # the task forever. This method only marks the task as
+  # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
+  # @param task Task
+  #
+  function stopTask(task::Task)
+    #try Base.throwto(task, InterruptException()) end
+    #task.state = :failed
   end
 
   #
   # Generates unique id by world position. This macro is
   # private insode Manager module
+  # @param man Manager data type
   # @param {Helper.Point} pos Unique World position
   # @return {Int} Unique pos id
   #
-  function _getPosId(pos::Helper.Point) pos.y * Manager._data.world.width + pos.x end
+  function _getPosId(man::ManagerTypes.ManagerData, pos::Helper.Point) pos.y * man.world.width + pos.x end
   #
   # Checks if specified position in a world is free. Other organism
   # or an energy block may be there at the moment.
   # @param pos Position we need to check
   # @return {Bool} true - free point, false - filled point
-  #
-  function _isFree(pos::Helper.Point)
-    !haskey(Manager._data.positions, _getPosId(pos)) && World.getEnergy(Manager._data.world, pos) === UInt32(0)
-  end
-  #
-  # Returns all energy in a world, except energy of organisms
-  # @return {Int} Amount of energy
-  #
-  function _getWorldEnergy()
-    local plane::Array{UInt32, 2} = Manager._data.world.data
-    local pos::Helper.Point = Helper.Point(0, 0)
-    local energy::Int = 0
-    local x::Int
-    local y::Int
-
-    for x in 1:size(plane)[2]
-      for y in 1:size(plane)[1]
-        pos.x = x
-        pos.y = y
-        if !Manager._isFree(pos) energy += 1 end
-      end
-    end
-
-    energy
+  # TODO: this method is very slow!!!
+  function _isFree(man::ManagerTypes.ManagerData, pos::Helper.Point)
+    !haskey(man.positions, _getPosId(man, pos)) && World.getEnergy(man.world, pos) === UInt32(0)
   end
   #
   # Updates IPS (Iterations Per second) counter and stores it in config
+  # @param man Manager data type
   # @param ips IPS
-  # @param stamp Current UNIX tame stamp value
-  # @return {UInt, Float64} new ips and current UNIX time stamp
+  # @param stamp Current UNIX time stamp value
+  # @param istamp IPS last UNIX time stamp value
+  # @return {Int, Int} new ips and current UNIX time stamp
   #
-  function _updateIps(ips::Int, stamp::Float64)
-    local socks::Array{Base.TCPSocket, 1} = Manager._cons.fastServer.socks
-    local ts::Float64 = time() - stamp
-    local dataIndex::UInt8 = UInt8(FastApi.API_UINT64)
+  function _updateIps(man::ManagerTypes.ManagerData, ips::Int, stamp::Float64, istamp::Float64)
+    local ts::Float64 = stamp - istamp
+    local sock::Base.TCPSocket
+    local dataIndex::UInt8
     local localIps::Int
     local i::Int
-
-    if ts >= 5.0
-      localIps = trunc(Int, ips / ts)
-	  #print("ips: ", localIps); #quit()
-      Config.val(:WORLD_IPS, localIps)
-      for i = 1:length(socks)
-        if Helper.isopen(socks[i])
-          Server.request(socks[i], dataIndex, localIps)
+    # TODO: 5.0 seconds should be get from config
+    if ts >= 1.0
+      localIps  = trunc(Int, ips / ts)
+      dataIndex = UInt8(FastApi.API_UINT64)
+      man.cfg.WORLD_IPS = localIps
+      @inbounds for sock in man.cons.fastServer.socks
+        if Helper.isopen(sock)
+          Server.request(sock, dataIndex, localIps)
+          @if_status man.status.rps += 1
         end
       end
-      return 0, time()
+      return 0, stamp
     end
 
-    ips + 1, stamp
+    ips + 1, istamp
   end
   #
   # Checks if it's a time to make application backup
+  # @param man Manager data type
+  # @param cfg Global configuration type
   # @param stamp Current UNIX timestamp
+  # @param bstamp Backup last UNIX time stamp value
   #
-  function _updateBackup(stamp::Float64)
-    if (time() - stamp) > Float64(Config.val(:BACKUP_PERIOD)) * 60.0
-      if length(Manager._data.tasks) > 0 backup() end
-      return time()
+  function _updateBackup(man::ManagerTypes.ManagerData, cfg::Config.ConfigData, stamp::Float64, bstamp::Float64)
+    if stamp - bstamp >= cfg.BACKUP_PERIOD
+      if length(man.tasks) > 0 backup(man) end
+      return stamp
     end
 
-    stamp
+    bstamp
   end
+  # TODO: describe yield() call logic
+  # Checks if active servers have bytes to read. It means, that we have to call
+  # yield() for this reading. yield() function will be called in organisms
+  # loop in ManagerOrganism.jl file.
+  # @param man Manager data type
+  # @param stamp Current UNIX time stamp
+  # @param ystamp yield last UNIX time stamp
+  # @param needYield Flag if we need for yield() call
+  # @return {(Float64, Bool)}
   #
-  # Manager related data. See ManagerData type for details. It's global, because
-  # Manager is a singleton.
-  # TODO: this type should be stored outside of this module in AppManager.jl
-  global _data = ManagerData(
-    World.create(),                                  # world
-    Dict{Int, Creature.Organism}(),                  # positions
-    Dict{UInt, Creature.Organism}(),                 # organisms
-    ManagerTypes.OrganismTask[],                     # tasks
-    CommandLine.create(),                            # params
-    UInt(2),                                         # organismId
-    UInt(0),                                         # totalOrganisms
-    Creature.create(UInt(0), Helper.Point(1,1)),     # minOrg
-    Creature.create(UInt(1), Helper.Point(2,1)),     # maxOrg
-    UInt(0),                                         # minId
-    UInt(0),                                         # maxId
-    CommandLine.has(CommandLine.create(), ARG_QUIET) # quiet
-  )
+  function _updateTasks(man::ManagerTypes.ManagerData, stamp::Float64, ystamp::Float64, needYield::Bool)
+    if stamp - ystamp >= man.cfg.CONNECTION_TASKS_CHECK_PERIOD
+      yield()
+      @if_status man.status.yps += 1
+      # TODO: potential problem here. this list of sockets may be expanded
+      # TODO: for example in many managers mode
+      return stamp, (length(man.cons.server.socks) > 0 || man.cons.streamInit)
+    end
+
+    ystamp, needYield
+  end
+  # # TODO: do i need this?
+  # # Checks id data in sockets available for reading
+  # # @param man Manager data type
+  # # @return {Bool}
+  # #
+  # function _dataAvailable(man::ManagerTypes.ManagerData)
+  #   local cons::ManagerTypes.Connections = man.cons
+  #   local sock::Base.TCPSocket
   #
-  # Current Manager/instance all available connections
+  #   @inbounds for sock in cons.server.socks
+  #     if nb_available(sock) > 0 return true end
+  #   end
+  #   if cons.streamInit
+  #     @inbounds for sock in cons.fastServer.socks
+  #       if nb_available(sock) > 0 return true end
+  #     end
+  #   end
   #
-  global _cons = _createConnections()
+  #   false
+  # end
 end

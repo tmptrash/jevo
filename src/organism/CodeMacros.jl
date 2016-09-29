@@ -1,21 +1,22 @@
 #
-# This file is a part of Code module. It contains macroses for 
+# This file is a part of Code module. It contains macroses for
 # organism's code.
 #
 # @author DeadbraiN
 #
+import Helper
 #
 # Creates new unique variable name and returns it's symbol
 # @param {Creature.Organism} org Owner of new variable
 # @return {Symbol}
 #
 macro newVar(org)
-  :(symbol("var_", $org.symbolId += 1))
+  :(Symbol("var_", $org.symbolId += 1))
 end
 #
 # Creates new unique custom function name.
 # @param {Creature.Organism} org Organism we are working with
-# @return {ASCIIString}
+# @return {String}
 #
 macro newFunc(org)
   :(string("func_", $org.symbolId += 1))
@@ -25,7 +26,7 @@ end
 # @return {DataType}
 #
 macro randType()
-  :($Helper.SUPPORTED_TYPES[rand(1:length($Helper.SUPPORTED_TYPES))])
+  :($Helper.SUPPORTED_TYPES[Helper.fastRand(length($Helper.SUPPORTED_TYPES))])
 end
 #
 # Returns a variable from existing in a code
@@ -38,7 +39,7 @@ macro randVar(org, pos, typ)
   :(
     length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]) < 1 ?
     :nothing :
-    $org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ][rand(1:length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]))]
+    $org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ][Helper.fastRand(length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]))]
   )
 end
 #
@@ -47,7 +48,7 @@ end
 # @return {Any}
 #
 macro randValue(typ)
-  :($typ !== ASCIIString ? rand($typ) : randstring())
+  :($typ !== String ? rand($typ) : randstring())
 end
 #
 # Returns chosen line in specified function and block

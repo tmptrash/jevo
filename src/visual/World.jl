@@ -23,16 +23,18 @@
 #
 module World
   import Helper
-  import Config
   import Event
+  import Dots
 
   export Plane
 
   export EVENT_DOT
+  export EVENT_MOVE
 
   export create
   export setEnergy
   export getEnergy
+  export moveEnergy
   export getFreePos
   export grabEnergy
   export getNearFreePos
@@ -60,15 +62,19 @@ module World
   #
   # Event, which is fired if new dot was painted in a world
   #
-  const EVENT_DOT = "dot"
-
+  const EVENT_DOT  = "dot"
+  #
+  # Event, which is fired if some dot was moved from one
+  # location to another.
+  #
+  const EVENT_MOVE = "move"
   #
   # Creates the world
   # @param width World width
   # @param height World height
   # @return {Plane} filled by zero values Plane
   #
-  function create(width::Int = Config.val(:WORLD_WIDTH), height::Int = Config.val(:WORLD_HEIGHT))
+  function create(width::Int, height::Int)
     Plane(width, height, fill(UInt32(0), height, width), Event.create())
   end
   #
@@ -83,6 +89,30 @@ module World
     if pos.x < 1 || pos.x > plane.width || pos.y < 1 || pos.y > plane.height return false end
     plane.data[pos.y, pos.x] = energy
     Event.fire(plane.obs, EVENT_DOT, pos, energy)
+    true
+  end
+  #
+  # Moves energy point from one location to another. Old coordinates
+  # will be filled by empty(zero) color. Moving is only works with
+  # one pixel (1px distance).
+  # @param plane World's plane
+  # @param pos Position of the energy point
+  # @param energy Amount of energy to add
+  # @return {Bool} It's possible, that energy position is not empty.
+  # false in this case. true - if dot was set.
+  #
+  function moveEnergy(plane::Plane, oldPos::Helper.Point, newPos::Helper.Point, energy::UInt32)
+    if newPos.x < 1 || newPos.x > plane.width || newPos.y < 1 || newPos.y > plane.height return false end
+    local dir::Int
+
+    if     newPos.x > oldPos.x dir = Dots.DIRECTION_RIGHT
+    elseif newPos.x < oldPos.x dir = Dots.DIRECTION_LEFT
+    elseif newPos.y > oldPos.y dir = Dots.DIRECTION_DOWN
+    else                       dir = Dots.DIRECTION_UP
+    end
+    plane.data[oldPos.y, oldPos.x] = UInt32(0)
+    plane.data[newPos.y, newPos.x] = energy
+    Event.fire(plane.obs, EVENT_MOVE, newPos, dir, energy)
     true
   end
   #
@@ -110,8 +140,8 @@ module World
     local i::Int = width * height < 1000 ? 100 : div(width * height, 10)
 
     while World.getEnergy(plane, pos) > UInt32(0) && i > 0
-      pos.x = rand(1:width)
-      pos.y = rand(1:height)
+      pos.x = Helper.fastRand(width)
+      pos.y = Helper.fastRand(height)
       i -= 1
     end
     i > 0 ? pos : false

@@ -3,7 +3,7 @@ function leak()
 		t = Task(eval(:(function() produce() end)))
 		consume(t)
 		try
-		  Base.throwto(t, null)
+		  Base.throwto(t, nothing)
 		end
 	end
 	gc()
