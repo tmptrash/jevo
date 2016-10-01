@@ -1,0 +1,9 @@
+language: julia
+julia:
+  - 0.5
+
+install:
+  ./build/install.sh
+
+script:
+  ./build/run-tests.sh
