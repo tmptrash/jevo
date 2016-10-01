@@ -7,3 +7,6 @@ install:
 
 script:
   ./build/run-tests.sh
+
+notifications:
+  slack: 'https://hooks.slack.com/services/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#ci'
