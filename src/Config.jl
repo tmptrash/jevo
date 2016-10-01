@@ -307,14 +307,14 @@ module Config
   #
   function create(empty::Bool = false)
     ConfigData(
-      empty ? [] : [110,300,95,0,1,1,1], # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
+      empty ? [] : [110,300,98,0,1,1,1], # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
       2,                                 # ORGANISM_MUTATIONS_ON_CLONE
       50,                                # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      900,                               # ORGANISM_MUTATION_PERIOD
+      600,                               # ORGANISM_MUTATION_PERIOD
       10000,                             # ORGANISM_MAX_MUTATION_PERIOD
-      4,                                 # ORGANISM_MUTATION_AMOUNT
+      3,                                 # ORGANISM_MUTATION_AMOUNT
       50,                                # ORGANISM_MAX_MUTATION_AMOUNT
-      200,                               # ORGANISM_START_AMOUNT
+      100,                               # ORGANISM_START_AMOUNT
       7000,                              # ORGANISM_START_ENERGY
       Int(typemax(UInt32)),              # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)
       300,                               # ORGANISM_ENERGY_DECREASE_PERIOD

@@ -35,7 +35,10 @@ function recover(man::ManagerTypes.ManagerData)
     if !_removeNew(man) return false end
     return Backup.lastFile() !== "" ? recover(man) : false
   end
-
+  #
+  # Main task reference should be set before the loop, because
+  # it may be used inside organism tasks
+  #
   man.task = curTask
   for t in data.tasks
     t.organism.codeFn = Creature.eval(t.organism.code)
@@ -79,12 +82,13 @@ end
 #
 function backup(man::ManagerTypes.ManagerData)
   local manCopy::ManagerTypes.ManagerData = deepcopy(man)
-  local tmpTask::Task = Task(()->true)
-  local tmpFn::Function = function() end
+  local tmpTask::Task = Task(_emptyFn)
   local task::ManagerTypes.OrganismTask
   local ret::Bool
   local org::Creature.Organism
   local tmpObs::Event.Observer = Event.create()
+  local posPair::Pair{Int, Creature.Organism}
+  local orgPair::Pair{UInt, Creature.Organism}
   #
   # We have to stop the task before it will be saved into the backup file.
   # yield() call is needed, because Julia has strange issue with yieldto()
@@ -96,19 +100,31 @@ function backup(man::ManagerTypes.ManagerData)
   @if_status man.status.yps += 1
   consume(tmpTask)
   #
-  # This is a small trick. We have to set all tasks in waiting
+  # This is a small trick. We have to set all tasks in "done"
   # state for serializing into the file. Julia can't save active
-  # tasks. After recover we will rerun them.
+  # tasks. After recover we will rerun them. It also can't save
+  # anonymous functions, so we have to have some empty function
+  # as a part of current Manager module (_emptyFn()).
   #
   for task in manCopy.tasks
     org          = task.organism
     task.task    = tmpTask
-    org.codeFn   = tmpFn
+    org.codeFn   = _emptyFn
+    org.observer = tmpObs
+  end
+  for posPair in manCopy.positions
+    org = posPair[2]
+    org.codeFn   = _emptyFn
+    org.observer = tmpObs
+  end
+  for orgPair in manCopy.organisms
+    org = orgPair[2]
+    org.codeFn   = _emptyFn
     org.observer = tmpObs
   end
   manCopy.world.obs    = tmpObs
-  manCopy.dotCallback  = tmpFn
-  manCopy.moveCallback = tmpFn
+  manCopy.dotCallback  = _emptyFn
+  manCopy.moveCallback = _emptyFn
   manCopy.task         = tmpTask
   manCopy.cons         = ManagerTypes.Connections()
   #
@@ -155,3 +171,7 @@ function _removeNew(man::ManagerTypes.ManagerData)
 
   true
 end
+#
+# Just stub function, which is used as a placeholder for saving a backup
+#
+function _emptyFn() end
