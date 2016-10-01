@@ -1,6 +1,6 @@
 {
   "name": "jevo",
   "tagline": "Julia based digital organisms evolution simulator",
-  "body": "Julia language based, digital organisms evolution simulator. This project similar to [Avida](https://en.wikipedia.org/wiki/Avida), but works with native julia code. More details on blog: https://jevosite.wordpress.com/ and youtube [channel](https://www.youtube.com/playlist?list=PL1NiKjXMaBimPuybPIXkVuO1MYy53XcdW). Presentation slides are [here](https://www.dropbox.com/s/fpffw9nga53k573/jevo.pptx?dl=0).\r\n\r\n### Authors and Contributors\r\n@tmptrash and @rkxtd\r\n",
+  "body": "Julia language based, digital organisms evolution simulator. This project similar to [Avida](https://en.wikipedia.org/wiki/Avida), but works with native julia code. More details on [blog](https://jevosite.wordpress.com/) and youtube [channel](https://www.youtube.com/playlist?list=PL1NiKjXMaBimPuybPIXkVuO1MYy53XcdW). Presentation slides are [here](https://www.dropbox.com/s/fpffw9nga53k573/jevo.pptx?dl=0).\r\n\r\n### Authors and Contributors\r\n@tmptrash and @rkxtd\r\n",
   "note": "Don't delete this file! It's used internally to help with page regeneration."
 }
