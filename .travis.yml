@@ -1,7 +1,5 @@
 language: julia
 julia:
-  - release
-  - nightly
   - 0.5
 
 install:
