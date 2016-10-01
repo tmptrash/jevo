@@ -1,0 +1,11 @@
+language: julia
+julia:
+  - release
+  - nightly
+  - 0.5
+
+install:
+  ./build/install.sh
+
+script:
+  ./build/run-tests.sh
