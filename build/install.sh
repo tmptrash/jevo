@@ -4,4 +4,4 @@
 # This script should be run first, before
 # all other...
 #
-julia --color=yes Dependencies.jl
+julia --color=yes ./build/Dependencies.jl
