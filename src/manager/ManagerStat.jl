@@ -1,3 +1,4 @@
+import CodeConfig.@if_debug
 import RpcApi
 import Config
 #
@@ -62,6 +63,7 @@ function _appendToFile(data::ASCIIString, file::ASCIIString)
     close(io)
   catch(e)
     warn("ManagerStat._appendToFile(): $e")
+    @if_debug showerror(STDOUT, e, catch_backtrace())
     ret = false
   finally
     if io !== null close(io) end

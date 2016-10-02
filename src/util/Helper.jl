@@ -3,6 +3,7 @@
 #
 module Helper
   #import Gtk
+  import CodeConfig.@if_debug
 
   export Pos
   export Point
@@ -248,7 +249,7 @@ module Helper
       serialize(io, data)
     catch(e)
       warn("Helper.save(): $e")
-      showerror(STDOUT, e, catch_backtrace())
+      @if_debug showerror(STDOUT, e, catch_backtrace())
       ret = false
     finally
       if io !== nothing close(io) end
@@ -270,7 +271,7 @@ module Helper
       ret = deserialize(io)
     catch(e)
       warn("Helper.load(): $e")
-      showerror(STDOUT, e, catch_backtrace())
+      @if_debug showerror(STDOUT, e, catch_backtrace())
       ret = nothing
     finally
       if io !== nothing close(io) end

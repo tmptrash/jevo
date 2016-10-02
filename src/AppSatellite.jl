@@ -7,6 +7,7 @@
 # @author DeadbraiN
 #
 include("ImportFolders.jl")
+import CodeConfig.@if_debug
 import Helper
 import Backup
 import Config
@@ -36,6 +37,7 @@ function main()
       break
     catch e
       stamp = _removeBrokenBackup(stamp, cfg)
+      @if_debug showerror(STDOUT, e, catch_backtrace())
     end
   end
 
@@ -65,6 +67,7 @@ function _removeBrokenBackup(stamp::Float64, cfg::Config.ConfigData)
       end
     catch e
       Helper.error("Something wrong with backup file removing: $last")
+      @if_debug showerror(STDOUT, e, catch_backtrace())
     end
   end
 

@@ -6,6 +6,7 @@
 # @author DeadbraiN
 #
 module Connection
+  import CodeConfig.@if_debug
   import Helper
   import Event
   import FastApi
@@ -79,6 +80,7 @@ module Connection
       serialize(sock, Command(fn, collect(args)))
     catch e
       Helper.warn("Connection.request(): $e")
+      @if_debug showerror(STDOUT, e, catch_backtrace())
       close(sock)
       return false
     end
@@ -104,6 +106,7 @@ module Connection
       _fastWrite(sock, dataIndex | REQUEST_BIT, args)
     catch e
       Helper.warn("Connection.fastRequest(): $e")
+      @if_debug showerror(STDOUT, e, catch_backtrace())
       close(sock)
       return false
     end
@@ -138,7 +141,7 @@ module Connection
         if notEmpty(ans) serialize(sock, ans) end
       end
     catch e
-      #showerror(STDOUT, e, catch_backtrace())
+      @if_debug showerror(STDOUT, e, catch_backtrace())
       return excFn(sock, e)
     end
 
@@ -179,6 +182,7 @@ module Connection
         Event.fire(obs, EVENT_AFTER_REQUEST, _fastRead(sock, dataIndex))
       end
     catch e
+      @if_debug showerror(STDOUT, e, catch_backtrace())
       return excFn(sock, e)
     end
 

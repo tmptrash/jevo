@@ -79,6 +79,7 @@
 # TODO: add EVENT_AFTER_REQUEST logic description
 # TODO: add description of fast part of this module
 module Server
+  import CodeConfig.@if_debug
   import Event
   import Helper
   using Connection
@@ -128,6 +129,7 @@ module Server
         return con
       catch e
         Helper.warn("Server.create(): $e")
+        @if_debug showerror(STDOUT, e, catch_backtrace())
       end
     end
 
@@ -164,6 +166,7 @@ module Server
           local sock::Base.TCPSocket = accept(con.server)
           push!(con.socks, sock)
         catch e
+          @if_debug showerror(STDOUT, e, catch_backtrace())
           #
           # Possibly Server.stop() was called.
           #
@@ -227,6 +230,7 @@ module Server
       Helper.info(string("Server has stopped: ", con.host, ":", con.port))
     catch e
       Helper.warn("Server.stop(): $e")
+      @if_debug showerror(STDOUT, e, catch_backtrace())
     end
   end
 

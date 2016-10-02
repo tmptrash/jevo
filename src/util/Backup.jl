@@ -5,6 +5,7 @@
 # @author DeadbraiN
 #
 module Backup
+  import CodeConfig.@if_debug
   import Helper
 
   export save
@@ -69,6 +70,7 @@ module Backup
       return rd
     catch e
       Helper.warn("Backup.getFiles(): $e")
+      @if_debug showerror(STDOUT, e, catch_backtrace())
     end
     []
   end
@@ -94,6 +96,7 @@ module Backup
       return rd[indmax(map((f) -> mtime(string(folder, "/", f)), rd))]
     catch e
       Helper.warn("Backup._getOldestFile(): $e")
+      @if_debug showerror(STDOUT, e, catch_backtrace())
     end
     ""
   end

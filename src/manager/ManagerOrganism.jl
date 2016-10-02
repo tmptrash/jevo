@@ -95,6 +95,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
       # TODO: this function is very slow!!! have to be optimized
       Mutator.mutate(cfg, org, org.mutationAmount)
+      t = true
     end
   end
   #
@@ -287,7 +288,8 @@ end
 # @return {Bool}
 #
 function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organism::Creature.Organism)
-  local idNew::Int = Manager._getPosId(man, pos)
+  local newPos::Helper.Point = Helper.Point(pos.x, pos.y)
+  local idNew::Int
   local idOld::Int = Manager._getPosId(man, organism.pos)
   local freeze::Bool = false
   local cyclicMove::Bool = false
@@ -296,17 +298,17 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   # specific cyclic way from the borders.
   #
   if man.cfg.WORLD_CYCLICAL
-    if pos.x < 1
-      pos.x = man.world.width
+    if newPos.x < 1
+      newPos.x = man.world.width
       cyclicMove = true
-    elseif pos.x > man.world.width
-      pos.x = 1
+    elseif newPos.x > man.world.width
+      newPos.x = 1
       cyclicMove = true
-    elseif pos.y < 1
-      pos.y = man.world.height
+    elseif newPos.y < 1
+      newPos.y = man.world.height
       cyclicMove = true
-    elseif pos.y > man.world.height
-      man.y = 1
+    elseif newPos.y > man.world.height
+      newPos.y = 1
       cyclicMove = true
     end
   #
@@ -320,16 +322,16 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   else
     local st = man.status
 
-    if pos.x < 1
+    if newPos.x < 1
       if !Client.isOk(man.cons.left)  || !Client.request(man.cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism) st.rps +=1; return false end
       freeze = true
-    elseif pos.x > man.world.width
+    elseif newPos.x > man.world.width
       if !Client.isOk(man.cons.right) || !Client.request(man.cons.right, RpcApi.RPC_ORG_STEP_RIGHT, organism) st.rps +=1; return false end
       freeze = true
-    elseif pos.y < 1
+    elseif newPos.y < 1
       if !Client.isOk(man.cons.up)    || !Client.request(man.cons.up, RpcApi.RPC_ORG_STEP_UP, organism) st.rps +=1; return false end
       freeze = true
-    elseif pos.y > man.world.height
+    elseif newPos.y > man.world.height
       if !Client.isOk(man.cons.down)  || !Client.request(man.cons.down, RpcApi.RPC_ORG_STEP_DOWN, organism) st.rps +=1; return false end
       freeze = true
     end
@@ -347,12 +349,13 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   # Destination position, where organism wants step to is not
   # empty. Other organism or an energy block is there.
   #
-  if idOld !== idNew && !Manager._isFree(man, pos) return false end
+  idNew = Manager._getPosId(man, newPos)
+  if idOld !== idNew && !Manager._isFree(man, newPos) return false end
   #
-  # pos - new organism position
+  # newPos - new organism position
   # organism.pos - old organism position
   #
-  if pos.x !== organism.pos.x || pos.y !== organism.pos.y
+  if idOld !== idNew
     delete!(man.positions, Manager._getPosId(man, organism.pos))
     man.positions[idNew] = organism
     #
@@ -362,13 +365,16 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
     #
     if cyclicMove
       World.setEnergy(man.world, organism.pos, UInt32(Dots.INDEX_EMPTY))
-      World.setEnergy(man.world, pos, UInt32(organism.color))
+      World.setEnergy(man.world, newPos, UInt32(organism.color))
     else
-     World.moveEnergy(man.world, organism.pos, pos, UInt32(organism.color))
+     World.moveEnergy(man.world, organism.pos, newPos, UInt32(organism.color))
     end
-    organism.pos = pos
+    organism.pos = newPos
+  #
+  # The position didn't change, so only color should be updated
+  #
   else
-    World.setEnergy(man.world, pos, UInt32(organism.color))
+    World.setEnergy(man.world, newPos, UInt32(organism.color))
   end
 
   true

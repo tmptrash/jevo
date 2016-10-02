@@ -52,6 +52,7 @@
 # @author DeadbraiN
 #
 module Client
+  import CodeConfig.@if_debug
   import Event
   import Helper
   using Connection
@@ -95,6 +96,7 @@ module Client
         @async while (fast ? fastAnswer(sock, obs, _onAnswerException) : answer(sock, obs, _onAnswerException)) end
       catch e
         Helper.warn("Client.create(): $e")
+        @if_debug showerror(STDOUT, e, catch_backtrace())
         if Helper.isopen(sock) close(sock) end
       end
       yield()
@@ -146,6 +148,7 @@ module Client
       yield()
     catch e
       Helper.warn("Client.stop(): $e")
+      @if_debug showerror(STDOUT, e, catch_backtrace())
     end
   end
   #

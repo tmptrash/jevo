@@ -13,7 +13,10 @@
 module CodeConfig
   export showStatus
   export showStatusPeriod
+  export debugMode
+
   export if_status
+  export if_debug
   #
   # Turns on/off output of real time manager status like
   # amount of organisms, IPS, RPS and so on...
@@ -25,8 +28,17 @@ module CodeConfig
   #
   const showStatusPeriod = 5.0
   #
+  # DEBUG mode. In this mode additional info like stack
+  # traces will be available
+  #
+  const debugMode        = true
+  #
   # This macro turns on specified code in case if "showStatus"
   # config is turned on.
   #
   macro if_status(ex) @static if CodeConfig.showStatus esc(ex) end end
+  #
+  # This macro turns on DEBUG information like stack traces...
+  #
+  macro if_debug(ex) @static if CodeConfig.debugMode esc(ex) end end
 end

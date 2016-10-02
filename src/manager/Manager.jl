@@ -17,6 +17,7 @@
 #
 module Manager
   import CodeConfig.@if_status
+  import CodeConfig.@if_debug
   import Creature
   import Mutator
   import World
@@ -152,7 +153,7 @@ module Manager
       end
     catch e
       Helper.error("Manager.run(): $e")
-      showerror(STDOUT, e, catch_backtrace())
+      @if_debug showerror(STDOUT, e, catch_backtrace())
       return false
     end
 
