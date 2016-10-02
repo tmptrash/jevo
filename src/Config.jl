@@ -312,7 +312,7 @@ module Config
       0,                                 # ORGANISM_MUTATIONS_ON_CLONE
       50,                                # ORGANISM_MAX_MUTATIONS_ON_CLONE
       5000,                              # ORGANISM_MUTATION_PERIOD
-      10000,                             # ORGANISM_MAX_MUTATION_PERIOD
+      1000,                              # ORGANISM_MAX_MUTATION_PERIOD
       1,                                 # ORGANISM_MUTATION_AMOUNT
       50,                                # ORGANISM_MAX_MUTATION_AMOUNT
       100,                               # ORGANISM_START_AMOUNT
