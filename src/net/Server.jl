@@ -161,7 +161,8 @@ module Server
           #
           # This line handles new connections
           #
-          push!(con.socks, accept(con.server))
+          local sock::Base.TCPSocket = accept(con.server)
+          push!(con.socks, sock)
         catch e
           #
           # Possibly Server.stop() was called.
@@ -169,8 +170,8 @@ module Server
           if !isOk(con) _close(con); break end
           Helper.warn("Server.run(): $e")
         end
-        local sock::Base.TCPSocket = con.socks[length(con.socks)]
         push!(con.tasks, @async while Helper.isopen(sock)
+          yield()
           con.fast ? fastAnswer(sock, con.observer, _onAnswerException) : answer(sock, con.observer, _onAnswerException)
           _update(con)
         end)

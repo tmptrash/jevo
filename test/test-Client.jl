@@ -132,6 +132,7 @@ module TestClient
     Event.on(ccon2.observer, Connection.EVENT_AFTER_REQUEST, (ans::Connection.Answer)->answer += ans.data.args[1])
 
     Server.run(scon)
+
     for i=1:10
       Client.request(ccon1, i, i)
       Client.request(ccon2, i, i)
