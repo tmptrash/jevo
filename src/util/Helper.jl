@@ -2,7 +2,7 @@
 # @author DeadbraiN
 #
 module Helper
-  import Gtk
+  #import Gtk
 
   export Pos
   export Point
@@ -155,10 +155,10 @@ module Helper
   #
   # This function is not presented in Julis Gtk package
   #
-  function gtkMarkup(label::Gtk.GtkLabel,str)
-    ccall((:gtk_label_set_markup,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{UInt8}),label,str)
-    return label
-  end
+  #function gtkMarkup(label::Gtk.GtkLabel,str)
+  #  ccall((:gtk_label_set_markup,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{UInt8}),label,str)
+  #  return label
+  #end
   #
   # Fast version of rand(n::Range) function. Generates random Int number in
   # range 1:n
