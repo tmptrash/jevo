@@ -1,5 +1,5 @@
 # jevo
-[](https://travis-ci.org/tmptrash/jevo.svg?branch=master)
+[![Build Status](https://travis-ci.org/tmptrash/jevo.svg?branch=master)](https://travis-ci.org/tmptrash/jevo)
 Julia language based, digital organisms evolution simulator. This project similar to [Avida](https://en.wikipedia.org/wiki/Avida)
 
 In progress...
