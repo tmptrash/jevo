@@ -41,7 +41,12 @@ function recover(man::ManagerTypes.ManagerData)
   #
   man.task = curTask
   for t in data.tasks
-    t.organism.codeFn = Creature.eval(t.organism.code)
+    t.organism.codeFn   = Creature.eval(t.organism.code)
+    #
+    # This line prevents observers to be shared between organisms
+    # Every organism should have it's own observer's instance
+    #
+    t.organism.observer = Event.create()
     bindEvents(man, t.organism)
     #
     # We must call yieldto(), because born() function parameters
@@ -71,7 +76,7 @@ function recover(man::ManagerTypes.ManagerData)
   # after backup loading, because they may be multiplied
   # on every app running.
   #
-  Event.clear(man.world.obs)
+  man.world.obs = Event.create()
 
   true
 end
@@ -86,7 +91,6 @@ function backup(man::ManagerTypes.ManagerData)
   local task::ManagerTypes.OrganismTask
   local ret::Bool
   local org::Creature.Organism
-  local tmpObs::Event.Observer = Event.create()
   local posPair::Pair{Int, Creature.Organism}
   local orgPair::Pair{UInt, Creature.Organism}
   #
@@ -110,19 +114,19 @@ function backup(man::ManagerTypes.ManagerData)
     org          = task.organism
     task.task    = tmpTask
     org.codeFn   = _emptyFn
-    org.observer = tmpObs
+    org.observer = Event.create()
   end
   for posPair in manCopy.positions
     org = posPair[2]
     org.codeFn   = _emptyFn
-    org.observer = tmpObs
+    org.observer = Event.create()
   end
   for orgPair in manCopy.organisms
     org = orgPair[2]
     org.codeFn   = _emptyFn
-    org.observer = tmpObs
+    org.observer = Event.create()
   end
-  manCopy.world.obs    = tmpObs
+  manCopy.world.obs    = Event.create()
   manCopy.dotCallback  = _emptyFn
   manCopy.moveCallback = _emptyFn
   manCopy.task         = tmpTask

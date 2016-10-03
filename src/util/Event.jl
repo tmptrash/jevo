@@ -98,10 +98,6 @@ module Event
     local len::Int = length(fns)
     local i::Function
 
-    # for i = 1:length(fns)
-    #   if length(obs.events[event]) !== len break end
-    #   fns[i](args...)
-    # end
     for i in fns
       i(args...)
     end

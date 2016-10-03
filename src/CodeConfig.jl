@@ -31,7 +31,7 @@ module CodeConfig
   # DEBUG mode. In this mode additional info like stack
   # traces will be available
   #
-  const debugMode        = true
+  const debugMode        = false
   #
   # This macro turns on specified code in case if "showStatus"
   # config is turned on.

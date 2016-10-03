@@ -346,7 +346,6 @@ function _onFastStreaming(man::ManagerTypes.ManagerData, sock::Base.TCPSocket, d
   man.cons.streamInit = false
   man.dotCallback     = (pos::Helper.Point, color::UInt32)->_onDot(man, pos, color)
   man.moveCallback    = (pos::Helper.Point, dir::Int, color::UInt32)->_onDot(man, pos, color, dir)
-
   Event.off(man.world.obs, World.EVENT_DOT, man.dotCallback)
   if !Event.has(man.world.obs, World.EVENT_DOT, man.dotCallback)
     Event.on(man.world.obs, World.EVENT_DOT, man.dotCallback)
