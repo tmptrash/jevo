@@ -132,6 +132,11 @@ function backup(man::ManagerTypes.ManagerData)
   manCopy.task         = tmpTask
   manCopy.cons         = ManagerTypes.Connections()
   #
+  # Before saving backup file, we need to make sure that backup folder is in place.
+  # Otherwise - create one.
+  #
+  Backup.createBackupDir()
+  #
   # These code lines create new backup file and remove last one
   #
   if (ret = Backup.save(manCopy))
