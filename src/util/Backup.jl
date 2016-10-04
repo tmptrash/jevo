@@ -63,7 +63,7 @@ module Backup
   #
   function getFiles(folder::String = FOLDER_NAME)
     try
-      if !isdir(folder) return "" end
+      if !isdir(folder) return [] end
       local rd::Array{AbstractString, 1} = readdir(folder)
 
       sort!(rd, alg = QuickSort, lt = (f1, f2) -> f1 < f2)

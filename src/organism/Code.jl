@@ -146,15 +146,17 @@ module Code
   # @return {Expr|Expr(:nothing)}
   #
   function fnCall(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+    local nothingEx::Expr           = Expr(:nothing)
     local funcsLen::Int             = length(org.funcs)
-    if funcsLen < 2 return Expr(:nothing) end
+    if funcsLen < 2 return nothingEx end
     local fnEx::Expr                = org.funcs[Helper.fastRand(funcsLen-1)+1].code # only custom function may be called
     local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]          # return DataType of Custom function
     local var::Symbol               = @randVar(org, pos, typ)                       # var = <fn-name>(...)
-    if var === :nothing return Expr(:nothing) end
+    if var === :nothing return nothingEx end
     local args::Array{Any, 1}       = fnEx.args[1].args                             # shortcut to func args
     local types::Array{DataType, 1} = Array{DataType, 1}()                          # func types only
     local argsLen::Int              = length(args)
+    local badParams::Bool           = false
 
     if argsLen > 1
       #
@@ -162,7 +164,8 @@ module Code
       #
       for i = 2:(Helper.fastRand(argsLen-1)+1) push!(types, args[i].args[1].args[2]) end
     end
-    fnEx = :($var=$(fnEx.args[1].args[1])($([(ex = @randVar(org, pos, i); if ex === :nothing return Expr(:nothing) end;ex) for i in types]...)))
+    fnEx = :($var=$(fnEx.args[1].args[1])($([(ex = @randVar(org, pos, i); if ex === :nothing badParams = true end;ex) for i in types]...)))
+    if badParams return nothingEx end
     #
     # Pushing of new variable should be after function call to prevent
     # error of calling function with argument of just created variable
