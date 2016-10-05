@@ -11,10 +11,11 @@
 # @author DeadbraiN
 #
 module CodeConfig
-  export showStatus
-  export showStatusPeriod
+  export statusMode
+  export statusModePeriod
   export debugMode
   export profileMode
+  export profilePeriod
 
   export if_status
   export if_debug
@@ -23,12 +24,12 @@ module CodeConfig
   # Turns on/off output of real time manager status like
   # amount of organisms, IPS, RPS and so on...
   #
-  const showStatus       = true
+  const statusMode       = true
   #
   # Status showing period in seconds. Works only if
   # "showStatus" option is set to true.
   #
-  const showStatusPeriod = 5.0
+  const statusModePeriod = 5.0
   #
   # DEBUG mode. In this mode additional info like stack
   # traces will be available
@@ -40,10 +41,15 @@ module CodeConfig
   #
   const profileMode      = false
   #
+  # Amount of iteration, which will be done in profileMode === true
+  # before profiler windows will be shown
+  #
+  const profileIps       = 2000
+  #
   # This macro turns on specified code in case if "showStatus"
   # config is turned on.
   #
-  macro if_status(ex) @static if CodeConfig.showStatus esc(ex) end end
+  macro if_status(ex) @static if CodeConfig.statusMode esc(ex) end end
   #
   # This macro turns on DEBUG code if debugMode is true
   #

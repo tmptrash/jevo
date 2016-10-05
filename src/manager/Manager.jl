@@ -19,6 +19,7 @@ module Manager
   import CodeConfig.@if_status
   import CodeConfig.@if_debug
   import CodeConfig.@if_profile
+  import CodeConfig
   import Creature
   import Mutator
   import World
@@ -62,7 +63,7 @@ module Manager
       function() end,                                                           # dotCallback
       function() end,                                                           # moveCallback
       current_task(),                                                           # task
-      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0)                               # status
+      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0, 0)                            # status
     )
     local cons::ManagerTypes.Connections = _createConnections(man)
 
@@ -154,8 +155,7 @@ module Manager
         #
         # This code is used for profiling of jevo
         #
-        @if_profile i += 1
-        @if_profile if i > 2000 return true end
+        @if_profile if (i += 1) > CodeConfig.profilePeriod return true end
       end
     catch e
       Helper.error("Manager.run(): $e")

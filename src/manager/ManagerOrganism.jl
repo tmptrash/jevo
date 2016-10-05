@@ -95,6 +95,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
       # TODO: this function is very slow!!! have to be optimized
       Mutator.mutate(cfg, org, org.mutationAmount)
+      man.status.mps += 1
     end
   end
   #
@@ -405,7 +406,10 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   local energy::Int      = div(organism.energy, 2) # minus 50% of energy
   organism.energy       -= energy
   crTask.organism.energy = energy
-  if energy > 0 Mutator.mutate(man.cfg, crTask.organism, crTask.organism.mutationsOnClone) end
+  if energy > 0
+    Mutator.mutate(man.cfg, crTask.organism, crTask.organism.mutationsOnClone)
+    man.status.mps += 1
+  end
 
   true
 end

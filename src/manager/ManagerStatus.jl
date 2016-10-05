@@ -12,15 +12,16 @@ import ManagerTypes
 #
 function _updateStatus(man::ManagerTypes.ManagerData, stamp::Float64)
   local st::ManagerTypes.ManagerStatus = man.status
-  local period::Float64 = CodeConfig.showStatusPeriod
+  local period::Float64 = CodeConfig.statusModePeriod
 
-  if stamp - st.stamp >= CodeConfig.showStatusPeriod
+  if stamp - st.stamp >= CodeConfig.statusModePeriod
     println(
       "ips: ",      man.cfg.WORLD_IPS,
       ", yps: ",    Int(div(st.yps, period)),
       ", syps: ",   Int(div(st.syps, period)),
       ", rps: ",    Int(div(st.rps, period)),
       ", srps: ",   Int(div(st.srps, period)),
+      ", mps: ",    Int(div(st.mps, period)),
       ", orgs: ",   length(man.tasks)
     )
     st.stamp = stamp
@@ -28,5 +29,6 @@ function _updateStatus(man::ManagerTypes.ManagerData, stamp::Float64)
     st.rps   = 0
     st.syps  = 0
     st.srps  = 0
+    st.mps   = 0
   end
 end
