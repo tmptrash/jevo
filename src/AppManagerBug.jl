@@ -1,7 +1,6 @@
 include("ImportFolders.jl")
 
 import Manager
-import ManagerTypes
 import Helper
 import Backup
 import CommandLine

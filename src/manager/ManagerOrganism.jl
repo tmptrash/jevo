@@ -95,7 +95,6 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
       # TODO: this function is very slow!!! have to be optimized
       Mutator.mutate(cfg, org, org.mutationAmount)
-      t = true
     end
   end
   #
