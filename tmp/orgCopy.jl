@@ -12,11 +12,11 @@
   #
   type MetaFunc
     expr::Expr
-    blocks::Dict{UInt64, Expr}
+    blocks::Dict{Int, Expr}
   end
   type MetaOrganism
-    lastFn::UInt64
-    funcs::Dict{UInt64, MetaFunc}
+    lastFn::Int
+    funcs::Dict{Int, MetaFunc}
   end
 
   #
@@ -27,20 +27,20 @@
     local f::Func
     local b::Block
     local mf::MetaFunc
-    local h::UInt64 = hash(c.code)
+    local h::Int = Int(pointer_from_objref(e))
     local mOrg::MetaOrganism = MetaOrganism(
       h,
-      Dict{UInt64, MetaFunc}(h => MetaFunc(e, Dict{UInt64, Expr}(h => e))) # these values will be updated
+      Dict{Int, MetaFunc}(h => MetaFunc(e, Dict{Int, Expr}(Int(pointer_from_objref(e.args[2])) => e))) # these values will be updated
     )
     local ex::Expr = _copy(e, mOrg)
     #
     # This is how we update meta information
     #
     for f in funcs
-      mf     = mOrg.funcs[hash(f.code)]
+      mf     = mOrg.funcs[Int(pointer_from_objref(f.code))]
       f.code = mf.expr
       for b in f.blocks
-        b.expr = mf.blocks[hash(b.expr)]
+        b.expr = mf.blocks[Int(pointer_from_objref(b.expr))]
       end
     end
     #
@@ -68,14 +68,14 @@
   #
   function _copyExprs(e::Expr, mOrg::MetaOrganism)
     local fn::MetaFunc
-    local blocks::Dict{UInt64, Expr}
-    local blockId::UInt64
+    local blocks::Dict{Int, Expr}
+    local blockId::Int
 
     if e.head === :function
-      push!(mOrg.funcs, (mOrg.lastFn = hash(e)) => (fn = MetaFunc(e, Dict{UInt64, Expr}())))
+      push!(mOrg.funcs, (mOrg.lastFn = Int(pointer_from_objref(e))) => (fn = MetaFunc(e, Dict{Int, Expr}())))
     elseif e.head === :block
       blocks  = mOrg.funcs[mOrg.lastFn].blocks
-      blockId = hash(e)
+      blockId = Int(pointer_from_objref(e))
       push!(blocks, blockId => e)
     end
     local ex::Expr = _copy(e, mOrg)
@@ -88,5 +88,5 @@
   #
   cfg = Config.create()
   c   = Creature.create(cfg)
-  #m = MetaOrganism(hash(c.code), Dict{UInt64, MetaFunc}(hash(c.code) => MetaFunc(c.code, Dict{UInt64, Expr}(hash(c.code.args[2]) => c.code))))
+  #m = MetaOrganism(Int(pointer_from_objref(c.code)), Dict{Int, MetaFunc}(Int(pointer_from_objref(c.code)) => MetaFunc(c.code, Dict{Int, Expr}(Int(pointer_from_objref(c.code.args[2])) => c.code))))
   for i = 1:1000 Mutator.mutate(cfg, c) end
