@@ -1,12 +1,15 @@
   #
   # Here is clonning algorithm. It was created as a replacement of embedded
   # deepcopy() function
+  # TODO: describe my copy() version
+  # TODO: describe meta map structure
+  # TODO: describe mem addresses
+  # TODO: describe requirement, that meta info and expr tree should be well prepared
   #
   include("..\\src\\ImportFolders.jl")
   import Manager
   import Creature.Block
   import Creature.Func
-  using Gallium
   #
   # Type, which describes a function in original Expr tree. It contains
   #
@@ -18,7 +21,6 @@
     lastFn::Int
     funcs::Dict{Int, MetaFunc}
   end
-
   #
   # Makes a clone of "e" expression and updates meta information
   # in "funcs" Array
@@ -28,10 +30,7 @@
     local b::Block
     local mf::MetaFunc
     local h::Int = Int(pointer_from_objref(e))
-    local mOrg::MetaOrganism = MetaOrganism(
-      h,
-      Dict{Int, MetaFunc}(h => MetaFunc(e, Dict{Int, Expr}(Int(pointer_from_objref(e.args[2])) => e))) # these values will be updated
-    )
+    local mOrg::MetaOrganism = MetaOrganism(h,Dict{Int, MetaFunc}(h => MetaFunc(e, Dict{Int, Expr}(Int(pointer_from_objref(e.args[2])) => e))))
     local ex::Expr = _copy(e, mOrg)
     #
     # This is how we update meta information
@@ -39,9 +38,7 @@
     for f in funcs
       mf     = mOrg.funcs[Int(pointer_from_objref(f.code))]
       f.code = mf.expr
-      for b in f.blocks
-        b.expr = mf.blocks[Int(pointer_from_objref(b.expr))]
-      end
+      for b in f.blocks b.expr = mf.blocks[Int(pointer_from_objref(b.expr))] end
     end
     #
     # References main function and it's block should be set separately
@@ -60,7 +57,9 @@
   end
   function _copyExprArgs(arr::Array{Any,1}, mOrg::MetaOrganism)
     local a::Any
-    Any[_copyExprs(a, mOrg) for a in arr]
+    local arrCopy::Array{Any, 1} = []
+    for a in arr push!(arrCopy, _copyExprs(a, mOrg)) end
+    arrCopy
   end
   function _copyExprs(a::ANY, mOrg::MetaOrganism) a end
   #
@@ -70,23 +69,24 @@
     local fn::MetaFunc
     local blocks::Dict{Int, Expr}
     local blockId::Int
-
+    #
+    # Don't touch this code. It's optimized for speed
+    #
     if e.head === :function
       push!(mOrg.funcs, (mOrg.lastFn = Int(pointer_from_objref(e))) => (fn = MetaFunc(e, Dict{Int, Expr}())))
+      return fn.expr = _copy(e, mOrg)
     elseif e.head === :block
       blocks  = mOrg.funcs[mOrg.lastFn].blocks
       blockId = Int(pointer_from_objref(e))
       push!(blocks, blockId => e)
+      return blocks[blockId] = _copy(e, mOrg)
     end
-    local ex::Expr = _copy(e, mOrg)
-    if e.head === :function fn.expr = ex
-    elseif e.head === :block blocks[blockId] = ex end
-    ex
+
+    _copy(e, mOrg)
   end
   #
   # entry point
   #
   cfg = Config.create()
   c   = Creature.create(cfg)
-  #m = MetaOrganism(Int(pointer_from_objref(c.code)), Dict{Int, MetaFunc}(Int(pointer_from_objref(c.code)) => MetaFunc(c.code, Dict{Int, Expr}(Int(pointer_from_objref(c.code.args[2])) => c.code))))
   for i = 1:1000 Mutator.mutate(cfg, c) end
