@@ -18,6 +18,7 @@ module Helper
   export info
   export warn
   export error
+  export emptyFn
 
   export SUPPORTED_TYPES
   #
@@ -279,6 +280,10 @@ module Helper
 
     ret
   end
+  #
+  # Just stub function, which is used as a placeholder for saving a backup
+  #
+  function emptyFn() end
 
   #
   # Supported types of code inside organism

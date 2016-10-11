@@ -57,6 +57,26 @@ module Creature
   #
   @enum DIRECTION up=1 down=2 left=3 right=4
   #
+  # Type, which describes a meta info about function in Expr tree.
+  # It contains a reference (expr) to the function and nested blocks
+  # array. Every block here is a Int and Expr pair, which is address
+  # of function in memory and the reference to this function.
+  #
+  type MetaFunc
+    expr::Expr
+    blocks::Dict{Int, Expr}
+  end
+  #
+  # Describes meta info of organism's code. It's used for making Expr()
+  # tree copy and contains current function (curFn) where are in and
+  # all functions dictionary (funcs). Int and MetaFunc pair is a address
+  # of function in memory (the key) and reference to MetaFunc type.
+  #
+  type MetaCode
+    curFn::Int
+    funcs::Dict{Int, MetaFunc}
+  end
+  #
   # Describes one block. Blocks are: "for", "if", "function" and other
   # operators. Is a part of "Func" type.
   #
@@ -79,9 +99,10 @@ module Creature
     #
     defIndex::Int
     #
-    # Constructor. Fills arguments and 0 for defIndex.
+    # Constructors. Fills arguments and 1 for defIndex.
     #
     Block(vars::Dict{DataType, Array{Symbol, 1}}, expr::Expr) = new(vars, expr, 1)
+    Block(vars::Dict{DataType, Array{Symbol, 1}}, expr::Expr, defIndex::Int) = new(vars, expr, defIndex)
   end
   #
   # Describes one function as a data container. It contains blocks
@@ -197,17 +218,17 @@ module Creature
   # @param cfg Global configuration type
   # @param id Organism unique id
   # @param pos Position of organism
-  # @return {Creature}
+  # @return {Organism}
   #
   function create(cfg::Config.ConfigData, id::UInt = UInt(0), pos::Helper.Point = Helper.Point(1, 1))
     #
     # This is main function of current organism. Expression
     # below means: function (o) return true end
     #
-    local code::Expr = Expr(:function, Expr(:tuple,                      # function paraments
-      Expr(:(::), :c, Expr(:., :Config, Expr(:quote, :ConfigData))),     # c::Config.ConfigData
-      Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),    # o::Creature.Organism
-        Expr(:block, Expr(:return, true))                                # return true
+    local code::Expr = Expr(:function, Expr(:tuple,                         # function paraments
+      Expr(:(::), :c, Expr(:., :Config, Expr(:quote, :ConfigData))),        # c::Config.ConfigData
+      Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),       # o::Creature.Organism
+        Expr(:block, Expr(:return, true))                                   # return true
     )
     #
     # Blocks of main function. In this case only one - main block.
@@ -237,6 +258,169 @@ module Creature
       pos,                                                                  # pos
       Event.create()                                                        # observer
     )
+  end
+  #
+  # Analog of deepcopy(org), but faster. It makes fully separate organism by
+  # cloning Expr tree (org.code) and metadata (org.funcs). Copying algorithm
+  # is little bit complicated: it walks through Expr tree (org.code) and
+  # stores information about all functions and blocks in special dictionary
+  # (MetaCode). After that, Array{Func, 1} of src organism is copied and it's
+  # internal links to functions and blocks to original Expr tree will be
+  # updated using this dictionary (MetaCode).
+  # @param cfg Application configuration
+  # @param org Organism we have to copy
+  # @return {Organism} Copy of organism
+  #
+  function create(cfg::Config.ConfigData, org::Creature.Organism)
+    local funcs::Array{Func, 1} = []
+    local f::Func
+    local b::Block
+    local bArr::Array{Block, 1}
+    local vars::Dict{DataType, Array{Symbol, 1}}
+    local syms::Array{Symbol, 1}
+    local dt::DataType
+    #
+    # This block does meta tree copy. Meta tree is a tree of
+    # functions, blocks and variables related to the Julia Expr() tree
+    #
+    for f in org.funcs
+      bArr = Block[]
+      push!(funcs, Func(f.code, bArr))
+      for b in f.blocks
+        vars = Dict{DataType, Array{Symbol, 1}}()
+        for (dt, syms) in b.vars vars[dt] = copy(syms) end
+        push!(bArr, Block(vars, b.expr, b.defIndex))
+      end
+    end
+    #
+    # Organism full copy instance
+    #
+    Organism(
+      org.id,                                                               # id
+      _clone(org.code, funcs),                                              # code
+      Helper.emptyFn,                                                       # codeFn
+      org.codeSize,                                                         # codeSize
+      org.symbolId,                                                         # symbolId
+      funcs,                                                                # funcs
+      org.mutationProbabilities,                                            # mutationProbabilities
+      org.mutationsOnClone,                                                 # mutationsOnClone
+      org.mutationPeriod,                                                   # mutationPeriod
+      org.mutationAmount,                                                   # mutationAmount
+      org.energy,                                                           # energy
+      org.color,                                                            # color
+      copy(org.mem),                                                        # mem
+      Helper.Point(org.pos.x, org.pos.y),                                   # pos
+      Event.create()                                                        # observer
+    )
+  end
+  #
+  # Makes Expr tree and meta info copy. Meta info (functions, blocks and
+  # variables) should be actual to copied organism's Expr tree. All links
+  # to new Expr tree will be set in funcs reference.
+  # @param e Reference to organism's code (main function)
+  # @param funcs Reference to the meta funcstions array we have to update
+  # @return {Expr} Expr tree copy
+  #
+  function _clone(e::Expr, funcs::Array{Func, 1})
+    local f::Func
+    local b::Block
+    local mf::MetaFunc
+    local h::Int = Int(pointer_from_objref(e))
+    local mCode::MetaCode = MetaCode(h, Dict{Int, MetaFunc}(h => MetaFunc(e, Dict{Int, Expr}(Int(pointer_from_objref(e.args[2])) => e.args[2]))))
+    local ex::Expr = _copy(e, mCode) # Expr tree copy
+    #
+    # This code updates links between meta tree and copy of Expr tree
+    #
+    for f in funcs
+      mf     = mCode.funcs[Int(pointer_from_objref(f.code))]
+      f.code = mf.expr
+      for b in f.blocks
+        if !haskey(mf.blocks, Int(pointer_from_objref(b.expr)))
+          # TODO: remove this!
+          println(b.expr)
+          println(ex)
+        end
+        b.expr = mf.blocks[Int(pointer_from_objref(b.expr))]
+      end
+    end
+    #
+    # References to main function and it's block should be set separately
+    # because our recursive code doesn't work well with main (first) function
+    #
+    funcs[1].code = ex                    # Main function
+    funcs[1].blocks[1].expr = ex.args[2]  # Main function's block
+
+    ex
+  end
+  #
+  # Entry point for recursive Expr tree copy algorithm. Idea grabbed from
+  # Julia sources: https://github.com/JuliaLang/julia/blob/master/base/expr.jl
+  # See copy() functions for details.
+  # @param e Expr reference to have to copy
+  # @param mCode Meta code of organism we are copiyng
+  # @return {Expr} Expression deep copy
+  #
+  function _copy(e::Expr, mCode::MetaCode)
+    local n::Expr = Expr(e.head);
+    n.args = _copyExprArgs(e.args, mCode);
+    n.typ = e.typ;
+    n
+  end
+  #
+  # Utility function, which is used in our Expr tree recursive algorithm.
+  # @param arr Array of arguments of current expression (args property)
+  # @param mCode Meta code of organism we are copiyng
+  # @return {Array{Any, 1}} Arguments copy
+  #
+  function _copyExprArgs(arr::Array{Any,1}, mCode::MetaCode)
+    local a::Any
+    local arrCopy::Array{Any, 1} = []
+    for a in arr push!(arrCopy, _copyExprs(a, mCode)) end
+    arrCopy
+  end
+  #
+  # Makes simple type copy. Simple type is Int, UInt, Symbol,...
+  # @param a Simple type
+  # @param mCode Meta code of organism we are copiyng
+  # @return {ANY} Simple type copy
+  #
+  function _copyExprs(a::ANY, mCode::MetaCode) a end
+  #
+  # This is a heart of expression tree copying algorithm. It finds
+  # functions and blocks in a code and makes their copies. It also
+  # creates small dictionary with addresses of function/blocks as
+  # keys and MetaFunc instances as values. This MetaCode instance
+  # will be used later for updating links between meta tree (Array{Func, 1})
+  # and expression tree.
+  # @param e Current expression
+  # @param mCode Meta code of organism we are copiyng
+  # @return {Expr} Expression copy
+  #
+  function _copyExprs(e::Expr, mCode::MetaCode)
+    local fn::MetaFunc
+    local blocks::Dict{Int, Expr}
+    local blockId::Int
+    #
+    # Don't touch this code block. It's optimized for speed
+    #
+    if e.head === :function
+      #
+      # This oldFn is used only for main function. We have to
+      # recover it after exiting from nested functions
+      #
+      local oldFn::Int = mCode.curFn
+      push!(mCode.funcs, (mCode.curFn = Int(pointer_from_objref(e))) => (fn = MetaFunc(e, Dict{Int, Expr}())))
+      fn.expr = _copy(e, mCode)
+      mCode.curFn = oldFn
+      return fn.expr
+    elseif e.head === :block
+      blocks  = mCode.funcs[mCode.curFn].blocks
+      blockId = Int(pointer_from_objref(e))
+      push!(blocks, blockId => _copy(e, mCode))
+      return blocks[blockId]
+    end
+
+    _copy(e, mCode)
   end
   #
   # TODO: describe this method

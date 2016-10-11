@@ -113,7 +113,7 @@ module Code
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
     # All parameters will be added as local variables.
     #
-    local fnEx::Expr  = :(function $(Symbol(@newFunc(org)))($(params...)) end)
+    local fnEx::Expr = :(function $(Symbol(@newFunc(org)))($(params...)) end)
     #
     # This property means that we haven't add mutations
     # before this line number, because we produce undefined

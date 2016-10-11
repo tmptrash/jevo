@@ -593,7 +593,7 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   if pos === false return false end
   local id::UInt = man.organismId
   # TODO: deepcopy() call is very slow!!! must be optimized
-  local org::Creature.Organism = organism === nothing ? Creature.create(man.cfg, id, pos) : add ? organism : deepcopy(organism)
+  local org::Creature.Organism = organism === nothing ? Creature.create(man.cfg, id, pos) : add ? organism : Creature.create(man.cfg, organism)
   local task::Task = Task(() -> Creature.born(org, man.cfg, man.task))
   local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, task, org)
 

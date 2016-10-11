@@ -17,8 +17,8 @@
     expr::Expr
     blocks::Dict{Int, Expr}
   end
-  type MetaOrganism
-    lastFn::Int
+  type MetaCode
+    curFn::Int
     funcs::Dict{Int, MetaFunc}
   end
   #
@@ -30,7 +30,7 @@
     local b::Block
     local mf::MetaFunc
     local h::Int = Int(pointer_from_objref(e))
-    local mOrg::MetaOrganism = MetaOrganism(h,Dict{Int, MetaFunc}(h => MetaFunc(e, Dict{Int, Expr}(Int(pointer_from_objref(e.args[2])) => e))))
+    local mOrg::MetaCode = MetaCode(h,Dict{Int, MetaFunc}(h => MetaFunc(e, Dict{Int, Expr}(Int(pointer_from_objref(e.args[2])) => e))))
     local ex::Expr = _copy(e, mOrg)
     #
     # This is how we update meta information
@@ -49,23 +49,23 @@
 
     ex
   end
-  function _copy(e::Expr, mOrg::MetaOrganism)
+  function _copy(e::Expr, mOrg::MetaCode)
     local n::Expr = Expr(e.head);
     n.args = _copyExprArgs(e.args, mOrg);
     n.typ = e.typ;
     n
   end
-  function _copyExprArgs(arr::Array{Any,1}, mOrg::MetaOrganism)
+  function _copyExprArgs(arr::Array{Any,1}, mOrg::MetaCode)
     local a::Any
     local arrCopy::Array{Any, 1} = []
     for a in arr push!(arrCopy, _copyExprs(a, mOrg)) end
     arrCopy
   end
-  function _copyExprs(a::ANY, mOrg::MetaOrganism) a end
+  function _copyExprs(a::ANY, mOrg::MetaCode) a end
   #
   # Don't change the order of these two if blocks
   #
-  function _copyExprs(e::Expr, mOrg::MetaOrganism)
+  function _copyExprs(e::Expr, mOrg::MetaCode)
     local fn::MetaFunc
     local blocks::Dict{Int, Expr}
     local blockId::Int
@@ -73,10 +73,10 @@
     # Don't touch this code. It's optimized for speed
     #
     if e.head === :function
-      push!(mOrg.funcs, (mOrg.lastFn = Int(pointer_from_objref(e))) => (fn = MetaFunc(e, Dict{Int, Expr}())))
+      push!(mOrg.funcs, (mOrg.curFn = Int(pointer_from_objref(e))) => (fn = MetaFunc(e, Dict{Int, Expr}())))
       return fn.expr = _copy(e, mOrg)
     elseif e.head === :block
-      blocks  = mOrg.funcs[mOrg.lastFn].blocks
+      blocks  = mOrg.funcs[mOrg.curFn].blocks
       blockId = Int(pointer_from_objref(e))
       push!(blocks, blockId => e)
       return blocks[blockId] = _copy(e, mOrg)
