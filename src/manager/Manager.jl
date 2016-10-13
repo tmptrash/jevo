@@ -171,7 +171,7 @@ module Manager
   # the task forever. This method only marks the task as
   # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
   # @param task Task
-  #
+  # TODO: do we need this?
   function stopTask(task::Task)
     #try Base.throwto(task, InterruptException()) end
     #task.state = :failed

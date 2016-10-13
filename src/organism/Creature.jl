@@ -267,11 +267,11 @@ module Creature
   # (MetaCode). After that, Array{Func, 1} of src organism is copied and it's
   # internal links to functions and blocks to original Expr tree will be
   # updated using this dictionary (MetaCode).
-  # @param cfg Application configuration
   # @param org Organism we have to copy
+  # @param cfg Application configuration
   # @return {Organism} Copy of organism
   #
-  function create(cfg::Config.ConfigData, org::Creature.Organism, id::UInt)
+  function create(org::Creature.Organism, cfg::Config.ConfigData, id::UInt, pos::Helper.Point)
     local funcs::Array{Func, 1} = []
     local f::Func
     local b::Block
@@ -309,7 +309,7 @@ module Creature
       org.energy,                                                           # energy
       org.color,                                                            # color
       copy(org.mem),                                                        # mem
-      Helper.Point(org.pos.x, org.pos.y),                                   # pos
+      pos,                                                                  # pos
       Event.create()                                                        # observer
     )
   end

@@ -75,7 +75,7 @@ module World
   # @return {Plane} filled by zero values Plane
   #
   function create(width::Int, height::Int)
-    Plane(width, height, fill(UInt32(0), height, width), Event.create())
+    Plane(width, height, fill(UInt32(Dots.INDEX_EMPTY), height, width), Event.create())
   end
   #
   # Adds energy point by specified coordinates

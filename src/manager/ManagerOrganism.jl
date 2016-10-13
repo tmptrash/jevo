@@ -59,6 +59,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   local i         ::Int
   local probs     ::Array{Int, 1}
   local cfg       ::Config.ConfigData = man.cfg
+
   #
   # This block runs one iteration for all available organisms.
   # By one iteration i mean that every organism from a list
@@ -78,10 +79,12 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # main loop for details.
     #
     if man.cons.streamInit::Bool return counter + 1 end
+    org = task.organism
     #
-    # Some organisms may be marked as "died" or "removed"
+    # Some organisms may be marked as "died" or "removed",
+    # So, we have to skip them.
     #
-    if istaskdone(task.task) continue end
+    if org.energy < 1 || istaskdone(task.task) continue end
     yieldto(task.task)
     #
     # This is how we mutate organisms during their life.
@@ -91,7 +94,6 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # Mutation will be automatically applied if organism
     # doesn't contain any code line.
     #
-    org = task.organism
     if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
       # TODO: this function is very slow!!! have to be optimized
       Mutator.mutate(cfg, org, org.mutationAmount)
@@ -195,12 +197,11 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     #
     # If population reaches minimum amount, we should stop killing it
     #
-    if length(tasks) > minOrgs org.energy -= (decVal + org.codeSize) end
-    if org.energy <= 0
+    if org.energy > 0 && length(tasks) > minOrgs org.energy -= (decVal + org.codeSize) end
+    if org.energy < 1
       _killOrganism(man, i)
       splice!(tasks, i)
     end
-
     i -= 1
   end
 end
@@ -264,8 +265,8 @@ end
 function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   if i === 0 || istaskdone(man.tasks[i].task) return false end
 
-  local id::UInt = man.tasks[i].id
   local org::Creature.Organism = man.tasks[i].organism
+  local id::UInt = org.id
 
   org.energy = 0
   org.color  = UInt32(Dots.INDEX_EMPTY)
@@ -403,6 +404,7 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   #
   # Clonning means additional energy waste
   #
+  # TODO: move energy decrease and _killOrganism() call to separate function and call it everywhere
   local energy::Int      = div(organism.energy, 2) # minus 50% of energy
   organism.energy       -= energy
   crTask.organism.energy = energy
@@ -410,6 +412,8 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
     Mutator.mutate(man.cfg, crTask.organism, crTask.organism.mutationsOnClone)
     man.status.mps += 1
   end
+  if organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks)) end
+  if crTask.organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === crTask.organism, man.tasks)) end
 
   true
 end
@@ -587,12 +591,12 @@ end
 # @param add We need just add existing organism to the world
 # @return {ManagerTypes.OrganismTask}
 # TODO: set type for arguments
-# TODO: this method is slow! We have to optimize it
+#
 function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos::Helper.Point = Helper.Point(0,0), add::Bool = false)
   pos = organism !== nothing && Helper.empty(pos) ? World.getNearFreePos(man.world, organism.pos) : (Helper.empty(pos) ? World.getFreePos(man.world) : pos)
   if pos === false return false end
   local id::UInt = man.organismId
-  local org::Creature.Organism = organism === nothing ? Creature.create(man.cfg, id, pos) : add ? organism : Creature.create(man.cfg, organism, id)
+  local org::Creature.Organism = organism === nothing ? Creature.create(man.cfg, id, pos) : add ? organism : Creature.create(organism, man.cfg, id, pos)
   local task::Task = Task(() -> Creature.born(org, man.cfg, man.task))
   local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, task, org)
 
