@@ -26,6 +26,7 @@ module ManagerTypes
     yps::Int          # all yields per second
     srps::Int         # moveXXX() related requests per second
     syps::Int         # moveXXX() related yields per second
+    mps::Int          # mutations per second
   end
   #
   # One task related to one organism

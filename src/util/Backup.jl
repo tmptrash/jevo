@@ -8,6 +8,7 @@ module Backup
   import CodeConfig.@if_debug
   import Helper
 
+  export createBackupDir
   export save
   export load
   export FOLDER_NAME
@@ -19,6 +20,20 @@ module Backup
   # Name of the folders with backups
   #
   const FOLDER_NAME  = "backup"
+  #
+  # creates backup directory if it doesn't exists
+  # @return {Bool}
+  #
+  function createBackupDir()
+    try
+      if !isdir(FOLDER_NAME) mkdir(FOLDER_NAME) end
+      return true
+    catch e
+      Helper.err("Backup.createBackupDirectory(): $e")
+      @if_debug showerror(STDOUT, e, catch_backtrace())
+    end
+    return false
+  end
   #
   # Makes a backup of application and stores it in file
   # @param data Data to save

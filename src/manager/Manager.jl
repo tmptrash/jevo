@@ -18,6 +18,8 @@
 module Manager
   import CodeConfig.@if_status
   import CodeConfig.@if_debug
+  import CodeConfig.@if_profile
+  import CodeConfig
   import Creature
   import Mutator
   import World
@@ -61,7 +63,7 @@ module Manager
       function() end,                                                           # dotCallback
       function() end,                                                           # moveCallback
       current_task(),                                                           # task
-      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0)                               # status
+      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0, 0)                            # status
     )
     local cons::ManagerTypes.Connections = _createConnections(man)
 
@@ -85,6 +87,7 @@ module Manager
     local tasks    ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
     local cfg      ::Config.ConfigData = man.cfg
     local needYield::Bool = false
+    @if_profile local i::Int = 0
 
     try
       #
@@ -110,7 +113,6 @@ module Manager
       # and organism's tasks switching.
       #
       while true
-      #for i=1:1000 # TODO: use macroses here instead of comments
         #
         # We have to wait while all clients are ready for streaming. This
         # is because the error in serializer. See issue for details:
@@ -150,6 +152,10 @@ module Manager
         # flag is set to false. See CodeConfig::showStatus for details.
         #
         @if_status _updateStatus(man, stamp)
+        #
+        # This code is used for profiling of jevo
+        #
+        @if_profile if (i += 1) > CodeConfig.profilePeriod return true end
       end
     catch e
       Helper.error("Manager.run(): $e")

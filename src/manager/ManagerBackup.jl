@@ -11,6 +11,7 @@ import Server
 import Client
 import Creature
 import ManagerTypes
+import Helper
 
 export recover
 export backup
@@ -87,7 +88,7 @@ end
 #
 function backup(man::ManagerTypes.ManagerData)
   local manCopy::ManagerTypes.ManagerData = deepcopy(man)
-  local tmpTask::Task = Task(_emptyFn)
+  local tmpTask::Task = Task(Helper.emptyFn)
   local task::ManagerTypes.OrganismTask
   local ret::Bool
   local org::Creature.Organism
@@ -108,29 +109,34 @@ function backup(man::ManagerTypes.ManagerData)
   # state for serializing into the file. Julia can't save active
   # tasks. After recover we will rerun them. It also can't save
   # anonymous functions, so we have to have some empty function
-  # as a part of current Manager module (_emptyFn()).
+  # as a part of current Manager module (Helper.emptyFn()).
   #
   for task in manCopy.tasks
     org          = task.organism
     task.task    = tmpTask
-    org.codeFn   = _emptyFn
+    org.codeFn   = Helper.emptyFn
     org.observer = Event.create()
   end
   for posPair in manCopy.positions
     org = posPair[2]
-    org.codeFn   = _emptyFn
+    org.codeFn   = Helper.emptyFn
     org.observer = Event.create()
   end
   for orgPair in manCopy.organisms
     org = orgPair[2]
-    org.codeFn   = _emptyFn
+    org.codeFn   = Helper.emptyFn
     org.observer = Event.create()
   end
   manCopy.world.obs    = Event.create()
-  manCopy.dotCallback  = _emptyFn
-  manCopy.moveCallback = _emptyFn
+  manCopy.dotCallback  = Helper.emptyFn
+  manCopy.moveCallback = Helper.emptyFn
   manCopy.task         = tmpTask
   manCopy.cons         = ManagerTypes.Connections()
+  #
+  # Before saving backup file, we need to make sure that backup folder is in place.
+  # Otherwise - create one.
+  #
+  Backup.createBackupDir()
   #
   # These code lines create new backup file and remove last one
   #
@@ -175,7 +181,3 @@ function _removeNew(man::ManagerTypes.ManagerData)
 
   true
 end
-#
-# Just stub function, which is used as a placeholder for saving a backup
-#
-function _emptyFn() end

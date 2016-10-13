@@ -11,34 +11,51 @@
 # @author DeadbraiN
 #
 module CodeConfig
-  export showStatus
-  export showStatusPeriod
+  export statusMode
+  export statusModePeriod
   export debugMode
+  export profileMode
+  export profilePeriod
 
   export if_status
   export if_debug
+  export if_profile
   #
   # Turns on/off output of real time manager status like
   # amount of organisms, IPS, RPS and so on...
   #
-  const showStatus       = true
+  const statusMode       = true
   #
   # Status showing period in seconds. Works only if
   # "showStatus" option is set to true.
   #
-  const showStatusPeriod = 5.0
+  const statusModePeriod = 5.0
   #
   # DEBUG mode. In this mode additional info like stack
   # traces will be available
   #
   const debugMode        = false
   #
+  # Turns on profiling mode. ProfileView package is used. Turns
+  # this config to on and run run-profiling.bat batch.
+  #
+  const profileMode      = false
+  #
+  # Amount of iteration, which will be done in profileMode === true
+  # before profiler windows will be shown
+  #
+  const profileIps       = 2000
+  #
   # This macro turns on specified code in case if "showStatus"
   # config is turned on.
   #
-  macro if_status(ex) @static if CodeConfig.showStatus esc(ex) end end
+  macro if_status(ex) @static if CodeConfig.statusMode esc(ex) end end
   #
-  # This macro turns on DEBUG information like stack traces...
+  # This macro turns on DEBUG code if debugMode is true
   #
   macro if_debug(ex) @static if CodeConfig.debugMode esc(ex) end end
+  #
+  # This macro turns on specified code in profiling mode
+  #
+  macro if_profile(ex) @static if CodeConfig.profileMode esc(ex) end end
 end
