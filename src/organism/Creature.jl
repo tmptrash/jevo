@@ -271,7 +271,7 @@ module Creature
   # @param org Organism we have to copy
   # @return {Organism} Copy of organism
   #
-  function create(cfg::Config.ConfigData, org::Creature.Organism)
+  function create(cfg::Config.ConfigData, org::Creature.Organism, id::UInt)
     local funcs::Array{Func, 1} = []
     local f::Func
     local b::Block
@@ -296,7 +296,7 @@ module Creature
     # Organism full copy instance
     #
     Organism(
-      org.id,                                                               # id
+      id,                                                                   # id
       _clone(org.code, funcs),                                              # code
       Helper.emptyFn,                                                       # codeFn
       org.codeSize,                                                         # codeSize
