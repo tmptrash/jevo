@@ -86,21 +86,21 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # Current organism could die during running it's code, for
     # example during giving it's energy to another organism (altruism)
     #
-    if org.energy < 1 continue end
+    if org.energy < 1 i -=1; continue end
     #
     # This is how we mutate organisms during their life.
     # Mutations occures according to organisms settings.
     # If mutationPeriod or mutationAmount set to 0, it
     # means that mutations during leaving are disabled.
     # Mutation will be automatically applied if organism
-    # doesn't contain any code line.
+    # doesn't contain any code line. This line must be
+    # last in organisms loop.
     #
-    if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0
-      # TODO: this function is very slow!!! have to be optimized
-      Mutator.mutate(cfg, org, org.mutationAmount)
-      man.status.mps += 1
-    end
-
+    if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task) end
+    #
+    # Here shouldn't be a code, after mutations, because current
+    # task may be updated with new one.
+    #
     i -= 1
   end
   len = length(tasks)
@@ -261,10 +261,13 @@ end
 # TODO: this method should kill organism at the moment. right now
 # TODO: it kills it later (see splice() call)
 function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
-  # TODO: what does i === 0 mean?
-  if i === 0 return false end
+  #
+  # 0 means, that organism index wasn't found
+  #
+  if i < 1 return false end
 
-  local org::Creature.Organism = man.tasks[i].organism
+  local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
+  local org::Creature.Organism = tasks[i].organism
   local id::UInt = org.id
 
   org.energy = 0
@@ -273,8 +276,8 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   _moveOrganism(man, org.pos, org)
   delete!(man.positions, Manager._getPosId(man, org.pos))
   delete!(man.organisms, id)
-  Manager.stopTask(man.tasks[i].task)
-  splice!(man.tasks, i)
+  Manager.stopTask(tasks[i].task)
+  splice!(tasks, i)
   msg(man, id, "die")
 
   true
@@ -381,6 +384,22 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   true
 end
 #
+# Mutates an organism according to his own amount of mutations.
+# @param man Instance of manager data type
+# @param task Task of organism
+#
+function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask)
+  if Mutator.mutate(man.cfg, task.organism, task.organism.mutationsOnClone)
+    #
+    # Because we have changed current organism's code, we have to
+    # update it's task. Otherwise, old, removed code will still be
+    # runned, before new code will be running.
+    #
+    task.task = Task(() -> Creature.born(task.organism, man.cfg, man.task))
+  end
+  man.status.mps += 1
+end
+#
 # Makes orhanism clone and apply mutations to it (child).
 # Finds free point for new organism and returns these coordinates.
 # If no free space, then returns false. It checks four (4) places
@@ -408,10 +427,7 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   local energy::Int      = div(organism.energy, 2) # minus 50% of energy
   organism.energy       -= energy
   crTask.organism.energy = energy
-  if energy > 0
-    Mutator.mutate(man.cfg, crTask.organism, crTask.organism.mutationsOnClone)
-    man.status.mps += 1
-  end
+  if energy > 0 _mutate(man, crTask) end
   if organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks)) end
   if crTask.organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === crTask.organism, man.tasks)) end
 
@@ -526,7 +542,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
   local id::Int = Manager._getPosId(man, pos)
   local org::Creature.Organism
 
-  if haskey(man.cons.frozen, organism.id)
+  if haskey(man.cons.frozen, organism.id) || organism.energy < 1
     return retObj.ret = 0
   end
   #
@@ -541,7 +557,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     if amount < 1
       if organism.energy <= abs(amount)
         # TODO: possibly slow code!
-        # TODO: move all findfirst() callsinside _killOrganism()
+        # TODO: move all findfirst() calls inside _killOrganism()
         _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks))
         amount = -organism.energy
       end
