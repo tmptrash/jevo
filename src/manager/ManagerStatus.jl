@@ -16,13 +16,13 @@ function _updateStatus(man::ManagerTypes.ManagerData, stamp::Float64)
 
   if stamp - st.stamp >= CodeConfig.statusModePeriod
     println(
-      "ips: ",      man.cfg.WORLD_IPS,
-      ", yps: ",    Int(div(st.yps, period)),
-      ", syps: ",   Int(div(st.syps, period)),
-      ", rps: ",    Int(div(st.rps, period)),
-      ", srps: ",   Int(div(st.srps, period)),
-      ", mps: ",    Int(div(st.mps, period)),
-      ", orgs: ",   length(man.tasks)
+      "ips ",      man.cfg.WORLD_IPS,
+      ", yps ",    Int(div(st.yps, period)),
+      ", syps ",   Int(div(st.syps, period)),
+      ", rps ",    Int(div(st.rps, period)),
+      ", srps ",   Int(div(st.srps, period)),
+      ", mps ",    Int(div(st.mps, period)),
+      ", orgs ",   length(man.tasks)
     )
     st.stamp = stamp
     st.yps   = 0

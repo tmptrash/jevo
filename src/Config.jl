@@ -320,7 +320,7 @@ module Config
       Int(typemax(UInt32)),              # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)
       500,                               # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                                 # ORGANISM_ENERGY_DECREASE_VALUE
-      600,                               # ORGANISM_REMOVE_AFTER_TIMES
+      1000,                              # ORGANISM_REMOVE_AFTER_TIMES
       5,                                 # ORGANISM_REMOVE_AMOUNT
       10,                                # ORGANISM_CLONE_AFTER_TIMES
       5,                                 # ORGANISM_START_COLOR

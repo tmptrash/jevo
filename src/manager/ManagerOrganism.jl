@@ -56,17 +56,18 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   local len       ::Int = length(tasks)
   local task      ::ManagerTypes.OrganismTask
   local org       ::Creature.Organism
-  local i         ::Int
+  local probIndex ::Int
   local probs     ::Array{Int, 1}
   local cfg       ::Config.ConfigData = man.cfg
+  local i         ::Int = len
 
   #
   # This block runs one iteration for all available organisms.
   # By one iteration i mean that every organism from a list
   # run peace of it's script - code between two produce() calls.
-  # TODO: optimize this two approaches. We have to have only one
-  # TODO: reverse loop.
-  @inbounds for task in tasks
+  #
+  while i > 0
+    task = tasks[i]
     #
     # Because this loop affects porformance, we have call yield()
     # here and not in main Manager while loop.
@@ -79,13 +80,13 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # main loop for details.
     #
     if man.cons.streamInit::Bool return counter + 1 end
+    yieldto(task.task)
     org = task.organism
     #
-    # Some organisms may be marked as "died" or "removed",
-    # So, we have to skip them.
+    # Current organism could die during running it's code, for
+    # example during giving it's energy to another organism (altruism)
     #
-    if org.energy < 1 || istaskdone(task.task) continue end
-    yieldto(task.task)
+    if org.energy < 1 continue end
     #
     # This is how we mutate organisms during their life.
     # Mutations occures according to organisms settings.
@@ -99,7 +100,10 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
       Mutator.mutate(cfg, org, org.mutationAmount)
       man.status.mps += 1
     end
+
+    i -= 1
   end
+  len = length(tasks)
   #
   # After all organisms die, we have to create next, new population
   #
@@ -121,9 +125,8 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   if needClone && len < cfg.WORLD_MAX_ORGANISMS && len > 0
     probs = Int[]
     @inbounds for task in tasks push!(probs, task.organism.energy) end
-    i = Helper.getProbIndex(probs)
-    org = tasks[i].organism
-    if org.energy > 0 && !istaskdone(tasks[i].task) _onClone(man, org) end
+    probIndex = Helper.getProbIndex(probs)
+    _onClone(man, tasks[probIndex].organism)
   end
   #
   # This block decreases energy from organisms, because they
@@ -166,10 +169,7 @@ function _removeMinOrganisms(man::ManagerTypes.ManagerData)
   if length(tasks) <= amount return false end
 
   @inbounds sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
-  for i = 1:amount
-    @inbounds if istaskdone(tasks[i].task) continue end
-    _killOrganism(man, i)
-  end
+  @inbounds for i = 1:amount _killOrganism(man, 1) end
 
   true
 end
@@ -197,11 +197,8 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     #
     # If population reaches minimum amount, we should stop killing it
     #
-    if org.energy > 0 && length(tasks) > minOrgs org.energy -= (decVal + org.codeSize) end
-    if org.energy < 1
-      _killOrganism(man, i)
-      splice!(tasks, i)
-    end
+    if length(tasks) > minOrgs org.energy -= (decVal + org.codeSize) end
+    if org.energy < 1 _killOrganism(man, i) end
     i -= 1
   end
 end
@@ -261,9 +258,11 @@ end
 # _updateOrganismsEnergy() function.
 # @param man Manager data type
 # @param i Index of organism's task
-#
+# TODO: this method should kill organism at the moment. right now
+# TODO: it kills it later (see splice() call)
 function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
-  if i === 0 || istaskdone(man.tasks[i].task) return false end
+  # TODO: what does i === 0 mean?
+  if i === 0 return false end
 
   local org::Creature.Organism = man.tasks[i].organism
   local id::UInt = org.id
@@ -275,6 +274,7 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   delete!(man.positions, Manager._getPosId(man, org.pos))
   delete!(man.organisms, id)
   Manager.stopTask(man.tasks[i].task)
+  splice!(man.tasks, i)
   msg(man, id, "die")
 
   true
@@ -541,6 +541,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     if amount < 1
       if organism.energy <= abs(amount)
         # TODO: possibly slow code!
+        # TODO: move all findfirst() callsinside _killOrganism()
         _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks))
         amount = -organism.energy
       end

@@ -272,7 +272,6 @@ function getBest(man::ManagerTypes.ManagerData, amount::Int)
   if amount > 0
     sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
     for i = 1:amount
-      if istaskdone(tasks[len - i + 1].task) continue end
       push!(best, _createSimpleOrganism(tasks[len - i + 1].id, tasks[len - i + 1].organism))
     end
   end
@@ -553,6 +552,7 @@ function _onBeforeResponse(man::ManagerTypes.ManagerData, side::String, data::Co
   #
   Manager._createOrganism(man, org, org.pos, true)
   org.energy -= div(org.energy * man.cfg.CONNECTION_STEP_ENERGY_PERCENT, 100)
+  if org.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === org, man.tasks)) end
   ans.id = RpcApi.RPC_ORG_STEP_OK
 
   true
