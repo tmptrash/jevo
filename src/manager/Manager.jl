@@ -63,7 +63,7 @@ module Manager
       function() end,                                                           # dotCallback
       function() end,                                                           # moveCallback
       current_task(),                                                           # task
-      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0, 0)                            # status
+      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0)                # status
     )
     local cons::ManagerTypes.Connections = _createConnections(man)
 

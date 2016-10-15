@@ -71,6 +71,8 @@ function createOrganisms(man::ManagerTypes.ManagerData)
   local i::Int
 
   Helper.info("Creating organisms...")
+  man.totalOrganisms = 0
+  man.organismId     = UInt(1)
   for i = 1:man.cfg.ORGANISM_START_AMOUNT createOrganism(man) end
 
   nothing
@@ -271,9 +273,7 @@ function getBest(man::ManagerTypes.ManagerData, amount::Int)
   amount = len > amount ? amount : len
   if amount > 0
     sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
-    for i = 1:amount
-      push!(best, _createSimpleOrganism(tasks[len - i + 1].id, tasks[len - i + 1].organism))
-    end
+    for i = 1:amount push!(best, _createSimpleOrganism(tasks[len - i + 1].id, tasks[len - i + 1].organism)) end
   end
 
   best

@@ -68,6 +68,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   #
   while i > 0
     task = tasks[i]
+    org  = task.organism
     #
     # Because this loop affects porformance, we have call yield()
     # here and not in main Manager while loop.
@@ -81,7 +82,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     #
     if man.cons.streamInit::Bool return counter + 1 end
     yieldto(task.task)
-    org = task.organism
+    @if_status man.status.ytps += 1
     #
     # Current organism could die during running it's code, for
     # example during giving it's energy to another organism (altruism)
@@ -107,11 +108,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   #
   # After all organisms die, we have to create next, new population
   #
-  if len < 1
-    man.totalOrganisms = 0
-    man.organismId     = UInt(1)
-    createOrganisms(man)
-  end
+  if len < 1 createOrganisms(man) end
   #
   # Cloning procedure. The meaning of this is in ability to
   # produce children as fast as much energy has an organism.
@@ -170,6 +167,7 @@ function _removeMinOrganisms(man::ManagerTypes.ManagerData)
 
   @inbounds sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
   @inbounds for i = 1:amount _killOrganism(man, 1) end
+  @if_status man.status.rops += 1
 
   true
 end
@@ -201,6 +199,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     if org.energy < 1 _killOrganism(man, i) end
     i -= 1
   end
+  @if_status man.status.eups += 1
 end
 #
 # Updates total world's energy. It shouldn't be less then minimum
@@ -389,7 +388,7 @@ end
 # @param task Task of organism
 #
 function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask)
-  if Mutator.mutate(man.cfg, task.organism, task.organism.mutationsOnClone)
+  if Mutator.mutate(man.cfg, task.organism, task.organism.mutationAmount)
     #
     # Because we have changed current organism's code, we have to
     # update it's task. Otherwise, old, removed code will still be
@@ -397,7 +396,7 @@ function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask)
     #
     task.task = Task(() -> Creature.born(task.organism, man.cfg, man.task))
   end
-  man.status.mps += 1
+  @if_status man.status.mps += 1
 end
 #
 # Makes orhanism clone and apply mutations to it (child).
@@ -430,6 +429,7 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   if energy > 0 _mutate(man, crTask) end
   if organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks)) end
   if crTask.organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === crTask.organism, man.tasks)) end
+  @if_status man.status.cps += 1
 
   true
 end

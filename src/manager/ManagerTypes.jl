@@ -23,7 +23,11 @@ module ManagerTypes
   type ManagerStatus
     stamp::Float64    # current UNIX time stamp
     rps::Int          # all requests per second
+    eups::Int         # energy updates per second
+    rops::Int         # remove organisms per second
+    ytps::Int         # one side yieldto() calls per second
     yps::Int          # all yields per second
+    cps::Int          # clones per second
     srps::Int         # moveXXX() related requests per second
     syps::Int         # moveXXX() related yields per second
     mps::Int          # mutations per second

@@ -60,7 +60,7 @@ module Mutator
       pos        = codeChange ? Code.getRandPos(org) : _posStub
       cmd        = codeChange ? Code.CODE_PARTS[Helper.fastRand(length(Code.CODE_PARTS))] : _cmdStub
       res        = org.codeSize < 1 ? _onAdd(cfg, org, pos, cmd) : _MUTATION_TYPES[pIndex](cfg, org, pos, cmd)
-      result    &= res
+      result    |= res
       #
       # Updates compiled version of the code. Only valid code will be applied,
       # because exception will be fired in case of error organism code.
