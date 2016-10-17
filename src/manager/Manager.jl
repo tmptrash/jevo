@@ -260,6 +260,16 @@ module Manager
 
     ystamp, needYield
   end
+  #
+  # Updates organism's task by creating new task with passed parameters
+  # @param man Instamce of ManagerData type
+  # @param task OrganismTask instance, where we have to update the task
+  #
+  function _updateOrgTask(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask)
+    task.task = Task(() -> Creature.born(task.organism, man.cfg, man.task))
+    yieldto(task.task)
+    @if_status man.status.ytps += 1
+  end
   # # TODO: do i need this?
   # # Checks id data in sockets available for reading
   # # @param man Manager data type

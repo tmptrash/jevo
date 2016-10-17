@@ -44,44 +44,38 @@ module Mutator
   #
   function mutate(cfg::Config.ConfigData, org::Creature.Organism, amount::Int = 1)
     local i         ::Int
-    local res       ::Bool
     local pIndex    ::Int
-    local result    ::Bool = true
     local codeChange::Bool
     local pos       ::Helper.Pos
+    local res       ::Bool
     local cmd       ::Code.CodePart
+    local realAmount::Int = 0
 
     for i = 1:amount
-      #
-      # If there is no code, we can't mutate it. We may only add code line
-      #
       pIndex     = org.codeSize < 1 ? 1 : Helper.getProbIndex(org.mutationProbabilities)
       codeChange = pIndex < 5
       pos        = codeChange ? Code.getRandPos(org) : _posStub
       cmd        = codeChange ? Code.CODE_PARTS[Helper.fastRand(length(Code.CODE_PARTS))] : _cmdStub
+      #
+      # If there is no code, we can't mutate it. We may only add code line
+      #
       res        = org.codeSize < 1 ? _onAdd(cfg, org, pos, cmd) : _MUTATION_TYPES[pIndex](cfg, org, pos, cmd)
-      result    |= res
-      #
-      # Updates compiled version of the code. Only valid code will be applied,
-      # because exception will be fired in case of error organism code.
-      #
-      if codeChange && res
-        try
-          #
-          # This function must be anonymous, because it's used for comparison
-          # with other functions for other organisms. If their names are equal
-          # and they are in the same module, then === operator returns true.
-          # @param o Associated with this code organism
-          #
-          org.codeFn = Creature.eval(org.code)
-          _changeColor(org)
-        catch e
-          # TODO: here fault script statictics should be collected
-        end
+      if res realAmount += 1 end
+    end
+    #
+    # It's very important to call eval() as few as possible. This is why
+    # we moved it outside the "for" loop.
+    #
+    if realAmount > 0
+      _changeColor(org, realAmount)
+      try
+        org.codeFn = Creature.eval(org.code)
+      catch e
+        # TODO: here fault script statictics should be collected
       end
     end
 
-    result
+    realAmount > 0
   end
   #
   # Changes organism's color a little bit. We use GR library for
@@ -89,12 +83,13 @@ module Mutator
   # they organizer in a gradient way. So we may just increase
   # color index to obtain smooth color change on organism descendants.
   # @param org Organism whom color we have to change
+  # @param amount Amount of mutations
   # TODO: there is a problem here, that in some peiod of time,
   # TODO: organisms will be black (invisible). We have to exclude
   # TODO: black color from the palette
   #
-  function _changeColor(org::Creature.Organism)
-    org.color += 1
+  function _changeColor(org::Creature.Organism, amount::Int)
+    org.color += amount
     if org.color > Dots.MAX_ORG_COLOR org.color = 1 end
   end
   #

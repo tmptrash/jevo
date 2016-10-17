@@ -96,11 +96,9 @@ module Event
     if !haskey(obs.events, event) return nothing end
     local fns::Array{Function, 1} = obs.events[event]
     local len::Int = length(fns)
-    local i::Function
+    local f::Function
 
-    for i in fns
-      i(args...)
-    end
+    for f in fns f(args...) end
   end
   #
   # Removes all event handlers from observer

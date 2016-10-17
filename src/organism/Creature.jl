@@ -334,14 +334,7 @@ module Creature
     for f in funcs
       mf     = mCode.funcs[Int(pointer_from_objref(f.code))]
       f.code = mf.expr
-      for b in f.blocks
-        if !haskey(mf.blocks, Int(pointer_from_objref(b.expr)))
-          # TODO: remove this!
-          println(b.expr)
-          println(ex)
-        end
-        b.expr = mf.blocks[Int(pointer_from_objref(b.expr))]
-      end
+      for b in f.blocks b.expr = mf.blocks[Int(pointer_from_objref(b.expr))] end
     end
     #
     # References to main function and it's block should be set separately
@@ -433,9 +426,6 @@ module Creature
     # TODO: check if this variable is used inside the org.codeFn()!!!
     #
     local i::Int8
-    local oldCode::Function
-
-    oldCode = org.codeFn
     #
     # This is main loop, where organism lives. It's body will be
     # changed soon by mutations.
@@ -452,7 +442,6 @@ module Creature
       #
       try
         org.codeFn(cfg, org)
-        if org.codeFn !== oldCode oldCode = org.codeFn end
       catch e
         # TODO: what we have to do with code errors?
         # TODO: we have to calculate it for statistics
