@@ -334,14 +334,7 @@ module Creature
     for f in funcs
       mf     = mCode.funcs[Int(pointer_from_objref(f.code))]
       f.code = mf.expr
-      for b in f.blocks
-        if !haskey(mf.blocks, Int(pointer_from_objref(b.expr)))
-          # TODO: remove this!
-          println(b.expr)
-          println(ex)
-        end
-        b.expr = mf.blocks[Int(pointer_from_objref(b.expr))]
-      end
+      for b in f.blocks b.expr = mf.blocks[Int(pointer_from_objref(b.expr))] end
     end
     #
     # References to main function and it's block should be set separately
