@@ -426,9 +426,6 @@ module Creature
     # TODO: check if this variable is used inside the org.codeFn()!!!
     #
     local i::Int8
-    local oldCode::Function
-
-    oldCode = org.codeFn
     #
     # This is main loop, where organism lives. It's body will be
     # changed soon by mutations.
@@ -445,7 +442,6 @@ module Creature
       #
       try
         org.codeFn(cfg, org)
-        if org.codeFn !== oldCode oldCode = org.codeFn end
       catch e
         # TODO: what we have to do with code errors?
         # TODO: we have to calculate it for statistics

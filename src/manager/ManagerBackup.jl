@@ -42,7 +42,7 @@ function recover(man::ManagerTypes.ManagerData)
   #
   man.task = curTask
   for t in data.tasks
-    t.organism.codeFn   = Creature.eval(t.organism.code)
+    t.organism.codeFn = Creature.eval(t.organism.code)
     #
     # This line prevents observers to be shared between organisms
     # Every organism should have it's own observer's instance
@@ -54,8 +54,7 @@ function recover(man::ManagerTypes.ManagerData)
     # will not be passed into the task and only last organism will
     # be run.
     #
-    t.task = Task(() -> Creature.born(t.organism, man.cfg, curTask))
-    yieldto(t.task)
+    Manager._updateOrgTask(man, t)
   end
   #
   # We don't need to load\create servers and clients every

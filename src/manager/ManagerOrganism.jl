@@ -394,7 +394,7 @@ function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask)
     # update it's task. Otherwise, old, removed code will still be
     # runned, before new code will be running.
     #
-    task.task = Task(() -> Creature.born(task.organism, man.cfg, man.task))
+    Manager._updateOrgTask(man, task)
   end
   @if_status man.status.mps += 1
 end
@@ -418,6 +418,7 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   # Creates new organism and apply mutations to him.
   #
   crTask = Manager._createOrganism(man, organism, pos)
+  @if_status man.status.cps += 1
   if crTask === false return false end
   #
   # Clonning means additional energy waste
@@ -429,7 +430,6 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   if energy > 0 _mutate(man, crTask) end
   if organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks)) end
   if crTask.organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === crTask.organism, man.tasks)) end
-  @if_status man.status.cps += 1
 
   true
 end
@@ -590,7 +590,7 @@ function _onStep(man::ManagerTypes.ManagerData, organism::Creature.Organism, pos
   if !haskey(man.cons.frozen, organism.id)
     _moveOrganism(man, pos, organism)
     #
-    # We have to explain here a little bit. This yieldto() switches current
+    # We have to explain this a little bit. This yieldto() switches current
     # context to man.task. It means that not all the code of current organism
     # will be run. It also solves a problem of parallel organisms runningand
     # smooth organisms moving in a visualizer.
@@ -614,8 +614,8 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   if pos === false return false end
   local id::UInt = man.organismId
   local org::Creature.Organism = organism === nothing ? Creature.create(man.cfg, id, pos) : add ? organism : Creature.create(organism, man.cfg, id, pos)
-  local task::Task = Task(() -> Creature.born(org, man.cfg, man.task))
-  local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, task, org)
+  local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, man.task, org)
+  Manager._updateOrgTask(man, oTask)
 
   org.pos = pos
   #
