@@ -78,15 +78,17 @@ module Manager
   # @return {Bool} run status
   #
   function run(man::ManagerTypes.ManagerData, recover::Bool = false)
-    local counter  ::Int = 1 # must be started from 1!
-    local ips      ::Int = 0
-    local istamp   ::Float64 = time()
-    local bstamp   ::Float64 = istamp
-    local ystamp   ::Float64 = istamp
-    local cons     ::ManagerTypes.Connections = man.cons
-    local tasks    ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
-    local cfg      ::Config.ConfigData = man.cfg
-    local needYield::Bool = false
+    local counter   ::Int = 1 # must be started from 1!
+    local ips       ::Int = 0
+    local istamp    ::Float64 = time()
+    local bstamp    ::Float64 = istamp
+    local ystamp    ::Float64 = istamp
+    local cons      ::ManagerTypes.Connections = man.cons
+    local tasks     ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
+    local cfg       ::Config.ConfigData = man.cfg
+    local needYield ::Bool = false
+    local backups   ::Int  = 0
+    local stayInLoop::Bool = true
     @if_profile local i::Int = 0
 
     try
@@ -104,7 +106,7 @@ module Manager
       # in this call. If we are in recover mode, then this step should
       # be skipped.
       #
-      if recover === false
+      if !recover
         setRandomEnergy(man, cfg.WORLD_START_ENERGY_BLOCKS, cfg.WORLD_START_ENERGY_AMOUNT)
         createOrganisms(man)
       end
@@ -132,10 +134,6 @@ module Manager
         #
         ips, istamp = _updateIps(man, ips, stamp, istamp)
         #
-        # Here we make auto-backup of application if there is a time
-        #
-        bstamp = _updateBackup(man, cfg, stamp, bstamp)
-        #
         # This call switches between all non blocking asynchronous
         # functions (see @async macro). For example, it handles all
         # input connections for current server. But we don't need to
@@ -147,6 +145,11 @@ module Manager
         # TODO: yieldto(), because we know all network related tasks
         # TODO: created by @async() macro.
         ystamp, needYield = _updateTasks(man, stamp, ystamp, needYield)
+        #
+        # Here we make auto-backup of application if there is a time
+        #
+        bstamp, backups, stayInLoop = _updateBackup(man, stamp, bstamp, backups)
+        if !stayInLoop return false end
         #
         # It's important to skip this function if CodeConfig.showStatus
         # flag is set to false. See CodeConfig::showStatus for details.
@@ -162,8 +165,10 @@ module Manager
       @if_debug showerror(STDOUT, e, catch_backtrace())
       return false
     end
-
-    true
+    #
+    # true means, that everything is okay, false - something went wrong
+    #
+    stayInLoop
   end
   #
   # This is how we stop the task. Stop means run last yieldto()
@@ -207,8 +212,7 @@ module Manager
     local sock::Base.TCPSocket
     local dataIndex::UInt8
     local localIps::Int
-    local i::Int
-    # TODO: 5.0 seconds should be get from config
+    # TODO: 1.0 seconds should be get from config
     if ts >= 1.0
       localIps  = trunc(Int, ips / ts)
       dataIndex = UInt8(FastApi.API_UINT64)
@@ -225,19 +229,25 @@ module Manager
     ips + 1, istamp
   end
   #
-  # Checks if it's a time to make application backup
+  # Checks if it's a time to make application backup. It also checks if
+  # system reaches specified amount of backups for app reset.
   # @param man Manager data type
-  # @param cfg Global configuration type
   # @param stamp Current UNIX timestamp
   # @param bstamp Backup last UNIX time stamp value
+  # @param backups Amount of backups from previous app reset
+  # @return {(Float64, Bool)} Updated time stamp and main loop quit flag
   #
-  function _updateBackup(man::ManagerTypes.ManagerData, cfg::Config.ConfigData, stamp::Float64, bstamp::Float64)
-    if stamp - bstamp >= cfg.BACKUP_PERIOD
-      if length(man.tasks) > 0 backup(man) end
-      return stamp
+  function _updateBackup(man::ManagerTypes.ManagerData, stamp::Float64, bstamp::Float64, backups::Int)
+    if stamp - bstamp >= man.cfg.BACKUP_PERIOD
+      if length(man.tasks) > 0
+        backup(man)
+        backups += 1
+        if backups === man.cfg.WORLD_RESET_AFTER_BACKUPS return (stamp, backups, false) end
+      end
+      return (stamp, backups, true)
     end
 
-    bstamp
+    (bstamp, backups, true)
   end
   # TODO: describe yield() call logic
   # Checks if active servers have bytes to read. It means, that we have to call
