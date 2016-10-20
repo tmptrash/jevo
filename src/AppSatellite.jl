@@ -57,8 +57,8 @@ end
 function _removeBrokenBackup(stamp::Float64, cfg::Config.ConfigData)
   local last::String
 
-  println("_removeBrokenBackup(), time: ", time(), ", stamp: ", stamp, ", period: ", cfg.BACKUP_PERIOD)
-  println("last file: ", Backup.lastFile())
+  #println("_removeBrokenBackup(), time: ", time(), ", stamp: ", stamp, ", period: ", cfg.BACKUP_PERIOD)
+  #println("last file: ", Backup.lastFile())
   if (time() - stamp) < cfg.BACKUP_PERIOD
     try
       if (last = Backup.lastFile()) != ""

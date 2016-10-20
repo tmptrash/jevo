@@ -209,6 +209,11 @@ module Config
     #
     WORLD_SCALE::Int
     #
+    # Amount of backups, after which application will be resetted.
+    # Process will be stopped and runned again.
+    #
+    WORLD_RESET_AFTER_BACKUPS::Int
+    #
     # Period of making automatic backup of application. In seconds
     #
     BACKUP_PERIOD::Float64
@@ -338,6 +343,7 @@ module Config
       0.3,                               # WORLD_MIN_ENERGY_PERCENT
       500,                               # WORLD_MIN_ENERGY_CHECK_PERIOD
       3,                                 # WORLD_SCALE
+      3,                                 # WORLD_RESET_AFTER_BACKUPS
       60.0,                              # BACKUP_PERIOD
       10,                                # BACKUP_AMOUNT
       650,                               # STAT_WIDTH

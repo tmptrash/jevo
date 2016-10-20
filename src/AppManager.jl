@@ -19,16 +19,24 @@ const ARG_RECOVER = "recover"
 # runs in a common mode.
 #
 function main()
+  Helper.info("Starting jevo...")
+
   local args::Dict{String, String} = CommandLine.create()
   local man::ManagerTypes.ManagerData = Manager.create()
-
+  local exitCode::Int
+  #
+  # According to returning value (exitCode) AppSatellite will run
+  # this app again (1) or just quit (0).
+  #
   if CommandLine.has(args, ARG_RECOVER)
     Manager.recover(man)
-    return Manager.run(man, true)
+    exitCode = Int(!Manager.run(man, true)) # 1 - error, 0 - okay
+  else
+    Helper.info("Running from scratch...")
+    exitCode = Int(!Manager.run(man)) # 1 - error, 0 - okay
   end
-
-  Helper.info("Running from scratch...")
-  Manager.run(man)
+  Helper.info("Quit jevo...")
+  exit(exitCode)
 end
 #
 # Application entry point
