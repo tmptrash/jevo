@@ -88,7 +88,7 @@ module Manager
     local cfg       ::Config.ConfigData = man.cfg
     local needYield ::Bool = false
     local backups   ::Int  = 0
-    local stayInLoop::Bool = true
+    local needExit  ::Bool = false
     @if_profile local i::Int = 0
 
     try
@@ -148,8 +148,8 @@ module Manager
         #
         # Here we make auto-backup of application if there is a time
         #
-        bstamp, backups, stayInLoop = _updateBackup(man, stamp, bstamp, backups)
-        if !stayInLoop return false end
+        bstamp, backups, needExit = _updateBackup(man, stamp, bstamp, backups)
+        if needExit return false end
         #
         # It's important to skip this function if CodeConfig.showStatus
         # flag is set to false. See CodeConfig::showStatus for details.
@@ -168,7 +168,7 @@ module Manager
     #
     # true means, that everything is okay, false - something went wrong
     #
-    stayInLoop
+    true
   end
   #
   # This is how we stop the task. Stop means run last yieldto()
@@ -242,12 +242,12 @@ module Manager
       if length(man.tasks) > 0
         backup(man)
         backups += 1
-        if backups === man.cfg.WORLD_RESET_AFTER_BACKUPS return (stamp, backups, false) end
+        if backups === man.cfg.WORLD_RESET_AFTER_BACKUPS return (stamp, backups, true) end
       end
-      return (stamp, backups, true)
+      return (stamp, backups, false)
     end
 
-    (bstamp, backups, true)
+    (bstamp, backups, false)
   end
   # TODO: describe yield() call logic
   # Checks if active servers have bytes to read. It means, that we have to call
