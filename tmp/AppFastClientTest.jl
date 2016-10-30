@@ -1,4 +1,4 @@
-include("../src/ImportFolders.jl")
+include("../src/global/ImportFolders.jl")
 
 import Config
 import Client

@@ -1,7 +1,7 @@
 #!/bin/bash
-# 
+#
 # Run this to install an application.
 # This script should be run first, before
 # all other...
 #
-julia --color=yes ./src/Dependencies.jl
+julia --color=yes ./src/global/Dependencies.jl

@@ -2,7 +2,7 @@
 # Calculates requests per second from client to server without response
 # Results: rps: 43796.25990550989, time: 22.83299994468689
 #
-include("../../src/ImportFolders.jl")
+include("../../src/global/ImportFolders.jl")
 
 import Config
 import Server

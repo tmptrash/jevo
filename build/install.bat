@@ -1,6 +1,6 @@
-rem 
+rem
 rem Run this to install an application.
 rem This script should be run first, before
 rem all other...
 rem
-julia --color=yes ./src/Dependencies.jl
+julia --color=yes ./src/global/Dependencies.jl

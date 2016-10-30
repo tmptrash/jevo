@@ -1,7 +1,7 @@
 #
 # TODO:
 #
-include("ImportFolders.jl")
+include("global/ImportFolders.jl")
 import RemoteWorld
 #
 # Analog of main() in C language

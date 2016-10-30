@@ -6,7 +6,7 @@
 #
 # @author DeadbraiN
 #
-include("ImportFolders.jl")
+include("global/ImportFolders.jl")
 import CodeConfig.@if_debug
 import Helper
 import Backup

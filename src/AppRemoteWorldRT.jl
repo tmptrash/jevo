@@ -7,7 +7,7 @@
 #
 # @author DeadbraiN
 #
-include("ImportFolders.jl")
+include("global/ImportFolders.jl")
 import RemoteWorldRT
 #
 # Analog of main() in C lang

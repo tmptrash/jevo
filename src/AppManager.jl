@@ -2,7 +2,7 @@
 # TODO: description
 # TODO: describe "recover" command line argument
 #
-include("ImportFolders.jl")
+include("global/ImportFolders.jl")
 
 import Manager
 import Helper

@@ -5,7 +5,7 @@
 #
 # @author DeadbraiN
 #
-include("ImportFolders.jl")
+include("global/ImportFolders.jl")
 
 import Client
 import Creature

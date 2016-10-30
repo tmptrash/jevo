@@ -1,5 +1,5 @@
 #
-# This script runs all tests in current folder, which are 
+# This script runs all tests in current folder, which are
 # in format: "test-<name>.jl". Other files will be skipped.
 #
 # @author DeadbraiN
@@ -14,7 +14,7 @@ test_regex = r"^test-.*\.jl$"
 # This line is needed after migrating to julia v0.4, because
 # include() doesn't search files(modules) in current folder.
 #
-include("../src/ImportFolders.jl")
+include("../src/global/ImportFolders.jl")
 #
 # All test files should be in "test" folder
 #
