@@ -8,35 +8,76 @@ import Manager
 import Helper
 import Backup
 import CommandLine
+import About
 #
 # Name of the command line argument, which tells the application
 # to recover itself from last backup.
-#
+# TODO: command line commands should be moved to separate module
 const ARG_RECOVER = "recover"
+const ARG_ABOUT   = "about"
+const ARG_VERSION = "version"
 #
 # This function starts the manager, world, organisms, server etc...
 # It checks "recover" argument for recovering from last backup or
 # runs in a common mode.
 #
 function main()
-  Helper.info("Starting jevo...")
-
+  local commands::Dict{String, Function} = Dict{String, Function}(
+    ARG_ABOUT   => _onAbout,
+    ARG_VERSION => _onVersion,
+    ARG_RECOVER => _onRecover
+  )
   local args::Dict{String, String} = CommandLine.create()
-  local man::ManagerTypes.ManagerData = Manager.create()
   local exitCode::Int
-  #
-  # According to returning value (exitCode) AppSatellite will run
-  # this app again (1) or just quit (0).
-  #
-  if CommandLine.has(args, ARG_RECOVER)
-    Manager.recover(man)
-    exitCode = Int(!Manager.run(man, true)) # 1 - error, 0 - okay
-  else
-    Helper.info("Running from scratch...")
-    exitCode = Int(!Manager.run(man)) # 1 - error, 0 - okay
+  local command::Pair{String, Function}
+
+  for command in commands
+    if CommandLine.has(args, command[1])
+      exitCode = command[2]()
+      exit(exitCode)
+    end
   end
-  Helper.info("Quit jevo...")
+
+  exitCode = _onRun()
   exit(exitCode)
+end
+
+function _onAbout()
+  Helper.info(About.description())
+  0
+end
+function _onVersion()
+  Helper.info(About.version())
+  0
+end
+#
+# Runs jevo application, but before recovers itself from
+# last backup file in "backup" folder.
+#
+function _onRecover()
+  local man::ManagerTypes.ManagerData
+  local exitCode::Int
+
+  Helper.info("Start jevo...")
+  man = Manager.create()
+  Manager.recover(man)
+  exitCode = Int(!Manager.run(man, true)) # 1 - error, 0 - okay
+  Helper.info("Quit jevo...")
+
+  exitCode
+end
+#
+# Handles running by "default". Runs jevo application, starts
+# Manager and evolution of digital organisms
+#
+function _onRun()
+  local exitCode::Int
+
+  Helper.info("Start jevo...")
+  Helper.info("Running from scratch...")
+  exitCode = Int(!Manager.run(Manager.create())) # 1 - error, 0 - okay
+  Helper.info("Quit jevo...")
+  exitCode
 end
 #
 # Application entry point
