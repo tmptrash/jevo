@@ -152,7 +152,7 @@ module Config
     # this organism at the position 1x5. The same scenario regarding Y
     # coordinate (height).
     WORLD_CYCLICAL::Bool
-    #
+    # TODO: do we need this?
     # Delay between requests for obtaining remote world region.
     # This parameter affects frames per second in a window canvas.
     # Value in seconds. It's possible to have zero based value. In

@@ -18,6 +18,7 @@
 module Manager
   import CodeConfig.@if_status
   import CodeConfig.@if_debug
+  import CodeConfig.@if_test
   import CodeConfig.@if_profile
   import CodeConfig
   import Creature
@@ -36,6 +37,7 @@ module Manager
 
   export create
   export run
+  export destroy
   #
   # This is how we collect Manager module from it's parts(files)
   #
@@ -46,10 +48,14 @@ module Manager
   @if_status include("ManagerStatus.jl")
   #
   # Creates manager related data instance. It will be passed to all
-  # manager methods
+  # manager methods. ManagerStatus type will be created in any case.
+  # In case if CodeConfig.modeStatus set in true or false. This is
+  # because i don't know how exclude one field from type depending
+  # on CodeConfig.modeStatus parameters. May be some cool macro may
+  # do it, maybe...
+  # @param cfg Configuration object for manager
   #
-  function create()
-    local cfg::Config.ConfigData = Config.create()
+  function create(cfg::Config.ConfigData = Config.create())
     local man::ManagerTypes.ManagerData = ManagerTypes.ManagerData(
       cfg,                                                                      # cfg
       World.create(cfg.WORLD_WIDTH, cfg.WORLD_HEIGHT),                          # world
@@ -78,7 +84,12 @@ module Manager
   # @return {Bool} run status
   #
   function run(man::ManagerTypes.ManagerData, recover::Bool = false)
-    local counter   ::Int = 1 # must be started from 1!
+    #
+    # must be started from 1! because we use % (div reminder) for checking
+    # if some config related to iterations occures. In case of 0 value
+    # all configs will be run at the beginning.
+    #
+    local counter   ::Int = 1
     local ips       ::Int = 0
     local istamp    ::Float64 = time()
     local bstamp    ::Float64 = istamp
@@ -158,7 +169,14 @@ module Manager
         #
         # This code is used for profiling of jevo
         #
-        @if_profile if (i += 1) > CodeConfig.profilePeriod return true end
+        @if_profile if (i += 1) > CodeConfig.modeProfilePeriod return true end
+        #
+        # This line is for special testing mode, which is called "iterational".
+        # In this mode we may run Manager iteration by iteration and measure
+        # different parameters like amount of organisms or their energy. It's
+        # easier to write unit tests with such mode...
+        #
+        @if_test produce(counter)
       end
     catch e
       Helper.error("Manager.run(): $e")
@@ -169,6 +187,28 @@ module Manager
     # true means, that everything is okay, false - something went wrong
     #
     true
+  end
+  #
+  # Destroys the manager and all realted components like servers,
+  # clients, etc...
+  # @param man Manager data object
+  #
+  function destroy(man::ManagerTypes.ManagerData)
+    World.destroy(man.world)
+    Server.stop(man.cons.server)
+    Server.stop(man.cons.fastServer)
+    Client.stop(man.cons.left)
+    Client.stop(man.cons.right)
+    Client.stop(man.cons.up)
+    Client.stop(man.cons.down)
+
+    man.positions    = Dict{Int, Creature.Organism}()
+    man.organisms    = Dict{UInt, Creature.Organism}()
+    man.tasks        = []
+    man.params       = Dict{String, String}()
+    man.dotCallback  = Helper.emptyFn
+    man.moveCallback = Helper.emptyFn
+    man.cons.frozen  = Dict{UInt, Creature.Organism}()
   end
   #
   # This is how we stop the task. Stop means run last yieldto()
@@ -277,8 +317,8 @@ module Manager
   #
   function _updateOrgTask(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask)
     task.task = Task(() -> Creature.born(task.organism, man.cfg, man.task))
-    yieldto(task.task)
-    @if_status man.status.ytps += 1
+    #yieldto(task.task)
+    #@if_status man.status.ytps += 1
   end
   # # TODO: do i need this?
   # # Checks id data in sockets available for reading

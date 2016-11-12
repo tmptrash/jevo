@@ -60,7 +60,6 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   local probs     ::Array{Int, 1}
   local cfg       ::Config.ConfigData = man.cfg
   local i         ::Int = len
-
   #
   # This block runs one iteration for all available organisms.
   # By one iteration i mean that every organism from a list
@@ -632,10 +631,10 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   # Adds organism to organisms pool
   #
   man.organismId += 1
+  man.totalOrganisms += 1
   man.organisms[id] = org
   man.positions[_getPosId(man, org.pos)] = org
   push!(man.tasks, oTask)
-  man.totalOrganisms += 1
   msg(man, id, "born")
 
   oTask

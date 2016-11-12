@@ -41,11 +41,16 @@ function main()
   exitCode = _onRun()
   exit(exitCode)
 end
-
+#
+# Just returns about info
+#
 function _onAbout()
   Helper.info(About.description())
   0
 end
+#
+# Returns jevo version
+#
 function _onVersion()
   Helper.info(About.version())
   0
@@ -77,6 +82,7 @@ function _onRun()
   Helper.info("Running from scratch...")
   exitCode = Int(!Manager.run(Manager.create())) # 1 - error, 0 - okay
   Helper.info("Quit jevo...")
+
   exitCode
 end
 #

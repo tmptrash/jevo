@@ -12,9 +12,9 @@ import ManagerTypes
 #
 function _updateStatus(man::ManagerTypes.ManagerData, stamp::Float64)
   local st::ManagerTypes.ManagerStatus = man.status
-  local period::Float64 = CodeConfig.statusModePeriod
+  local period::Float64 = CodeConfig.modeStatusPeriod
 
-  if stamp - st.stamp >= CodeConfig.statusModePeriod
+  if stamp - st.stamp >= CodeConfig.modeStatusPeriod
     println(
       "ips ",      man.cfg.WORLD_IPS,
       ", ytps ",   Int(div(st.ytps, period)),

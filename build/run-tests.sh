@@ -1,2 +1,2 @@
 #!/bin/bash
-julia --color=yes test/run-tests.jl
+julia --color=yes test/run-tests.jl modeTest

@@ -32,6 +32,7 @@ module World
   export EVENT_MOVE
 
   export create
+  export destroy
   export setEnergy
   export getEnergy
   export moveEnergy
@@ -76,6 +77,16 @@ module World
   #
   function create(width::Int, height::Int)
     Plane(width, height, fill(UInt32(Dots.INDEX_EMPTY), height, width), Event.create())
+  end
+  #
+  # Opposite to create. Destroys the World
+  # @param plane World instance
+  #
+  function destroy(plane::Plane)
+    plane.data = Array{UInt32, 2}()
+    Event.clear(plane.obs)
+    plane.width  = 0
+    plane.height = 0
   end
   #
   # Adds energy point by specified coordinates
@@ -203,14 +214,5 @@ module World
     end
 
     false
-  end
-  #
-  # Destroys world and it's data
-  # @param plane
-  #
-  function destroy(plane::Plane)
-    plane.data   = Array{UInt32, 2}()
-    plane.width  = 0
-    plane.height = 0
   end
 end
