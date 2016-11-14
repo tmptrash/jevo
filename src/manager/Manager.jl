@@ -118,8 +118,10 @@ module Manager
       # be skipped.
       #
       if !recover
-        setRandomEnergy(man, cfg.WORLD_START_ENERGY_BLOCKS, cfg.WORLD_START_ENERGY_AMOUNT)
-        createOrganisms(man)
+        if cfg.WORLD_START_ENERGY_BLOCKS + cfg.WORLD_START_ENERGY_AMOUNT > 0
+          setRandomEnergy(man, cfg.WORLD_START_ENERGY_BLOCKS, cfg.WORLD_START_ENERGY_AMOUNT)
+        end
+        if man.cfg.ORGANISM_START_AMOUNT > 0 createOrganisms(man) end
       end
       #
       # This is main infinite loop. It manages input connections

@@ -54,6 +54,20 @@ module TestManager
     TestManagerData(cfg, man, task, orgs)
   end
 
+  facts("Checking organisms clonning ability") do
+    local d = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:ORGANISM_CLONE_AFTER_TIMES=>3))
+    local orgAmount = length(d.man.organisms)
+
+    consume(d.task)
+    @fact length(d.man.organisms) - orgAmount --> 0
+    consume(d.task)
+    @fact length(d.man.organisms) - orgAmount --> 0
+    consume(d.task)
+    @fact length(d.man.organisms) - orgAmount --> 1
+    @fact length(d.man.positions) - orgAmount --> 1
+
+    Manager.destroy(d.man)
+  end
   facts("Checking period of energy grabbing from organisms") do
     local d = _create([Helper.Point(1,1), Helper.Point(2,2)])
 
