@@ -48,12 +48,23 @@ module TestManager
     for i = 1:length(positions)
       Manager.createOrganism(man, positions[i])
       push!(orgs, man.positions[Manager._getPosId(man, positions[i])])
+      println("onclone: ", orgs[1].mutationsOnClone)
     end
     man.task = task
 
     TestManagerData(cfg, man, task, orgs)
   end
 
+  facts("Checking if mutations mechanism works") do
+    local d = _create([Helper.Point(1,1)], Dict{Symbol, Any}(:ORGANISM_MUTATION_PERIOD=>2))
+    local mutations = d.man.status.mps
+
+    consume(d.task)
+    consume(d.task)
+    @fact d.man.status.mps - mutations --> 1
+
+    Manager.destroy(d.man)
+  end
   facts("Checking organisms clonning ability") do
     local d = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:ORGANISM_CLONE_AFTER_TIMES=>3))
     local orgAmount = length(d.man.organisms)
@@ -65,6 +76,26 @@ module TestManager
     consume(d.task)
     @fact length(d.man.organisms) - orgAmount --> 1
     @fact length(d.man.positions) - orgAmount --> 1
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking organisms mutations on clone") do
+    local d         = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:ORGANISM_CLONE_AFTER_TIMES=>2, :ORGANISM_MUTATIONS_ON_CLONE=>3))
+    local orgAmount = length(d.man.organisms)
+    local mutations = d.man.status.mps
+
+    @fact length(d.man.organisms)             --> 1
+    consume(d.task)
+    @fact length(d.man.organisms) - orgAmount --> 0
+    @fact d.man.status.mps - mutations        --> 0
+    consume(d.task)
+    @fact length(d.man.organisms) - orgAmount --> 1
+    @fact length(d.man.positions) - orgAmount --> 1
+    @fact d.man.status.mps - mutations        --> 3
+    consume(d.task)
+    @fact length(d.man.organisms) - orgAmount --> 1
+    @fact length(d.man.positions) - orgAmount --> 1
+    @fact d.man.status.mps - mutations        --> 3
 
     Manager.destroy(d.man)
   end
@@ -96,16 +127,6 @@ module TestManager
     @fact d.orgs[1].energy --> 94
     @fact d.orgs[2].energy --> 94
     @fact d.orgs[3].energy --> 94
-
-    Manager.destroy(d.man)
-  end
-  facts("Checking if mutations mechanism works") do
-    local d = _create([Helper.Point(1,1)], Dict{Symbol, Any}(:ORGANISM_MUTATION_PERIOD=>2))
-    local mutations = d.man.status.mps
-
-    consume(d.task)
-    consume(d.task)
-    @fact d.man.status.mps - mutations --> 1
 
     Manager.destroy(d.man)
   end

@@ -96,7 +96,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # doesn't contain any code line. This line must be
     # last in organisms loop.
     #
-    if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task) end
+    if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationAmount) end
     #
     # Here shouldn't be a code, after mutations, because current
     # task may be updated with new one.
@@ -385,9 +385,10 @@ end
 # Mutates an organism according to his own amount of mutations.
 # @param man Instance of manager data type
 # @param task Task of organism
+# @param mutations Amount of mutations we need to apply
 #
-function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask)
-  if Mutator.mutate(man.cfg, task.organism, task.organism.mutationAmount)
+function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask, mutations::Int)
+  if Mutator.mutate(man.cfg, task.organism, mutations)
     #
     # Because we have changed current organism's code, we have to
     # update it's task. Otherwise, old, removed code will still be
@@ -395,7 +396,7 @@ function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask)
     #
     Manager._updateOrgTask(man, task)
   end
-  @if_status man.status.mps += 1
+  @if_status man.status.mps += mutations
 end
 #
 # Makes orhanism clone and apply mutations to it (child).
@@ -426,7 +427,7 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   local energy::Int      = div(organism.energy, 2) # minus 50% of energy
   organism.energy       -= energy
   crTask.organism.energy = energy
-  if energy > 0 _mutate(man, crTask) end
+  if energy > 0 _mutate(man, crTask, crTask.organism.mutationsOnClone) end
   if organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks)) end
   if crTask.organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === crTask.organism, man.tasks)) end
 
