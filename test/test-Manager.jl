@@ -48,7 +48,6 @@ module TestManager
     for i = 1:length(positions)
       Manager.createOrganism(man, positions[i])
       push!(orgs, man.positions[Manager._getPosId(man, positions[i])])
-      println("onclone: ", orgs[1].mutationsOnClone)
     end
     man.task = task
 
@@ -60,8 +59,39 @@ module TestManager
     local mutations = d.man.status.mps
 
     consume(d.task)
+    @fact d.man.status.mps - mutations --> 0
     consume(d.task)
     @fact d.man.status.mps - mutations --> 1
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if mutations mechanism works with specified amount") do
+    local d = _create([Helper.Point(1,1)], Dict{Symbol, Any}(:ORGANISM_MUTATION_PERIOD=>2, :ORGANISM_MUTATION_AMOUNT=>3))
+    local mutations = d.man.status.mps
+
+    consume(d.task)
+    @fact d.man.status.mps - mutations --> 0
+    consume(d.task)
+    @fact d.man.status.mps - mutations --> 3
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if correct amount of organisms are created on start") do
+    local d = _create(Helper.Point[], Dict{Symbol, Any}(:ORGANISM_START_AMOUNT=>5))
+
+    @fact length(d.man.positions) === length(d.man.organisms) === 0 --> true
+    consume(d.task)
+    @fact length(d.man.positions) === length(d.man.organisms) === 5 --> true
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if organisms, which are created on start contain correct amopunt of energy") do
+    local d = _create(Helper.Point[], Dict{Symbol, Any}(:ORGANISM_START_AMOUNT=>3,:ORGANISM_START_ENERGY=>7))
+
+    @fact length(d.man.positions) === length(d.man.organisms) === 0 --> true
+    consume(d.task)
+    @fact length(d.man.positions) === length(d.man.organisms) === 3 --> true
+    for org in d.man.organisms @fact org[2].energy --> 7 end
 
     Manager.destroy(d.man)
   end
