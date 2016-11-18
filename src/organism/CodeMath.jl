@@ -9,6 +9,7 @@ export plus
 export minus
 export multiply
 export divide
+export not
 export reminder
 #
 # Binding of available types and available "plus" operators
@@ -16,10 +17,10 @@ export reminder
 #
 const PLUS_OPERATORS = Dict{DataType, Symbol}(
   String => :(*),
-  Bool        => :(&),
-  Int8        => :(+),
-  Int16       => :(+),
-  Int         => :(+)
+  Bool   => :(&),
+  Int8   => :(+),
+  Int16  => :(+),
+  Int    => :(+)
 )
 #
 # @cmd
@@ -136,6 +137,39 @@ function divide(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   end
 
   :($(v1) = $(v2) / $(v3))
+end
+#
+# @cmd
+# @line
+# ! operator implementation. Returns not result. Supports all
+# types: String, Int8, Bool,... In case of string: true if !empty,
+# false if empty. For numbers true if 0, false if !0. Representation
+# is the following: var::Bool = !(var|val)
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function not(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+  local typ::DataType = @randType()
+  local v1::Symbol    = @randVar(org, pos, Bool)
+  local v2::Symbol    = @randVar(org, pos, typ)
+  local val::Any      = @randValue(typ)
+
+  if v1 === :nothing return Expr(:nothing) end
+  val = (v2 === :nothing ? val : v2)
+  #
+  # "" -> true, "..." -> false
+  #
+  if typ === String
+    return :($v1 = isempty($val))
+  elseif typ === Bool
+    return :($(v1) = !($val))
+  end
+  #
+  # Works for Int8, Int16, Int64 types
+  #
+  :($(v1) = ($val < $typ(1)))
 end
 #
 # @cmd
