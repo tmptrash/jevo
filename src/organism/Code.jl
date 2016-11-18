@@ -340,7 +340,8 @@ module Code
     #
     CodePart(plus,        false), CodePart(minus,     false),
     CodePart(multiply,    false), CodePart(divide,    false),
-    CodePart(not,         false), CodePart(reminder,  false),
+    CodePart(not,         false), CodePart(and,       false),
+    CodePart(reminder,    false),
     #
     # CodeOrganism
     #

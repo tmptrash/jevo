@@ -10,6 +10,7 @@ export minus
 export multiply
 export divide
 export not
+export and
 export reminder
 #
 # Binding of available types and available "plus" operators
@@ -170,6 +171,31 @@ function not(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   # Works for Int8, Int16, Int64 types
   #
   :($(v1) = ($val < $typ(1)))
+end
+#
+# @cmd
+# @line
+# bitwise & operator implementation. Supports only numeric types
+# IntX and Bool. If code is empty this function will skip the execution.
+# Final line format: var = (var|val) & (var|val)
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function and(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+  local typ::DataType = @randBoolAndNumType()
+  local v1::Symbol    = @randVar(org, pos, typ)
+  local v2::Symbol    = @randVar(org, pos, typ)
+  local v3::Symbol    = @randVar(org, pos, typ)
+  local val1::Any     = @randValue(typ)
+  local val2::Any     = @randValue(typ)
+
+  if v1 === :nothing return Expr(:nothing) end
+  val1 = (v2 === :nothing ? val1 : v2)
+  val2 = (v3 === :nothing ? val2 : v3)
+
+  :($v1 = $typ($val1) & $typ($val2))
 end
 #
 # @cmd

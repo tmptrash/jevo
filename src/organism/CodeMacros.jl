@@ -29,6 +29,13 @@ macro randType()
   :($Helper.SUPPORTED_TYPES[Helper.fastRand(length($Helper.SUPPORTED_TYPES))])
 end
 #
+# Returns one of supported numeric and bool types. Is used randomizer for choosing type.
+# @return {DataType}
+#
+macro randBoolAndNumType()
+  :($Helper.SUPPORTED_TYPES[Helper.fastRand(length($Helper.SUPPORTED_TYPES) - 1) + 1])
+end
+#
 # Returns a variable from existing in a code
 # @param {Creature.Organism} org Organism we are mutating
 # @param {Helper.Pos} pos Code position
