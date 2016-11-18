@@ -95,6 +95,51 @@ module TestManager
 
     Manager.destroy(d.man)
   end
+  facts("Checking period of energy grabbing from organisms") do
+    local d = _create([Helper.Point(1,1), Helper.Point(2,2)])
+
+    @fact d.orgs[1].energy --> 100
+    @fact d.orgs[2].energy --> 100
+    # ORGANISM_ENERGY_DECREASE_PERIOD === 2, so we need run two iterations
+    consume(d.task)
+    consume(d.task)
+    @fact d.orgs[1].energy --> 99
+    @fact d.orgs[2].energy --> 99
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking amount energy grabbing from organisms per period") do
+    local d = _create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}(:ORGANISM_ENERGY_DECREASE_VALUE=>3))
+
+    @fact d.orgs[1].energy --> 100
+    @fact d.orgs[2].energy --> 100
+    @fact d.orgs[3].energy --> 100
+    # ORGANISM_ENERGY_DECREASE_PERIOD === 2, ORGANISM_ENERGY_DECREASE_VALUE === 3,
+    # so we need run 4 iterations to decrease energy on 6 points
+    consume(d.task)
+    consume(d.task)
+    consume(d.task)
+    consume(d.task)
+    @fact d.orgs[1].energy --> 94
+    @fact d.orgs[2].energy --> 94
+    @fact d.orgs[3].energy --> 94
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking minimum energy organisms removing") do
+    local d = _create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}(:ORGANISM_REMOVE_AFTER_TIMES=>3, :ORGANISM_REMOVE_AMOUNT=>2))
+
+    @fact length(d.man.organisms) === length(d.man.positions) === 3 --> true
+    consume(d.task)
+    @fact length(d.man.organisms) === length(d.man.positions) === 3 --> true
+    consume(d.task)
+    @fact length(d.man.organisms) === length(d.man.positions) === 3 --> true
+    consume(d.task)
+    @fact length(d.man.organisms) === length(d.man.positions) === 1 --> true
+
+    Manager.destroy(d.man)
+  end
+
   facts("Checking organisms clonning ability") do
     local d = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:ORGANISM_CLONE_AFTER_TIMES=>3))
     local orgAmount = length(d.man.organisms)
@@ -126,37 +171,6 @@ module TestManager
     @fact length(d.man.organisms) - orgAmount --> 1
     @fact length(d.man.positions) - orgAmount --> 1
     @fact d.man.status.mps - mutations        --> 3
-
-    Manager.destroy(d.man)
-  end
-  facts("Checking period of energy grabbing from organisms") do
-    local d = _create([Helper.Point(1,1), Helper.Point(2,2)])
-
-    @fact d.orgs[1].energy --> 100
-    @fact d.orgs[2].energy --> 100
-    # ORGANISM_ENERGY_DECREASE_PERIOD === 2, so we need run two iterations
-    consume(d.task)
-    consume(d.task)
-    @fact d.orgs[1].energy --> 99
-    @fact d.orgs[2].energy --> 99
-
-    Manager.destroy(d.man)
-  end
-  facts("Checking amount energy grabbing from organisms per period") do
-    local d = _create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}(:ORGANISM_ENERGY_DECREASE_VALUE=>3))
-
-    @fact d.orgs[1].energy --> 100
-    @fact d.orgs[2].energy --> 100
-    @fact d.orgs[3].energy --> 100
-    # ORGANISM_ENERGY_DECREASE_PERIOD === 2, ORGANISM_ENERGY_DECREASE_VALUE === 3,
-    # so we need run 4 iterations to decrease energy on 6 points
-    consume(d.task)
-    consume(d.task)
-    consume(d.task)
-    consume(d.task)
-    @fact d.orgs[1].energy --> 94
-    @fact d.orgs[2].energy --> 94
-    @fact d.orgs[3].energy --> 94
 
     Manager.destroy(d.man)
   end
