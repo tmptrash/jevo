@@ -15,6 +15,7 @@ import About
 # TODO: command line commands should be moved to separate module
 const ARG_RECOVER = "recover"
 const ARG_ABOUT   = "about"
+const ARG_INFO    = "info"
 const ARG_VERSION = "version"
 #
 # This function starts the manager, world, organisms, server etc...
@@ -24,6 +25,7 @@ const ARG_VERSION = "version"
 function main()
   local commands::Dict{String, Function} = Dict{String, Function}(
     ARG_ABOUT   => _onAbout,
+    ARG_INFO    => _onAbout,
     ARG_VERSION => _onVersion,
     ARG_RECOVER => _onRecover
   )

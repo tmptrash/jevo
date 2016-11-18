@@ -139,7 +139,6 @@ module TestManager
 
     Manager.destroy(d.man)
   end
-
   facts("Checking organisms clonning ability") do
     local d = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:ORGANISM_CLONE_AFTER_TIMES=>3))
     local orgAmount = length(d.man.organisms)
