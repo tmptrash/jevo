@@ -23,7 +23,7 @@ export fromMem
 # @param pos Position in code
 # @return {Expr} New expression or Expr(:nothing) if skipped
 #
-function lookAt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+function lookAt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local varSym::Symbol = @randVar(org, pos, Int)
   local xSym::Symbol   = @randVar(org, pos, Int16)
   local ySym::Symbol   = @randVar(org, pos, Int16)
@@ -39,7 +39,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function eatLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+function eatLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
   :(Creature.eatLeft(c, o, Int($(amount))))
@@ -52,7 +52,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function eatRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+function eatRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
   :(Creature.eatRight(c, o, Int($(amount))))
@@ -65,7 +65,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function eatUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+function eatUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
   :(Creature.eatUp(c, o, Int($(amount))))
@@ -78,7 +78,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function eatDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+function eatDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
   :(Creature.eatDown(c, o, Int($(amount))))
@@ -91,7 +91,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function stepLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+function stepLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   :(Creature.stepLeft(o))
 end
 #
@@ -102,7 +102,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function stepRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+function stepRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   :(Creature.stepRight(o))
 end
 #
@@ -113,7 +113,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function stepUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+function stepUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   :(Creature.stepUp(o))
 end
 #
@@ -124,7 +124,7 @@ end
 # @param org Organism we have to mutate
 # @param pos Position in code
 #
-function stepDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+function stepDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   :(Creature.stepDown(o))
 end
 #
@@ -136,7 +136,7 @@ end
 # @param pos Position in code
 # @return {Expr|nothing}
 #
-function toMem(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+function toMem(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local typ::DataType = @randType()
   local key::Symbol   = @randVar(org, pos, Int16)
   local val::Symbol   = @randVar(org, pos, Int16)
@@ -153,7 +153,7 @@ end
 # @param pos Position in code
 # @return {Expr|nothing}
 #
-function fromMem(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+function fromMem(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local typ::DataType = @randType()
   local key::Symbol   = @randVar(org, pos, Int16)
   local val::Symbol   = @randVar(org, pos, Int16)

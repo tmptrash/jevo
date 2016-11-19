@@ -5,7 +5,7 @@ module Helper
   #import Gtk
   import CodeConfig.@if_debug
 
-  export Pos
+  export CodePos
   export Point
   export RetObj
 
@@ -33,7 +33,7 @@ module Helper
   # Describes organism's code position. This position is used
   # for mutations (add, change, del,...)
   #
-  type Pos
+  type CodePos
     #
     # Index of function in Organism.Creature.funcs array
     #
@@ -286,7 +286,8 @@ module Helper
   function emptyFn() end
 
   #
-  # Supported types of code inside organism
+  # Supported types of code inside organism. At the end must be numeric types!!
+  # See @randBoolAndNumType() macro for details.
   #
   const SUPPORTED_TYPES = [String, Bool, Int8, Int16, Int]
 end

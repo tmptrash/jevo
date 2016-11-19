@@ -46,7 +46,7 @@ module Mutator
     local i         ::Int
     local pIndex    ::Int
     local codeChange::Bool
-    local pos       ::Helper.Pos
+    local pos       ::Helper.CodePos
     local res       ::Bool
     local cmd       ::Code.CodePart
     local realAmount::Int = 0
@@ -103,7 +103,7 @@ module Mutator
   # @return {Bool} true means that add mutation was occured, false
   # that there where no add or adding was skipped.
   #
-  function _onAdd(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+  function _onAdd(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
     @posCorrect(org, pos, cmd)
     local block::Creature.Block = org.funcs[pos.fnIdx].blocks[pos.blockIdx]
     #
@@ -136,7 +136,7 @@ module Mutator
   # @return {Bool} true means that there were a change, false
   # that there were no change or change was skipped.
   #
-  function _onChange(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+  function _onChange(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
     @posCorrect(org, pos, cmd)
     local block::Creature.Block = org.funcs[pos.fnIdx].blocks[pos.blockIdx]
     #
@@ -176,7 +176,7 @@ module Mutator
   # @return {Bool} true means that there were a delete, false
   # that there were no delete or delete was skipped.
   #
-  function _onDel(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+  function _onDel(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
     local lines::Array{Any, 1} = org.funcs[pos.fnIdx].blocks[pos.blockIdx].expr.args
     local len::Int = length(lines)
 
@@ -203,7 +203,7 @@ module Mutator
   # that there were no change or change was skipped.
   # TODO: implement in future
   #
-  function _onSmallChange(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+  function _onSmallChange(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
     # TODO: AST deep analyzing here!
     # TODO: variables and constants should be used here
     true
@@ -216,7 +216,7 @@ module Mutator
   # @param pos Unused
   # @param cmd Unused
   #
-  function _onClone(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+  function _onClone(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
     org.mutationsOnClone = Helper.fastZRand(cfg.ORGANISM_MAX_MUTATIONS_ON_CLONE)
     true
   end
@@ -228,7 +228,7 @@ module Mutator
   # @param pos Unused
   # @param cmd Unused
   #
-  function _onPeriod(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+  function _onPeriod(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
     org.mutationPeriod = Helper.fastZRand(cfg.ORGANISM_MAX_MUTATION_PERIOD)
     true
   end
@@ -240,7 +240,7 @@ module Mutator
   # @param pos Unused
   # @param cmd Unused
   #
-  function _onAmount(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+  function _onAmount(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
     org.mutationAmount = Helper.fastZRand(cfg.ORGANISM_MAX_MUTATION_AMOUNT)
     true
   end
@@ -251,7 +251,7 @@ module Mutator
   # @param pos Unused
   # @param cmd Unused
   #
-  function _onProbs(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos, cmd::Code.CodePart)
+  function _onProbs(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
     local probIndex = Helper.fastRand(length(org.mutationProbabilities))
     org.mutationProbabilities[probIndex] = Helper.fastZRand(cfg.ORGANISM_MUTATION_PROBABILITY_MAX_VALUE)
     true
@@ -266,7 +266,7 @@ module Mutator
   # "Empty" position. Means no position. Is used only like a stub for
   # functions, which don't need code position
   #
-  const _posStub = Helper.Pos(0,0,0)
+  const _posStub = Helper.CodePos(0,0,0)
   #
   # Stub for CodePart type. Is used with functions like: _onPeriod, _onPeriod,..
   # Which don't need a code part

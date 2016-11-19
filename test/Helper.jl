@@ -22,7 +22,7 @@ end
 #
 # Adds all available variables into specified position
 #
-function addVars(org::Creature.Organism, lines::Array{Int, 1}, pos::Helper.Pos)
+function addVars(org::Creature.Organism, lines::Array{Int, 1}, pos::Helper.CodePos)
   Helper.getSupportedTypes(function (t)
     var = Symbol("var_", org.symbolId += 1)
     push!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].vars[t], var)
@@ -32,7 +32,7 @@ end
 #
 # Adds one variable by type
 #
-function addVar(org::Creature.Organism, lines::Array{Int, 1}, pos::Helper.Pos, typ::DataType)
+function addVar(org::Creature.Organism, lines::Array{Int, 1}, pos::Helper.CodePos, typ::DataType)
   var = Symbol("var_", org.symbolId += 1)
   push!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].vars[typ], var)
   insert!(Helper.getLines(org.code, lines), pos.lineIdx, :(local $(var)::$(typ)=$(typ !== String ? rand(typ) : randstring())))

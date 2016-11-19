@@ -13,8 +13,8 @@ module TestCodeMath
   facts("Testing CodeMath.plus() with different variable types") do
     local conf = Config.create()
     local org  = Creature.create(conf)
-    addVars(org, [2], Helper.Pos(1,1,1))
-    Mutator._onAdd(conf, org, Helper.Pos(1,1,6), Code.CodePart(Code.plus, false))
+    addVars(org, [2], Helper.CodePos(1,1,1))
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,6), Code.CodePart(Code.plus, false))
     op = Helper.getArg(org.code, [2,6,2,1]) # operator
 
     @fact (op === :(+) || op === :(*) || op === :(&)) --> true
@@ -24,7 +24,7 @@ module TestCodeMath
   facts("Testing CodeMath.plus() without variables") do
     local conf = Config.create()
     local org  = Creature.create(conf)
-    Mutator._onAdd(conf, org, Helper.Pos(1,1,6), Code.CodePart(Code.plus, false))
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,6), Code.CodePart(Code.plus, false))
 
     @fact length(Helper.getLines(org.code, [2])) --> 1
     @fact eval(org.code)(conf, org) --> true
@@ -34,10 +34,10 @@ module TestCodeMath
     local org  = Creature.create(conf)
 
     types = deepcopy(Helper.SUPPORTED_TYPES)
-    addVar(org, [2], Helper.Pos(1,1,1), Int8)
+    addVar(org, [2], Helper.CodePos(1,1,1), Int8)
     empty!(Helper.SUPPORTED_TYPES)
     push!(Helper.SUPPORTED_TYPES, Int8)
-    Mutator._onAdd(conf, org, Helper.Pos(1,1,2), Code.CodePart(Code.plus, false))
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.plus, false))
     var = Helper.getArg(org.code, [2,1,1,1,1])
 
     @fact Helper.getArg(org.code, [2,2,1]) --> var
@@ -56,10 +56,10 @@ module TestCodeMath
     local org   = Creature.create(conf)
     local types = deepcopy(Helper.SUPPORTED_TYPES)
 
-    addVar(org, [2], Helper.Pos(1,1,1), Int16)
+    addVar(org, [2], Helper.CodePos(1,1,1), Int16)
     empty!(Helper.SUPPORTED_TYPES)
     push!(Helper.SUPPORTED_TYPES, Int16)
-    Mutator._onAdd(conf, org, Helper.Pos(1,1,2), Code.CodePart(Code.plus, false))
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.plus, false))
     var = Helper.getArg(org.code, [2,1,1,1,1])
 
     @fact Helper.getArg(org.code, [2,2,1]) --> var
@@ -78,10 +78,10 @@ module TestCodeMath
     local org   = Creature.create(conf)
     local types = deepcopy(Helper.SUPPORTED_TYPES)
 
-    addVar(org, [2], Helper.Pos(1,1,1), Int)
+    addVar(org, [2], Helper.CodePos(1,1,1), Int)
     empty!(Helper.SUPPORTED_TYPES)
     push!(Helper.SUPPORTED_TYPES, Int)
-    Mutator._onAdd(conf, org, Helper.Pos(1,1,2), Code.CodePart(Code.plus, false))
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.plus, false))
     var = Helper.getArg(org.code, [2,1,1,1,1])
 
     @fact Helper.getArg(org.code, [2,2,1]) --> var
@@ -100,10 +100,10 @@ module TestCodeMath
     local org   = Creature.create(conf)
     local types = deepcopy(Helper.SUPPORTED_TYPES)
 
-    addVar(org, [2], Helper.Pos(1,1,1), String)
+    addVar(org, [2], Helper.CodePos(1,1,1), String)
     empty!(Helper.SUPPORTED_TYPES)
     push!(Helper.SUPPORTED_TYPES, String)
-    Mutator._onAdd(conf, org, Helper.Pos(1,1,2), Code.CodePart(Code.plus, false))
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.plus, false))
     var = Helper.getArg(org.code, [2,1,1,1,1])
 
     @fact Helper.getArg(org.code, [2,2,1]) --> var
@@ -122,10 +122,10 @@ module TestCodeMath
     local org   = Creature.create(conf)
     local types = deepcopy(Helper.SUPPORTED_TYPES)
 
-    addVar(org, [2], Helper.Pos(1,1,1), Bool)
+    addVar(org, [2], Helper.CodePos(1,1,1), Bool)
     empty!(Helper.SUPPORTED_TYPES)
     push!(Helper.SUPPORTED_TYPES, Bool)
-    Mutator._onAdd(conf, org, Helper.Pos(1,1,2), Code.CodePart(Code.plus, false))
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.plus, false))
     var = Helper.getArg(org.code, [2,1,1,1,1])
 
     @fact Helper.getArg(org.code, [2,2,1]) --> var
@@ -146,8 +146,8 @@ module TestCodeMath
     local conf = Config.create()
     local org  = Creature.create(conf)
 
-    addVars(org, [2], Helper.Pos(1,1,1))
-    Mutator._onAdd(conf, org, Helper.Pos(1,1,6), Code.CodePart(Code.minus, false))
+    addVars(org, [2], Helper.CodePos(1,1,1))
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,6), Code.CodePart(Code.minus, false))
 
     @fact length(Helper.getLines(org.code, [2])) --> 7
     @fact eval(org.code)(conf, org) --> true
@@ -156,7 +156,7 @@ module TestCodeMath
     local conf = Config.create()
     local org  = Creature.create(conf)
 
-    Mutator._onAdd(conf, org, Helper.Pos(1,1,6), Code.CodePart(Code.minus, false))
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,6), Code.CodePart(Code.minus, false))
 
     @fact length(Helper.getLines(org.code, [2])) --> 1
     @fact eval(org.code)(conf, org) --> true

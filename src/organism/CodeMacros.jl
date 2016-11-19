@@ -36,9 +36,16 @@ macro randBoolAndNumType()
   :($Helper.SUPPORTED_TYPES[Helper.fastRand(length($Helper.SUPPORTED_TYPES) - 1) + 1])
 end
 #
+# Returns one of supported numeric types. Is used randomizer for choosing type.
+# @return {DataType}
+#
+macro randNumType()
+  :($Helper.SUPPORTED_TYPES[Helper.fastRand(length($Helper.SUPPORTED_TYPES) - 2) + 2])
+end
+#
 # Returns a variable from existing in a code
 # @param {Creature.Organism} org Organism we are mutating
-# @param {Helper.Pos} pos Code position
+# @param {Helper.CodePos} pos Code position
 # @param {DataType} typ Type of variable we want to take
 # @return {Symbol}
 #
@@ -58,9 +65,24 @@ macro randValue(typ)
   :($typ !== String ? rand($typ) : randstring())
 end
 #
+# Returns a variable from existing in a code or a value of
+# specified type.
+# @param {Creature.Organism} org Organism we are mutating
+# @param {Helper.CodePos} pos Code position
+# @param {DataType} typ Type of variable we want to take
+# @return {Symbol} It doesn't return :nothing symbol
+#
+macro randVarOrValue(org, pos, typ)
+  :(
+    length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]) < 1 ?
+    :($typ === String ? randstring() : rand($typ)) :
+    $org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ][Helper.fastRand(length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]))]
+  )
+end
+#
 # Returns chosen line in specified function and block
 # @param {Creature.Organism} org
-# @param {Helper.Pos} pos
+# @param {Helper.CodePos} pos
 # @return {Array{Expr, 1}}
 #
 macro getLine(org, pos)
@@ -69,7 +91,7 @@ end
 #
 # Returns chosen block of specified function
 # @param {Creature.Organism} org
-# @param {Helper.Pos} pos
+# @param {Helper.CodePos} pos
 # @return {Organism.Creature.Block}
 #
 macro getBlock(org, pos)
@@ -78,7 +100,7 @@ end
 #
 # Returns blocks array
 # @param {Creature.Organism} org
-# @param {Helper.Pos} pos
+# @param {Helper.CodePos} pos
 # @return {Array{Organism.Creature.Block, 1}}
 #
 macro getBlocks(org, pos)
@@ -88,7 +110,7 @@ end
 # Returns variables of specified block of specified
 # function.
 # @param {Creature.Organism} org
-# @param {Helper.Pos} pos
+# @param {Helper.CodePos} pos
 # @return {Array{Symbol, 1}}
 #
 macro getVars(org, pos)

@@ -36,7 +36,7 @@ module TestMutator
   # #
   # # pos - "1,2,3" fn - 1, block - 2, line - 3
   # #
-  # function setMutationPos(pos::String) Mutator.Code.eval(parse("function getRandPos(org::Creature.Organism) Helper.Pos(" * pos * ") end")) end
+  # function setMutationPos(pos::String) Mutator.Code.eval(parse("function getRandPos(org::Creature.Organism) Helper.CodePos(" * pos * ") end")) end
   # function setCodePart(part::String) Mutator.Code.eval(parse("const CODE_PARTS = [CodePart(" * part * ")]")) end
   # function restoreMutator() include("../src/organism/Mutator.jl") end
   # #

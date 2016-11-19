@@ -65,7 +65,7 @@ module Code
   # @param pos Position for current mutation
   # @return {Expr|Expr(:nothing)}
   #
-  function var(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+  function var(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
     local typ::DataType = @randType()
     local var::Symbol = @newVar(org)
     local block::Creature.Block = @getBlock(org, pos)
@@ -90,7 +90,7 @@ module Code
   # @param pos Code position
   # @return {Expr|Expr(:nothing)}
   #
-  function fn(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+  function fn(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
     local typ::DataType
     local sym::Symbol
     local i::Int
@@ -145,7 +145,7 @@ module Code
   # @param pos Code position
   # @return {Expr|Expr(:nothing)}
   #
-  function fnCall(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+  function fnCall(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
     local nothingEx::Expr           = Expr(:nothing)
     local funcsLen::Int             = length(org.funcs)
     if funcsLen < 2 return nothingEx end
@@ -183,7 +183,7 @@ module Code
   # @param pos Code position
   # @return {Expr|Expr(:nothing)}
   #
-  function condition(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+  function condition(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
     local typ::DataType = @randType()
     local v1::Symbol    = @randVar(org, pos, typ)
     if v1 === :nothing return Expr(:nothing) end
@@ -211,7 +211,7 @@ module Code
   # @param pos Position in a code
   # @return {Expr|Expr(:nothing)}
   #
-  function loop(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
+  function loop(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
     local v::Symbol = @randVar(org, pos, Int8)
     if v === :nothing return Expr(:nothing) end
     local loopEx    = :(for i::Int8 = 1:div($v, _LOOP_STEPS_DIVIDER) end)
@@ -234,7 +234,7 @@ module Code
   # @param org Organism we are working with
   # @param pos Remove/Change position
   #
-  function onRemoveLine(org::Creature.Organism, pos::Helper.Pos)
+  function onRemoveLine(org::Creature.Organism, pos::Helper.CodePos)
     local blocks::Array{Creature.Block, 1} = org.funcs[pos.fnIdx].blocks
     local exp::Expr = blocks[pos.blockIdx].expr.args[pos.lineIdx]
     local lines::Array{Any, 1}
@@ -286,7 +286,7 @@ module Code
   # block. Every function contains return operator at the end.
   # So we have to skip it.
   # @param org Organism we are working with
-  # @return {Pos} Position in a code
+  # @return {CodePos} Position in a code
   #
   function getRandPos(org::Creature.Organism)
     local fnIdx   ::Int = Helper.fastRand(length(org.funcs))
@@ -298,7 +298,7 @@ module Code
     #
     local lines   ::Int = length(block.expr.args) - (blockIdx === 1 ? 1 : 0) + 1
 
-    Helper.Pos(
+    Helper.CodePos(
       fnIdx,
       blockIdx,
       Helper.fastRand(lines)
@@ -341,6 +341,8 @@ module Code
     CodePart(plus,        false), CodePart(minus,     false),
     CodePart(multiply,    false), CodePart(divide,    false),
     CodePart(not,         false), CodePart(and,       false),
+    CodePart(or,          false), CodePart(xor,       false),
+    CodePart(rshift,      false), CodePart(lshift,    false),
     CodePart(reminder,    false),
     #
     # CodeOrganism
