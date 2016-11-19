@@ -158,7 +158,7 @@ function not(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local val::Any      = @randValue(typ)
 
   if v1 === :nothing return Expr(:nothing) end
-  val = (v2 === :nothing ? val : v2)
+  val = (v2 === :nothing ? val : (rand(Bool) ? v2 : val))
   #
   # "" -> true, "..." -> false
   #
@@ -192,8 +192,8 @@ function and(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Pos)
   local val2::Any     = @randValue(typ)
 
   if v1 === :nothing return Expr(:nothing) end
-  val1 = (v2 === :nothing ? val1 : v2)
-  val2 = (v3 === :nothing ? val2 : v3)
+  val1 = (v2 === :nothing ? val1 : (rand(Bool) ? v2 : val1))
+  val2 = (v3 === :nothing ? val2 : (rand(Bool) ? v3 : val2))
 
   :($v1 = $typ($val1) & $typ($val2))
 end
