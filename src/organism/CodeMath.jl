@@ -17,11 +17,12 @@ export reminder
 # for these types. We don't need to export this constant.
 #
 const PLUS_OPERATORS = Dict{DataType, Symbol}(
-  String => :(*),
-  Bool   => :(&),
-  Int8   => :(+),
-  Int16  => :(+),
-  Int    => :(+)
+  String  => :(*),
+  Bool    => :(&),
+  Int8    => :(+),
+  Int16   => :(+),
+  Int     => :(+),
+  Float64 => :(+)
 )
 #
 # @cmd
@@ -179,6 +180,7 @@ end
 #
 function and(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local typ::DataType = @randBoolAndNumType()
+  if typ === Float64 return Expr(:nothing) end
   local v1::Symbol    = @randVar(org, pos, typ)
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
@@ -200,6 +202,7 @@ end
 #
 function or(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local typ::DataType = @randBoolAndNumType()
+  if typ === Float64 return Expr(:nothing) end
   local v1::Symbol    = @randVar(org, pos, typ)
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
@@ -221,6 +224,7 @@ end
 #
 function xor(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local typ::DataType = @randBoolAndNumType()
+  if typ === Float64 return Expr(:nothing) end
   local v1::Symbol    = @randVar(org, pos, typ)
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
@@ -242,6 +246,7 @@ end
 #
 function rshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local typ::DataType = @randNumType()
+  if typ === Float64 return Expr(:nothing) end
   local v1::Symbol    = @randVar(org, pos, typ)
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
@@ -263,6 +268,7 @@ end
 #
 function lshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local typ::DataType = @randNumType()
+  if typ === Float64 return Expr(:nothing) end
   local v1::Symbol    = @randVar(org, pos, typ)
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
@@ -297,5 +303,5 @@ function reminder(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Co
     return :($v1 = $v2 | $v3)
   end
 
-  :($v1 = $v2 / $v3)
+  :($v1 = $v2 % $v3)
 end

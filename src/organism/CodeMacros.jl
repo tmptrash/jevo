@@ -37,6 +37,7 @@ macro randBoolAndNumType()
 end
 #
 # Returns one of supported numeric types. Is used randomizer for choosing type.
+# Supported are: IntX and Float64
 # @return {DataType}
 #
 macro randNumType()

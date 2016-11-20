@@ -289,5 +289,5 @@ module Helper
   # Supported types of code inside organism. At the end must be numeric types!!
   # See @randBoolAndNumType() macro for details.
   #
-  const SUPPORTED_TYPES = [String, Bool, Int8, Int16, Int]
+  const SUPPORTED_TYPES = [String, Bool, Int8, Int16, Int, Float64]
 end
