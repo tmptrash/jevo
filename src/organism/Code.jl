@@ -343,7 +343,8 @@ module Code
     CodePart(not,         false), CodePart(and,       false),
     CodePart(or,          false), CodePart(xor,       false),
     CodePart(rshift,      false), CodePart(lshift,    false),
-    CodePart(reminder,    false),
+    CodePart(reminder,    false), CodePart(toString,  false),
+    CodePart(toBool,      false),
     #
     # CodeOrganism
     #

@@ -305,3 +305,43 @@ function reminder(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Co
 
   :($v1 = $v2 % $v3)
 end
+#
+# @cmd
+# @line
+# Converts any types to string. Format: var = string((var|val))
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function toString(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local typ::DataType = @randType()
+  local v1::Symbol    = @randVar(org, pos, String)
+  if v1 === :nothing return Expr(:nothing) end
+  local v2::Any       = @randVarOrValue(org, pos, typ)
+
+  :($v1 = string($v2))
+end
+#
+# @cmd
+# @line
+# Converts any types to Bool. Format: var = Bool((var|val))
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function toBool(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local typ::DataType = @randType()
+  local v1::Symbol    = @randVar(org, pos, Bool)
+  if v1 === :nothing return Expr(:nothing) end
+  local v2::Any       = @randVarOrValue(org, pos, typ)
+
+  if typ === String
+    return :($v1 = isempty($v2))
+  elseif typ === Bool
+    return :($v1 = $v2)
+  end
+
+  :($v1 = ($v2 > $typ(0)))
+end
