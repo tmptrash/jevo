@@ -182,7 +182,7 @@ function getOrganisms(man::ManagerTypes.ManagerData, from::Int = 1, to::Int = 0)
   local i::Int
 
   from = from < 1 || from > len ? 1 : from
-  to   = to === 0 ? len : to
+  to   = to < 1 || to > len ? len : to
 
   for i = from:to push!(orgs, _createSimpleOrganism(man.tasks[i].id, man.tasks[i].organism)) end
 

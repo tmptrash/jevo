@@ -69,6 +69,7 @@ module Mutator
     if realAmount > 0
       _changeColor(org, realAmount)
       try
+        cfg.ORGANISM_EVALS += 1
         org.codeFn = Creature.eval(org.code)
       catch e
         # TODO: here fault script statictics should be collected

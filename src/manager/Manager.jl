@@ -98,8 +98,6 @@ module Manager
     local tasks     ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
     local cfg       ::Config.ConfigData = man.cfg
     local needYield ::Bool = false
-    local backups   ::Int  = 0
-    local needExit  ::Bool = false
     @if_profile local i::Int = 0
 
     try
@@ -161,8 +159,13 @@ module Manager
         #
         # Here we make auto-backup of application if there is a time
         #
-        bstamp, backups, needExit = _updateBackup(man, stamp, bstamp, backups)
-        if needExit return false end
+        bstamp = _updateBackup(man, stamp, bstamp)
+        #
+        # Because of issue: https://github.com/JuliaLang/julia/issues/19013
+        # we have to rerun our application after several eval calls. 6000
+        # obtained experimentally...
+        #
+        if cfg.ORGANISM_EVALS > 6000 return false end
         #
         # It's important to skip this function if CodeConfig.showStatus
         # flag is set to false. See CodeConfig::showStatus for details.
@@ -276,20 +279,15 @@ module Manager
   # @param man Manager data type
   # @param stamp Current UNIX timestamp
   # @param bstamp Backup last UNIX time stamp value
-  # @param backups Amount of backups from previous app reset
   # @return {(Float64, Bool)} Updated time stamp and main loop quit flag
   #
-  function _updateBackup(man::ManagerTypes.ManagerData, stamp::Float64, bstamp::Float64, backups::Int)
+  function _updateBackup(man::ManagerTypes.ManagerData, stamp::Float64, bstamp::Float64)
     if stamp - bstamp >= man.cfg.BACKUP_PERIOD
-      if length(man.tasks) > 0
-        backup(man)
-        backups += 1
-        if backups === man.cfg.WORLD_RESET_AFTER_BACKUPS return (stamp, backups, true) end
-      end
-      return (stamp, backups, false)
+      if length(man.tasks) > 0 backup(man) end
+      return stamp
     end
 
-    (bstamp, backups, false)
+    bstamp
   end
   # TODO: describe yield() call logic
   # Checks if active servers have bytes to read. It means, that we have to call

@@ -134,6 +134,10 @@ module Config
     #
     ORGANISM_MUTATION_PROBABILITY_MAX_VALUE::Int
     #
+    # Amount of eval calls for generatin organisms code
+    #
+    ORGANISM_EVALS::Int
+    #
     # Maximum amount of arguments in custom functions. Minimum 1.
     #
     CODE_MAX_FUNC_PARAMS::Int
@@ -208,11 +212,6 @@ module Config
     # to zoom them with a coefficient.
     #
     WORLD_SCALE::Int
-    #
-    # Amount of backups, after which application will be resetted.
-    # Process will be stopped and runned again.
-    #
-    WORLD_RESET_AFTER_BACKUPS::Int
     #
     # Period of making automatic backup of application. In seconds
     #
@@ -323,16 +322,17 @@ module Config
       100,                               # ORGANISM_START_AMOUNT
       7000,                              # ORGANISM_START_ENERGY
       Int(typemax(UInt32)),              # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)
-      100,                               # ORGANISM_ENERGY_DECREASE_PERIOD
+      30,                                # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                                 # ORGANISM_ENERGY_DECREASE_VALUE
       600,                               # ORGANISM_REMOVE_AFTER_TIMES
       5,                                 # ORGANISM_REMOVE_AMOUNT
       10,                                # ORGANISM_CLONE_AFTER_TIMES
       5,                                 # ORGANISM_START_COLOR
       65536,                             # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
+      0,                                 # ORGANISM_EVALS
       2,                                 # CODE_MAX_FUNC_PARAMS
-      260,                               # WORLD_WIDTH
-      200,                               # WORLD_HEIGHT
+      1900,                              # WORLD_WIDTH
+      930,                               # WORLD_HEIGHT
       true,                              # WORLD_CYCLICAL
       0,                                 # WORLD_FRAME_DELAY
       0,                                 # WORLD_IPS
@@ -342,8 +342,7 @@ module Config
       UInt32(0x0001F4),                  # WORLD_START_ENERGY_AMOUNT
       0.3,                               # WORLD_MIN_ENERGY_PERCENT
       500,                               # WORLD_MIN_ENERGY_CHECK_PERIOD
-      3,                                 # WORLD_SCALE
-      3,                                 # WORLD_RESET_AFTER_BACKUPS
+      1,                                 # WORLD_SCALE
       60.0,                              # BACKUP_PERIOD
       10,                                # BACKUP_AMOUNT
       650,                               # STAT_WIDTH
