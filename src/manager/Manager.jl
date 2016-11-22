@@ -92,13 +92,13 @@ module Manager
     local counter   ::Int = 1
     local ips       ::Int = 0
     local stamp     ::Float64 = time()
-    local rstamp    ::Float64 = stamp
     local istamp    ::Float64 = stamp
     local bstamp    ::Float64 = stamp
     local ystamp    ::Float64 = stamp
     local cons      ::ManagerTypes.Connections = man.cons
     local tasks     ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
     local cfg       ::Config.ConfigData = man.cfg
+    local backups   ::Int = 0
     local needYield ::Bool = false
     @if_profile local i::Int = 0
 
@@ -161,14 +161,14 @@ module Manager
         #
         # Here we make auto-backup of application if there is a time
         #
-        bstamp = _updateBackup(man, stamp, bstamp)
+        bstamp, backups = _updateBackup(man, stamp, bstamp, backups)
         #
         # Because of issue: https://github.com/JuliaLang/julia/issues/19013
         # we have to rerun our application after several eval calls. 6000
-        # obtained experimentally. 180 - 3minutes... This code should be
-        # removed if this issue will be fixed.
+        # obtained experimentally. This code should be removed if this
+        # issue will be fixed.
         #
-        if cfg.ORGANISM_EVALS > 6000 && stamp - rstamp > 180.0 return false end
+        if cfg.ORGANISM_EVALS > 6000 && backups > 2 return false end
         #
         # It's important to skip this function if CodeConfig.showStatus
         # flag is set to false. See CodeConfig::showStatus for details.
@@ -282,15 +282,19 @@ module Manager
   # @param man Manager data type
   # @param stamp Current UNIX timestamp
   # @param bstamp Backup last UNIX time stamp value
-  # @return {(Float64, Bool)} Updated time stamp and main loop quit flag
+  # @param backups Amount of backups, created from the beginning
+  # @return {(Float64, Int)} Updated time stamp and amount of backups
   #
-  function _updateBackup(man::ManagerTypes.ManagerData, stamp::Float64, bstamp::Float64)
+  function _updateBackup(man::ManagerTypes.ManagerData, stamp::Float64, bstamp::Float64, backups::Int)
     if stamp - bstamp >= man.cfg.BACKUP_PERIOD
-      if length(man.tasks) > 0 backup(man) end
-      return stamp
+      if length(man.tasks) > 0
+        backups += 1
+        backup(man)
+      end
+      return stamp, backups
     end
 
-    bstamp
+    bstamp, backups
   end
   # TODO: describe yield() call logic
   # Checks if active servers have bytes to read. It means, that we have to call
