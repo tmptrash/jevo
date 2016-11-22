@@ -164,11 +164,11 @@ module Manager
         bstamp, backups = _updateBackup(man, stamp, bstamp, backups)
         #
         # Because of issue: https://github.com/JuliaLang/julia/issues/19013
-        # we have to rerun our application after several eval calls. 6000
+        # we have to rerun our application after several eval calls. 2400
         # obtained experimentally. This code should be removed if this
         # issue will be fixed.
         #
-        if cfg.ORGANISM_EVALS > 6000 && backups > 2 return false end
+        if cfg.ORGANISM_EVALS > 2400 && backups > 5 return false end
         #
         # It's important to skip this function if CodeConfig.showStatus
         # flag is set to false. See CodeConfig::showStatus for details.

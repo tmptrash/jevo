@@ -72,6 +72,11 @@ function recover(man::ManagerTypes.ManagerData)
   man.totalOrganisms = data.totalOrganisms
   man.quiet          = data.quiet
   #
+  # We don't need to store amount of eval() calls
+  # between app runs
+  #
+  data.cfg.ORGANISM_EVALS = 0
+  #
   # We have to remove all event handlers from observers
   # after backup loading, because they may be multiplied
   # on every app running.

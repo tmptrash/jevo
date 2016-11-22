@@ -26,6 +26,7 @@ function _updateStatus(man::ManagerTypes.ManagerData, stamp::Float64)
       ", rps ",    Int(div(st.rps, period)),
       ", srps ",   Int(div(st.srps, period)),
       ", mps ",    Int(div(st.mps, period)),
+      ", evals ",  man.cfg.ORGANISM_EVALS,
       ", orgs ",   length(man.tasks)
     )
     st.stamp = stamp
