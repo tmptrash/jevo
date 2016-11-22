@@ -91,9 +91,11 @@ module Manager
     #
     local counter   ::Int = 1
     local ips       ::Int = 0
-    local istamp    ::Float64 = time()
-    local bstamp    ::Float64 = istamp
-    local ystamp    ::Float64 = istamp
+    local stamp     ::Float64 = time()
+    local rstamp    ::Float64 = stamp
+    local istamp    ::Float64 = stamp
+    local bstamp    ::Float64 = stamp
+    local ystamp    ::Float64 = stamp
     local cons      ::ManagerTypes.Connections = man.cons
     local tasks     ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
     local cfg       ::Config.ConfigData = man.cfg
@@ -163,9 +165,10 @@ module Manager
         #
         # Because of issue: https://github.com/JuliaLang/julia/issues/19013
         # we have to rerun our application after several eval calls. 6000
-        # obtained experimentally...
+        # obtained experimentally. 180 - 3minutes... This code should be
+        # removed if this issue will be fixed.
         #
-        if cfg.ORGANISM_EVALS > 6000 return false end
+        if cfg.ORGANISM_EVALS > 6000 && stamp - rstamp > 180.0 return false end
         #
         # It's important to skip this function if CodeConfig.showStatus
         # flag is set to false. See CodeConfig::showStatus for details.
