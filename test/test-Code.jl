@@ -219,9 +219,10 @@ module TestCode
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
     @fact Helper.getArg(org.code, [2,1,1,1]) --> :func_2
     addVars(org, [2,1,2], Helper.CodePos(2,1,1))
-    @fact Mutator._onAdd(conf, org, Helper.CodePos(2,1,6), Code.CodePart(Code.condition, true)) --> true
+    @fact Mutator._onAdd(conf, org, Helper.CodePos(2,1,7), Code.CodePart(Code.condition, true)) --> true
     @fact Mutator._onAdd(conf, org, Helper.CodePos(2,2,1), Code.CodePart(Code.condition, true)) --> false
-    @fact length(Helper.getLines(org.code, [2,1,2,6,2])) --> 0
+    println(Helper.getLines(org.code, [2,1,2,7,2]))
+    @fact length(Helper.getLines(org.code, [2,1,2,7,2])) --> 0
     @fact Code.eval(org.code)(conf, org) --> true
   end
   facts("Testing Code.condition() inside other Code.condition() with variables") do
