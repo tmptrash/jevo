@@ -11,6 +11,26 @@ const PORT    = Config.create().CONNECTION_SERVER_PORT
 const TIMEOUT = 30
 
 #
+# Erases current types and set them to newTypes
+# @param newTypes New types array
+# @return Types array before changing
+#
+function changeTypes(newTypes = DataType[])
+  local types = deepcopy(Helper.SUPPORTED_TYPES)
+  empty!(Helper.SUPPORTED_TYPES)
+  for i=1:length(newTypes) push!(Helper.SUPPORTED_TYPES, newTypes[i]) end
+  types
+end
+#
+# Resets types to oldTypes array. oldTypes should be obtained
+# by calling changeTypes() function
+# @param oldTypes Values returned by changeTypes()
+#
+function resetTypes(oldTypes)
+  empty!(Helper.SUPPORTED_TYPES)
+  for i=1:length(oldTypes) push!(Helper.SUPPORTED_TYPES, oldTypes[i]) end
+end
+#
 # Waits for timeout or function fn() to return true. Between
 # waitings, it runs yield() function.
 #
