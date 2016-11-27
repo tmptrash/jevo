@@ -137,28 +137,29 @@ module TestCode
   facts("Testing Code.fnCall() of one Code.fn()") do
     local conf = Config.create()
     local org = Creature.create(conf)
+    local index = length(Helper.SUPPORTED_TYPES) + 2
 
     conf.CODE_MAX_FUNC_PARAMS = 1
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
     addVars(org, [2], Helper.CodePos(1,1,1))
-    Mutator._onAdd(conf, org, Helper.CodePos(1,1,7), Code.CodePart(Code.fnCall, false))
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,index), Code.CodePart(Code.fnCall, false))
 
-    @fact Helper.getHead(org.code, [2,7]) --> :(=)
-    @fact Helper.getArg(org.code, [2,7,2,1]) --> :func_2
-    @fact Helper.getArg(org.code, [2,7,1]) --> Helper.getArg(org.code, [2,7,2,2])
+    @fact Helper.getHead(org.code, [2,index]) --> :(=)
+    @fact Helper.getArg(org.code, [2,index,2,1]) --> :func_2
+    @fact Helper.getArg(org.code, [2,index,1]) --> Helper.getArg(org.code, [2,index,2,2])
     @fact Code.eval(org.code)(conf, org) --> true
   end
   facts("Testing Code.fnCall() after removing Code.fn()") do
     local conf = Config.create()
     local org  = Creature.create(conf)
     local cp   = Code.CodePart(Code.fn, true)
+    local amount = length(Helper.SUPPORTED_TYPES)+1
 
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), cp)
     addVars(org, [2], Helper.CodePos(1,1,1))
-    Mutator._onDel(conf, org, Helper.CodePos(1,1,6), cp)
-    @fact Mutator._onAdd(conf, org, Helper.CodePos(1,1,7), Code.CodePart(Code.fnCall, false)) --> false
-
-    @fact length(Helper.getLines(org.code, [2])) --> 6
+    Mutator._onDel(conf, org, Helper.CodePos(1,1,amount), cp)
+    @fact Mutator._onAdd(conf, org, Helper.CodePos(1,1,amount), Code.CodePart(Code.fnCall, false)) --> false
+    @fact length(Helper.getLines(org.code, [2])) --> amount
     @fact length(org.funcs) --> 1
     @fact Code.eval(org.code)(conf, org) --> true
   end
@@ -168,12 +169,12 @@ module TestCode
   facts("Testing Code.condition() with all variables") do
     local conf = Config.create()
     local org  = Creature.create(conf)
+    local amount = length(Helper.SUPPORTED_TYPES) + 2
 
     addVars(org, [2], Helper.CodePos(1,1,1))
-    Mutator._onAdd(conf, org, Helper.CodePos(1,1,6), Code.CodePart(Code.condition, true))
-
-    @fact length(Helper.getLines(org.code, [2])) --> 7
-    @fact Helper.getHead(org.code, [2,6]) --> :if
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,amount - 1), Code.CodePart(Code.condition, true))
+    @fact length(Helper.getLines(org.code, [2])) --> amount
+    @fact Helper.getHead(org.code, [2,amount - 1]) --> :if
     @fact length(org.funcs[1].blocks) --> 2
     @fact Code.eval(org.code)(conf, org) --> true
   end
@@ -218,21 +219,21 @@ module TestCode
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
     @fact Helper.getArg(org.code, [2,1,1,1]) --> :func_2
     addVars(org, [2,1,2], Helper.CodePos(2,1,1))
-    @fact Mutator._onAdd(conf, org, Helper.CodePos(2,1,6), Code.CodePart(Code.condition, true)) --> true
+    @fact Mutator._onAdd(conf, org, Helper.CodePos(2,1,7), Code.CodePart(Code.condition, true)) --> true
     @fact Mutator._onAdd(conf, org, Helper.CodePos(2,2,1), Code.CodePart(Code.condition, true)) --> false
-    @fact length(Helper.getLines(org.code, [2,1,2,6,2])) --> 0
+    @fact length(Helper.getLines(org.code, [2,1,2,7,2])) --> 0
     @fact Code.eval(org.code)(conf, org) --> true
   end
   facts("Testing Code.condition() inside other Code.condition() with variables") do
     local conf = Config.create()
     local org  = Creature.create(conf)
+    local amount = length(Helper.SUPPORTED_TYPES)
 
     addVars(org, [2], Helper.CodePos(1,1,1))
-    Mutator._onAdd(conf, org, Helper.CodePos(1,1,6), Code.CodePart(Code.condition, true))
-
-    addVars(org, [2,6,2], Helper.CodePos(1,2,1))
-    Mutator._onAdd(conf, org, Helper.CodePos(1,2,6), Code.CodePart(Code.condition, true))
-    @fact length(Helper.getLines(org.code, [2,6,2])) --> 5
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,amount + 1), Code.CodePart(Code.condition, true))
+    addVars(org, [2,amount + 1,2], Helper.CodePos(1,2,1))
+    Mutator._onAdd(conf, org, Helper.CodePos(1,2,amount + 1), Code.CodePart(Code.condition, true))
+    @fact length(Helper.getLines(org.code, [2,amount+1,2])) --> amount
     @fact Code.eval(org.code)(conf, org) --> true
   end
   #
@@ -309,7 +310,7 @@ module TestCode
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,6), Code.CodePart(Code.loop, true))
     Mutator._onAdd(conf, org, Helper.CodePos(1,2,1), Code.CodePart(Code.fn, true))
 
-    @fact length(Helper.getLines(org.code, [2])) --> 7
+    @fact length(Helper.getLines(org.code, [2])) --> length(Helper.SUPPORTED_TYPES) + 2
     @fact length(Helper.getLines(org.code, [2,6,2])) --> 0
     @fact Code.eval(org.code)(conf, org) --> true
   end

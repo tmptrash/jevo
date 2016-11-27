@@ -35,7 +35,7 @@ module TestManager
     cfg.WORLD_START_ENERGY_BLOCKS         = 0
     cfg.WORLD_MIN_ENERGY_PERCENT          = 0.1
     cfg.WORLD_MIN_ENERGY_CHECK_PERIOD     = 10000
-    cfg.WORLD_RESET_AFTER_IPS             = 100000
+    cfg.ORGANISM_EVALS                    = 100000
     #
     # Config update
     #

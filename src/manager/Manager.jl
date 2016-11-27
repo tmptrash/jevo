@@ -1,5 +1,5 @@
 #
-# Manages organisms and they world
+# Manages organisms and their world
 #
 # @singleton
 # @author DeadbraiN

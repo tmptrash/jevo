@@ -75,7 +75,7 @@ module CodeConfig
   # DEBUG mode. In this mode additional info like stack
   # traces will be available
   #
-  const modeDebug         = _cmdActivated("modeDebug", true)
+  const modeDebug         = _cmdActivated("modeDebug", false)
   #
   # In this mode we may run a Manager in special "iteration" mode. It
   # means, that we may run one iteration per call. It's helpfull for
