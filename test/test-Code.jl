@@ -221,20 +221,19 @@ module TestCode
     addVars(org, [2,1,2], Helper.CodePos(2,1,1))
     @fact Mutator._onAdd(conf, org, Helper.CodePos(2,1,7), Code.CodePart(Code.condition, true)) --> true
     @fact Mutator._onAdd(conf, org, Helper.CodePos(2,2,1), Code.CodePart(Code.condition, true)) --> false
-    println(Helper.getLines(org.code, [2,1,2,7,2]))
     @fact length(Helper.getLines(org.code, [2,1,2,7,2])) --> 0
     @fact Code.eval(org.code)(conf, org) --> true
   end
   facts("Testing Code.condition() inside other Code.condition() with variables") do
     local conf = Config.create()
     local org  = Creature.create(conf)
+    local amount = length(Helper.SUPPORTED_TYPES)
 
     addVars(org, [2], Helper.CodePos(1,1,1))
-    Mutator._onAdd(conf, org, Helper.CodePos(1,1,6), Code.CodePart(Code.condition, true))
-
-    addVars(org, [2,6,2], Helper.CodePos(1,2,1))
-    Mutator._onAdd(conf, org, Helper.CodePos(1,2,6), Code.CodePart(Code.condition, true))
-    @fact length(Helper.getLines(org.code, [2,6,2])) --> length(Helper.SUPPORTED_TYPES)
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,amount + 1), Code.CodePart(Code.condition, true))
+    addVars(org, [2,amount + 1,2], Helper.CodePos(1,2,1))
+    Mutator._onAdd(conf, org, Helper.CodePos(1,2,amount + 1), Code.CodePart(Code.condition, true))
+    @fact length(Helper.getLines(org.code, [2,amount+1,2])) --> amount
     @fact Code.eval(org.code)(conf, org) --> true
   end
   #
