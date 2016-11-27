@@ -353,7 +353,9 @@ module Code
     CodePart(eatDown,     false), CodePart(stepLeft,  false),
     CodePart(stepRight,   false), CodePart(stepUp,    false),
     CodePart(stepDown,    false), CodePart(toMem,     false),
-    CodePart(fromMem,     false)
+    CodePart(fromMem,     false), CodePart(idLeft,    false),
+    CodePart(idRight,     false), CodePart(idUp,      false),
+    CodePart(idDown,      false),
   ]
   #
   # Available comparison operators. May be used with "if" operator

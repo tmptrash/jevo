@@ -14,6 +14,10 @@ export eatUp
 export eatDown
 export toMem
 export fromMem
+export idLeft
+export idRight
+export idUp
+export idDown
 #
 # @cmd
 # @line
@@ -38,6 +42,7 @@ end
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
+# @return {Expr|Expr(:nothing)}
 #
 function eatLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local amount::Symbol = @randVar(org, pos, Int8)
@@ -51,6 +56,7 @@ end
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
+# @return {Expr|Expr(:nothing)}
 #
 function eatRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local amount::Symbol = @randVar(org, pos, Int8)
@@ -64,6 +70,7 @@ end
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
+# @return {Expr|Expr(:nothing)}
 #
 function eatUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local amount::Symbol = @randVar(org, pos, Int8)
@@ -77,6 +84,7 @@ end
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
+# @return {Expr|Expr(:nothing)}
 #
 function eatDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local amount::Symbol = @randVar(org, pos, Int8)
@@ -134,7 +142,7 @@ end
 # @param cfg Global configuration type
 # @param org Organism we are working with
 # @param pos Position in code
-# @return {Expr|nothing}
+# @return {Expr|Expr(:nothing)}
 #
 function toMem(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local typ::DataType = @randType()
@@ -151,7 +159,7 @@ end
 # @param cfg Global configuration type
 # @param org Organism we are working with
 # @param pos Position in code
-# @return {Expr|nothing}
+# @return {Expr|Expr(:nothing)}
 #
 function fromMem(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local typ::DataType = @randType()
@@ -164,4 +172,68 @@ function fromMem(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Cod
   # this is one code line.
   #
   :($val=haskey(o.mem, $key) ? o.mem[$key] : $val)
+end
+#
+# @cmd
+# @line
+# Obtains unique id of organism from the left. UInt id will
+# be converted to Int type. If there is no organism on the left,
+# it will obtain 0.
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function idLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Int(Creature.idLeft(o)))
+end
+#
+# @cmd
+# @line
+# Obtains unique id of organism from the right. UInt id will
+# be converted to Int type. If there is no organism on the right,
+# it will obtain 0.
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function idRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Int(Creature.idRight(o)))
+end
+#
+# @cmd
+# @line
+# Obtains unique id of organism from the above. UInt id will
+# be converted to Int type. If there is no organism on the above,
+# it will obtain 0.
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function idUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Int(Creature.idUp(o)))
+end
+#
+# @cmd
+# @line
+# Obtains unique id of organism from the right. UInt id will
+# be converted to Int type. If there is no organism on the right,
+# it will obtain 0.
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function idDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Int(Creature.idDown(o)))
 end

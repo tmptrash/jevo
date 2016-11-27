@@ -322,108 +322,6 @@ module Creature
     )
   end
   #
-  # Makes Expr tree and meta info copy. Meta info (functions, blocks and
-  # variables) should be actual to copied organism's Expr tree. All links
-  # to new Expr tree will be set in funcs reference.
-  # @param e Reference to organism's code (main function)
-  # @param funcs Reference to the meta funcstions array we have to update
-  # @return {Expr} Expr tree copy
-  #
-  function _clone(e::Expr, funcs::Array{Func, 1})
-    local f::Func
-    local b::Block
-    local mf::MetaFunc
-    local h::Int = Int(pointer_from_objref(e))
-    local mCode::MetaCode = MetaCode(h, Dict{Int, MetaFunc}(h => MetaFunc(e, Dict{Int, Expr}(Int(pointer_from_objref(e.args[2])) => e.args[2]))))
-    local ex::Expr = _copy(e, mCode) # Expr tree copy
-    #
-    # This code updates links between meta tree and copy of Expr tree
-    #
-    for f in funcs
-      mf     = mCode.funcs[Int(pointer_from_objref(f.code))]
-      f.code = mf.expr
-      for b in f.blocks b.expr = mf.blocks[Int(pointer_from_objref(b.expr))] end
-    end
-    #
-    # References to main function and it's block should be set separately
-    # because our recursive code doesn't work well with main (first) function
-    #
-    funcs[1].code = ex                    # Main function
-    funcs[1].blocks[1].expr = ex.args[2]  # Main function's block
-
-    ex
-  end
-  #
-  # Entry point for recursive Expr tree copy algorithm. Idea grabbed from
-  # Julia sources: https://github.com/JuliaLang/julia/blob/master/base/expr.jl
-  # See copy() functions for details.
-  # @param e Expr reference to have to copy
-  # @param mCode Meta code of organism we are copiyng
-  # @return {Expr} Expression deep copy
-  #
-  function _copy(e::Expr, mCode::MetaCode)
-    local n::Expr = Expr(e.head);
-    n.args = _copyExprArgs(e.args, mCode);
-    n.typ = e.typ;
-    n
-  end
-  #
-  # Utility function, which is used in our Expr tree recursive algorithm.
-  # @param arr Array of arguments of current expression (args property)
-  # @param mCode Meta code of organism we are copiyng
-  # @return {Array{Any, 1}} Arguments copy
-  #
-  function _copyExprArgs(arr::Array{Any,1}, mCode::MetaCode)
-    local a::Any
-    local arrCopy::Array{Any, 1} = []
-    for a in arr push!(arrCopy, _copyExprs(a, mCode)) end
-    arrCopy
-  end
-  #
-  # Makes simple type copy. Simple type is Int, UInt, Symbol,...
-  # @param a Simple type
-  # @param mCode Meta code of organism we are copiyng
-  # @return {ANY} Simple type copy
-  #
-  function _copyExprs(a::ANY, mCode::MetaCode) a end
-  #
-  # This is a heart of expression tree copying algorithm. It finds
-  # functions and blocks in a code and makes their copies. It also
-  # creates small dictionary with addresses of function/blocks as
-  # keys and MetaFunc instances as values. This MetaCode instance
-  # will be used later for updating links between meta tree (Array{Func, 1})
-  # and expression tree.
-  # @param e Current expression
-  # @param mCode Meta code of organism we are copiyng
-  # @return {Expr} Expression copy
-  #
-  function _copyExprs(e::Expr, mCode::MetaCode)
-    local fn::MetaFunc
-    local blocks::Dict{Int, Expr}
-    local blockId::Int
-    #
-    # Don't touch this code block. It's optimized for speed
-    #
-    if e.head === :function
-      #
-      # This oldFn is used only for main function. We have to
-      # recover it after exiting from nested functions
-      #
-      local oldFn::Int = mCode.curFn
-      push!(mCode.funcs, (mCode.curFn = Int(pointer_from_objref(e))) => (fn = MetaFunc(e, Dict{Int, Expr}())))
-      fn.expr = _copy(e, mCode)
-      mCode.curFn = oldFn
-      return fn.expr
-    elseif e.head === :block
-      blocks  = mCode.funcs[mCode.curFn].blocks
-      blockId = Int(pointer_from_objref(e))
-      push!(blocks, blockId => _copy(e, mCode))
-      return blocks[blockId]
-    end
-
-    _copy(e, mCode)
-  end
-  #
   # TODO: describe this method
   # TODO: describe org, cfg = produce()
   #
@@ -525,32 +423,56 @@ module Creature
   function eatDown(cfg::Config.ConfigData, org::Organism, amount::Int) _grabEnergy(cfg, org, down, amount) end
   #
   # @oapi
-  # @param org Current organism
-  # sl - means make Step Left. Short name to help organism find this name faster.
   # Makes one step left. It decreases organism's x coodinate by 1.
+  # @param org Current organism
   #
   function stepLeft(org::Organism) Event.fire(org.observer, "stepleft", org) end
   #
   # @oapi
-  # @param org Current organism
-  # sr - means make Step Right. Short name to help organism find this name faster.
   # Makes one step right. It increases organism's x coodinate by 1.
+  # @param org Current organism
   #
   function stepRight(org::Organism) Event.fire(org.observer, "stepright", org) end
   #
   # @oapi
-  # @param org Current organism
-  # su - means make Step Up. Short name to help organism find this name faster.
   # Makes one step up. It decrease organism's y coodinate by 1.
+  # @param org Current organism
   #
   function stepUp(org::Organism) Event.fire(org.observer, "stepup", org) end
   #
   # @oapi
-  # @param org Current organism
-  # sd - means make Step Down. Short name to help organism find this name faster.
   # Makes one step down. It increase organism's y coodinate by 1.
+  # @param org Current organism
   #
   function stepDown(org::Organism) Event.fire(org.observer, "stepdown", org) end
+  #
+  # @oapi
+  # Obtains unique id of organism on the left. If there is not organism on
+  # the left, 0 will be obtained.
+  # @param org Current organism
+  #
+  function idLeft() Event.fire(org.observer, "idleft", org) end
+  #
+  # @oapi
+  # Obtains unique id of organism on the right. If there is not organism on
+  # the right, 0 will be obtained.
+  # @param org Current organism
+  #
+  function idRight() Event.fire(org.observer, "idright", org) end
+  #
+  # @oapi
+  # Obtains unique id of organism on the above. If there is not organism on
+  # the above, 0 will be obtained.
+  # @param org Current organism
+  #
+  function idUp() Event.fire(org.observer, "idup", org) end
+  #
+  # @oapi
+  # Obtains unique id of organism on the below. If there is not organism on
+  # the below, 0 will be obtained.
+  # @param org Current organism
+  #
+  function idDown() Event.fire(org.observer, "iddown", org) end
   #
   # @oapi
   # @param org Current organism
@@ -562,6 +484,108 @@ module Creature
   # TODO: this function is under question
   #function clone(org::Organism) Event.fire(org.observer, "clone", org) end
 
+  #
+  # Makes Expr tree and meta info copy. Meta info (functions, blocks and
+  # variables) should be actual to copied organism's Expr tree. All links
+  # to new Expr tree will be set in funcs reference.
+  # @param e Reference to organism's code (main function)
+  # @param funcs Reference to the meta funcstions array we have to update
+  # @return {Expr} Expr tree copy
+  #
+  function _clone(e::Expr, funcs::Array{Func, 1})
+    local f::Func
+    local b::Block
+    local mf::MetaFunc
+    local h::Int = Int(pointer_from_objref(e))
+    local mCode::MetaCode = MetaCode(h, Dict{Int, MetaFunc}(h => MetaFunc(e, Dict{Int, Expr}(Int(pointer_from_objref(e.args[2])) => e.args[2]))))
+    local ex::Expr = _copy(e, mCode) # Expr tree copy
+    #
+    # This code updates links between meta tree and copy of Expr tree
+    #
+    for f in funcs
+      mf     = mCode.funcs[Int(pointer_from_objref(f.code))]
+      f.code = mf.expr
+      for b in f.blocks b.expr = mf.blocks[Int(pointer_from_objref(b.expr))] end
+    end
+    #
+    # References to main function and it's block should be set separately
+    # because our recursive code doesn't work well with main (first) function
+    #
+    funcs[1].code = ex                    # Main function
+    funcs[1].blocks[1].expr = ex.args[2]  # Main function's block
+
+    ex
+  end
+  #
+  # Entry point for recursive Expr tree copy algorithm. Idea grabbed from
+  # Julia sources: https://github.com/JuliaLang/julia/blob/master/base/expr.jl
+  # See copy() functions for details.
+  # @param e Expr reference to have to copy
+  # @param mCode Meta code of organism we are copiyng
+  # @return {Expr} Expression deep copy
+  #
+  function _copy(e::Expr, mCode::MetaCode)
+    local n::Expr = Expr(e.head);
+    n.args = _copyExprArgs(e.args, mCode);
+    n.typ = e.typ;
+    n
+  end
+  #
+  # Utility function, which is used in our Expr tree recursive algorithm.
+  # @param arr Array of arguments of current expression (args property)
+  # @param mCode Meta code of organism we are copiyng
+  # @return {Array{Any, 1}} Arguments copy
+  #
+  function _copyExprArgs(arr::Array{Any,1}, mCode::MetaCode)
+    local a::Any
+    local arrCopy::Array{Any, 1} = []
+    for a in arr push!(arrCopy, _copyExprs(a, mCode)) end
+    arrCopy
+  end
+  #
+  # Makes simple type copy. Simple type is Int, UInt, Symbol,...
+  # @param a Simple type
+  # @param mCode Meta code of organism we are copiyng
+  # @return {ANY} Simple type copy
+  #
+  function _copyExprs(a::ANY, mCode::MetaCode) a end
+  #
+  # This is a heart of expression tree copying algorithm. It finds
+  # functions and blocks in a code and makes their copies. It also
+  # creates small dictionary with addresses of function/blocks as
+  # keys and MetaFunc instances as values. This MetaCode instance
+  # will be used later for updating links between meta tree (Array{Func, 1})
+  # and expression tree.
+  # @param e Current expression
+  # @param mCode Meta code of organism we are copiyng
+  # @return {Expr} Expression copy
+  #
+  function _copyExprs(e::Expr, mCode::MetaCode)
+    local fn::MetaFunc
+    local blocks::Dict{Int, Expr}
+    local blockId::Int
+    #
+    # Don't touch this code block. It's optimized for speed
+    #
+    if e.head === :function
+      #
+      # This oldFn is used only for main function. We have to
+      # recover it after exiting from nested functions
+      #
+      local oldFn::Int = mCode.curFn
+      push!(mCode.funcs, (mCode.curFn = Int(pointer_from_objref(e))) => (fn = MetaFunc(e, Dict{Int, Expr}())))
+      fn.expr = _copy(e, mCode)
+      mCode.curFn = oldFn
+      return fn.expr
+    elseif e.head === :block
+      blocks  = mCode.funcs[mCode.curFn].blocks
+      blockId = Int(pointer_from_objref(e))
+      push!(blocks, blockId => _copy(e, mCode))
+      return blocks[blockId]
+    end
+
+    _copy(e, mCode)
+  end
   #
   # Universal method for grabbing energy from the world. It grabs at
   # the position up, left, bottom or right from current organism.
