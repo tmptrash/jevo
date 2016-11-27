@@ -175,7 +175,8 @@ module Manager
         #
         @if_status _updateStatus(man, stamp)
         #
-        # This code is used for profiling of jevo
+        # This code is used for profiling of jevo. returning true means,
+        # that the process will be stopped and second run will not occures.
         #
         @if_profile if (i += 1) > CodeConfig.modeProfilePeriod return true end
         #
