@@ -349,7 +349,7 @@ module Config
       0.3,                               # WORLD_MIN_ENERGY_PERCENT
       500,                               # WORLD_MIN_ENERGY_CHECK_PERIOD
       1,                                 # WORLD_SCALE
-      60.0,                              # BACKUP_PERIOD
+      240.0,                             # BACKUP_PERIOD
       10,                                # BACKUP_AMOUNT
       650,                               # STAT_WIDTH
       500,                               # STAT_HEIGHT
