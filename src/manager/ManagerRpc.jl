@@ -432,6 +432,7 @@ function _createSimpleOrganism(id::UInt, org::Creature.Organism)
     org.color,
     org.mem,
     [org.pos.x, org.pos.y],
+    org.age,
     org.codeSize
   )
 end

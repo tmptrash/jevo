@@ -83,6 +83,10 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     yieldto(task.task)
     @if_status man.status.ytps += 1
     #
+    # Age of organism is increasing all the time
+    #
+    org.age += 1
+    #
     # Current organism could die during running it's code, for
     # example during giving it's energy to another organism (altruism)
     #
@@ -97,6 +101,11 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # last in organisms loop.
     #
     if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationAmount) end
+    #
+    # This is how organisms die if their age is bigger then some
+    # predefined config value (ORGANISM_DIE_AFTER)
+    #
+    if cfg.ORGANISM_DIE_AFTER > 0 && org.age > cfg.ORGANISM_DIE_AFTER _killOrganism(man, i) end
     #
     # Here shouldn't be a code, after mutations, because current
     # task may be updated with new one.

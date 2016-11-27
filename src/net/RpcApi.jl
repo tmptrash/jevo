@@ -114,6 +114,10 @@ module RpcApi
     #
     pos::Array{Int, 1}
     #
+    # Age of organism in iterations
+    #
+    age::Int
+    #
     # Organism code size in lines
     #
     codeSize::Int

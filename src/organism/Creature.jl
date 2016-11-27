@@ -209,6 +209,12 @@ module Creature
     #
     pos::Helper.Point
     #
+    # Organism's age. Calculated as an amount of iteration from
+    # borning to the current moment. This parameter can't be changed
+    # by organism itself.
+    #
+    age::Int
+    #
     # Adds events listening/firing logic to the organism.
     #
     observer::Event.Observer
@@ -256,6 +262,7 @@ module Creature
       cfg.ORGANISM_START_COLOR,                                             # color
       Dict{Int16, Int16}(),                                                 # mem
       pos,                                                                  # pos
+      0,                                                                    # age
       Event.create()                                                        # observer
     )
   end
@@ -310,6 +317,7 @@ module Creature
       org.color,                                                            # color
       copy(org.mem),                                                        # mem
       pos,                                                                  # pos
+      org.age,                                                              # age
       Event.create()                                                        # observer
     )
   end
