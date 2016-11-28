@@ -327,7 +327,7 @@ module Config
       100,                               # ORGANISM_START_AMOUNT
       7000,                              # ORGANISM_START_ENERGY
       Int(typemax(UInt32)),              # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)
-      30,                                # ORGANISM_ENERGY_DECREASE_PERIOD
+      50,                                # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                                 # ORGANISM_ENERGY_DECREASE_VALUE
       600,                               # ORGANISM_REMOVE_AFTER_TIMES
       5,                                 # ORGANISM_REMOVE_AMOUNT
