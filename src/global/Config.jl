@@ -318,9 +318,9 @@ module Config
   function create(empty::Bool = false)
     ConfigData(
       empty ? [] : [100,500,50,0,1,1,1], # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
-      0,                                 # ORGANISM_MUTATIONS_ON_CLONE
+      2,                                 # ORGANISM_MUTATIONS_ON_CLONE
       50,                                # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      5000,                              # ORGANISM_MUTATION_PERIOD
+      500,                               # ORGANISM_MUTATION_PERIOD
       1000,                              # ORGANISM_MAX_MUTATION_PERIOD
       1,                                 # ORGANISM_MUTATION_AMOUNT
       50,                                # ORGANISM_MAX_MUTATION_AMOUNT
@@ -335,7 +335,7 @@ module Config
       5,                                 # ORGANISM_START_COLOR
       65536,                             # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
       0,                                 # ORGANISM_EVALS
-      30000 * 10,                        # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
+      12000 * 10,                        # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
       2,                                 # CODE_MAX_FUNC_PARAMS
       1900,                              # WORLD_WIDTH
       930,                               # WORLD_HEIGHT
