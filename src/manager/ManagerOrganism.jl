@@ -109,7 +109,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # This is how organisms die if their age is bigger then some
     # predefined config value (ORGANISM_DIE_AFTER)
     #
-    if cfg.ORGANISM_DIE_AFTER > 0 && org.age > cfg.ORGANISM_DIE_AFTER _killOrganism(man, i) end
+    if cfg.ORGANISM_DIE_AFTER > 0 && org.age > cfg.ORGANISM_DIE_AFTER && length(tasks) > cfg.WORLD_MIN_ORGANISMS _killOrganism(man, i) end
     #
     # Here shouldn't be a code, after mutations, because current
     # task may be updated with new one.
@@ -141,7 +141,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # This block decreases energy from organisms, because they
   # spend it while leaving.
   #
-  if cfg.ORGANISM_ENERGY_DECREASE_PERIOD > 0 && counter % cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0
+  if cfg.ORGANISM_ENERGY_DECREASE_PERIOD > 0 && counter % cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0 && len > cfg.WORLD_MIN_ORGANISMS
     _updateOrganismsEnergy(man)
   end
   #
