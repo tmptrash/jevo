@@ -141,7 +141,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # This block decreases energy from organisms, because they
   # spend it while leaving.
   #
-  if cfg.ORGANISM_ENERGY_DECREASE_PERIOD > 0 && counter % cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0 && len > cfg.WORLD_MIN_ORGANISMS
+  if cfg.ORGANISM_ENERGY_DECREASE_PERIOD > 0 && counter % cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0
     _updateOrganismsEnergy(man)
   end
   #
@@ -154,7 +154,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   #
   # This call removes organisms with minimum energy
   #
-  if cfg.ORGANISM_REMOVE_AFTER_TIMES > 0 && counter % cfg.ORGANISM_REMOVE_AFTER_TIMES === 0 && len > cfg.WORLD_MIN_ORGANISMS
+  if cfg.ORGANISM_REMOVE_AFTER_TIMES > 0 && counter % cfg.ORGANISM_REMOVE_AFTER_TIMES === 0
     _removeMinOrganisms(man)
   end
   #
@@ -173,9 +173,10 @@ end
 function _removeMinOrganisms(man::ManagerTypes.ManagerData)
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   local amount::Int = man.cfg.ORGANISM_REMOVE_AMOUNT
+  local len::Int = length(tasks)
   local i::Int
 
-  if length(tasks) <= amount return false end
+  if len <= amount || len <= man.cfg.WORLD_MIN_ORGANISMS return false end
 
   @inbounds sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
   @inbounds for i = 1:amount _killOrganism(man, 1) end
@@ -193,12 +194,13 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   local decVal::Int = man.cfg.ORGANISM_ENERGY_DECREASE_VALUE
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   local minOrgs::Int = man.cfg.WORLD_MIN_ORGANISMS
+  local org::Creature.Organism
+  local i::Int = length(tasks)
+  if i <= man.cfg.WORLD_MIN_ORGANISMS return false end
   #
   # We have to go through tasks in reverse way, because we may
   # remove some elements inside while loop.
   #
-  local i::Int = length(tasks)
-  local org::Creature.Organism
   while i > 0
     #
     # if the organism is marked as "removed", we have to delete it
@@ -212,6 +214,8 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     i -= 1
   end
   @if_status man.status.eups += 1
+
+  true
 end
 #
 # Updates total world's energy. It shouldn't be less then minimum
