@@ -321,7 +321,7 @@ module Creature
       org.color,                                                            # color
       copy(org.mem),                                                        # mem
       pos,                                                                  # pos
-      org.age,                                                              # age
+      0,                                                                    # age
       Event.create()                                                        # observer
     )
   end
