@@ -335,7 +335,7 @@ module Config
       5,                                 # ORGANISM_START_COLOR
       65536,                             # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
       0,                                 # ORGANISM_EVALS
-      12000 * 10,                        # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
+      600 * 10,                          # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
       2,                                 # CODE_MAX_FUNC_PARAMS
       1900,                              # WORLD_WIDTH
       930,                               # WORLD_HEIGHT
