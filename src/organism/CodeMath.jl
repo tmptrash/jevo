@@ -345,3 +345,153 @@ function toBool(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Code
 
   :($v1 = ($v2 > $typ(0)))
 end
+#
+# @cmd
+# @line
+# Converts any types to Int. Format: var = Bool((var|val))
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function toInt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local typ::DataType = @randType()
+  local v1::Symbol    = @randVar(org, pos, Int)
+  if v1 === :nothing return Expr(:nothing) end
+  local v2::Any       = @randVarOrValue(org, pos, typ)
+
+  if typ === String return :($v1 = isempty($v2) ? 0 : 1) end
+
+  :($v1 = Int($v2))
+end
+#
+# @cmd
+# @line
+# Calculates square root of number. Format: var = sqrt(var)
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function sqrt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local typ::DataType = @randNumType()
+  local v1::Symbol = @randVar(org, pos, Float64)
+  if v1 === :nothing return Expr(:nothing) end
+  local v2::Symbol = @randVar(org, pos, typ)
+  if v2 === :nothing return Expr(:nothing) end
+
+  :($v1 = sqrt($v2 > 0 ? $v2 : $v1))
+end
+# @cmd
+# @line
+# Calculates natural logarithm of number. Format: var = log(var)
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function log(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local typ::DataType = @randNumType()
+  local v1::Symbol = @randVar(org, pos, Float64)
+  if v1 === :nothing return Expr(:nothing) end
+  local v2::Symbol = @randVar(org, pos, typ)
+  if v2 === :nothing return Expr(:nothing) end
+
+  :($v1 = log($v2 > 0 ? $v2 : $v1))
+end
+# @cmd
+# @line
+# Calculates sinus of number. Format: var = sin(var)
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function sin(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local typ::DataType = @randNumType()
+  local v1::Symbol = @randVar(org, pos, Float64)
+  if v1 === :nothing return Expr(:nothing) end
+  local v2::Any = @randVarOrValue(org, pos, typ)
+
+  :($v1 = sin($v2))
+end
+# @cmd
+# @line
+# Calculates cosinus of number. Format: var = cos(var)
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function cos(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local typ::DataType = @randNumType()
+  local v1::Symbol = @randVar(org, pos, Float64)
+  if v1 === :nothing return Expr(:nothing) end
+  local v2::Any = @randVarOrValue(org, pos, typ)
+
+  :($v1 = cos($v2))
+end
+# @cmd
+# @line
+# Calculates tangens of number. Format: var = tan(var)
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function tan(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local typ::DataType = @randNumType()
+  local v1::Symbol = @randVar(org, pos, Float64)
+  if v1 === :nothing return Expr(:nothing) end
+  local v2::Any = @randVarOrValue(org, pos, typ)
+
+  :($v1 = tan($v2))
+end
+# @cmd
+# @line
+# Calculates cotangens of number. Format: var = cot(var)
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function cot(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local typ::DataType = @randNumType()
+  local v1::Symbol = @randVar(org, pos, Float64)
+  if v1 === :nothing return Expr(:nothing) end
+  local v2::Any = @randVarOrValue(org, pos, typ)
+
+  :($v1 = cot($v2))
+end
+# @cmd
+# @line
+# Calculates secans of number. Format: var = sec(var)
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function sec(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local typ::DataType = @randNumType()
+  local v1::Symbol = @randVar(org, pos, Float64)
+  if v1 === :nothing return Expr(:nothing) end
+  local v2::Any = @randVarOrValue(org, pos, typ)
+
+  :($v1 = sec($v2))
+end
+# @cmd
+# @line
+# Calculates cosecans of number. Format: var = csc(var)
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function csc(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local typ::DataType = @randNumType()
+  local v1::Symbol = @randVar(org, pos, Float64)
+  if v1 === :nothing return Expr(:nothing) end
+  local v2::Any = @randVarOrValue(org, pos, typ)
+
+  :($v1 = csc($v2))
+end
