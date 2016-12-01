@@ -495,3 +495,17 @@ function csc(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
 
   :($v1 = csc($v2))
 end
+# @cmd
+# @line
+# Sets Pi to variable. Format: var = 3.1415...
+# @param cfg Global configuration type
+# @param org Organism we have to mutate
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function pi(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local v1::Symbol = @randVar(org, pos, Float64)
+  if v1 === :nothing return Expr(:nothing) end
+
+  :($v1 = pi)
+end

@@ -4,11 +4,13 @@
 #
 include("global/ImportFolders.jl")
 
+import CodeConfig.@if_profile
 import Manager
 import Helper
 import Backup
 import CommandLine
 import About
+@if_profile import ProfileView
 #
 # Name of the command line argument, which tells the application
 # to recover itself from last backup.
@@ -36,12 +38,14 @@ function main()
   for command in commands
     if CommandLine.has(args, command[1])
       exitCode = command[2]()
-      exit(exitCode)
+      if !CodeConfig.modeProfile exit(exitCode) end
+      return exitCode
     end
   end
 
   exitCode = _onRun()
-  exit(exitCode)
+  if !CodeConfig.modeProfile exit(exitCode) end
+  exitCode
 end
 #
 # Just returns about info
@@ -88,6 +92,14 @@ function _onRun()
   exitCode
 end
 #
-# Application entry point
+# Application entry point. In case of profiling mode, application
+# will be run in special profiling mode using ProfileView package.
+# In this case fire chart will be drown at the end
 #
-main()
+if CodeConfig.modeProfile
+  Profile.clear()
+  @profile main()
+  ProfileView.view()
+else
+  main()
+end
