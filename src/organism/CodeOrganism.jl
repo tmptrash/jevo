@@ -47,7 +47,12 @@ end
 function eatLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
-  :(Creature.eatLeft(c, o, Int($(amount))))
+  #
+  # If we pass previous line, then at least one Int8 var exists
+  #
+  local var::Symbol = @randVar(org, pos, Int8)
+
+  :($var = Int8(Creature.eatLeft(c, o, Int($(amount)))))
 end
 #
 # @cmd
@@ -61,7 +66,12 @@ end
 function eatRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
-  :(Creature.eatRight(c, o, Int($(amount))))
+  #
+  # If we pass previous line, then at least one Int8 var exists
+  #
+  local var::Symbol = @randVar(org, pos, Int8)
+
+  :($var = Int8(Creature.eatRight(c, o, Int($(amount)))))
 end
 #
 # @cmd
@@ -75,7 +85,12 @@ end
 function eatUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
-  :(Creature.eatUp(c, o, Int($(amount))))
+  #
+  # If we pass previous line, then at least one Int8 var exists
+  #
+  local var::Symbol = @randVar(org, pos, Int8)
+
+  :($var = Int8(Creature.eatUp(c, o, Int($(amount)))))
 end
 #
 # @cmd
@@ -89,7 +104,12 @@ end
 function eatDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
-  :(Creature.eatDown(c, o, Int($(amount))))
+  #
+  # If we pass previous line, then at least one Int8 var exists
+  #
+  local var::Symbol = @randVar(org, pos, Int8)
+
+  :($var = Int8(Creature.eatDown(c, o, Int($(amount)))))
 end
 #
 # @cmd
