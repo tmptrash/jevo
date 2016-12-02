@@ -149,11 +149,12 @@ module TestCodeMath
   facts("Testing CodeMath.minus() with different variable types") do
     local conf = Config.create()
     local org  = Creature.create(conf)
+    local typesAmount = length(Helper.SUPPORTED_TYPES)
 
     addVars(org, [2], Helper.CodePos(1,1,1))
-    Mutator._onAdd(conf, org, Helper.CodePos(1,1,6), Code.CodePart(Code.minus, false))
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,typesAmount + 1), Code.CodePart(Code.minus, false))
 
-    @fact length(Helper.getLines(org.code, [2])) --> length(Helper.SUPPORTED_TYPES) + 2
+    @fact length(Helper.getLines(org.code, [2])) --> typesAmount + 2
     @fact eval(org.code)(conf, org) --> true
   end
   facts("Testing CodeMath.minus() without variables") do
@@ -164,5 +165,24 @@ module TestCodeMath
 
     @fact length(Helper.getLines(org.code, [2])) --> 1
     @fact eval(org.code)(conf, org) --> true
+  end
+  facts("Testing CodeMath.minus() with Int8 variable") do
+    local conf  = Config.create()
+    local org   = Creature.create(conf)
+    local types = changeTypes([Int8])
+
+    addVar(org, [2], Helper.CodePos(1,1,1), Int8)
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.minus, false))
+    var = Helper.getArg(org.code, [2,1,1,1,1])
+
+    @fact Helper.getArg(org.code, [2,2,1]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,1]) --> :(-)
+    @fact Helper.getArg(org.code, [2,2,2,2]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,3]) --> var
+    @fact eval(org.code)(conf, org) --> true
+    #
+    # revert supported types
+    #
+    resetTypes(types)
   end
 end
