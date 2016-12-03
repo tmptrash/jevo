@@ -219,7 +219,6 @@ function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int, energy::UIn
   local yOffset::Int = div(man.world.height, 4)
 
   Helper.info("Creating random energy...")
-  println("w: ",man.world.width, " ", width + xOffset, " h: ",man.world.height, " ", height + yOffset)
   for i::Int = 1:amount
     setEnergy(man, Helper.fastRand(width) + xOffset, Helper.fastRand(height) + yOffset, energy)
   end
