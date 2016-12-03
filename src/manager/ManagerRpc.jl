@@ -213,9 +213,14 @@ end
 # @param energy Amount of energy within one point
 #
 function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int, energy::UInt32)
+  local width::Int = div(man.world.width, 2)
+  local height::Int = div(man.world.height, 2)
+  local xOffset::Int = div(width, 4)
+  local yOffset::Int = div(height, 4)
+
   Helper.info("Creating random energy...")
   for i::Int = 1:amount
-    setEnergy(man, Helper.fastRand(man.world.width), Helper.fastRand(man.world.height), energy)
+    setEnergy(man, Helper.fastRand(width) + xOffset, Helper.fastRand(height) + yOffset, energy)
   end
 
   nothing
