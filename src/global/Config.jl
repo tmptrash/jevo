@@ -335,14 +335,14 @@ module Config
       5,                                 # ORGANISM_START_COLOR
       65536,                             # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
       0,                                 # ORGANISM_EVALS
-      600 * 10,                          # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
+      300 * 10,                          # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
       2,                                 # CODE_MAX_FUNC_PARAMS
       1900,                              # WORLD_WIDTH
       930,                               # WORLD_HEIGHT
       true,                              # WORLD_CYCLICAL
       0,                                 # WORLD_FRAME_DELAY
       0,                                 # WORLD_IPS
-      5000,                              # WORLD_MAX_ORGANISMS
+      100,                               # WORLD_MAX_ORGANISMS
       50,                                # WORLD_MIN_ORGANISMS
       1000,                              # WORLD_START_ENERGY_BLOCKS
       UInt32(0x0001F4),                  # WORLD_START_ENERGY_AMOUNT

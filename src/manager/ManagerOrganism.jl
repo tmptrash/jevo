@@ -615,12 +615,23 @@ end
 # @param retObj Special object for return value
 #
 function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amount::Int, pos::Helper.Point, retObj::Helper.RetObj)
-  local id::Int = Manager._getPosId(man, pos)
+  local newPos::Helper.Point = Helper.Point(pos.x, pos.y)
+  local id::Int
   local org::Creature.Organism
 
-  if haskey(man.cons.frozen, organism.id) || organism.energy < 1
-    return retObj.ret = 0
+  if haskey(man.cons.frozen, organism.id) || organism.energy < 1 return retObj.ret = 0 end
+  #
+  # In case if cyclical mode is on, organism may grab energy
+  # outside the world's borders
+  #
+  if man.cfg.WORLD_CYCLICAL
+    if newPos.x < 1 newPos.x = man.world.width
+    elseif newPos.x > man.world.width newPos.x = 1
+    elseif newPos.y < 1 newPos.y = man.world.height
+    elseif newPos.y > man.world.height newPos.y = 1
+    end
   end
+  id = Manager._getPosId(man, newPos)
   #
   # If other organism at the position of the check,
   # then grab energy from it
@@ -649,7 +660,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       retObj.ret = org.energy
     end
   else
-    retObj.ret = World.grabEnergy(man.world, pos, UInt32(amount))
+    retObj.ret = World.grabEnergy(man.world, newPos, UInt32(amount))
   end
 
   retObj.ret
