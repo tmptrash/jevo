@@ -35,10 +35,10 @@ function bindEvents(man::ManagerTypes.ManagerData, org::Creature.Organism)
   Event.on(org.observer, "grabright", (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabRight(man, org, amount, retObj))
   Event.on(org.observer, "grabup",    (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabUp(man, org, amount, retObj))
   Event.on(org.observer, "grabdown",  (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabDown(man, org, amount, retObj))
-  Event.on(org.observer, "stepleft",  (org::Creature.Organism)->_onStepLeft(man, org))
-  Event.on(org.observer, "stepright", (org::Creature.Organism)->_onStepRight(man, org))
-  Event.on(org.observer, "stepup",    (org::Creature.Organism)->_onStepUp(man, org))
-  Event.on(org.observer, "stepdown",  (org::Creature.Organism)->_onStepDown(man, org))
+  Event.on(org.observer, "stepleft",  (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepLeft(man, org))
+  Event.on(org.observer, "stepright", (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepRight(man, org))
+  Event.on(org.observer, "stepup",    (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepUp(man, org))
+  Event.on(org.observer, "stepdown",  (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepDown(man, org))
   Event.on(org.observer, "idleft",    (org::Creature.Organism)->_onIdLeft(man, org))
   Event.on(org.observer, "idright",   (org::Creature.Organism)->_onIdRight(man, org))
   Event.on(org.observer, "idup",      (org::Creature.Organism)->_onIdUp(man, org))
@@ -663,8 +663,10 @@ end
 # @param pos Point where we should check the energy
 #
 function _onStep(man::ManagerTypes.ManagerData, organism::Creature.Organism, pos::Helper.Point)
+  local stepDone::Bool = false
+
   if !haskey(man.cons.frozen, organism.id)
-    _moveOrganism(man, pos, organism)
+    stepDone = _moveOrganism(man, pos, organism)
     #
     # We have to explain this a little bit. This yieldto() switches current
     # context to man.task. It means that not all the code of current organism
@@ -673,6 +675,8 @@ function _onStep(man::ManagerTypes.ManagerData, organism::Creature.Organism, pos
     #
     yieldto(man.task)
   end
+
+  stepDone
 end
 #
 # Creates new organism and binds event handlers to him. It also

@@ -430,25 +430,41 @@ module Creature
   # Makes one step left. It decreases organism's x coodinate by 1.
   # @param org Current organism
   #
-  function stepLeft(org::Organism) Event.fire(org.observer, "stepleft", org) end
+  function stepLeft(org::Organism)
+    local retObj::Helper.RetObj = Helper.RetObj()
+    Event.fire(org.observer, "stepleft", org. retObj)
+    retObj.ret::Bool
+  end
   #
   # @oapi
   # Makes one step right. It increases organism's x coodinate by 1.
   # @param org Current organism
   #
-  function stepRight(org::Organism) Event.fire(org.observer, "stepright", org) end
+  function stepRight(org::Organism)
+    local retObj::Helper.RetObj = Helper.RetObj()
+    Event.fire(org.observer, "stepright", org, retObj)
+    retObj.ret::Bool
+  end
   #
   # @oapi
   # Makes one step up. It decrease organism's y coodinate by 1.
   # @param org Current organism
   #
-  function stepUp(org::Organism) Event.fire(org.observer, "stepup", org) end
+  function stepUp(org::Organism)
+    local retObj::Helper.RetObj = Helper.RetObj()
+    Event.fire(org.observer, "stepup", org, retObj)
+    retObj.ret::Bool
+  end
   #
   # @oapi
   # Makes one step down. It increase organism's y coodinate by 1.
   # @param org Current organism
   #
-  function stepDown(org::Organism) Event.fire(org.observer, "stepdown", org) end
+  function stepDown(org::Organism)
+    local retObj::Helper.RetObj = Helper.RetObj()
+    Event.fire(org.observer, "stepdown", org, retObj)
+    retObj.ret::Bool
+  end
   #
   # @oapi
   # Obtains unique id of organism on the left. If there is not organism on

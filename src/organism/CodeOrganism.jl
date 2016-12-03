@@ -38,7 +38,7 @@ end
 #
 # @cmd
 # @line
-# Is called when organism bites on the left
+# Is called when organism bites on the left. Format: var = eatLeft(amount::Int8):Int8
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -57,7 +57,7 @@ end
 #
 # @cmd
 # @line
-# Is called when organism bites on the right
+# Is called when organism bites on the right. Format: var = eatRight(amount::Int8):Int8
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -76,7 +76,7 @@ end
 #
 # @cmd
 # @line
-# Is called when organism bites up
+# Is called when organism bites up. Format: var = eatUp(amount::Int8):Int8
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -95,7 +95,7 @@ end
 #
 # @cmd
 # @line
-# Is called when organism bites down
+# Is called when organism bites down. Format: var = eatDown(amount::Int8):Int8
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -118,9 +118,12 @@ end
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
+# @return {Expr|Expr(:nothing)}
 #
 function stepLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :(Creature.stepLeft(o))
+  local var::Symbol = @randVar(org, pos, Bool)
+  if var === :nothing return Expr(:nothing) end
+  :($var = Creature.stepLeft(o))
 end
 #
 # @cmd
@@ -129,9 +132,12 @@ end
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
+# @return {Expr|Expr(:nothing)}
 #
 function stepRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :(Creature.stepRight(o))
+  local var::Symbol = @randVar(org, pos, Bool)
+  if var === :nothing return Expr(:nothing) end
+  :($var = Creature.stepRight(o))
 end
 #
 # @cmd
@@ -140,9 +146,12 @@ end
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
+# @return {Expr|Expr(:nothing)}
 #
 function stepUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :(Creature.stepUp(o))
+  local var::Symbol = @randVar(org, pos, Bool)
+  if var === :nothing return Expr(:nothing) end
+  :($var = Creature.stepUp(o))
 end
 #
 # @cmd
@@ -151,9 +160,12 @@ end
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
+# @return {Expr|Expr(:nothing)}
 #
 function stepDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :(Creature.stepDown(o))
+  local var::Symbol = @randVar(org, pos, Bool)
+  if var === :nothing return Expr(:nothing) end
+  :($var = Creature.stepDown(o))
 end
 #
 # @cmd
