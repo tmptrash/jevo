@@ -70,6 +70,11 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # run peace of it's script - code between two produce() calls.
   #
   while i > 0
+    #
+    # During one iteration it's possible that two or more organisms
+    # will be killed. So we have to update i index!
+    #
+    if i > length(tasks) i = length(tasks) end
     task = tasks[i]
     org  = task.organism
     #
@@ -192,11 +197,12 @@ end
 #
 function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   local decVal::Int = man.cfg.ORGANISM_ENERGY_DECREASE_VALUE
+  local decPercent::Float64 = man.cfg.ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   local minOrgs::Int = man.cfg.WORLD_MIN_ORGANISMS
   local org::Creature.Organism
   local i::Int = length(tasks)
-  if i <= man.cfg.WORLD_MIN_ORGANISMS return false end
+  if i <= minOrgs return false end
   #
   # We have to go through tasks in reverse way, because we may
   # remove some elements inside while loop.
@@ -209,7 +215,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     #
     # If population reaches minimum amount, we should stop killing it
     #
-    if length(tasks) > minOrgs org.energy -= (decVal + org.codeSize) end
+    if length(tasks) > minOrgs org.energy -= (decVal + round(Int, org.codeSize * decPercent)) end
     if org.energy < 1 _killOrganism(man, i) end
     i -= 1
   end
@@ -424,7 +430,7 @@ end
 # @param organism Parent organism
 #
 function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
-  if length(man.tasks) >= man.cfg.WORLD_MAX_ORGANISMS return false end
+  if length(man.tasks) >= man.cfg.WORLD_MAX_ORGANISMS || organism.energy < 2 return false end
   #
   # First, we have to find free point near the organism to put
   # clone in. It's possible, that all places are filled.

@@ -112,6 +112,13 @@ module Config
     #
     ORGANISM_ENERGY_DECREASE_VALUE::Int
     #
+    # Percent (0..1), which affects how much energy will be decreased every
+    # time during organism energy update. Every configured period of time
+    # system grabs energy from organisms using formula: org.energy -= (
+    # ORGANISM_ENERGY_DECREASE_VALUE + org.codeSize * ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY)
+    #
+    ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY::Float64
+    #
     # After this amount of iterations we have to kill ORGANISM_REMOVE_AMOUNT
     # organisms with minimum energy. Set to 0 for disabling this config.
     #
@@ -329,6 +336,7 @@ module Config
       Int(typemax(UInt32)),              # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)
       50,                                # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                                 # ORGANISM_ENERGY_DECREASE_VALUE
+      0.3,                               # ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY
       600,                               # ORGANISM_REMOVE_AFTER_TIMES
       5,                                 # ORGANISM_REMOVE_AMOUNT
       10,                                # ORGANISM_CLONE_AFTER_TIMES
@@ -339,11 +347,11 @@ module Config
       2,                                 # CODE_MAX_FUNC_PARAMS
       1900,                              # WORLD_WIDTH
       930,                               # WORLD_HEIGHT
-      true,                              # WORLD_CYCLICAL
+      false,                             # WORLD_CYCLICAL
       0,                                 # WORLD_FRAME_DELAY
       0,                                 # WORLD_IPS
-      100,                               # WORLD_MAX_ORGANISMS
-      50,                                # WORLD_MIN_ORGANISMS
+      500,                               # WORLD_MAX_ORGANISMS
+      0,                                 # WORLD_MIN_ORGANISMS
       1000,                              # WORLD_START_ENERGY_BLOCKS
       UInt32(0x0001F4),                  # WORLD_START_ENERGY_AMOUNT
       0.3,                               # WORLD_MIN_ENERGY_PERCENT
