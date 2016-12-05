@@ -150,6 +150,10 @@ module Config
     #
     ORGANISM_DIE_AFTER::Int
     #
+    # Only after this amount of mutations organism should update it's color
+    #
+    ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS::Int
+    #
     # Maximum amount of arguments in custom functions. Minimum 1.
     #
     CODE_MAX_FUNC_PARAMS::Int
@@ -336,7 +340,7 @@ module Config
       Int(typemax(UInt32)),              # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)
       500,                               # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                                 # ORGANISM_ENERGY_DECREASE_VALUE
-      0.3,                               # ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY
+      0.2,                               # ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY
       600,                               # ORGANISM_REMOVE_AFTER_TIMES
       5,                                 # ORGANISM_REMOVE_AMOUNT
       10,                                # ORGANISM_CLONE_AFTER_TIMES
@@ -344,6 +348,7 @@ module Config
       65536,                             # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
       0,                                 # ORGANISM_EVALS
       6000 * 10,                         # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
+      20,                                # ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS
       2,                                 # CODE_MAX_FUNC_PARAMS
       1900,                              # WORLD_WIDTH
       930,                               # WORLD_HEIGHT

@@ -219,6 +219,10 @@ module Creature
     #
     age::Int
     #
+    # Amount obtained mutations, which since organism borning
+    #
+    mutationsFromStart::Int
+    #
     # Adds events listening/firing logic to the organism.
     #
     observer::Event.Observer
@@ -267,6 +271,7 @@ module Creature
       Dict{Int16, Int16}(),                                                 # mem
       pos,                                                                  # pos
       0,                                                                    # age
+      0,                                                                    # mutationsFromStart
       Event.create()                                                        # observer
     )
   end
@@ -322,6 +327,7 @@ module Creature
       copy(org.mem),                                                        # mem
       pos,                                                                  # pos
       0,                                                                    # age
+      0,                                                                    # mutationsFromStart
       Event.create()                                                        # observer
     )
   end

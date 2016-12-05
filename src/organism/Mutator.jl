@@ -67,7 +67,8 @@ module Mutator
     # we moved it outside the "for" loop.
     #
     if realAmount > 0
-      _changeColor(org, realAmount)
+      org.mutationsFromStart += realAmount
+      _changeColor(cfg, org, realAmount)
       try
         cfg.ORGANISM_EVALS += 1
         org.codeFn = Creature.eval(org.code)
@@ -89,9 +90,13 @@ module Mutator
   # TODO: organisms will be black (invisible). We have to exclude
   # TODO: black color from the palette
   #
-  function _changeColor(org::Creature.Organism, amount::Int)
-    org.color += amount
-    if org.color > Dots.MAX_ORG_COLOR org.color = 1 end
+  function _changeColor(cfg::Config.ConfigData, org::Creature.Organism, amount::Int)
+    local colIndex::Int = org.mutationsFromStart - (org.mutationsFromStart % cfg.ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS)
+
+    if org.mutationsFromStart > cfg.ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS && colIndex >= org.mutationsFromStart - amount && colIndex <= org.mutationsFromStart
+      org.color += 1
+      if org.color > Dots.MAX_ORG_COLOR org.color = 1 end
+    end
   end
   #
   # Adds one line of code into existing code blocks including all
