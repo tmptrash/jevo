@@ -360,7 +360,7 @@ module Code
     CodePart(stepDown,    false), CodePart(toMem,       false),
     CodePart(fromMem,     false), CodePart(idLeft,      false),
     CodePart(idRight,     false), CodePart(idUp,        false),
-    CodePart(idDown,      false),
+    CodePart(idDown,      false), CodePart(myColor,     false),
   ]
   #
   # Available comparison operators. May be used with "if" operator
