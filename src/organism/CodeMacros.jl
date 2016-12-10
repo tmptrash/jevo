@@ -53,7 +53,7 @@ end
 macro randVar(org, pos, typ)
   :(
     length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]) < 1 ?
-    :nothing :
+    :nothing : # TODO: should be just nothing, not :nothing
     $org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ][Helper.fastRand(length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]))]
   )
 end
