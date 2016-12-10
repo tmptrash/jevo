@@ -219,6 +219,10 @@ module Creature
     #
     age::Int
     #
+    # Percent of energy, which is given to clonned organism.
+    #
+    cloneEnergePercent::Int
+    #
     # Amount obtained mutations, which since organism borning
     #
     mutationsFromStart::Int
@@ -271,6 +275,7 @@ module Creature
       Dict{Int16, Int16}(),                                                 # mem
       pos,                                                                  # pos
       0,                                                                    # age
+      50,                                                                   # cloneEnergePercent
       0,                                                                    # mutationsFromStart
       Event.create()                                                        # observer
     )
@@ -327,6 +332,7 @@ module Creature
       copy(org.mem),                                                        # mem
       pos,                                                                  # pos
       0,                                                                    # age
+      50,                                                                   # cloneEnergePercent
       0,                                                                    # mutationsFromStart
       Event.create()                                                        # observer
     )
