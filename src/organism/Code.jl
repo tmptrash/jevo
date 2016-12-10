@@ -345,6 +345,8 @@ module Code
     CodePart(rshift,      false), CodePart(lshift,      false),
     CodePart(reminder,    false), CodePart(toString,    false),
     CodePart(toBool,      false), CodePart(toInt,       false),
+    CodePart(toInt8,      false), CodePart(toInt16,     false),
+    CodePart(toFloat64,   false),
     CodePart(sqrt,        false), CodePart(log,         false),
     CodePart(sin,         false), CodePart(cos,         false),
     CodePart(tan,         false), CodePart(cot,         false),
