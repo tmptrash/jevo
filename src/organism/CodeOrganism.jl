@@ -182,6 +182,7 @@ function toMem(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodeP
   local val::Symbol   = @randVar(org, pos, Int16)
 
   if key === :nothing return Expr(:nothing) end
+  
   :(o.mem[$key]=$val)
 end
 #
