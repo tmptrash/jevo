@@ -284,3 +284,31 @@ function myColor(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Cod
   if var === :nothing return Expr(:nothing) end
   :($var=Int16(o.color))
 end
+#
+# @cmd
+# @line
+# Obtains it's own X coordinate.
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function myX(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int16)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Int16(o.pos.x))
+end
+#
+# @cmd
+# @line
+# Obtains it's own Y coordinate.
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function myY(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int16)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Int16(o.pos.y))
+end

@@ -361,6 +361,7 @@ module Code
     CodePart(fromMem,     false), CodePart(idLeft,      false),
     CodePart(idRight,     false), CodePart(idUp,        false),
     CodePart(idDown,      false), CodePart(myColor,     false),
+    CodePart(myX,         false), CodePart(myY,         false),
   ]
   #
   # Available comparison operators. May be used with "if" operator
