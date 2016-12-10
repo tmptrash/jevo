@@ -483,28 +483,40 @@ module Creature
   # the left, 0 will be obtained.
   # @param org Current organism
   #
-  function idLeft(org::Organism) _onId(org, left) end
+  function idLeft(org::Organism)
+    local ret = _onProperty(org, left, :id)
+    ret === nothing ? 0 : ret
+  end
   #
   # @oapi
   # Obtains unique id of organism on the right. If there is not organism on
   # the right, 0 will be obtained.
   # @param org Current organism
   #
-  function idRight(org::Organism) _onId(org, right) end
+  function idRight(org::Organism)
+    local ret = _onProperty(org, right, :id)
+    ret === nothing ? 0 : ret
+  end
   #
   # @oapi
   # Obtains unique id of organism on the above. If there is not organism on
   # the above, 0 will be obtained.
   # @param org Current organism
   #
-  function idUp(org::Organism) _onId(org, up) end
+  function idUp(org::Organism)
+    local ret = _onProperty(org, up, :id)
+    ret === nothing ? 0 : ret
+  end
   #
   # @oapi
   # Obtains unique id of organism on the below. If there is not organism on
   # the below, 0 will be obtained.
   # @param org Current organism
   #
-  function idDown(org::Organism) _onId(org, down) end
+  function idDown(org::Organism)
+    local ret = _onProperty(org, down, :id)
+    ret === nothing ? 0 : ret
+  end
   #
   # @oapi
   # @param org Current organism
@@ -622,18 +634,23 @@ module Creature
   # Obtains unique id of nearest organism
   # @param org Current organism
   # @param dir Direction of nearest organism
+  # @param sym Symbol of organism's paramety we have to grab
   #
-  function _onId(org::Organism, dir::DIRECTION)
+  function _onProperty(org::Organism, dir::DIRECTION, sym::Symbol)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained unique organism id.
     #
     local retObj::Helper.RetObj = Helper.RetObj()
     #
+    # This parameter should be grabbed from organism
+    #
+    retObj.ret = sym
+    #
     # Listener of "id"$dir" should obtain unique organism id in retObj.ret
     # Possible values 0|id
     #
-    Event.fire(org.observer, string("id", dir), org, retObj)
+    Event.fire(org.observer, string("prop", dir), org, retObj)
 
     retObj.ret
   end

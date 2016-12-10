@@ -355,7 +355,7 @@ module Config
       true,                              # WORLD_CYCLICAL
       0,                                 # WORLD_FRAME_DELAY
       0,                                 # WORLD_IPS
-      700,                               # WORLD_MAX_ORGANISMS
+      400,                               # WORLD_MAX_ORGANISMS
       0,                                 # WORLD_MIN_ORGANISMS
       1000,                              # WORLD_START_ENERGY_BLOCKS
       UInt32(0x0001F4),                  # WORLD_START_ENERGY_AMOUNT

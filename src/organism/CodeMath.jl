@@ -157,14 +157,14 @@ function not(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   # "" -> true, "..." -> false
   #
   if typ === String
-    return :($v1 = isempty($v2))
+    return :($v1 = isempty($(v2)))
   elseif typ === Bool
-    return :($(v1) = !($v2))
+    return :($(v1) = !($(v2)))
   end
   #
   # Works for Int8, Int16, Int64 types
   #
-  :($(v1) = ($v2 < $typ(1)))
+  :($(v1) = ($(v2) < $typ(1)))
 end
 #
 # @cmd
@@ -186,7 +186,7 @@ function and(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   local v2::Any       = @randVarOrValue(org, pos, typ)
   local v3::Any       = @randVarOrValue(org, pos, typ)
 
-  :($v1 = $typ($v2) & $typ($v3))
+  :($v1 = $typ($(v2)) & $typ($(v3)))
 end
 #
 # @cmd
@@ -208,7 +208,7 @@ function or(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local v2::Any       = @randVarOrValue(org, pos, typ)
   local v3::Any       = @randVarOrValue(org, pos, typ)
 
-  :($v1 = $typ($v2) | $typ($v3))
+  :($v1 = $typ($(v2)) | $typ($(v3)))
 end
 #
 # @cmd
@@ -230,7 +230,7 @@ function xor(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   local v2::Any       = @randVarOrValue(org, pos, typ)
   local v3::Any       = @randVarOrValue(org, pos, typ)
 
-  :($v1 = $typ($v2) $ $typ($v3))
+  :($v1 = $typ($(v2)) $ $typ($(v3)))
 end
 #
 # @cmd
@@ -252,7 +252,7 @@ function rshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Code
   local v2::Any       = @randVarOrValue(org, pos, typ)
   local v3::Any       = @randVarOrValue(org, pos, typ)
 
-  :($v1 = $typ($v2) >> $typ($v3))
+  :($v1 = $typ($(v2)) >> $typ($(v3)))
 end
 #
 # @cmd
@@ -274,7 +274,7 @@ function lshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Code
   local v2::Any       = @randVarOrValue(org, pos, typ)
   local v3::Any       = @randVarOrValue(org, pos, typ)
 
-  :($v1 = $typ($v2) << $typ($v3))
+  :($v1 = $typ($(v2)) << $typ($(v3)))
 end
 #
 # @cmd
@@ -320,7 +320,7 @@ function toString(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Co
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
 
-  :($v1 = string($v2))
+  :($v1 = string($(v2)))
 end
 #
 # @cmd
@@ -338,9 +338,9 @@ function toBool(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Code
   local v2::Any       = @randVarOrValue(org, pos, typ)
 
   if typ === String
-    return :($v1 = isempty($v2))
+    return :($v1 = isempty($(v2)))
   elseif typ === Bool
-    return :($v1 = $v2)
+    return :($v1 = $(v2))
   end
 
   :($v1 = ($v2 > $typ(0)))
@@ -360,9 +360,9 @@ function toInt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodeP
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
 
-  if typ === String return :($v1 = isempty($v2) ? 0 : 1) end
+  if typ === String return :($v1 = (isempty($(v2)) ? 0 : 1)) end
 
-  :($v1 = Int($v2))
+  :($v1 = Int($(v2)))
 end
 #
 # @cmd
@@ -381,11 +381,11 @@ function toInt8(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Code
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
 
-  if typ === String return :($v1 = isempty($v2) ? 0 : 1) end
-  if typ === Bool return :($v1 = $v2 ? 1 : 0) end
-  if typ === Float64 return :($v1 = $(typemax(Int8)) >= $v2 ? Int8(round($v2)) : $(typemax(Int8))) end
+  if typ === String return :($v1 = isempty($(v2)) ? 0 : 1) end
+  if typ === Bool return :($v1 = $(v2) ? 1 : 0) end
+  if typ === Float64 return :($v1 = ($(typemax(Int8)) >= $(v2) ? Int8(round($(v2))) : $(typemax(Int8)))) end
 
-  :($v1 = $(typemax(Int8)) >= $v2 ? Int8($v2) : $(typemax(Int8)))
+  :($v1 = ($(typemax(Int8)) >= $(v2) ? Int8($(v2)) : $(typemax(Int8))))
 end
 #
 # @cmd
@@ -404,11 +404,11 @@ function toInt16(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Cod
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
 
-  if typ === String return :($v1 = isempty($v2) ? 0 : 1) end
-  if typ === Bool return :($v1 = $v2 ? 1 : 0) end
-  if typ === Float64 return :($v1 = $(typemax(Int16)) >= $v2 ? Int16(round($v2)) : $(typemax(Int16))) end
+  if typ === String return :($v1 = isempty($(v2)) ? 0 : 1) end
+  if typ === Bool return :($v1 = $(v2) ? 1 : 0) end
+  if typ === Float64 return :($v1 = ($(typemax(Int16)) >= $(v2) ? Int16(round($(v2))) : $(typemax(Int16)))) end
 
-  :($v1 = $(typemax(Int16)) >= $v2 ? Int16($v2) : $(typemax(Int16)))
+  :($v1 = ($(typemax(Int16)) >= $(v2) ? Int16($(v2)) : $(typemax(Int16))))
 end
 #
 # @cmd
@@ -425,9 +425,9 @@ function toFloat64(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.C
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
 
-  if typ === String return :($v1 = isempty($v2) ? 0.0 : 1.0) end
+  if typ === String return :($v1 = isempty($(v2)) ? 0.0 : 1.0) end
 
-  :($v1 = Float64($v2))
+  :($v1 = Float64($(v2)))
 end
 #
 # @cmd
@@ -478,7 +478,7 @@ function sin(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = sin($v2))
+  :($v1 = sin($(v2)))
 end
 # @cmd
 # @line
@@ -494,7 +494,7 @@ function cos(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = cos($v2))
+  :($v1 = cos($(v2)))
 end
 # @cmd
 # @line
@@ -510,7 +510,7 @@ function tan(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = tan($v2))
+  :($v1 = tan($(v2)))
 end
 # @cmd
 # @line
@@ -526,7 +526,7 @@ function cot(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = cot($v2))
+  :($v1 = cot($(v2)))
 end
 # @cmd
 # @line
@@ -542,7 +542,7 @@ function sec(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = sec($v2))
+  :($v1 = sec($(v2)))
 end
 # @cmd
 # @line
@@ -558,7 +558,7 @@ function csc(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = csc($v2))
+  :($v1 = csc($(v2)))
 end
 # @cmd
 # @line

@@ -39,10 +39,10 @@ function bindEvents(man::ManagerTypes.ManagerData, org::Creature.Organism)
   Event.on(org.observer, "stepright", (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepRight(man, org))
   Event.on(org.observer, "stepup",    (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepUp(man, org))
   Event.on(org.observer, "stepdown",  (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepDown(man, org))
-  Event.on(org.observer, "idleft",    (org::Creature.Organism)->_onIdLeft(man, org))
-  Event.on(org.observer, "idright",   (org::Creature.Organism)->_onIdRight(man, org))
-  Event.on(org.observer, "idup",      (org::Creature.Organism)->_onIdUp(man, org))
-  Event.on(org.observer, "iddown",    (org::Creature.Organism)->_onIdDown(man, org))
+  Event.on(org.observer, "propleft",  (org::Creature.Organism)->_onPropLeft(man, org))
+  Event.on(org.observer, "propright", (org::Creature.Organism)->_onPropRight(man, org))
+  Event.on(org.observer, "propup",    (org::Creature.Organism)->_onPropUp(man, org))
+  Event.on(org.observer, "propdown",  (org::Creature.Organism)->_onPropDown(man, org))
 end
 #
 # Updates organisms existances. We have to call this function to
@@ -552,60 +552,60 @@ function _onStepDown(man::ManagerTypes.ManagerData, org::Creature.Organism)
   _onStep(man, org, Helper.Point(org.pos.x, org.pos.y + 1))
 end
 #
-# Handler of "idleft" event. Checks if we may obtain unique id of
+# Handler of "propleft" event. Checks if we may obtain some property of
 # near organism, on the left.
 # @param man Manager data type
 # @param orgId Unique organism id
 # @param retObj Special object for return value
 #
-function _onIdLeft(man::ManagerTypes.ManagerData, org::Creature.Organism, retObj::Helper.RetObj)
-  _onId(man, org, Helper.Point(org.pos.x - 1, org.pos.y), retObj)
+function _onPropLeft(man::ManagerTypes.ManagerData, org::Creature.Organism, retObj::Helper.RetObj)
+  _onProp(man, org, Helper.Point(org.pos.x - 1, org.pos.y), retObj)
 end
 #
-# Handler of "idright" event. Checks if we may obtain unique id of
+# Handler of "propright" event. Checks if we may obtain some property of
 # near organism, on the right.
 # @param man Manager data type
 # @param orgId Unique organism id
 # @param retObj Special object for return value
 #
-function _onIdRight(man::ManagerTypes.ManagerData, org::Creature.Organism, retObj::Helper.RetObj)
-  _onId(man, org, Helper.Point(org.pos.x + 1, org.pos.y), retObj)
+function _onPropRight(man::ManagerTypes.ManagerData, org::Creature.Organism, retObj::Helper.RetObj)
+  _onProp(man, org, Helper.Point(org.pos.x + 1, org.pos.y), retObj)
 end
 #
-# Handler of "idup" event. Checks if we may obtain unique id of
+# Handler of "propup" event. Checks if we may obtain some property of
 # near organism, on the above.
 # @param man Manager data type
 # @param orgId Unique organism id
 # @param retObj Special object for return value
 #
-function _onIdUp(man::ManagerTypes.ManagerData, org::Creature.Organism, retObj::Helper.RetObj)
-  _onId(man, org, Helper.Point(org.pos.x, org.pos.y - 1), retObj)
+function _onPropUp(man::ManagerTypes.ManagerData, org::Creature.Organism, retObj::Helper.RetObj)
+  _onProp(man, org, Helper.Point(org.pos.x, org.pos.y - 1), retObj)
 end
 #
-# Handler of "iddown" event. Checks if we may obtain unique id of
+# Handler of "propdown" event. Checks if we may obtain some property of
 # near organism, on the below.
 # @param man Manager data type
 # @param orgId Unique organism id
 # @param retObj Special object for return value
 #
-function _onIdDown(man::ManagerTypes.ManagerData, org::Creature.Organism, retObj::Helper.RetObj)
-  _onId(man, org, Helper.Point(org.pos.x, org.pos.y + 1), retObj)
+function _onPropDown(man::ManagerTypes.ManagerData, org::Creature.Organism, retObj::Helper.RetObj)
+  _onProp(man, org, Helper.Point(org.pos.x, org.pos.y + 1), retObj)
 end
 #
-# Obtains unique id of organism on the specified side. If there is no
+# Obtains some property of organism on the specified side. If there is no
 # organism near current, will return 0.
 # @param man Manager data type
 # @param orgId Unique organism id
 # @param pos Position of nearest organism, which id we have to get
 # @param retObj Special object for return value
 #
-function _onId(man::ManagerTypes.ManagerData, org::Creature.Organism, pos::Helper.Point, retObj::Helper.RetObj)
+function _onProp(man::ManagerTypes.ManagerData, org::Creature.Organism, pos::Helper.Point, retObj::Helper.RetObj)
   local id::Int = Manager._getPosId(man, pos)
 
   if haskey(man.positions, id)
-    retObj.ret = Int(man.positions[id].id)
+    retObj.ret = getfield(man.positions[id], retObj.ret)
   else
-    retObj.ret = 0
+    retObj.ret = nothing
   end
 
   retObj.ret
