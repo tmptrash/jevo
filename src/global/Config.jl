@@ -348,7 +348,7 @@ module Config
       65536,                             # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
       0,                                 # ORGANISM_EVALS
       6000 * 10,                         # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
-      20,                                # ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS
+      50,                                # ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS
       2,                                 # CODE_MAX_FUNC_PARAMS
       1900,                              # WORLD_WIDTH
       930,                               # WORLD_HEIGHT

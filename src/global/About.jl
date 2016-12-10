@@ -5,7 +5,7 @@
 #
 module About
   function version()
-    "jevo v1.0-rc1"
+    "jevo v1.1-rc1"
   end
   function description()
     "jevo - evolutionary progorgamming and genetic algorithm related application,
