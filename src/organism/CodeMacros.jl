@@ -76,7 +76,7 @@ end
 macro randVarOrValue(org, pos, typ)
   :(
     length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]) < 1 ?
-    :($typ === String ? randstring() : rand($typ)) :
+    ($typ === String ? randstring() : rand($typ)) :
     $org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ][Helper.fastRand(length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]))]
   )
 end
