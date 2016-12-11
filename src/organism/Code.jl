@@ -364,6 +364,8 @@ module Code
     CodePart(idRight,     false), CodePart(idUp,        false),
     CodePart(idDown,      false), CodePart(myColor,     false),
     CodePart(myX,         false), CodePart(myY,         false),
+    CodePart(energyLeft,  false), CodePart(energyRight, false),
+    CodePart(energyUp,    false), CodePart(energyDown,  false)
   ]
   #
   # Available comparison operators. May be used with "if" operator

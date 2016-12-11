@@ -273,6 +273,66 @@ end
 #
 # @cmd
 # @line
+# Obtains amount of energy of organism from the left. If there is no organism
+# on the left, then 0 will be obtained
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function energyLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Creature.energyLeft(o))
+end
+#
+# @cmd
+# @line
+# Obtains amount of energy of organism from the right. If there is no organism
+# on the right, then 0 will be obtained
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function energyRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Creature.energyRight(o))
+end
+#
+# @cmd
+# @line
+# Obtains amount of energy of organism from the above. If there is no organism
+# on the above, then 0 will be obtained
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function energyUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Creature.energyUp(o))
+end
+#
+# @cmd
+# @line
+# Obtains amount of energy of organism from the below. If there is no organism
+# on the below, then 0 will be obtained
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function energyDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Creature.energyDown(o))
+end
+#
+# @cmd
+# @line
 # Obtains it's own color.
 # @param cfg Global configuration type
 # @param org Organism we are working with

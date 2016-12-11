@@ -483,38 +483,65 @@ module Creature
   # the left, 0 will be obtained.
   # @param org Current organism
   #
-  function idLeft(org::Organism)
-    local ret = _onProperty(org, left, :id)
-    ret === nothing ? 0 : ret
-  end
+  function idLeft(org::Organism) _getIntProperty(org, left, :id) end
   #
   # @oapi
   # Obtains unique id of organism on the right. If there is not organism on
   # the right, 0 will be obtained.
   # @param org Current organism
   #
-  function idRight(org::Organism)
-    local ret = _onProperty(org, right, :id)
-    ret === nothing ? 0 : ret
-  end
+  function idRight(org::Organism) _getIntProperty(org, right, :id) end
   #
   # @oapi
   # Obtains unique id of organism on the above. If there is not organism on
   # the above, 0 will be obtained.
   # @param org Current organism
   #
-  function idUp(org::Organism)
-    local ret = _onProperty(org, up, :id)
-    ret === nothing ? 0 : ret
-  end
+  function idUp(org::Organism) _getIntProperty(org, up, :id) end
   #
   # @oapi
   # Obtains unique id of organism on the below. If there is not organism on
   # the below, 0 will be obtained.
   # @param org Current organism
   #
-  function idDown(org::Organism)
-    local ret = _onProperty(org, down, :id)
+  function idDown(org::Organism) _getIntProperty(org, down, :id) end
+  #
+  # @oapi
+  # Obtains amount of energy of organism on the left. If there is not organism on
+  # the left, 0 will be obtained.
+  # @param org Current organism
+  #
+  function energyLeft(org::Organism) _getIntProperty(org, left, :energy) end
+  #
+  # @oapi
+  # Obtains amount of energy of organism on the right. If there is not organism on
+  # the right, 0 will be obtained.
+  # @param org Current organism
+  #
+  function energyRight(org::Organism) _getIntProperty(org, right, :energy) end
+  #
+  # @oapi
+  # Obtains amount of energy of organism on the above. If there is not organism on
+  # the above, 0 will be obtained.
+  # @param org Current organism
+  #
+  function energyUp(org::Organism) _getIntProperty(org, up, :energy) end
+  #
+  # @oapi
+  # Obtains amount of energy of organism on below. If there is not organism on
+  # below, 0 will be obtained.
+  # @param org Current organism
+  #
+  function energyDown(org::Organism) _getIntProperty(org, down, :energy) end
+  #
+  # Returns some Int value by specified organism property.
+  # @param org Organism with properties
+  # @param dir Direction of searching (left, right,...)
+  # @param propSymbol Symbol of needed property
+  # @return {Int|0} 0 if something wrong or property is zero
+  #
+  function _getIntProperty(org::Creature.Organism, dir::DIRECTION, propSymbol::Symbol)
+    local ret = _getProperty(org, dir, propSymbol)
     ret === nothing ? 0 : ret
   end
   #
@@ -636,7 +663,7 @@ module Creature
   # @param dir Direction of nearest organism
   # @param sym Symbol of organism's paramety we have to grab
   #
-  function _onProperty(org::Organism, dir::DIRECTION, sym::Symbol)
+  function _getProperty(org::Organism, dir::DIRECTION, sym::Symbol)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained unique organism id.
