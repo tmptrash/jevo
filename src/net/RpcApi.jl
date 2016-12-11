@@ -118,6 +118,10 @@ module RpcApi
     #
     age::Int
     #
+    # Percent of energy, which is given to clonned organism.
+    #
+    cloneEnergePercent::Int
+    #
     # Organism code size in lines
     #
     codeSize::Int
