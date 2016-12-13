@@ -185,4 +185,64 @@ module TestCodeMath
     #
     resetTypes(types)
   end
+  facts("Testing CodeMath.minus() with Int16 variable") do
+    local conf  = Config.create()
+    local org   = Creature.create(conf)
+    local types = changeTypes([Int16])
+
+    addVar(org, [2], Helper.CodePos(1,1,1), Int16)
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.minus, false))
+    var = Helper.getArg(org.code, [2,1,1,1,1])
+
+    @fact Helper.getArg(org.code, [2,2,1]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,1]) --> :(-)
+    @fact Helper.getArg(org.code, [2,2,2,2]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,3]) --> var
+    @fact eval(org.code)(conf, org) --> true
+    #
+    # revert supported types
+    #
+    resetTypes(types)
+  end
+  facts("Testing CodeMath.minus() with Int variable") do
+    local conf  = Config.create()
+    local org   = Creature.create(conf)
+    local types = changeTypes([Int])
+
+    addVar(org, [2], Helper.CodePos(1,1,1), Int)
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.minus, false))
+    var = Helper.getArg(org.code, [2,1,1,1,1])
+
+    @fact Helper.getArg(org.code, [2,2,1]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,1]) --> :(-)
+    @fact Helper.getArg(org.code, [2,2,2,2]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,3]) --> var
+    @fact eval(org.code)(conf, org) --> true
+    #
+    # revert supported types
+    #
+    resetTypes(types)
+  end
+  facts("Testing CodeMath.minus() with one Bool variable") do
+    local conf  = Config.create()
+    local org   = Creature.create(conf)
+    local types = changeTypes([Bool])
+
+    addVar(org, [2], Helper.CodePos(1,1,1), Bool)
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.minus, false))
+    @fact length(Helper.getLines(org.code, [2])) --> 3
+
+    var = Helper.getArg(org.code, [2,1,1,1,1])
+    @fact Helper.getArg(org.code, [2,2,1]) --> var
+    @fact Helper.getArg(org.code, [2,2,2,1]) --> :Bool
+    @fact Helper.getArg(org.code, [2,2,2,2,1]) --> :abs
+    @fact Helper.getArg(org.code, [2,2,2,2,2,1]) --> :(-)
+    @fact Helper.getArg(org.code, [2,2,2,2,2,2]) --> :var_1
+    @fact Helper.getArg(org.code, [2,2,2,2,2,3]) --> :var_1
+    @fact eval(org.code)(conf, org) --> true
+    #
+    # revert supported types
+    #
+    resetTypes(types)
+  end
 end
