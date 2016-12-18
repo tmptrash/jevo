@@ -143,6 +143,47 @@ module TestCodeMath
     #
     resetTypes(types)
   end
+  facts("Testing CodeMath.plus() with String and Bool variables") do
+    local conf  = Config.create()
+    local org   = Creature.create(conf)
+    local types = changeTypes([String, Bool])
+
+    addVar(org, [2], Helper.CodePos(1,1,1), String)
+    addVar(org, [2], Helper.CodePos(1,1,2), Bool)
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,3), Code.CodePart(Code.plus, false))
+    var = Helper.getArg(org.code, [2,3,1])
+
+    if var == :var_1 @fact Helper.getArg(org.code, [2,3,2,1]) --> :(*)
+    elseif var == :var_2 @fact Helper.getArg(org.code, [2,3,2,1]) --> :(&)
+    else error("Ivalid code in \"CodeMath.plus() with String and Bool variables\" test")
+    end
+    @fact Helper.getArg(org.code, [2,3,2,2]) --> var
+    @fact Helper.getArg(org.code, [2,3,2,3]) --> var
+    @fact eval(org.code)(conf, org) --> true
+    #
+    # revert supported types
+    #
+    resetTypes(types)
+  end
+  facts("Testing CodeMath.plus() with Int16 and Int variables") do
+    local conf  = Config.create()
+    local org   = Creature.create(conf)
+    local types = changeTypes([Int16, Int])
+
+    addVar(org, [2], Helper.CodePos(1,1,1), Int16)
+    addVar(org, [2], Helper.CodePos(1,1,2), Int)
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,3), Code.CodePart(Code.plus, false))
+    var = Helper.getArg(org.code, [2,3,1])
+
+    @fact Helper.getArg(org.code, [2,3,2,1]) --> :(+)
+    @fact Helper.getArg(org.code, [2,3,2,2]) --> var
+    @fact Helper.getArg(org.code, [2,3,2,3]) --> var
+    @fact eval(org.code)(conf, org) --> true
+    #
+    # revert supported types
+    #
+    resetTypes(types)
+  end
   #
   # minus
   #
