@@ -184,6 +184,25 @@ module TestCodeMath
     #
     resetTypes(types)
   end
+  facts("Testing CodeMath.plus() with Int and Float64 variables") do
+    local conf  = Config.create()
+    local org   = Creature.create(conf)
+    local types = changeTypes([Int, Float64])
+
+    addVar(org, [2], Helper.CodePos(1,1,1), Int)
+    addVar(org, [2], Helper.CodePos(1,1,2), Float64)
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,3), Code.CodePart(Code.plus, false))
+    var = Helper.getArg(org.code, [2,3,1])
+
+    @fact Helper.getArg(org.code, [2,3,2,1]) --> :(+)
+    @fact Helper.getArg(org.code, [2,3,2,2]) --> var
+    @fact Helper.getArg(org.code, [2,3,2,3]) --> var
+    @fact eval(org.code)(conf, org) --> true
+    #
+    # revert supported types
+    #
+    resetTypes(types)
+  end
   #
   # minus
   #
