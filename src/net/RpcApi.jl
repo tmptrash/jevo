@@ -120,7 +120,7 @@ module RpcApi
     #
     # Percent of energy, which is given to clonned organism.
     #
-    cloneEnergePercent::Int
+    cloneEnergyPercent::Int
     #
     # Organism code size in lines
     #

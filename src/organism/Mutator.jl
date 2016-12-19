@@ -270,7 +270,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onCloneEnergePercent(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
-    org.cloneEnergePercent = Helper.fastRand(100)
+    org.cloneEnergyPercent = Helper.fastRand(100)
     true
   end
   #

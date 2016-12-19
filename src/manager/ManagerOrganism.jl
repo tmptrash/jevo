@@ -447,7 +447,7 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   # Clonning means additional energy waste
   #
   # TODO: move energy decrease and _killOrganism() call to separate function and call it everywhere
-  local energy::Int      = div(organism.energy * organism.cloneEnergePercent, 100)
+  local energy::Int      = div(organism.energy * organism.cloneEnergyPercent, 100)
   organism.energy       -= energy
   crTask.organism.energy = energy
   if energy > 0 _mutate(man, crTask, crTask.organism.mutationsOnClone) end
