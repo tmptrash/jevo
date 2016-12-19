@@ -68,16 +68,14 @@ function minus(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodeP
   #
   # "1234"   - "85"  = "12" (just cut v1 by length of v2)
   # "qwerty" - "111" = "qwe"
-  # "123"[1:0] === ""
+  # "123" - "12345"  = ""  # "123"[1:0] === ""
   #
-  if typ === String
-    return :($v1 = $(v2)[1:(length($v3) > length($v2) ? 0 : length($v2) - length($v3))])
+  if typ === String return :($v1 = $(v2)[1:(length($v3) > length($v2) ? 0 : length($v2) - length($v3))])
   #
   # true  - true  = false, true  - false = true,
   # false - false = false, false - true  = true
   #
-  elseif typ === Bool
-    return :($v1 = Bool(abs($v2 - $v3)))
+  elseif typ === Bool return :($v1 = Bool(abs($v2 - $v3)))
   end
   #
   # Numeric types are here

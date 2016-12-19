@@ -29,7 +29,7 @@ module TestCodeMath
     @fact length(Helper.getLines(org.code, [2])) --> 1
     @fact eval(org.code)(conf, org) --> true
   end
-  facts("Testing CodeMath.plus() with UInt8 variable") do
+  facts("Testing CodeMath.plus() with Int8 variable") do
     local conf = Config.create()
     local org  = Creature.create(conf)
 
@@ -277,6 +277,22 @@ module TestCodeMath
     @fact Helper.getArg(org.code, [2,2,2,1]) --> :(-)
     @fact Helper.getArg(org.code, [2,2,2,2]) --> var
     @fact Helper.getArg(org.code, [2,2,2,3]) --> var
+    @fact eval(org.code)(conf, org) --> true
+    #
+    # revert supported types
+    #
+    resetTypes(types)
+  end
+  facts("Testing CodeMath.minus() with String variable") do
+    local conf  = Config.create()
+    local org   = Creature.create(conf)
+    local types = changeTypes([String])
+
+    addVar(org, [2], Helper.CodePos(1,1,1), String)
+    Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.minus, false))
+    var = Helper.getArg(org.code, [2,2,1])
+
+    @fact Helper.getArg(org.code, [2,2,2,1]) --> var
     @fact eval(org.code)(conf, org) --> true
     #
     # revert supported types
