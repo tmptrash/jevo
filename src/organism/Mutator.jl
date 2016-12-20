@@ -269,7 +269,7 @@ module Mutator
   # @param pos Unused
   # @param cmd Unused
   #
-  function _onCloneEnergePercent(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
+  function _onCloneEnergyPercent(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
     org.cloneEnergyPercent = Helper.fastRand(100)
     true
   end
@@ -277,7 +277,7 @@ module Mutator
   # All available functions for mutation types: change, add, del,...
   #
   const _MUTATION_TYPES = [
-    _onAdd, _onChange, _onDel, _onSmallChange, _onClone, _onPeriod, _onAmount, _onProbs, _onCloneEnergePercent
+    _onAdd, _onChange, _onDel, _onSmallChange, _onClone, _onPeriod, _onAmount, _onProbs, _onCloneEnergyPercent
   ]
   #
   # "Empty" position. Means no position. Is used only like a stub for
