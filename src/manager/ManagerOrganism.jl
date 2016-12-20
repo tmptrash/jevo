@@ -39,10 +39,10 @@ function bindEvents(man::ManagerTypes.ManagerData, org::Creature.Organism)
   Event.on(org.observer, "stepright", (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepRight(man, org))
   Event.on(org.observer, "stepup",    (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepUp(man, org))
   Event.on(org.observer, "stepdown",  (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepDown(man, org))
-  Event.on(org.observer, "propleft",  (org::Creature.Organism)->_onPropLeft(man, org))
-  Event.on(org.observer, "propright", (org::Creature.Organism)->_onPropRight(man, org))
-  Event.on(org.observer, "propup",    (org::Creature.Organism)->_onPropUp(man, org))
-  Event.on(org.observer, "propdown",  (org::Creature.Organism)->_onPropDown(man, org))
+  Event.on(org.observer, "propleft",  (org::Creature.Organism, retObj::Helper.RetObj)->_onPropLeft(man, org, retObj))
+  Event.on(org.observer, "propright", (org::Creature.Organism, retObj::Helper.RetObj)->_onPropRight(man, org, retObj))
+  Event.on(org.observer, "propup",    (org::Creature.Organism, retObj::Helper.RetObj)->_onPropUp(man, org, retObj))
+  Event.on(org.observer, "propdown",  (org::Creature.Organism, retObj::Helper.RetObj)->_onPropDown(man, org, retObj))
 end
 #
 # Updates organisms existances. We have to call this function to

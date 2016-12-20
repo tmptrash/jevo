@@ -319,7 +319,7 @@ module Creature
     Organism(
       id,                                                                   # id
       _clone(org.code, funcs),                                              # code
-      Helper.emptyFn,                                                       # codeFn
+      function (cfg::Config.ConfigData, org::Organism) end,                 # codeFn
       org.codeSize,                                                         # codeSize
       org.symbolId,                                                         # symbolId
       funcs,                                                                # funcs
@@ -365,6 +365,8 @@ module Creature
       try
         org.codeFn(cfg, org)
       catch e
+        #showerror(STDOUT, e, catch_backtrace())
+        #println("\n", org.code, "\n\n")
         # TODO: what we have to do with code errors?
         # TODO: we have to calculate it for statistics
       end
@@ -704,6 +706,6 @@ module Creature
     #
     # We can't exceed max amount of energy
     #
-    org.energy = min(org.energy + retObj.ret, cfg.ORGANISM_MAX_ENERGY)
+    if typeof(retObj.ret) == Int org.energy = min(org.energy + retObj.ret, cfg.ORGANISM_MAX_ENERGY) end
   end
 end

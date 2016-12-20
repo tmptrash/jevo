@@ -48,11 +48,14 @@ function eatLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Cod
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
   #
-  # If we pass previous line, then at least one Int8 var exists
+  # If we pass previous line, then at least one Int8 var exists.
+  # Amount of eated and current energy in sum may be bigger then
+  # typemax(Int8). So we have to use Int16 for return value.
   #
-  local var::Symbol = @randVar(org, pos, Int8)
+  local var::Symbol = @randVar(org, pos, Int16)
+  if var === :nothing return Expr(:nothing) end
 
-  :($var = Int8(Creature.eatLeft(c, o, Int($(amount)))))
+  :($var = Int16(Creature.eatLeft(c, o, Int($(amount)))))
 end
 #
 # @cmd
@@ -67,9 +70,12 @@ function eatRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Co
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
   #
-  # If we pass previous line, then at least one Int8 var exists
+  # If we pass previous line, then at least one Int8 var exists.
+  # Amount of eated and current energy in sum may be bigger then
+  # typemax(Int8). So we have to use Int16 for return value.
   #
-  local var::Symbol = @randVar(org, pos, Int8)
+  local var::Symbol = @randVar(org, pos, Int16)
+  if var === :nothing return Expr(:nothing) end
 
   :($var = Int8(Creature.eatRight(c, o, Int($(amount)))))
 end
@@ -86,9 +92,12 @@ function eatUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodeP
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
   #
-  # If we pass previous line, then at least one Int8 var exists
+  # If we pass previous line, then at least one Int8 var exists.
+  # Amount of eated and current energy in sum may be bigger then
+  # typemax(Int8). So we have to use Int16 for return value.
   #
-  local var::Symbol = @randVar(org, pos, Int8)
+  local var::Symbol = @randVar(org, pos, Int16)
+  if var === :nothing return Expr(:nothing) end
 
   :($var = Int8(Creature.eatUp(c, o, Int($(amount)))))
 end
@@ -105,9 +114,12 @@ function eatDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Cod
   local amount::Symbol = @randVar(org, pos, Int8)
   if amount === :nothing return Expr(:nothing) end
   #
-  # If we pass previous line, then at least one Int8 var exists
+  # If we pass previous line, then at least one Int8 var exists.
+  # Amount of eated and current energy in sum may be bigger then
+  # typemax(Int8). So we have to use Int16 for return value.
   #
-  local var::Symbol = @randVar(org, pos, Int8)
+  local var::Symbol = @randVar(org, pos, Int16)
+  if var === :nothing return Expr(:nothing) end
 
   :($var = Int8(Creature.eatDown(c, o, Int($(amount)))))
 end

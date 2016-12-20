@@ -11,6 +11,10 @@ export multiply
 export divide
 export not
 export and
+export or
+export xor
+export rshift
+export lshift
 export reminder
 #
 # Binding of available types and available "plus" operators
