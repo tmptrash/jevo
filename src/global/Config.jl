@@ -328,7 +328,7 @@ module Config
   #
   function create(empty::Bool = false)
     ConfigData(
-      empty ? [] : [10,200,3,0,1,1,1,1,1], # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
+      empty ? [] : [5,100,1,0,1,1,1,1,1],  # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
       2,                                   # ORGANISM_MUTATIONS_ON_CLONE
       50,                                  # ORGANISM_MAX_MUTATIONS_ON_CLONE
       500,                                 # ORGANISM_MUTATION_PERIOD
@@ -355,7 +355,7 @@ module Config
       true,                                # WORLD_CYCLICAL
       0,                                   # WORLD_FRAME_DELAY
       0,                                   # WORLD_IPS
-      700,                                 # WORLD_MAX_ORGANISMS
+      500,                                 # WORLD_MAX_ORGANISMS
       0,                                   # WORLD_MIN_ORGANISMS
       1000,                                # WORLD_START_ENERGY_BLOCKS
       UInt32(0x0001F4),                    # WORLD_START_ENERGY_AMOUNT
