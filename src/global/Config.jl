@@ -154,6 +154,11 @@ module Config
     #
     ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS::Int
     #
+    # Amount of energy, which will be decreased in case of organis's
+    # code error or exception
+    #
+    ORGANISM_ENERGY_DECREASE_ON_ERROR::Int
+    #
     # Maximum amount of arguments in custom functions. Minimum 1.
     #
     CODE_MAX_FUNC_PARAMS::Int
@@ -349,6 +354,7 @@ module Config
       0,                                   # ORGANISM_EVALS
       6000 * 10,                           # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
       50,                                  # ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS
+      10,                                  # ORGANISM_ENERGY_DECREASE_ON_ERROR
       2,                                   # CODE_MAX_FUNC_PARAMS
       1900,                                # WORLD_WIDTH
       930,                                 # WORLD_HEIGHT

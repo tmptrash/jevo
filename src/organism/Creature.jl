@@ -370,7 +370,7 @@ module Creature
         #
         # Organisms with errors in a code should be less successful
         #
-        org.energy -= 1
+        org.energy -= cfg.ORGANISM_ENERGY_DECREASE_ON_ERROR
         # TODO: what we have to do with code errors?
         # TODO: we have to calculate it for statistics
       end

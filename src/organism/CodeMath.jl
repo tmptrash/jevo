@@ -363,6 +363,7 @@ function toInt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodeP
   local v2::Any       = @randVarOrValue(org, pos, typ)
 
   if typ === String return :($v1 = (isempty($(v2)) ? 0 : 1)) end
+  if typ === Float64 return :($v1 = Int(round($(v2)))) end
 
   :($v1 = Int($(v2)))
 end
