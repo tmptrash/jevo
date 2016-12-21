@@ -302,7 +302,7 @@ function reminder(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Co
     return :($v1 = $v2 | $v3)
   end
 
-  :($v1 = $v2 % $v3)
+  :($v1 = $(v2) % ($(v3) === $typ(0) ? $typ(1) : $(v3)))
 end
 #
 # @cmd
