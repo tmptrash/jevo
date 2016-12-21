@@ -365,8 +365,8 @@ module Creature
       try
         org.codeFn(cfg, org)
       catch e
-        #showerror(STDOUT, e, catch_backtrace())
-        #println("\n", org.code, "\n\n")
+        showerror(STDOUT, e, catch_backtrace())
+        println("\n", org.code, "\n\n")
         #
         # Organisms with errors in a code should be less successful
         #

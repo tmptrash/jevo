@@ -526,7 +526,7 @@ function cot(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = cot($(v2)))
+  :($v1 = cot($(v2) === $typ(0) ? $typ(1) : $(v2)))
 end
 # @cmd
 # @line
@@ -558,7 +558,7 @@ function csc(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = csc($(v2)))
+  :($v1 = csc($(v2) === $typ(0) ? $typ(1) : $(v2)))
 end
 # @cmd
 # @line
