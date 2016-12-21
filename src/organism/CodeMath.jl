@@ -448,7 +448,7 @@ function sqrt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePo
   local v2::Symbol = @randVar(org, pos, typ)
   if v2 === :nothing return Expr(:nothing) end
 
-  :($v1 = sqrt($v2 > 0 ? $v2 : $v1))
+  :($v1 = sqrt(abs($(v2))))
 end
 # @cmd
 # @line
