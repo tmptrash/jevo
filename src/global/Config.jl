@@ -350,7 +350,7 @@ module Config
       5,                                   # ORGANISM_REMOVE_AMOUNT
       10,                                  # ORGANISM_CLONE_AFTER_TIMES
       5,                                   # ORGANISM_START_COLOR
-      65536,                               # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
+      500,                                 # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
       0,                                   # ORGANISM_EVALS
       6000 * 10,                           # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
       50,                                  # ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS

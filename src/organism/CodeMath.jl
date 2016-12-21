@@ -462,7 +462,7 @@ function log(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   local v2::Symbol = @randVar(org, pos, typ)
   if v2 === :nothing return Expr(:nothing) end
 
-  :($v1 = log($v2 > $typ(0) ? $v2 : abs($v1)))
+  :($v1 = log($v2 > $typ(0) ? $v2 : abs($(v1) !== 0.0 ? $(v1) : 1.0)))
 end
 # @cmd
 # @line
