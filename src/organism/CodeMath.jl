@@ -136,7 +136,7 @@ function divide(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Code
     return :($(v1) = $(v2) | $(v3))
   end
 
-  :($(v1) = $(v2) / $(v3))
+  :($(v1) = div($(v2), $(v3)))
 end
 #
 # @cmd
