@@ -266,7 +266,7 @@ module Creature
       0,                                                                    # codeSize
       0,                                                                    # symbolId
       funcs,                                                                # funcs
-      cfg.ORGANISM_MUTATION_PROBABILITIES,                                  # mutationProbabilities
+      copy(cfg.ORGANISM_MUTATION_PROBABILITIES),                            # mutationProbabilities
       cfg.ORGANISM_MUTATIONS_ON_CLONE,                                      # mutationsOnClone
       min(cfg.ORGANISM_MUTATION_PERIOD, cfg.ORGANISM_MAX_MUTATION_PERIOD),  # mutationPeriod
       min(cfg.ORGANISM_MUTATION_AMOUNT, cfg.ORGANISM_MAX_MUTATION_AMOUNT),  # mutationAmount
