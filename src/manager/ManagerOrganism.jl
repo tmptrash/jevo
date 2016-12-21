@@ -666,7 +666,10 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       retObj.ret = org.energy
     end
   else
-    retObj.ret = World.grabEnergy(man.world, newPos, UInt32(amount))
+    #
+    # Organism wants to give an energy, but no other organisms around
+    #
+    retObj.ret = amount > 0 ? World.grabEnergy(man.world, newPos, UInt32(amount)) : 0
   end
 
   retObj.ret
