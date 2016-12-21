@@ -77,7 +77,7 @@ function eatRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Co
   local var::Symbol = @randVar(org, pos, Int16)
   if var === :nothing return Expr(:nothing) end
 
-  :($var = Int8(Creature.eatRight(c, o, Int($(amount)))))
+  :($var = Int16(Creature.eatRight(c, o, Int($(amount)))))
 end
 #
 # @cmd
@@ -99,7 +99,7 @@ function eatUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodeP
   local var::Symbol = @randVar(org, pos, Int16)
   if var === :nothing return Expr(:nothing) end
 
-  :($var = Int8(Creature.eatUp(c, o, Int($(amount)))))
+  :($var = Int16(Creature.eatUp(c, o, Int($(amount)))))
 end
 #
 # @cmd
@@ -121,7 +121,7 @@ function eatDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Cod
   local var::Symbol = @randVar(org, pos, Int16)
   if var === :nothing return Expr(:nothing) end
 
-  :($var = Int8(Creature.eatDown(c, o, Int($(amount)))))
+  :($var = Int16(Creature.eatDown(c, o, Int($(amount)))))
 end
 #
 # @cmd
