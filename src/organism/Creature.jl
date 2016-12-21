@@ -365,8 +365,8 @@ module Creature
       try
         org.codeFn(cfg, org)
       catch e
-        #showerror(STDOUT, e, catch_backtrace())
-        #println("\n", org.code, "\n\n")
+        showerror(STDOUT, e, catch_backtrace())
+        println("\n", org.code, "\n\n")
         # TODO: what we have to do with code errors?
         # TODO: we have to calculate it for statistics
       end
@@ -446,7 +446,7 @@ module Creature
   #
   function stepLeft(org::Organism)
     local retObj::Helper.RetObj = Helper.RetObj()
-    Event.fire(org.observer, "stepleft", org. retObj)
+    Event.fire(org.observer, "stepleft", org, retObj)
     retObj.ret::Bool
   end
   #
