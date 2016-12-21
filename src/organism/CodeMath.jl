@@ -129,11 +129,8 @@ function divide(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Code
   # "1234"   / "854" = "1"   (just cut v1 by length of v1 / v2)
   # "qwerty" / "111" = "qw"
   #
-  if typ === String
-    # TODO: error: zero divide is here and zero index!
-    return :($v1 = $v2[1:(length($v3) > length($v2) > 0 ? 0 : div(length($v2), length($v3)))])
-  elseif typ === Bool
-    return :($(v1) = $(v2) | $(v3))
+  if typ === String return Expr(:nothing)
+  elseif typ === Bool return :($(v1) = $(v2) | $(v3))
   end
 
   :($(v1) = div($(v2), $(v3) === $typ(0) ? $typ(1) : $(v3)))
@@ -388,7 +385,7 @@ function toInt8(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Code
   if typ === Bool return :($v1 = $(v2) ? 1 : 0) end
   if typ === Float64 return :($v1 = ($(typemax(Int8)) >= $(v2) ? Int8(round($(v2))) : $(typemax(Int8)))) end
 
-  :($v1 = ($(typemax(Int8)) >= $(v2) ? Int8($(v2)) : $(typemax(Int8))))
+  :($v1 = ($(typemax(Int8)) >= abs($(v2)) ? Int8($(v2)) : $(typemax(Int8))))
 end
 #
 # @cmd
