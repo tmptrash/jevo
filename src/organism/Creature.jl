@@ -691,6 +691,7 @@ module Creature
   # @param dir      Direction Enum(left, right, up, down)
   # @param amount   Amount of grabbed energy
   # @param amount   Amount of energy to grab
+  # @return {Int} Amount of eated energy
   #
   function _grabEnergy(cfg::Config.ConfigData, org::Organism, dir::DIRECTION, amount::Int)
     #
@@ -706,6 +707,11 @@ module Creature
     #
     # We can't exceed max amount of energy
     #
-    if typeof(retObj.ret) == Int org.energy = min(org.energy + retObj.ret, cfg.ORGANISM_MAX_ENERGY) end
+    if typeof(retObj.ret) == Int
+      org.energy = min(org.energy + retObj.ret, cfg.ORGANISM_MAX_ENERGY)
+      return retObj.ret
+    end
+
+    0
   end
 end
