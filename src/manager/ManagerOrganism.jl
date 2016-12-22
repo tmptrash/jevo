@@ -140,7 +140,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     probs = Int[]
     @inbounds for task in tasks push!(probs, task.organism.energy) end
     probIndex = Helper.getProbIndex(probs)
-    _onClone(man, tasks[probIndex].organism)
+    if probIndex > 0 _onClone(man, tasks[probIndex].organism) end
   end
   #
   # This block decreases energy from organisms, because they
