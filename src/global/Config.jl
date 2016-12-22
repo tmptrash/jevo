@@ -333,7 +333,7 @@ module Config
   #
   function create(empty::Bool = false)
     ConfigData(
-      empty ? [] : [5,100,1,0,1,1,1,1,1],  # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount)
+      empty ? [] : [5,100,1,0,1,1,1,1,1],  # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount,probs,cloneEnergy)
       2,                                   # ORGANISM_MUTATIONS_ON_CLONE
       50,                                  # ORGANISM_MAX_MUTATIONS_ON_CLONE
       500,                                 # ORGANISM_MUTATION_PERIOD
@@ -350,7 +350,7 @@ module Config
       5,                                   # ORGANISM_REMOVE_AMOUNT
       10,                                  # ORGANISM_CLONE_AFTER_TIMES
       5,                                   # ORGANISM_START_COLOR
-      65536,                               # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
+      500,                                 # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
       0,                                   # ORGANISM_EVALS
       6000 * 10,                           # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
       50,                                  # ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS
