@@ -333,7 +333,7 @@ module Config
   #
   function create(empty::Bool = false)
     ConfigData(
-      empty ? [] : [5,100,1,0,1,1,1,1,1],  # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount,probs,cloneEnergy)
+      empty ? [] : [50,100,1,0,1,1,1,1,1], # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount,probs,cloneEnergy)
       0,                                   # ORGANISM_MUTATIONS_ON_CLONE
       50,                                  # ORGANISM_MAX_MUTATIONS_ON_CLONE
       700,                                 # ORGANISM_MUTATION_PERIOD
@@ -343,10 +343,10 @@ module Config
       100,                                 # ORGANISM_START_AMOUNT
       7000,                                # ORGANISM_START_ENERGY
       Int(typemax(UInt32)),                # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)
-      500,                                 # ORGANISM_ENERGY_DECREASE_PERIOD
+      100,                                 # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                                   # ORGANISM_ENERGY_DECREASE_VALUE
       0.2,                                 # ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY
-      600,                                 # ORGANISM_REMOVE_AFTER_TIMES
+      200,                                 # ORGANISM_REMOVE_AFTER_TIMES
       5,                                   # ORGANISM_REMOVE_AMOUNT
       10,                                  # ORGANISM_CLONE_AFTER_TIMES
       100,                                 # ORGANISM_START_COLOR
@@ -362,7 +362,7 @@ module Config
       0,                                   # WORLD_FRAME_DELAY
       0,                                   # WORLD_IPS
       1000,                                # WORLD_MAX_ORGANISMS
-      0,                                   # WORLD_MIN_ORGANISMS
+      50,                                  # WORLD_MIN_ORGANISMS
       1000,                                # WORLD_START_ENERGY_BLOCKS
       UInt32(0x0001F4),                    # WORLD_START_ENERGY_AMOUNT
       0.3,                                 # WORLD_MIN_ENERGY_PERCENT
