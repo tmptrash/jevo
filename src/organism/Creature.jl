@@ -339,7 +339,7 @@ module Creature
   end
   #
   # TODO: describe this method
-  # TODO: describe org, cfg = produce()
+  # TODO: describe org
   #
   function born(org::Organism, cfg::Config.ConfigData, task::Task)
     #

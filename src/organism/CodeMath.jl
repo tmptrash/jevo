@@ -293,13 +293,10 @@ function reminder(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Co
   local v2::Symbol    = @randVar(org, pos, typ)
   local v3::Symbol    = @randVar(org, pos, typ)
   #
-  # "1234"   / "854" = "1"   (just cut v1 by length of v1 / v2)
-  # "qwerty" / "111" = "qw"
+  # String reminder isn't supported
   #
-  if typ === String
-    return :($v1 = $v2[(length($v3) > length($v2) ? 1 : length($v3)):(length($v3) > length($v2) > 0 ? 0 : end)])
-  elseif typ === Bool
-    return :($v1 = $v2 | $v3)
+  if typ === String return Expr(:nothing)
+  elseif typ === Bool return :($v1 = $v2 | $v3)
   end
 
   :($v1 = $(v2) % ($(v3) === $typ(0) ? $typ(1) : $(v3)))
