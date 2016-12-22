@@ -199,10 +199,10 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   local decVal::Int = man.cfg.ORGANISM_ENERGY_DECREASE_VALUE
   local decPercent::Float64 = man.cfg.ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
-  local minOrgs::Int = man.cfg.WORLD_MIN_ORGANISMS
   local org::Creature.Organism
   local i::Int = length(tasks)
-  if i <= minOrgs return false end
+  local minOrgs::Int = man.cfg.WORLD_MIN_ORGANISMS
+  local dontKill::Bool = (i <= minOrgs)
   #
   # We have to go through tasks in reverse way, because we may
   # remove some elements inside while loop.
@@ -213,10 +213,21 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     #
     org = tasks[i].organism
     #
-    # If population reaches minimum amount, we should stop killing it
+    # Energy shouldn't be less then 1
     #
-    if length(tasks) > minOrgs org.energy -= (decVal + round(Int, org.codeSize * decPercent)) end
-    if org.energy < 1 _killOrganism(man, i) end
+    if dontKill
+      if org.energy < 1 org.energy = 2 end
+    else
+      #
+      # If population reaches minimum amount, we should stop killing it
+      #
+      org.energy -= (decVal + round(Int, org.codeSize * decPercent))
+      if org.energy < 1
+        _killOrganism(man, i)
+        dontKill = (length(tasks) <= minOrgs)
+      end
+    end
+
     i -= 1
   end
   @if_status man.status.eups += 1
@@ -625,7 +636,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
   local id::Int
   local org::Creature.Organism
 
-  if haskey(man.cons.frozen, organism.id) || organism.energy < 1 return retObj.ret = 0 end
+  if haskey(man.cons.frozen, organism.id) || organism.energy < 1 || length(man.tasks) <= man.cfg.WORLD_MIN_ORGANISMS return retObj.ret = 0 end
   #
   # In case if cyclical mode is on, organism may grab energy
   # outside the world's borders

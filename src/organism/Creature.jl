@@ -365,12 +365,12 @@ module Creature
       try
         org.codeFn(cfg, org)
       catch e
-        showerror(STDOUT, e, catch_backtrace())
-        println("\n", org.code, "\n\n")
+        #showerror(STDOUT, e, catch_backtrace())
+        #println("\n", org.code, "\n\n")
         #
         # Organisms with errors in a code should be less successful
         #
-        org.energy -= cfg.ORGANISM_ENERGY_DECREASE_ON_ERROR
+        if org.energy > cfg.ORGANISM_ENERGY_DECREASE_ON_ERROR org.energy -= cfg.ORGANISM_ENERGY_DECREASE_ON_ERROR end
         # TODO: what we have to do with code errors?
         # TODO: we have to calculate it for statistics
       end
