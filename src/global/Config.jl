@@ -362,7 +362,7 @@ module Config
       0,                                   # WORLD_FRAME_DELAY
       0,                                   # WORLD_IPS
       1000,                                # WORLD_MAX_ORGANISMS
-      50,                                  # WORLD_MIN_ORGANISMS
+      0,                                   # WORLD_MIN_ORGANISMS
       1000,                                # WORLD_START_ENERGY_BLOCKS
       UInt32(0x0001F4),                    # WORLD_START_ENERGY_AMOUNT
       0.3,                                 # WORLD_MIN_ENERGY_PERCENT

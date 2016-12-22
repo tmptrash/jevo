@@ -203,6 +203,8 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   local i::Int = length(tasks)
   local minOrgs::Int = man.cfg.WORLD_MIN_ORGANISMS
   local dontKill::Bool = (i <= minOrgs)
+
+  if dontKill return false end
   #
   # We have to go through tasks in reverse way, because we may
   # remove some elements inside while loop.
@@ -215,9 +217,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     #
     # Energy shouldn't be less then 1
     #
-    if dontKill
-      if org.energy < 1 org.energy = 2 end
-    else
+    if !dontKill
       #
       # If population reaches minimum amount, we should stop killing it
       #
@@ -441,7 +441,7 @@ end
 # @param organism Parent organism
 #
 function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
-  if length(man.tasks) >= man.cfg.WORLD_MAX_ORGANISMS || organism.energy < 2 return false end
+  if organism.energy < 1 return false end
   #
   # First, we have to find free point near the organism to put
   # clone in. It's possible, that all places are filled.
@@ -458,9 +458,13 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   # Clonning means additional energy waste
   #
   # TODO: move energy decrease and _killOrganism() call to separate function and call it everywhere
-  local energy::Int      = div(organism.energy * organism.cloneEnergyPercent, 100)
-  organism.energy       -= energy
-  crTask.organism.energy = energy
+  local minimum::Bool = length(man.tasks) <= man.cfg.WORLD_MIN_ORGANISMS
+  local energy::Int = minimum ? 1 : div(organism.energy * organism.cloneEnergyPercent, 100)
+
+  if !minimum
+    organism.energy       -= energy
+    crTask.organism.energy = energy
+  end
   if energy > 0 _mutate(man, crTask, crTask.organism.mutationsOnClone) end
   if organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks)) end
   if crTask.organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === crTask.organism, man.tasks)) end
