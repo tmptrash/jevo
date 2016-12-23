@@ -334,19 +334,19 @@ module Config
   function create(empty::Bool = false)
     ConfigData(
       empty ? [] : [50,100,1,0,1,1,1,1,1], # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount,probs,cloneEnergy)
-      0,                                   # ORGANISM_MUTATIONS_ON_CLONE
+      1,                                   # ORGANISM_MUTATIONS_ON_CLONE
       50,                                  # ORGANISM_MAX_MUTATIONS_ON_CLONE
-      700,                                 # ORGANISM_MUTATION_PERIOD
+      0,                                   # ORGANISM_MUTATION_PERIOD
       1000,                                # ORGANISM_MAX_MUTATION_PERIOD
       1,                                   # ORGANISM_MUTATION_AMOUNT
       50,                                  # ORGANISM_MAX_MUTATION_AMOUNT
       100,                                 # ORGANISM_START_AMOUNT
-      7000,                                # ORGANISM_START_ENERGY
+      10000,                               # ORGANISM_START_ENERGY
       Int(typemax(UInt32)),                # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)
       100,                                 # ORGANISM_ENERGY_DECREASE_PERIOD
       1,                                   # ORGANISM_ENERGY_DECREASE_VALUE
       0.2,                                 # ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY
-      200,                                 # ORGANISM_REMOVE_AFTER_TIMES
+      500,                                 # ORGANISM_REMOVE_AFTER_TIMES
       5,                                   # ORGANISM_REMOVE_AMOUNT
       10,                                  # ORGANISM_CLONE_AFTER_TIMES
       100,                                 # ORGANISM_START_COLOR
@@ -361,7 +361,7 @@ module Config
       true,                                # WORLD_CYCLICAL
       0,                                   # WORLD_FRAME_DELAY
       0,                                   # WORLD_IPS
-      1000,                                # WORLD_MAX_ORGANISMS
+      50000,                               # WORLD_MAX_ORGANISMS
       0,                                   # WORLD_MIN_ORGANISMS
       1000,                                # WORLD_START_ENERGY_BLOCKS
       UInt32(0x0001F4),                    # WORLD_START_ENERGY_AMOUNT
