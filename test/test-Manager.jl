@@ -21,7 +21,7 @@ module TestManager
   #
   function _create(positions::Vector{Helper.Point}, configs::Dict{Symbol, Any} = Dict{Symbol, Any}())
     local cfg::Config.ConfigData          = Config.create()
-    cfg.ORGANISM_MUTATIONS_ON_CLONE       = 0
+    cfg.ORGANISM_MUTATIONS_ON_CLONE_PERCENT       = 0
     cfg.ORGANISM_MUTATION_PERIOD          = 0
     cfg.ORGANISM_START_AMOUNT             = 0
     cfg.ORGANISM_START_ENERGY             = 100
@@ -154,7 +154,7 @@ module TestManager
     Manager.destroy(d.man)
   end
   facts("Checking organisms mutations on clone") do
-    local d         = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:ORGANISM_CLONE_AFTER_TIMES=>2, :ORGANISM_MUTATIONS_ON_CLONE=>3))
+    local d         = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:ORGANISM_CLONE_AFTER_TIMES=>2, :ORGANISM_MUTATIONS_ON_CLONE_PERCENT=>3))
     local orgAmount = length(d.man.organisms)
     local mutations = d.man.status.mps
 

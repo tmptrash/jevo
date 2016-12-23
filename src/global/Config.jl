@@ -56,17 +56,13 @@ module Config
     #
     ORGANISM_MUTATION_PROBABILITIES::Array{Int, 1}
     #
-    # Amount of mutations, which will be applied to arganism after clonning.
-    # Should be less then ORGANISM_MAX_MUTATIONS_ON_CLONE setting.
+    # Percent of mutations from code size, which will be applied to
+    # organism after clonning. Should be less then 100
     #
-    ORGANISM_MUTATIONS_ON_CLONE::Int
-    #
-    # Maximum amount of mutations on clone
-    #
-    ORGANISM_MAX_MUTATIONS_ON_CLONE::Int
+    ORGANISM_MUTATIONS_ON_CLONE_PERCENT::Float64
     #
     # Amount of iterations within organism's life loop, after that we
-    # do mutations according to ORGANISM_MUTATION_AMOUNT config. If 0, then
+    # do mutations according to ORGANISM_MUTATION_PERCENT config. If 0, then
     # mutations will be disabled. Should be less then ORGANISM_MAX_MUTATION_PERIOD
     #
     ORGANISM_MUTATION_PERIOD::Int
@@ -77,15 +73,9 @@ module Config
     #
     # Value, which will be used like amount of mutations per
     # ORGANISM_MUTATION_PERIOD iterations. 0 is a possible value if
-    # we want to disable mutations. Should be less then config
-    # ORGANISM_MAX_MUTATION_AMOUNT.
+    # we want to disable mutations. Should be less then 100
     #
-    ORGANISM_MUTATION_AMOUNT::Int
-    #
-    # Maximum amount of mutations per one mutation period. Related to
-    # ORGANISM_MUTATION_AMOUNT config.
-    #
-    ORGANISM_MAX_MUTATION_AMOUNT::Int
+    ORGANISM_MUTATION_PERCENT::Float64
     #
     # Amount of organisms we have to create on program start
     #
@@ -334,12 +324,10 @@ module Config
   function create(empty::Bool = false)
     ConfigData(
       empty ? [] : [50,100,1,0,1,1,1,1,1], # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount,probs,cloneEnergy)
-      1,                                   # ORGANISM_MUTATIONS_ON_CLONE
-      50,                                  # ORGANISM_MAX_MUTATIONS_ON_CLONE
+      2.0,                                 # ORGANISM_MUTATIONS_ON_CLONE_PERCENT
       500,                                 # ORGANISM_MUTATION_PERIOD
       1000,                                # ORGANISM_MAX_MUTATION_PERIOD
-      1,                                   # ORGANISM_MUTATION_AMOUNT
-      50,                                  # ORGANISM_MAX_MUTATION_AMOUNT
+      2.0,                                 # ORGANISM_MUTATION_PERCENT
       100,                                 # ORGANISM_START_AMOUNT
       10000,                               # ORGANISM_START_ENERGY
       Int(typemax(UInt32)),                # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)

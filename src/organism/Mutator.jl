@@ -42,7 +42,7 @@ module Mutator
   # TODO: describe return value. false mean no mutation
   # TODO: this function is very slow!!! must be optimized
   #
-  function mutate(cfg::Config.ConfigData, org::Creature.Organism, amount::Int = 1)
+  function mutate(cfg::Config.ConfigData, org::Creature.Organism, percent::Float64 = 1.0)
     local i         ::Int
     local pIndex    ::Int
     local codeChange::Bool
@@ -50,7 +50,11 @@ module Mutator
     local res       ::Bool
     local cmd       ::Code.CodePart
     local realAmount::Int = 0
-
+    local amount    ::Int = Int(div(Float64(org.codeSize) * percent, 100.0))
+    #
+    # Amount of mutations shouldn't be less then 1
+    #
+    amount = amount < 1 ? 1 : amount
     for i = 1:amount
       pIndex     = org.codeSize < 1 ? 1 : Helper.getProbIndex(org.mutationProbabilities)
       codeChange = pIndex < 5
@@ -77,7 +81,7 @@ module Mutator
       end
     end
 
-    realAmount > 0
+    realAmount
   end
   #
   # Changes organism's color a little bit. We use GR library for
@@ -215,7 +219,7 @@ module Mutator
     true
   end
   #
-  # mutationsOnClone property mutation handler. It changes this
+  # mutationsOnClonePercent property mutation handler. It changes this
   # property randomly. 0 means disable property.
   # @param cfg Global configuration type
   # @param org Organism we are working with
@@ -223,7 +227,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onClone(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
-    org.mutationsOnClone = Helper.fastZRand(cfg.ORGANISM_MAX_MUTATIONS_ON_CLONE)
+    org.mutationsOnClonePercent = rand(Float64) * 100.0
     true
   end
   #
@@ -239,7 +243,7 @@ module Mutator
     true
   end
   #
-  # mutationAmount property mutation handler. It changes this
+  # mutationPercent property mutation handler. It changes this
   # property randomly. 0 means disable property.
   # @param cfg Global configuration type
   # @param org Organism we are working with
@@ -247,7 +251,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onAmount(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
-    org.mutationAmount = Helper.fastZRand(cfg.ORGANISM_MAX_MUTATION_AMOUNT)
+    org.mutationPercent = rand(Float64) * 100.0
     true
   end
   #

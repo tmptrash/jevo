@@ -75,10 +75,10 @@ module RpcApi
     mutationProbabilities::Array{Int, 1}
     #
     # @inheritable
-    # Amount of mutations, which will be applied to arganism after
+    # Percent from code size of mutations, which will be applied to arganism after
     # clonning.
     #
-    mutationsOnClone::Int
+    mutationsOnClonePercent::Float64
     #
     # @inheritable
     # Amount of iterations within organism's life loop, after that we
@@ -90,9 +90,10 @@ module RpcApi
     # @inheritable
     # Value, which will be used like amount of mutations per
     # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
-    # we want to disable mutations.
+    # we want to disable mutations. Percent means "percent from
+    # code size".
     #
-    mutationAmount::Int
+    mutationPercent::Float64
     #
     # Organism's energy. If it's zero, then organism is die.
     # It can't be more then ORGANISM_MAX_ENERGY configuration.

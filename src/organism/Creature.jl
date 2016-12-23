@@ -173,10 +173,10 @@ module Creature
     mutationProbabilities::Array{Int, 1}
     #
     # @inheritable
-    # Amount of mutations, which will be applied to arganism after
-    # clonning.
+    # Percent of mutations from code size, which will be applied to
+    # arganism after clonning.
     #
-    mutationsOnClone::Int
+    mutationsOnClonePercent::Float64
     #
     # @inheritable
     # Amount of iterations within organism's life loop, after that we
@@ -188,9 +188,10 @@ module Creature
     # @inheritable
     # Value, which will be used like amount of mutations per
     # MUTATE_AFTER_TIMES iterations. 0 is a possible value if
-    # we want to disable mutations.
+    # we want to disable mutations. Percent means "Percent from
+    # code size".
     #
-    mutationAmount::Int
+    mutationPercent::Float64
     #
     # Organism's energy. If it's zero, then organism is die.
     # It can't be more then ORGANISM_MAX_ENERGY configuration.
@@ -267,9 +268,9 @@ module Creature
       0,                                                                    # symbolId
       funcs,                                                                # funcs
       copy(cfg.ORGANISM_MUTATION_PROBABILITIES),                            # mutationProbabilities
-      cfg.ORGANISM_MUTATIONS_ON_CLONE,                                      # mutationsOnClone
+      cfg.ORGANISM_MUTATIONS_ON_CLONE_PERCENT,                              # mutationsOnClonePercent
       min(cfg.ORGANISM_MUTATION_PERIOD, cfg.ORGANISM_MAX_MUTATION_PERIOD),  # mutationPeriod
-      min(cfg.ORGANISM_MUTATION_AMOUNT, cfg.ORGANISM_MAX_MUTATION_AMOUNT),  # mutationAmount
+      min(cfg.ORGANISM_MUTATION_PERCENT, 100.0),                            # mutationPercent
       cfg.ORGANISM_START_ENERGY,                                            # energy
       cfg.ORGANISM_START_COLOR,                                             # color
       Dict{Int16, Int16}(),                                                 # mem
@@ -324,9 +325,9 @@ module Creature
       org.symbolId,                                                         # symbolId
       funcs,                                                                # funcs
       org.mutationProbabilities,                                            # mutationProbabilities
-      org.mutationsOnClone,                                                 # mutationsOnClone
+      org.mutationsOnClonePercent,                                                 # mutationsOnClonePercent
       org.mutationPeriod,                                                   # mutationPeriod
-      org.mutationAmount,                                                   # mutationAmount
+      org.mutationPercent,                                                  # mutationPercent
       org.energy,                                                           # energy
       org.color,                                                            # color
       copy(org.mem),                                                        # mem

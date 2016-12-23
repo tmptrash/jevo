@@ -103,13 +103,13 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     #
     # This is how we mutate organisms during their life.
     # Mutations occures according to organisms settings.
-    # If mutationPeriod or mutationAmount set to 0, it
+    # If mutationPeriod or mutationPercent set to 0, it
     # means that mutations during leaving are disabled.
     # Mutation will be automatically applied if organism
     # doesn't contain any code line. This line must be
     # last in organisms loop.
     #
-    if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationAmount) end
+    if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationPercent) end
     #
     # This is how organisms die if their age is bigger then some
     # predefined config value (ORGANISM_DIE_AFTER)
@@ -428,10 +428,12 @@ end
 # Mutates an organism according to his own amount of mutations.
 # @param man Instance of manager data type
 # @param task Task of organism
-# @param mutations Amount of mutations we need to apply
+# @param mutationPercents Percent of mutations from code size
 #
-function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask, mutations::Int)
-  if Mutator.mutate(man.cfg, task.organism, mutations)
+function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask, mutationPercents::Float64)
+  local mutations::Int = Mutator.mutate(man.cfg, task.organism, mutationPercents)
+
+  if mutations > 0
     #
     # Because we have changed current organism's code, we have to
     # update it's task. Otherwise, old, removed code will still be
@@ -474,7 +476,7 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
     organism.energy       -= energy
     crTask.organism.energy = energy
   end
-  if energy > 0 _mutate(man, crTask, crTask.organism.mutationsOnClone) end
+  if energy > 0 _mutate(man, crTask, crTask.organism.mutationsOnClonePercent) end
   if organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks)) end
   if crTask.organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === crTask.organism, man.tasks)) end
 

@@ -22,9 +22,9 @@ function _updateStat(stamp::Float64)
         string("\"Probabilities\"       : ", org.mutationProbabilities, ",\n"),
         string("\"Amount of functions\" : ", length(split(code, "function ")) - 2, ",\n"), # minus main function
         string("\"Functions calls\"     : ", length(split(code, "func_")) - 1, ",\n"),
-        string("\"Mutations on clone\"  : ", org.mutationsOnClone, ",\n"),
+        string("\"Mutations on clone\"  : ", org.mutationsOnClonePercent, ",\n"),
         string("\"Mutations period\"    : ", org.mutationPeriod, ",\n"),
-        string("\"Mutations amount\"    : ", org.mutationAmount, ",\n"),
+        string("\"Mutations amount\"    : ", org.mutationPercent, ",\n"),
         string("\"Energy\"              : ", org.energy, ",\n"),
         string("\"for operators\"       : ", length(split(code, "for i::Int8")) - 1, ",\n"),
         string("\"if operators\"        : ", length(split(code, "if var")) - 1, ",\n"),
