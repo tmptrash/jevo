@@ -176,16 +176,24 @@ end
 # @param tasks Array of tasks with organisms inside
 #
 function _removeMinOrganisms(man::ManagerTypes.ManagerData)
-  local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
+  local len::Int = length(man.tasks)
   local amount::Int = man.cfg.ORGANISM_REMOVE_AMOUNT
-  local len::Int = length(tasks)
-  local i::Int
-
   if len <= amount || len <= man.cfg.WORLD_MIN_ORGANISMS return false end
 
-  @inbounds sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
-  @inbounds for i = 1:amount _killOrganism(man, 1) end
-  @if_status man.status.rops += 1
+  local allEnergy::Array{Int, 1} = Int[]
+  local orgIndex::Int
+  local task::ManagerTypes.OrganismTask
+  local maxEnergy::Int = typemax(Int32)
+  local i::Int
+  #
+  # Removes organism from the pool by probability. As less energy
+  # they have, as higher probability to remove them.
+  #
+  @inbounds for task in man.tasks push!(allEnergy, maxEnergy - task.organism.energy) end
+  for i = 1:amount
+    orgIndex = Helper.getProbIndex(allEnergy)
+    if _killOrganism(man, orgIndex) splice!(allEnergy, orgIndex) end
+  end
 
   true
 end
@@ -310,6 +318,7 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   delete!(man.organisms, id)
   Manager.stopTask(tasks[i].task)
   splice!(tasks, i)
+  @if_status man.status.rops += 1
   msg(man, id, "die")
 
   true
