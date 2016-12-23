@@ -12,6 +12,10 @@ export eatLeft
 export eatRight
 export eatUp
 export eatDown
+export stepLeft
+export stepRight
+export stepUp
+export stepDown
 export toMem
 export fromMem
 export idLeft
@@ -53,7 +57,7 @@ function eatLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Cod
   # typemax(Int8). So we have to use Int16 for return value.
   #
   local var::Symbol = @randVar(org, pos, Int16)
-  if var === :nothing return Expr(:nothing) end
+  if var === :nothing return :(Creature.eatLeft(c, o, Int($(amount)))) end
 
   :($var = Int16(Creature.eatLeft(c, o, Int($(amount)))))
 end
@@ -75,7 +79,7 @@ function eatRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Co
   # typemax(Int8). So we have to use Int16 for return value.
   #
   local var::Symbol = @randVar(org, pos, Int16)
-  if var === :nothing return Expr(:nothing) end
+  if var === :nothing return :(Creature.eatRight(c, o, Int($(amount)))) end
 
   :($var = Int16(Creature.eatRight(c, o, Int($(amount)))))
 end
@@ -97,7 +101,7 @@ function eatUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodeP
   # typemax(Int8). So we have to use Int16 for return value.
   #
   local var::Symbol = @randVar(org, pos, Int16)
-  if var === :nothing return Expr(:nothing) end
+  if var === :nothing return :(Creature.eatUp(c, o, Int($(amount)))) end
 
   :($var = Int16(Creature.eatUp(c, o, Int($(amount)))))
 end
@@ -119,7 +123,7 @@ function eatDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Cod
   # typemax(Int8). So we have to use Int16 for return value.
   #
   local var::Symbol = @randVar(org, pos, Int16)
-  if var === :nothing return Expr(:nothing) end
+  if var === :nothing return :(Creature.eatDown(c, o, Int($(amount)))) end
 
   :($var = Int16(Creature.eatDown(c, o, Int($(amount)))))
 end
@@ -134,7 +138,7 @@ end
 #
 function stepLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local var::Symbol = @randVar(org, pos, Bool)
-  if var === :nothing return Expr(:nothing) end
+  if var === :nothing return :(Creature.stepLeft(o)) end
   :($var = Creature.stepLeft(o))
 end
 #
@@ -148,7 +152,7 @@ end
 #
 function stepRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local var::Symbol = @randVar(org, pos, Bool)
-  if var === :nothing return Expr(:nothing) end
+  if var === :nothing return :(Creature.stepRight(o)) end
   :($var = Creature.stepRight(o))
 end
 #
@@ -162,7 +166,7 @@ end
 #
 function stepUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local var::Symbol = @randVar(org, pos, Bool)
-  if var === :nothing return Expr(:nothing) end
+  if var === :nothing return :(Creature.stepUp(o)) end
   :($var = Creature.stepUp(o))
 end
 #
@@ -176,7 +180,7 @@ end
 #
 function stepDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local var::Symbol = @randVar(org, pos, Bool)
-  if var === :nothing return Expr(:nothing) end
+  if var === :nothing return :(Creature.stepDown(o)) end
   :($var = Creature.stepDown(o))
 end
 #
