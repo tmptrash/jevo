@@ -1,5 +1,33 @@
 #
-# TODO: description
+# This module is an entry point of jevo application. jevo is a
+# Julia(http://julialang.org/) language based, digital organisms
+# evolution simulator.It's used for study the evolutionary biology
+# of self-replicating and evolving computer programs (digital
+# organisms (https://en.wikipedia.org/wiki/Digital_organism)).
+# This project similar to Avida(https://en.wikipedia.org/wiki/Avida),
+# but works with more abstract language (Julia) instead of assembler.
+# More details on blog(https://jevosite.wordpress.com/) and youtube
+# (https://www.youtube.com/playlist?list=PL1NiKjXMaBimPuybPIXkVuO1MYy53XcdW)
+# channel.
+#
+# jevo is also a client\server application. When you run one Manager
+# (current file) we are talking about one Manager's instance. It's
+# server and client at the same time, because other instances or remote
+# terminals\visualizers applications may be connected to it. Every
+# Manager manages virtual 2D world, runs virtual processor, parallel
+# organisms codes and so on.
+#
+# You may run the manager in different ways. The simplies way is:
+#   >julia src\AppSatellite.jl src\AppManager.jl
+# More useful way will be the following:
+#   >julia --color=yes src\AppSatellite.jl src\AppManager.jl quiet
+# It colors terminal output and reduces amount of default messages.
+# Also, jevo supports many command line arguments like: recover,
+# about, version and so on... You may use them at the end of command
+# line. For example, to get current jevo version you have to type:
+#   >julia src\AppManager.jl version
+#
+#
 # TODO: describe "recover" command line argument
 #
 include("global/ImportFolders.jl")
@@ -25,15 +53,15 @@ const ARG_VERSION = "version"
 # runs in a common mode.
 #
 function main()
+  local args::Dict{String, String} = CommandLine.create()
+  local exitCode::Int
+  local command::Pair{String, Function}
   local commands::Dict{String, Function} = Dict{String, Function}(
     ARG_ABOUT   => _onAbout,
     ARG_INFO    => _onAbout,
     ARG_VERSION => _onVersion,
     ARG_RECOVER => _onRecover
   )
-  local args::Dict{String, String} = CommandLine.create()
-  local exitCode::Int
-  local command::Pair{String, Function}
 
   for command in commands
     if CommandLine.has(args, command[1])
