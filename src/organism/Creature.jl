@@ -224,6 +224,13 @@ module Creature
     #
     cloneEnergyPercent::Int
     #
+    # Percent (0..1), which affects how much energy will be decreased every
+    # time during organism energy update. Every configured period of time
+    # system grabs energy from organisms using formula: org.energy -= (
+    # ORGANISM_ENERGY_DECREASE_VALUE + org.codeSize * energyDecreasePercent)
+    #
+    energyDecreasePercent::Float64
+    #
     # Amount obtained mutations, which since organism borning
     #
     mutationsFromStart::Int
@@ -277,6 +284,7 @@ module Creature
       pos,                                                                  # pos
       0,                                                                    # age
       50,                                                                   # cloneEnergyPercent
+      cfg.ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY,                         # energyDecreasePercent
       0,                                                                    # mutationsFromStart
       Event.create()                                                        # observer
     )
@@ -325,7 +333,7 @@ module Creature
       org.symbolId,                                                         # symbolId
       funcs,                                                                # funcs
       org.mutationProbabilities,                                            # mutationProbabilities
-      org.mutationsOnClonePercent,                                                 # mutationsOnClonePercent
+      org.mutationsOnClonePercent,                                          # mutationsOnClonePercent
       org.mutationPeriod,                                                   # mutationPeriod
       org.mutationPercent,                                                  # mutationPercent
       org.energy,                                                           # energy
@@ -334,6 +342,7 @@ module Creature
       pos,                                                                  # pos
       0,                                                                    # age
       50,                                                                   # cloneEnergyPercent
+      org.energyDecreasePercent,                                            # energyDecreasePercent
       0,                                                                    # mutationsFromStart
       Event.create()                                                        # observer
     )

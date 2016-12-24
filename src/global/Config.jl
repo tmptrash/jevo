@@ -327,58 +327,58 @@ module Config
   #
   function create(empty::Bool = false)
     ConfigData(
-      empty ? [] : [50,100,1,0,1,1,1,1,1], # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount,probs,cloneEnergy)
-      2.0,                                 # ORGANISM_MUTATIONS_ON_CLONE_PERCENT
-      500,                                 # ORGANISM_MUTATION_PERIOD
-      1000,                                # ORGANISM_MAX_MUTATION_PERIOD
-      2.0,                                 # ORGANISM_MUTATION_PERCENT
-      100,                                 # ORGANISM_START_AMOUNT
-      10000,                               # ORGANISM_START_ENERGY
-      Int(typemax(UInt32)),                # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)
-      200,                                 # ORGANISM_ENERGY_DECREASE_PERIOD
-      1,                                   # ORGANISM_ENERGY_DECREASE_VALUE
-      0.2,                                 # ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY
-      500,                                 # ORGANISM_REMOVE_AFTER_TIMES
-      5,                                   # ORGANISM_REMOVE_AMOUNT
-      10,                                  # ORGANISM_CLONE_AFTER_TIMES
-      100,                                 # ORGANISM_START_COLOR
-      100,                                 # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
-      0,                                   # ORGANISM_EVALS
-      6000 * 10,                           # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
-      50,                                  # ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS
-      1000,                                # ORGANISM_ENERGY_DECREASE_ON_ERROR
-      0,                                   # ORGANISM_ERRORS
-      3,                                   # CODE_MAX_FUNC_PARAMS
-      1900,                                # WORLD_WIDTH
-      940,                                 # WORLD_HEIGHT
-      true,                                # WORLD_CYCLICAL
-      0,                                   # WORLD_FRAME_DELAY
-      0,                                   # WORLD_IPS
-      50000,                               # WORLD_MAX_ORGANISMS
-      0,                                   # WORLD_MIN_ORGANISMS
-      1000,                                # WORLD_START_ENERGY_BLOCKS
-      UInt32(0x0001F4),                    # WORLD_START_ENERGY_AMOUNT
-      0.3,                                 # WORLD_MIN_ENERGY_PERCENT
-      500,                                 # WORLD_MIN_ENERGY_CHECK_PERIOD
-      1,                                   # WORLD_SCALE
-      240.0,                               # BACKUP_PERIOD
-      10,                                  # BACKUP_AMOUNT
-      650,                                 # STAT_WIDTH
-      500,                                 # STAT_HEIGHT
-      5,                                   # STAT_FRAME_DELAY
-      0.01,                                # CONNECTION_TASKS_CHECK_PERIOD
-      20,                                  # CONNECTION_STEP_ENERGY_PERCENT
-      2010,                                # CONNECTION_SERVER_PORT (current server port)
-      2011,                                # CONNECTION_FAST_SERVER_PORT (current server "fast" mode port)
-      ip"127.0.0.1",                       # CONNECTION_SERVER_IP
-      0,                                   # CONNECTION_LEFT_SERVER_PORT
-      ip"127.0.0.1",                       # CONNECTION_LEFT_SERVER_IP
-      0,                                   # CONNECTION_RIGHT_SERVER_PORT
-      ip"127.0.0.1",                       # CONNECTION_RIGHT_SERVER_IP
-      0,                                   # CONNECTION_UP_SERVER_PORT
-      ip"127.0.0.1",                       # CONNECTION_UP_SERVER_IP
-      0,                                   # CONNECTION_DOWN_SERVER_PORT
-      ip"127.0.0.1"                        # CONNECTION_DOWN_SERVER_IP
+      empty ? [] : [50,100,1,0,1,1,1,1,1,1],   # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount,probs,cloneEnergy)
+      2.0,                                     # ORGANISM_MUTATIONS_ON_CLONE_PERCENT
+      500,                                     # ORGANISM_MUTATION_PERIOD
+      1000,                                    # ORGANISM_MAX_MUTATION_PERIOD
+      2.0,                                     # ORGANISM_MUTATION_PERCENT
+      100,                                     # ORGANISM_START_AMOUNT
+      10000,                                   # ORGANISM_START_ENERGY
+      Int(typemax(UInt32)),                    # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)
+      200,                                     # ORGANISM_ENERGY_DECREASE_PERIOD
+      1,                                       # ORGANISM_ENERGY_DECREASE_VALUE
+      0.2,                                     # ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY
+      500,                                     # ORGANISM_REMOVE_AFTER_TIMES
+      5,                                       # ORGANISM_REMOVE_AMOUNT
+      10,                                      # ORGANISM_CLONE_AFTER_TIMES
+      100,                                     # ORGANISM_START_COLOR
+      100,                                     # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
+      0,                                       # ORGANISM_EVALS
+      6000 * 10,                               # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
+      50,                                      # ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS
+      1000,                                    # ORGANISM_ENERGY_DECREASE_ON_ERROR
+      0,                                       # ORGANISM_ERRORS
+      3,                                       # CODE_MAX_FUNC_PARAMS
+      1900,                                    # WORLD_WIDTH
+      940,                                     # WORLD_HEIGHT
+      true,                                    # WORLD_CYCLICAL
+      0,                                       # WORLD_FRAME_DELAY
+      0,                                       # WORLD_IPS
+      50000,                                   # WORLD_MAX_ORGANISMS
+      0,                                       # WORLD_MIN_ORGANISMS
+      1000,                                    # WORLD_START_ENERGY_BLOCKS
+      UInt32(0x0001F4),                        # WORLD_START_ENERGY_AMOUNT
+      0.3,                                     # WORLD_MIN_ENERGY_PERCENT
+      500,                                     # WORLD_MIN_ENERGY_CHECK_PERIOD
+      1,                                       # WORLD_SCALE
+      240.0,                                   # BACKUP_PERIOD
+      10,                                      # BACKUP_AMOUNT
+      650,                                     # STAT_WIDTH
+      500,                                     # STAT_HEIGHT
+      5,                                       # STAT_FRAME_DELAY
+      0.01,                                    # CONNECTION_TASKS_CHECK_PERIOD
+      20,                                      # CONNECTION_STEP_ENERGY_PERCENT
+      2010,                                    # CONNECTION_SERVER_PORT (current server port)
+      2011,                                    # CONNECTION_FAST_SERVER_PORT (current server "fast" mode port)
+      ip"127.0.0.1",                           # CONNECTION_SERVER_IP
+      0,                                       # CONNECTION_LEFT_SERVER_PORT
+      ip"127.0.0.1",                           # CONNECTION_LEFT_SERVER_IP
+      0,                                       # CONNECTION_RIGHT_SERVER_PORT
+      ip"127.0.0.1",                           # CONNECTION_RIGHT_SERVER_IP
+      0,                                       # CONNECTION_UP_SERVER_PORT
+      ip"127.0.0.1",                           # CONNECTION_UP_SERVER_IP
+      0,                                       # CONNECTION_DOWN_SERVER_PORT
+      ip"127.0.0.1"                            # CONNECTION_DOWN_SERVER_IP
     )
   end
   #

@@ -205,7 +205,6 @@ end
 #
 function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   local decVal::Int = man.cfg.ORGANISM_ENERGY_DECREASE_VALUE
-  local decPercent::Float64 = man.cfg.ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   local org::Creature.Organism
   local i::Int = length(tasks)
@@ -226,10 +225,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     # Energy shouldn't be less then 1
     #
     if !dontKill
-      #
-      # If population reaches minimum amount, we should stop killing it
-      #
-      org.energy -= (decVal + round(Int, org.codeSize * decPercent))
+      org.energy -= (decVal + round(Int, org.codeSize * org.energyDecreasePercent))
       if org.energy < 1
         _killOrganism(man, i)
         dontKill = (length(tasks) <= minOrgs)
