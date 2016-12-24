@@ -344,12 +344,6 @@ module Creature
   #
   function born(org::Organism, cfg::Config.ConfigData, task::Task)
     #
-    # This variable is used inside for loops in organism's code
-    # So, don't remove it
-    # TODO: check if this variable is used inside the org.codeFn()!!!
-    #
-    local i::Int8
-    #
     # This is main loop, where organism lives. It's body will be
     # changed soon by mutations.
     #
