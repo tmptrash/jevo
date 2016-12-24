@@ -366,8 +366,10 @@ module Creature
         # Organisms with errors in a code should be less successful
         #
         if org.energy > cfg.ORGANISM_ENERGY_DECREASE_ON_ERROR org.energy -= cfg.ORGANISM_ENERGY_DECREASE_ON_ERROR end
-        # TODO: what we have to do with code errors?
-        # TODO: we have to calculate it for statistics
+        #
+        # Amount of errors of current population
+        #
+        cfg.ORGANISM_ERRORS += 1
       end
     end
   end

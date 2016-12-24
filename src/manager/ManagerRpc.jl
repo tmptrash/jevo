@@ -71,8 +71,10 @@ function createOrganisms(man::ManagerTypes.ManagerData)
   local i::Int
 
   Helper.info("Creating organisms...")
-  man.totalOrganisms = 0
-  man.organismId     = UInt(1)
+  man.totalOrganisms      = 0
+  # TODO: for system with many managers id should be unique between them
+  man.organismId          = UInt(1)
+  man.cfg.ORGANISM_ERRORS = 0
   for i = 1:man.cfg.ORGANISM_START_AMOUNT createOrganism(man) end
 
   nothing
