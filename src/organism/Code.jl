@@ -214,7 +214,7 @@ module Code
   function loop(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
     local v::Symbol = @randVar(org, pos, Int8)
     if v === :nothing return Expr(:nothing) end
-    local loopEx    = :(for i::Int8 = 1:div($v, $(Int8(_LOOP_STEPS_DIVIDER)) end)
+    local loopEx    = :(for i::Int8 = 1:div($v, $(Int8(_LOOP_STEPS_DIVIDER))) end)
     #
     # This line fixes Julia small issue with additional comment line,
     # which is added during new loop creation. We have to remove
