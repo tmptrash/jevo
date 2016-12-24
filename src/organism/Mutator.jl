@@ -99,7 +99,7 @@ module Mutator
 
     if org.mutationsFromStart > cfg.ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS && colIndex >= org.mutationsFromStart - amount && colIndex <= org.mutationsFromStart
       org.color += 1
-      if org.color > Dots.MAX_ORG_COLOR org.color = 1 end
+      if org.color > Dots.INDEX_MAX_ORG_COLOR org.color = 1 end
     end
   end
   #

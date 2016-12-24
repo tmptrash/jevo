@@ -13,6 +13,7 @@ module Terminal
   import Connection
   import Creature
 
+  # TODO: check it this module contains all functions from ManagerRpc
   export init
   export termGetRegion
   export termCreateOrganisms
@@ -30,6 +31,7 @@ module Terminal
   export termBackup
   export termGetStatistics
   export termGetBest
+  export termMarkOrganism
   #
   # Contains connection object for shorthands
   #
@@ -160,6 +162,13 @@ module Terminal
   #
   function termGetBest(amount::Int)
     Client.request(_termData.con, RpcApi.RPC_GET_BEST, amount)
+  end
+  #
+  # Marks specified organism by color. See
+  # ManagerRpc.markOrganism for details
+  #
+  function termMarkOrganism(orgId::UInt32, colorIndex::Int)
+    Client.request(_termData.con, RpcApi.RPC_MARK_ORGANISM, orgId, colorIndex)
   end
   #
   # This object is created only for passing connection

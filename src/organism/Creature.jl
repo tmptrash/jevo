@@ -200,7 +200,7 @@ module Creature
     #
     # @inheritable
     # Color index of organism. Similar colors means relative organisms.
-    # Example: 1, 345, 1200. Should be less then Dots.MAX_ORG_COLOR
+    # Example: 1, 345, 1200. Should be less then Dots.INDEX_MAX_ORG_COLOR
     #
     color::Int
     #
@@ -697,7 +697,7 @@ module Creature
   # @param amount   Amount of grabbed energy
   # @param amount   Amount of energy to grab
   # @return {Int} Amount of eated energy
-  #
+  # TODO: rename it to eatEnergy and rename an event to eatXXX
   function _grabEnergy(cfg::Config.ConfigData, org::Organism, dir::DIRECTION, amount::Int)
     #
     # This map will be used for communication between this organism and

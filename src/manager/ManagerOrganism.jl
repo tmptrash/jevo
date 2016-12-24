@@ -698,7 +698,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     retObj.ret = amount > 0 ? World.grabEnergy(man.world, newPos, UInt32(amount)) : 0
   end
 
-  retObj.ret
+  retObj.ret = Int(retObj.ret)
 end
 #
 # Checks if specified position ("pos") has no energy and we may

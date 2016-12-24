@@ -8,8 +8,8 @@
 # @author DeadbraiN
 #
 module Dots
-  export MAX_COLOR
-  export MAX_ORG_COLOR
+  export INDEX_MAX_COLOR
+  export INDEX_MAX_ORG_COLOR
 
   export COLOR_EMPTY
   export INDEX_EMPTY
@@ -44,8 +44,8 @@ module Dots
   #
   # Maximum index of color we may use
   #
-  const MAX_ORG_COLOR = 1200
-  const MAX_COLOR     = 1256
+  const INDEX_MAX_ORG_COLOR = 1200
+  const INDEX_MAX_COLOR     = 1256
   #
   # Color and index of empty space
   #

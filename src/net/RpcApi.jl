@@ -29,6 +29,7 @@ module RpcApi
   export RPC_SET_UP_WORLD
   export RPC_SET_DOWN_WORLD
   export RPC_SET_WORLD_STREAMING
+  export RPC_MARK_ORGANISM
 
   export RPC_ORG_STEP_LEFT
   export RPC_ORG_STEP_RIGHT
@@ -197,21 +198,22 @@ module RpcApi
   const RPC_SET_UP_WORLD        = 19
   const RPC_SET_DOWN_WORLD      = 20
   const RPC_SET_WORLD_STREAMING = 21
+  const RPC_MARK_ORGANISM       = 22
   #
   # These IDs are for inter-instances communication. This is
   # something like internal protocol between Managers/servers.
-  #
-  const RPC_ORG_STEP_LEFT       = 22
-  const RPC_ORG_STEP_RIGHT      = 23
-  const RPC_ORG_STEP_UP         = 24
-  const RPC_ORG_STEP_DOWN       = 25
+
+  const RPC_ORG_STEP_LEFT       = 23
+  const RPC_ORG_STEP_RIGHT      = 24
+  const RPC_ORG_STEP_UP         = 25
+  const RPC_ORG_STEP_DOWN       = 26
   #
   # Means that step from one instance to another has finished
   #
-  const RPC_ORG_STEP_OK         = 26
-  const RPC_ORG_STEP_FAIL       = 27
+  const RPC_ORG_STEP_OK         = 27
+  const RPC_ORG_STEP_FAIL       = 28
   #
   # These id's for request from server to client
   #
-  const RPC_WORLD_CHANGE        = 28
+  const RPC_WORLD_CHANGE        = 29
 end

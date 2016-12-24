@@ -149,12 +149,12 @@ end
 # @rpc
 # Returns an organism by it's unique id
 # @param man Manager data type
-# @param organismId
+# @param orgId Unique organism's id
 # @return Creature.Organism or false if no organism with this id
 #
-function getOrganism(man::ManagerTypes.ManagerData, organismId::UInt)
-  if !haskey(man.organisms, organismId) return false end
-  _createSimpleOrganism(organismId, man.organisms[organismId])
+function getOrganism(man::ManagerTypes.ManagerData, orgId::UInt)
+  if !haskey(man.organisms, orgId) return false end
+  _createSimpleOrganism(orgId, man.organisms[orgId])
 end
 #
 # @rpc
@@ -321,8 +321,6 @@ end
 # will be run. If at least one client is waiting(state === STREAMING_INIT)
 # then server should wait (skip running organisms).
 # @param man Manager data type
-# @param sock Client's socket
-# @param state Streaming state (on,off,init)
 # TODO: rewrite this description
 function setStreaming(man::ManagerTypes.ManagerData)
   local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
@@ -338,6 +336,32 @@ function setStreaming(man::ManagerTypes.ManagerData)
 
   man.cons.streamInit = true
   getRegion(man)
+end
+#
+# @rpc
+# Changes organism color to specified. This is how we can mark
+# organism visually to have a possibility to find it on a screen
+# and do some observations. For returning original color back,
+# you have to call this function again with previous color index.
+# See return string value for previous color index
+# @param man Manager data type
+# @return {String} Message of color change operation. Is everything
+# is okay, then message with original organism color will be returned
+#
+function markOrganism(man::ManagerTypes.ManagerData, orgId::UInt32, colorIndex::Int)
+  if !haskey(man.organisms, orgId) return "Invalid organism id: 0x$(hex(orgId))" end
+  local org::Creature.Organism = man.organisms[orgId]
+  local prevColorIndex::Int = org.color
+  #
+  # Organism should be alive and color index should be in valid range
+  #
+  if org.energy < 1 return "Organism 0x$(hex(orgId)) has died" end
+  if colorIndex < Dots.INDEX_EMPTY || colorIndex > Dots.INDEX_MAX_ORG_COLOR
+    return "Invalid color $colorIndex. Should be in range: $(Dots.INDEX_EMPTY):$(Dots.INDEX_MAX_ORG_COLOR)"
+  end
+  org.color = colorIndex
+
+  "Organism 0x$(hex(orgId)) marked by $colorIndex color. Previous color was $prevColorIndex"
 end
 
 #
@@ -630,5 +654,6 @@ const _rpcApi = Function[
   setRightWorld,
   setUpWorld,
   setDownWorld,
-  setStreaming
+  setStreaming,
+  markOrganism
 ]

@@ -130,9 +130,9 @@ module OpenGlWindow
     #
     # We use GR library. It supports only 1256 colors. We have to check it
     #
-    if color > UInt32(Dots.MAX_COLOR)
+    if color > UInt32(Dots.INDEX_MAX_COLOR)
       Helper.warn(string("Unsupported color index ", color))
-      color = UInt32(Dots.MAX_COLOR)
+      color = UInt32(Dots.INDEX_MAX_COLOR)
     end
     if win.scale > 1
       x = (x - 1) * win.scale + 1
