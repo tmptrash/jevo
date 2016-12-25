@@ -57,7 +57,7 @@ module Config
     ORGANISM_MUTATION_PROBABILITIES::Array{Int, 1}
     #
     # Percent of mutations from code size, which will be applied to
-    # organism after clonning. Should be less then 100
+    # organism after clonning. Should be <= 100
     #
     ORGANISM_MUTATIONS_ON_CLONE_PERCENT::Float64
     #

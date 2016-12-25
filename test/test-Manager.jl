@@ -5,6 +5,8 @@ module TestManager
   import Creature
   import Helper
   import ManagerTypes
+  import Mutator
+  import Code
   #
   # Just a helper type for Manager tests
   #
@@ -20,22 +22,21 @@ module TestManager
   # Manager in separate task and creates default configuration.
   #
   function _create(positions::Vector{Helper.Point}, configs::Dict{Symbol, Any} = Dict{Symbol, Any}())
-    local cfg::Config.ConfigData          = Config.create()
-    cfg.ORGANISM_MUTATIONS_ON_CLONE_PERCENT       = 0
-    cfg.ORGANISM_MUTATION_PERIOD          = 0
-    cfg.ORGANISM_START_AMOUNT             = 0
-    cfg.ORGANISM_START_ENERGY             = 100
-    cfg.ORGANISM_ENERGY_DECREASE_PERIOD   = 2
-    cfg.ORGANISM_ENERGY_DECREASE_VALUE    = 1
-    cfg.ORGANISM_REMOVE_AFTER_TIMES       = 0
-    cfg.ORGANISM_CLONE_AFTER_TIMES        = 0
-    cfg.WORLD_WIDTH                       = 10
-    cfg.WORLD_HEIGHT                      = 10
-    cfg.WORLD_MIN_ORGANISMS               = 0
-    cfg.WORLD_START_ENERGY_BLOCKS         = 0
-    cfg.WORLD_MIN_ENERGY_PERCENT          = 0.1
-    cfg.WORLD_MIN_ENERGY_CHECK_PERIOD     = 10000
-    cfg.ORGANISM_EVALS                    = 100000
+    local cfg::Config.ConfigData            = Config.create()
+    cfg.ORGANISM_MUTATION_PERIOD            = 0
+    cfg.ORGANISM_START_AMOUNT               = 0
+    cfg.ORGANISM_START_ENERGY               = 100
+    cfg.ORGANISM_ENERGY_DECREASE_PERIOD     = 2
+    cfg.ORGANISM_ENERGY_DECREASE_VALUE      = 1
+    cfg.ORGANISM_REMOVE_AFTER_TIMES         = 0
+    cfg.ORGANISM_CLONE_AFTER_TIMES          = 0
+    cfg.WORLD_WIDTH                         = 10
+    cfg.WORLD_HEIGHT                        = 10
+    cfg.WORLD_MIN_ORGANISMS                 = 0
+    cfg.WORLD_START_ENERGY_BLOCKS           = 0
+    cfg.WORLD_MIN_ENERGY_PERCENT            = 0.1
+    cfg.WORLD_MIN_ENERGY_CHECK_PERIOD       = 10000
+    cfg.ORGANISM_EVALS                      = 100000
     #
     # Config update
     #
@@ -66,13 +67,15 @@ module TestManager
     Manager.destroy(d.man)
   end
   facts("Checking if mutations mechanism works with specified amount") do
-    local d = _create([Helper.Point(1,1)], Dict{Symbol, Any}(:ORGANISM_MUTATION_PERIOD=>2, :ORGANISM_MUTATION_AMOUNT=>3))
+    local d = _create([Helper.Point(1,1)], Dict{Symbol, Any}(:ORGANISM_MUTATION_PERIOD=>2, :ORGANISM_MUTATION_PERCENT=>100.0))
     local mutations = d.man.status.mps
 
+    Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,1), Code.CodePart(Code.var, false))
+    Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,2), Code.CodePart(Code.var, false))
     consume(d.task)
     @fact d.man.status.mps - mutations --> 0
     consume(d.task)
-    @fact d.man.status.mps - mutations --> 3
+    @fact d.man.status.mps - mutations --> 2
 
     Manager.destroy(d.man)
   end
@@ -154,9 +157,12 @@ module TestManager
     Manager.destroy(d.man)
   end
   facts("Checking organisms mutations on clone") do
-    local d         = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:ORGANISM_CLONE_AFTER_TIMES=>2, :ORGANISM_MUTATIONS_ON_CLONE_PERCENT=>3))
+    local d         = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:ORGANISM_CLONE_AFTER_TIMES=>2, :ORGANISM_MUTATIONS_ON_CLONE_PERCENT=>100.0))
     local orgAmount = length(d.man.organisms)
     local mutations = d.man.status.mps
+
+    Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,1), Code.CodePart(Code.var, false))
+    Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,2), Code.CodePart(Code.var, false))
 
     @fact length(d.man.organisms)             --> 1
     consume(d.task)
@@ -164,12 +170,13 @@ module TestManager
     @fact d.man.status.mps - mutations        --> 0
     consume(d.task)
     @fact length(d.man.organisms) - orgAmount --> 1
-    @fact length(d.man.positions) - orgAmount --> 1
-    @fact d.man.status.mps - mutations        --> 3
+    @fact d.man.status.mps - mutations        --> 2
     consume(d.task)
     @fact length(d.man.organisms) - orgAmount --> 1
-    @fact length(d.man.positions) - orgAmount --> 1
-    @fact d.man.status.mps - mutations        --> 3
+    @fact d.man.status.mps - mutations        --> 2
+    consume(d.task)
+    @fact length(d.man.organisms) - orgAmount --> 2
+    @fact d.man.status.mps - mutations        --> 4
 
     Manager.destroy(d.man)
   end

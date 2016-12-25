@@ -81,7 +81,7 @@ module Mutator
       end
     end
 
-    realAmount
+    amount
   end
   #
   # Changes organism's color a little bit. We use GR library for
