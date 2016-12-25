@@ -166,7 +166,7 @@ module Creature
     funcs::Array{Func, 1}
     #
     # @inheritable
-    # Mutations probability. Add, change, delete. e.g.: [1,10,2]
+    # Mutations probability. Add, change, delete. e.g.: [1,10,2,...]
     # means, that "add" mutation will be 10 times rare then "change"
     # and 2 times rare then "delete" mutations.
     #
@@ -574,6 +574,34 @@ module Creature
   #
   function codeSizeDown(org::Organism) _getIntProperty(org, down, :codeSize) end
   #
+  # @oapi
+  # Obtains clone energy percent of organism on the left. If there is not organism on
+  # the left, 0.0 will be obtained.
+  # @param org Current organism
+  #
+  function cloneEnergyPercentLeft(org::Organism) _getFloatProperty(org, left, :cloneEnergyPercent) end
+  #
+  # @oapi
+  # Obtains clone energy percent of organism on the right. If there is not organism on
+  # the left, 0.0 will be obtained.
+  # @param org Current organism
+  #
+  function cloneEnergyPercentRight(org::Organism) _getFloatProperty(org, right, :cloneEnergyPercent) end
+  #
+  # @oapi
+  # Obtains clone energy percent of organism on the up. If there is not organism on
+  # the left, 0.0 will be obtained.
+  # @param org Current organism
+  #
+  function cloneEnergyPercentUp(org::Organism) _getFloatProperty(org, up, :cloneEnergyPercent) end
+  #
+  # @oapi
+  # Obtains clone energy percent of organism on the bottom. If there is not organism on
+  # the left, 0.0 will be obtained.
+  # @param org Current organism
+  #
+  function cloneEnergyPercentDown(org::Organism) _getFloatProperty(org, down, :cloneEnergyPercent) end
+  #
   # Returns some Int value by specified organism property.
   # @param org Organism with properties
   # @param dir Direction of searching (left, right,...)
@@ -581,7 +609,18 @@ module Creature
   # @return {Int|0} 0 if something wrong or property is zero
   #
   function _getIntProperty(org::Creature.Organism, dir::DIRECTION, propSymbol::Symbol)
-    local ret = _getProperty(org, dir, propSymbol)
+    local ret::Int = _getProperty(org, dir, propSymbol)
+    ret === nothing ? 0 : ret
+  end
+  #
+  # Returns some Float64 value by specified organism property.
+  # @param org Organism with properties
+  # @param dir Direction of searching (left, right,...)
+  # @param propSymbol Symbol of needed property
+  # @return {Float64|0.0} 0.0 if something wrong or property is zero
+  #
+  function _getFloatProperty(org::Creature.Organism, dir::DIRECTION, propSymbol::Symbol)
+    local ret::Float64 = _getProperty(org, dir, propSymbol)
     ret === nothing ? 0 : ret
   end
   #

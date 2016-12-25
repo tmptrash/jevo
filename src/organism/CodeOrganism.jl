@@ -455,3 +455,59 @@ function codeSizeDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helpe
   if var === :nothing return Expr(:nothing) end
   :($var=Int16(Creature.codeSizeDown(o)))
 end
+#
+# @cmd
+# @line
+# Obtains clone energy percent of organism on the left
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function cloneEnergyPercentLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Float64)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Creature.cloneEnergyPercentLeft(o))
+end
+#
+# @cmd
+# @line
+# Obtains clone energy percent of organism on the right
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function cloneEnergyPercentRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Float64)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Creature.cloneEnergyPercentRight(o))
+end
+#
+# @cmd
+# @line
+# Obtains clone energy percent of organism on the above
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function cloneEnergyPercentUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Float64)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Creature.cloneEnergyPercentUp(o))
+end
+#
+# @cmd
+# @line
+# Obtains clone energy percent of organism on the bottom
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function cloneEnergyPercentDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Float64)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Creature.cloneEnergyPercentDown(o))
+end

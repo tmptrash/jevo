@@ -332,42 +332,44 @@ module Code
     #
     # Code
     #
-    CodePart(var,          false), CodePart(fn,           true),
-    CodePart(fnCall,       false), CodePart(condition,    true),
-    CodePart(loop,         true ),
+    CodePart(var,                     false), CodePart(fn,                      true),
+    CodePart(fnCall,                  false), CodePart(condition,               true),
+    CodePart(loop,                    true ),
     #
     # CodeMath
     #
-    CodePart(plus,         false), CodePart(minus,        false),
-    CodePart(multiply,     false), CodePart(divide,       false),
-    CodePart(not,          false), CodePart(and,          false),
-    CodePart(or,           false), CodePart(xor,          false),
-    CodePart(rshift,       false), CodePart(lshift,       false),
-    CodePart(reminder,     false), CodePart(toString,     false),
-    CodePart(toBool,       false), CodePart(toInt,        false),
-    CodePart(toInt8,       false), CodePart(toInt16,      false),
-    CodePart(toFloat64,    false),
-    CodePart(sqrt,         false), CodePart(log,          false),
-    CodePart(sin,          false), CodePart(cos,          false),
-    CodePart(tan,          false), CodePart(cot,          false),
-    CodePart(sec,          false), CodePart(csc,          false),
-    CodePart(pi,           false),
+    CodePart(plus,                    false), CodePart(minus,                   false),
+    CodePart(multiply,                false), CodePart(divide,                  false),
+    CodePart(not,                     false), CodePart(and,                     false),
+    CodePart(or,                      false), CodePart(xor,                     false),
+    CodePart(rshift,                  false), CodePart(lshift,                  false),
+    CodePart(reminder,                false), CodePart(toString,                false),
+    CodePart(toBool,                  false), CodePart(toInt,                   false),
+    CodePart(toInt8,                  false), CodePart(toInt16,                 false),
+    CodePart(toFloat64,               false),
+    CodePart(sqrt,                    false), CodePart(log,                     false),
+    CodePart(sin,                     false), CodePart(cos,                     false),
+    CodePart(tan,                     false), CodePart(cot,                     false),
+    CodePart(sec,                     false), CodePart(csc,                     false),
+    CodePart(pi,                      false),
     #
     # CodeOrganism
     #
-    CodePart(lookAt,       false), CodePart(eatLeft,      false),
-    CodePart(eatRight,     false), CodePart(eatUp,        false),
-    CodePart(eatDown,      false), CodePart(stepLeft,     false),
-    CodePart(stepRight,    false), CodePart(stepUp,       false),
-    CodePart(stepDown,     false), CodePart(toMem,        false),
-    CodePart(fromMem,      false), CodePart(idLeft,       false),
-    CodePart(idRight,      false), CodePart(idUp,         false),
-    CodePart(idDown,       false), CodePart(myColor,      false),
-    CodePart(myX,          false), CodePart(myY,          false),
-    CodePart(energyLeft,   false), CodePart(energyRight,  false),
-    CodePart(energyUp,     false), CodePart(energyDown,   false),
-    CodePart(codeSizeLeft, false), CodePart(codeSizeRight,false),
-    CodePart(codeSizeUp,   false), CodePart(codeSizeDown, false)
+    CodePart(lookAt,                  false), CodePart(eatLeft,                 false),
+    CodePart(eatRight,                false), CodePart(eatUp,                   false),
+    CodePart(eatDown,                 false), CodePart(stepLeft,                false),
+    CodePart(stepRight,               false), CodePart(stepUp,                  false),
+    CodePart(stepDown,                false), CodePart(toMem,                   false),
+    CodePart(fromMem,                 false), CodePart(idLeft,                  false),
+    CodePart(idRight,                 false), CodePart(idUp,                    false),
+    CodePart(idDown,                  false), CodePart(myColor,                 false),
+    CodePart(myX,                     false), CodePart(myY,                     false),
+    CodePart(energyLeft,              false), CodePart(energyRight,             false),
+    CodePart(energyUp,                false), CodePart(energyDown,              false),
+    CodePart(codeSizeLeft,            false), CodePart(codeSizeRight,           false),
+    CodePart(codeSizeUp,              false), CodePart(codeSizeDown,            false),
+    CodePart(cloneEnergyPercentLeft,  false), CodePart(cloneEnergyPercentRight, false),
+    CodePart(cloneEnergyPercentUp,    false), CodePart(cloneEnergyPercentDown,  false)
   ]
   #
   # Available comparison operators. May be used with "if" operator
