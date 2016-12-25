@@ -546,6 +546,34 @@ module Creature
   #
   function energyDown(org::Organism) _getIntProperty(org, down, :energy) end
   #
+  # @oapi
+  # Obtains code size of organism on the left. If there is not organism on
+  # the left, 0 will be obtained.
+  # @param org Current organism
+  #
+  function codeSizeLeft(org::Organism) _getIntProperty(org, left, :codeSize) end
+  #
+  # @oapi
+  # Obtains code size of organism on the right. If there is not organism on
+  # the right, 0 will be obtained.
+  # @param org Current organism
+  #
+  function codeSizeRight(org::Organism) _getIntProperty(org, right, :codeSize) end
+  #
+  # @oapi
+  # Obtains code size of organism on the above. If there is not organism on
+  # the above, 0 will be obtained.
+  # @param org Current organism
+  #
+  function codeSizeUp(org::Organism) _getIntProperty(org, up, :codeSize) end
+  #
+  # @oapi
+  # Obtains code size of organism on the below. If there is not organism on
+  # the below, 0 will be obtained.
+  # @param org Current organism
+  #
+  function codeSizeDown(org::Organism) _getIntProperty(org, down, :codeSize) end
+  #
   # Returns some Int value by specified organism property.
   # @param org Organism with properties
   # @param dir Direction of searching (left, right,...)

@@ -22,6 +22,17 @@ export idLeft
 export idRight
 export idUp
 export idDown
+export energyLeft
+export energyRight
+export energyUp
+export energyDown
+export myColor
+export myX
+export myY
+export codeSizeLeft
+export codeSizeRight
+export codeSizeUp
+export codeSizeDown
 #
 # @cmd
 # @line
@@ -387,4 +398,60 @@ function myY(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   local var::Symbol = @randVar(org, pos, Int16)
   if var === :nothing return Expr(:nothing) end
   :($var=Int16(o.pos.y))
+end
+#
+# @cmd
+# @line
+# Obtains code size of organism on the left
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function codeSizeLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int16)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Int16(Creature.codeSizeLeft(o)))
+end
+#
+# @cmd
+# @line
+# Obtains code size of organism on the right
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function codeSizeRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int16)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Int16(Creature.codeSizeRight(o)))
+end
+#
+# @cmd
+# @line
+# Obtains code size of organism on the up
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function codeSizeUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int16)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Int16(Creature.codeSizeUp(o)))
+end
+#
+# @cmd
+# @line
+# Obtains code size of organism on the down
+# @param cfg Global configuration type
+# @param org Organism we are working with
+# @param pos Position in code
+# @return {Expr|Expr(:nothing)}
+#
+function codeSizeDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local var::Symbol = @randVar(org, pos, Int16)
+  if var === :nothing return Expr(:nothing) end
+  :($var=Int16(Creature.codeSizeDown(o)))
 end
