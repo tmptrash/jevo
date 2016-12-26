@@ -110,7 +110,7 @@ end
 
 И на закуску предлогаю Вам видео примитивной [кооперации](https://www.youtube.com/watch?v=74Qxo3epWPI) для поисков энергии, которая развилась после нескольких дней работы системы...
 
-
+P.S. Если Вы заинтересованы в такого рода экспериментах, Вы биолог или, просто программист, которому интересно, пишите мне на [email](deadbrainman@gmail.com) и мы объеденим наши усилия для создания своего skynet.
 
 Материалы:
 - [презентация](https://www.dropbox.com/s/fpffw9nga53k573/jevo.pptx?dl=0)
@@ -118,3 +118,6 @@ end
 - мой [блог](https://jevosite.wordpress.com/)
 - мой [youtube канал](https://www.youtube.com/playlist?list=PL1NiKjXMaBimPuybPIXkVuO1MYy53XcdW)
 - [я сам](https://www.facebook.com/tmptrash)
+- [код проекта](https://github.com/tmptrash/jevo/tree/v1.1-rc1)
+
+Продолжение следует...
