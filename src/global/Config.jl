@@ -327,7 +327,7 @@ module Config
   #
   function create(empty::Bool = false)
     ConfigData(
-      empty ? [] : [50,100,1,0,1,1,1,1,1,1],   # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount,probs,cloneEnergy)
+      empty ? [] : [50,100,1,0,1,1,1,1,1,1],   # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount,probs,cloneEnergy,decreasePercent)
       2.0,                                     # ORGANISM_MUTATIONS_ON_CLONE_PERCENT
       500,                                     # ORGANISM_MUTATION_PERIOD
       1000,                                    # ORGANISM_MAX_MUTATION_PERIOD
