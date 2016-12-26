@@ -108,9 +108,13 @@ end
 - Усложнить язык, на котором пишется код организмов. Сейчас это только 54 элемента языка.
 - и т.д.
 
+И на закуску предлогаю Вам мои безволосые друзья несколько интересных видео того, что эволюционировало в моей "пробирке":
+- примитивная [кооперация](https://www.youtube.com/watch?v=74Qxo3epWPI) для поисков энергии
+- 
+
 Материалы:
 - презентация
-- видео презентация
-- мой блог
-- мой youtube канал
-- я сам
+- [видео презентация](https://www.youtube.com/watch?v=tF77s_4RA08)
+- мой [блог](https://jevosite.wordpress.com/)
+- мой [youtube канал](https://www.youtube.com/playlist?list=PL1NiKjXMaBimPuybPIXkVuO1MYy53XcdW)
+- [я сам](https://www.facebook.com/tmptrash)
