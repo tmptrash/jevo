@@ -113,7 +113,7 @@ end
 - 
 
 Материалы:
-- презентация
+- [презентация](https://www.dropbox.com/s/fpffw9nga53k573/jevo.pptx?dl=0)
 - [видео презентация](https://www.youtube.com/watch?v=tF77s_4RA08)
 - мой [блог](https://jevosite.wordpress.com/)
 - мой [youtube канал](https://www.youtube.com/playlist?list=PL1NiKjXMaBimPuybPIXkVuO1MYy53XcdW)
