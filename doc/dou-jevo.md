@@ -41,10 +41,10 @@
 1. `INITIALIZE` random organisms
 2. `EVALUATE` each organism (fitness)
 3. while !terminate do
-4.   `SELECT` parents organisms for next generation
-5.   `RECOMBINE` parents
-6.   `MUTATE` children
-7.   `EVALUATE` each organism (fitness)
+4. &nbsp;&nbsp;`SELECT` parents organisms for next generation
+5. &nbsp;&nbsp;`RECOMBINE` parents
+6. &nbsp;&nbsp;`MUTATE` children
+7. &nbsp;&nbsp;`EVALUATE` each organism (fitness)
 8. end
 
 Что это такое? Это реализация генетического алгоритма на абстрактном языке программирования.
