@@ -129,6 +129,7 @@ P.S. Если Вы заинтересованы в такого рода экс�
 ### Материалы:
 - [презентация](https://www.dropbox.com/s/fpffw9nga53k573/jevo.pptx?dl=0)
 - [видео презентация](https://www.youtube.com/watch?v=tF77s_4RA08)
+- [статья - комикс](http://lviv.com/lab/yak-stvoryty-shtuchnyj-intelekt-bez-nejronnyh-merezh-reyestratsiyi-i-sms) о jevo
 - мой [блог](https://jevosite.wordpress.com/)
 - мой [youtube канал](https://www.youtube.com/playlist?list=PL1NiKjXMaBimPuybPIXkVuO1MYy53XcdW)
 - [я сам](https://www.facebook.com/tmptrash)
