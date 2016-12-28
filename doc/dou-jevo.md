@@ -177,7 +177,7 @@ end
 
 ![Team! Team! Team!](https://dl.dropboxusercontent.com/u/45900723/jevo/team.png)
 
-Если Вы заинтересованы в такого рода экспериментах, Вы биолог или просто программист, которому интересно, пишите мне на [email](mailto:deadbrainman@gmail.com) и мы объединим наши усилия для создания своего skynet ;)
+Если Вы заинтересованы в такого рода экспериментах, Вы биолог или просто программист, которому интересно, пишите мне на [email](mailto:deadbrainman@gmail.com) и мы объединим наши усилия для создания своего [skynet](https://ru.wikipedia.org/wiki/%D0%A1%D0%BA%D0%B0%D0%B9%D0%BD%D0%B5%D1%82) ;)
 
 ### Материалы:
 - [презентация](https://www.dropbox.com/s/fpffw9nga53k573/jevo.pptx?dl=0)
