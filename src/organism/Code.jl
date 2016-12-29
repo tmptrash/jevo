@@ -22,6 +22,7 @@ module Code
   include("CodeMacros.jl")
   include("CodeOrganism.jl")
   include("CodeMath.jl")
+  include("CodeType.jl")
 
   export CodePart
   export CODE_PARTS
@@ -340,18 +341,20 @@ module Code
     #
     CodePart(plus,                    false), CodePart(minus,                   false),
     CodePart(multiply,                false), CodePart(divide,                  false),
-    CodePart(not,                     false), CodePart(and,                     false),
+    CodePart(reminder,                false), CodePart(and,                     false),
     CodePart(or,                      false), CodePart(xor,                     false),
     CodePart(rshift,                  false), CodePart(lshift,                  false),
-    CodePart(reminder,                false), CodePart(toString,                false),
-    CodePart(toBool,                  false), CodePart(toInt,                   false),
-    CodePart(toInt8,                  false), CodePart(toInt16,                 false),
-    CodePart(toFloat64,               false),
     CodePart(sqrt,                    false), CodePart(log,                     false),
     CodePart(sin,                     false), CodePart(cos,                     false),
     CodePart(tan,                     false), CodePart(cot,                     false),
     CodePart(sec,                     false), CodePart(csc,                     false),
-    CodePart(pi,                      false),
+    CodePart(not,                     false), CodePart(pi,                      false),
+    #
+    # CodeType
+    #
+    CodePart(toString,                false), CodePart(toFloat64,               false),
+    CodePart(toBool,                  false), CodePart(toInt,                   false),
+    CodePart(toInt8,                  false), CodePart(toInt16,                 false),
     #
     # CodeOrganism
     #
