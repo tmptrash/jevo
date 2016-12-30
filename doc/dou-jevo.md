@@ -102,7 +102,7 @@
 - тригонометрия: `sin`, `cos`, `tan`, `cot`, `sec`, `csc`
 - разные типы: `Bool`, `Float64`, `String`, `Int8`, `Int16`, `Int64`
 - работа с памятью: `toMem()`, `fromMem()`
-- определение своих и чужих параметров: `myX()`, `myY()`, `energyLeft()`...`energyDown()`, `idLeft()`...`idDown()`, `codeSizeLeft()`...`codeSizeDown()`, `cloneEnergyPercentLeft()`...`cloneEnergyPercentDown()`
+- определение своих и чужих параметров: `myX()`, `myY()`, `energyLeft()...energyDown()`, `idLeft()...idDown()`, `codeSizeLeft()...codeSizeDown()`, `cloneEnergyPercentLeft()...cloneEnergyPercentDown()`
 - возможность примитивного зрения: `lookAt(x,y)`
 - элементы языка Julia: циклы, переменные, функции, условия
 
