@@ -92,7 +92,7 @@ function toInt8(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Code
   if typ === Bool return :($v1 = $(v2) ? 1 : 0) end
   if typ === Float64 return :($v1 = ($(typemax(Int8)) >= Int8(round($(v2))) ? Int8(round($(v2))) : $(typemax(Int8)))) end
 
-  :($v1 = ($(typemax(Int8)) >= abs($(v2)) ? Int8($(v2)) : $(typemax(Int8))))
+  :($v1 = ($(typemax(Int8)) >= abs($(v2)) ? Int8(abs($(v2))) : $(typemax(Int8))))
 end
 #
 # @cmd
@@ -115,7 +115,7 @@ function toInt16(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Cod
   if typ === Bool return :($v1 = $(v2) ? 1 : 0) end
   if typ === Float64 return :($v1 = ($(typemax(Int16)) >= Int16(round($(v2))) ? Int16(round($(v2))) : $(typemax(Int16)))) end
 
-  :($v1 = ($(typemax(Int16)) >= abs($(v2)) ? Int16($(v2)) : $(typemax(Int16))))
+  :($v1 = ($(typemax(Int16)) >= abs($(v2)) ? Int16(abs($(v2))) : $(typemax(Int16))))
 end
 #
 # @cmd
