@@ -86,13 +86,25 @@ function toInt8(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Code
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, Int8)
   if v1 === :nothing return Expr(:nothing) end
-  local v2::Any       = @randVarOrValue(org, pos, typ)
+  local v2::Symbol    = @randVar(org, pos, typ)
+  #
+  # If there is no variable with needed type in current block,
+  # then we have to generate random typed value (see val)
+  #
+  if v2 === :nothing
+    local val::Any = @randValue(typ)
+    if typ === String  return :($v1 = $(length(val))) end
+    if typ === Bool    return :($v1 = $(Int8(val))) end
+    if typ === Float64 return :($v1 = $(typemax(Int8) >= Int8(round(val)) ? Int8(round(val)) : typemax(Int8))) end
 
-  if typ === String return :($v1 = isempty($(v2)) ? 0 : 1) end
-  if typ === Bool return :($v1 = $(v2) ? 1 : 0) end
-  if typ === Float64 return :($v1 = ($(typemax(Int8)) >= Int8(round($(v2))) ? Int8(round($(v2))) : $(typemax(Int8)))) end
+    return :($v1 = $(typemax(Int8) >= abs(val) ? Int8(abs(val)) : typemax(Int8)))
+  end
 
-  :($v1 = ($(typemax(Int8)) >= abs($(v2)) ? Int8(abs($(v2))) : $(typemax(Int8))))
+  if typ === String  return :($v1 = length($(v2))) end
+  if typ === Bool    return :($v1 = Int8($(v2))) end
+  if typ === Float64 return :($v1 = (ifelse($(typemax(Int8)) >= Int8(round($(v2))), Int8(round($(v2))), $(typemax(Int8))))) end
+
+  :($v1 = ifelse($(typemax(Int8)) >= abs($(v2)), Int8(abs($(v2))), $(typemax(Int8))))
 end
 #
 # @cmd

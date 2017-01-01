@@ -63,7 +63,7 @@ end
 # @return {Any}
 #
 macro randValue(typ)
-  :($typ !== String ? rand($typ) : randstring())
+  :($typ === String ? randstring() : rand($typ))
 end
 #
 # Returns a variable from existing in a code or a value of
