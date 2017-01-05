@@ -1,2 +1,2 @@
 #!/bin/bash
-julia --color=yes src/AppSatellite src/AppManager.jl
+julia --color=yes src/AppSatellite.jl src/AppManager.jl quiet port:2010
