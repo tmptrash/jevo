@@ -157,9 +157,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function not(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, Bool)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randType()
   local v2::Any       = @randVarOrValue(org, pos, typ)
   #
   # "" -> true, "..." -> false
@@ -296,9 +296,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function reminder(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randType()
   local v2::Symbol    = @randVar(org, pos, typ)
   local v3::Symbol    = @randVar(org, pos, typ)
   #
@@ -320,9 +320,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function sqrt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randNumType()
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randNumType()
   local v2::Symbol = @randVar(org, pos, typ)
   if v2 === :nothing return Expr(:nothing) end
 
@@ -337,9 +337,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function log(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randNumType()
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randNumType()
   local v2::Symbol = @randVar(org, pos, typ)
   if v2 === :nothing return Expr(:nothing) end
 
@@ -354,9 +354,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function sin(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randNumType()
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randNumType()
   local v2::Any = @randVarOrValue(org, pos, typ)
 
   :($v1 = sin($(v2)))
@@ -370,9 +370,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function cos(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randNumType()
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randNumType()
   local v2::Any = @randVarOrValue(org, pos, typ)
 
   :($v1 = cos($(v2)))
@@ -386,9 +386,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function tan(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randNumType()
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randNumType()
   local v2::Any = @randVarOrValue(org, pos, typ)
 
   :($v1 = tan($(v2)))
@@ -402,9 +402,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function cot(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randNumType()
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randNumType()
   local v2::Any = @randVarOrValue(org, pos, typ)
 
   :($v1 = cot($(v2) === $typ(0) ? $typ(1) : $(v2)))
@@ -418,9 +418,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function sec(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randNumType()
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randNumType()
   local v2::Any = @randVarOrValue(org, pos, typ)
 
   :($v1 = sec($(v2)))
@@ -434,9 +434,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function csc(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randNumType()
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randNumType()
   local v2::Any = @randVarOrValue(org, pos, typ)
 
   :($v1 = csc($(v2) === $typ(0) ? $typ(1) : $(v2)))
