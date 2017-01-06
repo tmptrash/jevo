@@ -21,9 +21,9 @@ export toFloat64
 # @return {Expr|Expr(:nothing)}
 #
 function toString(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, String)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randType()
   local v2::Symbol    = @randVar(org, pos, typ)
   #
   # If there is no variable with type "typ" in current block,
@@ -43,9 +43,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function toBool(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, Bool)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randType()
   local v2::Symbol    = @randVar(org, pos, typ)
   #
   # If there is no variable with type "typ" in current block,
@@ -76,9 +76,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function toInt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, Int)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randType()
   local v2::Symbol    = @randVar(org, pos, typ)
   #
   # If there is no variable with type "typ" in current block,
@@ -107,9 +107,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function toInt8(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, Int8)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randType()
   local v2::Symbol    = @randVar(org, pos, typ)
   #
   # If there is no variable with needed type in current block,
@@ -141,9 +141,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function toInt16(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, Int16)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randType()
   local v2::Symbol    = @randVar(org, pos, typ)
   #
   # If there is no variable with needed type in current block,
@@ -173,9 +173,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function toFloat64(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
+  local typ::DataType = @randType()
   local v2::Symbol    = @randVar(org, pos, typ)
   #
   # If there is no variable with needed type in current block,
