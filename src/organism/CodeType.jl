@@ -24,7 +24,12 @@ function toString(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Co
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, String)
   if v1 === :nothing return Expr(:nothing) end
-  local v2::Any       = @randVarOrValue(org, pos, typ)
+  local v2::Symbol    = @randVar(org, pos, typ)
+  #
+  # If there is no variable with type "typ" in current block,
+  # then we have to use constant value of type "typ"
+  #
+  if v2 === :nothing return :($v1 = $(string(@randValue(typ)))) end
 
   :($v1 = string($(v2)))
 end
@@ -41,15 +46,25 @@ function toBool(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Code
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, Bool)
   if v1 === :nothing return Expr(:nothing) end
-  local v2::Any       = @randVarOrValue(org, pos, typ)
-
-  if typ === String
-    return :($v1 = isempty($(v2)))
-  elseif typ === Bool
-    return :($v1 = $(v2))
+  local v2::Symbol    = @randVar(org, pos, typ)
+  #
+  # If there is no variable with type "typ" in current block,
+  # then we have to use constant value of type "typ"
+  #
+  if v2 === :nothing
+    if typ === String return :($v1 = $(isempty(@randValue(String))))
+    elseif typ === Bool return :($v1 = $(@randValue(Bool)))
+    elseif typ === Float64 return :($v1 = $(@randValue(Float64) > 0.0))
+    end
+    return :($v1 = $(@randValue(typ) > 0))
   end
 
-  :($v1 = ($v2 > $typ(0)))
+  if typ === String return :($v1 = isempty($(v2)))
+  elseif typ === Bool return :($v1 = $(v2))
+  elseif typ === Float64 return :($v1 = $(v2) > 0.0)
+  end
+
+  :($v1 = $(v2) > 0)
 end
 #
 # @cmd
@@ -64,9 +79,18 @@ function toInt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodeP
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, Int)
   if v1 === :nothing return Expr(:nothing) end
-  local v2::Any       = @randVarOrValue(org, pos, typ)
+  local v2::Symbol    = @randVar(org, pos, typ)
+  #
+  # If there is no variable with type "typ" in current block,
+  # then we have to use constant value of type "typ"
+  #
+  if v2 === :nothing
+    if typ === String return :($v1 = $(length(@randValue(String)))) end
+    if typ === Float64 return :($v1 = $(Int(round(@randValue(Float64))))) end
+    return :($v1 = $(Int(@randValue(typ))))
+  end
 
-  if typ === String return :($v1 = (isempty($(v2)) ? 0 : 1)) end
+  if typ === String return :($v1 = length($(v2))) end
   if typ === Float64 return :($v1 = Int(round($(v2)))) end
 
   :($v1 = Int($(v2)))
@@ -96,7 +120,6 @@ function toInt8(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Code
     if typ === String  return :($v1 = $(length(val))) end
     if typ === Bool    return :($v1 = $(Int8(val))) end
     if typ === Float64 return :($v1 = $(typemax(Int8) >= Int8(round(val)) ? Int8(round(val)) : typemax(Int8))) end
-
     return :($v1 = $(typemax(Int8) >= abs(val) ? Int8(abs(val)) : typemax(Int8)))
   end
 
@@ -121,13 +144,24 @@ function toInt16(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Cod
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, Int16)
   if v1 === :nothing return Expr(:nothing) end
-  local v2::Any       = @randVarOrValue(org, pos, typ)
+  local v2::Symbol    = @randVar(org, pos, typ)
+  #
+  # If there is no variable with needed type in current block,
+  # then we have to generate random typed value (see val)
+  #
+  if v2 === :nothing
+    local val::Any = @randValue(typ)
+    if typ === String  return :($v1 = $(length(val))) end
+    if typ === Bool    return :($v1 = $(Int16(val))) end
+    if typ === Float64 return :($v1 = $(typemax(Int16) >= Int16(round(val)) ? Int16(round(val)) : typemax(Int16))) end
+    return :($v1 = $(typemax(Int16) >= abs(val) ? Int16(abs(val)) : typemax(Int16)))
+  end
 
-  if typ === String return :($v1 = isempty($(v2)) ? 0 : 1) end
-  if typ === Bool return :($v1 = $(v2) ? 1 : 0) end
-  if typ === Float64 return :($v1 = ($(typemax(Int16)) >= Int16(round($(v2))) ? Int16(round($(v2))) : $(typemax(Int16)))) end
+  if typ === String  return :($v1 = length($(v2))) end
+  if typ === Bool    return :($v1 = Int16($(v2))) end
+  if typ === Float64 return :($v1 = (ifelse($(typemax(Int16)) >= Int16(round($(v2))), Int16(round($(v2))), $(typemax(Int16))))) end
 
-  :($v1 = ($(typemax(Int16)) >= abs($(v2)) ? Int16(abs($(v2))) : $(typemax(Int16))))
+  :($v1 = ifelse($(typemax(Int16)) >= abs($(v2)), Int16(abs($(v2))), $(typemax(Int16))))
 end
 #
 # @cmd
@@ -142,9 +176,17 @@ function toFloat64(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.C
   local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
-  local v2::Any       = @randVarOrValue(org, pos, typ)
+  local v2::Symbol    = @randVar(org, pos, typ)
+  #
+  # If there is no variable with needed type in current block,
+  # then we have to generate random typed value (see val)
+  #
+  if v2 === :nothing
+    if typ === String return :($v1 = $(Float64(length(@randValue(String))))) end
+    return :($v1 = $(Float64(@randValue(typ))))
+  end
 
-  if typ === String return :($v1 = isempty($(v2)) ? 0.0 : 1.0) end
+  if typ === String return :($v1 = Float64(length($(v2)))) end
 
   :($v1 = Float64($(v2)))
 end
