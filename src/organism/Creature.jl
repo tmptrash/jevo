@@ -609,7 +609,7 @@ module Creature
   # @return {Int|0} 0 if something wrong or property is zero
   #
   function _getIntProperty(org::Creature.Organism, dir::DIRECTION, propSymbol::Symbol)
-    local ret::Int = _getProperty(org, dir, propSymbol)
+    local ret::Any = _getProperty(org, dir, propSymbol)
     ret === nothing ? 0 : ret
   end
   #

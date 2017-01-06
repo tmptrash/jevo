@@ -296,9 +296,9 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function reminder(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   if v1 === :nothing return Expr(:nothing) end
-  local typ::DataType = @randType()
   local v2::Symbol    = @randVar(org, pos, typ)
   local v3::Symbol    = @randVar(org, pos, typ)
   #
