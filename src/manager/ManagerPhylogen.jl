@@ -46,5 +46,9 @@ end
 # @param man Manager related data object
 #
 function _phyloToJson(man::ManagerTypes.ManagerData)
-  # TODO:
+  local org::Creature.Organism
+
+  for org in man.phylogen.organisms
+    
+  end
 end

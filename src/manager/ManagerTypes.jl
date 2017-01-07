@@ -15,6 +15,7 @@ module ManagerTypes
 
   export ManagerStatus
   export ManagerPhylogen
+  export ManagerPhylogenMutations
   export ManagerData
   export OrganismTask
   export Connections
@@ -34,15 +35,45 @@ module ManagerTypes
     mps::Int          # mutations per second
   end
   #
+  # Describes one mutation of organism. Mutated organism - it's
+  # original (clonned) organism + mutations.
+  #
+  type ManagerPhylogenMutation
+    #
+    # Mutated organism
+    #
+    org::Creature.Organism
+    #
+    # Amount of real mutations applied to original organism
+    #
+    mutations::Array{Int, 1}
+  end
+  #
+  # Describes all mutations of organism. Organism and mutations
+  # should be separate copies from original organisms.
+  #
+  type ManagerPhylogenOrganism
+    #
+    # Organism object after birth
+    #
+    org::Creature.Organism
+    #
+    # Array of organisms based on org, but with mutations. This
+    # is something like it's future versions.
+    #
+    mutations::Array{ManagerPhylogenMutation, 1}
+  end
+  #
   # Contains Phylogenetic tree of organisms. These data will
   # be used for Phylogenetic tree visualization.
   #
   type ManagerPhylogen
     #
-    # Array of organism copies. It's important to have full copy without
-    # meta information about their code (funcs field should be empty)
+    # Map of organism copies. It's important to have full copy without
+    # meta information about their code (funcs field should be empty).
+    # Key is organism's unique id.
     #
-    organisms::Array{Creature.Organism, 1}
+    organisms::Dict{UInt, ManagerPhylogenOrganism}
     #
     # Array of relations. Relation it's two organism ids, that links
     # them together. For example parent and child organism ids. These

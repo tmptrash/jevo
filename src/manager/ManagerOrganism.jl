@@ -4,6 +4,7 @@
 #
 # @author DeadbraiN
 #
+import CodeConfig.@if_phylogen
 import CodeConfig.@if_status
 import Config
 import Helper
@@ -472,7 +473,14 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
     organism.energy       -= energy
     crTask.organism.energy = energy
   end
-  if energy > 0 _mutate(man, crTask, crTask.organism.mutationsOnClonePercent) end
+  if energy > 0
+    #
+    # Adds relation between parent and child organisms. Using this
+    # relation we may visualize phylogenetic tree
+    #
+    @if_phylogen _phyloAddRelation(man, organism.id, crTask.organism.id)
+    _mutate(man, crTask, crTask.organism.mutationsOnClonePercent)
+  end
   if organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks)) end
   if crTask.organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === crTask.organism, man.tasks)) end
 
@@ -759,6 +767,11 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   man.positions[_getPosId(man, org.pos)] = org
   push!(man.tasks, oTask)
   msg(man, id, "born")
+  #
+  # Adds organism to phylogenetic tree, if this module
+  # is turned on and working
+  #
+  @if_phylogen _phyloAddOrganism(man, org)
 
   oTask
 end
