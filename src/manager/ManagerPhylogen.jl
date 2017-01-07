@@ -15,6 +15,28 @@ import ManagerTypes.ManagerData
 import ManagerTypes.PhylogenOrganism
 import ManagerTypes.PhylogenMutation
 #
+# Prefix of backup files
+#
+const PHYLO_FILE_POSTFIX = "-jevo-phylo.json"
+#
+# Name of the folder for phylogenetic tree JSON files
+#
+const PHYLO_FOLDER_NAME = "phylogen"
+#
+# Creates directory for phylogenetic tree JSON files
+# @return {Bool}
+# TODO: the same code in Backup.jl
+function _phyloCreateFolder()
+  try
+    if !isdir(PHYLO_FOLDER_NAME) mkdir(PHYLO_FOLDER_NAME) end
+    return true
+  catch e
+    Helper.err("ManagerPhylogen._phyloCreateFolder(): $e")
+    @if_debug showerror(STDOUT, e, catch_backtrace())
+  end
+  return false
+end
+#
 # Adds one organism to phylogenetic organisms pool. Creates it's
 # copy without functions meta information. Mutations array will
 # be empty. We have to call this method every time when new organism
@@ -80,7 +102,11 @@ end
 # @param json JSON string data to save
 #
 function _phyloSave(man::ManagerData)
-  _phyloToFile(_phyloToJson(man), "graph.json")
+  if _phyloCreateFolder()
+    # TODO: the same code in Backup.jl
+    local file::String = string(PHYLO_FOLDER_NAME, "/", replace(string(now()), ":", "-"), PHYLO_FILE_POSTFIX)
+    _phyloToFile(_phyloToJson(man), file)
+  end
 end
 #
 # Converts phylogenetic tree arrays to JSONs. Example:
