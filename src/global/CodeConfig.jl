@@ -25,6 +25,7 @@ module CodeConfig
   export modeProfile
   export profilePeriod
 
+  export if_phylogen
   export if_status
   export if_debug
   export if_test
@@ -67,6 +68,11 @@ module CodeConfig
   #
   const modeStatus        = _cmdActivated("modeStatus", true)
   #
+  # Turns on/off Phylogenetic tree gathering process. Every organism
+  # will be in this tree. All the information will be stored in JSON files
+  #
+  const modePhylogen      = _cmdActivated("modePhylogen", false)
+  #
   # Status showing period in seconds. Works only if
   # "showStatus" option is set to true.
   #
@@ -92,6 +98,10 @@ module CodeConfig
   # before profiler windows will be shown
   #
   const modeProfilePeriod = _cmdActivated("modeProfilePeriod", 2000)
+  #
+  # This macro turns on creation of phylogenetic organisms tree creation module
+  #
+  macro if_phylogen(ex) @static if CodeConfig.modePhylogen esc(ex) end end
   #
   # This macro turns on specified code in case if "showStatus"
   # config is turned on.

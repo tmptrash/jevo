@@ -14,6 +14,7 @@ module ManagerTypes
   import World
 
   export ManagerStatus
+  export ManagerPhylogen
   export ManagerData
   export OrganismTask
   export Connections
@@ -31,6 +32,23 @@ module ManagerTypes
     srps::Int         # moveXXX() related requests per second
     syps::Int         # moveXXX() related yields per second
     mps::Int          # mutations per second
+  end
+  #
+  # Contains Phylogenetic tree of organisms. These data will
+  # be used for Phylogenetic tree visualization.
+  #
+  type ManagerPhylogen
+    #
+    # Array of organism copies. It's important to have full copy without
+    # meta information about their code (funcs field should be empty)
+    #
+    organisms::Array{Creature.Organism, 1}
+    #
+    # Array of relations. Relation it's two organism ids, that links
+    # them together. For example parent and child organism ids. These
+    # data will be used for phylogenetic graph creation.
+    #
+    relations::Array{UInt, 1}
   end
   #
   # One task related to one organism
@@ -142,6 +160,10 @@ module ManagerTypes
     #
     status::ManagerStatus
     #
+    # Phylogenetic tree of organisms
+    #
+    phylogen::ManagerPhylogen
+    #
     # Manager connections (with other managers, terminals, visualizer etc...)
     #
     cons::Connections
@@ -161,7 +183,8 @@ module ManagerTypes
       dotCallback::Function,
       moveCallback::Function,
       task::Task,
-      status::ManagerStatus
+      status::ManagerStatus,
+      phylogen::ManagerPhylogen
     ) = new(
       cfg,
       world,
@@ -194,6 +217,7 @@ module ManagerTypes
       moveCallback::Function,
       task::Task,
       status::ManagerStatus,
+      phylogen::ManagerPhylogen,
       cons::Connections
     ) = new(
       cfg,

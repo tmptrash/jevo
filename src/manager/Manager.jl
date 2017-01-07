@@ -16,6 +16,7 @@
 # TODO: describe frozen organisms conception
 #
 module Manager
+  import CodeConfig.@if_phylogen
   import CodeConfig.@if_status
   import CodeConfig.@if_debug
   import CodeConfig.@if_test
@@ -46,6 +47,7 @@ module Manager
   include("ManagerBackup.jl")
   include("ManagerParams.jl")
   @if_status include("ManagerStatus.jl")
+  @if_phylogen include("ManagerPhylogen.jl")
   #
   # Creates manager related data instance. It will be passed to all
   # manager methods. ManagerStatus type will be created in any case.
