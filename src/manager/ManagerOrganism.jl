@@ -317,6 +317,10 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   splice!(tasks, i)
   @if_status man.status.rops += 1
   msg(man, id, "die")
+  #
+  # Removes organism from phylogenetic tree
+  #
+  @if_phylogen _phyloDelOrganism(man, org)
 
   true
 end

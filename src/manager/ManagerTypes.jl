@@ -47,7 +47,7 @@ module ManagerTypes
     #
     # Amount of real mutations applied to original organism
     #
-    mutations::Array{Int, 1}
+    mutations::Int
   end
   #
   # Describes all mutations of organism. Organism and mutations
@@ -230,7 +230,8 @@ module ManagerTypes
       dotCallback,
       moveCallback,
       task,
-      status
+      status,
+      phylogen
     )
     #
     # Full constructor
@@ -265,6 +266,7 @@ module ManagerTypes
       moveCallback,
       task,
       status,
+      phylogen,
       cons
     )
   end

@@ -24,10 +24,20 @@ import ManagerTypes.PhylogenMutation
 #
 function _phyloAddOrganism(man::ManagerData, org::Organism)
   local orgCopy::Organism = _phyloCopyOrganism(man, org)
+
   if haskey(man.phylogen.organisms, orgCopy.id)
     Helper.error(string("Phylogen: Dublicate organism id: ", orgCopy.id))
   end
   man.phylogen.organisms[orgCopy.id] = PhylogenOrganism(orgCopy, [])
+end
+#
+# Opposite to _phyloAddOrganism() function. Removes one organism
+# from phylogenetic tree
+# @param man Manager related data object
+# @param org Organism we have to add to the pool
+#
+function _phyloDelOrganism(man::ManagerData, org::Organism)
+  delete!(man.phylogen.organisms, org.id)
 end
 #
 # Adds specified amount of mutations to organism. org parameter
@@ -61,7 +71,7 @@ end
 # @param man Manager related data object
 #
 function _phyloClear(man::ManagerData)
-  man.phylogen.organisms = Dict{UInt, PhylogenOrganism}();
+  #man.phylogen.organisms = Dict{UInt, PhylogenOrganism}();
   man.phylogen.relations = [];
 end
 #
@@ -84,21 +94,21 @@ end
 function _phyloToJson(man::ManagerData)
   local org::PhylogenOrganism
   local i::Int
+  local id::UInt
   local json::String
   local relations::Array{UInt, 1} = man.phylogen.relations
-  local arr::Array{String, 1} = []
-
-  json = "{nodes: ["
-  for org in man.phylogen.organisms
-    push!(arr, string("{id: ", org.id, "}"))
-  end
-  json *= join(arr, ",")
-  json *= "], edges: ["
+  local organisms::Dict{UInt, PhylogenOrganism} = man.phylogen.organisms
+  local arr::Array{String, 1}
 
   arr = []
-  for i = 1:2:length(man.phylogen.relations)
-    push!(arr, string("{from: ", relations[i],", to: ", relations[i+1], "}"))
-  end
+  json = "{\"nodes\": ["
+  # TODO: add mutations data here
+  for (id, org) in organisms push!(arr, string("{\"id\": ", id, "}")) end
+  json *= join(arr, ",")
+  json *= "], \"edges\": ["
+
+  arr = []
+  for i = 1:2:length(relations) push!(arr, string("{\"from\": ", relations[i],", \"to\": ", relations[i+1], "}")) end
   json *= join(arr, ",")
   json *= "]}"
 
@@ -127,7 +137,7 @@ end
 # @return {Bool} saving result
 #
 function _phyloToFile(data::String, file::String)
-  local io  = null
+  local io  = nothing
   local ret = true
 
   try
@@ -139,7 +149,7 @@ function _phyloToFile(data::String, file::String)
     @if_debug showerror(STDOUT, e, catch_backtrace())
     ret = false
   finally
-    if io !== null close(io) end
+    if io !== nothing close(io) end
   end
 
   ret

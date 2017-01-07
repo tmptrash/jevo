@@ -54,7 +54,7 @@ end
 # @return {Bool} saving result
 #
 function _appendToFile(data::ASCIIString, file::ASCIIString)
-  local io  = null
+  local io  = nothing
   local ret = true
 
   try
@@ -66,7 +66,7 @@ function _appendToFile(data::ASCIIString, file::ASCIIString)
     @if_debug showerror(STDOUT, e, catch_backtrace())
     ret = false
   finally
-    if io !== null close(io) end
+    if io !== nothing close(io) end
   end
 
   ret

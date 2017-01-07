@@ -71,7 +71,7 @@ module CodeConfig
   # Turns on/off Phylogenetic tree gathering process. Every organism
   # will be in this tree. All the information will be stored in JSON files
   #
-  const modePhylogen      = _cmdActivated("modePhylogen", false)
+  const modePhylogen      = _cmdActivated("modePhylogen", true)
   #
   # Status showing period in seconds. Works only if
   # "showStatus" option is set to true.
