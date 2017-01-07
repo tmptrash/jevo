@@ -59,19 +59,20 @@ module Manager
   #
   function create(cfg::Config.ConfigData = Config.create())
     local man::ManagerTypes.ManagerData = ManagerTypes.ManagerData(
-      cfg,                                                                      # cfg
-      World.create(cfg.WORLD_WIDTH, cfg.WORLD_HEIGHT),                          # world
-      Dict{Int, Creature.Organism}(),                                           # positions
-      Dict{UInt, Creature.Organism}(),                                          # organisms
-      ManagerTypes.OrganismTask[],                                              # tasks
-      CommandLine.create(),                                                     # params
-      UInt(1),                                                                  # organismId
-      UInt(0),                                                                  # totalOrganisms
-      CommandLine.has(CommandLine.create(), ARG_QUIET),                         # quiet
-      function() end,                                                           # dotCallback
-      function() end,                                                           # moveCallback
-      current_task(),                                                           # task
-      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0)                # status
+      cfg,                                                                          # cfg
+      World.create(cfg.WORLD_WIDTH, cfg.WORLD_HEIGHT),                              # world
+      Dict{Int, Creature.Organism}(),                                               # positions
+      Dict{UInt, Creature.Organism}(),                                              # organisms
+      ManagerTypes.OrganismTask[],                                                  # tasks
+      CommandLine.create(),                                                         # params
+      UInt(1),                                                                      # organismId
+      UInt(0),                                                                      # totalOrganisms
+      CommandLine.has(CommandLine.create(), ARG_QUIET),                             # quiet
+      function() end,                                                               # dotCallback
+      function() end,                                                               # moveCallback
+      current_task(),                                                               # task
+      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0),                   # status
+      ManagerTypes.ManagerPhylogen(Dict{UInt, ManagerTypes.PhylogenOrganism}(), []) # phylogen
     )
     local cons::ManagerTypes.Connections = _createConnections(man)
 
@@ -293,6 +294,8 @@ module Manager
       if length(man.tasks) > 0
         backups += 1
         backup(man)
+        @if_phylogen _phyloSave(man)
+        @if_phylogen _phyloClear(man)
       end
       return stamp, backups
     end

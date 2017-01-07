@@ -15,7 +15,8 @@ module ManagerTypes
 
   export ManagerStatus
   export ManagerPhylogen
-  export ManagerPhylogenMutations
+  export PhylogenOrganism
+  export PhylogenMutation
   export ManagerData
   export OrganismTask
   export Connections
@@ -38,7 +39,7 @@ module ManagerTypes
   # Describes one mutation of organism. Mutated organism - it's
   # original (clonned) organism + mutations.
   #
-  type ManagerPhylogenMutation
+  type PhylogenMutation
     #
     # Mutated organism
     #
@@ -52,7 +53,7 @@ module ManagerTypes
   # Describes all mutations of organism. Organism and mutations
   # should be separate copies from original organisms.
   #
-  type ManagerPhylogenOrganism
+  type PhylogenOrganism
     #
     # Organism object after birth
     #
@@ -61,7 +62,7 @@ module ManagerTypes
     # Array of organisms based on org, but with mutations. This
     # is something like it's future versions.
     #
-    mutations::Array{ManagerPhylogenMutation, 1}
+    mutations::Array{PhylogenMutation, 1}
   end
   #
   # Contains Phylogenetic tree of organisms. These data will
@@ -73,7 +74,7 @@ module ManagerTypes
     # meta information about their code (funcs field should be empty).
     # Key is organism's unique id.
     #
-    organisms::Dict{UInt, ManagerPhylogenOrganism}
+    organisms::Dict{UInt, PhylogenOrganism}
     #
     # Array of relations. Relation it's two organism ids, that links
     # them together. For example parent and child organism ids. These

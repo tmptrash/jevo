@@ -437,6 +437,7 @@ function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask,
     # runned, before new code will be running.
     #
     Manager._updateOrgTask(man, task)
+    @if_phylogen _phyloAddMutations(man, task.organism, mutations)
   end
   @if_status man.status.mps += mutations
 end
