@@ -129,7 +129,7 @@ function _phyloToJson(man::ManagerData)
   arr = []
   json = "{\"nodes\": ["
   # TODO: add mutations data here
-  for (id, org) in organisms push!(arr, string("{\"id\": ", id, "}")) end
+  for (id, org) in organisms push!(arr, string("{\"id\": ", id, ", \"label\": \"", id, "\"}")) end
   json *= join(arr, ",")
   json *= "], \"edges\": ["
 
