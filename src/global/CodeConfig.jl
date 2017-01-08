@@ -96,7 +96,7 @@ module CodeConfig
   #
   # Amount of iteration, which will be done in modeProfile === true
   # before profiler windows will be shown
-  #
+  # TODO: make this parameter as a part of modeProfile:2000 and remove it
   const modeProfilePeriod = _cmdActivated("modeProfilePeriod", 2000)
   #
   # This macro turns on creation of phylogenetic organisms tree creation module

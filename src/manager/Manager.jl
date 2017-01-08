@@ -35,6 +35,7 @@ module Manager
   import FastApi
   import Config
   import ManagerTypes
+  @if_phylogen import Phylogen
 
   export create
   export run
@@ -47,7 +48,6 @@ module Manager
   include("ManagerBackup.jl")
   include("ManagerParams.jl")
   @if_status include("ManagerStatus.jl")
-  @if_phylogen include("ManagerPhylogen.jl")
   #
   # Creates manager related data instance. It will be passed to all
   # manager methods. ManagerStatus type will be created in any case.
@@ -294,8 +294,8 @@ module Manager
       if length(man.tasks) > 0
         backups += 1
         backup(man)
-        @if_phylogen _phyloSave(man)
-        @if_phylogen _phyloClear(man)
+        @if_phylogen Phylogen.save(man)
+        @if_phylogen Phylogen.clear(man)
       end
       return stamp, backups
     end

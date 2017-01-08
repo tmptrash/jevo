@@ -14,6 +14,7 @@ import Client
 import Event
 import World
 import RpcApi
+import Phylogen
 import ManagerTypes
 #
 # Shows organism related message
@@ -320,7 +321,7 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   #
   # Removes organism from phylogenetic tree
   #
-  @if_phylogen _phyloDelOrganism(man, org)
+  @if_phylogen Phylogen.delOrganism(man, org)
 
   true
 end
@@ -441,7 +442,7 @@ function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask,
     # runned, before new code will be running.
     #
     Manager._updateOrgTask(man, task)
-    @if_phylogen _phyloAddMutations(man, task.organism, mutations)
+    @if_phylogen Phylogen.addMutations(man, task.organism, mutations)
   end
   @if_status man.status.mps += mutations
 end
@@ -483,7 +484,7 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
     # Adds relation between parent and child organisms. Using this
     # relation we may visualize phylogenetic tree
     #
-    @if_phylogen _phyloAddRelation(man, organism.id, crTask.organism.id)
+    @if_phylogen Phylogen.addRelation(man, organism.id, crTask.organism.id)
     _mutate(man, crTask, crTask.organism.mutationsOnClonePercent)
   end
   if organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks)) end
@@ -776,7 +777,7 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   # Adds organism to phylogenetic tree, if this module
   # is turned on and working
   #
-  @if_phylogen _phyloAddOrganism(man, org)
+  @if_phylogen Phylogen.addOrganism(man, org)
 
   oTask
 end

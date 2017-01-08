@@ -8,28 +8,28 @@ module Backup
   import CodeConfig.@if_debug
   import Helper
 
-  export createBackupDir
+  export createFolder
   export save
   export load
   export FOLDER_NAME
   #
-  # Prefix of backup files
+  # Defoult postfix of backup files
   #
   const FILE_POSTFIX = "-jevo-bkup.data"
   #
-  # Name of the folders with backups
+  # Default name of the folders with backups
   #
   const FOLDER_NAME  = "backup"
   #
   # creates backup directory if it doesn't exists
   # @return {Bool}
   #
-  function createBackupDir()
+  function createFolder(folder::String = FOLDER_NAME)
     try
-      if !isdir(FOLDER_NAME) mkdir(FOLDER_NAME) end
+      if !isdir(folder) mkdir(folder) end
       return true
     catch e
-      Helper.err("Backup.createBackupDirectory(): $e")
+      Helper.err("Backup.createFolder(): $e")
       @if_debug showerror(STDOUT, e, catch_backtrace())
     end
     return false
@@ -37,12 +37,14 @@ module Backup
   #
   # Makes a backup of application and stores it in file
   # @param data Data to save
+  # @param folder Folder name
+  # @param postfix Postfix for backup files
   # @return {Bool} Saving status
   #
-  function save(data::Any)
-    local file::String = string(FOLDER_NAME, "/", replace(string(now()), ":", "-"), FILE_POSTFIX)
+  function save(data::Any, folder::String = FOLDER_NAME, postfix::String = FILE_POSTFIX)
+    local file::String = string(folder, "/", replace(string(now()), ":", "-"), postfix)
 
-    if !isdir(FOLDER_NAME) mkdir(FOLDER_NAME) end
+    if !createFolder(folder) return false end
     if isfile(file)
       Helper.warn("Backup file is already exists: $file")
       return false
@@ -56,20 +58,17 @@ module Backup
   # will be loaded.
   # @return {Any|nothing} Loaded data or nothing if error
   #
-  function load(file::String = "")
-    if !isdir(FOLDER_NAME)
-      Helper.warn(string("Backup folder doesn't exist: ", FOLDER_NAME))
-      return nothing
-    end
+  function load(folder::String = FOLDER_NAME, file::String = "")
+    if !createFolder(folder) return nothing end
     if isempty(file)
-      file = _getOldestFile(FOLDER_NAME)
+      file = _getOldestFile(folder)
       if isempty(file)
         Helper.warn("No backup files")
         return nothing
       end
     end
 
-    Helper.load(FOLDER_NAME * "/" * file)
+    Helper.load(folder * "/" * file)
   end
   #
   # Returns array of backup files
@@ -91,10 +90,11 @@ module Backup
   end
   #
   # Returns name of the last modified file in a folder
+  # @param folder Folder with backup files
   # @return {String}
   #
-  function lastFile()
-    _getOldestFile(FOLDER_NAME)
+  function lastFile(folder::String = FOLDER_NAME)
+    _getOldestFile(folder)
   end
 
   #

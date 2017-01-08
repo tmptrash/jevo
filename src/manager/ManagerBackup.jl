@@ -70,6 +70,7 @@ function recover(man::ManagerTypes.ManagerData)
   man.params         = data.params
   man.organismId     = data.organismId
   man.totalOrganisms = data.totalOrganisms
+  man.phylogen       = data.phylogen
   man.quiet          = data.quiet
   #
   # We don't need to store amount of eval() calls
@@ -140,7 +141,7 @@ function backup(man::ManagerTypes.ManagerData)
   # Before saving backup file, we need to make sure that backup folder is in place.
   # Otherwise - create one.
   #
-  Backup.createBackupDir()
+  Backup.createFolder()
   #
   # These code lines create new backup file and remove last one
   #
