@@ -1,8 +1,22 @@
 #
-# Creates phylogenetic tree of organisms data sets. These data will
-# be stored in JSON files. One part is stored after application reload.
-# This approach will create small and separate JSON files for
-# later visualization.
+# Creates phylogenetic tree of organisms data sets. These data sets will
+# be stored in JSON files on HDD. One data set is stored after application
+# reloaded. This approach will create small and separate JSON files for
+# later visualization. Format of JSON:
+#
+# {
+#   nodes: [{id: Number, org: String, mutations: [{org: String, amount: Number},...]},...],
+#   edges: [{from:Number, to:Number},...]
+# }
+#
+# where:
+#   - id        - Organism unique id
+#   - org       - Organism object in string representation
+#   - mutations - All mutations of organism within his life
+#     - org     - Same like org above
+#     - amount  - Amount of mutations per one mutation session
+#   - from      - Relation source organism id
+#   - to        - Relation destination organism id
 #
 # @author DeadbraiN
 #
@@ -26,18 +40,20 @@ module Phylogen
   export clear
   export save
   #
-  # Postfix of phylogenetic tree files
+  # Default postfix of phylogenetic tree files
   #
   const PHYLO_FILE_POSTFIX = "-jevo-phylo.json"
   #
-  # Name of the folder for phylogenetic tree JSON files
+  # Default name of the folder for phylogenetic tree JSON files
   #
   const PHYLO_FOLDER_NAME = "phylogen"
   #
   # Adds one organism to phylogenetic organisms pool. Creates it's
-  # copy without functions meta information. Mutations array will
-  # be empty. We have to call this method every time when new organism
-  # will be created.
+  # copy without meta information. Mutations array will be empty.
+  # We have to call this method every time when new organism in a
+  # world will be created. One organism in phylogenetic tree is a
+  # node with relations. Every related node is a child or parent
+  # organism.
   # @param man Manager related data object
   # @param org Organism we have to add to the pool
   #
@@ -51,7 +67,8 @@ module Phylogen
   end
   #
   # Opposite to addOrganism() function. Removes one organism
-  # from phylogenetic tree
+  # from phylogenetic tree pool. Should be called if one organism
+  # has died in a world.
   # @param man Manager related data object
   # @param org Organism we have to add to the pool
   #
@@ -60,7 +77,9 @@ module Phylogen
   end
   #
   # Adds specified amount of mutations to organism. org parameter
-  # should be passed after all mutations are applied to him
+  # should be passed after all mutations are applied to him. Mutations
+  # are not a nodes in a tree. They are additional information of
+  # node (organism).
   # @param man Manager related data object
   # @param org Organism we have to add to the pool
   # param amount Amount of real mutations
@@ -76,7 +95,8 @@ module Phylogen
     push!(orgs[org.id].mutations, PhylogenMutation(orgCopy, amount))
   end
   #
-  # Adds relation (link) between parent and child organisms
+  # Adds relation (link) between parent and child organisms. Should be
+  # called every time, when clonning or crossover is called.
   # @param man Manager related data object
   # @param parentId Unique id of parent organism
   # @param childId Unique id of child organism
@@ -86,27 +106,23 @@ module Phylogen
     push!(man.phylogen.relations, childId)
   end
   #
-  # Clears phylogenetic tree arrays to start new portion of data
+  # Clears phylogenetic tree arrays to start new portion of data. Only
+  # relations may be cleared, because organisms pool should be actual
+  # all the time.
   # @param man Manager related data object
   #
   function clear(man::ManagerData)
     man.phylogen.relations = [];
   end
   #
-  # Saves JSON data to the file
+  # Saves JSON data to the file on HDD.
   # @param man Manager related data object
-  # @param json JSON string data to save
   #
   function save(man::ManagerData)
       Backup.save(_toJson(man), PHYLO_FOLDER_NAME, PHYLO_FILE_POSTFIX)
   end
   #
-  # Converts phylogenetic tree arrays to JSONs. Example:
-  # {
-  #   nodes: [{id:UInt},...],
-  #   edges: [{from: UInt, to: UInt},...]
-  # }
-  #
+  # Converts phylogenetic tree arrays to JSON.
   # @param man Manager related data object
   #
   function _toJson(man::ManagerData)
@@ -133,8 +149,7 @@ module Phylogen
     json
   end
   #
-  # Makes full organism copy, but removes all functions
-  # meta information.
+  # Makes full organism copy, but removes all meta information.
   # @param man Manager data object
   # @param org Organism we have to copy
   # @return {Organism}
