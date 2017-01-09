@@ -239,15 +239,18 @@ module Helper
   # in a file without special prefic before it.
   # @param data Data to save
   # @param file File name
+  # @param asText true if data need to be saved as a text
   # @return {Bool} saving result
   #
-  function save(data::Any, file::String = "backup.data")
+  function save(data::Any, file::String = "backup.data", asText::Bool = false)
     local io  = nothing
     local ret = true
 
     try
       io = open(file, "w")
-      serialize(io, data)
+      if asText write(io, data)
+      else serialize(io, data)
+      end
     catch(e)
       warn("Helper.save(): $e")
       @if_debug showerror(STDOUT, e, catch_backtrace())

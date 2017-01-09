@@ -6,6 +6,9 @@
 #
 import CodeConfig.@if_phylogen
 import CodeConfig.@if_status
+#
+# Dependencies
+#
 import Config
 import Helper
 import Creature
@@ -14,8 +17,11 @@ import Client
 import Event
 import World
 import RpcApi
-import Phylogen
 import ManagerTypes
+#
+# Manager plugins
+#
+@if_phylogen import Phylogen
 #
 # Shows organism related message
 # @param man Manager data type

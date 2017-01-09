@@ -39,9 +39,10 @@ module Backup
   # @param data Data to save
   # @param folder Folder name
   # @param postfix Postfix for backup files
+  # @param asText true if data need to be saved as a text
   # @return {Bool} Saving status
   #
-  function save(data::Any, folder::String = FOLDER_NAME, postfix::String = FILE_POSTFIX)
+  function save(data::Any, folder::String = FOLDER_NAME, postfix::String = FILE_POSTFIX, asText::Bool = false)
     local file::String = string(folder, "/", replace(string(now()), ":", "-"), postfix)
 
     if !createFolder(folder) return false end
@@ -50,7 +51,7 @@ module Backup
       return false
     end
 
-    Helper.save(data, file)
+    Helper.save(data, file, asText)
   end
   #
   # Loads a backup from file and returns it

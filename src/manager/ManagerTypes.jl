@@ -12,6 +12,7 @@ module ManagerTypes
   import Client
   import Config
   import World
+  import Event
 
   export ManagerStatus
   export ManagerPhylogen
@@ -196,6 +197,10 @@ module ManagerTypes
     #
     phylogen::ManagerPhylogen
     #
+    # Manager observer
+    #
+    observer::Event.Observer
+    #
     # Manager connections (with other managers, terminals, visualizer etc...)
     #
     cons::Connections
@@ -216,7 +221,8 @@ module ManagerTypes
       moveCallback::Function,
       task::Task,
       status::ManagerStatus,
-      phylogen::ManagerPhylogen
+      phylogen::ManagerPhylogen,
+      observer::Event.Observer
     ) = new(
       cfg,
       world,
@@ -231,7 +237,8 @@ module ManagerTypes
       moveCallback,
       task,
       status,
-      phylogen
+      phylogen,
+      observer
     )
     #
     # Full constructor
@@ -251,6 +258,7 @@ module ManagerTypes
       task::Task,
       status::ManagerStatus,
       phylogen::ManagerPhylogen,
+      observer::Event.Observer,
       cons::Connections
     ) = new(
       cfg,
@@ -267,6 +275,7 @@ module ManagerTypes
       task,
       status,
       phylogen,
+      observer,
       cons
     )
   end

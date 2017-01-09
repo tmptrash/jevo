@@ -16,11 +16,17 @@
 # TODO: describe frozen organisms conception
 #
 module Manager
+  #
+  # Macroses
+  #
   import CodeConfig.@if_phylogen
   import CodeConfig.@if_status
   import CodeConfig.@if_debug
   import CodeConfig.@if_test
   import CodeConfig.@if_profile
+  #
+  # Dependencies
+  #
   import CodeConfig
   import Creature
   import Mutator
@@ -35,6 +41,9 @@ module Manager
   import FastApi
   import Config
   import ManagerTypes
+  #
+  # Manager plugins
+  #
   @if_phylogen import Phylogen
 
   export create
@@ -72,7 +81,8 @@ module Manager
       function() end,                                                               # moveCallback
       current_task(),                                                               # task
       ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0),                   # status
-      ManagerTypes.ManagerPhylogen(Dict{UInt, ManagerTypes.PhylogenOrganism}(), []) # phylogen
+      ManagerTypes.ManagerPhylogen(Dict{UInt, ManagerTypes.PhylogenOrganism}(), []),# phylogen
+      Event.create()                                                                # observer
     )
     local cons::ManagerTypes.Connections = _createConnections(man)
 
