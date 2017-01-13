@@ -42,7 +42,7 @@ module Mutator
   # TODO: describe return value. false mean no mutation
   # TODO: this function is very slow!!! must be optimized
   #
-  function mutate(cfg::Config.ConfigData, org::Creature.Organism, percent::Float64 = 1.0)
+  function mutate(cfg::Config.ConfigData, org::Creature.Organism, percent::Float64)
     local i         ::Int
     local pIndex    ::Int
     local codeChange::Bool
@@ -50,7 +50,7 @@ module Mutator
     local res       ::Bool
     local cmd       ::Code.CodePart
     local realAmount::Int = 0
-    local amount    ::Int = Int(div(Float64(org.codeSize) * percent, 100.0))
+    local amount    ::Int = Int(round(Float64(org.codeSize) * percent))
     #
     # Amount of mutations shouldn't be less then 1
     #
@@ -74,7 +74,7 @@ module Mutator
       org.mutationsFromStart += realAmount
       _changeColor(cfg, org, realAmount)
       try
-        cfg.ORGANISM_EVALS += 1
+        cfg.orgEvals += 1
         org.codeFn = Creature.eval(org.code)
       catch e
         # TODO: here fault script statictics should be collected
@@ -95,9 +95,9 @@ module Mutator
   # TODO: black color from the palette
   #
   function _changeColor(cfg::Config.ConfigData, org::Creature.Organism, amount::Int)
-    local colIndex::Int = org.mutationsFromStart - (org.mutationsFromStart % cfg.ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS)
+    local colIndex::Int = org.mutationsFromStart - (org.mutationsFromStart % cfg.orgColorPeriod)
 
-    if org.mutationsFromStart > cfg.ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS && colIndex >= org.mutationsFromStart - amount && colIndex <= org.mutationsFromStart
+    if org.mutationsFromStart > cfg.orgColorPeriod && colIndex >= org.mutationsFromStart - amount && colIndex <= org.mutationsFromStart
       org.color += 1
       if org.color > Dots.INDEX_MAX_ORG_COLOR org.color = 1 end
     end
@@ -227,7 +227,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onClone(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
-    org.mutationsOnClonePercent = rand(Float64) * 100.0
+    org.mutationsOnClonePercent = rand(Float64)
     true
   end
   #
@@ -239,7 +239,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onPeriod(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
-    org.mutationPeriod = Helper.fastZRand(cfg.ORGANISM_MAX_MUTATION_PERIOD)
+    org.mutationPeriod = Helper.fastZRand(Config.ORGANISM_MAX_MUTATION_PERIOD)
     true
   end
   #
@@ -251,7 +251,7 @@ module Mutator
   # @param cmd Unused
   #
   function _onAmount(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
-    org.mutationPercent = rand(Float64) * 100.0
+    org.mutationPercent = rand(Float64)
     true
   end
   #
@@ -263,7 +263,7 @@ module Mutator
   #
   function _onProbs(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
     local probIndex = Helper.fastRand(length(org.mutationProbabilities))
-    org.mutationProbabilities[probIndex] = Helper.fastZRand(cfg.ORGANISM_MUTATION_PROBABILITY_MAX_VALUE)
+    org.mutationProbabilities[probIndex] = Helper.fastZRand(cfg.orgMutationProbsMaxValue)
     true
   end
   #
@@ -279,7 +279,7 @@ module Mutator
   end
   #
   # Mutates "Energy decrease code size dependency" value. See
-  # ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY config for details.
+  # orgEnergySpendPercent config for details.
   # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Unused

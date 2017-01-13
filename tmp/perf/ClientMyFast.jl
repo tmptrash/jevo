@@ -7,7 +7,7 @@ import Event
 
 global i = 1
 global t = time()
-global con = Client.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT), true)
+global con = Client.create(ip"127.0.0.1", Config.val(:conServerPort), true)
 
 function resp(sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer)
   global i

@@ -21,18 +21,18 @@ module TestMutator
   # # except adding
   # #
   # function setAddMutation()
-  #   _d.d[1] = Config.val(:ORGANISM_MUTATION_PROBABILITIES)
-  #   Config.val(:ORGANISM_MUTATION_PROBABILITIES, [1,0,0,0,0,0,0])
+  #   _d.d[1] = Config.val(:orgMutationProbs)
+  #   Config.val(:orgMutationProbs, [1,0,0,0,0,0,0])
   # end
-  # function restoreAddMutation()	Config.val(:ORGANISM_MUTATION_PROBABILITIES, _d.d[1]) end
+  # function restoreAddMutation()	Config.val(:orgMutationProbs, _d.d[1]) end
   # #
   # # Sets maximum function parameters to 1. Related to add mutation.
   # #
   # function setMaxFuncParams()
-  #   _d.d[2] = Config.val(:CODE_MAX_FUNC_PARAMS)
-  #   Config.val(:CODE_MAX_FUNC_PARAMS, 1)
+  #   _d.d[2] = Config.val(:codeFuncParamAmount)
+  #   Config.val(:codeFuncParamAmount, 1)
   # end
-  # function restoreMaxFuncParams() Config.val(:CODE_MAX_FUNC_PARAMS, _d.d[2]) end
+  # function restoreMaxFuncParams() Config.val(:codeFuncParamAmount, _d.d[2]) end
   # #
   # # pos - "1,2,3" fn - 1, block - 2, line - 3
   # #

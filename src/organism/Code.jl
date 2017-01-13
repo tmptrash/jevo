@@ -41,12 +41,6 @@ module Code
   export onRemoveLine
   export getRandPos
   #
-  # This value will be used in loop() function as a divider. Maximum
-  # amount of loop steps depends on this value. See loop() function
-  # for details.
-  #
-  const _LOOP_STEPS_DIVIDER = 16
-  #
   # Describes one code block like "if", "for", "function" and so on.
   # Is used for mutations of organism's AST. Contains function and
   # block flag. Function is used for obtaining new block expression
@@ -96,7 +90,7 @@ module Code
     local sym::Symbol
     local i::Int
     local exp::Expr
-    local paramLen::Int = Helper.fastRand(cfg.CODE_MAX_FUNC_PARAMS)
+    local paramLen::Int = Helper.fastRand(cfg.codeFuncParamAmount)
     local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing))
     local blocks::Array{Creature.Block, 1} = [block]
     #
@@ -215,7 +209,7 @@ module Code
   function loop(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
     local v::Symbol = @randVar(org, pos, Int8)
     if v === :nothing return Expr(:nothing) end
-    local loopEx    = :(for i::Int8 = 1:div($v, $(Int8(_LOOP_STEPS_DIVIDER))) end)
+    local loopEx    = :(for i::Int8 = 1:div($v, $(cfg.codeLoopDiv)) end)
     #
     # This line fixes Julia small issue with additional comment line,
     # which is added during new loop creation. We have to remove

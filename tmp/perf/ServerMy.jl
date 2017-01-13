@@ -13,6 +13,6 @@ function onBeforeResponse(sock::Base.TCPSocket, cmd::Connection.Command, ans::Co
   for i=1:1000000 Server.request(sock, 1) end
 end
 
-con = Server.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT))
+con = Server.create(ip"127.0.0.1", Config.val(:conServerPort))
 Event.on(con.observer, Connection.EVENT_BEFORE_RESPONSE, onBeforeResponse)
 Server.run(con)

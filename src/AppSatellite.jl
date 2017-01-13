@@ -46,7 +46,7 @@ end
 #
 # This is a fix for broken backup files. It's related to issue:
 # https://github.com/JuliaLang/julia/issues/15017
-# If app crashes less then BACKUP_PERIOD, then we have to remove last
+# If app crashes less then backupPeriod, then we have to remove last
 # backup file, because it contains broken organisms code or somthing
 # similar. The fact that we are inside this function means that our
 # application has crashed a moment ago.
@@ -57,9 +57,9 @@ end
 function _removeBrokenBackup(stamp::Float64, cfg::Config.ConfigData)
   local last::String
 
-  #println("_removeBrokenBackup(), time: ", time(), ", stamp: ", stamp, ", period: ", cfg.BACKUP_PERIOD)
+  #println("_removeBrokenBackup(), time: ", time(), ", stamp: ", stamp, ", period: ", cfg.backupPeriod)
   #println("last file: ", Backup.lastFile())
-  if (time() - stamp) < cfg.BACKUP_PERIOD
+  if (time() - stamp) < cfg.backupPeriod
     try
       if (last = Backup.lastFile()) != ""
         Helper.warn("Removing broken backup file: $last")

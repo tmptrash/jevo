@@ -66,7 +66,7 @@ module RemoteWorldRT
     RemoteDataRT(
       Client.create(host, cmdPort),
       Client.create(host, poolingPort, true),
-      OpenGlWindow.create(cfg.WORLD_WIDTH, cfg.WORLD_HEIGHT, cfg.WORLD_SCALE)
+      OpenGlWindow.create(cfg.worldWidth, cfg.worldHeight, cfg.worldZoom)
     )
   end
   #

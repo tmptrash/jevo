@@ -62,7 +62,7 @@ end
 # this flag is turned on.
 #
 function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield::Bool)
-  local cloneAfter::Int  = man.cfg.ORGANISM_CLONE_AFTER_TIMES
+  local cloneAfter::Int  = man.cfg.orgClonePeriod
   local needClone ::Bool = cloneAfter === 0 ? false : counter % cloneAfter === 0
   local tasks     ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   local len       ::Int = length(tasks)
@@ -120,9 +120,9 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationPercent) end
     #
     # This is how organisms die if their age is bigger then some
-    # predefined config value (ORGANISM_DIE_AFTER)
+    # predefined config value (orgAlivePeriod)
     #
-    if cfg.ORGANISM_DIE_AFTER > 0 && org.age > cfg.ORGANISM_DIE_AFTER && length(tasks) > cfg.WORLD_MIN_ORGANISMS _killOrganism(man, i) end
+    if cfg.orgAlivePeriod > 0 && org.age > cfg.orgAlivePeriod && length(tasks) > cfg.worldMinOrgs _killOrganism(man, i) end
     #
     # Here shouldn't be a code, after mutations, because current
     # task may be updated with new one.
@@ -144,7 +144,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # TODO: optimize this array. It should be created only once
   # TODO: outside the loop.
   #
-  if needClone && len < cfg.WORLD_MAX_ORGANISMS && len > 0
+  if needClone && len < cfg.worldMaxOrgs && len > 0
     probs = Int[]
     @inbounds for task in tasks push!(probs, task.organism.energy) end
     probIndex = Helper.getProbIndex(probs)
@@ -154,20 +154,20 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # This block decreases energy from organisms, because they
   # spend it while leaving.
   #
-  if cfg.ORGANISM_ENERGY_DECREASE_PERIOD > 0 && counter % cfg.ORGANISM_ENERGY_DECREASE_PERIOD === 0
+  if cfg.orgEnergySpendPeriod > 0 && counter % cfg.orgEnergySpendPeriod === 0
     _updateOrganismsEnergy(man)
   end
   #
   # Checks if total amount of energy in a world is less then
   # minimum, according to the configuration.
   #
-  if counter % cfg.WORLD_MIN_ENERGY_CHECK_PERIOD === 0 && cfg.WORLD_MIN_ENERGY_CHECK_PERIOD > 0
+  if counter % cfg.worldEnergyCheckPeriod === 0 && cfg.worldEnergyCheckPeriod > 0
     _updateWorldEnergy(man)
   end
   #
   # This call removes organisms with minimum energy
   #
-  if cfg.ORGANISM_REMOVE_AFTER_TIMES > 0 && counter % cfg.ORGANISM_REMOVE_AFTER_TIMES === 0
+  if cfg.orgRemoveWeakPeriod > 0 && counter % cfg.orgRemoveWeakPeriod === 0
     _removeMinOrganisms(man)
   end
   #
@@ -179,14 +179,14 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
 end
 #
 # Removes organisms with minimum energy. Amount of removed
-# organisms is set in ORGANISM_REMOVE_AMOUNT config.
+# organisms is set in orgRemoveWeakAmount config.
 # @param man Manager data type
 # @param tasks Array of tasks with organisms inside
 #
 function _removeMinOrganisms(man::ManagerTypes.ManagerData)
   local len::Int = length(man.tasks)
-  local amount::Int = man.cfg.ORGANISM_REMOVE_AMOUNT
-  if len <= amount || len <= man.cfg.WORLD_MIN_ORGANISMS return false end
+  local amount::Int = man.cfg.orgRemoveWeakAmount
+  if len <= amount || len <= man.cfg.worldMinOrgs return false end
 
   local allEnergy::Array{Int, 1} = Int[]
   local orgIndex::Int
@@ -212,11 +212,10 @@ end
 # @param man Manager data type
 #
 function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
-  local decVal::Int = man.cfg.ORGANISM_ENERGY_DECREASE_VALUE
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   local org::Creature.Organism
   local i::Int = length(tasks)
-  local minOrgs::Int = man.cfg.WORLD_MIN_ORGANISMS
+  local minOrgs::Int = man.cfg.worldMinOrgs
   local dontKill::Bool = (i <= minOrgs)
 
   if dontKill return false end
@@ -233,7 +232,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     # Energy shouldn't be less then 1
     #
     if !dontKill
-      org.energy -= (decVal + round(Int, org.codeSize * org.energyDecreasePercent))
+      org.energy -= round(Int, org.codeSize * org.energyDecreasePercent)
       if org.energy < 1
         _killOrganism(man, i)
         dontKill = (length(tasks) <= minOrgs)
@@ -248,7 +247,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
 end
 #
 # Updates total world's energy. It shouldn't be less then minimum
-# got from config: WORLD_MIN_ENERGY_PERCENT. We calculate this percent
+# got from config: worldEnergyCheckPercent. We calculate this percent
 # as a ration between whole world (100%) and all energy points together.
 # @param man Manager data type
 # TODO: this method is very slow!!! should be optimized!
@@ -271,8 +270,8 @@ function _updateWorldEnergy(man::ManagerTypes.ManagerData)
   #
   # Total amount of energy is less then in config
   #
-  if div(Float64(energy * 100), total) <= man.cfg.WORLD_MIN_ENERGY_PERCENT
-    setRandomEnergy(man, man.cfg.WORLD_START_ENERGY_BLOCKS, man.cfg.WORLD_START_ENERGY_AMOUNT)
+  if div(Float64(energy * 100), total) <= man.cfg.worldEnergyCheckPercent
+    setRandomEnergy(man, man.cfg.worldStartEnergyDots, man.cfg.worldStartEnergyInDot)
   end
 end
 #
@@ -350,7 +349,7 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   # If cyclical mode turned on, then we have to move organisms in a
   # specific cyclic way from the borders.
   #
-  if man.cfg.WORLD_CYCLICAL
+  if man.cfg.worldCyclical
     if newPos.x < 1
       newPos.x = man.world.width
       cyclicMove = true
@@ -478,7 +477,7 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   # Clonning means additional energy waste
   #
   # TODO: move energy decrease and _killOrganism() call to separate function and call it everywhere
-  local minimum::Bool = length(man.tasks) <= man.cfg.WORLD_MIN_ORGANISMS
+  local minimum::Bool = length(man.tasks) <= man.cfg.worldMinOrgs
   local energy::Int = minimum ? 1 : div(organism.energy * organism.cloneEnergyPercent, 100)
 
   if !minimum
@@ -667,12 +666,12 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
   local id::Int
   local org::Creature.Organism
 
-  if haskey(man.cons.frozen, organism.id) || organism.energy < 1 || length(man.tasks) <= man.cfg.WORLD_MIN_ORGANISMS return retObj.ret = 0 end
+  if haskey(man.cons.frozen, organism.id) || organism.energy < 1 || length(man.tasks) <= man.cfg.worldMinOrgs return retObj.ret = 0 end
   #
   # In case if cyclical mode is on, organism may grab energy
   # outside the world's borders
   #
-  if man.cfg.WORLD_CYCLICAL
+  if man.cfg.worldCyclical
     if newPos.x < 1 newPos.x = man.world.width
     elseif newPos.x > man.world.width newPos.x = 1
     elseif newPos.y < 1 newPos.y = man.world.height
@@ -696,7 +695,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
         _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks))
         amount = -organism.energy
       end
-      org.energy  = min(org.energy - amount, man.cfg.ORGANISM_MAX_ENERGY)
+      org.energy  = min(org.energy - amount, Config.ORGANISM_MAX_ENERGY)
       retObj.ret  = amount
     elseif org.energy > amount
       org.energy -= amount

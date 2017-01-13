@@ -14,6 +14,6 @@ function _onBeforeResponse(data::Connection.Command, ans::Connection.Answer)
   println("before-response\n", data, ans)
 end
 
-con = Client.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT))
+con = Client.create(ip"127.0.0.1", Config.val(:conServerPort))
 Event.on(con.observer, Connection.EVENT_AFTER_REQUEST, _onAfterResponse)
 Event.on(con.observer, Connection.EVENT_BEFORE_RESPONSE, _onBeforeResponse)

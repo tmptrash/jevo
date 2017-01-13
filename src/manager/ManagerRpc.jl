@@ -59,7 +59,7 @@ function getRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::In
     end
   end
 
-  RpcApi.Region(data, man.cfg.WORLD_IPS)
+  RpcApi.Region(data, man.cfg.worldIps)
 end
 #
 # @rpc
@@ -74,8 +74,8 @@ function createOrganisms(man::ManagerTypes.ManagerData)
   man.totalOrganisms      = 0
   # TODO: for system with many managers id should be unique between them
   man.organismId          = UInt(1)
-  man.cfg.ORGANISM_ERRORS = 0
-  for i = 1:man.cfg.ORGANISM_START_AMOUNT createOrganism(man) end
+  man.cfg.orgErrors = 0
+  for i = 1:man.cfg.orgStartAmount createOrganism(man) end
 
   nothing
 end
@@ -89,7 +89,7 @@ end
 # @return {Int} Organism id or false if organisms limit is riched
 #
 function createOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point = Helper.Point(0, 0))
-  if length(man.tasks) > man.cfg.WORLD_MAX_ORGANISMS return nothing end
+  if length(man.tasks) > man.cfg.worldMaxOrgs return nothing end
   orgTask = Manager._createOrganism(man, nothing, pos)
   orgTask === false ? false : orgTask.id
 
@@ -132,11 +132,11 @@ end
 # Does one mutation for specified organism
 # @param man Manager data type
 # @param organismId Unique orgaism's ID
-# @param amount Amount of mutations
+# @param percent Mutations percent from code size
 #
-function mutate(man::ManagerTypes.ManagerData, organismId::UInt, amount::Int = 1)
+function mutate(man::ManagerTypes.ManagerData, organismId::UInt, percent::Float64)
   if !haskey(man.organisms, organismId) return false end
-  Mutator.mutate(man.cfg, man.organisms[organismId], amount)
+  Mutator.mutate(man.cfg, man.organisms[organismId], percent)
 end
 #
 # @rpc
@@ -145,7 +145,7 @@ end
 # @return Int
 #
 function getIps(man::ManagerTypes.ManagerData)
-  man.cfg.WORLD_IPS
+  man.cfg.worldIps
 end
 #
 # @rpc
@@ -255,7 +255,7 @@ function getStatistics(man::ManagerTypes.ManagerData)
 
   RpcApi.Statistics(
     length(man.organisms),
-    man.cfg.WORLD_IPS,
+    man.cfg.worldIps,
     man.totalOrganisms,
     man.world.width,
     man.world.height,
@@ -394,7 +394,7 @@ end
 #
 function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32, dir::Int = Dots.DIRECTION_NO)
   local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
-  local ips::UInt16 = UInt16(man.cfg.WORLD_IPS)
+  local ips::UInt16 = UInt16(man.cfg.worldIps)
   local x::UInt16 = UInt16(pos.x)
   local y::UInt16 = UInt16(pos.y)
   local dataIndex::UInt8 = UInt8(FastApi.API_DOT_COLOR)
@@ -479,10 +479,10 @@ end
 #
 function _createClient(man::ManagerTypes.ManagerData, side::String)
   local con::Client.ClientConnection
-  local serverPort::Int = _getPort(man, getfield(Manager, Symbol("ARG_", side, "_SERVER_PORT")), Symbol("CONNECTION_", side, "_SERVER_PORT"))
-  local serverIp::IPv4  = _getIp(man, getfield(Manager, Symbol("ARG_", side, "_SERVER_IP")), Symbol("CONNECTION_", side, "_SERVER_IP"))
-  local thisPort::Int   = _getPort(man, Manager.ARG_SERVER_PORT, :CONNECTION_SERVER_PORT)
-  local thisIp::IPv4    = _getIp(man, Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP)
+  local serverPort::Int = _getPort(man, getfield(Manager, Symbol("ARG_", side, "_SERVER_PORT")), Symbol("con", ucfirst(lowercase(side)), "ServerPort"))
+  local serverIp::IPv4  = _getIp(man, getfield(Manager, Symbol("ARG_", side, "_SERVER_IP")), Symbol("con", ucfirst(lowercase(side)), "ServerIp"))
+  local thisPort::Int   = _getPort(man, Manager.ARG_SERVER_PORT, :conServerPort)
+  local thisIp::IPv4    = _getIp(man, Manager.ARG_SERVER_IP, :conServerIp)
 
   if serverPort === thisPort && serverIp === thisIp
     Helper.error(string("Error creating Client for ", side, " server. Remote port and IP are similar to current. Port: ", thisPort, ", IP: ", thisIp))
@@ -577,7 +577,7 @@ function _onBeforeResponse(man::ManagerTypes.ManagerData, side::String, data::Co
   # Something on a way of organism or maximum amount of organisms
   # were reached. So he can't move there at the moment.
   #
-  if !Manager._isFree(man, pos) || length(man.tasks) > man.cfg.WORLD_MAX_ORGANISMS
+  if !Manager._isFree(man, pos) || length(man.tasks) > man.cfg.worldMaxOrgs
     ans.id = RpcApi.RPC_ORG_STEP_FAIL
     return false
   end
@@ -585,7 +585,7 @@ function _onBeforeResponse(man::ManagerTypes.ManagerData, side::String, data::Co
   # Everything is okay, let's add an organism to the pool
   #
   Manager._createOrganism(man, org, org.pos, true)
-  org.energy -= div(org.energy * man.cfg.CONNECTION_STEP_ENERGY_PERCENT, 100)
+  org.energy -= div(org.energy * man.cfg.conStepEnergySpendPercent, 100)
   if org.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === org, man.tasks)) end
   ans.id = RpcApi.RPC_ORG_STEP_OK
 
@@ -619,8 +619,8 @@ end
 #
 function _createServer(man::ManagerTypes.ManagerData, fast::Bool = false)
   local con::Server.ServerConnection = Server.create(
-    _getIp(man, Manager.ARG_SERVER_IP, :CONNECTION_SERVER_IP),
-    _getPort(man, fast ? Manager.ARG_FAST_SERVER_PORT : Manager.ARG_SERVER_PORT, fast ? :CONNECTION_FAST_SERVER_PORT : :CONNECTION_SERVER_PORT),
+    _getIp(man, Manager.ARG_SERVER_IP, :conServerIp),
+    _getPort(man, fast ? Manager.ARG_FAST_SERVER_PORT : Manager.ARG_SERVER_PORT, fast ? :conFastServerPort : :conServerPort),
     fast
   )
   local fn::Function = fast ?

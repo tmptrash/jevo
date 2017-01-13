@@ -16,6 +16,6 @@ function onAfterResponse(data::Array{Any ,1})
   println("after-response\n", data)
 end
 
-con = Client.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT), true)
+con = Client.create(ip"127.0.0.1", Config.val(:conServerPort), true)
 Event.on(con.observer, Connection.EVENT_BEFORE_RESPONSE, onBeforeResponse)
 Event.on(con.observer, Connection.EVENT_AFTER_REQUEST, onAfterResponse)

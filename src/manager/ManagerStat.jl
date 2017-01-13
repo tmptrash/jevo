@@ -34,7 +34,7 @@ function _updateStat(stamp::Float64)
         string("\"Moving\"              : ", length(split(code, "Creature.step")) - 1, ",\n"),
         string("\"Amount of lines\"     : ", org.codeSize, ",\n"),
         string("\"Amount of organisms\" : ", length(Manager._data.tasks), ",\n"),
-        string("\"IPS\"                 : ", Config.val(:WORLD_IPS), ",\n"),
+        string("\"IPS\"                 : ", Config.val(:worldIps), ",\n"),
         string("\"World energy\"        : ", Manager._getWorldEnergy(), ",\n"),
         string("\"Generation number\"   : ", Manager._data.totalOrganisms, "\n"),
         "},\n"

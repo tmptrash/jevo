@@ -16,7 +16,7 @@ function _updateStatus(man::ManagerTypes.ManagerData, stamp::Float64)
 
   if stamp - st.stamp >= CodeConfig.modeStatusPeriod
     println(
-      "ips ",      man.cfg.WORLD_IPS,
+      "ips ",      man.cfg.worldIps,
       ", ytps ",   Int(div(st.ytps, period)),
       ", yps ",    Int(div(st.yps, period)),
       ", cps ",    Int(div(st.cps, period)),
@@ -26,8 +26,8 @@ function _updateStatus(man::ManagerTypes.ManagerData, stamp::Float64)
       ", rps ",    Int(div(st.rps, period)),
       ", srps ",   Int(div(st.srps, period)),
       ", mps ",    Int(div(st.mps, period)),
-      ", evals ",  man.cfg.ORGANISM_EVALS,
-      ", err ",    man.cfg.ORGANISM_ERRORS,
+      ", evals ",  man.cfg.orgEvals,
+      ", err ",    man.cfg.orgErrors,
       ", orgs ",   length(man.tasks)
     )
     st.stamp = stamp

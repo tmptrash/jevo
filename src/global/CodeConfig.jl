@@ -11,7 +11,7 @@
 # these configuration. For example, we may run jevo with
 # ccStatusMode:true command line parameter and it will be set to
 # true. Parameter without value means true value. For example:
-# >julia src\AppManager.jl ccStatusMode # means ccStatusMode:true
+# >julia src\AppManager.jl modeStatus # means modeStatus:true
 #
 # @author DeadbraiN
 #
@@ -37,7 +37,7 @@ module CodeConfig
   # @param cmd Name of the command
   # @param defValue Default value if command is not set
   # @return {Any}
-  #
+  # TODO: rename to cmdValue
   function _cmdActivated(cmd::String, defValue::Any)
     local hasCommand::Bool = CommandLine.has(_cmdLine, cmd)
     local cmdValue::Any = CommandLine.val(_cmdLine, cmd)

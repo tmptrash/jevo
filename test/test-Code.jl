@@ -36,7 +36,7 @@ module TestCode
   end
   facts("Testing Code.var() inside Code.fn()") do
     conf = Config.create()
-    conf.CODE_MAX_FUNC_PARAMS = 1
+    conf.codeFuncParamAmount = 1
     org = Creature.create(conf)
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
     Mutator._onAdd(conf, org, Helper.CodePos(2,1,1), Code.CodePart(Code.var, false))
@@ -50,7 +50,7 @@ module TestCode
   #
   facts("Testing Code.fn() inside empty script") do
     conf = Config.create()
-    conf.CODE_MAX_FUNC_PARAMS = 1
+    conf.codeFuncParamAmount = 1
     org = Creature.create(conf)
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
 
@@ -60,7 +60,7 @@ module TestCode
   facts("Testing Code.fn() arguments") do
     conf = Config.create()
     org  = Creature.create(conf)
-    conf.CODE_MAX_FUNC_PARAMS = 1
+    conf.codeFuncParamAmount = 1
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
 
     @fact Helper.getArg(org.code, [2,1,1,2,1,1]) --> :var_1
@@ -68,7 +68,7 @@ module TestCode
   end
   facts("Testing Code.fn() outside main function") do
     conf = Config.create()
-    conf.CODE_MAX_FUNC_PARAMS = 1
+    conf.codeFuncParamAmount = 1
     org = Creature.create(conf)
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
     Mutator._onAdd(conf, org, Helper.CodePos(2,1,1), Code.CodePart(Code.fn, true))
@@ -79,7 +79,7 @@ module TestCode
   end
   facts("Testing Code.fn() + Code.fn()") do
     conf = Config.create()
-    conf.CODE_MAX_FUNC_PARAMS = 1
+    conf.codeFuncParamAmount = 1
     org = Creature.create(conf)
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.fn, true))
@@ -92,7 +92,7 @@ module TestCode
   end
   facts("Testing Code.fn() should return the value") do
     conf = Config.create()
-    conf.CODE_MAX_FUNC_PARAMS = 1
+    conf.codeFuncParamAmount = 1
     org = Creature.create(conf)
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.fn, true))
@@ -139,7 +139,7 @@ module TestCode
     local org = Creature.create(conf)
     local index = length(Helper.SUPPORTED_TYPES) + 2
 
-    conf.CODE_MAX_FUNC_PARAMS = 1
+    conf.codeFuncParamAmount = 1
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
     addVars(org, [2], Helper.CodePos(1,1,1))
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,index), Code.CodePart(Code.fnCall, false))
@@ -191,7 +191,7 @@ module TestCode
     local conf = Config.create()
     local org  = Creature.create(conf)
 
-    conf.CODE_MAX_FUNC_PARAMS = 1
+    conf.codeFuncParamAmount = 1
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
     @fact Helper.getArg(org.code, [2,1,1,1]) --> :func_2
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.condition, true))
@@ -202,7 +202,7 @@ module TestCode
     local conf = Config.create()
     local org  = Creature.create(conf)
 
-    conf.CODE_MAX_FUNC_PARAMS = 1
+    conf.codeFuncParamAmount = 1
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
     @fact Helper.getArg(org.code, [2,1,1,1]) --> :func_2
 
@@ -215,7 +215,7 @@ module TestCode
     local conf = Config.create()
     local org  = Creature.create(conf)
 
-    conf.CODE_MAX_FUNC_PARAMS = 1
+    conf.codeFuncParamAmount = 1
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
     @fact Helper.getArg(org.code, [2,1,1,1]) --> :func_2
     addVars(org, [2,1,2], Helper.CodePos(2,1,1))
@@ -318,7 +318,7 @@ module TestCode
     local conf = Config.create()
     local org  = Creature.create(conf)
 
-    conf.CODE_MAX_FUNC_PARAMS = 1
+    conf.codeFuncParamAmount = 1
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
     addVar(org, [2,1,2], Helper.CodePos(2,1,1), Int8)
     Mutator._onAdd(conf, org, Helper.CodePos(2,1,2), Code.CodePart(Code.loop, true))

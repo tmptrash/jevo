@@ -7,7 +7,7 @@ import Creature
 import Helper
 
 const IP      = ip"127.0.0.1"
-const PORT    = Config.create().CONNECTION_SERVER_PORT
+const PORT    = Config.create().conServerPort
 const TIMEOUT = 30
 
 #

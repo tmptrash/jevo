@@ -24,7 +24,6 @@
 #
 module OpenGlWindow
   import GR
-  import Colors
   import Dots
   import Helper
 

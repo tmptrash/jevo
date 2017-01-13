@@ -139,7 +139,7 @@ module Terminal
   # Shorthand for RpcApi.RPC_SET_ENERGY_RND. See
   # ManagerRpc.setEnergy for details
   #
-  function termSetRandomEnergy(amount::Int = _termData.cfg.WORLD_START_ENERGY_BLOCKS, energy::UInt32 = _termData.cfg.WORLD_START_ENERGY_AMOUNT)
+  function termSetRandomEnergy(amount::Int = _termData.cfg.worldStartEnergyDots, energy::UInt32 = _termData.cfg.worldStartEnergyInDot)
     Client.request(_termData.con, RpcApi.RPC_SET_ENERGY_RND, amount, energy)
   end
   #

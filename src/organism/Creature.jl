@@ -210,7 +210,7 @@ module Creature
     mem::Dict{Int16, Int16}
     #
     # Organism's position in a 2D world. Starts from (1,1)
-    # ends with (WORLD_WIDTH, WORLD_HEIGHT) configurations.
+    # ends with (worldWidth, worldHeight) configurations.
     #
     pos::Helper.Point
     #
@@ -227,7 +227,7 @@ module Creature
     # Percent (0..1), which affects how much energy will be decreased every
     # time during organism energy update. Every configured period of time
     # system grabs energy from organisms using formula: org.energy -= (
-    # ORGANISM_ENERGY_DECREASE_VALUE + org.codeSize * energyDecreasePercent)
+    # org.codeSize * energyDecreasePercent)
     #
     energyDecreasePercent::Float64
     #
@@ -274,17 +274,17 @@ module Creature
       0,                                                                    # codeSize
       0,                                                                    # symbolId
       funcs,                                                                # funcs
-      copy(cfg.ORGANISM_MUTATION_PROBABILITIES),                            # mutationProbabilities
-      cfg.ORGANISM_MUTATIONS_ON_CLONE_PERCENT,                              # mutationsOnClonePercent
-      min(cfg.ORGANISM_MUTATION_PERIOD, cfg.ORGANISM_MAX_MUTATION_PERIOD),  # mutationPeriod
-      min(cfg.ORGANISM_MUTATION_PERCENT, 100.0),                            # mutationPercent
-      cfg.ORGANISM_START_ENERGY,                                            # energy
-      cfg.ORGANISM_START_COLOR,                                             # color
+      copy(cfg.orgMutationProbs),                                           # mutationProbabilities
+      cfg.orgCloneMutation,                                                 # mutationsOnClonePercent
+      min(cfg.orgRainMutationPeriod, Config.ORGANISM_MAX_MUTATION_PERIOD),  # mutationPeriod
+      min(cfg.orgRainMutationPercent, 1.0),                                        # mutationPercent
+      cfg.orgStartEnergy,                                                   # energy
+      cfg.orgStartColor,                                             # color
       Dict{Int16, Int16}(),                                                 # mem
       pos,                                                                  # pos
       0,                                                                    # age
       50,                                                                   # cloneEnergyPercent
-      cfg.ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY,                         # energyDecreasePercent
+      cfg.orgEnergySpendPercent,                         # energyDecreasePercent
       0,                                                                    # mutationsFromStart
       Event.create()                                                        # observer
     )
@@ -374,11 +374,11 @@ module Creature
         #
         # Organisms with errors in a code should be less successful
         #
-        if org.energy > cfg.ORGANISM_ENERGY_DECREASE_ON_ERROR org.energy -= cfg.ORGANISM_ENERGY_DECREASE_ON_ERROR end
+        if org.energy > cfg.orgEnergySpendOnError org.energy -= cfg.orgEnergySpendOnError end
         #
         # Amount of errors of current population
         #
-        cfg.ORGANISM_ERRORS += 1
+        cfg.orgErrors += 1
       end
     end
   end
@@ -785,7 +785,7 @@ module Creature
     # We can't exceed max amount of energy
     #
     if typeof(retObj.ret) == Int
-      org.energy = min(org.energy + retObj.ret, cfg.ORGANISM_MAX_ENERGY)
+      org.energy = min(org.energy + retObj.ret, Config.ORGANISM_MAX_ENERGY)
       return retObj.ret
     end
 

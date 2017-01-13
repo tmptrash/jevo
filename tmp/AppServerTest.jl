@@ -16,7 +16,7 @@ function onAfterResponse(ans::Connection.Answer)
   println("after-serponse\n", ans)
 end
 
-con = Server.create(ip"127.0.0.1", Config.val(:CONNECTION_SERVER_PORT))
+con = Server.create(ip"127.0.0.1", Config.val(:conServerPort))
 Event.on(con.observer, Connection.EVENT_BEFORE_RESPONSE, onBeforeResponse)
 Event.on(con.observer, Connection.EVENT_AFTER_REQUEST, onAfterResponse)
 Server.run(con)

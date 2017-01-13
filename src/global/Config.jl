@@ -24,12 +24,24 @@ module Config
   import CodeConfig.@if_debug
   import Helper
 
+  export ORGANISM_MAX_MUTATION_PERIOD
+
+  export create
   export save
   export load
   export isEmpty
+  export format
 
   export ConfigData
-
+  #
+  # Maximum period for mutations. Related to orgRainMutationPeriod config
+  #
+  const ORGANISM_MAX_MUTATION_PERIOD = 1000
+  #
+  # Maximum amount of energy, which one organism may contains. Should be
+  # less then typemax(UInt32).
+  #
+  const ORGANISM_MAX_ENERGY = Int(typemax(UInt32))
   #
   # Data type for storing configuration data. Is used in pair with GData
   # type. For accessing use Gonfig.val(man.cfg, :SYMBOL[, value]) function
@@ -54,160 +66,138 @@ module Config
     #     amount       - Probability of amount of mutations per period
     # ]
     #
-    ORGANISM_MUTATION_PROBABILITIES::Array{Int, 1}
+    orgMutationProbs::Array{Int, 1}
+    #
+    # Max value, which we may use in orgMutationProbs array.
+    #
+    orgMutationProbsMaxValue::Int
     #
     # Percent of mutations from code size, which will be applied to
     # organism after clonning. Should be <= 100
     #
-    ORGANISM_MUTATIONS_ON_CLONE_PERCENT::Float64
+    orgCloneMutation::Float64
+    #
+    # Amount of iterations before clonning process
+    #
+    orgClonePeriod::Int
     #
     # Amount of iterations within organism's life loop, after that we
-    # do mutations according to ORGANISM_MUTATION_PERCENT config. If 0, then
+    # do mutations according to orgRainMutationPercent config. If 0, then
     # mutations will be disabled. Should be less then ORGANISM_MAX_MUTATION_PERIOD
     #
-    ORGANISM_MUTATION_PERIOD::Int
-    #
-    # Maximum period for mutations. Related to ORGANISM_MUTATION_PERIOD config
-    #
-    ORGANISM_MAX_MUTATION_PERIOD::Int
+    orgRainMutationPeriod::Int
     #
     # Value, which will be used like amount of mutations per
-    # ORGANISM_MUTATION_PERIOD iterations. 0 is a possible value if
+    # orgRainMutationPeriod iterations. 0 is a possible value if
     # we want to disable mutations. Should be less then 100
     #
-    ORGANISM_MUTATION_PERCENT::Float64
+    orgRainMutationPercent::Float64
     #
     # Amount of organisms we have to create on program start
     #
-    ORGANISM_START_AMOUNT::Int
+    orgStartAmount::Int
     #
     # Amount of energy for first organisms. They are like Adam and
     # Eve. It means that these empty (without code) organism were created
     # by operator and not by evolution.
     #
-    ORGANISM_START_ENERGY::Int
+    orgStartEnergy::Int
     #
-    # Maximum amount of energy, which one organism may contains. Should be
-    # less then typemax(UInt32).
+    # Begin color of "empty" organism (organism without code).
     #
-    ORGANISM_MAX_ENERGY::Int
+    orgStartColor::Int
+    #
+    # Only after this amount of mutations organism should update it's color
+    #
+    orgColorPeriod::Int
     #
     # Amount of iterations within organism's life loop, after that we decrease
-    # amount of energy into ORGANISM_ENERGY_DECREASE_VALUE points. If 0, then energy
+    # amount of energy into orgEnergySpendPercent. If 0, then energy
     # decreasing will be disabled.
     #
-    ORGANISM_ENERGY_DECREASE_PERIOD::Int
-    #
-    # Value, which will be descreased in organism after "descreaseAfterTimes" period
-    #
-    ORGANISM_ENERGY_DECREASE_VALUE::Int
+    orgEnergySpendPeriod::Int
     #
     # Percent (0..1), which affects how much energy will be decreased every
     # time during organism energy update. Every configured period of time
     # system grabs energy from organisms using formula: org.energy -= (
-    # ORGANISM_ENERGY_DECREASE_VALUE + org.codeSize * ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY)
+    # org.codeSize * orgEnergySpendPercent)
     #
-    ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY::Float64
-    #
-    # After this amount of iterations we have to kill ORGANISM_REMOVE_AMOUNT
-    # organisms with minimum energy. Set to 0 for disabling this config.
-    #
-    ORGANISM_REMOVE_AFTER_TIMES::Int
-    #
-    # Amount of organisms, which we have to remove after every
-    # ORGANISM_REMOVE_AFTER_TIMES iterations
-    #
-    ORGANISM_REMOVE_AMOUNT::Int
-    #
-    # Amount of iterations before clonning process
-    #
-    ORGANISM_CLONE_AFTER_TIMES::Int
-    #
-    # Begin color of "empty" organism (organism without code).
-    #
-    ORGANISM_START_COLOR::Int
-    #
-    # Max value, which we may use in ORGANISM_MUTATION_PROBABILITIES array.
-    #
-    ORGANISM_MUTATION_PROBABILITY_MAX_VALUE::Int
-    #
-    # Amount of eval calls for generatin organisms code
-    #
-    ORGANISM_EVALS::Int
-    #
-    # Amount of iterations when organism is alive. It will die after
-    # this period. If 0, then will not be used.
-    #
-    ORGANISM_DIE_AFTER::Int
-    #
-    # Only after this amount of mutations organism should update it's color
-    #
-    ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS::Int
+    orgEnergySpendPercent::Float64
     #
     # Amount of energy, which will be decreased in case of organis's
     # code error or exception
     #
-    ORGANISM_ENERGY_DECREASE_ON_ERROR::Int
+    orgEnergySpendOnError::Int
+    #
+    # After this amount of iterations we have to kill orgRemoveWeakAmount
+    # organisms with minimum energy. Set to 0 for disabling this config.
+    #
+    orgRemoveWeakPeriod::Int
+    #
+    # Amount of organisms, which we have to remove after every
+    # orgRemoveWeakPeriod iterations
+    #
+    orgRemoveWeakAmount::Int
+    #
+    # Amount of iterations when organism is alive. It will die after
+    # this period. If 0, then will not be used.
+    #
+    orgAlivePeriod::Int
     #
     # Amount of errors in organisms codes in current population
     #
-    ORGANISM_ERRORS::Int
+    orgErrors::Int
+    #
+    # Amount of eval calls for generatin organisms code
+    #
+    orgEvals::Int
     #
     # Maximum amount of arguments in custom functions. Minimum 1.
     #
-    CODE_MAX_FUNC_PARAMS::Int
+    codeFuncParamAmount::Int
+    #
+    # This value will be used in Code.loop() function as a divider. Maximum
+    # amount of loop steps depends on this value. See loop() function
+    # for details.
+    #
+    codeLoopDiv::Int
     #
     # World width
     #
-    WORLD_WIDTH::Int
+    worldWidth::Int
     #
     # World height
     #
-    WORLD_HEIGHT::Int
+    worldHeight::Int
     #
     # Turns on ciclic world mode. It means that organisms may go outside
     # it's border, but still be inside. For example, if the world has 10x10
     # size and the organism has 10x5 position in it, one step right will move
     # this organism at the position 1x5. The same scenario regarding Y
     # coordinate (height).
-    WORLD_CYCLICAL::Bool
-    # TODO: do we need this?
-    # Delay between requests for obtaining remote world region.
-    # This parameter affects frames per second in a window canvas.
-    # Value in seconds. It's possible to have zero based value. In
-    # this case requests will be posted one by one without delays.
-    # So the speed for 0 delay depends only on network speed.
-    #
-    WORLD_FRAME_DELAY::Int
-    #
-    # IPS (Iteration Per Second). Amount of iterations, which were
-    # occures within one second. One iteration means one for all
-    # organisms in a World. This value will be set many times in main
-    # Manager's loop.
-    #
-    WORLD_IPS::Int
+    worldCyclical::Bool
     #
     # Maximum amount of organisms in a world. If some organisms will
     # try to clone itself, when entire amount of organisms are equal
     # this value, then it(clonning) will not happen.
     #
-    WORLD_MAX_ORGANISMS::Int
+    worldMaxOrgs::Int
     #
     # Minimum amount of orgaisms in a world. If this value riached,
     # then remove minimum energetic organisms mechanism will be disabled
     # until total amount will be more then this value.
     #
-    WORLD_MIN_ORGANISMS::Int
+    worldMinOrgs::Int
     #
     # Amount of energy blocks in a world. Blocks will be placed in a
     # random way...
     #
-    WORLD_START_ENERGY_BLOCKS::Int
+    worldStartEnergyDots::Int
     #
-    # Amount of energy in every block. See WORLD_START_ENERGY_BLOCKS
+    # Amount of energy in every block. See worldStartEnergyDots
     # config for details.
     #
-    WORLD_START_ENERGY_AMOUNT::UInt32
+    worldStartEnergyInDot::UInt32
     #
     # Minimum percent of energy in current world. Under percent i mean
     # percent from entire world area (100%). If the energy will be less
@@ -215,42 +205,33 @@ module Config
     # Should be less then 100.0 and more and equal to 0.0. 0.17 is a
     # normal percent for this system.
     #
-    WORLD_MIN_ENERGY_PERCENT::Float64
+    worldEnergyCheckPercent::Float64
     #
     # An amount of iteration, after which we have to check world energy
-    # amount. Works in pair with WORLD_MIN_ENERGY_PERCENT. May be 0 if
+    # amount. Works in pair with worldEnergyCheckPercent. May be 0 if
     # you want to disable it
     #
-    WORLD_MIN_ENERGY_CHECK_PERIOD::Int
+    worldEnergyCheckPeriod::Int
     #
     # World scaling. On todays monitors pixel are so small, so we have
     # to zoom them with a coefficient.
     #
-    WORLD_SCALE::Int
+    worldZoom::Int
+    #
+    # IPS (Iteration Per Second). Amount of iterations, which were
+    # occures within one second. One iteration means one for all
+    # organisms in a World. This value will be set many times in main
+    # Manager's loop.
+    #
+    worldIps::Int
     #
     # Period of making automatic backup of application. In seconds
     #
-    BACKUP_PERIOD::Float64
+    backupPeriod::Float64
     #
     # Amount of backup files stored on HDD. Old files will be removed
     #
-    BACKUP_AMOUNT::Int
-    #
-    # Width of statistics window
-    # TODO: should be removed from here. It doesn't related to Manager
-    STAT_WIDTH::Int
-    #
-    # Height of statistics window
-    #  TODO: should be removed from here. It doesn't related to Manager
-    STAT_HEIGHT::Int
-    #
-    # Delay between requests for obtaining remote statistics.
-    # This parameter affects frames per second in a window label.
-    # Value in seconds. It's possible to have zero based value. In
-    # this case requests will be posted one by one without delays.
-    # So the speed for 0 delay depends only on network speed.
-    # TODO: should be removed from here. It doesn't related to Manager
-    STAT_FRAME_DELAY::Int
+    backupAmount::Int
     #
     # The period of time between yield() calls in "stand by" mode.
     # In this mode manager waits for data in sockets and new connections.
@@ -258,65 +239,65 @@ module Config
     # it eats CPU cicles. In case of data in sockets or new connections
     # yield() will be called more often.
     #
-    CONNECTION_TASKS_CHECK_PERIOD::Float64
+    conYieldPeriod::Float64
     #
     # Percent of energy, which will be minused from organism after
     # stepping from one instance to another.
     #
-    CONNECTION_STEP_ENERGY_PERCENT::Int
+    conStepEnergySpendPercent::Int
     #
     # Starting number for TCP/IP listening
     #
-    CONNECTION_SERVER_PORT::Int
+    conServerPort::Int
+    #
+    # Works in pair with conServerPort. An IP of current
+    # server/instance.
+    # TODO: IPv6?
+    conServerIp::IPv4
     #
     # Port number for "fast" mode. It uses, for example, for pooling
     #
-    CONNECTION_FAST_SERVER_PORT::Int
-    #
-    # Works in pair with CONNECTION_SERVER_PORT. An IP of current
-    # server/instance.
-    # TODO: IPv6?
-    CONNECTION_SERVER_IP::IPv4
+    conFastServerPort::Int
     #
     # Left side server's (instance) port we want connect to. May be
     # zero (0) if no left side server available.
     #
-    CONNECTION_LEFT_SERVER_PORT::Int
+    conLeftServerPort::Int
     #
     # Left server(instance) IP address. Works in pair with
-    # CONNECTION_LEFT_SERVER_PORT
+    # conLeftServerPort
     #
-    CONNECTION_LEFT_SERVER_IP::IPv4
+    conLeftServerIp::IPv4
     #
     # Right side server's (instance) port we want connect to. May be
     # zero (0) if no right side server available.
     #
-    CONNECTION_RIGHT_SERVER_PORT::Int
+    conRightServerPort::Int
     #
     # Right server(instance) IP address. Works in pair with
-    # CONNECTION_RIGHT_SERVER_PORT
+    # conRightServerPort
     #
-    CONNECTION_RIGHT_SERVER_IP::IPv4
+    conRightServerIp::IPv4
     #
     # Left up server's (instance) port we want connect to. May be
     # zero (0) if no up side server available.
     #
-    CONNECTION_UP_SERVER_PORT::Int
+    conUpServerPort::Int
     #
     # Up server(instance) IP address. Works in pair with
-    # CONNECTION_UP_SERVER_PORT
+    # conUpServerPort
     #
-    CONNECTION_UP_SERVER_IP::IPv4
+    conUpServerIp::IPv4
     #
     # Left down server's (instance) port we want connect to. May be
     # zero (0) if no down side server available.
     #
-    CONNECTION_DOWN_SERVER_PORT::Int
+    conDownServerPort::Int
     #
     # Down server(instance) IP address. Works in pair with
-    # CONNECTION_DOWN_SERVER_PORT
+    # conDownServerPort
     #
-    CONNECTION_DOWN_SERVER_IP::IPv4
+    conDownServerIp::IPv4
   end
   #
   # Creates configuration object. It will be used in all config
@@ -327,58 +308,56 @@ module Config
   #
   function create(empty::Bool = false)
     ConfigData(
-      empty ? [] : [50,100,1,0,1,1,1,1,1,1],   # ORGANISM_MUTATION_PROBABILITIES (add,change,del,small-change,clone,period,amount,probs,cloneEnergy,decreasePercent)
-      2.0,                                     # ORGANISM_MUTATIONS_ON_CLONE_PERCENT
-      500,                                     # ORGANISM_MUTATION_PERIOD
-      1000,                                    # ORGANISM_MAX_MUTATION_PERIOD
-      2.0,                                     # ORGANISM_MUTATION_PERCENT
-      100,                                     # ORGANISM_START_AMOUNT
-      10000,                                   # ORGANISM_START_ENERGY
-      Int(typemax(UInt32)),                    # ORGANISM_MAX_ENERGY. Should be less or equal to typemax(UInt32)
-      200,                                     # ORGANISM_ENERGY_DECREASE_PERIOD
-      1,                                       # ORGANISM_ENERGY_DECREASE_VALUE
-      0.2,                                     # ORGANISM_ENERGY_DECREASE_SIZE_DEPENDENCY
-      500,                                     # ORGANISM_REMOVE_AFTER_TIMES
-      5,                                       # ORGANISM_REMOVE_AMOUNT
-      10,                                      # ORGANISM_CLONE_AFTER_TIMES
-      100,                                     # ORGANISM_START_COLOR
-      100,                                     # ORGANISM_MUTATION_PROBABILITY_MAX_VALUE
-      0,                                       # ORGANISM_EVALS
-      6000 * 10,                               # ORGANISM_DIE_AFTER (amountOfSeconds * averageIPSperSecond)
-      50,                                      # ORGANISM_UPDATE_COLOR_AFTER_MUTATIONS
-      1000,                                    # ORGANISM_ENERGY_DECREASE_ON_ERROR
-      0,                                       # ORGANISM_ERRORS
-      3,                                       # CODE_MAX_FUNC_PARAMS
-      1900,                                    # WORLD_WIDTH
-      940,                                     # WORLD_HEIGHT
-      true,                                    # WORLD_CYCLICAL
-      0,                                       # WORLD_FRAME_DELAY
-      0,                                       # WORLD_IPS
-      50000,                                   # WORLD_MAX_ORGANISMS
-      0,                                       # WORLD_MIN_ORGANISMS
-      1000,                                    # WORLD_START_ENERGY_BLOCKS
-      UInt32(0x0001F4),                        # WORLD_START_ENERGY_AMOUNT
-      0.3,                                     # WORLD_MIN_ENERGY_PERCENT
-      500,                                     # WORLD_MIN_ENERGY_CHECK_PERIOD
-      1,                                       # WORLD_SCALE
-      10.0,#240.0,                                   # BACKUP_PERIOD
-      10,                                      # BACKUP_AMOUNT
-      650,                                     # STAT_WIDTH
-      500,                                     # STAT_HEIGHT
-      5,                                       # STAT_FRAME_DELAY
-      0.01,                                    # CONNECTION_TASKS_CHECK_PERIOD
-      20,                                      # CONNECTION_STEP_ENERGY_PERCENT
-      2010,                                    # CONNECTION_SERVER_PORT (current server port)
-      2011,                                    # CONNECTION_FAST_SERVER_PORT (current server "fast" mode port)
-      ip"127.0.0.1",                           # CONNECTION_SERVER_IP
-      0,                                       # CONNECTION_LEFT_SERVER_PORT
-      ip"127.0.0.1",                           # CONNECTION_LEFT_SERVER_IP
-      0,                                       # CONNECTION_RIGHT_SERVER_PORT
-      ip"127.0.0.1",                           # CONNECTION_RIGHT_SERVER_IP
-      0,                                       # CONNECTION_UP_SERVER_PORT
-      ip"127.0.0.1",                           # CONNECTION_UP_SERVER_IP
-      0,                                       # CONNECTION_DOWN_SERVER_PORT
-      ip"127.0.0.1"                            # CONNECTION_DOWN_SERVER_IP
+      empty ? [] : [50,100,1,0,1,1,1,1,1,1],   # orgMutationProbs (add,change,del,small-change,clone,period,amount,probs,cloneEnergy,decreasePercent)
+      100,                                     # orgMutationProbsMaxValue
+      2.0,                                     # orgCloneMutation
+      10,                                      # orgClonePeriod
+      500,                                     # orgRainMutationPeriod
+      0.2,                                     # orgRainMutationPercent
+      100,                                     # orgStartAmount
+      10000,                                   # orgStartEnergy
+      100,                                     # orgStartColor
+      50,                                      # orgColorPeriod
+      200,                                     # orgEnergySpendPeriod
+      0.2,                                     # orgEnergySpendPercent
+      1000,                                    # orgEnergySpendOnError
+      500,                                     # orgRemoveWeakPeriod
+      5,                                       # orgRemoveWeakAmount
+      6000 * 10,                               # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
+      0,                                       # orgErrors
+      0,                                       # orgEvals
+
+      3,                                       # codeFuncParamAmount
+      Int8(16),                                # codeLoopDiv
+
+      1900,                                    # worldWidth
+      940,                                     # worldHeight
+      true,                                    # worldCyclical
+      50000,                                   # worldMaxOrgs
+      0,                                       # worldMinOrgs
+      1000,                                    # worldStartEnergyDots
+      UInt32(0x0001F4),                        # worldStartEnergyInDot
+      0.3,                                     # worldEnergyCheckPercent
+      500,                                     # worldEnergyCheckPeriod
+      1,                                       # worldZoom
+      0,                                       # worldIps
+
+      10.0,#240.0,                                   # backupPeriod
+      10,                                      # backupAmount
+
+      0.01,                                    # conYieldPeriod
+      20,                                      # conStepEnergySpendPercent
+      2010,                                    # conServerPort (current server port)
+      ip"127.0.0.1",                           # conServerIp
+      2011,                                    # conFastServerPort (current server "fast" mode port)
+      0,                                       # conLeftServerPort
+      ip"127.0.0.1",                           # conLeftServerIp
+      0,                                       # conRightServerPort
+      ip"127.0.0.1",                           # conRightServerIp
+      0,                                       # conUpServerPort
+      ip"127.0.0.1",                           # conUpServerIp
+      0,                                       # conDownServerPort
+      ip"127.0.0.1"                            # conDownServerIp
     )
   end
   #
@@ -413,7 +392,7 @@ module Config
   # @return {Bool}
   #
   function isEmpty(data::ConfigData)
-    length(data.ORGANISM_MUTATION_PROBABILITIES) == 0
+    length(data.orgMutationProbs) == 0
   end
   #
   # Formats configuration for usable user's view

@@ -69,7 +69,7 @@ module Manager
   function create(cfg::Config.ConfigData = Config.create())
     local man::ManagerTypes.ManagerData = ManagerTypes.ManagerData(
       cfg,                                                                          # cfg
-      World.create(cfg.WORLD_WIDTH, cfg.WORLD_HEIGHT),                              # world
+      World.create(cfg.worldWidth, cfg.worldHeight),                              # world
       Dict{Int, Creature.Organism}(),                                               # positions
       Dict{UInt, Creature.Organism}(),                                              # organisms
       ManagerTypes.OrganismTask[],                                                  # tasks
@@ -131,10 +131,10 @@ module Manager
       # be skipped.
       #
       if !recover
-        if cfg.WORLD_START_ENERGY_BLOCKS + cfg.WORLD_START_ENERGY_AMOUNT > 0
-          setRandomEnergy(man, cfg.WORLD_START_ENERGY_BLOCKS, cfg.WORLD_START_ENERGY_AMOUNT)
+        if cfg.worldStartEnergyDots + cfg.worldStartEnergyInDot > 0
+          setRandomEnergy(man, cfg.worldStartEnergyDots, cfg.worldStartEnergyInDot)
         end
-        if man.cfg.ORGANISM_START_AMOUNT > 0 createOrganisms(man) end
+        if man.cfg.orgStartAmount > 0 createOrganisms(man) end
       end
       #
       # This is main infinite loop. It manages input connections
@@ -181,7 +181,7 @@ module Manager
         # obtained experimentally. This code should be removed if this
         # issue will be fixed.
         #
-        if cfg.ORGANISM_EVALS > 2400 && backups > 5 return false end
+        if cfg.orgEvals > 2400 && backups > 5 return false end
         #
         # It's important to skip this function if CodeConfig.showStatus
         # flag is set to false. See CodeConfig::showStatus for details.
@@ -278,7 +278,7 @@ module Manager
     if ts >= 1.0
       localIps  = trunc(Int, ips / ts)
       dataIndex = UInt8(FastApi.API_UINT64)
-      man.cfg.WORLD_IPS = localIps
+      man.cfg.worldIps = localIps
       @inbounds for sock in man.cons.fastServer.socks
         if Helper.isopen(sock)
           Server.request(sock, dataIndex, localIps)
@@ -300,7 +300,7 @@ module Manager
   # @return {(Float64, Int)} Updated time stamp and amount of backups
   #
   function _updateBackup(man::ManagerTypes.ManagerData, stamp::Float64, bstamp::Float64, backups::Int)
-    if stamp - bstamp >= man.cfg.BACKUP_PERIOD
+    if stamp - bstamp >= man.cfg.backupPeriod
       if length(man.tasks) > 0
         backups += 1
         backup(man)
@@ -323,7 +323,7 @@ module Manager
   # @return {(Float64, Bool)}
   #
   function _updateTasks(man::ManagerTypes.ManagerData, stamp::Float64, ystamp::Float64, needYield::Bool)
-    if stamp - ystamp >= man.cfg.CONNECTION_TASKS_CHECK_PERIOD
+    if stamp - ystamp >= man.cfg.conYieldPeriod
       yield()
       @if_status man.status.yps += 1
       # TODO: potential problem here. this list of sockets may be expanded

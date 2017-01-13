@@ -76,7 +76,7 @@ function recover(man::ManagerTypes.ManagerData)
   # We don't need to store amount of eval() calls
   # between app runs
   #
-  data.cfg.ORGANISM_EVALS = 0
+  data.cfg.orgEvals = 0
   #
   # We have to remove all event handlers from observers
   # after backup loading, because they may be multiplied
@@ -153,7 +153,7 @@ function backup(man::ManagerTypes.ManagerData)
   ret
 end
 #
-# Removes first last backup by date. Only last BACKUP_AMOUNT files are
+# Removes first last backup by date. Only last backupAmount files are
 # available at the moment.
 # @param man Reference to manager data object
 #
@@ -162,9 +162,9 @@ function _removeOld(man::ManagerTypes.ManagerData)
   local len::Int = length(files)
   local i::Int
 
-  if len <= man.cfg.BACKUP_AMOUNT return true end
+  if len <= man.cfg.backupAmount return true end
   Helper.info("Removing old backup files...")
-  for i = 1:(len - man.cfg.BACKUP_AMOUNT)
+  for i = 1:(len - man.cfg.backupAmount)
     rm(Backup.FOLDER_NAME * "/" * files[i])
   end
 
