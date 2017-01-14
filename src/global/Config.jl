@@ -23,6 +23,7 @@
 module Config
   import CodeConfig.@if_debug
   import Helper
+  import CommandLine
 
   export ORGANISM_MAX_MUTATION_PERIOD
 
@@ -47,6 +48,10 @@ module Config
   # type. For accessing use Gonfig.val(man.cfg, :SYMBOL[, value]) function
   #
   type ConfigData
+    #
+    # Comman line arguments returned by CommanLine.create() function
+    #
+    cmdLineArgs::Dict{String, String}
     #
     # Probabilities with which mutator decides what to do: add,
     # change, delete character of the code; change amount of
@@ -308,6 +313,7 @@ module Config
   #
   function create(empty::Bool = false)
     ConfigData(
+      CommandLine.create(),                    # cmdLineArgs
       empty ? [] : [50,100,1,0,1,1,1,1,1,1],   # orgMutationProbs (add,change,del,small-change,clone,period,amount,probs,cloneEnergy,decreasePercent)
       100,                                     # orgMutationProbsMaxValue
       2.0,                                     # orgCloneMutation
@@ -361,6 +367,23 @@ module Config
     )
   end
   #
+  # Merges default configuration obtained by calling create() method
+  # and command line arguments. Command line arguments have higher
+  # priority, then default.
+  # @param data Configuration data object
+  #
+  function merge(data::ConfigData)
+    local name::Symbol
+
+    for name in fieldnames(data)
+      #
+      # We have to skip command line arguments object
+      #
+      if name === :cmdLineArgs continue end
+      setfield!(data, name, _getSetting(data, string(name)))
+    end
+  end
+  #
   # Saves all data into the file. If file exists, it will be overriden
   # @param data Config Data type
   # @param file File name
@@ -397,7 +420,7 @@ module Config
   #
   # Formats configuration for usable user's view
   # @return {String}
-  #
+  # TODO: do we need this?
   function format(data::ConfigData)
     local fields::Array{Symbol, 1} = fieldnames(ConfigData)
     local i::Symbol
@@ -408,5 +431,37 @@ module Config
     end
 
     arr
+  end
+  #
+  # Returns one configuration setting from command line parameters
+  # or from ConfigData instance. Default values are set in create() method
+  # @param name Name of the setting
+  # @return {String} Value from command line or default value
+  #
+  function _getSetting(data::ConfigData, name::String)
+    CommanLine.has(data.cmdLineArgs, name) ?
+    _parseCmdValue(data, name) :
+    getfield(data, Symbol(name))
+  end
+  #
+  # This function returns command line argument value fro specified
+  # command. Command and settings in configuration (ConfigData) should
+  # be the same. Supported types are in comments below...
+  # @param data Config data
+  # @param cmd Name of the command
+  # @return {Any}
+  #
+  function _parseCmdValue(data::ConfigData, cmd::String)
+    local cmdValue::String = CommandLine.val(data, cmd)
+
+    if isempty(cmdValue) return true                                            # Bool
+    elseif cmdValue == "true" return true                                       # Bool
+    elseif cmdValue == "false" return false                                     # Bool
+    elseif !isnull(tryparse(Int, cmdValue)) return parse(Int, cmdValue)         # Int
+    elseif !isnull(tryparse(Float64, cmdValue)) return parse(Float64, cmdValue) # Float64
+    elseif cmdValue[1] === '[' return parse.(split(cmdValue[2:end-1], ","))     # Array{Int,1}
+    end
+
+    cmdValue                                                                    # String
   end
 end

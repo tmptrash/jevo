@@ -45,12 +45,13 @@ module CodeConfig
     # We have only command without value
     #
     if hasCommand
-      if isempty(cmdValue) return true end
-      if cmdValue == "true" return true end
-      if cmdValue == "false" return false end
-      if !isnull(tryparse(Int, cmdValue)) return parse(Int, cmdValue) end
-      if !isnull(tryparse(Float64, cmdValue)) return parse(Float64, cmdValue) end
-      return cmdValue # String
+      if isempty(cmdValue) return true end                                        # Bool
+      if cmdValue == "true" return true end                                       # Bool
+      if cmdValue == "false" return false end                                     # Bool
+      if !isnull(tryparse(Int, cmdValue)) return parse(Int, cmdValue) end         # Int
+      if !isnull(tryparse(Float64, cmdValue)) return parse(Float64, cmdValue) end # Float64
+      if cmdValue[1] === '[' return parse.(split(cmdValue[2:end-1], ",")) end     # Array{Int,1}
+      return cmdValue                                                             # String
     end
 
     defValue
