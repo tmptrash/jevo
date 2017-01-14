@@ -22,20 +22,20 @@ module TestManager
   # Manager in separate task and creates default configuration.
   #
   function _create(positions::Vector{Helper.Point}, configs::Dict{Symbol, Any} = Dict{Symbol, Any}())
-    local cfg::Config.ConfigData            = Config.create()
-    cfg.orgRainMutationPeriod            = 0
-    cfg.orgStartAmount               = 0
-    cfg.orgStartEnergy               = 100
-    cfg.orgEnergySpendPeriod     = 2
-    cfg.orgEnergySpendAmount      = 1
-    cfg.orgRemoveWeakPeriod         = 0
-    cfg.orgClonePeriod          = 0
-    cfg.worldWidth                         = 10
-    cfg.worldHeight                        = 10
-    cfg.worldMinOrgs                 = 0
-    cfg.worldStartEnergyDots           = 0
-    cfg.worldEnergyCheckPercent            = 0.1
-    cfg.worldEnergyCheckPeriod       = 10000
+    local cfg::Config.ConfigData      = Config.create()
+    cfg.orgRainMutationPeriod         = 0
+    cfg.orgStartAmount                = 0
+    cfg.orgStartEnergy                = 100
+    cfg.orgEnergySpendPeriod          = 2
+    cfg.orgEnergySpendPercent         = 1.0
+    cfg.orgRemoveWeakPeriod           = 0
+    cfg.orgClonePeriod                = 0
+    cfg.worldWidth                    = 10
+    cfg.worldHeight                   = 10
+    cfg.worldMinOrgs                  = 0
+    cfg.worldStartEnergyDots          = 0
+    cfg.worldEnergyCheckPercent       = 0.1
+    cfg.worldEnergyCheckPeriod        = 10000
     cfg.orgEvals                      = 100000
     #
     # Config update
@@ -88,7 +88,7 @@ module TestManager
 
     Manager.destroy(d.man)
   end
-  facts("Checking if organisms, which are created on start contain correct amopunt of energy") do
+  facts("Checking if organisms, which are created on start contain correct amount of energy") do
     local d = _create(Helper.Point[], Dict{Symbol, Any}(:orgStartAmount=>3,:orgStartEnergy=>7))
 
     @fact length(d.man.positions) === length(d.man.organisms) === 0 --> true
@@ -112,20 +112,20 @@ module TestManager
     Manager.destroy(d.man)
   end
   facts("Checking amount energy grabbing from organisms per period") do
-    local d = _create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}(:orgEnergySpendAmount=>3))
+    local d = _create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}(:orgEnergySpendPercent=>1.0))
 
     @fact d.orgs[1].energy --> 100
     @fact d.orgs[2].energy --> 100
     @fact d.orgs[3].energy --> 100
-    # orgEnergySpendPeriod === 2, orgEnergySpendAmount === 3,
+    # orgEnergySpendPeriod === 2, orgEnergySpendPercent === 1,
     # so we need run 4 iterations to decrease energy on 6 points
     consume(d.task)
     consume(d.task)
     consume(d.task)
     consume(d.task)
-    @fact d.orgs[1].energy --> 94
-    @fact d.orgs[2].energy --> 94
-    @fact d.orgs[3].energy --> 94
+    @fact d.orgs[1].energy --> 98
+    @fact d.orgs[2].energy --> 98
+    @fact d.orgs[3].energy --> 98
 
     Manager.destroy(d.man)
   end
@@ -157,7 +157,7 @@ module TestManager
     Manager.destroy(d.man)
   end
   facts("Checking organisms mutations on clone") do
-    local d         = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>2, :orgCloneMutation=>100.0))
+    local d         = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>2, :orgCloneMutation=>1.0))
     local orgAmount = length(d.man.organisms)
     local mutations = d.man.status.mps
 

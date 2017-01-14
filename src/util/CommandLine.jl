@@ -4,7 +4,7 @@
 # Argument itself may consist of name and value. e.g.:
 # "file:test.txt" or "arg=value" or "param/val". You may
 # use different separators between name and the value.
-# See ARG_VAL_SEPARATORS constant for details. 
+# See ARG_VAL_SEPARATORS constant for details.
 #
 # Usage:
 #     $julia test.jl 1 arg:val
@@ -47,13 +47,17 @@ module CommandLine
   end
   #
   # Returns specified argument's value. If no value or argument
-  # doesn't exist, then returns empty string
+  # doesn't exist, then returns empty string. In case if parse
+  # argument is true, then it will try to parse it's value's type
   # @param args Arguments object returned by create()
   # @param arg Name of the argument
-  # @return {String} Argument's value or empty string
+  # @param parse true if we have to try parse the value
+  # @return {Any} Argument's value or empty string
   #
-  function val(args::Dict{String, String}, arg::String)
-    haskey(args, arg) ? args[arg] : ""
+  function val(args::Dict{String, String}, arg::String, parse::Bool = false)
+    if !haskey(args, arg) return "" end
+    if parse return _parse(args, arg) end
+    args[arg]
   end
   #
   # Checks if specified key (arg) is in command line
@@ -63,5 +67,25 @@ module CommandLine
   #
   function has(args::Dict{String, String}, arg::String)
     haskey(args, arg)
+  end
+  #
+  # This function returns parsed command line argument value for specified
+  # command. Supported types are in comments below...
+  # @param args Command line arguments returned by create()
+  # @param arg Name of the argument
+  # @return {Any}
+  #
+  function _parse(args::Dict{String, String}, arg::String)
+    local value::String = val(args, arg)
+
+    if isempty(value) return true                                               # Bool
+    elseif value == "true" return true                                          # Bool
+    elseif value == "false" return false                                        # Bool
+    elseif !isnull(tryparse(Int, value)) return parse(Int, value)               # Int
+    elseif !isnull(tryparse(Float64, value)) return parse(Float64, value)       # Float64
+    elseif value[1] === '[' return parse.(split(value[2:end-1], ","))           # Array{Int,1}
+    end
+
+    value                                                                       # String
   end
 end

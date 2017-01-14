@@ -37,7 +37,7 @@ module CodeConfig
   # @param cmd Name of the command
   # @param defValue Default value if command is not set
   # @return {Any}
-  # TODO: rename to cmdValue
+  # TODO: remove this!!!
   function _cmdActivated(cmd::String, defValue::Any)
     local hasCommand::Bool = CommandLine.has(_cmdLine, cmd)
     local cmdValue::Any = CommandLine.val(_cmdLine, cmd)
@@ -82,7 +82,7 @@ module CodeConfig
   # DEBUG mode. In this mode additional info like stack
   # traces will be available
   #
-  const modeDebug         = _cmdActivated("modeDebug", true)
+  const modeDebug         = _cmdActivated("modeDebug", false)
   #
   # In this mode we may run a Manager in special "iteration" mode. It
   # means, that we may run one iteration per call. It's helpfull for
