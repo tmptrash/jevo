@@ -48,6 +48,12 @@ module Phylogen
   #
   const PHYLO_FOLDER_NAME = "phylogen"
   #
+  # Module initializer
+  #
+  function init(man::ManagerData)
+    
+  end
+  #
   # Adds one organism to phylogenetic organisms pool. Creates it's
   # copy without meta information. Mutations array will be empty.
   # We have to call this method every time when new organism in a

@@ -84,6 +84,7 @@ module CommandLine
     elseif !isnull(tryparse(Int, value)) return parse(Int, value)               # Int
     elseif !isnull(tryparse(Float64, value)) return parse(Float64, value)       # Float64
     elseif value[1] === '[' return parse.(split(value[2:end-1], ","))           # Array{Int,1}
+    elseif length(split(value, ".")) === 4 IPv4(value)                          # IPv4
     end
 
     value                                                                       # String

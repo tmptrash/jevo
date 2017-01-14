@@ -54,8 +54,9 @@ module Manager
   #
   include("ManagerOrganism.jl")
   include("ManagerRpc.jl")
-  include("ManagerBackup.jl")
+  include("ManagerBackup.jl") # TODO: should be a plugin
   include("ManagerParams.jl")
+  include("ManagerPlugins.jl")
   @if_status include("ManagerStatus.jl")
   #
   # Creates manager related data instance. It will be passed to all
@@ -69,7 +70,7 @@ module Manager
   function create(cfg::Config.ConfigData = Config.create())
     local man::ManagerTypes.ManagerData = ManagerTypes.ManagerData(
       cfg,                                                                          # cfg
-      World.create(cfg.worldWidth, cfg.worldHeight),                              # world
+      World.create(cfg.worldWidth, cfg.worldHeight),                                # world
       Dict{Int, Creature.Organism}(),                                               # positions
       Dict{UInt, Creature.Organism}(),                                              # organisms
       ManagerTypes.OrganismTask[],                                                  # tasks

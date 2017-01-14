@@ -166,7 +166,7 @@ module Config
     # amount of loop steps depends on this value. See loop() function
     # for details.
     #
-    codeLoopDiv::Int
+    codeLoopDiv::Int8
     #
     # World width
     #
@@ -304,6 +304,14 @@ module Config
     # conDownServerPort
     #
     conDownServerIp::IPv4
+    #
+    # Array of included plugins
+    #
+    plugIncluded::Array{String, 1}
+    #
+    # Array of excluded plugins. Affects plugIncluded list
+    #
+    plugExcluded::Array{String, 1}
   end
   #
   # Creates configuration object. It will be used in all config
@@ -364,7 +372,10 @@ module Config
       0,                                       # conUpServerPort
       ip"127.0.0.1",                           # conUpServerIp
       0,                                       # conDownServerPort
-      ip"127.0.0.1"                            # conDownServerIp
+      ip"127.0.0.1",                           # conDownServerIp
+
+      ["Phylogen"],                            # plugIncluded
+      []                                       # plugExcluded
     )
 
     merge ? _merge(cfg) : cfg
@@ -437,7 +448,7 @@ module Config
       # We have to skip command line arguments object
       #
       if name === :cmdLineArgs continue end
-      setfield!(data, name, _setting(data, string(name)))
+      setfield!(data, name, _setting(data, name))
     end
 
     data
@@ -448,9 +459,20 @@ module Config
   # @param name Name of the setting
   # @return {String} Value from command line or default value
   #
-  function _setting(data::ConfigData, name::String)
-    CommandLine.has(data.cmdLineArgs, name) ?
-    CommandLine.val(data.cmdLineArgs, name, true) :
-    getfield(data, Symbol(name))
+  function _setting(data::ConfigData, name::Symbol)
+    local sName::String = string(name)
+    local val::Any
+
+    if CommandLine.has(data.cmdLineArgs, sName)
+      val = CommandLine.val(data.cmdLineArgs, sName, true)
+      #
+      # In case of Int type we have to figure out exact type
+      # Int8, UInt16 and so on...
+      #
+      if typeof(val) === Int return convert(typeof(getfield(data, name)), val) end
+      return val
+    end
+
+    getfield(data, name)
   end
 end
