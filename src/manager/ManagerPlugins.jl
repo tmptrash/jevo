@@ -43,13 +43,12 @@ function initPlugins(man::ManagerTypes.ManagerData)
   #
   plugins = findfirst(included, ALL_PLUGINS) > 0 ? included : setdiff(included, excluded)
   Helper.info(string("Initializing plugins: ", join(plugins, ","), "..."), false)
-
   for plugin in plugins
     if plugin === ALL_PLUGINS continue end
     Base.require(Symbol(plugin))
     getfield(eval(Symbol(plugin)), :init)(man)
   end
-  Helper.info("done")
+  Helper.done()
 
   nothing
 end

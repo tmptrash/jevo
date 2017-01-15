@@ -15,6 +15,7 @@ module Helper
   export getProbIndex
   export getSupportedTypes
   export isopen
+  export done
   export info
   export warn
   export error
@@ -100,12 +101,19 @@ module Helper
     print_with_color(:red, "ERROR: ", msg, "\n")
   end
   #
-  # Print info message with green color
+  # Prints info message with green color
   # @param msg Text message to show
   # @param newLine Add new line character at the end of message
   #
   function info(msg::AbstractString, newLine::Bool = true)
-    print_with_color(:green, "INFO: ", msg, newLine ? "\n" : "")
+    print_with_color(:green, string("INFO: ", msg, newLine ? "\n" : ""))
+  end
+  #
+  # Prints "done" after info message (see info() function)
+  # @param msg Text message to show
+  #
+  function done(msg::AbstractString = "done")
+    print_with_color(:green, string(msg, "\n"))
   end
   #
   # This method is an analog of isopen() from julia/base/stream.jl.
