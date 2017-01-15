@@ -32,7 +32,7 @@ module Phylogen
   import ManagerTypes.PhylogenOrganism
   import ManagerTypes.PhylogenMutation
 
-  export createFolder
+  export init
   export addOrganism
   export delOrganism
   export addMutations
@@ -51,7 +51,6 @@ module Phylogen
   # Module initializer
   #
   function init(man::ManagerData)
-    
   end
   #
   # Adds one organism to phylogenetic organisms pool. Creates it's

@@ -102,9 +102,10 @@ module Helper
   #
   # Print info message with green color
   # @param msg Text message to show
-  # OPT: console output is heavy operation
-  function info(msg::AbstractString)
-    print_with_color(:green, "INFO: ", msg, "\n")
+  # @param newLine Add new line character at the end of message
+  #
+  function info(msg::AbstractString, newLine::Bool = true)
+    print_with_color(:green, "INFO: ", msg, newLine ? "\n" : "")
   end
   #
   # This method is an analog of isopen() from julia/base/stream.jl.

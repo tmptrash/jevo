@@ -117,6 +117,7 @@ module Manager
     @if_profile local i::Int = 0
 
     try
+      initPlugins(man)
       #
       # This server is listening for all other managers and remote
       # terminal. It runs obtained commands and send answers back.
