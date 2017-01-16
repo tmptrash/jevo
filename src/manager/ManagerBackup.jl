@@ -70,8 +70,8 @@ function recover(man::ManagerTypes.ManagerData)
   man.params         = data.params
   man.organismId     = data.organismId
   man.totalOrganisms = data.totalOrganisms
-  man.phylogen       = data.phylogen
   man.quiet          = data.quiet
+  man.plugins        = data.plugins
   #
   # We don't need to store amount of eval() calls
   # between app runs

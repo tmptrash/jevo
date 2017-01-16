@@ -21,24 +21,15 @@
 # @author DeadbraiN
 #
 module Phylogen
-  import CodeConfig
-  import CodeConfig.@if_debug
-  import Creature.Organism
   import Helper
   import Creature
   import Event
   import Backup
   import ManagerTypes.ManagerData
-  import ManagerTypes.PhylogenOrganism
-  import ManagerTypes.PhylogenMutation
+  import ManagerTypes.Plugin
 
+  export PhylogenData
   export init
-  export addOrganism
-  export delOrganism
-  export addMutations
-  export addRelation
-  export clear
-  export save
   #
   # Default postfix of phylogenetic tree files
   #
@@ -48,9 +39,74 @@ module Phylogen
   #
   const PHYLO_FOLDER_NAME = "phylogen"
   #
+  # Name of the current module
+  #
+  const MODULE_NAME = string(Phylogen)
+  #
+  # Describes one mutation of organism. Mutated organism - it's
+  # original (clonned) organism + mutations.
+  #
+  type PhylogenMutation
+    #
+    # Mutated organism
+    #
+    org::Creature.Organism
+    #
+    # Amount of real mutations applied to original organism
+    #
+    mutations::Int
+  end
+  #
+  # Describes all mutations of organism. Organism and mutations
+  # should be separate copies from original organisms.
+  #
+  type PhylogenOrganism
+    #
+    # Organism object after birth
+    #
+    org::Creature.Organism
+    #
+    # Array of organisms based on org, but with mutations. This
+    # is something like it's future versions.
+    #
+    mutations::Array{PhylogenMutation, 1}
+  end
+  #
+  # Contains Phylogenetic tree of organisms. These data will
+  # be used for Phylogenetic tree visualization.
+  #
+  type PhylogenData <: Plugin
+    #
+    # Map of organism copies. It's important to have full copy without
+    # meta information about their code (funcs field should be empty).
+    # Key is organism's unique id.
+    #
+    organisms::Dict{UInt, PhylogenOrganism}
+    #
+    # Array of relations. Relation it's two organism ids, that links
+    # them together. For example parent and child organism ids. These
+    # data will be used for phylogenetic graph creation.
+    #
+    relations::Array{UInt, 1}
+  end
+  #
   # Module initializer
   #
   function init(man::ManagerData)
+    #
+    # We havr to add ourself to plugins map
+    #
+    man.plugins[MODULE_NAME] = PhylogenData(Dict{UInt, PhylogenOrganism}(), [])
+    #
+    # All event handlers should be binded here
+    #
+    Event.on(man.obs, "backup", _save)
+    Event.on(man.obs, "backup", _clear)
+    Event.on(man.obs, "killorganism", _delOrganism)
+    Event.on(man.obs, "bornorganism", _addOrganism)
+    Event.on(man.obs, "mutate", _addMutations)
+    Event.on(man.obs, "clone", _addRelation)
+
   end
   #
   # Adds one organism to phylogenetic organisms pool. Creates it's
@@ -62,13 +118,13 @@ module Phylogen
   # @param man Manager related data object
   # @param org Organism we have to add to the pool
   #
-  function addOrganism(man::ManagerData, org::Organism)
-    local orgCopy::Organism = _copyOrganism(man, org)
+  function _addOrganism(man::ManagerData, org::Creature.Organism)
+    local orgCopy::Creature.Organism = _copyOrganism(man, org)
 
-    if haskey(man.phylogen.organisms, org.id)
+    if haskey(man.plugins[MODULE_NAME].organisms, org.id)
       Helper.error(string("Phylogen: Dublicate organism id: ", org.id))
     end
-    man.phylogen.organisms[org.id] = PhylogenOrganism(orgCopy, [])
+    man.plugins[MODULE_NAME].organisms[org.id] = PhylogenOrganism(orgCopy, [])
   end
   #
   # Opposite to addOrganism() function. Removes one organism
@@ -77,8 +133,8 @@ module Phylogen
   # @param man Manager related data object
   # @param org Organism we have to add to the pool
   #
-  function delOrganism(man::ManagerData, org::Organism)
-    delete!(man.phylogen.organisms, org.id)
+  function _delOrganism(man::ManagerData, org::Creature.Organism)
+    delete!(man.plugins[MODULE_NAME].organisms, org.id)
   end
   #
   # Adds specified amount of mutations to organism. org parameter
@@ -89,13 +145,13 @@ module Phylogen
   # @param org Organism we have to add to the pool
   # param amount Amount of real mutations
   #
-  function addMutations(man::ManagerData, org::Organism, amount::Int)
-    local orgs::Dict{UInt, PhylogenOrganism} = man.phylogen.organisms
+  function _addMutations(man::ManagerData, org::Creature.Organism, amount::Int)
+    local orgs::Dict{UInt, PhylogenOrganism} = man.plugins[MODULE_NAME].organisms
     if !haskey(orgs, org.id)
       Helper.error(string("Phylogen: Unknown organism id: ", org.id))
       return nothing
     end
-    local orgCopy::Organism = _copyOrganism(man, org)
+    local orgCopy::Creature.Organism = _copyOrganism(man, org)
 
     push!(orgs[org.id].mutations, PhylogenMutation(orgCopy, amount))
   end
@@ -106,9 +162,9 @@ module Phylogen
   # @param parentId Unique id of parent organism
   # @param childId Unique id of child organism
   #
-  function addRelation(man::ManagerData, parentId::UInt, childId::UInt)
-    push!(man.phylogen.relations, parentId)
-    push!(man.phylogen.relations, childId)
+  function _addRelation(man::ManagerData, parentId::UInt, childId::UInt)
+    push!(man.plugins[MODULE_NAME].relations, parentId)
+    push!(man.plugins[MODULE_NAME].relations, childId)
   end
   #
   # Clears phylogenetic tree arrays to start new portion of data. Only
@@ -116,15 +172,15 @@ module Phylogen
   # all the time.
   # @param man Manager related data object
   #
-  function clear(man::ManagerData)
-    man.phylogen.relations = [];
+  function _clear(man::ManagerData)
+    man.plugins[MODULE_NAME].relations = [];
   end
   #
   # Saves JSON data to the file on HDD.
   # @param man Manager related data object
   #
-  function save(man::ManagerData)
-      Backup.save(_toJson(man), PHYLO_FOLDER_NAME, PHYLO_FILE_POSTFIX, true)
+  function _save(man::ManagerData)
+    Backup.save(_toJson(man), PHYLO_FOLDER_NAME, PHYLO_FILE_POSTFIX, true)
   end
   #
   # Converts phylogenetic tree arrays to JSON.
@@ -135,8 +191,8 @@ module Phylogen
     local i::Int
     local id::UInt
     local json::String
-    local relations::Array{UInt, 1} = man.phylogen.relations
-    local organisms::Dict{UInt, PhylogenOrganism} = man.phylogen.organisms
+    local relations::Array{UInt, 1} = man.plugins[MODULE_NAME].relations
+    local organisms::Dict{UInt, PhylogenOrganism} = man.plugins[MODULE_NAME].organisms
     local arr::Array{String, 1}
 
     arr = []
@@ -159,8 +215,8 @@ module Phylogen
   # @param org Organism we have to copy
   # @return {Organism}
   #
-  function _copyOrganism(man::ManagerData, org::Organism)
-    local orgCopy::Organism = Creature.create(org, man.cfg, org.id, org.pos)
+  function _copyOrganism(man::ManagerData, org::Creature.Organism)
+    local orgCopy::Creature.Organism = Creature.create(org, man.cfg, org.id, org.pos)
 
     orgCopy.funcs  = []
     orgCopy.codeFn = Helper.emptyFn

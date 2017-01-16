@@ -1,5 +1,12 @@
 #
 # Manages organisms and their world
+# Events:
+#   afterbackup {ManagerData}                Fires after backup has created
+#   killorganism{ManagerData, Organism}      Fires if organism has die
+#   bornorganism{ManagerData, Creature}      Fire if organism has borned
+#   mutate      {ManagerData, Creature, Int} Fires if mutations have occures
+#   clone       {ManagerData, UInt, UInt}    Fires if after clonning
+#
 #
 # @singleton
 # @author DeadbraiN
@@ -19,7 +26,6 @@ module Manager
   #
   # Macroses
   #
-  import CodeConfig.@if_phylogen
   import CodeConfig.@if_status
   import CodeConfig.@if_debug
   import CodeConfig.@if_test
@@ -41,10 +47,6 @@ module Manager
   import FastApi
   import Config
   import ManagerTypes
-  #
-  # Manager plugins
-  #
-  @if_phylogen import Phylogen
 
   export create
   export run
@@ -68,26 +70,29 @@ module Manager
   # @param cfg Configuration object for manager
   #
   function create(cfg::Config.ConfigData = Config.create())
-    local man::ManagerTypes.ManagerData = ManagerTypes.ManagerData(
-      cfg,                                                                          # cfg
-      World.create(cfg.worldWidth, cfg.worldHeight),                                # world
-      Dict{Int, Creature.Organism}(),                                               # positions
-      Dict{UInt, Creature.Organism}(),                                              # organisms
-      ManagerTypes.OrganismTask[],                                                  # tasks
-      CommandLine.create(),                                                         # params
-      UInt(1),                                                                      # organismId
-      UInt(0),                                                                      # totalOrganisms
-      CommandLine.has(CommandLine.create(), ARG_QUIET),                             # quiet
-      function() end,                                                               # dotCallback
-      function() end,                                                               # moveCallback
-      current_task(),                                                               # task
-      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0),                   # status
-      ManagerTypes.ManagerPhylogen(Dict{UInt, ManagerTypes.PhylogenOrganism}(), []),# phylogen
-      Event.create()                                                                # observer
-    )
-    local cons::ManagerTypes.Connections = _createConnections(man)
+    local man::ManagerTypes.ManagerData
+    local obs::Event.Observer = Event.create()
 
-    man.cons = cons
+    man = ManagerTypes.ManagerData(
+      cfg,                                                                      # cfg
+      World.create(cfg.worldWidth, cfg.worldHeight),                            # world
+      Dict{Int, Creature.Organism}(),                                           # positions
+      Dict{UInt, Creature.Organism}(),                                          # organisms
+      ManagerTypes.OrganismTask[],                                              # tasks
+      CommandLine.create(),                                                     # params
+      UInt(1),                                                                  # organismId
+      UInt(0),                                                                  # totalOrganisms
+      CommandLine.has(CommandLine.create(), ARG_QUIET),                         # quiet
+      function() end,                                                           # dotCallback
+      function() end,                                                           # moveCallback
+      current_task(),                                                           # task
+      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0),               # status
+      Dict{String, ManagerTypes.Plugin}(),                                      # plugins
+      obs                                                                       # obs
+    )
+    man.cons = _createConnections(man)
+    initPlugins(man)
+
     man
   end
   #
@@ -117,7 +122,6 @@ module Manager
     @if_profile local i::Int = 0
 
     try
-      initPlugins(man)
       #
       # This server is listening for all other managers and remote
       # terminal. It runs obtained commands and send answers back.
@@ -306,8 +310,7 @@ module Manager
       if length(man.tasks) > 0
         backups += 1
         backup(man)
-        @if_phylogen Phylogen.save(man)
-        @if_phylogen Phylogen.clear(man)
+        Event.fire(man.obs, "backup", man)
       end
       return stamp, backups
     end

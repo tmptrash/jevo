@@ -1,6 +1,6 @@
 #
-# This file contains a list of folders, which we have 
-# to add to include search path. After that we may use 
+# This file contains a list of folders, which we have
+# to add to include search path. After that we may use
 # import ModuleName. This file should be included from
 # root directory. e.g.: in AppXXX.jl files...
 #

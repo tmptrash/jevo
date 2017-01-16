@@ -14,13 +14,18 @@ module ManagerTypes
   import World
   import Event
 
+  export Plugin
   export ManagerStatus
-  export ManagerPhylogen
-  export PhylogenOrganism
-  export PhylogenMutation
   export ManagerData
   export OrganismTask
   export Connections
+  #
+  # Abstraction for plugin type. All plugins should be inherited
+  # from this type like this:
+  #
+  # type MyPlugin <: Plugin ... end
+  #
+  abstract Plugin
   #
   # Contains real time status data like IPS, RPS,...
   #
@@ -35,53 +40,6 @@ module ManagerTypes
     srps::Int         # moveXXX() related requests per second
     syps::Int         # moveXXX() related yields per second
     mps::Int          # mutations per second
-  end
-  #
-  # Describes one mutation of organism. Mutated organism - it's
-  # original (clonned) organism + mutations.
-  #
-  type PhylogenMutation
-    #
-    # Mutated organism
-    #
-    org::Creature.Organism
-    #
-    # Amount of real mutations applied to original organism
-    #
-    mutations::Int
-  end
-  #
-  # Describes all mutations of organism. Organism and mutations
-  # should be separate copies from original organisms.
-  #
-  type PhylogenOrganism
-    #
-    # Organism object after birth
-    #
-    org::Creature.Organism
-    #
-    # Array of organisms based on org, but with mutations. This
-    # is something like it's future versions.
-    #
-    mutations::Array{PhylogenMutation, 1}
-  end
-  #
-  # Contains Phylogenetic tree of organisms. These data will
-  # be used for Phylogenetic tree visualization.
-  #
-  type ManagerPhylogen
-    #
-    # Map of organism copies. It's important to have full copy without
-    # meta information about their code (funcs field should be empty).
-    # Key is organism's unique id.
-    #
-    organisms::Dict{UInt, PhylogenOrganism}
-    #
-    # Array of relations. Relation it's two organism ids, that links
-    # them together. For example parent and child organism ids. These
-    # data will be used for phylogenetic graph creation.
-    #
-    relations::Array{UInt, 1}
   end
   #
   # One task related to one organism
@@ -193,13 +151,14 @@ module ManagerTypes
     #
     status::ManagerStatus
     #
-    # Phylogenetic tree of organisms
+    # All available(compiled) Manager's plugins. Key is a plugin string
+    # name (filename). Value - plugin related data type.
     #
-    phylogen::ManagerPhylogen
+    plugins::Dict{String, Plugin}
     #
     # Manager observer
     #
-    observer::Event.Observer
+    obs::Event.Observer
     #
     # Manager connections (with other managers, terminals, visualizer etc...)
     #
@@ -221,8 +180,8 @@ module ManagerTypes
       moveCallback::Function,
       task::Task,
       status::ManagerStatus,
-      phylogen::ManagerPhylogen,
-      observer::Event.Observer
+      plugins::Dict{String, Plugin},
+      obs::Event.Observer
     ) = new(
       cfg,
       world,
@@ -237,46 +196,8 @@ module ManagerTypes
       moveCallback,
       task,
       status,
-      phylogen,
-      observer
-    )
-    #
-    # Full constructor
-    #
-    ManagerData(
-      cfg::Config.ConfigData,
-      world::World.Plane,
-      positions::Dict{Int, Creature.Organism},
-      organisms::Dict{UInt, Creature.Organism},
-      tasks::Array{OrganismTask, 1},
-      params::Dict{String, String},
-      organismId::UInt,
-      totalOrganisms::UInt,
-      quiet::Bool,
-      dotCallback::Function,
-      moveCallback::Function,
-      task::Task,
-      status::ManagerStatus,
-      phylogen::ManagerPhylogen,
-      observer::Event.Observer,
-      cons::Connections
-    ) = new(
-      cfg,
-      world,
-      positions,
-      organisms,
-      tasks,
-      params,
-      organismId,
-      totalOrganisms,
-      quiet,
-      dotCallback,
-      moveCallback,
-      task,
-      status,
-      phylogen,
-      observer,
-      cons
+      plugins,
+      obs
     )
   end
 end

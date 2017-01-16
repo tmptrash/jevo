@@ -26,6 +26,8 @@ const ALL_PLUGINS = "all"
 # Included and excluded plugins are set in Config.DataConfig.plugIncluded,
 # plugExcluded
 # @param cfg Configuration data object
+# @param obs Observer for events
+# @return {Array{String,1}} Activated plugins array
 #
 function initPlugins(man::ManagerTypes.ManagerData)
   local plugin::String
@@ -36,7 +38,7 @@ function initPlugins(man::ManagerTypes.ManagerData)
   # "all" setting is in exclude list. We have to disable all plugins
   # by returning nothing. require() will not be called for them
   #
-  if findfirst(excluded, ALL_PLUGINS) > 0 return nothing end
+  if findfirst(excluded, ALL_PLUGINS) > 0 return false end
   #
   # if "all" setting is in include list, we have to include all plugins.
   # otherwise excluded plugins should be excluded from included list
@@ -46,9 +48,9 @@ function initPlugins(man::ManagerTypes.ManagerData)
   for plugin in plugins
     if plugin === ALL_PLUGINS continue end
     Base.require(Symbol(plugin))
-    getfield(eval(Symbol(plugin)), :init)(man)
+    getfield(Main.eval(Symbol(plugin)), :init)(man)
   end
   Helper.done()
 
-  nothing
+  true
 end
