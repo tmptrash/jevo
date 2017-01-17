@@ -104,10 +104,10 @@ function backup(man::ManagerTypes.ManagerData)
   # yield() call is needed, because Julia has strange issue with yieldto()
   # or i don't understand it's logic. Anyway, it stucks without this call.
   # TODO: do we need this?
-  # TODO: move this yieldto() and @if_status in separate function
+  # TODO: move this yieldto() and fire() in separate function
   # TODO: reuse this approach in every file...
   yield()
-  @if_status man.status.yps += 1
+  Event.fire(man.obs, "yield", man)
   consume(tmpTask)
   #
   # This is a small trick. We have to set all tasks in "done"

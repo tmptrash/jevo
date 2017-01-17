@@ -1,3 +1,11 @@
 jevo
 .idea
 backup
+/phylogen
+/build/run-code-math-test.bat
+/build/run-code-test.bat
+/build/run-man-test.bat
+/test/run-code-math-test.jl
+/test/run-code-test.jl
+/test/run-man-test.jl
+/tmp/tmp-cond.jl

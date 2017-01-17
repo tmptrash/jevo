@@ -1,4 +1,4 @@
-#
+# TODO: this file should be removed
 # This is configuration file for entire application.
 # It turns on or off some code parts according to below constants.
 # The difference between this and Config.jl is in preprocessor.
@@ -18,15 +18,12 @@
 module CodeConfig
   import CommandLine
 
-  export modeStatus
   export modeStatusPeriod
   export modeDebug
   export modeTest
   export modeProfile
   export profilePeriod
 
-  export if_phylogen
-  export if_status
   export if_debug
   export if_test
   export if_profile
@@ -64,16 +61,6 @@ module CodeConfig
   #
   const _cmdLine          = CommandLine.create()
   #
-  # Turns on/off output of real time manager status like
-  # amount of organisms, IPS, RPS and so on...
-  #
-  const modeStatus        = _cmdActivated("modeStatus", true)
-  #
-  # Turns on/off Phylogenetic tree gathering process. Every organism
-  # will be in this tree. All the information will be stored in JSON files
-  #
-  const modePhylogen      = _cmdActivated("modePhylogen", true)
-  #
   # Status showing period in seconds. Works only if
   # "showStatus" option is set to true.
   #
@@ -99,15 +86,6 @@ module CodeConfig
   # before profiler windows will be shown
   # TODO: make this parameter as a part of modeProfile:2000 and remove it
   const modeProfilePeriod = _cmdActivated("modeProfilePeriod", 2000)
-  #
-  # This macro turns on creation of phylogenetic organisms tree creation module
-  #
-  macro if_phylogen(ex) @static if CodeConfig.modePhylogen esc(ex) end end
-  #
-  # This macro turns on specified code in case if "showStatus"
-  # config is turned on.
-  #
-  macro if_status(ex) @static if CodeConfig.modeStatus esc(ex) end end
   #
   # This macro turns on DEBUG code if modeDebug is true
   #

@@ -4,8 +4,6 @@
 #
 # @author DeadbraiN
 #
-import CodeConfig.@if_status
-#
 # Dependencies
 #
 import Config
@@ -84,7 +82,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # Because this loop affects porformance, we have call yield()
     # here and not in main Manager while loop.
     #
-    if needYield yield(); @if_status man.status.yps += 1 end
+    if needYield yield(); Event.fire(man.obs, "yield", man) end
     #
     # We have to wait while all clients are ready for streaming. This
     # is because the error in serializer. See issue for details:
@@ -93,7 +91,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     #
     if man.cons.streamInit::Bool return counter + 1 end
     yieldto(task.task)
-    @if_status man.status.ytps += 1
+    Event.fire(man.obs, "yieldto", man)
     #
     # Age of organism is increasing all the time
     #
@@ -236,7 +234,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
 
     i -= 1
   end
-  @if_status man.status.eups += 1
+  Event.fire(man.obs, "updateenergy", man)
 
   true
 end
@@ -316,7 +314,6 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   delete!(man.organisms, id)
   Manager.stopTask(tasks[i].task)
   splice!(tasks, i)
-  @if_status man.status.rops += 1
   msg(man, id, "die")
   Event.fire(man.obs, "killorganism", man, org)
 
@@ -439,9 +436,8 @@ function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask,
     # runned, before new code will be running.
     #
     Manager._updateOrgTask(man, task)
-    Event.fire(man.obs, "mutate", man, task.organism, mutations)
+    Event.fire(man.obs, "mutations", man, task.organism, mutations)
   end
-  @if_status man.status.mps += mutations
 end
 #
 # Makes orhanism clone and apply mutations to it (child).
@@ -459,11 +455,11 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   #
   pos = World.getNearFreePos(man.world, organism.pos)
   if pos === false return false end
-  #
+  #s
   # Creates new organism and apply mutations to him.
   #
   crTask = Manager._createOrganism(man, organism, pos)
-  @if_status man.status.cps += 1
+  Event.fire(man.obs, "clone", man, organism.id, crTask.organism.id)
   if crTask === false return false end
   #
   # Clonning means additional energy waste
@@ -477,11 +473,6 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
     crTask.organism.energy = energy
   end
   if energy > 0
-    #
-    # Adds relation between parent and child organisms. Using this
-    # relation we may visualize phylogenetic tree
-    #
-    Event.fire(man.obs, "clone", man, organism.id, crTask.organism.id)
     _mutate(man, crTask, crTask.organism.mutationsOnClonePercent)
   end
   if organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks)) end

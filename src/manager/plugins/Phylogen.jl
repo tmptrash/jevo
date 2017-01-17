@@ -28,7 +28,6 @@ module Phylogen
   import ManagerTypes.ManagerData
   import ManagerTypes.Plugin
 
-  export PhylogenData
   export init
   #
   # Default postfix of phylogenetic tree files
@@ -104,7 +103,7 @@ module Phylogen
     Event.on(man.obs, "backup", _clear)
     Event.on(man.obs, "killorganism", _delOrganism)
     Event.on(man.obs, "bornorganism", _addOrganism)
-    Event.on(man.obs, "mutate", _addMutations)
+    Event.on(man.obs, "mutations", _addMutations)
     Event.on(man.obs, "clone", _addRelation)
 
   end

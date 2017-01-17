@@ -357,7 +357,7 @@ module Config
       1,                                       # worldZoom
       0,                                       # worldIps
 
-      240.0,                                   # backupPeriod
+      10.0,#240.0,                                   # backupPeriod
       10,                                      # backupAmount
 
       0.01,                                    # conYieldPeriod
@@ -374,7 +374,7 @@ module Config
       0,                                       # conDownServerPort
       ip"127.0.0.1",                           # conDownServerIp
 
-      ["Phylogen"],                            # plugIncluded
+      ["Phylogen", "Status"],                  # plugIncluded
       []                                       # plugExcluded
     )
 

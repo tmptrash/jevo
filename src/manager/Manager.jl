@@ -4,8 +4,15 @@
 #   afterbackup {ManagerData}                Fires after backup has created
 #   killorganism{ManagerData, Organism}      Fires if organism has die
 #   bornorganism{ManagerData, Creature}      Fire if organism has borned
-#   mutate      {ManagerData, Creature, Int} Fires if mutations have occures
+#   mutations   {ManagerData, Creature, Int} Fires if mutations have occures
 #   clone       {ManagerData, UInt, UInt}    Fires if after clonning
+#   yield       {ManagerData}                Fires if yield() is called
+#   yieldto     {ManagerData}                Fires if yieldto() is called
+#   iteration   {ManagerData, Float64}       Is fired on every iteration (see IPS)
+#   updateenergy{ManagerData}                Is fired on every organisms energy update
+#   killorganism{ManagerData, Organism}      Is called if organism has been killed
+#   dotrequest  {ManagerData}                Is called if step (dot) request is occured
+#   stepyield   {ManagerData}                Is called if one step related yield was called
 #
 #
 # @singleton
@@ -26,7 +33,6 @@ module Manager
   #
   # Macroses
   #
-  import CodeConfig.@if_status
   import CodeConfig.@if_debug
   import CodeConfig.@if_test
   import CodeConfig.@if_profile
@@ -56,17 +62,12 @@ module Manager
   #
   include("ManagerOrganism.jl")
   include("ManagerRpc.jl")
-  include("ManagerBackup.jl") # TODO: should be a plugin
+  include("ManagerBackup.jl")
   include("ManagerParams.jl")
   include("ManagerPlugins.jl")
-  @if_status include("ManagerStatus.jl")
   #
   # Creates manager related data instance. It will be passed to all
-  # manager methods. ManagerStatus type will be created in any case.
-  # In case if CodeConfig.modeStatus set in true or false. This is
-  # because i don't know how exclude one field from type depending
-  # on CodeConfig.modeStatus parameters. May be some cool macro may
-  # do it, maybe...
+  # manager methods
   # @param cfg Configuration object for manager
   #
   function create(cfg::Config.ConfigData = Config.create())
@@ -86,7 +87,6 @@ module Manager
       function() end,                                                           # dotCallback
       function() end,                                                           # moveCallback
       current_task(),                                                           # task
-      ManagerTypes.ManagerStatus(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0),               # status
       Dict{String, ManagerTypes.Plugin}(),                                      # plugins
       obs                                                                       # obs
     )
@@ -152,7 +152,11 @@ module Manager
         # is because the error in serializer. See issue for details:
         # https://github.com/JuliaLang/julia/issues/16746
         #
-        if cons.streamInit yield(); @if_status man.status.yps += 1; continue end
+        if cons.streamInit
+          yield()
+          Event.fire(man.obs, "yield", man)
+          continue
+        end
         #
         # This is global time stamp in seconds
         #
@@ -189,10 +193,9 @@ module Manager
         #
         if cfg.orgEvals > 2400 && backups > 5 return false end
         #
-        # It's important to skip this function if CodeConfig.showStatus
-        # flag is set to false. See CodeConfig::showStatus for details.
+        # Means that one iteration in a system has occured
         #
-        @if_status _updateStatus(man, stamp)
+        Event.fire(man.obs, "iteration", man, stamp)
         #
         # This code is used for profiling of jevo. returning true means,
         # that the process will be stopped and second run will not occures.
@@ -288,7 +291,7 @@ module Manager
       @inbounds for sock in man.cons.fastServer.socks
         if Helper.isopen(sock)
           Server.request(sock, dataIndex, localIps)
-          @if_status man.status.rps += 1
+          Event.fire(man.obs, "request", man)
         end
       end
       return 0, stamp
@@ -330,7 +333,7 @@ module Manager
   function _updateTasks(man::ManagerTypes.ManagerData, stamp::Float64, ystamp::Float64, needYield::Bool)
     if stamp - ystamp >= man.cfg.conYieldPeriod
       yield()
-      @if_status man.status.yps += 1
+      Event.fire(man.obs, "yield", man)
       # TODO: potential problem here. this list of sockets may be expanded
       # TODO: for example in many managers mode
       return stamp, (length(man.cons.server.socks) > 0 || man.cons.streamInit)
@@ -345,8 +348,6 @@ module Manager
   #
   function _updateOrgTask(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask)
     task.task = Task(() -> Creature.born(task.organism, man.cfg, man.task))
-    #yieldto(task.task)
-    #@if_status man.status.ytps += 1
   end
   # # TODO: do i need this?
   # # Checks id data in sockets available for reading

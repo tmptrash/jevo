@@ -15,7 +15,6 @@ module ManagerTypes
   import Event
 
   export Plugin
-  export ManagerStatus
   export ManagerData
   export OrganismTask
   export Connections
@@ -26,21 +25,6 @@ module ManagerTypes
   # type MyPlugin <: Plugin ... end
   #
   abstract Plugin
-  #
-  # Contains real time status data like IPS, RPS,...
-  #
-  type ManagerStatus
-    stamp::Float64    # current UNIX time stamp
-    rps::Int          # all requests per second
-    eups::Int         # energy updates per second
-    rops::Int         # remove organisms per second
-    ytps::Int         # one side yieldto() calls per second
-    yps::Int          # all yields per second
-    cps::Int          # clones per second
-    srps::Int         # moveXXX() related requests per second
-    syps::Int         # moveXXX() related yields per second
-    mps::Int          # mutations per second
-  end
   #
   # One task related to one organism
   #
@@ -146,11 +130,6 @@ module ManagerTypes
     #
     task::Task
     #
-    # This field is optional and will be added only if CodeConfig.showStatus
-    # flag will be set to true.
-    #
-    status::ManagerStatus
-    #
     # All available(compiled) Manager's plugins. Key is a plugin string
     # name (filename). Value - plugin related data type.
     #
@@ -179,7 +158,6 @@ module ManagerTypes
       dotCallback::Function,
       moveCallback::Function,
       task::Task,
-      status::ManagerStatus,
       plugins::Dict{String, Plugin},
       obs::Event.Observer
     ) = new(
@@ -195,7 +173,6 @@ module ManagerTypes
       dotCallback,
       moveCallback,
       task,
-      status,
       plugins,
       obs
     )
