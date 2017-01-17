@@ -357,7 +357,7 @@ module Config
       1,                                       # worldZoom
       0,                                       # worldIps
 
-      10.0,#240.0,                                   # backupPeriod
+      240.0,                                   # backupPeriod
       10,                                      # backupAmount
 
       0.01,                                    # conYieldPeriod

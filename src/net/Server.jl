@@ -125,7 +125,7 @@ module Server
       try
         local server::Base.TCPServer = listen(host, port)
         con = ServerConnection(tasks, socks, server, obs, host, port, fast)
-        Helper.info(string(fast ? "Fast" : "Slow", " Server created: ", con.host, ":", con.port))
+        Helper.info(string(fast ? "Fast" : "Slow", " Server created on ", con.host, ":", con.port))
         return con
       catch e
         Helper.warn("Server.create(): $e")
@@ -156,7 +156,7 @@ module Server
       return false
     end
 
-    Helper.info(string(con.fast ? "Fast" : "Slow", " server has run: ", con.host, ":", con.port))
+    Helper.info(string(con.fast ? "Fast" : "Slow", " server has run on ", con.host, ":", con.port))
     @async begin
       while true
         try

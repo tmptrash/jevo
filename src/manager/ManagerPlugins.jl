@@ -22,6 +22,10 @@ import Config
 #
 const ALL_PLUGINS = "all"
 #
+# Is used for right padding with "." symbol
+#
+const PLUGIN_NAME_MAX_LEN = 20
+#
 # Initializes all available plugins according to configuration.
 # Included and excluded plugins are set in Config.DataConfig.plugIncluded,
 # plugExcluded
@@ -44,13 +48,14 @@ function initPlugins(man::ManagerTypes.ManagerData)
   # otherwise excluded plugins should be excluded from included list
   #
   plugins = findfirst(included, ALL_PLUGINS) > 0 ? included : setdiff(included, excluded)
-  Helper.info(string("Initializing plugins: ", join(plugins, ","), "..."), false)
+  Helper.info("Initializing plugins: ")
   for plugin in plugins
     if plugin === ALL_PLUGINS continue end
+    Helper.info(string("  ", rpad(plugin, PLUGIN_NAME_MAX_LEN, ".")), false)
     Base.require(Symbol(plugin))
     getfield(Main.eval(Symbol(plugin)), :init)(man)
+    Helper.done()
   end
-  Helper.done()
 
   true
 end

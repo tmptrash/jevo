@@ -97,7 +97,7 @@ function _onRecover()
   local man::ManagerTypes.ManagerData
   local exitCode::Int
 
-  Helper.info("Start jevo...")
+  Helper.info("Starting jevo...")
   man = Manager.create()
   Manager.recover(man)
   exitCode = Int(!Manager.run(man, true)) # 1 - error, 0 - okay
@@ -112,7 +112,7 @@ end
 function _onRun()
   local exitCode::Int
 
-  Helper.info("Start jevo...")
+  Helper.info("Starting jevo...")
   Helper.info("Running from scratch...")
   exitCode = Int(!Manager.run(Manager.create())) # 1 - error, 0 - okay
   Helper.info("Quit jevo...")
