@@ -2,9 +2,6 @@
 # @author DeadbraiN
 #
 module Helper
-  #import Gtk
-  import CodeConfig.@if_debug
-
   export CodePos
   export Point
   export RetObj
@@ -262,7 +259,7 @@ module Helper
       end
     catch(e)
       warn("Helper.save(): $e")
-      @if_debug showerror(STDOUT, e, catch_backtrace())
+      showerror(STDOUT, e, catch_backtrace())
       ret = false
     finally
       if io !== nothing close(io) end
@@ -284,7 +281,7 @@ module Helper
       ret = deserialize(io)
     catch(e)
       warn("Helper.load(): $e")
-      @if_debug showerror(STDOUT, e, catch_backtrace())
+      showerror(STDOUT, e, catch_backtrace())
       ret = nothing
     finally
       if io !== nothing close(io) end

@@ -7,7 +7,7 @@
 # @author DeadbraiN
 #
 include("global/ImportFolders.jl")
-import CodeConfig.@if_debug
+import Config.@if_debug
 import Helper
 import Backup
 import Config

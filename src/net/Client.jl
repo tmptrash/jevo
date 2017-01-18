@@ -52,7 +52,7 @@
 # @author DeadbraiN
 #
 module Client
-  import CodeConfig.@if_debug
+  import Config.@if_debug
   import Event
   import Helper
   using Connection

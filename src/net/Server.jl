@@ -79,7 +79,7 @@
 # TODO: add EVENT_AFTER_REQUEST logic description
 # TODO: add description of fast part of this module
 module Server
-  import CodeConfig.@if_debug
+  import Config.@if_debug
   import Event
   import Helper
   using Connection

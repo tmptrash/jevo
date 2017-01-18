@@ -6,7 +6,7 @@
 # @author DeadbraiN
 #
 module Connection
-  import CodeConfig.@if_debug
+  import Config.@if_debug
   import Helper
   import Event
   import FastApi

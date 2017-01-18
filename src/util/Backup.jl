@@ -5,7 +5,7 @@
 # @author DeadbraiN
 #
 module Backup
-  import CodeConfig.@if_debug
+  import Config.@if_debug
   import Helper
 
   export createFolder

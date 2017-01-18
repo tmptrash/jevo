@@ -21,12 +21,13 @@
 # @author DeadbraiN
 #
 module Config
-  import CodeConfig.@if_debug
   import Helper
   import CommandLine
 
   export ORGANISM_MAX_MUTATION_PERIOD
   export ORGANISM_MAX_ENERGY
+
+  export if_debug
 
   export create
   export save
@@ -312,6 +313,58 @@ module Config
     # Array of excluded plugins. Affects plugIncluded list
     #
     plugExcluded::Array{String, 1}
+    #
+    # Debug mode. This mode means, that all debug messages
+    # will be posted to the terminal
+    #
+    modeDebug::Bool
+  end
+  #
+  # Returns one configuration setting from command line parameters
+  # or from ConfigData instance. Default values are set in create() method
+  # @param args Command line arguments
+  # @param name Name of the setting
+  # @return {String} Value from command line or default value
+  #
+  function _setting(data::ConfigData, name::Symbol)
+    local sName::String = string(name)
+    local val::Any
+
+    if CommandLine.has(data.cmdLineArgs, sName)
+      val = CommandLine.val(data.cmdLineArgs, sName, true)
+      #
+      # In case of Int type we have to figure out exact type
+      # Int8, UInt16 and so on...
+      #
+      if typeof(val) === Int return convert(typeof(getfield(data, name)), val) end
+      return val
+    end
+
+    getfield(data, name)
+  end
+  #
+  # Merges default configuration obtained by calling create() method
+  # and command line arguments. Command line arguments have higher
+  # priority, then default. For example, if use runs jevo like this:
+  #
+  #   julia src/AppManager.jl worldWidth:1024
+  #
+  # it means, that worldWidth config will be 1024 instead of default value
+  # @param data Configuration data object
+  # @return {ConfigData} Updated configuration object
+  #
+  function _merge(data::ConfigData)
+    local name::Symbol
+
+    for name in fieldnames(data)
+      #
+      # We have to skip command line arguments object
+      #
+      if name === :cmdLineArgs continue end
+      setfield!(data, name, _setting(data, name))
+    end
+
+    data
   end
   #
   # Creates configuration object. It will be used in all config
@@ -357,7 +410,7 @@ module Config
       1,                                       # worldZoom
       0,                                       # worldIps
 
-      240.0,                                   # backupPeriod
+      10.0,#240.0,                                   # backupPeriod
       10,                                      # backupAmount
 
       0.01,                                    # conYieldPeriod
@@ -375,11 +428,18 @@ module Config
       ip"127.0.0.1",                           # conDownServerIp
 
       ["Phylogen", "Status"],                  # plugIncluded
-      []                                       # plugExcluded
+      [],                                      # plugExcluded
+
+      true                                     # modeDebug
     )
 
     merge ? _merge(cfg) : cfg
   end
+  #
+  # This macro turns on DEBUG code if modeDebug. For example, it
+  # shows debug messages in terminal. Don't change this macro position
+  #
+  macro if_debug(ex) @static if _setting(create(), :modeDebug) esc(ex) end end
   #
   # Saves all data into the file. If file exists, it will be overriden
   # @param data Config Data type
@@ -428,51 +488,5 @@ module Config
     end
 
     arr
-  end
-  #
-  # Merges default configuration obtained by calling create() method
-  # and command line arguments. Command line arguments have higher
-  # priority, then default. For example, if use runs jevo like this:
-  #
-  #   julia src/AppManager.jl worldWidth:1024
-  #
-  # it means, that worldWidth config will be 1024 instead of default value
-  # @param data Configuration data object
-  # @return {ConfigData} Updated configuration object
-  #
-  function _merge(data::ConfigData)
-    local name::Symbol
-
-    for name in fieldnames(data)
-      #
-      # We have to skip command line arguments object
-      #
-      if name === :cmdLineArgs continue end
-      setfield!(data, name, _setting(data, name))
-    end
-
-    data
-  end
-  #
-  # Returns one configuration setting from command line parameters
-  # or from ConfigData instance. Default values are set in create() method
-  # @param name Name of the setting
-  # @return {String} Value from command line or default value
-  #
-  function _setting(data::ConfigData, name::Symbol)
-    local sName::String = string(name)
-    local val::Any
-
-    if CommandLine.has(data.cmdLineArgs, sName)
-      val = CommandLine.val(data.cmdLineArgs, sName, true)
-      #
-      # In case of Int type we have to figure out exact type
-      # Int8, UInt16 and so on...
-      #
-      if typeof(val) === Int return convert(typeof(getfield(data, name)), val) end
-      return val
-    end
-
-    getfield(data, name)
   end
 end

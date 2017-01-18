@@ -33,7 +33,7 @@ module Manager
   #
   # Macroses
   #
-  import CodeConfig.@if_debug
+  import Config.@if_debug
   import CodeConfig.@if_test
   import CodeConfig.@if_profile
   #

@@ -1,4 +1,4 @@
-import CodeConfig.@if_debug
+import Config.@if_debug
 import RpcApi
 import Config
 #
