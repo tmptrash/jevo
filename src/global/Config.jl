@@ -333,6 +333,10 @@ module Config
     # package will draw performance flame chart
     #
     modeProfilePeriod::Int
+    #
+    # Amount of seconds for status showing in terminal
+    #
+    modeStatusPeriod::Int
   end
   #
   # Returns one configuration setting from command line parameters
@@ -448,7 +452,8 @@ module Config
       true,                                    # modeDebug
       false,                                   # modeTest
       false,                                   # modeProfile
-      2000                                     # modeProfilePeriod
+      2000,                                    # modeProfilePeriod
+      5.0                                      # modeStatusPeriod
     )
 
     merge ? _merge(cfg) : cfg

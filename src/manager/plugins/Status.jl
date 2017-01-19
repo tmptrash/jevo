@@ -4,7 +4,6 @@
 # @author DeadbraiN
 #
 module Status
-  import CodeConfig
   import ManagerTypes.ManagerData
   import ManagerTypes.Plugin
   import Creature
@@ -59,9 +58,9 @@ module Status
   #
   function _onStatus(man::ManagerData, stamp::Float64)
     local st::StatusData  = man.plugins[MODULE_NAME]
-    local period::Float64 = CodeConfig.modeStatusPeriod
+    local period::Float64 = man.cfg.modeStatusPeriod
 
-    if stamp - st.stamp >= CodeConfig.modeStatusPeriod
+    if stamp - st.stamp >= man.cfg.modeStatusPeriod
       println(
         "ips ",      man.cfg.worldIps,
         ", ytps ",   Int(div(st.ytps, period)),

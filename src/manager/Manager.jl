@@ -39,7 +39,6 @@ module Manager
   #
   # Dependencies
   #
-  import CodeConfig
   import Creature
   import Mutator
   import World
