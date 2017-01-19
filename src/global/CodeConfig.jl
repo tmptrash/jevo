@@ -19,11 +19,9 @@ module CodeConfig
   import CommandLine
 
   export modeStatusPeriod
-  export modeTest
   export modeProfile
   export profilePeriod
 
-  export if_test
   export if_profile
   #
   # This function checks if specified command is activated. Activated
@@ -64,12 +62,6 @@ module CodeConfig
   #
   const modeStatusPeriod  = _cmdActivated("modeStatusPeriod", 5.0)
   #
-  # In this mode we may run a Manager in special "iteration" mode. It
-  # means, that we may run one iteration per call. It's helpfull for
-  # testing of different aspects of Manager (e.g.: energy decrease)
-  #
-  const modeTest          = _cmdActivated("modeTest", false)
-  #
   # Turns on profiling mode. ProfileView package is used. Turns
   # this config to on and run run-profiling.bat batch.
   #
@@ -79,11 +71,6 @@ module CodeConfig
   # before profiler windows will be shown
   # TODO: make this parameter as a part of modeProfile:2000 and remove it
   const modeProfilePeriod = _cmdActivated("modeProfilePeriod", 2000)
-  #
-  # This macro turns on special test mode, which is called "iterational".
-  # In this mode we may run Manager for special amount of iterations like a task.
-  #
-  macro if_test(ex) @static if CodeConfig.modeTest esc(ex) end end
   #
   # This macro turns on specified code in profiling mode
   #

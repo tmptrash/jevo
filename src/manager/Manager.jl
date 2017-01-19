@@ -34,7 +34,7 @@ module Manager
   # Macroses
   #
   import Config.@if_debug
-  import CodeConfig.@if_test
+  import Config.@if_test
   import CodeConfig.@if_profile
   #
   # Dependencies

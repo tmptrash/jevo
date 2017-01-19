@@ -318,6 +318,11 @@ module Config
     # will be posted to the terminal
     #
     modeDebug::Bool
+    #
+    # Testing mode. In this mode user may run jevo step by step
+    # and test it'sinternal parts. For example, during unit tests
+    #
+    modeTest::Bool
   end
   #
   # Returns one configuration setting from command line parameters
@@ -430,7 +435,8 @@ module Config
       ["Phylogen", "Status"],                  # plugIncluded
       [],                                      # plugExcluded
 
-      true                                     # modeDebug
+      true,                                    # modeDebug
+      false                                    # modeTest
     )
 
     merge ? _merge(cfg) : cfg
@@ -440,6 +446,11 @@ module Config
   # shows debug messages in terminal. Don't change this macro position
   #
   macro if_debug(ex) @static if _setting(create(), :modeDebug) esc(ex) end end
+  #
+  # This macro turns on special test mode, which is called "iterational".
+  # In this mode we may run Manager for special amount of iterations like a task.
+  #
+  macro if_test(ex) @static if _setting(create(), :modeTest) esc(ex) end end
   #
   # Saves all data into the file. If file exists, it will be overriden
   # @param data Config Data type
