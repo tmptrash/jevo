@@ -35,7 +35,7 @@ module Manager
   #
   import Config.@if_debug
   import Config.@if_test
-  import CodeConfig.@if_profile
+  import Config.@if_profile
   #
   # Dependencies
   #
@@ -140,7 +140,7 @@ module Manager
         if cfg.worldStartEnergyDots + cfg.worldStartEnergyInDot > 0
           setRandomEnergy(man, cfg.worldStartEnergyDots, cfg.worldStartEnergyInDot)
         end
-        if man.cfg.orgStartAmount > 0 createOrganisms(man) end
+        if cfg.orgStartAmount > 0 createOrganisms(man) end
       end
       #
       # This is main infinite loop. It manages input connections
@@ -200,7 +200,7 @@ module Manager
         # This code is used for profiling of jevo. returning true means,
         # that the process will be stopped and second run will not occures.
         #
-        @if_profile if (i += 1) > CodeConfig.modeProfilePeriod return true end
+        @if_profile if (i += 1) > cfg.modeProfilePeriod return true end
         #
         # This line is for special testing mode, which is called "iterational".
         # In this mode we may run Manager iteration by iteration and measure

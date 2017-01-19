@@ -32,7 +32,7 @@
 #
 include("global/ImportFolders.jl")
 
-import CodeConfig.@if_profile
+import Config.@if_profile
 import Manager
 import Helper
 import Backup
@@ -66,14 +66,14 @@ function main()
   for command in commands
     if CommandLine.has(args, command[1])
       exitCode = command[2]()
-      if !CodeConfig.modeProfile exit(exitCode) end
-      return exitCode
+      @if_profile return exitCode
+      exit(exitCode)
     end
   end
 
   exitCode = _onRun()
-  if !CodeConfig.modeProfile exit(exitCode) end
-  exitCode
+  @if_profile return exitCode
+  exit(exitCode)
 end
 #
 # Just returns about info
@@ -124,10 +124,8 @@ end
 # will be run in special profiling mode using ProfileView package.
 # In this case fire chart will be drown at the end
 #
-if CodeConfig.modeProfile
-  Profile.clear()
-  @profile main()
-  ProfileView.view()
-else
-  main()
-end
+@if_profile Profile.clear()
+@if_profile @profile main()
+@if_profile ProfileView.view()
+@if_profile return 0
+main()

@@ -19,10 +19,6 @@ module CodeConfig
   import CommandLine
 
   export modeStatusPeriod
-  export modeProfile
-  export profilePeriod
-
-  export if_profile
   #
   # This function checks if specified command is activated. Activated
   # means set up in command line agrument. It means, that user run
@@ -61,18 +57,4 @@ module CodeConfig
   # "showStatus" option is set to true.
   #
   const modeStatusPeriod  = _cmdActivated("modeStatusPeriod", 5.0)
-  #
-  # Turns on profiling mode. ProfileView package is used. Turns
-  # this config to on and run run-profiling.bat batch.
-  #
-  const modeProfile       = _cmdActivated("modeProfile", false)
-  #
-  # Amount of iteration, which will be done in modeProfile === true
-  # before profiler windows will be shown
-  # TODO: make this parameter as a part of modeProfile:2000 and remove it
-  const modeProfilePeriod = _cmdActivated("modeProfilePeriod", 2000)
-  #
-  # This macro turns on specified code in profiling mode
-  #
-  macro if_profile(ex) @static if CodeConfig.modeProfile esc(ex) end end
 end

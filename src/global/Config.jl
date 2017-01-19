@@ -323,6 +323,16 @@ module Config
     # and test it'sinternal parts. For example, during unit tests
     #
     modeTest::Bool
+    #
+    # Is used for profiling the application with ProfileView
+    # package. See run-profiling.sh for details
+    #
+    modeProfile::Bool
+    #
+    # Amount of iterations in profile mode after which ProfileView
+    # package will draw performance flame chart
+    #
+    modeProfilePeriod::Int
   end
   #
   # Returns one configuration setting from command line parameters
@@ -436,7 +446,9 @@ module Config
       [],                                      # plugExcluded
 
       true,                                    # modeDebug
-      false                                    # modeTest
+      false,                                   # modeTest
+      false,                                   # modeProfile
+      2000                                     # modeProfilePeriod
     )
 
     merge ? _merge(cfg) : cfg
@@ -451,6 +463,11 @@ module Config
   # In this mode we may run Manager for special amount of iterations like a task.
   #
   macro if_test(ex) @static if _setting(create(), :modeTest) esc(ex) end end
+  #
+  # This macro turns on specified code in profiling mode. You may use
+  # run-profiling.sh for this
+  #
+  macro if_profile(ex) @static if _setting(create(), :modeProfile) esc(ex) end end
   #
   # Saves all data into the file. If file exists, it will be overriden
   # @param data Config Data type
