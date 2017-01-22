@@ -232,6 +232,7 @@ end
 # @param man Manager data type
 #
 function doBackup(man::ManagerTypes.ManagerData)
+  # TODO: JBackup should be used
   Manager.backup(man)
   nothing
 end

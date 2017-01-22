@@ -1,6 +1,8 @@
 #
 # Part of the Manager module for working with backups. It may
 # save and load application state into/from the file.
+#
+#
 # TODO: describe index based saving format
 #
 # @author DeadbraiN
@@ -123,12 +125,12 @@ function backup(man::ManagerTypes.ManagerData)
     org.observer = Event.create()
   end
   for posPair in manCopy.positions
-    org = posPair[2]
+    org          = posPair[2]
     org.codeFn   = Helper.emptyFn
     org.observer = Event.create()
   end
   for orgPair in manCopy.organisms
-    org = orgPair[2]
+    org          = orgPair[2]
     org.codeFn   = Helper.emptyFn
     org.observer = Event.create()
   end
@@ -141,7 +143,7 @@ function backup(man::ManagerTypes.ManagerData)
   # Before saving backup file, we need to make sure that backup folder is in place.
   # Otherwise - create one.
   #
-  Backup.createFolder()
+  Backup.folder()
   #
   # These code lines create new backup file and remove last one
   #
@@ -149,6 +151,7 @@ function backup(man::ManagerTypes.ManagerData)
     _removeOld(man)
     Helper.info(string("Backup has created: ", Backup.lastFile()))
   end
+  Event.fire(man.obs, "backup", man)
 
   ret
 end

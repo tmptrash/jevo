@@ -1,6 +1,7 @@
 #
 # Manages organisms and their world
 # Events:
+#   created     {ManagerData}                Fires after manager creates it's data types
 #   afterbackup {ManagerData}                Fires after backup has created
 #   killorganism{ManagerData, Organism}      Fires if organism has die
 #   bornorganism{ManagerData, Creature}      Fire if organism has borned
@@ -13,6 +14,7 @@
 #   killorganism{ManagerData, Organism}      Is called if organism has been killed
 #   dotrequest  {ManagerData}                Is called if step (dot) request is occured
 #   stepyield   {ManagerData}                Is called if one step related yield was called
+#   backup      {ManagerData}                Fired after backup has created
 #
 #
 # @singleton
@@ -151,11 +153,7 @@ module Manager
         # is because the error in serializer. See issue for details:
         # https://github.com/JuliaLang/julia/issues/16746
         #
-        if cons.streamInit
-          yield()
-          Event.fire(man.obs, "yield", man)
-          continue
-        end
+        if cons.streamInit yield(); Event.fire(man.obs, "yield", man); continue end
         #
         # This is global time stamp in seconds
         #
@@ -312,7 +310,6 @@ module Manager
       if length(man.tasks) > 0
         backups += 1
         backup(man)
-        Event.fire(man.obs, "backup", man)
       end
       return stamp, backups
     end
