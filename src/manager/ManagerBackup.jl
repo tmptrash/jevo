@@ -2,7 +2,6 @@
 # Part of the Manager module for working with backups. It may
 # save and load application state into/from the file.
 #
-#
 # TODO: describe index based saving format
 #
 # @author DeadbraiN

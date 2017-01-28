@@ -87,6 +87,18 @@ module Phylogen
     # data will be used for phylogenetic graph creation.
     #
     relations::Array{UInt, 1}
+    #
+    # Set of killed organism ids. By killed, i mean organisms, who
+    # were killed before they were saved to JSON file. We have to
+    # store them in killedOrganisms, because JSON will have releation
+    # to undefined (killed) organism and graph wisualizer will fail
+    #
+    killedIds::Set{UInt}
+    #
+    # Organisms, who were killed before they will be stored in JSON file.
+    # See killedIds for details
+    #
+    killedOrganisms::Dict{UInt, PhylogenOrganism}
   end
   #
   # Module initializer
@@ -95,7 +107,7 @@ module Phylogen
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = PhylogenData(Dict{UInt, PhylogenOrganism}(), [])
+    man.plugins[MODULE_NAME] = PhylogenData(Dict{UInt, PhylogenOrganism}(), [], Set{UInt}(), Dict{UInt, PhylogenOrganism}())
     #
     # All event handlers should be binded here
     #
@@ -133,6 +145,13 @@ module Phylogen
   # @param org Organism we have to add to the pool
   #
   function _delOrganism(man::ManagerData, org::Creature.Organism)
+    #
+    # We have unsaved relation for this organism, so we have to
+    # store it in separate dictionary
+    #
+    if in(org.id, man.plugins[MODULE_NAME].killedIds)
+      man.plugins[MODULE_NAME].killedOrganisms[org.id] = man.plugins[MODULE_NAME].organisms[org.id]
+    end
     delete!(man.plugins[MODULE_NAME].organisms, org.id)
   end
   #
@@ -162,8 +181,12 @@ module Phylogen
   # @param childId Unique id of child organism
   #
   function _addRelation(man::ManagerData, parentId::UInt, childId::UInt)
-    push!(man.plugins[MODULE_NAME].relations, parentId)
-    push!(man.plugins[MODULE_NAME].relations, childId)
+    local data::PhylogenData = man.plugins[MODULE_NAME]
+
+    push!(data.relations, parentId)
+    push!(data.relations, childId)
+    push!(data.killedIds, parentId)
+    push!(data.killedIds, childId)
   end
   #
   # Clears phylogenetic tree arrays to start new portion of data. Only
@@ -173,6 +196,8 @@ module Phylogen
   #
   function _clear(man::ManagerData)
     man.plugins[MODULE_NAME].relations = [];
+    man.plugins[MODULE_NAME].killedIds = Set{UInt}();
+    man.plugins[MODULE_NAME].killedOrganisms = Dict{UInt, PhylogenOrganism}()
   end
   #
   # Saves JSON data to the file on HDD.
@@ -191,22 +216,38 @@ module Phylogen
     local id::UInt
     local json::String
     local relations::Array{UInt, 1} = man.plugins[MODULE_NAME].relations
-    local organisms::Dict{UInt, PhylogenOrganism} = man.plugins[MODULE_NAME].organisms
-    local arr::Array{String, 1}
+    local nodes::Array{String, 1} = []
+    local edges::Array{String, 1} = []
 
-    arr = []
-    json = "{\"nodes\": ["
-    # TODO: add mutations data here
-    for (id, org) in organisms push!(arr, string("{\"id\": ", id, ", \"label\": \"", id, "\"}")) end
-    json *= join(arr, ",")
-    json *= "], \"edges\": ["
+    json = "{\"elements\":{\"nodes\":["
+    _fillBy(man.plugins[MODULE_NAME].organisms, nodes)
+    _fillBy(man.plugins[MODULE_NAME].killedOrganisms, nodes)
+    json *= join(nodes, ",")
+    json *= "]"
 
-    arr = []
-    for i = 1:2:length(relations) push!(arr, string("{\"from\": ", relations[i],", \"to\": ", relations[i+1], "}")) end
-    json *= join(arr, ",")
-    json *= "]}"
+    for i = 1:2:length(relations) push!(edges, string("{\"data\":{\"source\":\"", relations[i],"\",\"target\":\"", relations[i+1], "\"}}")) end
+    if length(edges) < 1 return json end
+    json *= ",\"edges\":["
+    json *= join(edges, ",")
+    json *= "]}}"
 
     json
+  end
+  #
+  # Fills "nodes" array by "organisms" data
+  # @param organisms
+  # @param nodes
+  # TODO: add mutations data here
+  function _fillBy(orgs::Dict{UInt, PhylogenOrganism}, nodes::Array{String, 1})
+    local org::PhylogenOrganism
+    local id::UInt
+
+    for (id, org) in orgs
+      push!(nodes, string(
+        "{\"data\":{\"id\": \"", id,
+        "\",\"code\":\"", replace(replace(string(org.org.code), "\n", "\\n"), "\"", "\\\""),
+        "\"}}"))
+    end
   end
   #
   # Makes full organism copy, but removes all meta information.
