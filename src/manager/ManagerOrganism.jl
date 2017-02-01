@@ -62,7 +62,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   local task      ::ManagerTypes.OrganismTask
   local org       ::Creature.Organism
   local probIndex ::Int
-  local probs     ::Array{Int, 1}
+  local probs     ::Array{UInt, 1}
   local cfg       ::Config.ConfigData = man.cfg
   local i         ::Int = len
   #
@@ -138,8 +138,8 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # TODO: outside the loop.
   #
   if needClone && len < cfg.worldMaxOrgs && len > 0
-    probs = Int[]
-    @inbounds for task in tasks push!(probs, task.organism.energy) end
+    probs = UInt[]
+    @inbounds for task in tasks push!(probs, UInt(task.organism.energy) * UInt(task.organism.mutationsFromStart)) end
     probIndex = Helper.getProbIndex(probs)
     if probIndex > 0 _onClone(man, tasks[probIndex].organism) end
   end
@@ -181,16 +181,16 @@ function _removeMinOrganisms(man::ManagerTypes.ManagerData)
   local amount::Int = man.cfg.orgRemoveWeakAmount
   if len <= amount || len <= man.cfg.worldMinOrgs return false end
 
-  local allEnergy::Array{Int, 1} = Int[]
+  local allEnergy::Array{UInt, 1} = Int[]
   local orgIndex::Int
   local task::ManagerTypes.OrganismTask
-  local maxEnergy::Int = typemax(Int32)
+  local maxEnergy::UInt = UInt(typemax(Int32)) * UInt(typemax(Int32))
   local i::Int
   #
   # Removes organism from the pool by probability. As less energy
   # they have, as higher probability to remove them.
   #
-  @inbounds for task in man.tasks push!(allEnergy, maxEnergy - task.organism.energy) end
+  @inbounds for task in man.tasks push!(allEnergy, maxEnergy - UInt(task.organism.energy) * UInt(task.organism.mutationsFromStart)) end
   for i = 1:amount
     orgIndex = Helper.getProbIndex(allEnergy)
     if _killOrganism(man, orgIndex) splice!(allEnergy, orgIndex) end

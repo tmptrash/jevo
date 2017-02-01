@@ -174,6 +174,12 @@ module Helper
   #
   function fastRand(n::Int) trunc(Int, rand() * n) + 1 end
   #
+  # Fast version of rand(n::Range) function. Generates random UInt number in
+  # range 1:n
+  # @param n Right number value in a range
+  #
+  function fastRand(n::UInt) trunc(UInt, rand() * n) + UInt(1) end
+  #
   # Fast version of rand(0::Range) function. Generates random Int number in
   # range 0:n
   # @param n Right number value in a range
@@ -205,6 +211,34 @@ module Helper
     #
     if num < div(s, 2)
       s = 0
+      for i = 1:len if num <= (s += prob[i]) break end end
+    else
+      for i = len:-1:1 if num > (s -= prob[i]) break end end
+    end
+
+    i
+  end
+  #
+  # The same like getProbIndex(prob::Array{Int, 1}), but for UInt type
+  # @param {Array{UInt, 1}} prob Probabilities array. e.g.: [3,2] or [1,3]
+  # @return {Int} 0 Means that index is invalid
+  #
+  function getProbIndex(prob::Array{UInt, 1})
+    local len::Int = length(prob)
+    if len < 1 return 0 end
+    local s::UInt = sum(prob)
+    if s < 1 return 0 end
+    local num::UInt = UInt(fastRand(s))
+    local i::Int = 1
+    #
+    # This is small optimization algorithm. if random number in
+    # a left part of all numbers sum, the we have to go to it from
+    # left to right, if not - then from right to left. Otherwise,
+    # going every time from left to right will be a little bit
+    # slower then this aproach.
+    #
+    if num < div(s, UInt(2))
+      s = UInt(0)
       for i = 1:len if num <= (s += prob[i]) break end end
     else
       for i = len:-1:1 if num > (s -= prob[i]) break end end

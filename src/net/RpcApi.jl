@@ -101,6 +101,10 @@ module RpcApi
     #
     energy::Int
     #
+    # Amount of mutations starting from first ancestor
+    #
+    mutationsFromStart::Int
+    #
     # @inheritable
     # Color of organism. Similar colors means relative organisms.
     # Example: 0x00RRGGBB - first two digits are skipped.

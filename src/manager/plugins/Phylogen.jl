@@ -219,17 +219,17 @@ module Phylogen
     local nodes::Array{String, 1} = []
     local edges::Array{String, 1} = []
 
-    json = "{\"elements\":{\"nodes\":["
+    json = "{\"nodes\":["
     _fillBy(man.plugins[MODULE_NAME].organisms, nodes)
     _fillBy(man.plugins[MODULE_NAME].killedOrganisms, nodes)
     json *= join(nodes, ",")
     json *= "]"
 
-    for i = 1:2:length(relations) push!(edges, string("{\"data\":{\"source\":\"", relations[i],"\",\"target\":\"", relations[i+1], "\"}}")) end
+    for i = 1:2:length(relations) push!(edges, string("{\"source\":\"", relations[i],"\",\"target\":\"", relations[i+1], "\"}")) end
     if length(edges) < 1 return json end
     json *= ",\"edges\":["
     json *= join(edges, ",")
-    json *= "]}}"
+    json *= "]}"
 
     json
   end
@@ -244,9 +244,9 @@ module Phylogen
 
     for (id, org) in orgs
       push!(nodes, string(
-        "{\"data\":{\"id\": \"", id,
+        "{\"id\": \"", id,
         "\",\"code\":\"", replace(replace(string(org.org.code), "\n", "\\n"), "\"", "\\\""),
-        "\"}}"))
+        "\"}"))
     end
   end
   #

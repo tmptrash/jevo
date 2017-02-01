@@ -343,7 +343,7 @@ module Creature
       0,                                                                    # age
       50,                                                                   # cloneEnergyPercent
       org.energyDecreasePercent,                                            # energyDecreasePercent
-      0,                                                                    # mutationsFromStart
+      org.mutationsFromStart,                                               # mutationsFromStart
       Event.create()                                                        # observer
     )
   end
