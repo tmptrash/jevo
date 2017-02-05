@@ -136,16 +136,6 @@ module Config
     #
     orgEnergySpendOnError::Int
     #
-    # After this amount of iterations we have to kill orgRemoveWeakAmount
-    # organisms with minimum energy. Set to 0 for disabling this config.
-    #
-    orgRemoveWeakPeriod::Int
-    #
-    # Amount of organisms, which we have to remove after every
-    # orgRemoveWeakPeriod iterations
-    #
-    orgRemoveWeakAmount::Int
-    #
     # Amount of iterations when organism is alive. It will die after
     # this period. If 0, then will not be used.
     #
@@ -408,8 +398,6 @@ module Config
       200,                                     # orgEnergySpendPeriod
       0.2,                                     # orgEnergySpendPercent
       1000,                                    # orgEnergySpendOnError
-      500,                                     # orgRemoveWeakPeriod
-      5,                                       # orgRemoveWeakAmount
       6000 * 10,                               # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
       0,                                       # orgErrors
       0,                                       # orgEvals

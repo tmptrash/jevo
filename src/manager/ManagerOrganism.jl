@@ -117,6 +117,10 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     #
     if cfg.orgAlivePeriod > 0 && org.age > cfg.orgAlivePeriod && length(tasks) > cfg.worldMinOrgs _killOrganism(man, i) end
     #
+    # Updates diversity and fitness information for all organisms in population
+    #
+    _updateDiversityAndFitness(man, org)
+    #
     # Here shouldn't be a code, after mutations, because current
     # task may be updated with new one.
     #
@@ -137,12 +141,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # TODO: optimize this array. It should be created only once
   # TODO: outside the loop.
   #
-  if needClone && len < cfg.worldMaxOrgs && len > 0
-    probs = UInt[]
-    @inbounds for task in tasks push!(probs, UInt(task.organism.energy) * UInt(task.organism.mutationsFromStart)) end
-    probIndex = Helper.getProbIndex(probs)
-    if probIndex > 0 _onClone(man, tasks[probIndex].organism) end
-  end
+  if needClone && len < cfg.worldMaxOrgs && len > 0 _updateClonning(man, tasks) end
   #
   # This block decreases energy from organisms, because they
   # spend it while leaving.
@@ -158,12 +157,6 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     _updateWorldEnergy(man)
   end
   #
-  # This call removes organisms with minimum energy
-  #
-  if cfg.orgRemoveWeakPeriod > 0 && counter % cfg.orgRemoveWeakPeriod === 0
-    _removeMinOrganisms(man)
-  end
-  #
   # This counter should be infinite, but not zero!
   #
   if counter === typemax(Int) counter = 1 end
@@ -171,32 +164,32 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   counter + 1
 end
 #
-# Removes organisms with minimum energy. Amount of removed
-# organisms is set in orgRemoveWeakAmount config.
+# Updates clonning of organisms. Chooses organism for clonning according
+# to fitness * diversuty criteria
 # @param man Manager data type
-# @param tasks Array of tasks with organisms inside
+# @param org Organism
 #
-function _removeMinOrganisms(man::ManagerTypes.ManagerData)
-  local len::Int = length(man.tasks)
-  local amount::Int = man.cfg.orgRemoveWeakAmount
-  if len <= amount || len <= man.cfg.worldMinOrgs return false end
+function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerTypes.OrganismTask, 1})
+  local df::ManagerTypes.DiversityAndFitness = man.df
+  local coef::Float64 = df.maxEnergy > df.maxMutations ? div(Float64(df.maxEnergy), df.maxMutations) : 1.0 / div(Float64(df.maxMutations), df.maxEnergy)
+  local probs::Array{UInt, 1} = UInt[]
+  local probIndex::Int
 
-  local allEnergy::Array{UInt, 1} = Int[]
-  local orgIndex::Int
-  local task::ManagerTypes.OrganismTask
-  local maxEnergy::UInt = UInt(typemax(Int32)) * UInt(typemax(Int32))
-  local i::Int
-  #
-  # Removes organism from the pool by probability. As less energy
-  # they have, as higher probability to remove them.
-  #
-  @inbounds for task in man.tasks push!(allEnergy, maxEnergy - UInt(task.organism.energy) * UInt(task.organism.mutationsFromStart)) end
-  for i = 1:amount
-    orgIndex = Helper.getProbIndex(allEnergy)
-    if _killOrganism(man, orgIndex) splice!(allEnergy, orgIndex) end
-  end
-
-  true
+  #println("old coef: ", coef)
+  coef = isnan(coef) || isinf(coef) ? 1.0 : coef
+  #println("coef: ", coef, " df: ", df)
+  @inbounds for task in tasks push!(probs, UInt(task.organism.energy) * UInt(round(task.organism.mutationsFromStart * coef))) end
+  probIndex = Helper.getProbIndex(probs)
+  if probIndex > 0 _onClone(man, tasks[probIndex].organism) end
+end
+#
+# Updates diversity and fitness information for population
+# @param man Manager data type
+# @param org Organism
+#
+function _updateDiversityAndFitness(man::ManagerTypes.ManagerData, org::Creature.Organism)
+  if org.mutationsFromStart > man.df.maxMutations man.df.maxMutations = org.mutationsFromStart end
+  if org.energy > man.df.maxEnergy man.df.maxEnergy = org.energy end
 end
 #
 # Updates energy of all organisms. Decreases their energy according

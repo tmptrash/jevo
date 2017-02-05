@@ -277,14 +277,14 @@ module Creature
       copy(cfg.orgMutationProbs),                                           # mutationProbabilities
       cfg.orgCloneMutation,                                                 # mutationsOnClonePercent
       min(cfg.orgRainMutationPeriod, Config.ORGANISM_MAX_MUTATION_PERIOD),  # mutationPeriod
-      min(cfg.orgRainMutationPercent, 1.0),                                        # mutationPercent
+      min(cfg.orgRainMutationPercent, 1.0),                                 # mutationPercent
       cfg.orgStartEnergy,                                                   # energy
-      cfg.orgStartColor,                                             # color
+      cfg.orgStartColor,                                                    # color
       Dict{Int16, Int16}(),                                                 # mem
       pos,                                                                  # pos
       0,                                                                    # age
       50,                                                                   # cloneEnergyPercent
-      cfg.orgEnergySpendPercent,                         # energyDecreasePercent
+      cfg.orgEnergySpendPercent,                                            # energyDecreasePercent
       0,                                                                    # mutationsFromStart
       Event.create()                                                        # observer
     )
