@@ -408,7 +408,7 @@ module Config
       1900,                                    # worldWidth
       940,                                     # worldHeight
       true,                                    # worldCyclical
-      50000,                                   # worldMaxOrgs
+      500,                                     # worldMaxOrgs
       0,                                       # worldMinOrgs
       1000,                                    # worldStartEnergyDots
       UInt32(0x0001F4),                        # worldStartEnergyInDot
