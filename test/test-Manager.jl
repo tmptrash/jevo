@@ -28,7 +28,6 @@ module TestManager
     cfg.orgStartEnergy                = 100
     cfg.orgEnergySpendPeriod          = 2
     cfg.orgEnergySpendPercent         = 1.0
-    cfg.orgRemoveWeakPeriod           = 0
     cfg.orgClonePeriod                = 0
     cfg.worldWidth                    = 10
     cfg.worldHeight                   = 10
@@ -129,55 +128,42 @@ module TestManager
 
     Manager.destroy(d.man)
   end
-  facts("Checking minimum energy organisms removing") do
-    local d = _create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}(:orgRemoveWeakPeriod=>3, :orgRemoveWeakAmount=>2))
-
-    @fact length(d.man.organisms) === length(d.man.positions) === 3 --> true
-    consume(d.task)
-    @fact length(d.man.organisms) === length(d.man.positions) === 3 --> true
-    consume(d.task)
-    @fact length(d.man.organisms) === length(d.man.positions) === 3 --> true
-    consume(d.task)
-    @fact length(d.man.organisms) === length(d.man.positions) === 1 --> true
-
-    Manager.destroy(d.man)
-  end
-  facts("Checking organisms clonning ability") do
-    local d = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>3))
-    local orgAmount = length(d.man.organisms)
-
-    consume(d.task)
-    @fact length(d.man.organisms) - orgAmount --> 0
-    consume(d.task)
-    @fact length(d.man.organisms) - orgAmount --> 0
-    consume(d.task)
-    @fact length(d.man.organisms) - orgAmount --> 1
-    @fact length(d.man.positions) - orgAmount --> 1
-
-    Manager.destroy(d.man)
-  end
-  facts("Checking organisms mutations on clone") do
-    local d         = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>2, :orgCloneMutation=>1.0))
-    local orgAmount = length(d.man.organisms)
-    local mutations = d.man.plugins["Status"].mps
-
-    Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,1), Code.CodePart(Code.var, false))
-    Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,2), Code.CodePart(Code.var, false))
-
-    @fact length(d.man.organisms)             --> 1
-    consume(d.task)
-    @fact length(d.man.organisms) - orgAmount --> 0
-    @fact d.man.plugins["Status"].mps - mutations        --> 0
-    consume(d.task)
-    @fact length(d.man.organisms) - orgAmount --> 1
-    @fact d.man.plugins["Status"].mps - mutations        --> 2
-    consume(d.task)
-    @fact length(d.man.organisms) - orgAmount --> 1
-    @fact d.man.plugins["Status"].mps - mutations        --> 2
-    consume(d.task)
-    @fact length(d.man.organisms) - orgAmount --> 2
-    @fact d.man.plugins["Status"].mps - mutations        --> 4
-
-    Manager.destroy(d.man)
-  end
+  # facts("Checking organisms clonning ability") do
+  #   local d = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>3))
+  #   local orgAmount = length(d.man.organisms)
+  #
+  #   consume(d.task)
+  #   @fact length(d.man.organisms) - orgAmount --> 0
+  #   consume(d.task)
+  #   @fact length(d.man.organisms) - orgAmount --> 0
+  #   consume(d.task)
+  #   @fact length(d.man.organisms) - orgAmount --> 1
+  #   @fact length(d.man.positions) - orgAmount --> 1
+  #
+  #   Manager.destroy(d.man)
+  # end
+  # facts("Checking organisms mutations on clone") do
+  #   local d         = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>2, :orgCloneMutation=>1.0))
+  #   local orgAmount = length(d.man.organisms)
+  #   local mutations = d.man.plugins["Status"].mps
+  #
+  #   Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,1), Code.CodePart(Code.var, false))
+  #   Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,2), Code.CodePart(Code.var, false))
+  #
+  #   @fact length(d.man.organisms)             --> 1
+  #   consume(d.task)
+  #   @fact length(d.man.organisms) - orgAmount --> 0
+  #   @fact d.man.plugins["Status"].mps - mutations        --> 0
+  #   consume(d.task)
+  #   @fact length(d.man.organisms) - orgAmount --> 1
+  #   @fact d.man.plugins["Status"].mps - mutations        --> 2
+  #   consume(d.task)
+  #   @fact length(d.man.organisms) - orgAmount --> 1
+  #   @fact d.man.plugins["Status"].mps - mutations        --> 2
+  #   consume(d.task)
+  #   @fact length(d.man.organisms) - orgAmount --> 2
+  #   @fact d.man.plugins["Status"].mps - mutations        --> 4
+  #
+  #   Manager.destroy(d.man)
+  # end
 end
