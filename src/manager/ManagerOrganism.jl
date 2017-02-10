@@ -354,19 +354,17 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   # kill him in current Manager/instance.
   #
   else
-    local st = man.status
-
     if newPos.x < 1
-      if !Client.isOk(man.cons.left)  || !Client.request(man.cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism) st.rps +=1; return false end
+      if !Client.isOk(man.cons.left)  || !Client.request(man.cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism) Event.fire(man.obs, "request", man); return false end
       freeze = true
     elseif newPos.x > man.world.width
-      if !Client.isOk(man.cons.right) || !Client.request(man.cons.right, RpcApi.RPC_ORG_STEP_RIGHT, organism) st.rps +=1; return false end
+      if !Client.isOk(man.cons.right) || !Client.request(man.cons.right, RpcApi.RPC_ORG_STEP_RIGHT, organism) Event.fire(man.obs, "request", man); return false end
       freeze = true
     elseif newPos.y < 1
-      if !Client.isOk(man.cons.up)    || !Client.request(man.cons.up, RpcApi.RPC_ORG_STEP_UP, organism) st.rps +=1; return false end
+      if !Client.isOk(man.cons.up)    || !Client.request(man.cons.up, RpcApi.RPC_ORG_STEP_UP, organism) Event.fire(man.obs, "request", man); return false end
       freeze = true
     elseif newPos.y > man.world.height
-      if !Client.isOk(man.cons.down)  || !Client.request(man.cons.down, RpcApi.RPC_ORG_STEP_DOWN, organism) st.rps +=1; return false end
+      if !Client.isOk(man.cons.down)  || !Client.request(man.cons.down, RpcApi.RPC_ORG_STEP_DOWN, organism) Event.fire(man.obs, "request", man); return false end
       freeze = true
     end
     #
