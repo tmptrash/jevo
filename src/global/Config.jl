@@ -408,7 +408,7 @@ module Config
       1900,                                    # worldWidth
       940,                                     # worldHeight
       true,                                    # worldCyclical
-      500,                                     # worldMaxOrgs
+      1000,                                    # worldMaxOrgs
       0,                                       # worldMinOrgs
       1000,                                    # worldStartEnergyDots
       UInt32(0x0001F4),                        # worldStartEnergyInDot
@@ -437,7 +437,7 @@ module Config
       ["Phylogen", "Status"],                  # plugIncluded
       [],                                      # plugExcluded
 
-      false,                                   # modeDebug
+      true,                                    # modeDebug
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod

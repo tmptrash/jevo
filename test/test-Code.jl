@@ -11,41 +11,6 @@ module TestCode
 
   include("Helper.jl")
   #
-  # var
-  #
-  facts("Testing Code.var() in empty script") do
-    conf = Config.create()
-    org  = Creature.create(conf)
-    var  = Code.var(conf, org, Helper.CodePos(1,1,1))
-
-    @fact var.head --> :local
-    @fact var.args[1].args[1].args[1] --> :var_1
-    @fact Code.eval(org.code)(conf, org) --> true
-  end
-  facts("Testing Code.var() + other Code.var()") do
-    conf = Config.create()
-    org  = Creature.create(conf)
-    Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.var, false))
-    Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.var, false))
-
-    @fact Helper.getHead(org.code, [2,1]) --> :local
-    @fact Helper.getHead(org.code, [2,2]) --> :local
-    @fact Helper.getArg(org.code, [2,1,1,1,1]) --> :var_2
-    @fact Helper.getArg(org.code, [2,2,1,1,1]) --> :var_1
-    @fact Code.eval(org.code)(conf, org) --> true
-  end
-  facts("Testing Code.var() inside Code.fn()") do
-    conf = Config.create()
-    conf.codeFuncParamAmount = 1
-    org = Creature.create(conf)
-    Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
-    Mutator._onAdd(conf, org, Helper.CodePos(2,1,1), Code.CodePart(Code.var, false))
-
-    @fact Helper.getArg(org.code, [2,1,1,1]) --> :func_2
-    @fact Helper.getArg(org.code, [2,1,2,1,1,1,1]) --> :var_3
-    @fact Code.eval(org.code)(conf, org) --> true
-  end
-  #
   # fn
   #
   facts("Testing Code.fn() inside empty script") do
@@ -259,31 +224,6 @@ module TestCode
     Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.loop, true))
 
     @fact Helper.getHead(org.code, [2,2]) --> :for
-    @fact Code.eval(org.code)(conf, org) --> true
-  end
-  facts("Testing Code.loop() inside other Code.loop() without Code.var()") do
-    local conf  = Config.create()
-    local org   = Creature.create(conf)
-    local var   = Symbol("var_", org.symbolId += 1)
-    local lines = org.code.args[2].args
-
-    push!(org.funcs[1].blocks[1].vars[Int8], var)
-    insert!(lines, 1, :(local $(var)::Int8=12))
-    Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.loop, true))
-    Mutator._onAdd(conf, org, Helper.CodePos(1,2,1), Code.CodePart(Code.loop, true))
-    @fact length(Helper.getLines(org.code, [2,2,2])) --> 0
-    @fact Code.eval(org.code)(conf, org) --> true
-  end
-  facts("Testing Code.loop() inside other Code.loop() with Code.var()") do
-    local conf = Config.create()
-    local org  = Creature.create(conf)
-
-    addVar(org, [2], Helper.CodePos(1,1,1), Int8)
-    Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.loop, true))
-    addVar(org, [2,2,2], Helper.CodePos(1,2,1), Int8)
-    Mutator._onAdd(conf, org, Helper.CodePos(1,2,1), Code.CodePart(Code.loop, true))
-
-    @fact length(Helper.getLines(org.code, [2,2,2])) --> 1
     @fact Code.eval(org.code)(conf, org) --> true
   end
   facts("Testing Code.loop() near other Code.loop()") do

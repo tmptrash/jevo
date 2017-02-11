@@ -69,8 +69,8 @@ module TestManager
     local d = _create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgRainMutationPeriod=>2, :orgRainMutationPercent=>100.0))
     local mutations = d.man.plugins["Status"].mps
 
-    Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,1), Code.CodePart(Code.var, false))
-    Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,2), Code.CodePart(Code.var, false))
+    Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,1), Code.CodePart(Code.plus, false))
+    Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,2), Code.CodePart(Code.plus, false))
     consume(d.task)
     @fact d.man.plugins["Status"].mps - mutations --> 0
     consume(d.task)
@@ -147,8 +147,8 @@ module TestManager
   #   local orgAmount = length(d.man.organisms)
   #   local mutations = d.man.plugins["Status"].mps
   #
-  #   Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,1), Code.CodePart(Code.var, false))
-  #   Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,2), Code.CodePart(Code.var, false))
+  #   Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,1), Code.CodePart(Code.plus, false))
+  #   Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,2), Code.CodePart(Code.plus, false))
   #
   #   @fact length(d.man.organisms)             --> 1
   #   consume(d.task)

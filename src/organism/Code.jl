@@ -52,30 +52,6 @@ module Code
   end
   #
   # @cmd
-  # @line
-  # Returns AST expression for variable declaration. Format:
-  # local name::Type = value
-  # @param cfg Global configuration type
-  # @param org Organism we have to mutate
-  # @param pos Position for current mutation
-  # @return {Expr|Expr(:nothing)}
-  #
-  function var(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-    local typ::DataType = @randType()
-    local var::Symbol = @newVar(org)
-    local block::Creature.Block = @getBlock(org, pos)
-    #
-    # This property means that we haven't add mutations
-    # before this line number, because we produce undefined
-    # variable/function error.
-    #
-    block.defIndex += 1
-    push!(block.vars[typ], var)
-
-    :(local $(var)::$(typ)=$(@randValue(typ)))
-  end
-  #
-  # @cmd
   # @block
   # Creates custom function with unique name, random arguments with
   # default values. By default it returns first parameter as local
@@ -89,6 +65,7 @@ module Code
     local typ::DataType
     local sym::Symbol
     local i::Int
+    local j::Int
     local exp::Expr
     local paramLen::Int = Helper.fastRand(cfg.codeFuncParamAmount)
     local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing))
@@ -123,6 +100,18 @@ module Code
     # calculation.
     #
     _removeCommentLine(block.expr.args)
+    #
+    # Fills default variables meta data. Adds embedded vars at the
+    # beginning of new function
+    #
+    i = 1
+    map(function(typ::DataType)
+      for j in 1:Creature.VAR_AMOUNT
+        push!(block.vars[typ], Symbol("var_", i))
+        push!(block.expr.args, :(local $(Symbol("var_", i))::$(Symbol(typ))))
+        i += 1
+      end
+    end, Helper.SUPPORTED_TYPES)
     push!(block.expr.args, :(return $(params[1].args[1].args[1])))
     push!(org.funcs, Creature.Func(fnEx, blocks))
 
@@ -291,12 +280,12 @@ module Code
     # In this line we skip "return" operator and lines with variables
     # and functions declaration.
     #
-    local lines   ::Int = length(block.expr.args) - (blockIdx === 1 ? 1 : 0) + 1
+    local lines   ::Int = length(block.expr.args) - (blockIdx === 1 ? 1 : 0) + 1 - block.defIndex
 
     Helper.CodePos(
       fnIdx,
       blockIdx,
-      Helper.fastRand(lines)
+      Helper.fastRand(lines) + block.defIndex
     )
   end
   #
@@ -327,9 +316,8 @@ module Code
     #
     # Code
     #
-    CodePart(var,                     false), CodePart(fn,                      true),
-    CodePart(fnCall,                  false), CodePart(condition,               true),
-    CodePart(loop,                    true ),
+    CodePart(fn,                      true ), CodePart(fnCall,                  false),
+    CodePart(condition,               true ), CodePart(loop,                    true ),
     #
     # CodeMath
     #

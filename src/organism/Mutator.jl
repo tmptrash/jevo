@@ -131,7 +131,7 @@ module Mutator
     # to prevent UndefVarError error in case of calling
     # before defining the function. The same for variables.
     #
-    insert!(block.expr.args, cmd.fn === Code.fn || cmd.fn === Code.var ? 1 : pos.lineIdx, exp)
+    insert!(block.expr.args, cmd.fn === Code.fn ? block.defIndex : pos.lineIdx, exp)
     org.codeSize += 1
 
     true
@@ -162,12 +162,13 @@ module Mutator
     if len < 1 ||
        pos.lineIdx >= len ||
        lines[pos.lineIdx].head === :return ||
+       pos.lineIdx <= block.defIndex ||   # we can't remove predefined vars
        #
        # Sometimes, we may change a line with var or function and this
        # change will be after other non declarative(var/func) lines. So
        # this is how we break the rule vars/funcs declaration at the beginning.
        #
-       (cmd.fn === Code.fn || cmd.fn === Code.var) && pos.lineIdx > block.defIndex ||
+       cmd.fn === Code.fn ||
        (exp = cmd.fn(cfg, org, pos)).head === :nothing
       return false
     end
@@ -192,6 +193,7 @@ module Mutator
 
     if len < 1 ||
        pos.lineIdx >= len ||
+       pos.lineIdx <= org.funcs[pos.fnIdx].blocks[pos.blockIdx].defIndex || # we can't remove predefined vars
        lines[pos.lineIdx].head === :return
       return false
     end
@@ -304,7 +306,7 @@ module Mutator
   # Stub for CodePart type. Is used with functions like: _onPeriod, _onPeriod,..
   # Which don't need a code part
   #
-  const _cmdStub = Code.CodePart(Code.var, false)
+  const _cmdStub = Code.CodePart(Code.plus, false)
  #  #
  #  # TODO:
  #  #

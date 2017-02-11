@@ -39,6 +39,7 @@ module Creature
   import Helper
   import Config
 
+  export VAR_AMOUNT
   export Organism
 
   export create
@@ -56,6 +57,10 @@ module Creature
   export idRight
   export idUp
   export idDown
+  #
+  # Amount of embedded variables for one type
+  #
+  const VAR_AMOUNT = 5
   #
   # Enumeration for direction: up, down, left, right
   #
@@ -105,7 +110,7 @@ module Creature
     #
     # Constructors. Fills arguments and 1 for defIndex.
     #
-    Block(vars::Dict{DataType, Array{Symbol, 1}}, expr::Expr) = new(vars, expr, 1)
+    Block(vars::Dict{DataType, Array{Symbol, 1}}, expr::Expr) = new(vars, expr, VAR_AMOUNT * length(Helper.SUPPORTED_TYPES))
     Block(vars::Dict{DataType, Array{Symbol, 1}}, expr::Expr, defIndex::Int) = new(vars, expr, defIndex)
   end
   #
@@ -252,9 +257,48 @@ module Creature
     # below means: function (o) return true end
     #
     local code::Expr = Expr(:function, Expr(:tuple,                         # function paraments
-      Expr(:(::), :c, Expr(:., :Config, Expr(:quote, :ConfigData))),        # c::Config.ConfigData
-      Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),       # o::Creature.Organism
-        Expr(:block, Expr(:return, true))                                   # return true
+        Expr(:(::), :c, Expr(:., :Config,   Expr(:quote, :ConfigData))),    # c::Config.ConfigData
+        Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),     # o::Creature.Organism
+        # TODO: this lines should be added dynamically with VAR_AMOUNT constant
+          Expr(:block,
+            Expr(:local, Expr(:(::), :var_1,  :String)),                    # String variables
+            Expr(:local, Expr(:(::), :var_2,  :String)),
+            Expr(:local, Expr(:(::), :var_3,  :String)),
+            Expr(:local, Expr(:(::), :var_4,  :String)),
+            Expr(:local, Expr(:(::), :var_5,  :String)),
+
+            Expr(:local, Expr(:(::), :var_6,  :Bool)),                      # Bool variables
+            Expr(:local, Expr(:(::), :var_7,  :Bool)),
+            Expr(:local, Expr(:(::), :var_8,  :Bool)),
+            Expr(:local, Expr(:(::), :var_9,  :Bool)),
+            Expr(:local, Expr(:(::), :var_10, :Bool)),
+
+            Expr(:local, Expr(:(::), :var_11, :Int8)),                      # Int8 variables
+            Expr(:local, Expr(:(::), :var_12, :Int8)),
+            Expr(:local, Expr(:(::), :var_13, :Int8)),
+            Expr(:local, Expr(:(::), :var_14, :Int8)),
+            Expr(:local, Expr(:(::), :var_15, :Int8)),
+
+            Expr(:local, Expr(:(::), :var_16, :Int16)),                     # Int16 variables
+            Expr(:local, Expr(:(::), :var_17, :Int16)),
+            Expr(:local, Expr(:(::), :var_18, :Int16)),
+            Expr(:local, Expr(:(::), :var_19, :Int16)),
+            Expr(:local, Expr(:(::), :var_20, :Int16)),
+
+            Expr(:local, Expr(:(::), :var_21, :Int)),                       # Int64 variables
+            Expr(:local, Expr(:(::), :var_22, :Int)),
+            Expr(:local, Expr(:(::), :var_23, :Int)),
+            Expr(:local, Expr(:(::), :var_24, :Int)),
+            Expr(:local, Expr(:(::), :var_25, :Int)),
+
+            Expr(:local, Expr(:(::), :var_26, :Float64)),                   # Float64 variables
+            Expr(:local, Expr(:(::), :var_27, :Float64)),
+            Expr(:local, Expr(:(::), :var_28, :Float64)),
+            Expr(:local, Expr(:(::), :var_29, :Float64)),
+            Expr(:local, Expr(:(::), :var_30, :Float64)),
+
+            Expr(:return, true)                                             # return true
+        )
     )
     #
     # Blocks of main function. In this case only one - main block.
@@ -266,13 +310,20 @@ module Creature
     # which belong to main function.
     #
     local funcs::Array{Func, 1} = [Func(code, blocks)]
+    local block::Block = blocks[1]
+    local i::Int = 0
+    local j::Int
+    #
+    # Fills variables meta data
+    #
+    map((typ::DataType) -> for j in 1:VAR_AMOUNT push!(block.vars[typ], Symbol("var_", i += 1)) end, Helper.SUPPORTED_TYPES)
 
     Organism(
       id,                                                                   # id
       code,                                                                 # code
       eval(code),                                                           # codeFn
       0,                                                                    # codeSize
-      0,                                                                    # symbolId
+      VAR_AMOUNT * length(Helper.SUPPORTED_TYPES),                          # symbolId
       funcs,                                                                # funcs
       copy(cfg.orgMutationProbs),                                           # mutationProbabilities
       cfg.orgCloneMutation,                                                 # mutationsOnClonePercent

@@ -51,7 +51,7 @@ module TestMutator
   # facts("Adding var to empty code") do
   #   setAddMutation()
   #   setMutationPos("1,1,1")
-  #   setCodePart("Code.var, false")
+  #   setCodePart("Code.plus, false")
 
   #   org = Creature.create()
   #   @fact Mutator._onAdd(org)                         --> true
@@ -64,7 +64,7 @@ module TestMutator
   # facts("Adding two vars to empty code") do
   #   setAddMutation()
   #   setMutationPos("1,1,1")
-  #   setCodePart("Code.var, false")
+  #   setCodePart("Code.plus, false")
 
   #   org = Creature.create()
   #   @fact Mutator._onAdd(org)                         --> true
@@ -88,7 +88,7 @@ module TestMutator
   #   @fact Helper.getLines(org.code, [2,1,1])[1]       --> :func_2
   #   setMutationPos("2,1,1")
   #   println(Code.getRandPos(org))
-  #   setCodePart("Code.var, false")
+  #   setCodePart("Code.plus, false")
   #   @fact Mutator._onAdd(org)                         --> true
   #   #println(Helper.getLines(org.code, [2,2,1,1])[1]     --> :var_1)
 
