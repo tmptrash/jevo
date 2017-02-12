@@ -52,6 +52,22 @@ module Code
   end
   #
   # @cmd
+  # @line
+  # Returns AST expression for variable declaration. Format:
+  # local name::Type = value
+  # @param cfg Global configuration type
+  # @param org Organism we have to mutate
+  # @param pos Position for current mutation
+  # @return {Expr|Expr(:nothing)}
+  #
+  function var(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+    local typ::DataType = @randType()
+    local var::Symbol   = @randVar(org, pos, typ)
+
+    :($var=$(@randValue(typ)))
+  end
+  #
+  # @cmd
   # @block
   # Creates custom function with unique name, random arguments with
   # default values. By default it returns first parameter as local
@@ -316,8 +332,9 @@ module Code
     #
     # Code
     #
-    CodePart(fn,                      true ), CodePart(fnCall,                  false),
-    CodePart(condition,               true ), CodePart(loop,                    true ),
+    CodePart(var,                     false), CodePart(fn,                      true ),
+    CodePart(fnCall,                  false), CodePart(condition,               true ),
+    CodePart(loop,                    true ),
     #
     # CodeMath
     #
