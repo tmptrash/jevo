@@ -63,8 +63,9 @@ module Code
   function var(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
     local typ::DataType = @randType()
     local var::Symbol   = @randVar(org, pos, typ)
-
-    :($var=$(@randValue(typ)))
+    if var === :nothing return Expr(:nothing) end
+    
+    :($(var)=$(@randValue(typ)))
   end
   #
   # @cmd
@@ -124,7 +125,7 @@ module Code
     map(function(typ::DataType)
       for j in 1:Creature.VAR_AMOUNT
         push!(block.vars[typ], Symbol("var_", i))
-        push!(block.expr.args, :(local $(Symbol("var_", i))::$(Symbol(typ))))
+        push!(block.expr.args, :(local $(Symbol("var_", i))::$(Symbol(typ))=$(@randValue(typ))))
         i += 1
       end
     end, Helper.SUPPORTED_TYPES)
