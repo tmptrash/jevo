@@ -110,7 +110,7 @@ module Creature
     #
     # Constructors. Fills arguments and 1 for defIndex.
     #
-    Block(vars::Dict{DataType, Array{Symbol, 1}}, expr::Expr) = new(vars, expr, VAR_AMOUNT * length(Helper.SUPPORTED_TYPES))
+    Block(vars::Dict{DataType, Array{Symbol, 1}}, expr::Expr) = new(vars, expr, 1)
     Block(vars::Dict{DataType, Array{Symbol, 1}}, expr::Expr, defIndex::Int) = new(vars, expr, defIndex)
   end
   #
@@ -303,7 +303,7 @@ module Creature
     #
     # Blocks of main function. In this case only one - main block.
     #
-    local blocks::Array{Block, 1} = [Block(Helper.getTypesMap(), code.args[2])]
+    local blocks::Array{Block, 1} = [Block(Helper.getTypesMap(), code.args[2], VAR_AMOUNT * length(Helper.SUPPORTED_TYPES))]
     #
     # This block below, creates variables of main function, which we created
     # in code above (local code::Expr  = ...). It also creates one block,
