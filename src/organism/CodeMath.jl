@@ -326,7 +326,7 @@ function sqrt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePo
   local v2::Symbol = @randVar(org, pos, typ)
   if v2 === :nothing return Expr(:nothing) end
 
-  :($v1 = sqrt(abs($(v2))))
+  :($v1 = sqrt(abs(Float64($(v2)))))
 end
 # @cmd
 # @line
@@ -343,7 +343,7 @@ function log(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos
   local v2::Symbol = @randVar(org, pos, typ)
   if v2 === :nothing return Expr(:nothing) end
 
-  :($v1 = log($v2 > $typ(0) ? $v2 : abs($(v1) !== 0.0 ? $(v1) : 1.0)))
+  :($v1 = log($v2 > $typ(0) ? $v2 : abs(Float64($(v1)) !== 0.0 ? $(v1) : 1.0)))
 end
 # @cmd
 # @line
