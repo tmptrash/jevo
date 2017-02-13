@@ -261,41 +261,41 @@ module Creature
         Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),     # o::Creature.Organism
         # TODO: this lines should be added dynamically with VAR_AMOUNT constant
           Expr(:block,
-            Expr(:local, Expr(:(=), Expr(:(::), :var_1, :String), "")),     # String variables
-            Expr(:local, Expr(:(=), Expr(:(::), :var_2, :String), "")),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_3, :String), "")),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_4, :String), "")),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_5, :String), "")),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_1, :String), randstring())),     # String variables
+            Expr(:local, Expr(:(=), Expr(:(::), :var_2, :String), randstring())),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_3, :String), randstring())),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_4, :String), randstring())),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_5, :String), randstring())),
 
-            Expr(:local, Expr(:(=), Expr(:(::), :var_6, :Bool),   false)),  # Bool variables
-            Expr(:local, Expr(:(=), Expr(:(::), :var_7, :Bool),   false)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_8, :Bool),   false)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_9, :Bool),   false)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_10, :Bool),  false)),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_6, :Bool),   rand(Bool))),  # Bool variables
+            Expr(:local, Expr(:(=), Expr(:(::), :var_7, :Bool),   rand(Bool))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_8, :Bool),   rand(Bool))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_9, :Bool),   rand(Bool))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_10, :Bool),  rand(Bool))),
 
-            Expr(:local, Expr(:(=), Expr(:(::), :var_11, :Int8),   0)),     # Int8 variables
-            Expr(:local, Expr(:(=), Expr(:(::), :var_12, :Int8),   0)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_13, :Int8),   0)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_14, :Int8),   0)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_15, :Int8),   0)),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_11, :Int8),   rand(Int8))),     # Int8 variables
+            Expr(:local, Expr(:(=), Expr(:(::), :var_12, :Int8),   rand(Int8))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_13, :Int8),   rand(Int8))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_14, :Int8),   rand(Int8))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_15, :Int8),   rand(Int8))),
 
-            Expr(:local, Expr(:(=), Expr(:(::), :var_16, :Int16),  0)),     # Int16 variables
-            Expr(:local, Expr(:(=), Expr(:(::), :var_17, :Int16),  0)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_18, :Int16),  0)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_19, :Int16),  0)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_20, :Int16),  0)),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_16, :Int16),  rand(Int16))),     # Int16 variables
+            Expr(:local, Expr(:(=), Expr(:(::), :var_17, :Int16),  rand(Int16))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_18, :Int16),  rand(Int16))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_19, :Int16),  rand(Int16))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_20, :Int16),  rand(Int16))),
 
-            Expr(:local, Expr(:(=), Expr(:(::), :var_21, :Int),    0)),     # Int64 variables
-            Expr(:local, Expr(:(=), Expr(:(::), :var_22, :Int),    0)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_23, :Int),    0)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_24, :Int),    0)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_25, :Int),    0)),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_21, :Int),    rand(Int))),     # Int64 variables
+            Expr(:local, Expr(:(=), Expr(:(::), :var_22, :Int),    rand(Int))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_23, :Int),    rand(Int))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_24, :Int),    rand(Int))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_25, :Int),    rand(Int))),
 
-            Expr(:local, Expr(:(=), Expr(:(::), :var_26, :Float64),0.0)),   # Float64 variables
-            Expr(:local, Expr(:(=), Expr(:(::), :var_27, :Float64),0.0)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_28, :Float64),0.0)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_29, :Float64),0.0)),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_30, :Float64),0.0)),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_26, :Float64),rand(Float64))),   # Float64 variables
+            Expr(:local, Expr(:(=), Expr(:(::), :var_27, :Float64),rand(Float64))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_28, :Float64),rand(Float64))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_29, :Float64),rand(Float64))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_30, :Float64),rand(Float64))),
 
             Expr(:return, true)                                             # return true
         )
@@ -661,7 +661,7 @@ module Creature
   #
   function _getIntProperty(org::Creature.Organism, dir::DIRECTION, propSymbol::Symbol)
     local ret::Any = _getProperty(org, dir, propSymbol)
-    ret === nothing ? 0 : Int(ret)
+    Int(ret === nothing ? 0 : ret)
   end
   #
   # Returns some Float64 value by specified organism property.
@@ -672,7 +672,7 @@ module Creature
   #
   function _getFloatProperty(org::Creature.Organism, dir::DIRECTION, propSymbol::Symbol)
     local ret::Any = _getProperty(org, dir, propSymbol)
-    ret === nothing ? 0 : Float64(ret)
+    Float64(ret === nothing ? 0.0 : ret)
   end
   #
   # @oapi

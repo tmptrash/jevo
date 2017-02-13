@@ -100,7 +100,11 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # Current organism could die during running it's code, for
     # example during giving it's energy to another organism (altruism)
     #
-    if org.energy < 1 i -=1; continue end
+    if org.energy < 1
+      _killOrganism(man, i)
+      i -=1
+      continue
+    end
     #
     # This is how we mutate organisms during their life.
     # Mutations occures according to organisms settings.
@@ -216,9 +220,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     # Energy shouldn't be less then 1
     #
     if !dontKill
-      org.energy -= (1 + round(Int, org.codeSize * org.energyDecreasePercent))
-      if org.energy < 1
-        _killOrganism(man, i)
+      if _decreaseOrganismEnergy(man, org, 1 + round(Int, org.codeSize * org.energyDecreasePercent), i)
         dontKill = (length(tasks) <= minOrgs)
       end
     end
@@ -226,6 +228,21 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     i -= 1
   end
   Event.fire(man.obs, "updateenergy", man)
+
+  true
+end
+#
+# Decreases energy from organism on "amount"
+# @param man Manager data type
+# @param org Organism
+# @param amount Amount of energy we have to decrease
+#
+function _decreaseOrganismEnergy(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int, orgIndex::Int = 0)
+  org.energy -= amount
+  if org.energy < 1
+    _killOrganism(man, orgIndex === 0 ? findfirst((t) -> t.organism === org, man.tasks) : orgIndex)
+    return false
+  end
 
   true
 end
@@ -458,14 +475,12 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   local energy::Int = minimum ? 1 : div(organism.energy * organism.cloneEnergyPercent, 100)
 
   if !minimum
-    organism.energy       -= energy
-    crTask.organism.energy = energy
+    _decreaseOrganismEnergy(man, organism, energy)
+    _decreaseOrganismEnergy(man, crTask.organism, energy)
   end
-  if energy > 0
+  if energy > 0 && crTask.organism.energy > 0
     _mutate(man, crTask, crTask.organism.mutationsOnClonePercent)
   end
-  if organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks)) end
-  if crTask.organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === crTask.organism, man.tasks)) end
 
   true
 end
@@ -662,9 +677,6 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     #
     if amount < 1
       if organism.energy <= abs(amount)
-        # TODO: possibly slow code!
-        # TODO: move all findfirst() calls inside _killOrganism()
-        _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks))
         amount = -organism.energy
       end
       org.energy  = min(org.energy - amount, Config.ORGANISM_MAX_ENERGY)
@@ -673,17 +685,16 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       org.energy -= amount
       retObj.ret  = amount
     elseif org.energy <= amount
-      # TODO: possibly, slow code. To fix this we have to
-      # TODO: use map instead array for tasks (man.tasks)
-      _killOrganism(man, findfirst((t) -> t.organism === org, man.tasks))
       retObj.ret = org.energy
     end
+    if org.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === org, man.tasks)) end
   else
     #
     # Organism wants to give an energy, but no other organisms around
     #
     retObj.ret = amount > 0 ? World.grabEnergy(man.world, newPos, UInt32(amount)) : 0
   end
+  if organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks)) end
 
   retObj.ret = Int(retObj.ret)
 end

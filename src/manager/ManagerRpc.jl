@@ -584,8 +584,7 @@ function _onBeforeResponse(man::ManagerTypes.ManagerData, side::String, data::Co
   # Everything is okay, let's add an organism to the pool
   #
   Manager._createOrganism(man, org, org.pos, true)
-  org.energy -= div(org.energy * man.cfg.conStepEnergySpendPercent, 100)
-  if org.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === org, man.tasks)) end
+  _decreaseOrganismEnergy(man, org, div(org.energy * man.cfg.conStepEnergySpendPercent, 100))
   ans.id = RpcApi.RPC_ORG_STEP_OK
 
   true
