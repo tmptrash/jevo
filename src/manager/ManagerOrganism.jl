@@ -175,9 +175,7 @@ function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerType
   local probs::Array{UInt, 1} = UInt[]
   local probIndex::Int
 
-  #println("old coef: ", coef)
   coef = isnan(coef) || isinf(coef) ? 1.0 : coef
-  #println("coef: ", coef, " df: ", df)
   @inbounds for task in tasks push!(probs, UInt(task.organism.energy) * UInt(round(task.organism.mutationsFromStart * coef))) end
   probIndex = Helper.getProbIndex(probs)
   if probIndex > 0 _onClone(man, tasks[probIndex].organism) end
