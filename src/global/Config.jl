@@ -396,7 +396,7 @@ module Config
       100,                                     # orgStartColor
       50,                                      # orgColorPeriod
       200,                                     # orgEnergySpendPeriod
-      0.2,                                     # orgEnergySpendPercent
+      1.0,                                     # orgEnergySpendPercent
       1000,                                    # orgEnergySpendOnError
       6000 * 10,                               # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
       0,                                       # orgErrors

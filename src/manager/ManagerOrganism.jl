@@ -100,11 +100,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # Current organism could die during running it's code, for
     # example during giving it's energy to another organism (altruism)
     #
-    if org.energy < 1
-      _killOrganism(man, i)
-      i -=1
-      continue
-    end
+    if org.energy < 1 _killOrganism(man, i); i -=1; continue end
     #
     # This is how we mutate organisms during their life.
     # Mutations occures according to organisms settings.
@@ -169,7 +165,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
 end
 #
 # Updates clonning of organisms. Chooses organism for clonning according
-# to fitness * diversuty criteria
+# to fitness * diversity criterias
 # @param man Manager data type
 # @param org Organism
 #
@@ -180,7 +176,9 @@ function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerType
   local probIndex::Int
 
   coef = isnan(coef) || isinf(coef) ? 1.0 : coef
-  @inbounds for task in tasks push!(probs, UInt(task.organism.energy) * UInt(round(task.organism.mutationsFromStart * coef))) end
+  @inbounds for task in tasks
+    push!(probs, UInt(task.organism.energy) * UInt(round(task.organism.mutationsFromStart * coef)))
+  end
   probIndex = Helper.getProbIndex(probs)
   if probIndex > 0 _onClone(man, tasks[probIndex].organism) end
 end
@@ -220,7 +218,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     # Energy shouldn't be less then 1
     #
     if !dontKill
-      if _decreaseOrganismEnergy(man, org, 1 + round(Int, org.codeSize * org.energyDecreasePercent), i)
+      if _decreaseOrganismEnergy(man, org, org.codeSize + round(Int, org.codeSize * org.energyDecreasePercent), i)
         dontKill = (length(tasks) <= minOrgs)
       end
     end
