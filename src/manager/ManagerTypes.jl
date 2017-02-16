@@ -71,20 +71,6 @@ module ManagerTypes
     ) = new(streamInit, server, fastServer, left, right, up, down, frozen)
   end
   #
-  # Information regarding diversity and fitness: min and max
-  # values for Creature.mutationsFromStart and min and max values
-  # for Creature.energy. Reprodactive success depends on multiplication
-  # of diversity and fitness, which are calculated as:
-  # diversityRange = maxMutations - minMutations
-  # fitnessRange   = maxEnergy - minEnergy
-  # fitnessCoef    = diversityRange / fitnessRange
-  # finalFitness   = diversity * fitness / fitnessCoef
-  #
-  type DiversityAndFitness
-    maxMutations::Int
-    maxEnergy::Int
-  end
-  #
   # Manager's related type. Contains world, command line parameters,
   # organisms map and so on... If some fields will be changed, don't
   # forget to change them in recover() function.
@@ -144,10 +130,6 @@ module ManagerTypes
     #
     task::Task
     #
-    # Diversity and fitness information
-    #
-    df::DiversityAndFitness
-    #
     # All available(compiled) Manager's plugins. Key is a plugin string
     # name (filename). Value - plugin related data type.
     #
@@ -176,7 +158,6 @@ module ManagerTypes
       dotCallback::Function,
       moveCallback::Function,
       task::Task,
-      df::DiversityAndFitness,
       plugins::Dict{String, Plugin},
       obs::Event.Observer
     ) = new(
@@ -192,7 +173,6 @@ module ManagerTypes
       dotCallback,
       moveCallback,
       task,
-      df,
       plugins,
       obs
     )

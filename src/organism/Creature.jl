@@ -227,7 +227,7 @@ module Creature
     #
     # Percent of energy, which is given to clonned organism.
     #
-    cloneEnergyPercent::Int
+    cloneEnergyPercent::Float64
     #
     # Percent (0..1), which affects how much energy will be decreased every
     # time during organism energy update. Every configured period of time
@@ -334,7 +334,7 @@ module Creature
       Dict{Int16, Int16}(),                                                 # mem
       pos,                                                                  # pos
       0,                                                                    # age
-      50,                                                                   # cloneEnergyPercent
+      0.5,                                                                  # cloneEnergyPercent
       cfg.orgEnergySpendPercent,                                            # energyDecreasePercent
       0,                                                                    # mutationsFromStart
       Event.create()                                                        # observer
@@ -392,7 +392,7 @@ module Creature
       copy(org.mem),                                                        # mem
       pos,                                                                  # pos
       0,                                                                    # age
-      50,                                                                   # cloneEnergyPercent
+      0.5,                                                                  # cloneEnergyPercent
       org.energyDecreasePercent,                                            # energyDecreasePercent
       org.mutationsFromStart,                                               # mutationsFromStart
       Event.create()                                                        # observer
@@ -420,8 +420,8 @@ module Creature
       try
         org.codeFn(cfg, org)
       catch e
-        showerror(STDOUT, e, catch_backtrace())
-        println("\n", org.code, "\n\n")
+        #showerror(STDOUT, e, catch_backtrace())
+        #println("\n", org.code, "\n\n")
         #
         # Organisms with errors in a code should be less successful
         #

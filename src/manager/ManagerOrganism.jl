@@ -117,10 +117,6 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     #
     if cfg.orgAlivePeriod > 0 && org.age > cfg.orgAlivePeriod && length(tasks) > cfg.worldMinOrgs _killOrganism(man, i) end
     #
-    # Updates diversity and fitness information for all organisms in population
-    #
-    _updateDiversityAndFitness(man, org)
-    #
     # Here shouldn't be a code, after mutations, because current
     # task may be updated with new one.
     #
@@ -170,26 +166,12 @@ end
 # @param org Organism
 #
 function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerTypes.OrganismTask, 1})
-  local df::ManagerTypes.DiversityAndFitness = man.df
-  local coef::Float64 = df.maxEnergy > df.maxMutations ? div(Float64(df.maxEnergy), df.maxMutations) : 1.0 / div(Float64(df.maxMutations), df.maxEnergy)
   local probs::Array{UInt, 1} = UInt[]
   local probIndex::Int
 
-  coef = isnan(coef) || isinf(coef) ? 1.0 : coef
-  @inbounds for task in tasks
-    push!(probs, UInt(task.organism.energy) * UInt(round(task.organism.mutationsFromStart * coef)))
-  end
+  @inbounds for task in tasks push!(probs, UInt(task.organism.energy) * UInt(task.organism.mutationsFromStart)) end
   probIndex = Helper.getProbIndex(probs)
   if probIndex > 0 _onClone(man, tasks[probIndex].organism) end
-end
-#
-# Updates diversity and fitness information for population
-# @param man Manager data type
-# @param org Organism
-#
-function _updateDiversityAndFitness(man::ManagerTypes.ManagerData, org::Creature.Organism)
-  if org.mutationsFromStart > man.df.maxMutations man.df.maxMutations = org.mutationsFromStart end
-  if org.energy > man.df.maxEnergy man.df.maxEnergy = org.energy end
 end
 #
 # Updates energy of all organisms. Decreases their energy according
@@ -468,9 +450,8 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   #
   # Clonning means additional energy waste
   #
-  # TODO: move energy decrease and _killOrganism() call to separate function and call it everywhere
   local minimum::Bool = length(man.tasks) <= man.cfg.worldMinOrgs
-  local energy::Int = minimum ? 1 : div(organism.energy * organism.cloneEnergyPercent, 100)
+  local energy::Int = minimum ? 1 : Int(round(organism.energy * organism.cloneEnergyPercent))
 
   if !minimum
     _decreaseOrganismEnergy(man, organism, energy)

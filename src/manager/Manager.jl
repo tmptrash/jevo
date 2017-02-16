@@ -88,7 +88,6 @@ module Manager
       function() end,                                                           # dotCallback
       function() end,                                                           # moveCallback
       current_task(),                                                           # task
-      ManagerTypes.DiversityAndFitness(0, 0),                                   # df
       Dict{String, ManagerTypes.Plugin}(),                                      # plugins
       obs                                                                       # obs
     )
