@@ -161,7 +161,10 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
 end
 #
 # Updates clonning of organisms. Chooses organism for clonning according
-# to fitness * diversity criterias
+# to energy * diversity criterias. Energy should be more valuable in this
+# process, because diversity (mutations) are very simple to obtain and
+# population will die, if diversity and energy will have similar affection
+# on natural selection mechanism. 
 # @param man Manager data type
 # @param org Organism
 #

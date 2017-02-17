@@ -33,6 +33,8 @@
 include("global/ImportFolders.jl")
 
 import Config.@if_profile
+import Config.@if_not_profile
+import Config
 import Manager
 import Helper
 import Backup
@@ -96,10 +98,16 @@ end
 function _onRecover()
   local man::ManagerTypes.ManagerData
   local exitCode::Int
+  local cfg::Config.ConfigData = Config.create(false, true)
 
   Helper.info("Starting jevo...")
-  man = Manager.create()
+  man = Manager.create(cfg)
   Manager.recover(man)
+  #
+  # Overrides recovered config by command line arguments
+  #
+  man.cfg.cmdLineArgs = CommandLine.create()
+  man.cfg = Config.merge(man.cfg)
   exitCode = Int(!Manager.run(man, true)) # 1 - error, 0 - okay
   Helper.info("Quit jevo...")
 
@@ -127,5 +135,4 @@ end
 @if_profile Profile.clear()
 @if_profile @profile main()
 @if_profile ProfileView.view()
-@if_profile return 0
-main()
+@if_not_profile main()

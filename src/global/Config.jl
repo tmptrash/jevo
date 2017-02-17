@@ -28,12 +28,16 @@ module Config
   export ORGANISM_MAX_ENERGY
 
   export if_debug
+  export if_test
+  export if_profile
+  export if_not_profile
 
   export create
   export save
   export load
   export isEmpty
   export format
+  export merge
 
   export ConfigData
   #
@@ -362,7 +366,7 @@ module Config
   # @param data Configuration data object
   # @return {ConfigData} Updated configuration object
   #
-  function _merge(data::ConfigData)
+  function merge(data::ConfigData)
     local name::Symbol
 
     for name in fieldnames(data)
@@ -382,7 +386,7 @@ module Config
   # @param empty Flag to create empty configuration
   # @return {ConfigData} Data type instance
   #
-  function create(merge::Bool = true, empty::Bool = false)
+  function create(isMerge::Bool = true, empty::Bool = false)
     local cfg::ConfigData = ConfigData(
       CommandLine.create(),                    # cmdLineArgs
       empty ? [] : [50,100,1,0,1,1,1,1,1,1],   # orgMutationProbs (add,change,del,small-change,clone,period,amount,probs,cloneEnergy,decreasePercent)
@@ -444,7 +448,7 @@ module Config
       5.0                                      # modeStatusPeriod
     )
 
-    merge ? _merge(cfg) : cfg
+    isMerge ? merge(cfg) : cfg
   end
   #
   # This macro turns on DEBUG code if modeDebug. For example, it
@@ -461,6 +465,11 @@ module Config
   # run-profiling.sh for this
   #
   macro if_profile(ex) @static if _setting(create(), :modeProfile) esc(ex) end end
+  #
+  # This macro turns on specified code in not profiling mode. You may use
+  # run-server.bat for this.
+  #
+  macro if_not_profile(ex) @static if !_setting(create(), :modeProfile) esc(ex) end end
   #
   # Saves all data into the file. If file exists, it will be overriden
   # @param data Config Data type
