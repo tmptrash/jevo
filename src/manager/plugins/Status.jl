@@ -34,6 +34,8 @@ module Status
     eMin::Int         # minimum organism energy
     eMax::Int         # maximum organism energy
     evals::Int        # amount of eval() calls till previous status
+    csMin::Int        # minimum organism code size
+    csMax::Int        # maximum organism code size
   end
   #
   # Module initializer
@@ -42,7 +44,7 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    man.plugins[MODULE_NAME] = StatusData(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     #
     # All event handlers should be binded here
     #
@@ -75,19 +77,21 @@ module Status
 
     if stamp - st.stamp >= cfg.modeStatusPeriod
       print(string(Dates.format(now(), "HH:MM:SS"), " "))
-      print_with_color(:red,    rpad(string("ips:",    cfg.worldIps),             7))
+      print_with_color(:red,    rpad(string("ips:",    cfg.worldIps),             8))
       print_with_color(:red,    rpad(string("mut:",    st.mps),                   9))
       print_with_color(:red,    rpad(string("kil:",    st.kops),                  8))
       print_with_color(:red,    rpad(string("clon:",   st.cps),                   8))
       print_with_color(:red,    rpad(string("eval:",   cfg.orgEvals - st.evals), 10))
       print_with_color(:red,    rpad(string("req:",    st.rps),                   9))
       print_with_color(:red,    rpad(string("sreq:",   st.srps),                  9))
-      print_with_color(:red,    rpad(string("enup:",   st.eups),                   8), "     ")
+      print_with_color(:red,    rpad(string("enup:",   st.eups),                  8), "     ")
       #print_with_color(:red,    rpad(string("ytps:",   st.ytps)), 11))
       #print_with_color(:red,    rpad(string("yps:",    st.yps)),  9))
       #print_with_color(:red,    rpad(string("syps:",   st.syps)),  9))
 
       print_with_color(:yellow, rpad(string("err:",    man.cfg.orgErrors),        9))
+      print_with_color(:yellow, rpad(string("cmin:",   st.csMin),                 9))
+      print_with_color(:yellow, rpad(string("cmax:",   st.csMax),                 9))
       print_with_color(:yellow, rpad(string("emin:",   st.eMin),                  8))
       print_with_color(:yellow, rpad(string("emax:",   format(st.eMax, commas=true)),  14), "     ")
 
@@ -106,6 +110,8 @@ module Status
       st.mps    = 0
       st.eMin   = typemax(Int)
       st.eMax   = 0
+      st.csMin  = typemax(Int)
+      st.csMax  = 0
       st.evals  = cfg.orgEvals
     end
     #
@@ -194,7 +200,15 @@ module Status
     local sd::StatusData = man.plugins[MODULE_NAME]
 
     sd.energy += org.energy
+    #
+    # Finds min/max energetic organisms in population
+    #
     if org.energy < sd.eMin sd.eMin = org.energy end
-    if org.energy > sd.eMax sd.eMax = org.energy end
+    if org.energy >= sd.eMax sd.eMax = org.energy end
+    #
+    # Updates min/max code sizes
+    #
+    if org.codeSize >  sd.csMax sd.csMax = org.codeSize end
+    if org.codeSize <= sd.csMin sd.csMin = org.codeSize end
   end
 end

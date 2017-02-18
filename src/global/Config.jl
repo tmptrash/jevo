@@ -445,7 +445,7 @@ module Config
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod
-      5.0                                      # modeStatusPeriod
+      10.0                                     # modeStatusPeriod
     )
 
     isMerge ? merge(cfg) : cfg

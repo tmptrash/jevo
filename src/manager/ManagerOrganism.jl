@@ -117,9 +117,9 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     #
     if cfg.orgAlivePeriod > 0 && org.age > cfg.orgAlivePeriod && length(tasks) > cfg.worldMinOrgs _killOrganism(man, i) end
     #
-    # This is how we find maximum energetic organism
+    # Updates min/max values
     #
-    if org.energy > man.maxEnergy man.maxEnergy = org.energy end
+    _updateMinMax(man, org)
     #
     # Event about one organism has processed (runned)
     #
@@ -161,11 +161,34 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     _updateWorldEnergy(man)
   end
   #
+  # Resets min/max values
+  #
+  _resetMinMax(man)
+  #
   # This counter should be infinite, but not zero!
   #
   if counter === typemax(Int) counter = 1 end
 
   counter + 1
+end
+#
+# Updates minimum and maximum values for organisms (like energy, codeSize,...)
+# @param man Manager data type
+# @param org Organism
+#
+function _updateMinMax(man::ManagerTypes.ManagerData, org::Creature.Organism)
+  #
+  # This is how we find maximum energetic organism
+  #
+  if org.energy > man.maxEnergy man.maxEnergy = org.energy end
+end
+#
+# This method should be called at the end of every iteration, because
+# during next iteration max/min values may be different
+# @param man Manager data type
+#
+function _resetMinMax(man::ManagerTypes.ManagerData)
+  man.maxEnergy = 0
 end
 #
 # Updates clonning of organisms. Chooses organism for clonning according
@@ -233,11 +256,6 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
 
     i -= 1
   end
-  #
-  # Maximum energy should be calculated on every main loop iteration,
-  # because best organism may die and this value should be updated
-  #
-  man.maxEnergy = 0
   Event.fire(man.obs, "updateenergy", man)
 
   true
