@@ -28,6 +28,9 @@ module Status
     srps::Int         # moveXXX() related requests per second
     syps::Int         # moveXXX() related yields per second
     mps::Int          # mutations per second
+    energy::Int       # total energy in population
+    eMin::Int         # minimum organism energy
+    eMax::Int         # maximum organism energy
   end
   #
   # Module initializer
@@ -36,7 +39,7 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    man.plugins[MODULE_NAME] = StatusData(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     #
     # All event handlers should be binded here
     #
@@ -50,6 +53,7 @@ module Status
     Event.on(man.obs, "clone", _onClone)
     Event.on(man.obs, "dotrequest", _onDotRequest)
     Event.on(man.obs, "stepyield", _onStepYield)
+    Event.on(man.obs, "organism", _onOrganism)
   end
   #
   # Shows real time status obtained from StatusData type
@@ -61,31 +65,39 @@ module Status
     local period::Float64 = man.cfg.modeStatusPeriod
 
     if stamp - st.stamp >= man.cfg.modeStatusPeriod
-      println(
-        "ips ",      man.cfg.worldIps,
-        ", ytps ",   Int(div(st.ytps, period)),
-        ", yps ",    Int(div(st.yps, period)),
-        ", cps ",    Int(div(st.cps, period)),
-        ", eups ",   Int(div(st.eups, period)),
-        ", kops ",   Int(div(st.kops, period)),
-        ", syps ",   Int(div(st.syps, period)),
-        ", rps ",    Int(div(st.rps, period)),
-        ", srps ",   Int(div(st.srps, period)),
-        ", mps ",    Int(div(st.mps, period)),
-        ", evals ",  man.cfg.orgEvals,
-        ", err ",    man.cfg.orgErrors,
-        ", orgs ",   length(man.tasks)
-      )
-      st.stamp = stamp
-      st.ytps  = 0
-      st.yps   = 0
-      st.cps   = 0
-      st.eups  = 0
-      st.kops  = 0
-      st.rps   = 0
-      st.syps  = 0
-      st.srps  = 0
-      st.mps   = 0
+      print(string(Dates.format(now(), "HH:MM:SS"), " "))
+      print_with_color(:red,    rpad(string("ips:",    man.cfg.worldIps),                    8))
+      print_with_color(:red,    rpad(string("cps:",    Int(div(st.cps,           period))),  7))
+      print_with_color(:red,    rpad(string("eups:",   Int(div(st.eups,          period))),  8))
+      print_with_color(:red,    rpad(string("kops:",   Int(div(st.kops,          period))),  8))
+      print_with_color(:red,    rpad(string("rps:",    Int(div(st.rps,           period))),  8))
+      print_with_color(:red,    rpad(string("srps:",   Int(div(st.srps,          period))),  9))
+      print_with_color(:red,    rpad(string("mps:",    Int(div(st.mps,           period))),  8))
+      print_with_color(:red,    rpad(string("ytps:",   Int(div(st.ytps,          period))), 11))
+      print_with_color(:red,    rpad(string("yps:",    Int(div(st.yps,           period))),  9))
+      print_with_color(:red,    rpad(string("syps:",   Int(div(st.syps,          period))),  9))
+
+      print_with_color(:yellow, rpad(string("eval:",   Int(div(man.cfg.orgEvals, period))), 10))
+      print_with_color(:yellow, rpad(string("err:",    man.cfg.orgErrors),                   9))
+      print_with_color(:yellow, rpad(string("org:",    length(man.tasks)),                   8))
+
+      print_with_color(:green,  rpad(string("emin:",   st.eMin),                             9))
+      print_with_color(:green,  rpad(string("emax:",   st.eMax),                            14))
+      print_with_color(:green,  rpad(string("nrg:",    st.energy),                          14), "\n")
+
+      st.stamp  = stamp
+      st.ytps   = 0
+      st.yps    = 0
+      st.cps    = 0
+      st.eups   = 0
+      st.kops   = 0
+      st.rps    = 0
+      st.syps   = 0
+      st.srps   = 0
+      st.mps    = 0
+      st.energy = 0
+      st.eMin   = typemax(Int)
+      st.eMax   = 0
     end
   end
   #
@@ -158,5 +170,17 @@ module Status
   function _onStepYield(man::ManagerData)
     man.plugins[MODULE_NAME].yps  += 1
     man.plugins[MODULE_NAME].syps += 1
+  end
+  #
+  # Handles "organism" event. Means, that one organism has processed (runned)
+  # @param man Manager related data object
+  # @param org Organism
+  #
+  function _onOrganism(man::ManagerData, org::Creature.Organism)
+    local sd::StatusData = man.plugins[MODULE_NAME]
+
+    sd.energy += org.energy
+    if org.energy < sd.eMin sd.eMin = org.energy end
+    if org.energy > sd.eMax sd.eMax = org.energy end
   end
 end

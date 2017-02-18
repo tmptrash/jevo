@@ -117,6 +117,10 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     #
     if cfg.orgAlivePeriod > 0 && org.age > cfg.orgAlivePeriod && length(tasks) > cfg.worldMinOrgs _killOrganism(man, i) end
     #
+    # Event about one organism has processed (runned)
+    #
+    Event.fire(man.obs, "organism", man, org)
+    #
     # Here shouldn't be a code, after mutations, because current
     # task may be updated with new one.
     #
@@ -164,7 +168,7 @@ end
 # to energy * diversity criterias. Energy should be more valuable in this
 # process, because diversity (mutations) are very simple to obtain and
 # population will die, if diversity and energy will have similar affection
-# on natural selection mechanism. 
+# on natural selection mechanism.
 # @param man Manager data type
 # @param org Organism
 #

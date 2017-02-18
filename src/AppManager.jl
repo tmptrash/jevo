@@ -98,7 +98,7 @@ end
 function _onRecover()
   local man::ManagerTypes.ManagerData
   local exitCode::Int
-  local cfg::Config.ConfigData = Config.create(false, true)
+  local cfg::Config.ConfigData = Config.create(false)
 
   Helper.info("Starting jevo...")
   man = Manager.create(cfg)
