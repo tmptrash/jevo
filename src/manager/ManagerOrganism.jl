@@ -117,6 +117,10 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     #
     if cfg.orgAlivePeriod > 0 && org.age > cfg.orgAlivePeriod && length(tasks) > cfg.worldMinOrgs _killOrganism(man, i) end
     #
+    # This is how we find maximum energetic organism
+    #
+    if org.energy > man.maxEnergy man.maxEnergy = org.energy end
+    #
     # Event about one organism has processed (runned)
     #
     Event.fire(man.obs, "organism", man, org)
@@ -141,7 +145,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # TODO: optimize this array. It should be created only once
   # TODO: outside the loop.
   #
-  if needClone && len < cfg.worldMaxOrgs && len > 0 _updateClonning(man, tasks) end
+  if needClone && len > 0 _updateClonning(man, tasks) end
   #
   # This block decreases energy from organisms, because they
   # spend it while leaving.
@@ -171,14 +175,29 @@ end
 # on natural selection mechanism.
 # @param man Manager data type
 # @param org Organism
+# @return {Bool} Clonning was successful or not
 #
 function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerTypes.OrganismTask, 1})
   local probs::Array{UInt, 1} = UInt[]
   local probIndex::Int
-
+  local orgAmount::Int = length(tasks)
+  #
+  # Checks if random selected organism may be removed and clonning
+  # will be available, because we already limit the maximum (cfg.worldMaxOrgs)
+  #
+  if orgAmount >= man.cfg.worldMaxOrgs
+    probIndex = Helper.fastRand(orgAmount)
+    if probIndex < 1 || Helper.fastRand(man.maxEnergy) < man.maxEnergy - tasks[probIndex].organism.energy return false end
+    _killOrganism(man, probIndex)
+  end
+  #
+  # This code will be run if total amount of organisms is less then cfg.worldMaxOrgs
+  #
   @inbounds for task in tasks push!(probs, UInt(task.organism.energy) * UInt(task.organism.mutationsFromStart)) end
   probIndex = Helper.getProbIndex(probs)
   if probIndex > 0 _onClone(man, tasks[probIndex].organism) end
+
+  true
 end
 #
 # Updates energy of all organisms. Decreases their energy according
@@ -214,6 +233,11 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
 
     i -= 1
   end
+  #
+  # Maximum energy should be calculated on every main loop iteration,
+  # because best organism may die and this value should be updated
+  #
+  man.maxEnergy = 0
   Event.fire(man.obs, "updateenergy", man)
 
   true
@@ -468,7 +492,7 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   end
 
   Event.fire(man.obs, "clone", man, organism.id, crTask.organism.id)
-  
+
   true
 end
 #

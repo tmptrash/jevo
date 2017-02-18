@@ -88,6 +88,7 @@ module Manager
       function() end,                                                           # dotCallback
       function() end,                                                           # moveCallback
       current_task(),                                                           # task
+      0,                                                                        # maxEnergy
       Dict{String, ManagerTypes.Plugin}(),                                      # plugins
       obs                                                                       # obs
     )

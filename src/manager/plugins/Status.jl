@@ -51,7 +51,7 @@ module Status
     Event.on(man.obs, "yieldto", _onYieldTo)
     Event.on(man.obs, "request", _onRequest)
     Event.on(man.obs, "updateenergy", _onUpdateEnergy)
-    Event.on(man.obs, "killorgaism", _onKillOrganism)
+    Event.on(man.obs, "killorganism", _onKillOrganism)
     Event.on(man.obs, "mutations", _onMutations)
     Event.on(man.obs, "clone", _onClone)
     Event.on(man.obs, "dotrequest", _onDotRequest)

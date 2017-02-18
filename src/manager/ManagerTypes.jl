@@ -130,6 +130,10 @@ module ManagerTypes
     #
     task::Task
     #
+    # Energy of maximum energetic organism
+    #
+    maxEnergy::Int
+    #
     # All available(compiled) Manager's plugins. Key is a plugin string
     # name (filename). Value - plugin related data type.
     #
@@ -158,6 +162,7 @@ module ManagerTypes
       dotCallback::Function,
       moveCallback::Function,
       task::Task,
+      maxEnergy::Int,
       plugins::Dict{String, Plugin},
       obs::Event.Observer
     ) = new(
@@ -173,6 +178,7 @@ module ManagerTypes
       dotCallback,
       moveCallback,
       task,
+      maxEnergy,
       plugins,
       obs
     )
