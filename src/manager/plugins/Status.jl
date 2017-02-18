@@ -7,7 +7,9 @@ module Status
   import ManagerTypes.ManagerData
   import ManagerTypes.Plugin
   import Creature
+  import Config
   import Event
+  import Formatting.format
 
   export init
   #
@@ -31,6 +33,7 @@ module Status
     energy::Int       # total energy in population
     eMin::Int         # minimum organism energy
     eMax::Int         # maximum organism energy
+    evals::Int        # amount of eval() calls till previous status
   end
   #
   # Module initializer
@@ -39,7 +42,7 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    man.plugins[MODULE_NAME] = StatusData(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     #
     # All event handlers should be binded here
     #
@@ -62,28 +65,34 @@ module Status
   #
   function _onStatus(man::ManagerData, stamp::Float64)
     local st::StatusData  = man.plugins[MODULE_NAME]
-    local period::Float64 = man.cfg.modeStatusPeriod
+    local cfg::Config.ConfigData = man.cfg
+    local period::Float64 = cfg.modeStatusPeriod
 
-    if stamp - st.stamp >= man.cfg.modeStatusPeriod
+    #
+    # Condition for the first run
+    #
+    if cfg.orgEvals < 1 st.evals = cfg.orgEvals end
+
+    if stamp - st.stamp >= cfg.modeStatusPeriod
       print(string(Dates.format(now(), "HH:MM:SS"), " "))
-      print_with_color(:red,    rpad(string("ips:",    man.cfg.worldIps),                    8))
-      print_with_color(:red,    rpad(string("cps:",    Int(div(st.cps,           period))),  7))
-      print_with_color(:red,    rpad(string("eups:",   Int(div(st.eups,          period))),  8))
-      print_with_color(:red,    rpad(string("kops:",   Int(div(st.kops,          period))),  8))
-      print_with_color(:red,    rpad(string("rps:",    Int(div(st.rps,           period))),  8))
-      print_with_color(:red,    rpad(string("srps:",   Int(div(st.srps,          period))),  9))
-      print_with_color(:red,    rpad(string("mps:",    Int(div(st.mps,           period))),  8))
-      print_with_color(:red,    rpad(string("ytps:",   Int(div(st.ytps,          period))), 11))
-      print_with_color(:red,    rpad(string("yps:",    Int(div(st.yps,           period))),  9))
-      print_with_color(:red,    rpad(string("syps:",   Int(div(st.syps,          period))),  9))
+      print_with_color(:red,    rpad(string("ips:",    cfg.worldIps),             7))
+      print_with_color(:red,    rpad(string("mut:",    st.mps),                   9))
+      print_with_color(:red,    rpad(string("kil:",    st.kops),                  8))
+      print_with_color(:red,    rpad(string("clon:",   st.cps),                   8))
+      print_with_color(:red,    rpad(string("eval:",   cfg.orgEvals - st.evals), 10))
+      print_with_color(:red,    rpad(string("req:",    st.rps),                   9))
+      print_with_color(:red,    rpad(string("sreq:",   st.srps),                  9))
+      print_with_color(:red,    rpad(string("enup:",   st.eups),                   8), "     ")
+      #print_with_color(:red,    rpad(string("ytps:",   st.ytps)), 11))
+      #print_with_color(:red,    rpad(string("yps:",    st.yps)),  9))
+      #print_with_color(:red,    rpad(string("syps:",   st.syps)),  9))
 
-      print_with_color(:yellow, rpad(string("eval:",   Int(div(man.cfg.orgEvals, period))), 10))
-      print_with_color(:yellow, rpad(string("err:",    man.cfg.orgErrors),                   9))
-      print_with_color(:yellow, rpad(string("org:",    length(man.tasks)),                   8))
+      print_with_color(:yellow, rpad(string("err:",    man.cfg.orgErrors),        9))
+      print_with_color(:yellow, rpad(string("emin:",   st.eMin),                  8))
+      print_with_color(:yellow, rpad(string("emax:",   format(st.eMax, commas=true)),  14), "     ")
 
-      print_with_color(:green,  rpad(string("emin:",   st.eMin),                             9))
-      print_with_color(:green,  rpad(string("emax:",   st.eMax),                            14))
-      print_with_color(:green,  rpad(string("nrg:",    st.energy),                          14), "\n")
+      print_with_color(:green,  rpad(string("orgs:",   length(man.tasks)),        9))
+      print_with_color(:green,  rpad(string("nrg:",    format(st.energy, commas=true)), 16), "\n")
 
       st.stamp  = stamp
       st.ytps   = 0
@@ -95,10 +104,15 @@ module Status
       st.syps   = 0
       st.srps   = 0
       st.mps    = 0
-      st.energy = 0
       st.eMin   = typemax(Int)
       st.eMax   = 0
+      st.evals  = cfg.orgEvals
     end
+    #
+    # Energy of entire population should be calculated again
+    # for every "iteration" event call
+    #
+    st.energy = 0
   end
   #
   # Calls if yield() in Manager is called

@@ -452,7 +452,6 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   # Creates new organism and apply mutations to him.
   #
   crTask = Manager._createOrganism(man, organism, pos)
-  Event.fire(man.obs, "clone", man, organism.id, crTask.organism.id)
   if crTask === false return false end
   #
   # Clonning means additional energy waste
@@ -468,6 +467,8 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
     _mutate(man, crTask, crTask.organism.mutationsOnClonePercent)
   end
 
+  Event.fire(man.obs, "clone", man, organism.id, crTask.organism.id)
+  
   true
 end
 #
