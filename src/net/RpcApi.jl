@@ -131,13 +131,6 @@ module RpcApi
     # Organism code size in lines
     #
     codeSize::Int
-    #
-    # Percent (0..1), which affects how much energy will be decreased every
-    # time during organism energy update. Every configured period of time
-    # system grabs energy from organisms using formula: org.energy -= (
-    # org.codeSize * energyDecreasePercent)
-    #
-    energyDecreasePercent::Float64
   end
   #
   # Structure of world statistics

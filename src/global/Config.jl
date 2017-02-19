@@ -123,17 +123,9 @@ module Config
     orgColorPeriod::Int
     #
     # Amount of iterations within organism's life loop, after that we decrease
-    # amount of energy into orgEnergySpendPercent. If 0, then energy
-    # decreasing will be disabled.
+    # some amount of energy. If 0, then energy decreasing will be disabled.
     #
     orgEnergySpendPeriod::Int
-    #
-    # Percent (0..1), which affects how much energy will be decreased every
-    # time during organism energy update. Every configured period of time
-    # system grabs energy from organisms using formula: org.energy -= (
-    # org.codeSize * orgEnergySpendPercent)
-    #
-    orgEnergySpendPercent::Float64
     #
     # Amount of energy, which will be decreased in case of organis's
     # code error or exception
@@ -389,7 +381,7 @@ module Config
   function create(isMerge::Bool = true, empty::Bool = false)
     local cfg::ConfigData = ConfigData(
       CommandLine.create(),                    # cmdLineArgs
-      empty ? [] : [50,100,1,0,1,1,1,1,1,1],   # orgMutationProbs (add,change,del,small-change,clone,period,amount,probs,cloneEnergy,decreasePercent)
+      empty ? [] : [50,100,1,0,1,1,1,1,1],     # orgMutationProbs (add,change,del,small-change,clone,period,amount,probs,cloneEnergy
       100,                                     # orgMutationProbsMaxValue
       2.0,                                     # orgCloneMutation
       10,                                      # orgClonePeriod
@@ -400,9 +392,8 @@ module Config
       100,                                     # orgStartColor
       50,                                      # orgColorPeriod
       200,                                     # orgEnergySpendPeriod
-      1.0,                                     # orgEnergySpendPercent
       1000,                                    # orgEnergySpendOnError
-      6000 * 10,                               # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
+      6000,                                    # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
       0,                                       # orgErrors
       0,                                       # orgEvals
 

@@ -27,7 +27,6 @@ module TestManager
     cfg.orgStartAmount                = 0
     cfg.orgStartEnergy                = 100
     cfg.orgEnergySpendPeriod          = 2
-    cfg.orgEnergySpendPercent         = 1.0
     cfg.orgClonePeriod                = 0
     cfg.worldWidth                    = 10
     cfg.worldHeight                   = 10
@@ -111,12 +110,12 @@ module TestManager
     Manager.destroy(d.man)
   end
   facts("Checking amount energy grabbing from organisms per period") do
-    local d = _create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}(:orgEnergySpendPercent=>1.0))
+    local d = _create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}())
 
     @fact d.orgs[1].energy --> 100
     @fact d.orgs[2].energy --> 100
     @fact d.orgs[3].energy --> 100
-    # orgEnergySpendPeriod === 2, orgEnergySpendPercent === 1,
+    # orgEnergySpendPeriod === 2
     # so we need run 4 iterations to decrease energy on 6 points
     consume(d.task)
     consume(d.task)

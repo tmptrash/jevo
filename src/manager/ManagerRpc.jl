@@ -464,8 +464,7 @@ function _createSimpleOrganism(id::UInt, org::Creature.Organism)
     [org.pos.x, org.pos.y],
     org.age,
     org.cloneEnergyPercent,
-    org.codeSize,
-    org.energyDecreasePercent
+    org.codeSize
   )
 end
 #

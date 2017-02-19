@@ -229,13 +229,6 @@ module Creature
     #
     cloneEnergyPercent::Float64
     #
-    # Percent (0..1), which affects how much energy will be decreased every
-    # time during organism energy update. Every configured period of time
-    # system grabs energy from organisms using formula: org.energy -= (
-    # org.codeSize * energyDecreasePercent)
-    #
-    energyDecreasePercent::Float64
-    #
     # Amount obtained mutations, which since organism borning
     #
     mutationsFromStart::Int
@@ -335,7 +328,6 @@ module Creature
       pos,                                                                  # pos
       0,                                                                    # age
       0.5,                                                                  # cloneEnergyPercent
-      cfg.orgEnergySpendPercent,                                            # energyDecreasePercent
       0,                                                                    # mutationsFromStart
       Event.create()                                                        # observer
     )
@@ -393,7 +385,6 @@ module Creature
       pos,                                                                  # pos
       0,                                                                    # age
       0.5,                                                                  # cloneEnergyPercent
-      org.energyDecreasePercent,                                            # energyDecreasePercent
       org.mutationsFromStart,                                               # mutationsFromStart
       Event.create()                                                        # observer
     )

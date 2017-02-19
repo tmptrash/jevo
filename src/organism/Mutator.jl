@@ -280,22 +280,10 @@ module Mutator
     true
   end
   #
-  # Mutates "Energy decrease code size dependency" value. See
-  # orgEnergySpendPercent config for details.
-  # @param cfg Global configuration type
-  # @param org Organism we are working with
-  # @param pos Unused
-  # @param cmd Unused
-  #
-  function _onDecreasePercent(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos, cmd::Code.CodePart)
-    org.energyDecreasePercent = rand(Float64)
-    true
-  end
-  #
   # All available functions for mutation types: change, add, del,...
   #
   const _MUTATION_TYPES = [
-    _onAdd, _onChange, _onDel, _onSmallChange, _onClone, _onPeriod, _onAmount, _onProbs, _onCloneEnergyPercent, _onDecreasePercent
+    _onAdd, _onChange, _onDel, _onSmallChange, _onClone, _onPeriod, _onAmount, _onProbs, _onCloneEnergyPercent
   ]
   #
   # "Empty" position. Means no position. Is used only like a stub for
