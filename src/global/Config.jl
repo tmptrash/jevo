@@ -323,6 +323,10 @@ module Config
     # Amount of seconds for status showing in terminal
     #
     modeStatusPeriod::Int
+    #
+    # In this mode status report will be short or full
+    #
+    modeStatusFull::Bool
   end
   #
   # Returns one configuration setting from command line parameters
@@ -393,7 +397,7 @@ module Config
       50,                                      # orgColorPeriod
       200,                                     # orgEnergySpendPeriod
       1000,                                    # orgEnergySpendOnError
-      6000,                                    # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
+      10000,                                   # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
       0,                                       # orgErrors
       0,                                       # orgEvals
 
@@ -407,8 +411,8 @@ module Config
       0,                                       # worldMinOrgs
       1000,                                    # worldStartEnergyDots
       UInt32(0x0001F4),                        # worldStartEnergyInDot
-      0.3,                                     # worldEnergyCheckPercent
-      500,                                     # worldEnergyCheckPeriod
+      0.5,                                     # worldEnergyCheckPercent
+      1000,                                    # worldEnergyCheckPeriod
       1,                                       # worldZoom
       0,                                       # worldIps
 
@@ -436,7 +440,8 @@ module Config
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod
-      10.0                                     # modeStatusPeriod
+      10.0,                                    # modeStatusPeriod
+      false                                    # modeStatusFull
     )
 
     isMerge ? merge(cfg) : cfg

@@ -69,7 +69,7 @@ end
 function createOrganisms(man::ManagerTypes.ManagerData)
   local i::Int
 
-  Helper.info("Creating organisms...")
+  if !man.quiet Helper.info("Creating organisms...") end
   man.totalOrganisms      = 0
   # TODO: for system with many managers id should be unique between them
   man.organismId          = UInt(1)
@@ -219,7 +219,7 @@ function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int, energy::UIn
   local xOffset::Int = div(man.world.width, Helper.fastRand(9) + 1)
   local yOffset::Int = div(man.world.height, Helper.fastRand(9) + 1)
 
-  Helper.info("Creating random energy...")
+  if !man.quiet Helper.info("Creating random energy...") end
   for i::Int = 1:amount
     setEnergy(man, Helper.fastRand(width) + xOffset, Helper.fastRand(height) + yOffset, energy)
   end

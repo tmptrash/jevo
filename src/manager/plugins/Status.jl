@@ -36,6 +36,16 @@ module Status
     evals::Int        # amount of eval() calls till previous status
     csMin::Int        # minimum organism code size
     csMax::Int        # maximum organism code size
+    eatl::Int         # organism eats left
+    eatr::Int         # organism eats right
+    eatu::Int         # organism eats up
+    eatd::Int         # organism eats down
+    eated::Int        # total amount of eating in population
+    stepl::Int        # organism moves left
+    stepr::Int        # organism moves right
+    stepu::Int        # organism moves up
+    stepd::Int        # organism moves down
+    steps::Int        # total amount of moving in population
   end
   #
   # Module initializer
@@ -44,21 +54,31 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    man.plugins[MODULE_NAME] = StatusData(0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
     #
     # All event handlers should be binded here
     #
     Event.on(man.obs, "iteration", _onStatus)
-    Event.on(man.obs, "yield", _onYield)
-    Event.on(man.obs, "yieldto", _onYieldTo)
+    #Event.on(man.obs, "yield", _onYield)
+    #Event.on(man.obs, "yieldto", _onYieldTo)
+    #Event.on(man.obs, "stepyield", _onStepYield)
     Event.on(man.obs, "request", _onRequest)
     Event.on(man.obs, "updateenergy", _onUpdateEnergy)
     Event.on(man.obs, "killorganism", _onKillOrganism)
     Event.on(man.obs, "mutations", _onMutations)
     Event.on(man.obs, "clone", _onClone)
     Event.on(man.obs, "dotrequest", _onDotRequest)
-    Event.on(man.obs, "stepyield", _onStepYield)
     Event.on(man.obs, "organism", _onOrganism)
+
+    Event.on(man.obs, "eatleft", _onEatLeft)
+    Event.on(man.obs, "eatright", _onEatRight)
+    Event.on(man.obs, "eatup", _onEatUp)
+    Event.on(man.obs, "eatdown", _onEatDown)
+
+    Event.on(man.obs, "stepleft", _onStepLeft)
+    Event.on(man.obs, "stepright", _onStepRight)
+    Event.on(man.obs, "stepup", _onStepUp)
+    Event.on(man.obs, "stepdown", _onStepDown)
   end
   #
   # Shows real time status obtained from StatusData type
@@ -77,26 +97,57 @@ module Status
 
     if stamp - st.stamp >= cfg.modeStatusPeriod
       print(string(Dates.format(now(), "HH:MM:SS"), " "))
-      print_with_color(:red,    rpad(string("ips:",    cfg.worldIps),             8))
-      print_with_color(:red,    rpad(string("mut:",    st.mps),                   9))
-      print_with_color(:red,    rpad(string("kil:",    st.kops),                  8))
-      print_with_color(:red,    rpad(string("clon:",   st.cps),                   8))
-      print_with_color(:red,    rpad(string("eval:",   cfg.orgEvals - st.evals), 10))
-      print_with_color(:red,    rpad(string("req:",    st.rps),                   9))
-      print_with_color(:red,    rpad(string("sreq:",   st.srps),                  9))
-      print_with_color(:red,    rpad(string("enup:",   st.eups),                  8), "     ")
+      if cfg.modeStatusFull
+        print_with_color(:green,   rpad(string("eat:",    st.eatl),                     11))
+        print_with_color(:green,   rpad(string(st.eatr),                                 8))
+        print_with_color(:green,   rpad(string(st.eatu),                                 8))
+        print_with_color(:green,   rpad(string(st.eatd),                                 8))
+        print_with_color(:green,   rpad(string(format(st.eated, commas=true)),          10))
+      else
+        print_with_color(:green,   rpad(string("eat:", format(st.eated, commas=true)),  14))
+      end
+
+      if cfg.modeStatusFull
+        print_with_color(:red,     rpad(string("step:", st.stepl),                      11))
+        print_with_color(:red,     rpad(string(st.stepr),                                6))
+        print_with_color(:red,     rpad(string(st.stepu),                                6))
+        print_with_color(:red,     rpad(string(st.stepd),                                6))
+        print_with_color(:red,     rpad(string(format(st.steps, commas=true)),          10))
+      else
+        print_with_color(:red,     rpad(string("step:", format(st.steps, commas=true)), 14))
+      end
+
+      print_with_color(:yellow,    rpad(string("ips:",    cfg.worldIps),                 9))
+      print_with_color(:yellow,    rpad(string("mut:",    st.mps),                       9))
+      print_with_color(:yellow,    rpad(string("kil:",    st.kops),                      8))
+      print_with_color(:yellow,    rpad(string("clon:",   st.cps),                       8))
+      print_with_color(:yellow,    rpad(string("eval:",   cfg.orgEvals - st.evals),     10))
+      print_with_color(:yellow,    rpad(string("req:",    st.rps),                       9))
+      if cfg.modeStatusFull
+        print_with_color(:yellow,  rpad(string("sreq:",   st.srps),                      9))
+        print_with_color(:yellow,  rpad(string("enup:",   st.eups),                      8))
+      end
+      #if cfg.modeStatusFull print("\n         ") end
+
+      print_with_color(:orange,    rpad(string("err:",    man.cfg.orgErrors),           11))
+      if cfg.modeStatusFull
+        print_with_color(:orange,    rpad(string("code:",   st.csMin),                  12))
+        print_with_color(:orange,    rpad(string(st.csMax),                              7))
+      else
+        print_with_color(:orange,    rpad(string("code:", div(st.csMax - st.csMin, 2)),  9))
+      end
+      if cfg.modeStatusFull
+        print_with_color(:orange,    rpad(string("nrg:",    st.eMin),                   11))
+        print_with_color(:orange,    rpad(string(format(st.eMax, commas=true)),          7))
+      end
+      #if cfg.modeStatusFull print("                                                        ") end
+
       #print_with_color(:red,    rpad(string("ytps:",   st.ytps)), 11))
       #print_with_color(:red,    rpad(string("yps:",    st.yps)),  9))
       #print_with_color(:red,    rpad(string("syps:",   st.syps)),  9))
 
-      print_with_color(:yellow, rpad(string("err:",    man.cfg.orgErrors),        9))
-      print_with_color(:yellow, rpad(string("cmin:",   st.csMin),                 9))
-      print_with_color(:yellow, rpad(string("cmax:",   st.csMax),                 9))
-      print_with_color(:yellow, rpad(string("emin:",   st.eMin),                  8))
-      print_with_color(:yellow, rpad(string("emax:",   format(st.eMax, commas=true)),  14), "     ")
-
-      print_with_color(:green,  rpad(string("orgs:",   length(man.tasks)),        9))
-      print_with_color(:green,  rpad(string("nrg:",    format(st.energy, commas=true)), 16), "\n")
+      print_with_color(:cyan,   rpad(string("orgs:",   length(man.tasks)),               9))
+      print_with_color(:cyan,   rpad(string("nrg:",    format(st.energy, commas=true)),  16), "\n")
 
       st.stamp  = stamp
       st.ytps   = 0
@@ -113,12 +164,22 @@ module Status
       st.csMin  = typemax(Int)
       st.csMax  = 0
       st.evals  = cfg.orgEvals
+      st.eatl   = 0
+      st.eatr   = 0
+      st.eatu   = 0
+      st.eatd   = 0
+      st.eated  = 0
+      st.stepl  = 0
+      st.stepr  = 0
+      st.stepu  = 0
+      st.stepd  = 0
     end
     #
-    # Energy of entire population should be calculated again
+    # Energy/steps of entire population should be calculated again
     # for every "iteration" event call
     #
     st.energy = 0
+    st.steps  = 0
   end
   #
   # Calls if yield() in Manager is called
@@ -210,5 +271,113 @@ module Status
     #
     if org.codeSize >  sd.csMax sd.csMax = org.codeSize end
     if org.codeSize <= sd.csMin sd.csMin = org.codeSize end
+  end
+  #
+  # Is called every time if some organism calls eatLeft() function
+  # @param man Manager data type
+  # @param org Organism, who is eating
+  # @param amount Amount of wanted eating (bite)
+  # @param eated Amount of eated energy
+  #
+  function _onEatLeft(man::ManagerData, org::Creature.Organism, amount::Int, eated::Int)
+    local sd::StatusData = man.plugins[MODULE_NAME]
+
+    sd.eatl  += eated
+    sd.eated += eated
+  end
+  #
+  # Is called every time if some organism calls eatRight() function
+  # @param man Manager data type
+  # @param org Organism, who is eating
+  # @param amount Amount of wanted eating (bite)
+  # @param eated Amount of eated energy
+  #
+  function _onEatRight(man::ManagerData, org::Creature.Organism, amount::Int, eated::Int)
+    local sd::StatusData = man.plugins[MODULE_NAME]
+
+    sd.eatr  += eated
+    sd.eated += eated
+  end
+  #
+  # Is called every time if some organism calls eatUp() function
+  # @param man Manager data type
+  # @param org Organism, who is eating
+  # @param amount Amount of wanted eating (bite)
+  # @param eated Amount of eated energy
+  #
+  function _onEatUp(man::ManagerData, org::Creature.Organism, amount::Int, eated::Int)
+    local sd::StatusData = man.plugins[MODULE_NAME]
+
+    sd.eatu  += eated
+    sd.eated += eated
+  end
+  #
+  # Is called every time if some organism calls eatDown() function
+  # @param man Manager data type
+  # @param org Organism, who is eating
+  # @param amount Amount of wanted eating (bite)
+  # @param eated Amount of eated energy
+  #
+  function _onEatDown(man::ManagerData, org::Creature.Organism, amount::Int, eated::Int)
+    local sd::StatusData = man.plugins[MODULE_NAME]
+
+    sd.eatd  += eated
+    sd.eated += eated
+  end
+  #
+  # Is called every time if some organism calls stepLeft() function
+  # @param man Manager data type
+  # @param org Organism, who is moving
+  # @param stepDone Is step was successful or not
+  #
+  function _onStepLeft(man::ManagerData, org::Creature.Organism, stepDone::Bool)
+    local sd::StatusData = man.plugins[MODULE_NAME]
+
+    if stepDone
+      sd.stepl += 1
+      sd.steps += 1
+    end
+  end
+  #
+  # Is called every time if some organism calls stepRight() function
+  # @param man Manager data type
+  # @param org Organism, who is moving
+  # @param stepDone Is step was successful or not
+  #
+  function _onStepRight(man::ManagerData, org::Creature.Organism, stepDone::Bool)
+    local sd::StatusData = man.plugins[MODULE_NAME]
+
+    if stepDone
+      sd.stepr += 1
+      sd.steps += 1
+    end
+  end
+  #
+  # Is called every time if some organism calls stepUp() function
+  # @param man Manager data type
+  # @param org Organism, who is moving
+  # @param stepDone Is step was successful or not
+  #
+  function _onStepUp(man::ManagerData, org::Creature.Organism, stepDone::Bool)
+    local sd::StatusData = man.plugins[MODULE_NAME]
+
+    if stepDone
+      sd.stepu += 1
+      sd.steps += 1
+    end
+  end
+  #
+  # Is called every time if some organism calls stepDown() function
+  # @param man Manager data type
+  # @param org Organism, who is moving
+  # @param stepDone Is step was successful or not
+  #
+  function _onStepDown(man::ManagerData, org::Creature.Organism, stepDone::Bool)
+    local sd::StatusData = man.plugins[MODULE_NAME]
+
+    if stepDone
+      sd.stepd += 1
+      sd.steps += 1
+    end
   end
 end

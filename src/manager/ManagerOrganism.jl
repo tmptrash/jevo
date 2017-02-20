@@ -100,7 +100,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # Current organism could die during running it's code, for
     # example during giving it's energy to another organism (altruism)
     #
-    if org.energy < 1 _killOrganism(man, i); i -=1; continue end
+    if org.energy < 1 && i <= length(tasks) _killOrganism(man, i); i -=1; continue end
     #
     # This is how we mutate organisms during their life.
     # Mutations occures according to organisms settings.
@@ -249,7 +249,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     # Energy shouldn't be less then 1
     #
     if !dontKill
-      if _decreaseOrganismEnergy(man, org, org.codeSize, i)
+      if !_decreaseOrganismEnergy(man, org, org.codeSize, i)
         dontKill = (length(tasks) <= minOrgs)
       end
     end
@@ -269,7 +269,7 @@ end
 function _decreaseOrganismEnergy(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int, orgIndex::Int = 0)
   org.energy -= amount
   if org.energy < 1
-    _killOrganism(man, orgIndex === 0 ? findfirst((t) -> t.organism === org, man.tasks) : orgIndex)
+    _killOrganism(man, (orgIndex < 1 ? findfirst((t) -> t.organism === org, man.tasks) : orgIndex))
     return false
   end
 
@@ -541,7 +541,10 @@ end
 # @param retObj Special object for return value
 #
 function _onGrabLeft(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int, retObj::Helper.RetObj)
-  _onGrab(man, org, amount, Helper.Point(org.pos.x - 1, org.pos.y), retObj)
+  local eated::Int = _onGrab(man, org, amount, Helper.Point(org.pos.x - 1, org.pos.y), retObj)
+  Event.fire(man.obs, "eatleft", man, org, amount, eated)
+
+  eated
 end
 #
 # Grabs energy on the right side of the organism
@@ -551,7 +554,10 @@ end
 # @param retObj Special object for return value
 #
 function _onGrabRight(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int, retObj::Helper.RetObj)
-  _onGrab(man, org, amount, Helper.Point(org.pos.x + 1, org.pos.y), retObj)
+  local eated::Int = _onGrab(man, org, amount, Helper.Point(org.pos.x + 1, org.pos.y), retObj)
+  Event.fire(man.obs, "eatright", man, org, amount, eated)
+
+  eated
 end
 #
 # Grabs energy on the up side of the organism
@@ -561,7 +567,10 @@ end
 # @param retObj Special object for return value
 #
 function _onGrabUp(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int, retObj::Helper.RetObj)
-  _onGrab(man, org, amount, Helper.Point(org.pos.x, org.pos.y - 1), retObj)
+  local eated::Int = _onGrab(man, org, amount, Helper.Point(org.pos.x, org.pos.y - 1), retObj)
+  Event.fire(man.obs, "eatup", man, org, amount, eated)
+
+  eated
 end
 #
 # Grabs energy on the down side of the organism
@@ -571,7 +580,10 @@ end
 # @param retObj Special object for return value
 #
 function _onGrabDown(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int, retObj::Helper.RetObj)
-  _onGrab(man, org, amount, Helper.Point(org.pos.x, org.pos.y + 1), retObj)
+  local eated::Int = _onGrab(man, org, amount, Helper.Point(org.pos.x, org.pos.y + 1), retObj)
+  Event.fire(man.obs, "eatdown", man, org, amount, eated)
+
+  eated
 end
 #
 # Handler of "stepleft" event. Checks a possibility to step left.
@@ -580,7 +592,10 @@ end
 # @param orgId Unique organism id
 #
 function _onStepLeft(man::ManagerTypes.ManagerData, org::Creature.Organism)
-  _onStep(man, org, Helper.Point(org.pos.x - 1, org.pos.y))
+  local stepDone::Bool = _onStep(man, org, Helper.Point(org.pos.x - 1, org.pos.y))
+  Event.fire(man.obs, "stepleft", man, org, stepDone)
+
+  stepDone
 end
 #
 # Handler of "stepright" event. Checks a possibility to step right.
@@ -589,7 +604,10 @@ end
 # @param orgId Unique organism id
 #
 function _onStepRight(man::ManagerTypes.ManagerData, org::Creature.Organism)
-  _onStep(man, org, Helper.Point(org.pos.x + 1, org.pos.y))
+  local stepDone::Bool = _onStep(man, org, Helper.Point(org.pos.x + 1, org.pos.y))
+  Event.fire(man.obs, "stepright", man, org, stepDone)
+
+  stepDone
 end
 #
 # Handler of "stepup" event. Checks a possibility to step up.
@@ -598,7 +616,10 @@ end
 # @param orgId Unique organism id
 #
 function _onStepUp(man::ManagerTypes.ManagerData, org::Creature.Organism)
-  _onStep(man, org, Helper.Point(org.pos.x, org.pos.y - 1))
+  local stepDone::Bool = _onStep(man, org, Helper.Point(org.pos.x, org.pos.y - 1))
+  Event.fire(man.obs, "stepup", man, org, stepDone)
+
+  stepDone
 end
 #
 # Handler of "stepdown" event. Checks a possibility to step down.
@@ -606,7 +627,10 @@ end
 # @param orgId Unique organism id
 #
 function _onStepDown(man::ManagerTypes.ManagerData, org::Creature.Organism)
-  _onStep(man, org, Helper.Point(org.pos.x, org.pos.y + 1))
+  local stepDone::Bool = _onStep(man, org, Helper.Point(org.pos.x, org.pos.y + 1))
+  Event.fire(man.obs, "stepdown", man, org, stepDone)
+
+  stepDone
 end
 #
 # Handler of "propleft" event. Checks if we may obtain some property of
@@ -706,6 +730,9 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     #
     if amount < 1
       if organism.energy <= abs(amount)
+        # TODO: possibly slow code!
+        # TODO: move all findfirst() calls inside _killOrganism()
+        _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks))
         amount = -organism.energy
       end
       org.energy  = min(org.energy - amount, Config.ORGANISM_MAX_ENERGY)
@@ -714,16 +741,17 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       org.energy -= amount
       retObj.ret  = amount
     elseif org.energy <= amount
+      # TODO: possibly, slow code. To fix this we have to
+      # TODO: use map instead array for tasks (man.tasks)
+      _killOrganism(man, findfirst((t) -> t.organism === org, man.tasks))
       retObj.ret = org.energy
     end
-    if org.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === org, man.tasks)) end
   else
     #
     # Organism wants to give an energy, but no other organisms around
     #
     retObj.ret = amount > 0 ? World.grabEnergy(man.world, newPos, UInt32(amount)) : 0
   end
-  if organism.energy < 1 _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks)) end
 
   retObj.ret = Int(retObj.ret)
 end
