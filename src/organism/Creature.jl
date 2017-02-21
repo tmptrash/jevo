@@ -422,6 +422,7 @@ module Creature
         #
         cfg.orgErrors += 1
       end
+      cfg.codeRuns += 1
     end
   end
   #

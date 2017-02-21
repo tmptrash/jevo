@@ -21,6 +21,8 @@ module Status
   #
   type StatusData <: Plugin
     stamp::Float64    # current UNIX time stamp
+    ips::Float64      # average IPS
+    ipsAmount::Int    # amount of IPS checks. Is used for average IPS calculation
     rps::Int          # all requests per second
     eups::Int         # energy updates per second
     kops::Int         # killed organisms per second
@@ -54,7 +56,7 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
     #
     # All event handlers should be binded here
     #
@@ -89,84 +91,93 @@ module Status
     local st::StatusData  = man.plugins[MODULE_NAME]
     local cfg::Config.ConfigData = man.cfg
     local period::Float64 = cfg.modeStatusPeriod
+    local ips::Float64
 
     #
     # Condition for the first run
     #
     if cfg.orgEvals < 1 st.evals = cfg.orgEvals end
+    #
+    # Calculates average IPS for period "period"
+    #
+    st.ipsAmount += 1
+    st.ips += man.ips
 
-    if stamp - st.stamp >= cfg.modeStatusPeriod
+    if stamp - st.stamp >= period
+      ips = st.ips / st.ipsAmount
       print(string(Dates.format(now(), "HH:MM:SS"), " "))
-      print_with_color(:green,  rpad(string("orgs:",   length(man.tasks)),               9))
-      print_with_color(:normal, rpad(string("ips:",    cfg.worldIps),                    9))
-      print_with_color(:green,  rpad(string("nrg:",    format(st.energy, commas=true)), 16))
+      print_with_color(:green,  rpad(string("orgs:",   length(man.tasks)),                9))
+      print_with_color(:normal, rpad(string("ips:",    @sprintf "%.3f" ips),             13))
+      print_with_color(:green,  rpad(string("nrg:",    format(div(st.energy, ips), commas=true)), 16))
       if cfg.modeStatusFull
-        print_with_color(:red,   rpad(string("eat:",    st.eatl),                     11))
-        print_with_color(:red,   rpad(string(st.eatr),                                 8))
-        print_with_color(:red,   rpad(string(st.eatu),                                 8))
-        print_with_color(:red,   rpad(string(st.eatd),                                 8))
-        print_with_color(:red,   rpad(string(format(st.eated, commas=true)),          10))
+        print_with_color(:red,   rpad(string("eat:",    st.eatl),                        11))
+        print_with_color(:red,   rpad(string(st.eatr),                                    8))
+        print_with_color(:red,   rpad(string(st.eatu),                                    8))
+        print_with_color(:red,   rpad(string(st.eatd),                                    8))
+        print_with_color(:red,   rpad(string(format(st.eated, commas=true)),             10))
       else
-        print_with_color(:red,   rpad(string("eat:", format(st.eated, commas=true)),  14))
+        print_with_color(:red,   rpad(string("eat:", format(div(st.eated, ips), commas=true)),     14))
       end
       if cfg.modeStatusFull
-        print_with_color(:red, rpad(string("step:", st.stepl),                      11))
-        print_with_color(:red, rpad(string(st.stepr),                                6))
-        print_with_color(:red, rpad(string(st.stepu),                                6))
-        print_with_color(:red, rpad(string(st.stepd),                                6))
-        print_with_color(:red, rpad(string(format(st.steps, commas=true)),          10))
+        print_with_color(:red, rpad(string("step:", st.stepl),                           11))
+        print_with_color(:red, rpad(string(st.stepr),                                     6))
+        print_with_color(:red, rpad(string(st.stepu),                                     6))
+        print_with_color(:red, rpad(string(st.stepd),                                     6))
+        print_with_color(:red, rpad(string(format(st.steps, commas=true)),               10))
       else
-        print_with_color(:red, rpad(string("step:", format(st.steps, commas=true)), 14))
+        print_with_color(:red, rpad(string("step:", format(div(st.steps, ips), commas=true)),      14))
       end
-      print_with_color(:red,       rpad(string("mut:",    st.mps),                       9))
-      print_with_color(:red,       rpad(string("kil:",    st.kops),                      8))
-      print_with_color(:yellow,    rpad(string("clon:",   st.cps),                       9))
-      print_with_color(:yellow,    rpad(string("eval:",   cfg.orgEvals - st.evals),     10))
-      print_with_color(:yellow,    rpad(string("req:",    st.rps),                       9))
+      print_with_color(:red,       rpad(string("mut:",    st.mps),                        9))
+      print_with_color(:red,       rpad(string("kil:",    st.kops),                       8))
+      print_with_color(:yellow,    rpad(string("clon:",   st.cps),                        9))
+      print_with_color(:yellow,    rpad(string("eval:",   cfg.orgEvals - st.evals),      10))
+      print_with_color(:yellow,    rpad(string("req:",    st.rps),                        9))
       if cfg.modeStatusFull
-        print_with_color(:yellow,  rpad(string("sreq:",   st.srps),                      9))
-        print_with_color(:yellow,  rpad(string("enup:",   st.eups),                      8))
+        print_with_color(:yellow,  rpad(string("sreq:",   st.srps),                       9))
+        print_with_color(:yellow,  rpad(string("enup:",   st.eups),                       8))
       end
-      print_with_color(:orange,    rpad(string("err:",    man.cfg.orgErrors),           11))
+      print_with_color(:orange,    rpad(string("err:",    man.cfg.orgErrors),            11))
       if cfg.modeStatusFull
-        print_with_color(:orange,    rpad(string("code:",   st.csMin),                  12))
-        print_with_color(:orange,    rpad(string(st.csMax),                              7))
+        print_with_color(:orange,    rpad(string("code:",   st.csMin),                   12))
+        print_with_color(:orange,    rpad(string(st.csMax),                               7))
       else
-        print_with_color(:orange,    rpad(string("code:", div(st.csMax - st.csMin, 2)),  9), "\n")
+        print_with_color(:orange,    rpad(string("code:", div(st.csMax - st.csMin, 2)),    9), "\n")
       end
       if cfg.modeStatusFull
-        print_with_color(:orange,    rpad(string("nrg:",    st.eMin),                   11))
-        print_with_color(:orange,    rpad(string(format(st.eMax, commas=true)),          7), "\n")
+        print_with_color(:orange,    rpad(string("nrg:",    st.eMin),                    11))
+        print_with_color(:orange,    rpad(string(format(st.eMax, commas=true)),            7), "\n")
       end
 
       #print_with_color(:red,    rpad(string("ytps:",   st.ytps)), 11))
       #print_with_color(:red,    rpad(string("yps:",    st.yps)),  9))
       #print_with_color(:red,    rpad(string("syps:",   st.syps)),  9))
 
-      st.stamp  = stamp
-      st.ytps   = 0
-      st.yps    = 0
-      st.cps    = 0
-      st.eups   = 0
-      st.kops   = 0
-      st.rps    = 0
-      st.syps   = 0
-      st.srps   = 0
-      st.mps    = 0
-      st.eMin   = typemax(Int)
-      st.eMax   = 0
-      st.csMin  = typemax(Int)
-      st.csMax  = 0
-      st.evals  = cfg.orgEvals
-      st.eatl   = 0
-      st.eatr   = 0
-      st.eatu   = 0
-      st.eatd   = 0
-      st.eated  = 0
-      st.stepl  = 0
-      st.stepr  = 0
-      st.stepu  = 0
-      st.stepd  = 0
+      st.stamp     = stamp
+      st.ipsAmount = 0
+      st.ips       = 0.0
+      st.ytps      = 0
+      st.yps       = 0
+      st.cps       = 0
+      st.eups      = 0
+      st.kops      = 0
+      st.rps       = 0
+      st.syps      = 0
+      st.srps      = 0
+      st.mps       = 0
+      st.eMin      = typemax(Int)
+      st.eMax      = 0
+      st.csMin     = typemax(Int)
+      st.csMax     = 0
+      st.evals     = cfg.orgEvals
+      st.eatl      = 0
+      st.eatr      = 0
+      st.eatu      = 0
+      st.eatd      = 0
+      st.eated     = 0
+      st.stepl     = 0
+      st.stepr     = 0
+      st.stepu     = 0
+      st.stepd     = 0
     end
     #
     # Energy/steps of entire population should be calculated again

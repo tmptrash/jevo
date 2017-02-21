@@ -89,6 +89,7 @@ module Manager
       function() end,                                                           # moveCallback
       current_task(),                                                           # task
       0,                                                                        # maxEnergy
+      0.0,                                                                      # ips
       Dict{String, ManagerTypes.Plugin}(),                                      # plugins
       obs                                                                       # obs
     )
@@ -111,7 +112,6 @@ module Manager
     # all configs will be run at the beginning.
     #
     local counter   ::Int = 1
-    local ips       ::Int = 0
     local stamp     ::Float64 = time()
     local istamp    ::Float64 = stamp
     local bstamp    ::Float64 = stamp
@@ -166,7 +166,7 @@ module Manager
         #
         # We have to update IPS (Iterations Per Second) every second
         #
-        ips, istamp = _updateIps(man, ips, stamp, istamp)
+        istamp = _updateIps(man, stamp, istamp)
         #
         # This call switches between all non blocking asynchronous
         # functions (see @async macro). For example, it handles all
@@ -271,31 +271,29 @@ module Manager
   #
   # Updates IPS (Iterations Per second) counter and stores it in config
   # @param man Manager data type
-  # @param ips IPS
   # @param stamp Current UNIX time stamp value
   # @param istamp IPS last UNIX time stamp value
-  # @return {Int, Int} new ips and current UNIX time stamp
+  # @return {Float64, Int} new ips and current UNIX time stamp
   #
-  function _updateIps(man::ManagerTypes.ManagerData, ips::Int, stamp::Float64, istamp::Float64)
+  function _updateIps(man::ManagerTypes.ManagerData, stamp::Float64, istamp::Float64)
     local ts::Float64 = stamp - istamp
     local sock::Base.TCPSocket
     local dataIndex::UInt8
-    local localIps::Int
     # TODO: 1.0 seconds should be get from config
     if ts >= 1.0
-      localIps  = trunc(Int, ips / ts)
-      dataIndex = UInt8(FastApi.API_UINT64)
-      man.cfg.worldIps = localIps
+      man.ips = man.cfg.codeRuns / length(man.tasks) / ts
+      man.cfg.codeRuns = 0
+      dataIndex = UInt8(FastApi.API_FLOAT64)
       @inbounds for sock in man.cons.fastServer.socks
         if Helper.isopen(sock)
-          Server.request(sock, dataIndex, localIps)
+          Server.request(sock, dataIndex, man.ips)
           Event.fire(man.obs, "request", man)
         end
       end
-      return 0, stamp
+      return stamp
     end
 
-    ips + 1, istamp
+    istamp
   end
   #
   # Checks if it's a time to make application backup. It also checks if

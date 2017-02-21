@@ -155,6 +155,10 @@ module Config
     #
     codeLoopDiv::Int8
     #
+    # Amount of organisms entire code runs per some period of time
+    #
+    codeRuns::Int
+    #
     # World width
     #
     worldWidth::Int
@@ -210,13 +214,6 @@ module Config
     # to zoom them with a coefficient.
     #
     worldZoom::Int
-    #
-    # IPS (Iteration Per Second). Amount of iterations, which were
-    # occures within one second. One iteration means one for all
-    # organisms in a World. This value will be set many times in main
-    # Manager's loop.
-    #
-    worldIps::Int
     #
     # Period of making automatic backup of application. In seconds
     #
@@ -403,6 +400,7 @@ module Config
 
       3,                                       # codeFuncParamAmount
       Int8(16),                                # codeLoopDiv
+      0,                                       # codeRuns
 
       1900,                                    # worldWidth
       940,                                     # worldHeight
@@ -414,7 +412,6 @@ module Config
       0.5,                                     # worldEnergyCheckPercent
       1000,                                    # worldEnergyCheckPeriod
       1,                                       # worldZoom
-      0,                                       # worldIps
 
       300.0,                                   # backupPeriod
       10,                                      # backupAmount

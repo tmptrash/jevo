@@ -134,6 +134,10 @@ module ManagerTypes
     #
     maxEnergy::Int
     #
+    # Amount of iterations per second
+    #
+    ips::Float64
+    #
     # All available(compiled) Manager's plugins. Key is a plugin string
     # name (filename). Value - plugin related data type.
     #
@@ -163,6 +167,7 @@ module ManagerTypes
       moveCallback::Function,
       task::Task,
       maxEnergy::Int,
+      ips::Float64,
       plugins::Dict{String, Plugin},
       obs::Event.Observer
     ) = new(
@@ -179,6 +184,7 @@ module ManagerTypes
       moveCallback,
       task,
       maxEnergy,
+      ips,
       plugins,
       obs
     )

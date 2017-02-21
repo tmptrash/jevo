@@ -50,7 +50,7 @@ module RpcApi
   #
   type Region
     reg::Array{UInt32, 2}
-    ips::Int
+    ips::Float64
   end
   #
   # This is an analog of Creature.Organism type. It's used for
@@ -143,7 +143,7 @@ module RpcApi
     #
     # Iterations(cicles) per second
     #
-    ips::Int
+    ips::Float64
     #
     # Total amount of organisms: alive+dead
     #

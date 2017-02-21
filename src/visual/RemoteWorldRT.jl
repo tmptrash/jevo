@@ -46,7 +46,7 @@ module RemoteWorldRT
     ts::Float64
     poolingRequests::Int
     oldRequests::Int
-    ips::Int
+    ips::Float64
 
     RemoteDataRT(
       cmdCon::Client.ClientConnection,
@@ -117,7 +117,7 @@ module RemoteWorldRT
       rd.ts = time()
       rd.oldRequests = rd.poolingRequests
       rd.poolingRequests = 0
-      OpenGlWindow.title(rd.win, string("ips: ", rd.ips, ", rps: ", rd.oldRequests))
+      OpenGlWindow.title(rd.win, string("ips: ", round(rd.ips), ", rps: ", rd.oldRequests))
       OpenGlWindow.update(rd.win)
     end
     rd.poolingRequests += 1
@@ -157,7 +157,7 @@ module RemoteWorldRT
     if ans.data === false Helper.error("Only one viewer is supported"); return nothing end
     local region::Array{UInt32, 2} = ans.data.reg
 
-    OpenGlWindow.title(rd.win, string("ips: ", ans.data.ips, ", rps: 0"))
+    OpenGlWindow.title(rd.win, string("ips: ", round(ans.data.ips), ", rps: 0"))
     for x::Int in 1:size(region)[2]
       for y::Int in 1:size(region)[1]
         OpenGlWindow.dot(rd.win, x, y, UInt32(region[y, x]))

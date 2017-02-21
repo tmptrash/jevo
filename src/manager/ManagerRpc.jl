@@ -58,7 +58,7 @@ function getRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::In
     end
   end
 
-  RpcApi.Region(data, man.cfg.worldIps)
+  RpcApi.Region(data, man.ips)
 end
 #
 # @rpc
@@ -141,10 +141,10 @@ end
 # @rpc
 # Returns current IPS (Iterations Per Second) value
 # @param man Manager data type
-# @return Int
+# @return Float64
 #
 function getIps(man::ManagerTypes.ManagerData)
-  man.cfg.worldIps
+  man.ips
 end
 #
 # @rpc
@@ -255,7 +255,7 @@ function getStatistics(man::ManagerTypes.ManagerData)
 
   RpcApi.Statistics(
     length(man.organisms),
-    man.cfg.worldIps,
+    man.ips,
     man.totalOrganisms,
     man.world.width,
     man.world.height,
@@ -394,7 +394,6 @@ end
 #
 function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32, dir::Int = Dots.DIRECTION_NO)
   local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
-  local ips::UInt16 = UInt16(man.cfg.worldIps)
   local x::UInt16 = UInt16(pos.x)
   local y::UInt16 = UInt16(pos.y)
   local dataIndex::UInt8 = UInt8(FastApi.API_DOT_COLOR)
