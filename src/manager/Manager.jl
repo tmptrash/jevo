@@ -277,23 +277,21 @@ module Manager
   #
   function _updateIps(man::ManagerTypes.ManagerData, stamp::Float64, istamp::Float64)
     local ts::Float64 = stamp - istamp
+    if ts < man.cfg.worldIpsPeriod return istamp end
     local sock::Base.TCPSocket
     local dataIndex::UInt8
-    # TODO: 1.0 seconds should be get from config
-    if ts >= 1.0
-      man.ips = man.cfg.codeRuns / length(man.tasks) / ts
-      man.cfg.codeRuns = 0
-      dataIndex = UInt8(FastApi.API_FLOAT64)
-      @inbounds for sock in man.cons.fastServer.socks
-        if Helper.isopen(sock)
-          Server.request(sock, dataIndex, man.ips)
-          Event.fire(man.obs, "request", man)
-        end
+
+    man.ips = man.cfg.codeRuns / length(man.tasks) / ts
+    man.cfg.codeRuns = 0
+    dataIndex = UInt8(FastApi.API_FLOAT64)
+    @inbounds for sock in man.cons.fastServer.socks
+      if Helper.isopen(sock)
+        Server.request(sock, dataIndex, man.ips)
+        Event.fire(man.obs, "request", man)
       end
-      return stamp
     end
 
-    istamp
+    stamp
   end
   #
   # Checks if it's a time to make application backup. It also checks if

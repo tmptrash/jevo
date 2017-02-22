@@ -215,6 +215,12 @@ module Config
     #
     worldZoom::Int
     #
+    # Period of seconds, which is user for checking IPS value. It's
+    # possible to increase it to reduce amount of requests and additional
+    # code in main loop
+    #
+    worldIpsPeriod::Float64
+    #
     # Period of making automatic backup of application. In seconds
     #
     backupPeriod::Float64
@@ -412,6 +418,7 @@ module Config
       0.5,                                     # worldEnergyCheckPercent
       1000,                                    # worldEnergyCheckPeriod
       1,                                       # worldZoom
+      1.0,                                     # worldIpsPeriod
 
       300.0,                                   # backupPeriod
       10,                                      # backupAmount

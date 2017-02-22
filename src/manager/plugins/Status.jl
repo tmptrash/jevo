@@ -105,49 +105,49 @@ module Status
 
     if stamp - st.stamp >= period
       ips = st.ips / st.ipsAmount
-      print(string(Dates.format(now(), "HH:MM:SS"), " "))
-      print_with_color(:green,  rpad(string("orgs:",   length(man.tasks)),                9))
-      print_with_color(:normal, rpad(string("ips:",    @sprintf "%.3f" ips),             13))
-      print_with_color(:green,  rpad(string("nrg:",    format(div(st.energy, ips), commas=true)), 16))
-      if cfg.modeStatusFull
-        print_with_color(:red,   rpad(string("eat:",    st.eatl),                        11))
-        print_with_color(:red,   rpad(string(st.eatr),                                    8))
-        print_with_color(:red,   rpad(string(st.eatu),                                    8))
-        print_with_color(:red,   rpad(string(st.eatd),                                    8))
-        print_with_color(:red,   rpad(string(format(st.eated, commas=true)),             10))
-      else
-        print_with_color(:red,   rpad(string("eat:", format(div(st.eated, ips), commas=true)),     14))
-      end
-      if cfg.modeStatusFull
-        print_with_color(:red, rpad(string("step:", st.stepl),                           11))
-        print_with_color(:red, rpad(string(st.stepr),                                     6))
-        print_with_color(:red, rpad(string(st.stepu),                                     6))
-        print_with_color(:red, rpad(string(st.stepd),                                     6))
-        print_with_color(:red, rpad(string(format(st.steps, commas=true)),               10))
-      else
-        print_with_color(:red, rpad(string("step:", format(div(st.steps, ips), commas=true)),      14))
-      end
-      print_with_color(:red,       rpad(string("mut:",    st.mps),                        9))
-      print_with_color(:red,       rpad(string("kil:",    st.kops),                       8))
-      print_with_color(:yellow,    rpad(string("clon:",   st.cps),                        9))
-      print_with_color(:yellow,    rpad(string("eval:",   cfg.orgEvals - st.evals),      10))
-      print_with_color(:yellow,    rpad(string("req:",    st.rps),                        9))
-      if cfg.modeStatusFull
-        print_with_color(:yellow,  rpad(string("sreq:",   st.srps),                       9))
-        print_with_color(:yellow,  rpad(string("enup:",   st.eups),                       8))
-      end
-      print_with_color(:orange,    rpad(string("err:",    man.cfg.orgErrors),            11))
-      if cfg.modeStatusFull
-        print_with_color(:orange,    rpad(string("code:",   st.csMin),                   12))
-        print_with_color(:orange,    rpad(string(st.csMax),                               7))
-      else
-        print_with_color(:orange,    rpad(string("code:", div(st.csMax - st.csMin, 2)),    9), "\n")
-      end
-      if cfg.modeStatusFull
-        print_with_color(:orange,    rpad(string("nrg:",    st.eMin),                    11))
-        print_with_color(:orange,    rpad(string(format(st.eMax, commas=true)),            7), "\n")
-      end
+      st.energy = div(st.energy, period)
 
+      print(string(Dates.format(now(), "HH:MM:SS"), " "))
+      _showParam(:green,  "orgs:", length(man.tasks), 9)
+      _showParam(:normal, "ips:",  (@sprintf "%.3f" ips), 13)
+      _showParam(:green,  "nrg:",  div(st.energy, ips), 16, true)
+      _showParam(:red,    "eat:",  div(st.eated, ips), 14, true)
+      _showParam(:red,    "step:", div(st.steps, ips), 14, true)
+      _showParam(:red,    "mut:",  div(st.mps, ips), 9)
+      _showParam(:red,    "kil:",  div(st.kops, ips), 8)
+      _showParam(:yellow, "clon:", div(st.cps, ips), 9)
+      _showParam(:yellow, "req:",  div(st.rps, ips), 9)
+      _showParam(:yellow, "eval:", cfg.orgEvals - st.evals, 10)
+      _showParam(:orange, "err:",  man.cfg.orgErrors, 11)
+      _showParam(:orange, "code:", div(st.csMax - st.csMin, 2), 9)
+      print("\n")
+
+      # if cfg.modeStatusFull
+      #   print_with_color(:red,   rpad(string("eat:",    st.eatl),                        11))
+      #   print_with_color(:red,   rpad(string(st.eatr),                                    8))
+      #   print_with_color(:red,   rpad(string(st.eatu),                                    8))
+      #   print_with_color(:red,   rpad(string(st.eatd),                                    8))
+      #   print_with_color(:red,   rpad(string(format(st.eated, commas=true)),             10))
+      # end
+      # if cfg.modeStatusFull
+      #   print_with_color(:red, rpad(string("step:", st.stepl),                           11))
+      #   print_with_color(:red, rpad(string(st.stepr),                                     6))
+      #   print_with_color(:red, rpad(string(st.stepu),                                     6))
+      #   print_with_color(:red, rpad(string(st.stepd),                                     6))
+      #   print_with_color(:red, rpad(string(format(st.steps, commas=true)),               10))
+      # end
+      # if cfg.modeStatusFull
+      #   print_with_color(:yellow,  rpad(string("sreq:",   div(st.srps, ips)),                       9))
+      #   print_with_color(:yellow,  rpad(string("enup:",   div(st.eups, ips)),                       8))
+      # end
+      # if cfg.modeStatusFull
+      #   print_with_color(:orange,    rpad(string("code:",   st.csMin),                   12))
+      #   print_with_color(:orange,    rpad(string(st.csMax),                               7))
+      # end
+      # if cfg.modeStatusFull
+      #   print_with_color(:orange,    rpad(string("nrg:",    st.eMin),                    11))
+      #   print_with_color(:orange,    rpad(string(format(st.eMax, commas=true)),            7), "\n")
+      # end
       #print_with_color(:red,    rpad(string("ytps:",   st.ytps)), 11))
       #print_with_color(:red,    rpad(string("yps:",    st.yps)),  9))
       #print_with_color(:red,    rpad(string("syps:",   st.syps)),  9))
@@ -178,13 +178,17 @@ module Status
       st.stepr     = 0
       st.stepu     = 0
       st.stepd     = 0
+      st.energy    = 0
     end
-    #
-    # Energy/steps of entire population should be calculated again
-    # for every "iteration" event call
-    #
-    st.energy = 0
     st.steps  = 0
+  end
+  #
+  # Shows one parameter in status line accordint to settings
+  #
+  function _showParam(color::Symbol, name::String, val::Any, width::Int, formatComas::Bool = false)
+    if formatComas print_with_color(color, rpad(string(name, format(val, commas = true)), width))
+    else print_with_color(color, rpad(string(name, val), width))
+    end
   end
   #
   # Calls if yield() in Manager is called
