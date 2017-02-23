@@ -22,7 +22,7 @@ module Status
   type StatusData <: Plugin
     stamp::Float64    # current UNIX time stamp
     ips::Float64      # average IPS
-    ipsAmount::Int    # amount of IPS checks. Is used for average IPS calculation
+    iterations::Int   # amount of IPS checks. Is used for average IPS calculation
     rps::Int          # all requests per second
     eups::Int         # energy updates per second
     kops::Int         # killed organisms per second
@@ -48,6 +48,7 @@ module Status
     stepu::Int        # organism moves up
     stepd::Int        # organism moves down
     steps::Int        # total amount of moving in population
+    orgs::Int         # average amount of organisms
   end
   #
   # Module initializer
@@ -56,11 +57,11 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
     #
     # All event handlers should be binded here
     #
-    Event.on(man.obs, "iteration", _onStatus)
+    Event.on(man.obs, "iteration", _onIteration)
     #Event.on(man.obs, "yield", _onYield)
     #Event.on(man.obs, "yieldto", _onYieldTo)
     #Event.on(man.obs, "stepyield", _onStepYield)
@@ -87,11 +88,12 @@ module Status
   # @param man Manager data type object
   # @param stamp Current time stamp
   #
-  function _onStatus(man::ManagerData, stamp::Float64)
+  function _onIteration(man::ManagerData, stamp::Float64)
     local st::StatusData  = man.plugins[MODULE_NAME]
     local cfg::Config.ConfigData = man.cfg
     local period::Float64 = cfg.modeStatusPeriod
     local ips::Float64
+    local coef::Float64
 
     #
     # Condition for the first run
@@ -100,22 +102,25 @@ module Status
     #
     # Calculates average IPS for period "period"
     #
-    st.ipsAmount += 1
+    st.iterations += 1
     st.ips += man.ips
+    st.orgs += length(man.tasks)
 
     if stamp - st.stamp >= period
-      ips = st.ips / st.ipsAmount
-      st.energy = div(st.energy, period)
+      st.orgs   = div(st.orgs, st.iterations)
+      coef      = period * st.orgs
+      ips       = st.ips / st.iterations
+      st.energy = div(st.energy, coef)
 
       print(string(Dates.format(now(), "HH:MM:SS"), " "))
-      _showParam(:green,  "orgs:", length(man.tasks), 9)
+      _showParam(:green,  "orgs:", st.orgs, 9)
       _showParam(:normal, "ips:",  (@sprintf "%.3f" ips), 13)
-      _showParam(:green,  "nrg:",  div(st.energy, ips), 16, true)
-      _showParam(:red,    "eat:",  div(st.eated, ips), 14, true)
-      _showParam(:red,    "step:", div(st.steps, ips), 14, true)
-      _showParam(:red,    "mut:",  div(st.mps, ips), 9)
-      _showParam(:red,    "kil:",  st.kops, 8)
-      _showParam(:yellow, "clon:", st.cps, 9)
+      _showParam(:green,  "nrg:",  st.energy, 16, true)
+      _showParam(:red,    "eat:",  round(st.eated / coef, 2), 14, true)
+      _showParam(:red,    "step:", round(st.steps / coef, 2), 14, true)
+      _showParam(:red,    "mut:",  round(st.mps / coef, 2), 12)
+      _showParam(:red,    "kil:",  round(st.kops / coef, 2), 12)
+      _showParam(:yellow, "clon:", round(st.cps / coef, 2), 13)
       _showParam(:yellow, "req:",  st.rps, 9)
       _showParam(:yellow, "eval:", cfg.orgEvals - st.evals, 10)
       _showParam(:orange, "err:",  man.cfg.orgErrors, 11)
@@ -153,7 +158,7 @@ module Status
       #print_with_color(:red,    rpad(string("syps:",   st.syps)),  9))
 
       st.stamp     = stamp
-      st.ipsAmount = 0
+      st.iterations = 0
       st.ips       = 0.0
       st.ytps      = 0
       st.yps       = 0
@@ -179,6 +184,7 @@ module Status
       st.stepu     = 0
       st.stepd     = 0
       st.energy    = 0
+      st.orgs      = 0
     end
     st.steps  = 0
   end
