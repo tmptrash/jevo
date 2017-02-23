@@ -32,7 +32,9 @@ module Status
     srps::Int         # moveXXX() related requests per second
     syps::Int         # moveXXX() related yields per second
     mps::Int          # mutations per second
-    energy::Int       # total energy in population
+    energy::Int       # energy of organisms
+    allEnergy::Int    # energy of populations
+    allEnergyAmount::Int # amount of population energy measurements
     eMin::Int         # minimum organism energy
     eMax::Int         # maximum organism energy
     evals::Int        # amount of eval() calls till previous status
@@ -42,7 +44,7 @@ module Status
     eatr::Int         # organism eats right
     eatu::Int         # organism eats up
     eatd::Int         # organism eats down
-    eated::Int        # total amount of eating in population
+    eated::Int        # total amount of eating for organisms
     stepl::Int        # organism moves left
     stepr::Int        # organism moves right
     stepu::Int        # organism moves up
@@ -57,11 +59,12 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
     #
     # All event handlers should be binded here
     #
     Event.on(man.obs, "iteration", _onIteration)
+    Event.on(man.obs, "ips", _onIps)
     #Event.on(man.obs, "yield", _onYield)
     #Event.on(man.obs, "yieldto", _onYieldTo)
     #Event.on(man.obs, "stepyield", _onStepYield)
@@ -88,13 +91,11 @@ module Status
   # @param man Manager data type object
   # @param stamp Current time stamp
   #
-  function _onIteration(man::ManagerData, stamp::Float64)
+  function _onIps(man::ManagerData, stamp::Float64, codeRuns::Int)
     local st::StatusData  = man.plugins[MODULE_NAME]
     local cfg::Config.ConfigData = man.cfg
     local period::Float64 = cfg.modeStatusPeriod
-    local ips::Float64
-    local coef::Float64
-
+    local iterations::Int
     #
     # Condition for the first run
     #
@@ -103,24 +104,19 @@ module Status
     # Calculates average IPS for period "period"
     #
     st.iterations += 1
-    st.ips += man.ips
+    st.ips  += man.ips
     st.orgs += length(man.tasks)
 
     if stamp - st.stamp >= period
-      st.orgs   = div(st.orgs, st.iterations)
-      coef      = period * st.orgs
-      ips       = st.ips / st.iterations
-      st.energy = div(st.energy, coef)
-
       print(string(Dates.format(now(), "HH:MM:SS"), " "))
-      _showParam(:green,  "orgs:", st.orgs, 9)
-      _showParam(:normal, "ips:",  (@sprintf "%.3f" ips), 13)
-      _showParam(:green,  "nrg:",  st.energy, 16, true)
-      _showParam(:red,    "eat:",  round(st.eated / coef, 2), 14, true)
-      _showParam(:red,    "step:", round(st.steps / coef, 2), 14, true)
-      _showParam(:red,    "mut:",  round(st.mps / coef, 2), 12)
-      _showParam(:red,    "kil:",  round(st.kops / coef, 2), 12)
-      _showParam(:yellow, "clon:", round(st.cps / coef, 2), 13)
+      _showParam(:green,  "orgs:", div(st.orgs, st.iterations), 9)
+      _showParam(:normal, "ips:",  (@sprintf "%.3f" st.ips / st.iterations), 13)
+      _showParam(:green,  "nrg:",  div(st.allEnergy, st.allEnergyAmount), 16, true)
+      _showParam(:red,    "eat:",  st.eated, 12, true)
+      _showParam(:red,    "step:", st.steps, 12, true)
+      _showParam(:red,    "mut:",  st.mps, 10)
+      _showParam(:red,    "kil:",  st.kops, 10)
+      _showParam(:yellow, "clon:", st.cps, 11)
       _showParam(:yellow, "req:",  st.rps, 9)
       _showParam(:yellow, "eval:", cfg.orgEvals - st.evals, 10)
       _showParam(:orange, "err:",  man.cfg.orgErrors, 11)
@@ -183,10 +179,24 @@ module Status
       st.stepr     = 0
       st.stepu     = 0
       st.stepd     = 0
+      st.steps     = 0
       st.energy    = 0
+      st.allEnergy = 0
+      st.allEnergyAmount = 0
       st.orgs      = 0
     end
-    st.steps  = 0
+  end
+  #
+  # Calls for every iteration, after all organisms were run
+  # @param man Manager data type object
+  # @param stamp Current time stamp
+  #
+  function _onIteration(man::ManagerData, stamp::Float64)
+    local st::StatusData = man.plugins[MODULE_NAME]
+
+    st.allEnergyAmount += 1
+    st.allEnergy += st.energy
+    st.energy = 0
   end
   #
   # Shows one parameter in status line accordint to settings

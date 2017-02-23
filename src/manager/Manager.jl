@@ -15,6 +15,8 @@
 #   dotrequest  {ManagerData}                Is called if step (dot) request is occured
 #   stepyield   {ManagerData}                Is called if one step related yield was called
 #   backup      {ManagerData}                Fired after backup has created
+#   ips         {ManagerData}                Fired after ips parameter has updated
+# TODO: gather all events
 #
 #
 # @singleton
@@ -282,6 +284,7 @@ module Manager
     local dataIndex::UInt8
 
     man.ips = man.cfg.codeRuns / length(man.tasks) / ts
+    Event.fire(man.obs, "ips", man, stamp, man.cfg.codeRuns)
     man.cfg.codeRuns = 0
     dataIndex = UInt8(FastApi.API_FLOAT64)
     @inbounds for sock in man.cons.fastServer.socks
