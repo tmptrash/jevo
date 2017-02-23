@@ -112,7 +112,7 @@ module Status
       _showParam(:green,  "orgs:", div(st.orgs, st.iterations), 9)
       _showParam(:normal, "ips:",  (@sprintf "%.3f" st.ips / st.iterations), 13)
       _showParam(:green,  "nrg:",  div(st.allEnergy, st.allEnergyAmount), 16, true)
-      _showParam(:red,    "eat:",  st.eated, 12, true)
+      _showParam(:red,    "eat:",  st.eated, 14, true)
       _showParam(:red,    "step:", st.steps, 12, true)
       _showParam(:red,    "mut:",  st.mps, 10)
       _showParam(:red,    "kil:",  st.kops, 10)
