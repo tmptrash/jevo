@@ -1,1 +1,1 @@
-julia --color=yes -q -i -e "include(\"src\\AppRemoteWorld.jl\")"
+julia --color=yes -q -i -e "include(\"src\\AppRemoteWorldRT.jl\")"
