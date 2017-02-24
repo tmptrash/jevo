@@ -20,7 +20,7 @@
 # You may run the manager in different ways. The simplies way is:
 #   >julia src\AppSatellite.jl src\AppManager.jl
 # More useful way will be the following:
-#   >julia --color=yes src\AppSatellite.jl src\AppManager.jl quiet
+#   >julia --color=yes src\AppSatellite.jl src\AppManager.jl modeQuiet
 # It colors terminal output and reduces amount of default messages.
 # Also, jevo supports many command line arguments like: recover,
 # about, version and so on... You may use them at the end of command
@@ -100,7 +100,7 @@ function _onRecover()
   local exitCode::Int
   local cfg::Config.ConfigData = Config.create(false)
 
-  Helper.info("Starting jevo...")
+  if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info("Starting jevo...") end
   man = Manager.create(cfg)
   Manager.recover(man)
   #
@@ -109,7 +109,7 @@ function _onRecover()
   man.cfg.cmdLineArgs = CommandLine.create()
   man.cfg = Config.merge(man.cfg)
   exitCode = Int(!Manager.run(man, true)) # 1 - error, 0 - okay
-  Helper.info("Quit jevo...")
+  if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info("Quit jevo...") end
 
   exitCode
 end
@@ -120,10 +120,10 @@ end
 function _onRun()
   local exitCode::Int
 
-  Helper.info("Starting jevo...")
-  Helper.info("Running from scratch...")
+  if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info("Starting jevo...") end
+  if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info("Running from scratch...") end
   exitCode = Int(!Manager.run(Manager.create())) # 1 - error, 0 - okay
-  Helper.info("Quit jevo...")
+  if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info("Quit jevo...") end
 
   exitCode
 end

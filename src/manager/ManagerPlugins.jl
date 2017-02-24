@@ -48,13 +48,13 @@ function initPlugins(man::ManagerTypes.ManagerData)
   # otherwise excluded plugins should be excluded from included list
   #
   plugins = findfirst(included, ALL_PLUGINS) > 0 ? included : setdiff(included, excluded)
-  Helper.info("Initializing plugins: ")
+  if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info("Initializing plugins: ") end
   for plugin in plugins
     if plugin === ALL_PLUGINS continue end
-    Helper.info(string("  ", rpad(plugin, PLUGIN_NAME_MAX_LEN, ".")), false)
+    if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info(string("  ", rpad(plugin, PLUGIN_NAME_MAX_LEN, ".")), false) end
     Base.require(Symbol(plugin))
     getfield(Main.eval(Symbol(plugin)), :init)(man)
-    Helper.done()
+    if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.done() end
   end
 
   true

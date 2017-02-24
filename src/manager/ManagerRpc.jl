@@ -69,7 +69,7 @@ end
 function createOrganisms(man::ManagerTypes.ManagerData)
   local i::Int
 
-  if !man.quiet Helper.info("Creating organisms...") end
+  if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info("Creating organisms...") end
   man.totalOrganisms      = 0
   # TODO: for system with many managers id should be unique between them
   man.organismId          = UInt(1)
@@ -117,13 +117,13 @@ function getConfig(man::ManagerTypes.ManagerData, name::Symbol)
 end
 #
 # @rpc
-# Updates quite mode of manager. In quite mode we don't show
+# Updates quiet mode of manager. In quiet mode we don't show
 # info and warning messages to the terminal.
 # @param man Manager data type
-# @param mode New quite mode
+# @param mode New quiet mode
 #
-function setQuite(man::ManagerTypes.ManagerData, mode::Bool)
-  man.quiet = mode
+function setQuiet(man::ManagerTypes.ManagerData, mode::Int)
+  man.cfg.modeQuiet = mode
   nothing
 end
 #
@@ -219,7 +219,7 @@ function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int, energy::UIn
   local xOffset::Int = div(man.world.width, Helper.fastRand(9) + 1)
   local yOffset::Int = div(man.world.height, Helper.fastRand(9) + 1)
 
-  if !man.quiet Helper.info("Creating random energy...") end
+  if man.cfg.modeQuiet === Config.MODE_QUIET_ALL Helper.info("Creating random energy...") end
   for i::Int = 1:amount
     setEnergy(man, Helper.fastRand(width) + xOffset, Helper.fastRand(height) + yOffset, energy)
   end
@@ -638,7 +638,7 @@ const _rpcApi = Function[
   createOrganism,
   setConfig,
   getConfig,
-  setQuite,
+  setQuiet,
   mutate,
   getIps,
   getOrganism,

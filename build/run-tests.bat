@@ -9,5 +9,5 @@ if not exist test (
   exit /b 1
 )
 set ERRORLEVEL=0
-julia --color=yes test\run-tests.jl modeTest
+julia --color=yes test\run-tests.jl modeTest modeQuiet:2
 exit /b %ERRORLEVEL%

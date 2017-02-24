@@ -40,6 +40,22 @@ module Config
   export merge
 
   export ConfigData
+
+  export MODE_QUIET_ALL
+  export MODE_QUIET_IMPORTANT
+  export MODE_QUIET_NO
+  #
+  # Show all messages
+  #
+  const MODE_QUIET_ALL = 0
+  #
+  # Show only important messages
+  #
+  const MODE_QUIET_IMPORTANT = 1
+  #
+  # Supress showing messages
+  #
+  const MODE_QUIET_NO = 2
   #
   # Maximum period for mutations. Related to orgRainMutationPeriod config
   #
@@ -330,6 +346,13 @@ module Config
     # In this mode status report will be short or full
     #
     modeStatusFull::Bool
+    #
+    # Mode for showing/supressing of messages. Possible values:
+    #   0 - all messages
+    #   1 - only important messages
+    #   2 - no messages
+    #
+    modeQuiet::Int
   end
   #
   # Returns one configuration setting from command line parameters
@@ -440,12 +463,13 @@ module Config
       ["Phylogen", "Status"],                  # plugIncluded
       [],                                      # plugExcluded
 
-      true,                                    # modeDebug
+      false,                                   # modeDebug
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod
       10.0,                                    # modeStatusPeriod
-      false                                    # modeStatusFull
+      false,                                   # modeStatusFull
+      0                                        # modeQuiet
     )
 
     isMerge ? merge(cfg) : cfg

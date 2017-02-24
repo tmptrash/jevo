@@ -25,7 +25,7 @@ export backup
 # @return {Bool} recover status
 #
 function recover(man::ManagerTypes.ManagerData)
-  Helper.info(string("Recovering from backup: ", Backup.lastFile()))
+  if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info(string("Recovering from backup: ", Backup.lastFile())) end
   local data = Backup.load()
   local t::ManagerTypes.OrganismTask
   local curTask::Task = current_task()
@@ -71,7 +71,6 @@ function recover(man::ManagerTypes.ManagerData)
   man.params         = data.params
   man.organismId     = data.organismId
   man.totalOrganisms = data.totalOrganisms
-  man.quiet          = data.quiet
   man.maxEnergy      = data.maxEnergy
   man.plugins        = data.plugins
   #
@@ -149,7 +148,7 @@ function backup(man::ManagerTypes.ManagerData)
   #
   if (ret = Backup.save(manCopy))
     _removeOld(man)
-    Helper.info(string("Backup has created: ", Backup.lastFile()))
+    if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info(string("Backup has created: ", Backup.lastFile())) end
   end
   Event.fire(man.obs, "backup", man)
 
@@ -166,7 +165,7 @@ function _removeOld(man::ManagerTypes.ManagerData)
   local i::Int
 
   if len <= man.cfg.backupAmount return true end
-  Helper.info("Removing old backup files...")
+  if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info("Removing old backup files...") end
   for i = 1:(len - man.cfg.backupAmount)
     rm(Backup.FOLDER_NAME * "/" * files[i])
   end
@@ -184,7 +183,7 @@ function _removeNew(man::ManagerTypes.ManagerData)
   local file::String = len > 0 ? files[len] : ""
 
   if len < 1 return false end
-  Helper.info(string("Backup has removed: ", file))
+  if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info(string("Backup has removed: ", file)) end
   rm(Backup.FOLDER_NAME * "/" * file)
 
   true

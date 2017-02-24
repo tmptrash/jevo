@@ -20,7 +20,7 @@ module Terminal
   export termCreateOrganism
   export termSetConfig
   export termGetConfig
-  export termSetQuite
+  export termSetQuiet
   export termMutate
   export termGetIps
   export termGetOrganism
@@ -87,11 +87,11 @@ module Terminal
     Client.request(_termData.con, RpcApi.RPC_GET_CONFIG, name)
   end
   #
-  # Shorthand for RpcApi.RPC_SET_QUITE. See
-  # ManagerRpc.setQuite for details
+  # Shorthand for RpcApi.RPC_SET_QUIET. See
+  # ManagerRpc.setQuiet for details
   #
-  function termSetQuite(mode::Bool = true)
-    Client.request(_termData.con, RpcApi.RPC_SET_QUITE, mode)
+  function termSetQuiet(mode::Bool = true)
+    Client.request(_termData.con, RpcApi.RPC_SET_QUIET, mode)
   end
   #
   # Shorthand for RpcApi.RPC_MUTATE. See
