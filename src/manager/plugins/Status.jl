@@ -1,5 +1,6 @@
 #
 # Shows real time status of current Manager
+# TODO: explain all parameters
 #
 # @author DeadbraiN
 #
@@ -50,6 +51,7 @@ module Status
     stepu::Int        # organism moves up
     stepd::Int        # organism moves down
     steps::Int        # total amount of moving in population
+    grabbed::Int      # amount of energy grabbed by the system from population
     orgs::Int         # average amount of organisms
   end
   #
@@ -59,7 +61,7 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
     #
     # All event handlers should be binded here
     #
@@ -75,6 +77,7 @@ module Status
     Event.on(man.obs, "clone", _onClone)
     Event.on(man.obs, "dotrequest", _onDotRequest)
     Event.on(man.obs, "organism", _onOrganism)
+    Event.on(man.obs, "grabenergy", _onGrabEnergy)
 
     Event.on(man.obs, "eatleft", _onEatLeft)
     Event.on(man.obs, "eatright", _onEatRight)
@@ -113,6 +116,7 @@ module Status
       _showParam(:normal, "ips:",  (@sprintf "%.3f" st.ips / st.iterations), 13)
       _showParam(:green,  "nrg:",  div(st.allEnergy, st.allEnergyAmount), 16, true)
       _showParam(:red,    "eat:",  st.eated, 14, true)
+      _showParam(:red,    "grab:", st.grabbed, 15, true)
       _showParam(:red,    "step:", st.steps, 12, true)
       _showParam(:red,    "mut:",  st.mps, 10)
       _showParam(:red,    "kil:",  st.kops, 10)
@@ -175,6 +179,7 @@ module Status
       st.eatu      = 0
       st.eatd      = 0
       st.eated     = 0
+      st.grabbed   = 0
       st.stepl     = 0
       st.stepr     = 0
       st.stepu     = 0
@@ -296,6 +301,14 @@ module Status
     #
     if org.codeSize >  sd.csMax sd.csMax = org.codeSize end
     if org.codeSize <= sd.csMin sd.csMin = org.codeSize end
+  end
+  #
+  # Is called on enery grab of energy from organism
+  # @param man Manager related data object
+  # @param amount Amount of grabbed energy
+  #
+  function _onGrabEnergy(man::ManagerData, amount::Int)
+    man.plugins[MODULE_NAME].grabbed += amount
   end
   #
   # Is called every time if some organism calls eatLeft() function

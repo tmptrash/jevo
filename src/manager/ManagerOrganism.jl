@@ -249,6 +249,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     # Energy shouldn't be less then 1
     #
     if !dontKill
+      Event.fire(man.obs, "grabenergy", man, org.energy < org.codeSize ? org.energy : org.codeSize)
       if !_decreaseOrganismEnergy(man, org, org.codeSize, i)
         dontKill = (length(tasks) <= minOrgs)
       end
