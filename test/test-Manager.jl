@@ -8,6 +8,7 @@ module TestManager
   import ManagerTypes
   import Mutator
   import Code
+  import World
   #
   # Just a helper type for Manager tests
   #
@@ -291,6 +292,28 @@ module TestManager
     consume(d.task)
     consume(d.task)
     @fact up.energy --> 100
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if organism can eat energy") do
+    local d = _create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local up = d.orgs[1]
+
+    _code(d, :eatRight, up)
+    for i = 1:5 getArg(up.code, [2,10 + i,1]).args[2] = 10 end # sets all Int8 vars to 10
+    _updateCode(up)
+    World.setEnergy(d.man.world, Helper.Point(2,1), UInt32(30))
+
+    @fact up.energy === 100 --> true
+    @fact World.getEnergy(d.man.world, Helper.Point(2,1)) --> 30
+    consume(d.task)
+    consume(d.task)
+    @fact up.energy --> 110
+    @fact World.getEnergy(d.man.world, Helper.Point(2,1)) --> 20
+    consume(d.task)
+    consume(d.task)
+    @fact up.energy --> 130
+    @fact World.getEnergy(d.man.world, Helper.Point(2,1)) --> 0
 
     Manager.destroy(d.man)
   end
