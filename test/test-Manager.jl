@@ -263,6 +263,37 @@ module TestManager
 
     Manager.destroy(d.man)
   end
+
+  facts("Checking if organism can eat empty space") do
+    local d = _create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local up = d.orgs[1]
+
+    _code(d, :eatDown, up)
+    for i = 1:5 getArg(up.code, [2,10 + i,1]).args[2] = 10 end # sets all Int8 vars to 10
+    _updateCode(up)
+
+    @fact up.energy === 100 --> true
+    consume(d.task)
+    consume(d.task)
+    @fact up.energy --> 100
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if organism can eat out of borders") do
+    local d = _create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local up = d.orgs[1]
+
+    _code(d, :eatUp, up)
+    for i = 1:5 getArg(up.code, [2,10 + i,1]).args[2] = 10 end # sets all Int8 vars to 10
+    _updateCode(up)
+
+    @fact up.energy === 100 --> true
+    consume(d.task)
+    consume(d.task)
+    @fact up.energy --> 100
+
+    Manager.destroy(d.man)
+  end
   # facts("Checking if organisms, which are created on start contain correct amount of energy") do
   #   local d = _create(Helper.Point[], Dict{Symbol, Any}(:orgStartAmount=>3,:orgStartEnergy=>7))
   #
