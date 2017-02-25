@@ -123,7 +123,7 @@ module TestManager
     for i = 1:5 getArg(left.code, [2,10 + i,1]).args[2] = 10 end # sets all Int8 vars to 10
     _updateCode(left)
 
-    @fact d.orgs[1].energy === d.orgs[2].energy === 100 --> true
+    @fact left.energy === right.energy === 100 --> true
     consume(d.task)
     consume(d.task)
     @fact left.energy --> 110
@@ -140,7 +140,7 @@ module TestManager
     for i = 1:5 getArg(left.code, [2,10 + i,1]).args[2] = -10 end # sets all Int8 vars to 10
     _updateCode(left)
 
-    @fact d.orgs[1].energy === d.orgs[2].energy === 100 --> true
+    @fact left.energy === right.energy === 100 --> true
     consume(d.task)
     consume(d.task)
     @fact left.energy --> 90
@@ -157,7 +157,7 @@ module TestManager
     for i = 1:5 getArg(left.code, [2,10 + i,1]).args[2] = 0 end # sets all Int8 vars to 10
     _updateCode(left)
 
-    @fact d.orgs[1].energy === d.orgs[2].energy === 100 --> true
+    @fact left.energy === right.energy === 100 --> true
     consume(d.task)
     consume(d.task)
     @fact left.energy --> 100
@@ -179,12 +179,87 @@ module TestManager
     _updateCode(left)
     _updateCode(right)
 
-    @fact d.orgs[1].energy === d.orgs[2].energy === 100 --> true
+    @fact left.energy === right.energy === 100 --> true
     consume(d.task)
     consume(d.task)
     consume(d.task)
     @fact left.energy --> 100
     @fact right.energy --> 100
+
+    Manager.destroy(d.man)
+  end
+
+  facts("Checking if up organism can eat down one") do
+    local d = _create([Helper.Point(1,1), Helper.Point(1,2)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local up = d.orgs[1]
+    local down = d.orgs[2]
+
+    _code(d, :eatDown, up)
+    for i = 1:5 getArg(up.code, [2,10 + i,1]).args[2] = 10 end # sets all Int8 vars to 10
+    _updateCode(up)
+
+    @fact up.energy === down.energy === 100 --> true
+    consume(d.task)
+    consume(d.task)
+    @fact up.energy --> 110
+    @fact down.energy --> 90
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if up organism can donate down one") do
+    local d = _create([Helper.Point(1,1), Helper.Point(1,2)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local up = d.orgs[1]
+    local down = d.orgs[2]
+
+    _code(d, :eatDown, up)
+    for i = 1:5 getArg(up.code, [2,10 + i,1]).args[2] = -10 end # sets all Int8 vars to 10
+    _updateCode(up)
+
+    @fact up.energy === down.energy === 100 --> true
+    consume(d.task)
+    consume(d.task)
+    @fact up.energy --> 90
+    @fact down.energy --> 110
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if up organism can eat zero energy from down one") do
+    local d = _create([Helper.Point(1,1), Helper.Point(1,2)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local up = d.orgs[1]
+    local down = d.orgs[2]
+
+    _code(d, :eatDown, up)
+    for i = 1:5 getArg(up.code, [2,10 + i,1]).args[2] = 0 end # sets all Int8 vars to 10
+    _updateCode(up)
+
+    @fact up.energy === up.energy === 100 --> true
+    consume(d.task)
+    consume(d.task)
+    @fact up.energy --> 100
+    @fact down.energy --> 100
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if up organism eats down and down eats up") do
+    local d = _create([Helper.Point(1,1), Helper.Point(1,2)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local up = d.orgs[1]
+    local down = d.orgs[2]
+
+    _code(d, :eatDown, up)
+    _code(d, :eatUp, down)
+    for i = 1:5
+      getArg(up.code, [2,10 + i,1]).args[2] = 10   # sets all Int8 vars to 10
+      getArg(down.code, [2,10 + i,1]).args[2] = 10 # sets all Int8 vars to 10
+    end
+    _updateCode(up)
+    _updateCode(down)
+
+    @fact up.energy === down.energy === 100 --> true
+    consume(d.task)
+    consume(d.task)
+    consume(d.task)
+    @fact up.energy --> 100
+    @fact down.energy --> 100
 
     Manager.destroy(d.man)
   end
