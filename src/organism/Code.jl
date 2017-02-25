@@ -64,7 +64,7 @@ module Code
     local typ::DataType = @randType()
     local var::Symbol   = @randVar(org, pos, typ)
     if var === :nothing return Expr(:nothing) end
-    
+
     :($(var)=$(@randValue(typ)))
   end
   #

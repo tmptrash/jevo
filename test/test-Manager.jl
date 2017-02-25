@@ -52,7 +52,25 @@ module TestManager
 
     TestManagerData(cfg, man, task, orgs)
   end
-
+  #
+  # Adds code line to specified organism
+  # @param data Data type, returned by _create() function
+  # @param codePart Symbol, which represents specific dode part like: plus, eatUp or myX...
+  # @param org Organism we are adding to
+  # @param pos Poition in organism code (optional)
+  #
+  function _code(data::TestManagerData, codePart::Symbol, org::Creature.Organism, pos::Helper.CodePos = Helper.CodePos(0,0,0))
+    local cp::Code.CodePart
+    #
+    # This is how we find real CodePart() type
+    #
+    for cp in Code.CODE_PARTS if string(cp.fn) == string("Code.", codePart) break end end
+    #
+    # Position is not set, we have to add to the end of code to the main function
+    #
+    if pos.fnIdx < 1 pos = Helper.CodePos(1,1,length(org.code.args[2].args)) end
+    Mutator._onAdd(data.cfg, org, pos, cp)
+  end
   # facts("Checking if mutations mechanism works") do
   #   local d = _create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgRainMutationPeriod=>2))
   #   local mutations = d.man.plugins["Status"].mps
@@ -65,11 +83,11 @@ module TestManager
   #   Manager.destroy(d.man)
   # end
   facts("Checking if mutations mechanism works with specified amount") do
-    local d = _create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgRainMutationPeriod=>2, :orgRainMutationPercent=>1.0))
+    local d = _create([Helper.Point(1,1)], Dict(:orgRainMutationPeriod=>2, :orgRainMutationPercent=>1.0))
     local mutations = d.man.plugins["Status"].mps
 
-    Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,31), Code.CodePart(Code.plus, false))
-    Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,32), Code.CodePart(Code.plus, false))
+    _code(d, :plus, d.orgs[1])
+    _code(d, :plus, d.orgs[1])
 
     consume(d.task)
     @fact d.man.plugins["Status"].mps - mutations --> 0
@@ -78,15 +96,24 @@ module TestManager
 
     Manager.destroy(d.man)
   end
-  # facts("Checking if correct amount of organisms are created on start") do
-  #   local d = _create(Helper.Point[], Dict{Symbol, Any}(:orgStartAmount=>5))
-  #
-  #   @fact length(d.man.positions) === length(d.man.organisms) === 0 --> true
-  #   consume(d.task)
-  #   @fact length(d.man.positions) === length(d.man.organisms) === 5 --> true
-  #
-  #   Manager.destroy(d.man)
-  # end
+  facts("Checking if correct amount of organisms are created on start") do
+    local d = _create(Helper.Point[], Dict{Symbol, Any}(:orgStartAmount=>5))
+
+    @fact length(d.man.positions) === length(d.man.organisms) === 0 --> true
+    consume(d.task)
+    @fact length(d.man.positions) === length(d.man.organisms) === 5 --> true
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if one organism can eat another") do
+    local d = _create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+
+    @fact length(d.man.organisms) --> 2
+    consume(d.task)
+    @fact length(d.man.positions) === length(d.man.organisms) === 5 --> true
+
+    Manager.destroy(d.man)
+  end
   # facts("Checking if organisms, which are created on start contain correct amount of energy") do
   #   local d = _create(Helper.Point[], Dict{Symbol, Any}(:orgStartAmount=>3,:orgStartEnergy=>7))
   #
