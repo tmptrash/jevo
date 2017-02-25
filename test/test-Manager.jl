@@ -1,9 +1,10 @@
 module TestManager
   using FactCheck
+  import Helper.getArg
+  import Helper
   import Manager
   import Config
   import Creature
-  import Helper
   import ManagerTypes
   import Mutator
   import Code
@@ -70,18 +71,26 @@ module TestManager
     #
     if pos.fnIdx < 1 pos = Helper.CodePos(1,1,length(org.code.args[2].args)) end
     Mutator._onAdd(data.cfg, org, pos, cp)
+    _updateCode(org)
   end
-  # facts("Checking if mutations mechanism works") do
-  #   local d = _create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgRainMutationPeriod=>2))
-  #   local mutations = d.man.plugins["Status"].mps
   #
-  #   consume(d.task)
-  #   @fact d.man.plugins["Status"].mps - mutations --> 0
-  #   consume(d.task)
-  #   @fact d.man.plugins["Status"].mps - mutations --> 1
+  # compiles code of organism according to org.code expression
+  # @param org Organism we are working with
   #
-  #   Manager.destroy(d.man)
-  # end
+  function _updateCode(org::Creature.Organism)
+    org.codeFn = Creature.eval(org.code)
+  end
+  facts("Checking if mutations mechanism works") do
+    local d = _create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgRainMutationPeriod=>2, :orgRainMutationPercent=>0.1))
+    local mutations = d.man.plugins["Status"].mps
+
+    consume(d.task)
+    @fact d.man.plugins["Status"].mps - mutations --> 0
+    consume(d.task)
+    @fact d.man.plugins["Status"].mps - mutations --> 1
+
+    Manager.destroy(d.man)
+  end
   facts("Checking if mutations mechanism works with specified amount") do
     local d = _create([Helper.Point(1,1)], Dict(:orgRainMutationPeriod=>2, :orgRainMutationPercent=>1.0))
     local mutations = d.man.plugins["Status"].mps
@@ -105,12 +114,77 @@ module TestManager
 
     Manager.destroy(d.man)
   end
-  facts("Checking if one organism can eat another") do
+  facts("Checking if left organism can eat right one") do
     local d = _create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local left = d.orgs[1]
+    local right = d.orgs[2]
 
-    @fact length(d.man.organisms) --> 2
+    _code(d, :eatRight, left)
+    for i = 1:5 getArg(left.code, [2,10 + i,1]).args[2] = 10 end # sets all Int8 vars to 10
+    _updateCode(left)
+
+    @fact d.orgs[1].energy === d.orgs[2].energy === 100 --> true
     consume(d.task)
-    @fact length(d.man.positions) === length(d.man.organisms) === 5 --> true
+    consume(d.task)
+    @fact left.energy --> 110
+    @fact right.energy --> 90
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if left organism can donate right one") do
+    local d = _create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local left = d.orgs[1]
+    local right = d.orgs[2]
+
+    _code(d, :eatRight, left)
+    for i = 1:5 getArg(left.code, [2,10 + i,1]).args[2] = -10 end # sets all Int8 vars to 10
+    _updateCode(left)
+
+    @fact d.orgs[1].energy === d.orgs[2].energy === 100 --> true
+    consume(d.task)
+    consume(d.task)
+    @fact left.energy --> 90
+    @fact right.energy --> 110
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if left organism can eat zero energy from right one") do
+    local d = _create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local left = d.orgs[1]
+    local right = d.orgs[2]
+
+    _code(d, :eatRight, left)
+    for i = 1:5 getArg(left.code, [2,10 + i,1]).args[2] = 0 end # sets all Int8 vars to 10
+    _updateCode(left)
+
+    @fact d.orgs[1].energy === d.orgs[2].energy === 100 --> true
+    consume(d.task)
+    consume(d.task)
+    @fact left.energy --> 100
+    @fact right.energy --> 100
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if left organism eats right and right eats left") do
+    local d = _create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local left = d.orgs[1]
+    local right = d.orgs[2]
+
+    _code(d, :eatRight, left)
+    _code(d, :eatLeft, right)
+    for i = 1:5
+      getArg(left.code, [2,10 + i,1]).args[2] = 10  # sets all Int8 vars to 10
+      getArg(right.code, [2,10 + i,1]).args[2] = 10 # sets all Int8 vars to 10
+    end
+    _updateCode(left)
+    _updateCode(right)
+
+    @fact d.orgs[1].energy === d.orgs[2].energy === 100 --> true
+    consume(d.task)
+    consume(d.task)
+    consume(d.task)
+    @fact left.energy --> 100
+    @fact right.energy --> 100
 
     Manager.destroy(d.man)
   end
