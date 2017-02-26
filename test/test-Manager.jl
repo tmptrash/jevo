@@ -314,6 +314,9 @@ module TestManager
     consume(d.task)
     @fact up.energy --> 130
     @fact World.getEnergy(d.man.world, Helper.Point(2,1)) --> 0
+	consume(d.task)
+    @fact up.energy --> 130
+    @fact World.getEnergy(d.man.world, Helper.Point(2,1)) --> 0
 
     Manager.destroy(d.man)
   end
