@@ -314,7 +314,7 @@ module TestManager
     consume(d.task)
     @fact up.energy --> 130
     @fact World.getEnergy(d.man.world, Helper.Point(2,1)) --> 0
-	consume(d.task)
+	  consume(d.task)
     @fact up.energy --> 130
     @fact World.getEnergy(d.man.world, Helper.Point(2,1)) --> 0
 
@@ -343,24 +343,30 @@ module TestManager
   #
   #   Manager.destroy(d.man)
   # end
-  # facts("Checking amount energy grabbing from organisms per period") do
-  #   local d = _create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}())
-  #
-  #   @fact d.orgs[1].energy --> 100
-  #   @fact d.orgs[2].energy --> 100
-  #   @fact d.orgs[3].energy --> 100
-  #   # orgEnergySpendPeriod === 2
-  #   # so we need run 4 iterations to decrease energy on 6 points
-  #   consume(d.task)
-  #   consume(d.task)
-  #   consume(d.task)
-  #   consume(d.task)
-  #   @fact d.orgs[1].energy --> 98
-  #   @fact d.orgs[2].energy --> 98
-  #   @fact d.orgs[3].energy --> 98
-  #
-  #   Manager.destroy(d.man)
-  # end
+  facts("Checking amount of energy grabbing from organisms per period") do
+    local d = _create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>2))
+
+    _code(d, :plus, d.orgs[1])
+    _code(d, :minus, d.orgs[2])
+    _code(d, :minus, d.orgs[2])
+    _code(d, :not, d.orgs[3])
+    _code(d, :not, d.orgs[3])
+    _code(d, :not, d.orgs[3])
+    @fact d.orgs[1].energy --> 100
+    @fact d.orgs[2].energy --> 100
+    @fact d.orgs[3].energy --> 100
+    # orgEnergySpendPeriod === 2
+    # so we need run 4 iterations to decrease energy on 6 points
+    consume(d.task)
+    consume(d.task)
+    consume(d.task)
+    consume(d.task)
+    @fact d.orgs[1].energy --> 98
+    @fact d.orgs[2].energy --> 96
+    @fact d.orgs[3].energy --> 94
+
+    Manager.destroy(d.man)
+  end
   # # facts("Checking organisms clonning ability") do
   # #   local d = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>3))
   # #   local orgAmount = length(d.man.organisms)
