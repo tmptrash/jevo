@@ -100,7 +100,7 @@ function _onRecover()
   local exitCode::Int
   local cfg::Config.ConfigData = Config.create(false)
 
-  if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info("Starting jevo...") end
+  if cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info("Starting jevo...") end
   man = Manager.create(cfg)
   Manager.recover(man)
   #

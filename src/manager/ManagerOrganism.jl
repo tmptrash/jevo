@@ -22,7 +22,7 @@ import ManagerTypes
 # @param msg Organism's message
 #
 function msg(man::ManagerTypes.ManagerData, id::UInt, msg::String)
-  if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info(string("org-", id, " ", msg)) end
+  if man.cfg.modeQuiet < Config.MODE_QUIET_IMPORTANT Helper.info(string("org-", id, " ", msg)) end
 end
 #
 # Binds handlers to organism's events
