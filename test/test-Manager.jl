@@ -320,29 +320,18 @@ module TestManager
 
     Manager.destroy(d.man)
   end
-  # facts("Checking if organisms, which are created on start contain correct amount of energy") do
-  #   local d = _create(Helper.Point[], Dict{Symbol, Any}(:orgStartAmount=>3,:orgStartEnergy=>7))
-  #
-  #   @fact length(d.man.positions) === length(d.man.organisms) === 0 --> true
-  #   consume(d.task)
-  #   @fact length(d.man.positions) === length(d.man.organisms) === 3 --> true
-  #   for org in d.man.organisms @fact org[2].energy --> 7 end
-  #
-  #   Manager.destroy(d.man)
-  # end
-  # facts("Checking period of energy grabbing from organisms") do
-  #   local d = _create([Helper.Point(1,1), Helper.Point(2,2)])
-  #
-  #   @fact d.orgs[1].energy --> 100
-  #   @fact d.orgs[2].energy --> 100
-  #   # orgEnergySpendPeriod === 2, so we need run two iterations
-  #   consume(d.task)
-  #   consume(d.task)
-  #   @fact d.orgs[1].energy --> 99
-  #   @fact d.orgs[2].energy --> 99
-  #
-  #   Manager.destroy(d.man)
-  # end
+  # orgStartAmount, orgStartEnergy
+  facts("Checking if organisms, which are created on start contain correct amount of energy") do
+    local d = _create(Helper.Point[], Dict{Symbol, Any}(:orgStartAmount=>3,:orgStartEnergy=>7))
+
+    @fact length(d.man.positions) === length(d.man.organisms) === 0 --> true
+    consume(d.task)
+    @fact length(d.man.positions) === length(d.man.organisms) === 3 --> true
+    for org in d.man.organisms @fact org[2].energy --> 7 end
+
+    Manager.destroy(d.man)
+  end
+  # orgEnergySpendPeriod
   facts("Checking amount of energy grabbing from organisms per period") do
     local d = _create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>2))
 
@@ -367,20 +356,54 @@ module TestManager
 
     Manager.destroy(d.man)
   end
-  # # facts("Checking organisms clonning ability") do
-  # #   local d = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>3))
-  # #   local orgAmount = length(d.man.organisms)
-  # #
-  # #   consume(d.task)
-  # #   @fact length(d.man.organisms) - orgAmount --> 0
-  # #   consume(d.task)
-  # #   @fact length(d.man.organisms) - orgAmount --> 0
-  # #   consume(d.task)
-  # #   @fact length(d.man.organisms) - orgAmount --> 1
-  # #   @fact length(d.man.positions) - orgAmount --> 1
-  # #
-  # #   Manager.destroy(d.man)
-  # # end
+  # orgClonePeriod
+  facts("Checking organisms clonning ability") do
+    local d = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>3))
+    local orgAmount = length(d.man.organisms)
+
+    consume(d.task)
+    @fact length(d.man.organisms) - orgAmount --> 0
+    consume(d.task)
+    @fact length(d.man.organisms) - orgAmount --> 0
+    consume(d.task)
+    @fact length(d.man.organisms) - orgAmount --> 1
+    @fact length(d.man.positions) - orgAmount --> 1
+
+    Manager.destroy(d.man)
+  end
+  # orgStartEnergy, orgEnergySpendPeriod
+  facts("Checking if organisms dying if no energy works") do
+    local d = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgStartEnergy=>2, :orgEnergySpendPeriod=>2))
+    local org = d.orgs[1]
+
+    _code(d, :plus, org)
+    consume(d.task)
+    @fact org.energy --> 2
+    consume(d.task)
+    @fact org.energy --> 1
+    consume(d.task)
+    @fact org.energy --> 1
+    consume(d.task)
+    @fact org.energy --> 0
+    @fact length(d.man.organisms) --> 0
+
+    Manager.destroy(d.man)
+  end
+  # orgStartEnergy, orgAlivePeriod, worldMinOrgs
+  facts("Checking if organisms dying, because of age works") do
+    local d = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgStartEnergy=>2, :orgAlivePeriod=>3, :worldMinOrgs=>0))
+    local org = d.orgs[1]
+
+    _code(d, :plus, org)
+    consume(d.task)
+    @fact length(d.man.organisms) --> 1
+    consume(d.task)
+    @fact length(d.man.organisms) --> 1
+    consume(d.task)
+    @fact length(d.man.organisms) --> 0
+
+    Manager.destroy(d.man)
+  end
   # # facts("Checking organisms mutations on clone") do
   # #   local d         = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>2, :orgCloneMutation=>1.0))
   # #   local orgAmount = length(d.man.organisms)

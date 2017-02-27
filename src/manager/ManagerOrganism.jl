@@ -115,7 +115,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # This is how organisms die if their age is bigger then some
     # predefined config value (orgAlivePeriod)
     #
-    if cfg.orgAlivePeriod > 0 && org.age > cfg.orgAlivePeriod && length(tasks) > cfg.worldMinOrgs _killOrganism(man, i) end
+    if cfg.orgAlivePeriod > 0 && org.age >= cfg.orgAlivePeriod && length(tasks) > cfg.worldMinOrgs _killOrganism(man, i) end
     #
     # Updates min/max values
     #

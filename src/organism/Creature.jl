@@ -229,7 +229,8 @@ module Creature
     #
     cloneEnergyPercent::Float64
     #
-    # Amount obtained mutations, which since organism borning
+    # Amount obtained mutations, which since organism borning. Should be
+    # started from 1, because we obtain zero adaptivness.
     #
     mutationsFromStart::Int
     #
@@ -328,7 +329,7 @@ module Creature
       pos,                                                                  # pos
       0,                                                                    # age
       0.5,                                                                  # cloneEnergyPercent
-      0,                                                                    # mutationsFromStart
+      1,                                                                    # mutationsFromStart
       Event.create()                                                        # observer
     )
   end
