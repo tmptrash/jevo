@@ -100,7 +100,7 @@ module Config
     orgMutationProbsMaxValue::Int
     #
     # Percent of mutations from code size, which will be applied to
-    # organism after clonning. Should be <= 100
+    # organism after clonning. Should be <= 1.0
     #
     orgCloneMutation::Float64
     #
@@ -411,9 +411,9 @@ module Config
   function create(isMerge::Bool = true, empty::Bool = false)
     local cfg::ConfigData = ConfigData(
       CommandLine.create(),                    # cmdLineArgs
-      empty ? [] : [50,100,1,0,1,1,1,1,1],     # orgMutationProbs (add,change,del,small-change,clone,period,amount,probs,cloneEnergy
+      empty ? [] : [50,100,1,0,1,1,1,1,1],     # orgMutationProbs (add,change,del,small-change,clone,period,amount,probs,cloneEnergy)
       100,                                     # orgMutationProbsMaxValue
-      2.0,                                     # orgCloneMutation
+      0.2,                                     # orgCloneMutation
       10,                                      # orgClonePeriod
       500,                                     # orgRainMutationPeriod
       0.2,                                     # orgRainMutationPercent

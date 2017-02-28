@@ -70,8 +70,8 @@ module Mutator
     # It's very important to call eval() as few as possible. This is why
     # we moved it outside the "for" loop.
     #
+    org.mutationsFromStart += amount
     if realAmount > 0
-      org.mutationsFromStart += realAmount
       _changeColor(cfg, org, realAmount)
       try
         cfg.orgEvals += 1

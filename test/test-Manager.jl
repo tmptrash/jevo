@@ -320,6 +320,7 @@ module TestManager
 
     Manager.destroy(d.man)
   end
+  # TODO: check all configs
   # orgStartAmount, orgStartEnergy
   facts("Checking if organisms, which are created on start contain correct amount of energy") do
     local d = _create(Helper.Point[], Dict{Symbol, Any}(:orgStartAmount=>3,:orgStartEnergy=>7))
@@ -404,28 +405,27 @@ module TestManager
 
     Manager.destroy(d.man)
   end
-  # # facts("Checking organisms mutations on clone") do
-  # #   local d         = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>2, :orgCloneMutation=>1.0))
-  # #   local orgAmount = length(d.man.organisms)
-  # #   local mutations = d.man.plugins["Status"].mps
-  # #
-  # #   Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,1), Code.CodePart(Code.plus, false))
-  # #   Mutator._onAdd(d.cfg, d.orgs[1], Helper.CodePos(1,1,2), Code.CodePart(Code.plus, false))
-  # #
-  # #   @fact length(d.man.organisms)             --> 1
-  # #   consume(d.task)
-  # #   @fact length(d.man.organisms) - orgAmount --> 0
-  # #   @fact d.man.plugins["Status"].mps - mutations        --> 0
-  # #   consume(d.task)
-  # #   @fact length(d.man.organisms) - orgAmount --> 1
-  # #   @fact d.man.plugins["Status"].mps - mutations        --> 2
-  # #   consume(d.task)
-  # #   @fact length(d.man.organisms) - orgAmount --> 1
-  # #   @fact d.man.plugins["Status"].mps - mutations        --> 2
-  # #   consume(d.task)
-  # #   @fact length(d.man.organisms) - orgAmount --> 2
-  # #   @fact d.man.plugins["Status"].mps - mutations        --> 4
-  # #
-  # #   Manager.destroy(d.man)
-  # # end
+  # orgClonePeriod, orgCloneMutation
+  facts("Checking organisms mutations on clone") do
+    local d         = _create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>2, :orgCloneMutation=>1.0))
+    local org       = d.orgs[1]
+    local mutations = d.man.plugins["Status"].mps
+
+    _code(d, :plus, org)
+    _code(d, :plus, org)
+
+    @fact org.mutationsFromStart        --> 1
+    @fact length(d.man.organisms)       --> 1
+
+    consume(d.task)
+    @fact length(d.man.organisms)       --> 1
+    @fact org.mutationsFromStart        --> 1
+
+    consume(d.task)
+    @fact length(d.man.organisms)       --> 2
+    @fact org.mutationsFromStart        --> 1
+    @fact d.man.organisms[org.id+1].mutationsFromStart  --> 3
+
+    Manager.destroy(d.man)
+  end
 end
