@@ -41,6 +41,8 @@ module Status
     evals::Int        # amount of eval() calls till previous status
     csMin::Int        # minimum organism code size
     csMax::Int        # maximum organism code size
+    code::Int         # average code size
+    codeAmount::Int   # is used to calculate average organisms code size
     eatl::Int         # organism eats left
     eatr::Int         # organism eats right
     eatu::Int         # organism eats up
@@ -61,7 +63,7 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
     #
     # All event handlers should be binded here
     #
@@ -124,7 +126,7 @@ module Status
       _showParam(:yellow, "req:",  st.rps, 9)
       _showParam(:yellow, "eval:", cfg.orgEvals - st.evals, 10)
       _showParam(:orange, "err:",  man.cfg.orgErrors, 11)
-      _showParam(:orange, "code:", div(st.csMax - st.csMin, 2), 9)
+      _showParam(:orange, "code:", (@sprintf "%.2f" st.code / st.codeAmount), 12)
       print("\n")
 
       # if cfg.modeStatusFull
@@ -173,6 +175,8 @@ module Status
       st.eMax      = 0
       st.csMin     = typemax(Int)
       st.csMax     = 0
+      st.code      = 0
+      st.codeAmount = 0
       st.evals     = cfg.orgEvals
       st.eatl      = 0
       st.eatr      = 0
@@ -291,6 +295,8 @@ module Status
     local sd::StatusData = man.plugins[MODULE_NAME]
 
     sd.energy += org.energy
+    sd.code   += org.codeSize
+    sd.codeAmount += 1
     #
     # Finds min/max energetic organisms in population
     #

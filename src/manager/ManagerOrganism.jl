@@ -224,7 +224,7 @@ function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerType
 end
 #
 # Updates energy of all organisms. Decreases their energy according
-# to config (ORGANISM, DECREASE_VALUE). Removes marked as "delete"
+# to config (orgEnergySpendPeriod). Removes marked as "delete"
 # tasks from man.tasks map.
 # @param man Manager data type
 #
