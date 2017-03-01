@@ -32,30 +32,33 @@ module TestCode
 
     Manager.destroy(d.man)
   end
-  # facts("Testing Code.fn() outside main function") do
-  #   conf = Config.create()
-  #   conf.codeFuncParamAmount = 1
-  #   org = Creature.create(conf)
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
-  #   Mutator._onAdd(conf, org, Helper.CodePos(2,1,1), Code.CodePart(Code.fn, true))
-  #
-  #   @fact length(org.funcs) --> 2
-  #   @fact length(Helper.getLines(org.code, [2,1,2])) --> 1
-  #   @fact Code.eval(org.code)(conf, org) --> true
-  # end
-  # facts("Testing Code.fn() + Code.fn()") do
-  #   conf = Config.create()
-  #   conf.codeFuncParamAmount = 1
-  #   org = Creature.create(conf)
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.fn, true))
-  #
-  #   @fact length(org.funcs) --> 3
-  #   @fact length(Helper.getLines(org.code, [2])) --> 3
-  #   @fact Helper.getHead(org.code, [2,1]) --> :function
-  #   @fact Helper.getHead(org.code, [2,2]) --> :function
-  #   @fact Code.eval(org.code)(conf, org) --> true
-  # end
+  facts("Testing Code.fn() outside main function") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+    local org = d.orgs[1]
+
+    code(d, :fn, org)
+    code(d, :fn, org)
+    @fact length(org.funcs) --> 3
+    @fact length(Helper.getLines(org.code, [2,31,2])) --> 31
+    @fact Code.eval(org.code)(d.cfg, org) --> true
+
+    Manager.destroy(d.man)
+  end
+  facts("Testing Code.fn() + Code.fn()") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+    local org = d.orgs[1]
+
+    code(d, :fn, org)
+    code(d, :fn, org)
+
+    @fact length(org.funcs) --> 3
+    @fact length(Helper.getLines(org.code, [2])) --> 33
+    @fact Helper.getHead(org.code, [2,31]) --> :function
+    @fact Helper.getHead(org.code, [2,32]) --> :function
+    @fact Code.eval(org.code)(d.cfg, org) --> true
+
+    Manager.destroy(d.man)
+  end
   # facts("Testing Code.fn() should return the value") do
   #   conf = Config.create()
   #   conf.codeFuncParamAmount = 1
