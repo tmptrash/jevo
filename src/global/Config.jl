@@ -413,10 +413,10 @@ module Config
       CommandLine.create(),                    # cmdLineArgs
       empty ? [] : [50,100,1,0,1,1,1,1,1],     # orgMutationProbs (add,change,del,small-change,clone,period,amount,probs,cloneEnergy)
       100,                                     # orgMutationProbsMaxValue
-      0.2,                                     # orgCloneMutation
+      0.02,                                    # orgCloneMutation
       10,                                      # orgClonePeriod
       500,                                     # orgRainMutationPeriod
-      0.2,                                     # orgRainMutationPercent
+      0.01,                                    # orgRainMutationPercent
       100,                                     # orgStartAmount
       10000,                                   # orgStartEnergy
       100,                                     # orgStartColor
@@ -427,7 +427,7 @@ module Config
       0,                                       # orgErrors
       0,                                       # orgEvals
 
-      3,                                       # codeFuncParamAmount
+      2,                                       # codeFuncParamAmount
       Int8(16),                                # codeLoopDiv
       0,                                       # codeRuns
 
