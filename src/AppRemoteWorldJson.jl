@@ -8,7 +8,7 @@
 # @author DeadbraiN
 #
 include("global/ImportFolders.jl")
-import RemoteWorldRT
+import RemoteWorldJson
 #
 # Analog of main() in C lang
 #
@@ -16,8 +16,8 @@ function main()
   local cfg::Config.ConfigData = Config.create()
 
   if Config.isEmpty(cfg) quit() end
-  rw = RemoteWorldRT.create(cfg, cfg.conServerIp, cfg.conServerPort, cfg.conFastServerPort)
-  RemoteWorldRT.start(rw)
+  rw = RemoteWorldJson.create(cfg, cfg.conServerIp, cfg.conServerPort, cfg.conFastServerPort)
+  RemoteWorldJson.start(rw)
 end
 #
 # Application entry point
