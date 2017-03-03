@@ -37,8 +37,6 @@ module RemoteWorldJson
     #
     cmdCon::Client.ClientConnection
     poolingCon::Client.ClientConnection
-    json::Array{String,1}
-    dotsAmount::Int
     fileIndex::Int
     diffs::Array{Any,1}
     #
@@ -54,10 +52,9 @@ module RemoteWorldJson
     RemoteDataRT(
       cmdCon::Client.ClientConnection,
       poolingCon::Client.ClientConnection,
-      json::Array{String,1},
-      dotsAmount::Int,
-      fileIndex::Int
-    ) = new(cmdCon, poolingCon, json, dotsAmount, fileIndex)
+      fileIndex::Int,
+      diffs::Array{Any, 1}
+    ) = new(cmdCon, poolingCon, fileIndex, diffs)
   end
   #
   # Creates connection with remote host for display pixels from remote world.
@@ -69,13 +66,12 @@ module RemoteWorldJson
   #
   function create(cfg::Config.ConfigData, host::Base.IPAddr, cmdPort::Int, poolingPort::Int)
     if !isdir(JSON_FOLDER) mkdir(JSON_FOLDER) end
-    
+
     RemoteDataRT(
       Client.create(host, cmdPort),
       Client.create(host, poolingPort, true),
-      String[],
       0,
-      0
+      Any[]
     )
   end
   #
@@ -155,14 +151,12 @@ module RemoteWorldJson
       local pixelDiff = Dict("sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color)
       push!(rd.diffs, pixelDiff)
 
-      #= if length(diffs) > AMOUNT_OF_RECORDS =#
-      #=   local file::String = string(JSON_FOLDER, "/", lpad(rd.fileIndex, 4, "0"), ".json") =#
-      #=   Helper.save(JSON.json(diffs), fileName, true) =#
-
-      #=   diffs = [] =#
-      #=   rd.fileIndex += 1 =#
-      #= end =#
-
+      if length(rd.diffs) > AMOUNT_OF_RECORDS
+        local file::String = string(JSON_FOLDER, "/", lpad(rd.fileIndex, 4, "0"), ".json")
+        Helper.save(JSON.json(rd.diffs), file, true)
+        rd.diffs = []
+        rd.fileIndex += 1
+      end
     else
       rd.ips = data[1]
     end
