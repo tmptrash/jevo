@@ -12,6 +12,7 @@ module RemoteWorldJson
   import Config
   import Helper
   import Dots
+  import JSON
 
   export create
   export start
@@ -39,6 +40,7 @@ module RemoteWorldJson
     json::Array{String,1}
     dotsAmount::Int
     fileIndex::Int
+    diffs::Array{Any,1}
     #
     # Lazy loading fields
     #
@@ -138,15 +140,29 @@ module RemoteWorldJson
       # This is moving of the dot. We have to draw empty dot
       # on previous dot position and colored dot on new position.
       #
+
+      local sourceX::Int = x;
+      local sourceY::Int = y;
+
       if dir !== Dots.DIRECTION_NO
-        if     dir === Dots.DIRECTION_UP    _dot(rd, x, y + 1, UInt32(Dots.INDEX_EMPTY))
-        elseif dir === Dots.DIRECTION_RIGHT _dot(rd, x - 1, y, UInt32(Dots.INDEX_EMPTY))
-        elseif dir === Dots.DIRECTION_DOWN  _dot(rd, x, y - 1, UInt32(Dots.INDEX_EMPTY))
-        else                                _dot(rd, x + 1, y, UInt32(Dots.INDEX_EMPTY))
+        if     dir === Dots.DIRECTION_UP    sourceY = y + 1
+        elseif dir === Dots.DIRECTION_RIGHT sourceX = x - 1
+        elseif dir === Dots.DIRECTION_DOWN  sourceY = y - 1
+        else                                sourceX = x + 1
         end
       end
-      _dot(rd, x, y, color << 8 >> 8) # clear first byte with direction
-      #OpenGlWindow.update(rd.win)
+
+      local pixelDiff = Dict("sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color)
+      push!(rd.diffs, pixelDiff)
+
+      #= if length(diffs) > AMOUNT_OF_RECORDS =#
+      #=   local file::String = string(JSON_FOLDER, "/", lpad(rd.fileIndex, 4, "0"), ".json") =#
+      #=   Helper.save(JSON.json(diffs), fileName, true) =#
+
+      #=   diffs = [] =#
+      #=   rd.fileIndex += 1 =#
+      #= end =#
+
     else
       rd.ips = data[1]
     end
@@ -159,38 +175,25 @@ module RemoteWorldJson
     if ans.data === false Helper.error("Only one viewer is supported"); return nothing end
     local region::Array{UInt32, 2} = ans.data.reg
 
-    #OpenGlWindow.title(rd.win, string("ips: ", round(ans.data.ips), ", rps: 0"))
+    # Store each pixel to key frame
+    keyFrameRegion = []
     for x::Int in 1:size(region)[2]
       for y::Int in 1:size(region)[1]
-        _dot(rd, x, y, UInt32(region[y, x]))
+        pixel = Dict("x" => x, "y" => y, "c" => UInt32(region[y, x]))
+        push!(keyFrameRegion, pixel)
       end
     end
-    #OpenGlWindow.update(rd.win)
+
+    keyFrame = Dict("region" => keyFrameRegion,
+                    "width" => size(region)[2],
+                    "height" => size(region)[1])
+
+    local fileName::String = string(JSON_FOLDER, "/keyframe.json")
+    Helper.save(JSON.json(keyFrame), fileName, true)
+
     #
     # This command means "turn on server pooling"
     #
     Client.request(rd.poolingCon, UInt8(FastApi.API_UINT8), UInt8(0))
-  end
-  #
-  # Saves pixels to JSON string file
-  #
-  function _toJson(rd::RemoteDataRT)
-    local file::String = string(JSON_FOLDER, "/", lpad(rd.fileIndex, 4, "0"), ".json")
-
-    Helper.save(string("[{", join(rd.json, "},{"), "}]"), file, true)
-    rd.json = []
-  end
-  #
-  # Adds one dot to the JSON string
-  #
-  function _dot(rd::RemoteDataRT, x::Int, y::Int, color::UInt32)
-    push!(rd.json, string("x:", x, ",y:", y, ",c:", color))
-    rd.dotsAmount += 1
-
-    if rd.dotsAmount > AMOUNT_OF_RECORDS
-      _toJson(rd)
-      rd.dotsAmount = 0
-      rd.fileIndex += 1
-    end
   end
 end
