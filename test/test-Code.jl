@@ -102,21 +102,20 @@ module TestCode
 
     Manager.destroy(d.man)
   end
-  # facts("Testing Code.fnCall() of one Code.fn()") do
-  #   local conf = Config.create()
-  #   local org = Creature.create(conf)
-  #   local index = length(Helper.SUPPORTED_TYPES) + 2
-  #
-  #   conf.codeFuncParamAmount = 1
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
-  #   addVars(org, [2], Helper.CodePos(1,1,1))
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,index), Code.CodePart(Code.fnCall, false))
-  #
-  #   @fact Helper.getHead(org.code, [2,index]) --> :(=)
-  #   @fact Helper.getArg(org.code, [2,index,2,1]) --> :func_2
-  #   @fact Helper.getArg(org.code, [2,index,1]) --> Helper.getArg(org.code, [2,index,2,2])
-  #   @fact Code.eval(org.code)(conf, org) --> true
-  # end
+  facts("Testing Code.fnCall() of one Code.fn()") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+    local org = d.orgs[1]
+    local index = 32
+
+    code(d, :fn, org)
+    code(d, :fnCall, org)
+
+    @fact Helper.getHead(org.code, [2,index]) --> :(=)
+    @fact Helper.getArg(org.code, [2,index,2,1]) --> :func_32
+    @fact Code.eval(org.code)(d.cfg, org) --> true
+
+    Manager.destroy(d.man)
+  end
   # facts("Testing Code.fnCall() after removing Code.fn()") do
   #   local conf = Config.create()
   #   local org  = Creature.create(conf)
