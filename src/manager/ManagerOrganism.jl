@@ -747,6 +747,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       _killOrganism(man, findfirst((t) -> t.organism === org, man.tasks))
       retObj.ret = org.energy
     end
+    Event.fire(man.obs, "eatorganism", man, retObj.ret)
   else
     #
     # Organism wants to give an energy, but no other organisms around
