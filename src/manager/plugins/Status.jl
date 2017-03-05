@@ -47,6 +47,7 @@ module Status
     eatr::Int         # organism eats right
     eatu::Int         # organism eats up
     eatd::Int         # organism eats down
+    eatorg::Int        # amount of energy obtained by eating other organisms
     eated::Int        # total amount of eating for organisms
     stepl::Int        # organism moves left
     stepr::Int        # organism moves right
@@ -63,12 +64,13 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
     #
     # All event handlers should be binded here
     #
     Event.on(man.obs, "iteration", _onIteration)
     Event.on(man.obs, "ips", _onIps)
+    Event.on(man.obs, "eatorganism", _onEatOrganism)
     #Event.on(man.obs, "yield", _onYield)
     #Event.on(man.obs, "yieldto", _onYieldTo)
     #Event.on(man.obs, "stepyield", _onStepYield)
@@ -118,6 +120,7 @@ module Status
       _showParam(:normal, "ips:",  (@sprintf "%.3f" st.ips / st.iterations), 13)
       _showParam(:green,  "nrg:",  div(st.allEnergy, st.allEnergyAmount), 16, true)
       _showParam(:red,    "eat:",  st.eated, 14, true)
+      _showParam(:red,    "eatorg:",  st.eatorg, 17, true)
       _showParam(:red,    "grab:", st.grabbed, 15, true)
       _showParam(:red,    "step:", st.steps, 12, true)
       _showParam(:red,    "mut:",  st.mps, 10)
@@ -182,6 +185,7 @@ module Status
       st.eatr      = 0
       st.eatu      = 0
       st.eatd      = 0
+      st.eatorg    = 0
       st.eated     = 0
       st.grabbed   = 0
       st.stepl     = 0
@@ -194,6 +198,14 @@ module Status
       st.allEnergyAmount = 0
       st.orgs      = 0
     end
+  end
+  #
+  # Handler of "eatorganism" event
+  # @param man Manager data type
+  # @param eated Amount of energy obteined by eating of other organism
+  #
+  function _onEatOrganism(man::ManagerData, eated::Int)
+    man.plugins[MODULE_NAME].eatorg += eated
   end
   #
   # Calls for every iteration, after all organisms were run
