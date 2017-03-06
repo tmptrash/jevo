@@ -110,7 +110,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # doesn't contain any code line. This line must be
     # last in organisms loop.
     #
-    if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationPercent) end
+    if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationPercent, false) end
     #
     # This is how organisms die if their age is bigger then some
     # predefined config value (orgAlivePeriod)
@@ -461,8 +461,10 @@ end
 # @param man Instance of manager data type
 # @param task Task of organism
 # @param mutationPercents Percent of mutations from code size
+# @param onClone true if current mutations were applied on clonning
+# of organism and not as a rain mutations
 #
-function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask, mutationPercents::Float64)
+function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask, mutationPercents::Float64, onClone::Bool = true)
   local mutations::Int = Mutator.mutate(man.cfg, task.organism, mutationPercents)
 
   if mutations > 0
@@ -472,7 +474,7 @@ function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask,
     # runned, before new code will be running.
     #
     Manager._updateOrgTask(man, task)
-    Event.fire(man.obs, "mutations", man, task.organism, mutations)
+    Event.fire(man.obs, "mutations", man, task.organism, mutations, onClone)
   end
 end
 #
