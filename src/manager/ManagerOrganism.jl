@@ -233,7 +233,8 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   local org::Creature.Organism
   local i::Int = length(tasks)
   local minOrgs::Int = man.cfg.worldMinOrgs
-  local dontKill::Bool = (i <= minOrgs)
+  local dontKill::Bool = (i < minOrgs)
+  local codeSize::Int
 
   if dontKill return false end
   #
@@ -249,8 +250,9 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     # Energy shouldn't be less then 1
     #
     if !dontKill
-      Event.fire(man.obs, "grabenergy", man, org.energy < org.codeSize ? org.energy : org.codeSize)
-      if !_decreaseOrganismEnergy(man, org, org.codeSize, i)
+      codeSize = org.codeSize < 1 ? 1 : org.codeSize
+      Event.fire(man.obs, "grabenergy", man, org.energy < codeSize ? org.energy : codeSize)
+      if !_decreaseOrganismEnergy(man, org, codeSize, i)
         dontKill = (length(tasks) <= minOrgs)
       end
     end
