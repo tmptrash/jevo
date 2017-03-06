@@ -9,3 +9,9 @@ backup
 /test/run-code-test.jl
 /test/run-man-test.jl
 /tmp/tmp-cond.jl
+
+# temporary folder for jsons
+jsons
+
+# vim stuff
+*.un~
