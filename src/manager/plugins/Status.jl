@@ -33,6 +33,7 @@ module Status
     srps::Int         # moveXXX() related requests per second
     syps::Int         # moveXXX() related yields per second
     mps::Int          # mutations per second
+    cmps::Int         # amount of mutations on clone
     energy::Int       # energy of organisms
     allEnergy::Int    # energy of populations
     allEnergyAmount::Int # amount of population energy measurements
@@ -64,7 +65,7 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
     #
     # All event handlers should be binded here
     #
@@ -123,7 +124,8 @@ module Status
       _showParam(:red,    "eatorg:",  st.eatorg, 17, true)
       _showParam(:red,    "grab:", st.grabbed, 15, true)
       _showParam(:red,    "step:", st.steps, 12, true)
-      _showParam(:red,    "mut:",  st.mps, 10)
+      _showParam(:orange, "cmut:", st.cmps, 11)
+      _showParam(:orange, "mut:",  st.mps, 10)
       _showParam(:red,    "kil:",  st.kops, 10)
       _showParam(:yellow, "clon:", st.cps, 11)
       _showParam(:yellow, "req:",  st.rps, 9)
@@ -174,6 +176,7 @@ module Status
       st.syps      = 0
       st.srps      = 0
       st.mps       = 0
+      st.cmps      = 0
       st.eMin      = typemax(Int)
       st.eMax      = 0
       st.csMin     = typemax(Int)
@@ -267,10 +270,13 @@ module Status
   # Calculates amount of mutations for specified organism
   # @param man Manager related data object
   # @param org Organism we have to add to the pool
-  # param amount Amount of real mutations
+  # @param amount Amount of real mutations
+  # @param onClone true if current mutations were applied on clonning
+  # of organism and not as a rain mutations
   #
-  function _onMutations(man::ManagerData, org::Creature.Organism, amount::Int)
+  function _onMutations(man::ManagerData, org::Creature.Organism, amount::Int, onClone::Bool)
     man.plugins[MODULE_NAME].mps += amount
+    if onClone man.plugins[MODULE_NAME].cmps += amount end
   end
   #
   # Handles organism clonning

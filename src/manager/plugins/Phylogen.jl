@@ -161,9 +161,10 @@ module Phylogen
   # node (organism).
   # @param man Manager related data object
   # @param org Organism we have to add to the pool
-  # param amount Amount of real mutations
+  # @param amount Amount of real mutations
+  # @param onClone true if current mutations were applied on clone
   #
-  function _addMutations(man::ManagerData, org::Creature.Organism, amount::Int)
+  function _addMutations(man::ManagerData, org::Creature.Organism, amount::Int, onClone::Bool)
     local orgs::Dict{UInt, PhylogenOrganism} = man.plugins[MODULE_NAME].organisms
     if !haskey(orgs, org.id)
       Helper.error(string("Phylogen: Unknown organism id: ", org.id))
