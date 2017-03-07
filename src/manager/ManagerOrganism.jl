@@ -110,7 +110,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # doesn't contain any code line. This line must be
     # last in organisms loop.
     #
-    if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationPercent, false) end
+    if cfg.orgRainMutationPeriod > 0 && org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationPercent, false) end
     #
     # This is how organisms die if their age is bigger then some
     # predefined config value (orgAlivePeriod)
