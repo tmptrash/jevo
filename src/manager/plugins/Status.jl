@@ -7,6 +7,7 @@
 module Status
   import ManagerTypes.ManagerData
   import ManagerTypes.Plugin
+  import ManagerTypes.OrganismTask
   import Creature
   import Config
   import Event
@@ -35,8 +36,6 @@ module Status
     mps::Int          # mutations per second
     cmps::Int         # amount of mutations on clone
     energy::Int       # energy of organisms
-    allEnergy::Int    # energy of populations
-    allEnergyAmount::Int # amount of population energy measurements
     eMin::Int         # minimum organism energy
     eMax::Int         # maximum organism energy
     evals::Int        # amount of eval() calls till previous status
@@ -65,7 +64,7 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
     #
     # All event handlers should be binded here
     #
@@ -114,20 +113,21 @@ module Status
     st.iterations += 1
     st.ips  += man.ips
     st.orgs += length(man.tasks)
+    _calcEnergy(man)
 
     if stamp - st.stamp >= period
       print(string(Dates.format(now(), "HH:MM:SS"), " "))
       _showParam(:green,  "orgs:", div(st.orgs, st.iterations), 9)
       _showParam(:normal, "ips:",  (@sprintf "%.3f" st.ips / st.iterations), 13)
-      _showParam(:green,  "nrg:",  div(st.allEnergy, st.allEnergyAmount), 16, true)
+      _showParam(:green,  "nrg:",  st.energy, 16, true)
       _showParam(:red,    "eat:",  st.eated, 15, true)
-      _showParam(:red,    "eatorg:",  st.eatorg, 18, true)
+      _showParam(:red,    "eato:", st.eatorg, 16, true)
       _showParam(:red,    "grab:", st.grabbed, 15, true)
       _showParam(:red,    "step:", st.steps, 12, true)
       _showParam(:orange, "cmut:", st.cmps, 11)
       _showParam(:orange, "mut:",  st.mps, 10)
-      _showParam(:red,    "kil:",  st.kops, 10)
-      _showParam(:yellow, "clon:", st.cps, 11)
+      _showParam(:red,    "kil:",  st.kops, 9)
+      _showParam(:yellow, "clon:", st.cps, 10)
       _showParam(:yellow, "req:",  st.rps, 9)
       _showParam(:yellow, "eval:", cfg.orgEvals - st.evals, 10)
       _showParam(:orange, "err:",  man.cfg.orgErrors, 11)
@@ -197,9 +197,20 @@ module Status
       st.stepd     = 0
       st.steps     = 0
       st.energy    = 0
-      st.allEnergy = 0
-      st.allEnergyAmount = 0
       st.orgs      = 0
+    end
+  end
+  #
+  # Calculates total energy of population
+  # @param man Manager data type
+  #
+  function _calcEnergy(man::ManagerData)
+    local st::StatusData = man.plugins[MODULE_NAME]
+    local task::OrganismTask
+
+    st.energy = 0
+    for task in man.tasks
+      st.energy += task.organism.energy
     end
   end
   #
@@ -217,10 +228,6 @@ module Status
   #
   function _onIteration(man::ManagerData, stamp::Float64)
     local st::StatusData = man.plugins[MODULE_NAME]
-
-    st.allEnergyAmount += 1
-    st.allEnergy += st.energy
-    st.energy = 0
   end
   #
   # Shows one parameter in status line accordint to settings
