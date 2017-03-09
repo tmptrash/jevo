@@ -293,16 +293,16 @@ module Code
     local fnIdx   ::Int = Helper.fastRand(length(org.funcs))
     local blockIdx::Int = Helper.fastRand(length(org.funcs[fnIdx].blocks))
     local block   ::Creature.Block = org.funcs[fnIdx].blocks[blockIdx]
+    local isFunc  ::Bool = blockIdx === 1
     #
     # In this line we skip "return" operator and lines with variables
     # and functions declaration.
     #
-    local lines   ::Int = length(block.expr.args) - (blockIdx === 1 ? 1 + block.defIndex : 0) + 1
-
+    local lines   ::Int = length(block.expr.args) - (isFunc ? Creature.VARS_AMOUNT + 1 : 0)
     Helper.CodePos(
       fnIdx,
       blockIdx,
-      Helper.fastRand(lines) + (blockIdx === 1 ? block.defIndex : 0)
+      Helper.fastRand(lines) + (isFunc ? Creature.VARS_AMOUNT : 0)
     )
   end
   #
