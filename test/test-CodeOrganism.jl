@@ -390,9 +390,21 @@ module TestCodeOrganism
 
     code(d, :stepLeft, org)
     updateCode(org)
+    #
+    # Sets energy on the right side of the world
+    #
+    World.setEnergy(d.man.world, Helper.Point(10,1), UInt32(123))
     consume(d.task)
     @fact World.getEnergy(d.man.world, Helper.Point(1,1)) --> UInt32(100)
-    @fact World.getEnergy(d.man.world, Helper.Point(10,1)) --> UInt32(0)
+    @fact World.getEnergy(d.man.world, Helper.Point(10,1)) --> UInt32(123)
+    consume(d.task)
+    @fact World.getEnergy(d.man.world, Helper.Point(1,1)) --> UInt32(100)
+    @fact World.getEnergy(d.man.world, Helper.Point(10,1)) --> UInt32(123)
+    #
+    # Removes energy on the right side of the world
+    #
+    World.setEnergy(d.man.world, Helper.Point(10,1), UInt32(0))
+    consume(d.task)
     consume(d.task)
     @fact World.getEnergy(d.man.world, Helper.Point(1,1)) --> UInt32(0)
     @fact World.getEnergy(d.man.world, Helper.Point(10,1)) --> UInt32(100)
