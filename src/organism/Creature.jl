@@ -40,6 +40,7 @@ module Creature
   import Config
 
   export VAR_AMOUNT
+  export VARS_AMOUNT
   export Organism
 
   export create
@@ -61,6 +62,10 @@ module Creature
   # Amount of embedded variables for one type
   #
   const VAR_AMOUNT = 5
+  #
+  # All variables amount
+  #
+  const VARS_AMOUNT = length(Helper.SUPPORTED_TYPES) * VAR_AMOUNT
   #
   # Enumeration for direction: up, down, left, right
   #
