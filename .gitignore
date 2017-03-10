@@ -10,8 +10,11 @@ backup
 /test/run-man-test.jl
 /tmp/tmp-cond.jl
 
-# temporary folder for jsons
+## temporary folder for jsons
 jsons
 
-# vim stuff
+## vim stuff
 *.un~
+
+## macosx stuff
+*.DS_Store
