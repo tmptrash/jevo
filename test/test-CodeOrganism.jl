@@ -384,6 +384,22 @@ module TestCodeOrganism
 
     Manager.destroy(d.man)
   end
+  facts("Checking if organism can move left, but can't because of energy block") do
+    local d = create([Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local org = d.orgs[1]
+
+    code(d, :stepLeft, org)
+    updateCode(org)
+    World.setEnergy(d.man.world, Helper.Point(1,1), UInt32(123))
+    consume(d.task)
+    @fact World.getEnergy(d.man.world, Helper.Point(2,1)) --> UInt32(100)
+    @fact World.getEnergy(d.man.world, Helper.Point(1,1)) --> UInt32(123)
+    consume(d.task)
+    @fact World.getEnergy(d.man.world, Helper.Point(2,1)) --> UInt32(100)
+    @fact World.getEnergy(d.man.world, Helper.Point(1,1)) --> UInt32(123)
+
+    Manager.destroy(d.man)
+  end
   facts("Checking if organism can move left out of the border in cyclic mode and can't, because of energy block") do
     local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100, :worldCyclical=>true))
     local org = d.orgs[1]
