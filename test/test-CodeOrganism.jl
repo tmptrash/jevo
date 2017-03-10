@@ -369,6 +369,7 @@ module TestCodeOrganism
 
     Manager.destroy(d.man)
   end
+  # TODO: same tests for right, up, down
   facts("Checking if organism can move left out of the border in cyclic mode") do
     local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100, :worldCyclical=>true))
     local org = d.orgs[1]
@@ -384,7 +385,7 @@ module TestCodeOrganism
 
     Manager.destroy(d.man)
   end
-  facts("Checking if organism can move left, but can't because of energy block") do
+  facts("Checking if organism can't move left, because of energy block") do
     local d = create([Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
     local org = d.orgs[1]
 
