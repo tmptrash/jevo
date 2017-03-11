@@ -49,7 +49,7 @@ module RpcApi
   # Describes 2D region in a world
   #
   type Region
-    reg::Array{UInt32, 2}
+    reg::Array{UInt16, 2}
     ips::Float64
   end
   #
@@ -107,9 +107,9 @@ module RpcApi
     #
     # @inheritable
     # Color of organism. Similar colors means relative organisms.
-    # Example: 0x00RRGGBB - first two digits are skipped.
+    # Example: 0xAABB
     #
-    color::UInt32
+    color::UInt16
     #
     # Organism's personal memory. Is used in any possible way.
     #
@@ -175,7 +175,7 @@ module RpcApi
   type Dot
     x::Int
     y::Int
-    color::UInt32
+    color::UInt16
   end
   #
   # RPC API unique identifiers. Only these functions may be called

@@ -87,7 +87,7 @@ module RemoteWorldRT
     #
     # This is how we redefine colors for world's objects
     #
-    for color in Dots.COLORS OpenGlWindow.setColor(color.index, color.rgb...) end
+    for color in Dots.COLORS OpenGlWindow.setColor(Int(color.index), color.rgb...) end
 
     Event.on(rd.poolingCon.observer, Connection.EVENT_BEFORE_RESPONSE, rd.poolingBeforeCb)
     Event.on(rd.cmdCon.observer, Connection.EVENT_AFTER_REQUEST, rd.cmdAfterCb)
@@ -107,7 +107,7 @@ module RemoteWorldRT
   #
   # Handler of remote server pooling request. It may contain two types
   # of data:
-  #    x::Uint16, y::UInt16, color::UInt32, ips::UInt16 or
+  #    x::Uint16, y::UInt16, color::UInt16, ips::UInt16 or
   #    ips::UInt16
   # @param rd Remote Data object
   # @param data Command related data
@@ -128,22 +128,23 @@ module RemoteWorldRT
     # position by empty color.
     #
     if length(data) > 1
-      local color::UInt32 = UInt32(data[3])
-      local dir::Int = color & 0xff000000 >> 24
-      local x::Int = Int(data[1])
-      local y::Int = Int(data[2])
+      local nibbles::UInt16 = UInt16(data[3])
+      local color::UInt16   = nibbles & 0x0fff # last 3 nibbles are color
+      local dir::Int        = nibbles >> 12    # first nibble is direction
+      local x::UInt16       = UInt16(data[1])
+      local y::UInt16       = UInt16(data[2])
       #
       # This is moving of the dot. We have to draw empty dot
       # on previous dot position and colored dot on new position.
       #
       if dir !== Dots.DIRECTION_NO
-        if     dir === Dots.DIRECTION_UP    OpenGlWindow.dot(rd.win, x, y + 1, UInt32(Dots.INDEX_EMPTY))
-        elseif dir === Dots.DIRECTION_RIGHT OpenGlWindow.dot(rd.win, x - 1, y, UInt32(Dots.INDEX_EMPTY))
-        elseif dir === Dots.DIRECTION_DOWN  OpenGlWindow.dot(rd.win, x, y - 1, UInt32(Dots.INDEX_EMPTY))
-        else                                OpenGlWindow.dot(rd.win, x + 1, y, UInt32(Dots.INDEX_EMPTY))
+        if     dir === Dots.DIRECTION_UP    OpenGlWindow.dot(rd.win, x, y + UInt16(1), Dots.INDEX_EMPTY)
+        elseif dir === Dots.DIRECTION_RIGHT OpenGlWindow.dot(rd.win, x - UInt16(1), y, Dots.INDEX_EMPTY)
+        elseif dir === Dots.DIRECTION_DOWN  OpenGlWindow.dot(rd.win, x, y - UInt16(1), Dots.INDEX_EMPTY)
+        else                                OpenGlWindow.dot(rd.win, x + UInt16(1), y, Dots.INDEX_EMPTY)
         end
       end
-      OpenGlWindow.dot(rd.win, x, y, color << 8 >> 8) # clear first byte with direction
+      OpenGlWindow.dot(rd.win, x, y, color)
       OpenGlWindow.update(rd.win)
     else
       rd.ips = data[1]
@@ -155,12 +156,12 @@ module RemoteWorldRT
   #
   function _onRegion(rd::RemoteDataRT, ans::Connection.Answer)
     if ans.data === false Helper.error("Only one viewer is supported"); return nothing end
-    local region::Array{UInt32, 2} = ans.data.reg
+    local region::Array{UInt16, 2} = ans.data.reg
 
     OpenGlWindow.title(rd.win, string("ips: ", round(ans.data.ips), ", rps: 0"))
-    for x::Int in 1:size(region)[2]
-      for y::Int in 1:size(region)[1]
-        OpenGlWindow.dot(rd.win, x, y, UInt32(region[y, x]))
+    for x::UInt16 in 1:size(region)[2]
+      for y::UInt16 in 1:size(region)[1]
+        OpenGlWindow.dot(rd.win, x, y, region[y, x])
       end
     end
     OpenGlWindow.update(rd.win)

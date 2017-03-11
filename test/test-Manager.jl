@@ -232,7 +232,7 @@ module TestManager
     code(d, :eatRight, up)
     for i = 1:5 getArg(up.code, [2,10 + i,1]).args[2] = 10 end # sets all Int8 vars to 10
     updateCode(up)
-    World.setEnergy(d.man.world, Helper.Point(2,1), UInt32(30))
+    World.setEnergy(d.man.world, Helper.Point(2,1), UInt16(30))
 
     @fact up.energy === 100 --> true
     @fact World.getEnergy(d.man.world, Helper.Point(2,1)) --> 30

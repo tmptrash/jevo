@@ -56,6 +56,7 @@ module Manager
   import FastApi
   import Config
   import ManagerTypes
+  import Dots
 
   export create
   export run
@@ -268,7 +269,7 @@ module Manager
   # @return {Bool} true - free point, false - filled point
   # TODO: this method is very slow!!!
   function _isFree(man::ManagerTypes.ManagerData, pos::Helper.Point)
-    !haskey(man.positions, _getPosId(man, pos)) && World.getEnergy(man.world, pos) === UInt32(0)
+    !haskey(man.positions, _getPosId(man, pos)) && World.getEnergy(man.world, pos) === Dots.INDEX_EMPTY
   end
   #
   # Updates IPS (Iterations Per second) counter and stores it in config

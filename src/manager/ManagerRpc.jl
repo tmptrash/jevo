@@ -38,7 +38,7 @@ const _SIDE_DOWN  = "DOWN"
 # @param y1 End y. 0 means all height
 #
 function getRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
-  local data::Array{UInt32, 2}
+  local data::Array{UInt16, 2}
   local pos::Helper.Point = Helper.Point(0, 0)
 
   maxWidth  = size(man.world.data)[2]
@@ -197,10 +197,10 @@ end
 # @param y Y coordinate
 # @param energy Amount of energy
 #
-function setEnergy(man::ManagerTypes.ManagerData, x::Int, y::Int, energy::UInt32)
+function setEnergy(man::ManagerTypes.ManagerData, x::Int, y::Int, energy::UInt16)
   local pos::Helper.Point = Helper.Point(x, y)
 
-  if World.getEnergy(man.world, pos) === UInt32(0)
+  if World.getEnergy(man.world, pos) === Dots.INDEX_EMPTY
     World.setEnergy(man.world, pos, energy)
   end
 
@@ -213,7 +213,7 @@ end
 # @param amount Amount of energy points
 # @param energy Amount of energy within one point
 #
-function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int, energy::UInt32)
+function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int, energy::UInt16)
   local width::Int = div(man.world.width, Helper.fastRand(5) + 1)
   local height::Int = div(man.world.height, Helper.fastRand(9))
   local xOffset::Int = div(man.world.width, Helper.fastRand(9) + 1)
@@ -353,7 +353,7 @@ end
 function markOrganism(man::ManagerTypes.ManagerData, orgId::UInt32, colorIndex::Int)
   if !haskey(man.organisms, orgId) return "Invalid organism id: 0x$(hex(orgId))" end
   local org::Creature.Organism = man.organisms[orgId]
-  local prevColorIndex::Int = org.color
+  local prevColorIndex::UInt16 = org.color
   #
   # Organism should be alive and color index should be in valid range
   #
@@ -374,8 +374,8 @@ end
 #
 function _onFastStreaming(man::ManagerTypes.ManagerData, sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer)
   man.cons.streamInit = false
-  man.dotCallback     = (pos::Helper.Point, color::UInt32)->_onDot(man, pos, color)
-  man.moveCallback    = (pos::Helper.Point, dir::Int, color::UInt32)->_onDot(man, pos, color, dir)
+  man.dotCallback     = (pos::Helper.Point, color::UInt16)->_onDot(man, pos, color)
+  man.moveCallback    = (pos::Helper.Point, dir::Int, color::UInt16)->_onDot(man, pos, color, dir)
   Event.off(man.world.obs, World.EVENT_DOT, man.dotCallback)
   if !Event.has(man.world.obs, World.EVENT_DOT, man.dotCallback)
     Event.on(man.world.obs, World.EVENT_DOT, man.dotCallback)
@@ -392,10 +392,8 @@ end
 # @param pos Dot coordinates
 # @param color Dot color
 #
-function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32, dir::Int = Dots.DIRECTION_NO)
+function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16, dir::Int = Dots.DIRECTION_NO)
   local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
-  local x::UInt16 = UInt16(pos.x)
-  local y::UInt16 = UInt16(pos.y)
   local dataIndex::UInt8 = UInt8(FastApi.API_DOT_COLOR)
   local off::Bool = true
   #
@@ -403,15 +401,16 @@ function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32,
   #
   color = _getColorIndex(man, pos, color)
   #
-  # Encodes direction to the first(unused) byte of color
+  # Encodes direction to the first(unused) half byte of color.
+  # e.g.: 0x000F -> 0xF000
   #
   if dir !== Dots.DIRECTION_NO
-    color |= (UInt32(dir) << 24)
+    color |= (UInt16(dir) << 12)
   end
   for i::Int = 1:length(socks)
     if Helper.isopen(socks[i])
       off = false
-      Server.request(socks[i], dataIndex, x, y, color)
+      Server.request(socks[i], dataIndex, UInt16(pos.x), UInt16(pos.y), color)
       Event.fire(man.obs, "dotrequest", man)
     end
   end
@@ -428,18 +427,18 @@ function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32,
 end
 #
 # Converts color to it's index. This index is used for Visualizer
-# to draw colored dot
+# to draw colored dots
 # @param man Manager data type
 # @param pos Dot coordinates
 # @param color  Dot color
-# @return {UInt32} Color index
+# @return {UInt16} Color index
 #
-function _getColorIndex(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32)
+function _getColorIndex(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16)
   local posId::Int = Manager._getPosId(man, pos)
   local isOrganism::Bool = haskey(man.positions, posId)
 
-  if color !== UInt32(Dots.INDEX_EMPTY)
-    color = UInt32(isOrganism ? man.positions[posId].color : Dots.INDEX_ENERGY)
+  if color !== Dots.INDEX_EMPTY
+    color = isOrganism ? man.positions[posId].color : Dots.INDEX_ENERGY
   end
 
   color
@@ -530,7 +529,7 @@ function _onAfterResponse(man::ManagerTypes.ManagerData, side::String, ans::Conn
 
   delete!(man.cons.frozen, ans.data)
   if ans.id !== RpcApi.RPC_ORG_STEP_OK
-    if World.getEnergy(man.world, org.pos) > UInt32(0)
+    if World.getEnergy(man.world, org.pos) > Dots.INDEX_EMPTY
       pos = World.getNearFreePos(man.world, org.pos)
       #
       # If there is no free space, we have to kill this frozen organism

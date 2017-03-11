@@ -98,8 +98,8 @@ module Mutator
     local colIndex::Int = org.mutationsFromStart - (org.mutationsFromStart % cfg.orgColorPeriod)
 
     if org.mutationsFromStart > cfg.orgColorPeriod && colIndex >= org.mutationsFromStart - amount && colIndex <= org.mutationsFromStart
-      org.color += 1
-      if org.color > Dots.INDEX_MAX_ORG_COLOR org.color = 1 end
+      org.color += UInt16(1)
+      if org.color > Dots.INDEX_MAX_ORG_COLOR org.color = Dots.INDEX_FIRST_COLOR end
     end
   end
   #

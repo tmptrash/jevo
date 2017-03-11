@@ -132,14 +132,14 @@ module Terminal
   # Shorthand for RpcApi.RPC_SET_ENERGY. See
   # ManagerRpc.setEnergy for details
   #
-  function termSetEnergy(x::Int, y::Int, energy::UInt32)
+  function termSetEnergy(x::Int, y::Int, energy::UInt16)
     Client.request(_termData.con, RpcApi.RPC_SET_ENERGY, x, y, energy)
   end
   #
   # Shorthand for RpcApi.RPC_SET_ENERGY_RND. See
   # ManagerRpc.setEnergy for details
   #
-  function termSetRandomEnergy(amount::Int = _termData.cfg.worldStartEnergyDots, energy::UInt32 = _termData.cfg.worldStartEnergyInDot)
+  function termSetRandomEnergy(amount::Int = _termData.cfg.worldStartEnergyDots, energy::UInt16 = _termData.cfg.worldStartEnergyInDot)
     Client.request(_termData.con, RpcApi.RPC_SET_ENERGY_RND, amount, energy)
   end
   #

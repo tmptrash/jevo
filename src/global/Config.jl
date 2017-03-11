@@ -62,9 +62,9 @@ module Config
   const ORGANISM_MAX_MUTATION_PERIOD = 1000
   #
   # Maximum amount of energy, which one organism may contains. Should be
-  # less then typemax(UInt32).
+  # less then typemax(UInt16).
   #
-  const ORGANISM_MAX_ENERGY = Int(typemax(UInt32))
+  const ORGANISM_MAX_ENERGY = Int(typemax(UInt16))
   #
   # Data type for storing configuration data. Is used in pair with GData
   # type. For accessing use Gonfig.val(man.cfg, :SYMBOL[, value]) function
@@ -210,7 +210,7 @@ module Config
     # Amount of energy in every block. See worldStartEnergyDots
     # config for details.
     #
-    worldStartEnergyInDot::UInt32
+    worldStartEnergyInDot::UInt16
     #
     # Minimum percent of energy in current world. Under percent i mean
     # percent from entire world area (100%). If the energy will be less
@@ -437,7 +437,7 @@ module Config
       500,                                     # worldMaxOrgs
       0,                                       # worldMinOrgs
       1000,                                    # worldStartEnergyDots
-      UInt32(0x0001F4),                        # worldStartEnergyInDot
+      UInt16(0x0001F4),                        # worldStartEnergyInDot
       0.5,                                     # worldEnergyCheckPercent
       1000,                                    # worldEnergyCheckPeriod
       1,                                       # worldZoom

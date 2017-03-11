@@ -107,7 +107,7 @@ module RemoteWorldJson
   #
   # Handler of remote server pooling request. It may contain two types
   # of data:
-  #    x::Uint16, y::UInt16, color::UInt32, ips::UInt16 or
+  #    x::Uint16, y::UInt16, color::UInt16, ips::UInt16 or
   #    ips::UInt16
   # @param rd Remote Data object
   # @param data Command related data
@@ -128,23 +128,23 @@ module RemoteWorldJson
     # position by empty color.
     #
     if length(data) > 1
-      local color::UInt32 = UInt32(data[3])
-      local dir::Int = color & 0xff000000 >> 24
-      local x::Int = Int(data[1])
-      local y::Int = Int(data[2])
+      local nibbles::UInt16 = UInt16(data[3])
+      local color::UInt16   = nibbles & 0x0fff # last 3 nibbles are color
+      local dir::Int        = nibbles >> 12    # first nibble is direction
+      local x::UInt16       = UInt16(data[1])
+      local y::UInt16       = UInt16(data[2])
       #
       # This is moving of the dot. We have to draw empty dot
       # on previous dot position and colored dot on new position.
       #
-
-      local sourceX::Int = x;
-      local sourceY::Int = y;
+      local sourceX::UInt16 = x;
+      local sourceY::UInt16 = y;
 
       if dir !== Dots.DIRECTION_NO
-        if     dir === Dots.DIRECTION_UP    sourceY = y + 1
-        elseif dir === Dots.DIRECTION_RIGHT sourceX = x - 1
-        elseif dir === Dots.DIRECTION_DOWN  sourceY = y - 1
-        else                                sourceX = x + 1
+        if     dir === Dots.DIRECTION_UP    sourceY = y + UInt16(1)
+        elseif dir === Dots.DIRECTION_RIGHT sourceX = x - UInt16(1)
+        elseif dir === Dots.DIRECTION_DOWN  sourceY = y - UInt16(1)
+        else                                sourceX = x + UInt16(1)
         end
       end
 
@@ -167,13 +167,13 @@ module RemoteWorldJson
   #
   function _onRegion(rd::RemoteDataRT, ans::Connection.Answer)
     if ans.data === false Helper.error("Only one viewer is supported"); return nothing end
-    local region::Array{UInt32, 2} = ans.data.reg
+    local region::Array{UInt16, 2} = ans.data.reg
 
     # Store each pixel to key frame
     keyFrameRegion = []
     for x::Int in 1:size(region)[2]
       for y::Int in 1:size(region)[1]
-        pixel = Dict("x" => x, "y" => y, "c" => UInt32(region[y, x]))
+        pixel = Dict("x" => x, "y" => y, "c" => UInt16(region[y, x]))
         push!(keyFrameRegion, pixel)
       end
     end

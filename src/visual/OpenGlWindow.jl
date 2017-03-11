@@ -12,8 +12,8 @@
 #   import OpenGlWindow
 #   ...
 #   win = OpenGlWindow.create(300, 300, 3)
-#   CanvasWindow.dot(win, 20, 20, UInt32(11197883)) # R=AA,G=DD,B=BB
-#   OpenGlWindow.dot(win, 30, 30, UInt32(11197883)) # R=AA,G=DD,B=BB
+#   CanvasWindow.dot(win, 20, 20, UInt16(11197883)) # R=AA,G=DD,B=BB
+#   OpenGlWindow.dot(win, 30, 30, UInt16(11197883)) # R=AA,G=DD,B=BB
 #   OpenGlWindow.update(win)                        # Two dots will be shown
 #   ...
 #   OpenGlWindow.destroy(win)
@@ -79,7 +79,7 @@ module OpenGlWindow
     GR.setlinewidth(1)
     GR.setlinetype(GR.LINETYPE_SOLID)
     GR.setlinecolorind(emptyColor)
-    GR.settextcolorind(Dots.INDEX_TEXT)
+    GR.settextcolorind(Int(Dots.INDEX_TEXT))
     #
     # Settings for fillrect() function
     #
@@ -125,24 +125,24 @@ module OpenGlWindow
   # @param y Y coordinate of the point
   # @param color Color of the dot. We use only last three bytes (24bits) of four.
   #
-  function dot(win::Window, x::Int, y::Int, color::UInt32)
+  function dot(win::Window, x::UInt16, y::UInt16, color::UInt16)
     #
-    # We use GR library. It supports only 1256 colors. We have to check it
+    # We use GR library. It supports only Dots.INDEX_MAX_COLOR colors. We have to check it
     #
-    if color > UInt32(Dots.INDEX_MAX_COLOR)
+    if color > Dots.INDEX_MAX_COLOR
       Helper.warn(string("Unsupported color index ", color))
-      color = UInt32(Dots.INDEX_MAX_COLOR)
+      color = Dots.INDEX_MAX_COLOR
     end
     if win.scale > 1
-      x = (x - 1) * win.scale + 1
-      y = win.height * win.scale - (y - 1) * win.scale + 1
+      x = (x - UInt16(1)) * UInt16(win.scale + 1)
+      y = win.height * win.scale - (y - UInt16(1)) * UInt16(win.scale + 1)
       GR.setlinecolorind(Int(color))
       GR.setfillcolorind(Int(color))
-      GR.fillrect(x, x + win.scale, y, y + win.scale)
+      GR.fillrect(Int(x), Int(x) + win.scale, Int(y), Int(y) + win.scale)
     else
       GR.setmarkercolorind(Int(color))
-      win.xBuf[1] = x
-      win.yBuf[1] = y
+      win.xBuf[1] = Int(x)
+      win.yBuf[1] = Int(y)
       GR.polymarker(win.xBuf, win.yBuf)
     end
   end
@@ -157,8 +157,8 @@ module OpenGlWindow
     local ymax::Float64 = Float64(win.height * win.scale + _FOOTER_HEIGHT)
     local ycoef::Float64 = win.ratio / ymax
 
-    GR.setlinecolorind(Dots.INDEX_EMPTY)
-    GR.setfillcolorind(Dots.INDEX_EMPTY)
+    GR.setlinecolorind(Int(Dots.INDEX_EMPTY))
+    GR.setfillcolorind(Int(Dots.INDEX_EMPTY))
     GR.fillrect(1, win.width * win.scale + win.scale, ymax - _FOOTER_HEIGHT + win.scale, ymax)
     # TODO: fix this hardcode (15.0)
     GR.text(0.01, win.ratio - (ycoef * _FOOTER_HEIGHT) + ycoef * 19.0, title)

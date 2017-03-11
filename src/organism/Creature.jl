@@ -207,7 +207,7 @@ module Creature
     # Color index of organism. Similar colors means relative organisms.
     # Example: 1, 345, 1200. Should be less then Dots.INDEX_MAX_ORG_COLOR
     #
-    color::Int
+    color::UInt16
     #
     # @inharitable
     # Organism's personal memory. Is used in any possible way.

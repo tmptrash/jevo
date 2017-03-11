@@ -38,7 +38,7 @@ module FastApi
     String, Void,                           # 3
     UInt8, Void,                            # 5
     UInt16, Void,                           # 7
-    UInt16, UInt16, UInt32, Void,           # 9 pos::Helper.Point, color::UInt32, ips::UInt16
+    UInt16, UInt16, UInt16, Void,           # 9 pos::Helper.Point, color::UInt16, ips::UInt16
     Float64, Void                           # 13
   ]
 end

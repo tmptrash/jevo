@@ -283,7 +283,7 @@ end
 # @param man Manager data type
 # TODO: this method is very slow!!! should be optimized!
 function _updateWorldEnergy(man::ManagerTypes.ManagerData)
-  local plane::Array{UInt32, 2} = man.world.data
+  local plane::Array{UInt16, 2} = man.world.data
   local total::Int = man.world.width * man.world.height
   local energy::Int = 0
   local positions::Dict{Int, Creature.Organism} = man.positions
@@ -315,9 +315,9 @@ end
 function _freezeOrganism(man::ManagerTypes.ManagerData, i::Int)
   local id::UInt = man.tasks[i].id
   local org::Creature.Organism = man.tasks[i].organism
-  local oldColor::UInt32 = org.color
+  local oldColor::UInt16 = org.color
 
-  org.color = UInt32(Dots.INDEX_EMPTY)
+  org.color = UInt16(Dots.INDEX_EMPTY)
   Event.clear(org.observer)
   _moveOrganism(man, org.pos, org)
   org.color = oldColor
@@ -345,7 +345,7 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   local id::UInt = org.id
 
   org.energy = 0
-  org.color  = UInt32(Dots.INDEX_EMPTY)
+  org.color  = UInt16(Dots.INDEX_EMPTY)
   Event.clear(org.observer)
   _moveOrganism(man, org.pos, org)
   delete!(man.positions, Manager._getPosId(man, org.pos))
@@ -441,17 +441,17 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
     # transfet only new coordinates, color and direction
     #
     if cyclicMove
-      World.setEnergy(man.world, organism.pos, UInt32(Dots.INDEX_EMPTY))
-      World.setEnergy(man.world, newPos, UInt32(organism.color))
+      World.setEnergy(man.world, organism.pos, UInt16(Dots.INDEX_EMPTY))
+      World.setEnergy(man.world, newPos, UInt16(organism.color))
     else
-     World.moveEnergy(man.world, organism.pos, newPos, UInt32(organism.color))
+     World.moveEnergy(man.world, organism.pos, newPos, organism.color)
     end
     organism.pos = newPos
   #
   # The position didn't change, so only color should be updated
   #
   else
-    World.setEnergy(man.world, newPos, UInt32(organism.color))
+    World.setEnergy(man.world, newPos, UInt16(organism.color))
   end
 
   true
@@ -751,7 +751,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     #
     # Organism wants to give an energy, but no other organisms around
     #
-    retObj.ret = amount > 0 ? World.grabEnergy(man.world, newPos, UInt32(amount)) : 0
+    retObj.ret = amount > 0 ? World.grabEnergy(man.world, newPos, UInt16(amount)) : 0
   end
 
   retObj.ret = Int(retObj.ret)
