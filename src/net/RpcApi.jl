@@ -8,6 +8,8 @@
 # @author DeadbraiN
 #
 module RpcApi
+  export BLOCK_SIZE
+
   export RPC_GET_REGION
   export RPC_CREATE_ORGANISMS
   export RPC_CREATE_ORGANISM
@@ -44,12 +46,33 @@ module RpcApi
   export Region
   export SimpleOrganism
   export Statistics
-  export Dot
+  export Org
+  export Block
   #
-  # Describes 2D region in a world
+  # Describes one organism's dot in a world
+  #
+  type Org
+    id::UInt32
+    color::UInt16 # only 65536 colors are supported now
+    age::UInt16
+  end
+  #
+  # Describes one block of pixels of size 16x16
+  #
+  type Block
+    energy::Array{UInt8, 1} # array of energy dots offsets within current 16x16 block
+    orgs::Array{Org, 1}     # array of organisms within current 16x16 block
+  end
+  #
+  # Describes pixels region in a world. This type will be transfered
+  # to the client. Maximum supported sesolution 4096x4096
   #
   type Region
-    reg::Array{UInt16, 2}
+    xBlocks::UInt8
+    yBlocks::UInt8
+    width::UInt16
+    height::UInt16
+    blocks::Array{Block, 1}
     ips::Float64
   end
   #
@@ -170,13 +193,9 @@ module RpcApi
     maxOrg::SimpleOrganism
   end
   #
-  # Describes one dot in a world
+  # The size of one 16x16 block
   #
-  type Dot
-    x::Int
-    y::Int
-    color::UInt16
-  end
+  const BLOCK_SIZE = 16
   #
   # RPC API unique identifiers. Only these functions may be called
   # remotely on the server.

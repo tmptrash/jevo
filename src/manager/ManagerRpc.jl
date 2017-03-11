@@ -30,7 +30,9 @@ const _SIDE_UP    = "UP"
 const _SIDE_DOWN  = "DOWN"
 #
 # @rpc
-# Grabs world's rectangle region and returns it
+# Grabs world's rectangle region and returns it. This function is optimized
+# for fast transferring through network by obtaining small "Region" type
+# instance.
 # @param man Manager data type
 # @param x Start X coordinate of region
 # @param y Start Y coordinate of region
@@ -38,27 +40,59 @@ const _SIDE_DOWN  = "DOWN"
 # @param y1 End y. 0 means all height
 #
 function getRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
-  local data::Array{UInt16, 2}
-  local pos::Helper.Point = Helper.Point(0, 0)
+  local data::Array{UInt16, 2} = _cutRegion(man, x, y, x1, y1)
+  #local pos::Helper.Point = Helper.Point(0, 0)
+  local xBlocks::Int = _calcBlocksAmount(x, x1)
+  local yBlocks::Int = _calcBlocksAmount(y, y1)
+  local region::RpcApi.Region = RpcApi.Region(
+    UInt8(xBlocks),
+    UInt8(yBlocks),
+    UInt16(x1-x+1),
+    UInt16(y1-y+1),
+    RpcApi.Block[],
+    man.ips
+  )
+  local xOffs::Int = 1
+  local yOffs::Int = 1
+  local xBlock::Int
+  local yBlock::Int
+  local curX::Int
+  local curY::Int
+  local block::RpcApi.Block
+  local org::Creature.Organism
 
-  maxWidth  = size(man.world.data)[2]
-  maxHeight = size(man.world.data)[1]
-
-  if (x1 < 1 || x1 > maxWidth)  x1 = maxWidth  end
-  if (y1 < 1 || y1 > maxHeight) y1 = maxHeight end
-  if (x  < 1 || x  > maxWidth)  x  = 1 end
-  if (y  < 1 || y  > maxHeight) y  = 1 end
-
-  data = deepcopy(man.world.data[y:y1, x:x1])
-  for x in 1:size(data)[2]
-    for y in 1:size(data)[1]
-      pos.x = x
-      pos.y = y
-      data[y, x] = _getColorIndex(man, pos, data[y, x])
+  for yBlock = 1:yBlocks
+    for xBlock = 1:xBlocks
+      block = Block(UInt8[], RpcApi.Org[])
+      for curY = yOffs:yOffs + RpcApi.BLOCK_SIZE - 1
+        if curY > y1 break end
+        for curX = xOffs:xOffs + RpcApi.BLOCK_SIZE - 1
+          if curX > x1 break end
+          if data[curY, curX] > Dots.INDEX_EMPTY   # not empty dot
+            if _isOrganism(man, curX, curY)
+              org = man.positions[Manager._getPosId(man, Helper.Point(curX, curY))]
+              push!(block.orgs, RpcApi.Org(org.id, org.color, org.age))
+            else
+              push!(block.energy, UInt8((curY - yOffs) * RpcApi.BLOCK_SIZE + cutX - xOffs + 1))
+            end
+          end
+        end
+      end
+      push!(region.blocks, block)
+      xOffs = xBlock * RpcApi.BLOCK_SIZE + 1
     end
+    yOffs = yBlock * RpcApi.BLOCK_SIZE + 1
   end
-
-  RpcApi.Region(data, man.ips)
+  # for x in 1:size(data)[2]
+  #   for y in 1:size(data)[1]
+  #     pos.x = x
+  #     pos.y = y
+  #     data[y, x] = _getColorIndex(man, pos, data[y, x])
+  #   end
+  # end
+  #
+  #RpcApi.Region(data, man.ips)
+  region
 end
 #
 # @rpc
@@ -434,14 +468,21 @@ end
 # @return {UInt16} Color index
 #
 function _getColorIndex(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16)
-  local posId::Int = Manager._getPosId(man, pos)
-  local isOrganism::Bool = haskey(man.positions, posId)
-
   if color !== Dots.INDEX_EMPTY
-    color = isOrganism ? man.positions[posId].color : Dots.INDEX_ENERGY
+    color = _isOrganism(man, pos.x, pos.y) ? man.positions[posId].color : Dots.INDEX_ENERGY
   end
 
   color
+end
+#
+# Checks if in specified X and Y is an organism
+# @param man Manager data type
+# @param x X coordinate
+# @param y Y coordinate
+# @return {Bool}
+#
+function _isOrganism(man::ManagerTypes.ManagerData, x::Int, y::Int)
+  haskey(man.positions, Manager._getPosId(man, Helper.Point(x, y)))
 end
 #
 # Assembles RpcApi.SimpleOrganism type from wider Creature.Organism
@@ -625,6 +666,37 @@ function _createServer(man::ManagerTypes.ManagerData, fast::Bool = false)
   Event.on(con.observer, Connection.EVENT_BEFORE_RESPONSE, fn)
 
   con
+end
+#
+# Cuts specified region and return 2D array of it
+# @param man Manager data type
+# @param x Start X coordinate of region
+# @param y Start Y coordinate of region
+# @param x1 End x. 0 means all width
+# @param y1 End y. 0 means all height
+#
+function _cutRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
+  local maxWidth::Int  = size(man.world.data)[2]
+  local maxHeight::Int = size(man.world.data)[1]
+
+  if (x1 < 1 || x1 > maxWidth)  x1 = maxWidth  end
+  if (y1 < 1 || y1 > maxHeight) y1 = maxHeight end
+  if (x  < 1 || x  > maxWidth)  x  = 1 end
+  if (y  < 1 || y  > maxHeight) y  = 1 end
+
+  deepcopy(man.world.data[y:y1, x:x1])
+end
+#
+# Returns amount of blocks depending on amount of pixels. For example, if
+# we have 17x17 pixels block (for block size of 16x16) we have to have 2x2
+# blocks for storing this.
+# @param x Start coordinate (may be X or Y)
+# @param x1 End coordinate (may be X or Y)
+# @return {Int} Blocks amount
+#
+function _calcBlocksAmount(x::Int, x1::Int)
+  local blocks::Int = x1 - x + 1
+  div(blocks, RpcApi.BLOCK_SIZE) + (blocks % RpcApi.BLOCK_SIZE > 0 ? 1 : 0)
 end
 #
 # An API for remove clients. This manager will be a server for them.
