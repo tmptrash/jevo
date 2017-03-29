@@ -12,6 +12,7 @@ module FastApi
   export API_UINT8
   export API_UINT16
   export API_DOT_COLOR
+  export API_ORG_COLOR
   export API_FLOAT64
   #
   # Indexes in _api field, which are used in request() method in
@@ -22,7 +23,8 @@ module FastApi
   const API_UINT8         = 5
   const API_UINT16        = 7
   const API_DOT_COLOR     = 9
-  const API_FLOAT64       = 13
+  const API_ORG_COLOR     = 13
+  const API_FLOAT64       = 18
   #
   # Just returns all available types API
   # @return {Array{DataType, 1}}
@@ -38,7 +40,8 @@ module FastApi
     String, Void,                           # 3
     UInt8, Void,                            # 5
     UInt16, Void,                           # 7
-    UInt16, UInt16, UInt16, Void,           # 9 pos::Helper.Point, color::UInt16, ips::UInt16
-    Float64, Void                           # 13
+    UInt16, UInt16, UInt16, Void,           # 9  x, y, color
+    UInt16, UInt16, UInt16, UInt, Void,     # 13 x, y, dir|color, orgId
+    Float64, Void                           # 18
   ]
 end

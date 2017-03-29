@@ -81,30 +81,6 @@ function getRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::In
     end
   end
 
-  # for yBlock = 1:yBlocks
-  #   for xBlock = 1:xBlocks
-  #     block = RpcApi.Block(UInt8[], RpcApi.Org[])
-  #     for curY = yOffs:yOffs + RpcApi.BLOCK_SIZE - 1
-  #       if curY > y1 break end
-  #       for curX = xOffs:xOffs + RpcApi.BLOCK_SIZE - 1
-  #         if curX > x1 break end
-  #         if data[curY, curX] > Dots.INDEX_EMPTY   # not empty dot
-  #           offs = UInt8((curY - yOffs) * RpcApi.BLOCK_SIZE + curX - xOffs)
-  #           if _isOrganism(man, curX, curY)
-  #             org = man.positions[Manager._getPosId(man, Helper.Point(curX, curY))]
-  #             push!(block.orgs, RpcApi.Org(offs, org.id, org.color, org.age))
-  #           else
-  #             push!(block.energy, offs)
-  #           end
-  #         end
-  #       end
-  #     end
-  #     push!(region.blocks, block)
-  #     xOffs = xBlock * RpcApi.BLOCK_SIZE + 1
-  #   end
-  #   yOffs = yBlock * RpcApi.BLOCK_SIZE + 1
-  # end
-
   region
 end
 #
@@ -485,25 +461,30 @@ end
 #
 function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16, dir::Int = Dots.DIRECTION_NO)
   local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
-  local dataIndex::UInt8 = UInt8(FastApi.API_DOT_COLOR)
+  local dataIndex::UInt8
   local off::Bool = true
-  local tmpCol::UInt16
+  local org::Creature.Organism
   #
   # This is how we get color index of a dot
   #
-  tmpCol = color = _getColorIndex(man, pos, color)
+  color = _getColorIndex(man, pos, color)
   #
-  # Encodes direction to the first(unused) half byte of color.
+  # Encodes direction of organism to the first(unused) half byte of color.
   # e.g.: 0x000F -> 0xF000
   #
   if dir !== Dots.DIRECTION_NO
     color |= (UInt16(dir) << 12)
+    org = man.positions[Manager._getPosId(man, pos)]
+    dataIndex = UInt8(FastApi.API_ORG_COLOR)
+  else
+    dataIndex = UInt8(FastApi.API_DOT_COLOR)
   end
+
   for i::Int = 1:length(socks)
     if Helper.isopen(socks[i])
       off = false
-      Server.request(socks[i], dataIndex, UInt16(pos.x), UInt16(pos.y), color)
-      #println("x: ", pos.x, " y: ", pos.y, " c: ", tmpCol, " d: ", dir)
+      if dir === Dots.DIRECTION_NO Server.request(socks[i], dataIndex, UInt16(pos.x), UInt16(pos.y), color)
+      else Server.request(socks[i], dataIndex, UInt16(pos.x), UInt16(pos.y), color, org.id) end
       Event.fire(man.obs, "dotrequest", man)
     end
   end
