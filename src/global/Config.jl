@@ -415,7 +415,7 @@ module Config
       100,                                     # orgMutationProbsMaxValue
       0.02,                                    # orgCloneMutation
       10,                                      # orgClonePeriod
-      500,                                     # orgRainMutationPeriod
+      0,                                       # orgRainMutationPeriod
       0.01,                                    # orgRainMutationPercent
       100,                                     # orgStartAmount
       10000,                                   # orgStartEnergy

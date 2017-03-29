@@ -7,6 +7,7 @@
 module Status
   import ManagerTypes.ManagerData
   import ManagerTypes.Plugin
+  import ManagerTypes.OrganismTask
   import Creature
   import Config
   import Event
@@ -33,9 +34,8 @@ module Status
     srps::Int         # moveXXX() related requests per second
     syps::Int         # moveXXX() related yields per second
     mps::Int          # mutations per second
+    cmps::Int         # amount of mutations on clone
     energy::Int       # energy of organisms
-    allEnergy::Int    # energy of populations
-    allEnergyAmount::Int # amount of population energy measurements
     eMin::Int         # minimum organism energy
     eMax::Int         # maximum organism energy
     evals::Int        # amount of eval() calls till previous status
@@ -47,6 +47,7 @@ module Status
     eatr::Int         # organism eats right
     eatu::Int         # organism eats up
     eatd::Int         # organism eats down
+    eatorg::Int        # amount of energy obtained by eating other organisms
     eated::Int        # total amount of eating for organisms
     stepl::Int        # organism moves left
     stepr::Int        # organism moves right
@@ -69,6 +70,7 @@ module Status
     #
     Event.on(man.obs, "iteration", _onIteration)
     Event.on(man.obs, "ips", _onIps)
+    Event.on(man.obs, "eatorganism", _onEatOrganism)
     #Event.on(man.obs, "yield", _onYield)
     #Event.on(man.obs, "yieldto", _onYieldTo)
     #Event.on(man.obs, "stepyield", _onStepYield)
@@ -111,20 +113,23 @@ module Status
     st.iterations += 1
     st.ips  += man.ips
     st.orgs += length(man.tasks)
+    _calcEnergy(man)
 
     if stamp - st.stamp >= period
       print(string(Dates.format(now(), "HH:MM:SS"), " "))
-      _showParam(:green,  "orgs:", div(st.orgs, st.iterations), 9)
+      _showParam(:green,  "org:",  div(st.orgs, st.iterations), 8)
       _showParam(:normal, "ips:",  (@sprintf "%.3f" st.ips / st.iterations), 13)
-      _showParam(:green,  "nrg:",  div(st.allEnergy, st.allEnergyAmount), 16, true)
-      _showParam(:red,    "eat:",  st.eated, 14, true)
+      _showParam(:green,  "nrg:",  st.energy, 16, true)
+      _showParam(:red,    "eat:",  st.eated, 15, true)
+      _showParam(:red,    "eato:", st.eatorg, 16, true)
       _showParam(:red,    "grab:", st.grabbed, 15, true)
-      _showParam(:red,    "step:", st.steps, 12, true)
-      _showParam(:red,    "mut:",  st.mps, 10)
-      _showParam(:red,    "kil:",  st.kops, 10)
-      _showParam(:yellow, "clon:", st.cps, 11)
-      _showParam(:yellow, "req:",  st.rps, 9)
-      _showParam(:yellow, "eval:", cfg.orgEvals - st.evals, 10)
+      _showParam(:cyan,   "step:", st.steps, 13, true)
+      _showParam(:orange, "cmut:", st.cmps, 11)
+      _showParam(:orange, "mut:",  st.mps, 10)
+      _showParam(:yellow, "kil:",  st.kops, 9)
+      _showParam(:yellow, "clon:", st.cps, 10)
+      #_showParam(:yellow, "req:",  st.rps, 9)
+      #_showParam(:yellow, "eval:", cfg.orgEvals - st.evals, 10)
       _showParam(:orange, "err:",  man.cfg.orgErrors, 11)
       _showParam(:orange, "code:", (@sprintf "%.2f" st.code / st.codeAmount), 12)
       print("\n")
@@ -171,6 +176,7 @@ module Status
       st.syps      = 0
       st.srps      = 0
       st.mps       = 0
+      st.cmps      = 0
       st.eMin      = typemax(Int)
       st.eMax      = 0
       st.csMin     = typemax(Int)
@@ -182,6 +188,7 @@ module Status
       st.eatr      = 0
       st.eatu      = 0
       st.eatd      = 0
+      st.eatorg    = 0
       st.eated     = 0
       st.grabbed   = 0
       st.stepl     = 0
@@ -190,10 +197,29 @@ module Status
       st.stepd     = 0
       st.steps     = 0
       st.energy    = 0
-      st.allEnergy = 0
-      st.allEnergyAmount = 0
       st.orgs      = 0
     end
+  end
+  #
+  # Calculates total energy of population
+  # @param man Manager data type
+  #
+  function _calcEnergy(man::ManagerData)
+    local st::StatusData = man.plugins[MODULE_NAME]
+    local task::OrganismTask
+
+    st.energy = 0
+    for task in man.tasks
+      st.energy += task.organism.energy
+    end
+  end
+  #
+  # Handler of "eatorganism" event
+  # @param man Manager data type
+  # @param eated Amount of energy obteined by eating of other organism
+  #
+  function _onEatOrganism(man::ManagerData, eated::Int)
+    man.plugins[MODULE_NAME].eatorg += eated
   end
   #
   # Calls for every iteration, after all organisms were run
@@ -202,10 +228,6 @@ module Status
   #
   function _onIteration(man::ManagerData, stamp::Float64)
     local st::StatusData = man.plugins[MODULE_NAME]
-
-    st.allEnergyAmount += 1
-    st.allEnergy += st.energy
-    st.energy = 0
   end
   #
   # Shows one parameter in status line accordint to settings
@@ -255,10 +277,13 @@ module Status
   # Calculates amount of mutations for specified organism
   # @param man Manager related data object
   # @param org Organism we have to add to the pool
-  # param amount Amount of real mutations
+  # @param amount Amount of real mutations
+  # @param onClone true if current mutations were applied on clonning
+  # of organism and not as a rain mutations
   #
-  function _onMutations(man::ManagerData, org::Creature.Organism, amount::Int)
+  function _onMutations(man::ManagerData, org::Creature.Organism, amount::Int, onClone::Bool)
     man.plugins[MODULE_NAME].mps += amount
+    if onClone man.plugins[MODULE_NAME].cmps += amount end
   end
   #
   # Handles organism clonning

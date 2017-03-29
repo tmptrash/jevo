@@ -173,8 +173,11 @@ module RemoteWorldJson
     keyFrameRegion = []
     for x::Int in 1:size(region)[2]
       for y::Int in 1:size(region)[1]
-        pixel = Dict("x" => x, "y" => y, "c" => UInt16(region[y, x]))
-        push!(keyFrameRegion, pixel)
+        local color::UInt16 = UInt16(region[y, x])
+        if (color != 0)
+          pixel = Dict("x" => x, "y" => y, "c" =>  color)
+          push!(keyFrameRegion, pixel)
+        end
       end
     end
 

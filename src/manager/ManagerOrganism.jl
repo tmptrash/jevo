@@ -110,7 +110,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # doesn't contain any code line. This line must be
     # last in organisms loop.
     #
-    if org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationPercent) end
+    if cfg.orgRainMutationPeriod > 0 && org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationPercent, false) end
     #
     # This is how organisms die if their age is bigger then some
     # predefined config value (orgAlivePeriod)
@@ -233,7 +233,8 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   local org::Creature.Organism
   local i::Int = length(tasks)
   local minOrgs::Int = man.cfg.worldMinOrgs
-  local dontKill::Bool = (i <= minOrgs)
+  local dontKill::Bool = (i < minOrgs)
+  local codeSize::Int
 
   if dontKill return false end
   #
@@ -249,8 +250,9 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     # Energy shouldn't be less then 1
     #
     if !dontKill
-      Event.fire(man.obs, "grabenergy", man, org.energy < org.codeSize ? org.energy : org.codeSize)
-      if !_decreaseOrganismEnergy(man, org, org.codeSize, i)
+      codeSize = org.codeSize < 1 ? 1 : org.codeSize
+      Event.fire(man.obs, "grabenergy", man, org.energy < codeSize ? org.energy : codeSize)
+      if !_decreaseOrganismEnergy(man, org, codeSize, i)
         dontKill = (length(tasks) <= minOrgs)
       end
     end
@@ -461,8 +463,10 @@ end
 # @param man Instance of manager data type
 # @param task Task of organism
 # @param mutationPercents Percent of mutations from code size
+# @param onClone true if current mutations were applied on clonning
+# of organism and not as a rain mutations
 #
-function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask, mutationPercents::Float64)
+function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask, mutationPercents::Float64, onClone::Bool = true)
   local mutations::Int = Mutator.mutate(man.cfg, task.organism, mutationPercents)
 
   if mutations > 0
@@ -472,7 +476,7 @@ function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask,
     # runned, before new code will be running.
     #
     Manager._updateOrgTask(man, task)
-    Event.fire(man.obs, "mutations", man, task.organism, mutations)
+    Event.fire(man.obs, "mutations", man, task.organism, mutations, onClone)
   end
 end
 #
@@ -747,6 +751,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       _killOrganism(man, findfirst((t) -> t.organism === org, man.tasks))
       retObj.ret = org.energy
     end
+    Event.fire(man.obs, "eatorganism", man, retObj.ret)
   else
     #
     # Organism wants to give an energy, but no other organisms around
