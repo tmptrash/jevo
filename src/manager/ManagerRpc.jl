@@ -40,8 +40,9 @@ const _SIDE_DOWN  = "DOWN"
 # @param y1 End y. 0 means all height
 #
 function getRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
+  x, y, x1, y1 = _normalizeRegion(man, x, y, x1, y1)
+
   local data::Array{UInt16, 2} = _cutRegion(man, x, y, x1, y1)
-  #local pos::Helper.Point = Helper.Point(0, 0)
   local xBlocks::Int = _calcBlocksAmount(x, x1)
   local yBlocks::Int = _calcBlocksAmount(y, y1)
   local region::RpcApi.Region = RpcApi.Region(
@@ -52,46 +53,58 @@ function getRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::In
     RpcApi.Block[],
     man.ips
   )
+  local i::Int
   local xOffs::Int = 1
   local yOffs::Int = 1
   local xBlock::Int
   local yBlock::Int
-  local curX::Int
-  local curY::Int
+  local curX::UInt16
+  local curY::UInt16
   local block::RpcApi.Block
   local org::Creature.Organism
-
-  for yBlock = 1:yBlocks
-    for xBlock = 1:xBlocks
-      block = Block(UInt8[], RpcApi.Org[])
-      for curY = yOffs:yOffs + RpcApi.BLOCK_SIZE - 1
-        if curY > y1 break end
-        for curX = xOffs:xOffs + RpcApi.BLOCK_SIZE - 1
-          if curX > x1 break end
-          if data[curY, curX] > Dots.INDEX_EMPTY   # not empty dot
-            if _isOrganism(man, curX, curY)
-              org = man.positions[Manager._getPosId(man, Helper.Point(curX, curY))]
-              push!(block.orgs, RpcApi.Org(org.id, org.color, org.age))
-            else
-              push!(block.energy, UInt8((curY - yOffs) * RpcApi.BLOCK_SIZE + cutX - xOffs + 1))
-            end
-          end
-        end
-      end
-      push!(region.blocks, block)
-      xOffs = xBlock * RpcApi.BLOCK_SIZE + 1
-    end
-    yOffs = yBlock * RpcApi.BLOCK_SIZE + 1
-  end
-  # for x in 1:size(data)[2]
-  #   for y in 1:size(data)[1]
-  #     pos.x = x
-  #     pos.y = y
-  #     data[y, x] = _getColorIndex(man, pos, data[y, x])
-  #   end
-  # end
+  local offs::UInt8
+  local pos::Helper.Point = Helper.Point(0, 0)
   #
-  #RpcApi.Region(data, man.ips)
+  # Creates all blocks
+  #
+  for i = 1:(xBlocks * yBlocks) push!(region.blocks, RpcApi.Block(UInt8[], RpcApi.Org[])) end
+  #
+  # Walks through all dots in a world and stores only energy and organisms
+  #
+  for curY = UInt16(y):UInt16(y1)
+    pos.y = curY
+    for curX = UInt16(x):UInt16(x1)
+      pos.x = curX
+      if _isOrganism(man, Int(curX), Int(curY)) _addOrg(man, region, curX, curY)
+      elseif World.getEnergy(man.world, pos) > Dots.INDEX_EMPTY _addEnergy(man, region, curX, curY)
+      end
+    end
+  end
+
+  # for yBlock = 1:yBlocks
+  #   for xBlock = 1:xBlocks
+  #     block = RpcApi.Block(UInt8[], RpcApi.Org[])
+  #     for curY = yOffs:yOffs + RpcApi.BLOCK_SIZE - 1
+  #       if curY > y1 break end
+  #       for curX = xOffs:xOffs + RpcApi.BLOCK_SIZE - 1
+  #         if curX > x1 break end
+  #         if data[curY, curX] > Dots.INDEX_EMPTY   # not empty dot
+  #           offs = UInt8((curY - yOffs) * RpcApi.BLOCK_SIZE + curX - xOffs)
+  #           if _isOrganism(man, curX, curY)
+  #             org = man.positions[Manager._getPosId(man, Helper.Point(curX, curY))]
+  #             push!(block.orgs, RpcApi.Org(offs, org.id, org.color, org.age))
+  #           else
+  #             push!(block.energy, offs)
+  #           end
+  #         end
+  #       end
+  #     end
+  #     push!(region.blocks, block)
+  #     xOffs = xBlock * RpcApi.BLOCK_SIZE + 1
+  #   end
+  #   yOffs = yBlock * RpcApi.BLOCK_SIZE + 1
+  # end
+
   region
 end
 #
@@ -401,6 +414,53 @@ function markOrganism(man::ManagerTypes.ManagerData, orgId::UInt32, colorIndex::
 end
 
 #
+# Creates Org type instance according to specified coordinates and organism
+# in these coordinates.
+# @param man Manager data type
+# @param region Region of a world we are working with
+# @param x X coordinate
+# @param y Y coordinate
+#
+function _addOrg(man::ManagerTypes.ManagerData, region::RpcApi.Region, x::UInt16, y::UInt16)
+  local org::Creature.Organism = man.positions[Manager._getPosId(man, Helper.Point(x, y))]
+  local block::RpcApi.Block
+  local offs::UInt8
+
+  block, offs = _findBlock(man, region, x, y)
+  push!(block.orgs, RpcApi.Org(offs, org.id, org.color, org.age))
+end
+#
+# Creates energy offset in found block for specified coordinates
+# @param man Manager data type
+# @param region Region of a world we are working with
+# @param x X coordinate
+# @param y Y coordinate
+#
+function _addEnergy(man::ManagerTypes.ManagerData, region::RpcApi.Region, x::UInt16, y::UInt16)
+  local block::RpcApi.Block
+  local offs::UInt8
+
+  block, offs = _findBlock(man, region, x, y)
+  push!(block.energy, offs)
+end
+#
+# Creates Org type instance according to specified coordinates and organism
+# in these coordinates.
+# @param man Manager data type
+# @param region Region of a world we are working with
+# @param x X coordinate
+# @param y Y coordinate
+# @return {Tuple{RpcApi.Region, Int, Int}}
+#
+function _findBlock(man::ManagerTypes.ManagerData, region::RpcApi.Region, x::UInt16, y::UInt16)
+  local xBlock::Int = div(x - 1, RpcApi.BLOCK_SIZE) + 1
+  local yBlock::Int = div(y - 1, RpcApi.BLOCK_SIZE) + 1
+  local xOffs::Int  = xBlock * RpcApi.BLOCK_SIZE - RpcApi.BLOCK_SIZE
+  local yOffs::Int  = yBlock * RpcApi.BLOCK_SIZE - RpcApi.BLOCK_SIZE
+
+  (region.blocks[(yBlock - 1) * region.xBlocks + xBlock], UInt8((y - yOffs - 1) * RpcApi.BLOCK_SIZE + x - xOffs - 1))
+end
+#
 # Handler of EVENT_BEFORE_RESPONSE for "fast" pooling mode. Turns
 # on "fast" streaming (pooling).
 # @param man Manager data type
@@ -410,14 +470,11 @@ function _onFastStreaming(man::ManagerTypes.ManagerData, sock::Base.TCPSocket, d
   man.cons.streamInit = false
   man.dotCallback     = (pos::Helper.Point, color::UInt16)->_onDot(man, pos, color)
   man.moveCallback    = (pos::Helper.Point, dir::Int, color::UInt16)->_onDot(man, pos, color, dir)
+
   Event.off(man.world.obs, World.EVENT_DOT, man.dotCallback)
-  if !Event.has(man.world.obs, World.EVENT_DOT, man.dotCallback)
-    Event.on(man.world.obs, World.EVENT_DOT, man.dotCallback)
-  end
   Event.off(man.world.obs, World.EVENT_MOVE, man.moveCallback)
-  if !Event.has(man.world.obs, World.EVENT_MOVE, man.moveCallback)
-    Event.on(man.world.obs, World.EVENT_MOVE, man.moveCallback)
-  end
+  Event.on(man.world.obs, World.EVENT_DOT, man.dotCallback)
+  Event.on(man.world.obs, World.EVENT_MOVE, man.moveCallback)
 end
 #
 # This is a handler on world dot change. It notify remote clients
@@ -430,10 +487,11 @@ function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16,
   local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
   local dataIndex::UInt8 = UInt8(FastApi.API_DOT_COLOR)
   local off::Bool = true
+  local tmpCol::UInt16
   #
   # This is how we get color index of a dot
   #
-  color = _getColorIndex(man, pos, color)
+  tmpCol = color = _getColorIndex(man, pos, color)
   #
   # Encodes direction to the first(unused) half byte of color.
   # e.g.: 0x000F -> 0xF000
@@ -445,6 +503,7 @@ function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16,
     if Helper.isopen(socks[i])
       off = false
       Server.request(socks[i], dataIndex, UInt16(pos.x), UInt16(pos.y), color)
+      #println("x: ", pos.x, " y: ", pos.y, " c: ", tmpCol, " d: ", dir)
       Event.fire(man.obs, "dotrequest", man)
     end
   end
@@ -469,7 +528,7 @@ end
 #
 function _getColorIndex(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16)
   if color !== Dots.INDEX_EMPTY
-    color = _isOrganism(man, pos.x, pos.y) ? man.positions[posId].color : Dots.INDEX_ENERGY
+    color = _isOrganism(man, pos.x, pos.y) ? man.positions[Manager._getPosId(man, pos)].color : Dots.INDEX_ENERGY
   end
 
   color
@@ -675,16 +734,8 @@ end
 # @param x1 End x. 0 means all width
 # @param y1 End y. 0 means all height
 #
-function _cutRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
-  local maxWidth::Int  = size(man.world.data)[2]
-  local maxHeight::Int = size(man.world.data)[1]
-
-  if (x1 < 1 || x1 > maxWidth)  x1 = maxWidth  end
-  if (y1 < 1 || y1 > maxHeight) y1 = maxHeight end
-  if (x  < 1 || x  > maxWidth)  x  = 1 end
-  if (y  < 1 || y  > maxHeight) y  = 1 end
-
-  deepcopy(man.world.data[y:y1, x:x1])
+function _cutRegion(man::ManagerTypes.ManagerData, x::Int, y::Int, x1::Int, y1::Int)
+  copy(man.world.data[y:y1, x:x1])
 end
 #
 # Returns amount of blocks depending on amount of pixels. For example, if
@@ -697,6 +748,28 @@ end
 function _calcBlocksAmount(x::Int, x1::Int)
   local blocks::Int = x1 - x + 1
   div(blocks, RpcApi.BLOCK_SIZE) + (blocks % RpcApi.BLOCK_SIZE > 0 ? 1 : 0)
+end
+#
+# Checks if specified coordinates are out of world. If so, then world
+# coordinates will be returned. Otherwise the same coordinates will be
+# returned
+# @param man Manager data type
+# @param x Start X coordinate of region
+# @param y Start Y coordinate of region
+# @param x1 End x. 0 means all width
+# @param y1 End y. 0 means all height
+# @return {Tuple}
+#
+function _normalizeRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
+  local maxWidth::Int  = size(man.world.data)[2]
+  local maxHeight::Int = size(man.world.data)[1]
+
+  if (x1 < 1 || x1 > maxWidth)  x1 = maxWidth  end
+  if (y1 < 1 || y1 > maxHeight) y1 = maxHeight end
+  if (x  < 1 || x  > maxWidth)  x  = 1 end
+  if (y  < 1 || y  > maxHeight) y  = 1 end
+
+  (x, y, x1, y1)
 end
 #
 # An API for remove clients. This manager will be a server for them.

@@ -1,4 +1,3 @@
-Pkg.add("Debug")
 Pkg.add("FactCheck")
 Pkg.add("GR")
 Pkg.add("ProfileView")

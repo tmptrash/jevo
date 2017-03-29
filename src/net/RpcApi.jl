@@ -52,6 +52,7 @@ module RpcApi
   # Describes one organism's dot in a world
   #
   type Org
+    offs::UInt8
     id::UInt32
     color::UInt16 # only 65536 colors are supported now
     age::UInt16

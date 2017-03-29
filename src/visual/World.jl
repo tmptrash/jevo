@@ -100,6 +100,7 @@ module World
     if pos.x < 1 || pos.x > plane.width || pos.y < 1 || pos.y > plane.height return false end
     plane.data[pos.y, pos.x] = energy
     Event.fire(plane.obs, EVENT_DOT, pos, energy)
+
     true
   end
   #
@@ -124,6 +125,7 @@ module World
     plane.data[oldPos.y, oldPos.x] = Dots.INDEX_EMPTY
     plane.data[newPos.y, newPos.x] = energy
     Event.fire(plane.obs, EVENT_MOVE, newPos, dir, energy)
+
     true
   end
   #

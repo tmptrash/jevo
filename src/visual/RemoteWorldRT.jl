@@ -15,6 +15,7 @@ module RemoteWorldRT
   import Event
   import OpenGlWindow
   import Connection
+  import Creature
   import Client
   import RpcApi
   import FastApi
@@ -133,11 +134,13 @@ module RemoteWorldRT
       local dir::Int        = nibbles >> 12    # first nibble is direction
       local x::UInt16       = UInt16(data[1])
       local y::UInt16       = UInt16(data[2])
+      #println("x: ", x, " y: ", y, " c: ", color, " d: ", dir)
       #
       # This is moving of the dot. We have to draw empty dot
       # on previous dot position and colored dot on new position.
       #
       if dir !== Dots.DIRECTION_NO
+        #println(hex(nibbles))
         if     dir === Dots.DIRECTION_UP    OpenGlWindow.dot(rd.win, x, y + UInt16(1), Dots.INDEX_EMPTY)
         elseif dir === Dots.DIRECTION_RIGHT OpenGlWindow.dot(rd.win, x - UInt16(1), y, Dots.INDEX_EMPTY)
         elseif dir === Dots.DIRECTION_DOWN  OpenGlWindow.dot(rd.win, x, y - UInt16(1), Dots.INDEX_EMPTY)
@@ -155,16 +158,36 @@ module RemoteWorldRT
   # @param data Answer object with region data
   #
   function _onRegion(rd::RemoteDataRT, ans::Connection.Answer)
-    if ans.data === false Helper.error("Only one viewer is supported"); return nothing end
-    local region::Array{UInt16, 2} = ans.data.reg
+    # if ans.data === false Helper.error("Only one viewer is supported"); return nothing end
+    # local region::Array{UInt16, 2} = ans.data.reg
+    #
+    # OpenGlWindow.title(rd.win, string("ips: ", round(ans.data.ips), ", rps: 0"))
+    # for x::UInt16 in 1:size(region)[2]
+    #   for y::UInt16 in 1:size(region)[1]
+    #     OpenGlWindow.dot(rd.win, x, y, region[y, x])
+    #   end
+    # end
+    # OpenGlWindow.update(rd.win)
+    local region::RpcApi.Region = ans.data
+    local blockIdx::Int
+    local blocks::Int = region.yBlocks * region.xBlocks
+    local block::RpcApi.Block
+    local offs::UInt8
+    local org::RpcApi.Org
+    local xOffs::UInt16
+    local yOffs::UInt16
 
-    OpenGlWindow.title(rd.win, string("ips: ", round(ans.data.ips), ", rps: 0"))
-    for x::UInt16 in 1:size(region)[2]
-      for y::UInt16 in 1:size(region)[1]
-        OpenGlWindow.dot(rd.win, x, y, region[y, x])
+    for blockIdx = 0:blocks - 1
+      block = region.blocks[blockIdx + 1]
+      yOffs = div(blockIdx, region.xBlocks) * RpcApi.BLOCK_SIZE
+      xOffs = blockIdx % region.xBlocks * RpcApi.BLOCK_SIZE
+      for offs in block.energy
+        OpenGlWindow.dot(rd.win, xOffs + UInt16(offs % RpcApi.BLOCK_SIZE + 1), yOffs + UInt16(div(offs, RpcApi.BLOCK_SIZE) + 1), UInt16(Dots.INDEX_ENERGY))
+      end
+      for org in block.orgs
+        OpenGlWindow.dot(rd.win, xOffs + UInt16(org.offs % RpcApi.BLOCK_SIZE + 1), yOffs + UInt16(div(org.offs, RpcApi.BLOCK_SIZE) + 1), org.color)
       end
     end
-    OpenGlWindow.update(rd.win)
     #
     # This command means "turn on server pooling"
     #
