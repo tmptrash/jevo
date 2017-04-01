@@ -442,18 +442,14 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
     # through network and remove blinks in visualizer, because we
     # transfet only new coordinates, color and direction
     #
-    if cyclicMove
-      World.setEnergy(man.world, organism.pos, UInt16(Dots.INDEX_EMPTY))
-      World.setEnergy(man.world, newPos, UInt16(organism.color))
-    else
-     World.moveEnergy(man.world, organism.pos, newPos, organism.color)
-    end
+    if cyclicMove World.moveEnergy(man.world, organism.pos, newPos, organism.color, true)
+    else World.moveEnergy(man.world, organism.pos, newPos, organism.color) end
     organism.pos = newPos
   #
   # The position didn't change, so only color should be updated
   #
   else
-    World.setEnergy(man.world, newPos, UInt16(organism.color))
+    World.moveEnergy(man.world, newPos, newPos, organism.color)
   end
 
   true

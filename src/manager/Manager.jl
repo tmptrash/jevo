@@ -282,15 +282,13 @@ module Manager
     local ts::Float64 = stamp - istamp
     if ts < man.cfg.worldIpsPeriod return istamp end
     local sock::Base.TCPSocket
-    local dataIndex::UInt8
 
     man.ips = man.cfg.codeRuns / length(man.tasks) / ts
     Event.fire(man.obs, "ips", man, stamp, man.cfg.codeRuns)
     man.cfg.codeRuns = 0
-    dataIndex = UInt8(FastApi.API_FLOAT64)
     @inbounds for sock in man.cons.fastServer.socks
       if Helper.isopen(sock)
-        Server.request(sock, dataIndex, man.ips)
+        Server.request(sock, UInt8(FastApi.API_FLOAT64), man.ips)
         Event.fire(man.obs, "request", man)
       end
     end

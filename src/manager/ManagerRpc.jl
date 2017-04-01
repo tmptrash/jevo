@@ -32,7 +32,19 @@ const _SIDE_DOWN  = "DOWN"
 # @rpc
 # Grabs world's rectangle region and returns it. This function is optimized
 # for fast transferring through network by obtaining small "Region" type
-# instance.
+# instance. It works in a little complicated way:
+# - first it normalizes coordinates. It means, that thay should be in a range 1:width
+#   and 1:height of world (see Config.worldWidth/worldHright configs).
+# - second, it splits obtained region into small 16x16 squares (see _calcBlocksAmount).
+#   If the region isn't multiple to 16, then additional squares will be at the
+#   right and at the bottom.
+# - Every dot within one square may be described as 1 byte index (0..255, see
+#   Region.Block.energy). This is how we store all energy dots (see RpcApi.Block.energy)
+#   and organism dots (see RpcApi.Org types) within squares by index
+# - empty (black) dots are skipped
+# - In one RpcApi.Org type we may transfer any organism related info. It's possible
+#   to add more fields to this type in future.
+#
 # @param man Manager data type
 # @param x Start X coordinate of region
 # @param y Start Y coordinate of region
@@ -445,7 +457,7 @@ end
 function _onFastStreaming(man::ManagerTypes.ManagerData, sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer)
   man.cons.streamInit = false
   man.dotCallback     = (pos::Helper.Point, color::UInt16)->_onDot(man, pos, color)
-  man.moveCallback    = (pos::Helper.Point, dir::Int, color::UInt16)->_onDot(man, pos, color, dir)
+  man.moveCallback    = (pos::Helper.Point, dir::Int, color::UInt16, outOfBorder::Bool)->_onDot(man, pos, color, dir, outOfBorder)
 
   Event.off(man.world.obs, World.EVENT_DOT, man.dotCallback)
   Event.off(man.world.obs, World.EVENT_MOVE, man.moveCallback)
@@ -459,7 +471,7 @@ end
 # @param pos Dot coordinates
 # @param color Dot color
 #
-function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16, dir::Int = Dots.DIRECTION_NO)
+function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16, dir::Int = Dots.DIRECTION_NO, outOfBorder::Bool = false)
   local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
   local dataIndex::UInt8
   local off::Bool = true
@@ -484,7 +496,7 @@ function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16,
     if Helper.isopen(socks[i])
       off = false
       if dir === Dots.DIRECTION_NO Server.request(socks[i], dataIndex, UInt16(pos.x), UInt16(pos.y), color)
-      else Server.request(socks[i], dataIndex, UInt16(pos.x), UInt16(pos.y), color, org.id) end
+      else Server.request(socks[i], dataIndex, UInt16(pos.x), UInt16(pos.y), color, org.id, outOfBorder) end
       Event.fire(man.obs, "dotrequest", man)
     end
   end

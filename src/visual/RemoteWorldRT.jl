@@ -39,6 +39,8 @@ module RemoteWorldRT
     cmdCon::Client.ClientConnection
     poolingCon::Client.ClientConnection
     win::OpenGlWindow.Window
+    width::UInt16
+    height::UInt16
     #
     # Lazy loading fields
     #
@@ -52,8 +54,10 @@ module RemoteWorldRT
     RemoteDataRT(
       cmdCon::Client.ClientConnection,
       poolingCon::Client.ClientConnection,
-      win::OpenGlWindow.Window
-    ) = new(cmdCon, poolingCon, win)
+      win::OpenGlWindow.Window,
+      width::UInt16,
+      height::UInt16
+    ) = new(cmdCon, poolingCon, win, width, height)
   end
   #
   # Creates connection with remote host for display pixels from remote world.
@@ -67,7 +71,9 @@ module RemoteWorldRT
     RemoteDataRT(
       Client.create(host, cmdPort),
       Client.create(host, poolingPort, true),
-      OpenGlWindow.create(cfg.worldWidth, cfg.worldHeight, cfg.worldZoom)
+      OpenGlWindow.create(cfg.worldWidth, cfg.worldHeight, cfg.worldZoom),
+      UInt16(cfg.worldWidth),
+      UInt16(cfg.worldHeight)
     )
   end
   #
@@ -129,6 +135,9 @@ module RemoteWorldRT
     # position by empty color.
     #
     if length(data) > 1
+      local infoBits::UInt8
+      local outOfBorder::Bool
+      local dontMove::Bool
       local nibbles::UInt16 = UInt16(data[3])
       local color::UInt16   = nibbles & 0x0fff # last 3 nibbles are color
       local dir::Int        = nibbles >> 12    # first nibble is direction
@@ -137,13 +146,37 @@ module RemoteWorldRT
       #
       # This is moving of the dot. We have to draw empty dot
       # on previous dot position and colored dot on new position.
+      # This code also knows about moving of organisms out of border
+      # in a cyclical mode
       #
       if dir !== Dots.DIRECTION_NO
-        if     dir === Dots.DIRECTION_UP    OpenGlWindow.dot(rd.win, x, y + UInt16(1), Dots.INDEX_EMPTY)
-        elseif dir === Dots.DIRECTION_RIGHT OpenGlWindow.dot(rd.win, x - UInt16(1), y, Dots.INDEX_EMPTY)
-        elseif dir === Dots.DIRECTION_DOWN  OpenGlWindow.dot(rd.win, x, y - UInt16(1), Dots.INDEX_EMPTY)
-        else                                OpenGlWindow.dot(rd.win, x + UInt16(1), y, Dots.INDEX_EMPTY)
+        infoBits    = UInt8(data[5])
+        outOfBorder = infoBits & 0b1 > 0
+        dontMove    = infoBits & 0b10 > 0
+        #
+        # - local orgId::UInt = UInt(data[4]) # is an organism id
+        # - if we are in this block and color === Dots.INDEX_EMPTY, then organism has died
+        # - if dontMove is true, then organism changes it's color, but stay on the same position
+        #
+        if dir === Dots.DIRECTION_UP
+          if outOfBorder OpenGlWindow.dot(rd.win, x, rd.height, Dots.INDEX_EMPTY)
+          else OpenGlWindow.dot(rd.win, x, y + 0x0001, Dots.INDEX_EMPTY)
+          end
+        elseif dir === Dots.DIRECTION_RIGHT
+          if outOfBorder OpenGlWindow.dot(rd.win, 0x0001, y, Dots.INDEX_EMPTY)
+          else OpenGlWindow.dot(rd.win, x - 0x0001, y, Dots.INDEX_EMPTY)
+          end
+        elseif dir === Dots.DIRECTION_DOWN
+          if outOfBorder OpenGlWindow.dot(rd.win, x, 0x0001, Dots.INDEX_EMPTY)
+          else OpenGlWindow.dot(rd.win, x, y - 0x0001, Dots.INDEX_EMPTY)
+          end
+        else
+          if outOfBorder OpenGlWindow.dot(rd.win, x + 0x0001, y, Dots.INDEX_EMPTY)
+          else OpenGlWindow.dot(rd.win, rd.width, y, Dots.INDEX_EMPTY)
+          end
         end
+      else
+        # if we are here, then new energy block was created
       end
       OpenGlWindow.dot(rd.win, x, y, color)
       OpenGlWindow.update(rd.win)
