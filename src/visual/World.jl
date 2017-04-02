@@ -25,6 +25,7 @@ module World
   import Helper
   import Event
   import Dots
+  import Creature
 
   export Plane
 
@@ -113,24 +114,23 @@ module World
   # @return {Bool} It's possible, that energy position is not empty.
   # false in this case. true - if dot was set.
   #
-  function moveEnergy(plane::Plane, oldPos::Helper.Point, newPos::Helper.Point, energy::UInt16, outOfBorder::Bool = false)
+  function moveEnergy(plane::Plane, oldPos::Helper.Point, newPos::Helper.Point, org::Creature.Organism, outOfBorder::Bool = false)
     if newPos.x < 1 || newPos.x > plane.width || newPos.y < 1 || newPos.y > plane.height return false end
     local dir::Int
-    local infoBits::UInt8 = UInt8(outOfBorder)
+    local energy::UInt16 = org.energy
 
     if     newPos.x > oldPos.x dir = Dots.DIRECTION_RIGHT
     elseif newPos.x < oldPos.x dir = Dots.DIRECTION_LEFT
     elseif newPos.y > oldPos.y dir = Dots.DIRECTION_DOWN
     elseif newPos.y < oldPos.y dir = Dots.DIRECTION_UP
-    else infoBits |= 0b11
+    else dir = Dots.DIRECTION_NO
     end
     plane.data[oldPos.y, oldPos.x] = Dots.INDEX_EMPTY
     plane.data[newPos.y, newPos.x] = energy
     #
     # infoBits: 7th bit - organism goes out of border
-    # infoButs: 6th bit - organism doesn't move, but changed color
     #
-    Event.fire(plane.obs, EVENT_MOVE, newPos, dir, energy, infoBits)
+    Event.fire(plane.obs, EVENT_MOVE, newPos, dir, org.color, org.id, outOfBorder)
 
     true
   end

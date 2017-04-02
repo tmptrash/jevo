@@ -456,8 +456,8 @@ end
 #
 function _onFastStreaming(man::ManagerTypes.ManagerData, sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer)
   man.cons.streamInit = false
-  man.dotCallback     = (pos::Helper.Point, color::UInt16)->_onDot(man, pos, color)
-  man.moveCallback    = (pos::Helper.Point, dir::Int, color::UInt16, outOfBorder::Bool)->_onDot(man, pos, color, dir, outOfBorder)
+  man.dotCallback     = (pos::Helper.Point, color::UInt16)->_onDrawEnergy(man, pos, color)
+  man.moveCallback    = (pos::Helper.Point, dir::Int, color::UInt16, orgId::UInt, outOfBorder::Bool)->_onDrawOrganism(man, pos, color, dir, orgId, outOfBorder)
 
   Event.off(man.world.obs, World.EVENT_DOT, man.dotCallback)
   Event.off(man.world.obs, World.EVENT_MOVE, man.moveCallback)
@@ -471,32 +471,50 @@ end
 # @param pos Dot coordinates
 # @param color Dot color
 #
-function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16, dir::Int = Dots.DIRECTION_NO, outOfBorder::Bool = false)
+function _onDrawEnergy(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16)
   local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
-  local dataIndex::UInt8
   local off::Bool = true
-  local org::Creature.Organism
-  #
-  # This is how we get color index of a dot
-  #
-  color = _getColorIndex(man, pos, color)
-  #
-  # Encodes direction of organism to the first(unused) half byte of color.
-  # e.g.: 0x000F -> 0xF000
-  #
-  if dir !== Dots.DIRECTION_NO
-    color |= (UInt16(dir) << 12)
-    org = man.positions[Manager._getPosId(man, pos)]
-    dataIndex = UInt8(FastApi.API_ORG_COLOR)
-  else
-    dataIndex = UInt8(FastApi.API_DOT_COLOR)
-  end
 
   for i::Int = 1:length(socks)
     if Helper.isopen(socks[i])
       off = false
-      if dir === Dots.DIRECTION_NO Server.request(socks[i], dataIndex, UInt16(pos.x), UInt16(pos.y), color)
-      else Server.request(socks[i], dataIndex, UInt16(pos.x), UInt16(pos.y), color, org.id, outOfBorder) end
+      Server.request(socks[i], FastApi.API_DOT_COLOR, UInt16(pos.x), UInt16(pos.y), Dots.INDEX_ENERGY)
+      Event.fire(man.obs, "dotrequest", man)
+    end
+  end
+  #
+  # This is how we push all active messages to the network
+  # TODO: change to yieldto() do we need this?
+  yield()
+  Event.fire(man.obs, "yield", man)
+  #
+  # All "fast" clients were disconnected
+  #
+  if off Event.off(man.world.obs, World.EVENT_DOT, man.dotCallback) end
+  if off Event.off(man.world.obs, World.EVENT_MOVE, man.moveCallback) end
+end
+#
+# This is a handler on world dot change. It notify remote clients
+# about these changes.
+# @param man Manager data type
+# @param pos Dot coordinates
+# @param color Dot color
+#
+function _onDrawOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16, dir::Int, orgId::UInt, outOfBorder::Bool)
+  local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
+  local dataIndex::UInt8
+  local off::Bool = true
+  local hasDirection::Bool = dir !== Dots.DIRECTION_NO
+  local infoBits::UInt8 = UInt8(outOfBorder)
+  #
+  # Encodes direction of organism to the first(unused) half byte of color.
+  # e.g.: 0x000F -> 0xF000
+  #
+  color |= (UInt16(dir) << 12)
+  for i::Int = 1:length(socks)
+    if Helper.isopen(socks[i])
+      off = false
+      Server.request(socks[i], FastApi.API_ORG_COLOR, UInt16(pos.x), UInt16(pos.y), color, orgId, infoBits)
       Event.fire(man.obs, "dotrequest", man)
     end
   end
@@ -510,21 +528,6 @@ function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16,
   #
   if off Event.off(man.world.obs, World.EVENT_DOT, man.dotCallback) end
   if off Event.off(man.world.obs, World.EVENT_MOVE, man.moveCallback) end
-end
-#
-# Converts color to it's index. This index is used for Visualizer
-# to draw colored dots
-# @param man Manager data type
-# @param pos Dot coordinates
-# @param color  Dot color
-# @return {UInt16} Color index
-#
-function _getColorIndex(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16)
-  if color !== Dots.INDEX_EMPTY
-    color = _isOrganism(man, pos.x, pos.y) ? man.positions[Manager._getPosId(man, pos)].color : Dots.INDEX_ENERGY
-  end
-
-  color
 end
 #
 # Checks if in specified X and Y is an organism

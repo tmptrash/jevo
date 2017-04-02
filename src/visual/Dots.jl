@@ -30,11 +30,11 @@ module Dots
   #
   # Evergy move possible directions
   #
-  const DIRECTION_NO    = 0
-  const DIRECTION_LEFT  = 1
-  const DIRECTION_UP    = 2
-  const DIRECTION_RIGHT = 3
-  const DIRECTION_DOWN  = 4
+  const DIRECTION_NO        = 0
+  const DIRECTION_LEFT      = 1
+  const DIRECTION_UP        = 2
+  const DIRECTION_RIGHT     = 3
+  const DIRECTION_DOWN      = 4
   #
   # Describes one color and it's index
   #

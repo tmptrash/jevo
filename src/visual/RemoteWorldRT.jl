@@ -120,6 +120,7 @@ module RemoteWorldRT
   # @param data Command related data
   #
   function _onDot(rd::RemoteDataRT, data::Array{Any, 1})
+    local paramAmount::Int = length(data)
     if time() - rd.ts > 1.0
       rd.ts = time()
       rd.oldRequests = rd.poolingRequests
@@ -128,61 +129,75 @@ module RemoteWorldRT
       OpenGlWindow.update(rd.win)
     end
     rd.poolingRequests += 1
-    #
-    # if only one item in data array, then it's IPS. if more then it's a dot.
-    # First byte of color is a direction (see DIRECTION_XXX constants). In this
-    # case we have to "move" specified dot to new location and clear previous
-    # position by empty color.
-    #
-    if length(data) > 1
-      local infoBits::UInt8
-      local outOfBorder::Bool
-      local dontMove::Bool
-      local nibbles::UInt16 = UInt16(data[3])
-      local color::UInt16   = nibbles & 0x0fff # last 3 nibbles are color
-      local dir::Int        = nibbles >> 12    # first nibble is direction
-      local x::UInt16       = UInt16(data[1])
-      local y::UInt16       = UInt16(data[2])
-      #
-      # This is moving of the dot. We have to draw empty dot
-      # on previous dot position and colored dot on new position.
-      # This code also knows about moving of organisms out of border
-      # in a cyclical mode
-      #
-      if dir !== Dots.DIRECTION_NO
-        infoBits    = UInt8(data[5])
-        outOfBorder = infoBits & 0b1 > 0
-        dontMove    = infoBits & 0b10 > 0
-        #
-        # - local orgId::UInt = UInt(data[4]) # is an organism id
-        # - if we are in this block and color === Dots.INDEX_EMPTY, then organism has died
-        # - if dontMove is true, then organism changes it's color, but stay on the same position
-        #
-        if dir === Dots.DIRECTION_UP
-          if outOfBorder OpenGlWindow.dot(rd.win, x, rd.height, Dots.INDEX_EMPTY)
-          else OpenGlWindow.dot(rd.win, x, y + 0x0001, Dots.INDEX_EMPTY)
-          end
-        elseif dir === Dots.DIRECTION_RIGHT
-          if outOfBorder OpenGlWindow.dot(rd.win, 0x0001, y, Dots.INDEX_EMPTY)
-          else OpenGlWindow.dot(rd.win, x - 0x0001, y, Dots.INDEX_EMPTY)
-          end
-        elseif dir === Dots.DIRECTION_DOWN
-          if outOfBorder OpenGlWindow.dot(rd.win, x, 0x0001, Dots.INDEX_EMPTY)
-          else OpenGlWindow.dot(rd.win, x, y - 0x0001, Dots.INDEX_EMPTY)
-          end
-        else
-          if outOfBorder OpenGlWindow.dot(rd.win, x + 0x0001, y, Dots.INDEX_EMPTY)
-          else OpenGlWindow.dot(rd.win, rd.width, y, Dots.INDEX_EMPTY)
-          end
-        end
-      else
-        # if we are here, then new energy block was created
-      end
-      OpenGlWindow.dot(rd.win, x, y, color)
-      OpenGlWindow.update(rd.win)
-    else
-      rd.ips = data[1]
+    # TODO: it's better to check type of request by FastApi.API_XXX constants
+    if paramAmount === 5 _onOrganismDot(rd, data)
+    elseif paramAmount === 3 _onEnergyDot(rd, data)
+    elseif paramAmount === 1 _onIps(rd, data)
     end
+  end
+  #
+  # Request for drawing organism dot
+  # @param rd Remote Data object
+  # @param data Command related data
+  #
+  function _onOrganismDot(rd::RemoteDataRT, data::Array{Any, 1})
+    local x::UInt16       = UInt16(data[1])
+    local y::UInt16       = UInt16(data[2])
+    local nibbles::UInt16 = UInt16(data[3])
+    local infoBits::UInt8 = UInt8(data[5])
+    local color::UInt16   = nibbles & 0x0fff # last 3 nibbles are color
+    local dir::Int        = nibbles >> 12    # first nibble is direction
+    local outOfBorder::Bool = infoBits & 0b1 > 0
+    #
+    # This is moving of the dot. We have to draw empty dot
+    # on previous dot position and colored dot on new position.
+    # This code also knows about moving of organisms out of border
+    # in a cyclical mode
+    #
+    # TIP!!!
+    # - local orgId::UInt = UInt(data[4]) # is an organism id
+    # - if color === Dots.INDEX_EMPTY, then organism has died
+    # - if dir === Dots.DIRECTION_NO, then organism changes it's color, but stay on the same position
+    # - if color !== Dots.INDEX_EMPTY && dir === Dots.DIRECTION_NO, then organism has born
+    #
+    if dir === Dots.DIRECTION_UP
+      if outOfBorder OpenGlWindow.dot(rd.win, x, rd.height, Dots.INDEX_EMPTY)
+      else OpenGlWindow.dot(rd.win, x, y + 0x0001, Dots.INDEX_EMPTY)
+      end
+    elseif dir === Dots.DIRECTION_RIGHT
+      if outOfBorder OpenGlWindow.dot(rd.win, 0x0001, y, Dots.INDEX_EMPTY)
+      else OpenGlWindow.dot(rd.win, x - 0x0001, y, Dots.INDEX_EMPTY)
+      end
+    elseif dir === Dots.DIRECTION_DOWN
+      if outOfBorder OpenGlWindow.dot(rd.win, x, 0x0001, Dots.INDEX_EMPTY)
+      else OpenGlWindow.dot(rd.win, x, y - 0x0001, Dots.INDEX_EMPTY)
+      end
+    elseif dir === Dots.DIRECTION_LEFT
+      if outOfBorder OpenGlWindow.dot(rd.win, rd.width, y, Dots.INDEX_EMPTY)
+      else OpenGlWindow.dot(rd.win, x + 0x0001, y, Dots.INDEX_EMPTY)
+      end
+    elseif dir === Dots.DIRECTION_NO
+      OpenGlWindow.dot(rd.win, x, y, Dots.INDEX_EMPTY)
+    end
+    OpenGlWindow.dot(rd.win, x, y, color)
+    OpenGlWindow.update(rd.win)
+  end
+  #
+  # Request for drawing energy dot. If we are here, then new energy block was created
+  # @param rd Remote Data object
+  # @param data Command related data
+  #
+  function _onEnergyDot(rd::RemoteDataRT, data::Array{Any, 1})
+    OpenGlWindow.dot(rd.win, UInt16(data[1]), UInt16(data[2]), UInt16(data[3]))
+    OpenGlWindow.update(rd.win)
+  end
+  #
+  # Request for drawing ips valus
+  # @param rd Remote Data object
+  # @param data Command related data
+  #
+  function _onIps(rd::RemoteDataRT, data::Array{Any, 1})
+    rd.ips = data[1]
   end
   #
   # Handler of RpcApi.RPC_SET_WORLD_STREAMING request

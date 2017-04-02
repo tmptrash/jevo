@@ -435,21 +435,21 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   # organism.pos - old organism position
   #
   if idOld !== idNew
-    delete!(man.positions, Manager._getPosId(man, organism.pos))
+    delete!(man.positions, idOld)
     man.positions[idNew] = organism
     #
     # Using this command, we optimize amount of transferred data
     # through network and remove blinks in visualizer, because we
     # transfet only new coordinates, color and direction
     #
-    if cyclicMove World.moveEnergy(man.world, organism.pos, newPos, organism.color, true)
-    else World.moveEnergy(man.world, organism.pos, newPos, organism.color) end
+    if cyclicMove World.moveEnergy(man.world, organism.pos, newPos, organism, true)
+    else World.moveEnergy(man.world, organism.pos, newPos, organism) end
     organism.pos = newPos
   #
   # The position didn't change, so only color should be updated
   #
   else
-    World.moveEnergy(man.world, newPos, newPos, organism.color)
+    World.moveEnergy(man.world, newPos, newPos, organism)
   end
 
   true

@@ -18,13 +18,13 @@ module FastApi
   # Indexes in _api field, which are used in request() method in
   # fast mode.
   #
-  const API_UINT64        = 1
-  const API_ASCIISTRING   = 3
-  const API_UINT8         = 5
-  const API_UINT16        = 7
-  const API_DOT_COLOR     = 9
-  const API_ORG_COLOR     = 13
-  const API_FLOAT64       = 19
+  const API_UINT64        = UInt8(1)
+  const API_ASCIISTRING   = UInt8(3)
+  const API_UINT8         = UInt8(5)
+  const API_UINT16        = UInt8(7)
+  const API_DOT_COLOR     = UInt8(9)
+  const API_ORG_COLOR     = UInt8(13)
+  const API_FLOAT64       = UInt8(19)
   #
   # Just returns all available types API
   # @return {Array{DataType, 1}}
