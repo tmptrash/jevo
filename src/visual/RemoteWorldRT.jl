@@ -10,7 +10,7 @@
 # of showing depends on network speed.
 #
 # @author DeadbraiN
-# TODO: describe two clients here (slow and pooling)
+# TODO: describe two clients here (slow and fast)
 module RemoteWorldRT
   import Event
   import OpenGlWindow

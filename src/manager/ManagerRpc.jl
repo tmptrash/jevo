@@ -1,10 +1,9 @@
 #
-# This is a part of Manager module.
-# TODO: Description
-# TODO: Dependencies
-# TODO: describe annotations: @rpc (RPC function)
-# TODO: add console message for all commands
-# TODO: describe returning nothing in @rpc functions
+# This is a part of Manager module. It represents Manager's Remote API, which
+# may be called from remote client or other manager. For this @rpc annotation
+# is used for functions. The value, which is returned by these functions will
+# be transferred to remote client (caller) as an answer. If @rpc function
+# returns nothing, then response to the remove caller will not be transferred.
 #
 # @author DeadbraiN
 #
@@ -12,7 +11,6 @@ import RpcApi
 import Config
 import Mutator
 import World
-import CommandLine
 import Event
 import FastApi
 import Server
