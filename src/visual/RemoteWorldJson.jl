@@ -104,86 +104,128 @@ module RemoteWorldJson
     Client.stop(rd.cmdCon)
     Client.stop(rd.poolingCon)
   end
-  #
-  # Handler of remote server pooling request. It may contain two types
-  # of data:
-  #    x::Uint16, y::UInt16, color::UInt16, ips::UInt16 or
-  #    ips::UInt16
-  # @param rd Remote Data object
-  # @param data Command related data
-  #
+
   function _onDot(rd::RemoteDataRT, data::Array{Any, 1})
+    local paramAmount::Int = length(data)
     if time() - rd.ts > 1.0
       rd.ts = time()
       rd.oldRequests = rd.poolingRequests
       rd.poolingRequests = 0
-      #OpenGlWindow.title(rd.win, string("ips: ", round(rd.ips), ", rps: ", rd.oldRequests))
-      #OpenGlWindow.update(rd.win)
     end
     rd.poolingRequests += 1
-    #
-    # if only one item in data array, then it's IPS. if more then it's a dot.
-    # First byte of color is a direction (see DIRECTION_XXX constants). In this
-    # case we have to "move" specified dot to new location and clear previous
-    # position by empty color.
-    #
-    if length(data) > 1
-      local nibbles::UInt16 = UInt16(data[3])
-      local color::UInt16   = nibbles & 0x0fff # last 3 nibbles are color
-      local dir::Int        = nibbles >> 12    # first nibble is direction
-      local x::UInt16       = UInt16(data[1])
-      local y::UInt16       = UInt16(data[2])
-      #
-      # This is moving of the dot. We have to draw empty dot
-      # on previous dot position and colored dot on new position.
-      #
-      local sourceX::UInt16 = x;
-      local sourceY::UInt16 = y;
-
-      if dir !== Dots.DIRECTION_NO
-        if     dir === Dots.DIRECTION_UP    sourceY = y + UInt16(1)
-        elseif dir === Dots.DIRECTION_RIGHT sourceX = x - UInt16(1)
-        elseif dir === Dots.DIRECTION_DOWN  sourceY = y - UInt16(1)
-        else                                sourceX = x + UInt16(1)
-        end
-      end
-
-      local pixelDiff = Dict("sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color)
-      push!(rd.diffs, pixelDiff)
-
-      if length(rd.diffs) > AMOUNT_OF_RECORDS
-        local file::String = string(JSON_FOLDER, "/", lpad(rd.fileIndex, 4, "0"), ".json")
-        Helper.save(JSON.json(rd.diffs), file, true)
-        rd.diffs = []
-        rd.fileIndex += 1
-      end
-    else
-      rd.ips = data[1]
+    # TODO: it's better to check type of request by FastApi.API_XXX constants
+    if paramAmount === 5 _onOrganismDot(rd, data)
+    elseif paramAmount === 3 _onEnergyDot(rd, data)
     end
   end
+
+  function _onOrganismDot(rd::RemoteDataRT, data::Array{Any, 1})
+    local x::UInt16       = UInt16(data[1])
+    local y::UInt16       = UInt16(data[2])
+    local nibbles::UInt16 = UInt16(data[3])
+    local infoBits::UInt8 = UInt8(data[5])
+    local color::UInt16   = nibbles & 0x0fff # last 3 nibbles are color
+    local dir::Int        = nibbles >> 12    # first nibble is direction
+    local outOfBorder::Bool = infoBits & 0b1 > 0
+    local pixelDiff::Dict
+
+    local orgId::UInt = UInt(data[4]) # is an organism id
+
+    local sourceX::UInt16 = x;
+    local sourceY::UInt16 = y;
+
+    if color === Dots.INDEX_EMPTY
+      pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "remove")
+      push!(rd.diffs, pixelDiff)
+    elseif color !== Dots.INDEX_EMPTY && dir === Dots.DIRECTION_NO
+      pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "add")
+      push!(rd.diffs, pixelDiff)
+    elseif dir === Dots.DIRECTION_NO
+      pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "color")
+      push!(rd.diffs, pixelDiff)
+    else
+
+      if     dir === Dots.DIRECTION_UP    sourceY = y + UInt16(1)
+      elseif dir === Dots.DIRECTION_RIGHT sourceX = x - UInt16(1)
+      elseif dir === Dots.DIRECTION_DOWN  sourceY = y - UInt16(1)
+      else                                sourceX = x + UInt16(1)
+      end
+
+      pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "a" => "move", "c" => color)
+      push!(rd.diffs, pixelDiff)
+    end
+
+    if length(rd.diffs) > AMOUNT_OF_RECORDS
+      local file::String = string(JSON_FOLDER, "/", lpad(rd.fileIndex, 4, "0"), ".json")
+      Helper.save(JSON.json(rd.diffs), file, true)
+      rd.diffs = []
+      rd.fileIndex += 1
+    end
+  end
+
+  #
+  # Request for drawing energy dot. If we are here, then new energy block was created
+  # @param rd Remote Data object
+  # @param data Command related data
+  #
+  function _onEnergyDot(rd::RemoteDataRT, data::Array{Any, 1})
+
+    local x::UInt16       = UInt16(data[1])
+    local y::UInt16       = UInt16(data[2])
+
+    local pixelDiff = Dict("id" => 0, "sx" => x, "sy" => y, "dx" => x, "dy" => y, "c" => data[3], "a" => "add")
+    push!(rd.diffs, pixelDiff)
+
+    if length(rd.diffs) > AMOUNT_OF_RECORDS
+      local file::String = string(JSON_FOLDER, "/", lpad(rd.fileIndex, 4, "0"), ".json")
+      Helper.save(JSON.json(rd.diffs), file, true)
+      rd.diffs = []
+      rd.fileIndex += 1
+    end
+
+  end
+
   #
   # Handler of RpcApi.RPC_SET_WORLD_STREAMING request
   # @param data Answer object with region data
   #
   function _onRegion(rd::RemoteDataRT, ans::Connection.Answer)
-    if ans.data === false Helper.error("Only one viewer is supported"); return nothing end
-    local region::Array{UInt16, 2} = ans.data.reg
+    local region::RpcApi.Region = ans.data
+    local blockIdx::Int
+    local blocks::Int = region.yBlocks * region.xBlocks
+    local block::RpcApi.Block
+    local offs::UInt8
+    local org::RpcApi.Org
+    local xOffs::UInt16
+    local yOffs::UInt16
 
-    # Store each pixel to key frame
     keyFrameRegion = []
-    for x::Int in 1:size(region)[2]
-      for y::Int in 1:size(region)[1]
-        local color::UInt16 = UInt16(region[y, x])
-        if (color != 0)
-          pixel = Dict("x" => x, "y" => y, "c" =>  color)
-          push!(keyFrameRegion, pixel)
-        end
+
+    for blockIdx = 0:blocks - 1
+      block = region.blocks[blockIdx + 1]
+      yOffs = div(blockIdx, region.xBlocks) * RpcApi.BLOCK_SIZE
+      xOffs = blockIdx % region.xBlocks * RpcApi.BLOCK_SIZE
+      for offs in block.energy
+
+        local x::UInt16       = xOffs + UInt16(offs % RpcApi.BLOCK_SIZE + 1)
+        local y::UInt16       = yOffs + UInt16(div(offs, RpcApi.BLOCK_SIZE) + 1)
+
+        pixel = Dict("id" => 0, "x" => x, "y" => y, "c" =>  UInt16(Dots.INDEX_ENERGY))
+        push!(keyFrameRegion, pixel)
+      end
+      for org in block.orgs
+
+        local x::UInt16       = xOffs + UInt16(org.offs % RpcApi.BLOCK_SIZE + 1)
+        local y::UInt16       = yOffs + UInt16(div(org.offs, RpcApi.BLOCK_SIZE) + 1)
+
+        pixel = Dict("id" => org.id, "x" => x, "y" => y, "c" =>  org.color)
+        push!(keyFrameRegion, pixel)
       end
     end
 
     keyFrame = Dict("region" => keyFrameRegion,
-                    "width" => size(region)[2],
-                    "height" => size(region)[1])
+                    "width" => region.width,
+                    "height" => region.height)
 
     local fileName::String = string(JSON_FOLDER, "/keyframe.json")
     Helper.save(JSON.json(keyFrame), fileName, true)
@@ -193,4 +235,5 @@ module RemoteWorldJson
     #
     Client.request(rd.poolingCon, UInt8(FastApi.API_UINT8), UInt8(0))
   end
+
 end
