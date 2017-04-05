@@ -476,7 +476,7 @@ function _onDrawEnergy(man::ManagerTypes.ManagerData, pos::Helper.Point, color::
   for i::Int = 1:length(socks)
     if Helper.isopen(socks[i])
       off = false
-      Server.request(socks[i], FastApi.API_DOT_COLOR, UInt16(pos.x), UInt16(pos.y), Dots.INDEX_ENERGY)
+      Server.request(socks[i], FastApi.API_DOT_COLOR, UInt16(pos.x), UInt16(pos.y))
       Event.fire(man.obs, "dotrequest", man)
     end
   end

@@ -131,7 +131,7 @@ module RemoteWorldRT
     rd.poolingRequests += 1
     # TODO: it's better to check type of request by FastApi.API_XXX constants
     if paramAmount === 5 _onOrganismDot(rd, data)
-    elseif paramAmount === 3 _onEnergyDot(rd, data)
+    elseif paramAmount === 2 _onEnergyDot(rd, data)
     elseif paramAmount === 1 _onIps(rd, data)
     end
   end
@@ -188,7 +188,7 @@ module RemoteWorldRT
   # @param data Command related data
   #
   function _onEnergyDot(rd::RemoteDataRT, data::Array{Any, 1})
-    OpenGlWindow.dot(rd.win, UInt16(data[1]), UInt16(data[2]), UInt16(data[3]))
+    OpenGlWindow.dot(rd.win, UInt16(data[1]), UInt16(data[2]), Dots.INDEX_ENERGY)
     OpenGlWindow.update(rd.win)
   end
   #
