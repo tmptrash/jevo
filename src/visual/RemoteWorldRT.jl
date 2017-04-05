@@ -206,14 +206,13 @@ module RemoteWorldRT
   function _onRegion(rd::RemoteDataRT, ans::Connection.Answer)
     local region::RpcApi.Region = ans.data
     local blockIdx::Int
-    local blocks::Int = region.yBlocks * region.xBlocks
     local block::RpcApi.Block
     local offs::UInt8
     local org::RpcApi.Org
     local xOffs::UInt16
     local yOffs::UInt16
 
-    for blockIdx = 0:blocks - 1
+    for blockIdx = 0:length(region.blocks) - 1
       block = region.blocks[blockIdx + 1]
       yOffs = div(blockIdx, region.xBlocks) * RpcApi.BLOCK_SIZE
       xOffs = blockIdx % region.xBlocks * RpcApi.BLOCK_SIZE
