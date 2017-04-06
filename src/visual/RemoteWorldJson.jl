@@ -6,6 +6,7 @@
 module RemoteWorldJson
   import Event
   import Connection
+  import Creature
   import Client
   import RpcApi
   import FastApi
@@ -104,7 +105,14 @@ module RemoteWorldJson
     Client.stop(rd.cmdCon)
     Client.stop(rd.poolingCon)
   end
-
+  #
+  # Handler of remote server pooling request. It may contain two types
+  # of data:
+  #    x::Uint16, y::UInt16, color::UInt16, ips::UInt16 or
+  #    ips::UInt16
+  # @param rd Remote Data object
+  # @param data Command related data
+  #
   function _onDot(rd::RemoteDataRT, data::Array{Any, 1})
     local paramAmount::Int = length(data)
     if time() - rd.ts > 1.0
@@ -115,10 +123,14 @@ module RemoteWorldJson
     rd.poolingRequests += 1
     # TODO: it's better to check type of request by FastApi.API_XXX constants
     if paramAmount === 5 _onOrganismDot(rd, data)
-    elseif paramAmount === 3 _onEnergyDot(rd, data)
+    elseif paramAmount === 2 _onEnergyDot(rd, data)
     end
   end
-
+  #
+  # Request for drawing organism dot
+  # @param rd Remote Data object
+  # @param data Command related data
+  #
   function _onOrganismDot(rd::RemoteDataRT, data::Array{Any, 1})
     local x::UInt16       = UInt16(data[1])
     local y::UInt16       = UInt16(data[2])
@@ -140,11 +152,13 @@ module RemoteWorldJson
     elseif color !== Dots.INDEX_EMPTY && dir === Dots.DIRECTION_NO
       pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "add")
       push!(rd.diffs, pixelDiff)
-    elseif dir === Dots.DIRECTION_NO
-      pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "color")
-      push!(rd.diffs, pixelDiff)
+    # TODO: this scenario is not valid at the moment
+    #elseif dir === Dots.DIRECTION_NO
+    #  pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "color")
+    #  push!(rd.diffs, pixelDiff)
     else
-
+      # TODO: here outOfBorder flag should be also used, because organisms
+      # TODO: move outside of the border from time to time
       if     dir === Dots.DIRECTION_UP    sourceY = y + UInt16(1)
       elseif dir === Dots.DIRECTION_RIGHT sourceX = x - UInt16(1)
       elseif dir === Dots.DIRECTION_DOWN  sourceY = y - UInt16(1)
@@ -173,7 +187,7 @@ module RemoteWorldJson
     local x::UInt16       = UInt16(data[1])
     local y::UInt16       = UInt16(data[2])
 
-    local pixelDiff = Dict("id" => 0, "sx" => x, "sy" => y, "dx" => x, "dy" => y, "c" => data[3], "a" => "add")
+    local pixelDiff = Dict("id" => 0, "sx" => x, "sy" => y, "dx" => x, "dy" => y, "c" => Dots.INDEX_ENERGY, "a" => "add")
     push!(rd.diffs, pixelDiff)
 
     if length(rd.diffs) > AMOUNT_OF_RECORDS
@@ -192,7 +206,6 @@ module RemoteWorldJson
   function _onRegion(rd::RemoteDataRT, ans::Connection.Answer)
     local region::RpcApi.Region = ans.data
     local blockIdx::Int
-    local blocks::Int = region.yBlocks * region.xBlocks
     local block::RpcApi.Block
     local offs::UInt8
     local org::RpcApi.Org
@@ -201,7 +214,7 @@ module RemoteWorldJson
 
     keyFrameRegion = []
 
-    for blockIdx = 0:blocks - 1
+    for blockIdx = 0:length(region.blocks) - 1
       block = region.blocks[blockIdx + 1]
       yOffs = div(blockIdx, region.xBlocks) * RpcApi.BLOCK_SIZE
       xOffs = blockIdx % region.xBlocks * RpcApi.BLOCK_SIZE
