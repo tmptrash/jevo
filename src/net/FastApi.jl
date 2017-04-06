@@ -23,8 +23,8 @@ module FastApi
   const API_UINT8         = UInt8(5)
   const API_UINT16        = UInt8(7)
   const API_DOT_COLOR     = UInt8(9)
-  const API_ORG_COLOR     = UInt8(12)
-  const API_FLOAT64       = UInt8(18)
+  const API_ORG_COLOR     = UInt8(13)
+  const API_FLOAT64       = UInt8(19)
   #
   # Just returns all available types API
   # @return {Array{DataType, 1}}
@@ -40,8 +40,8 @@ module FastApi
     String, Void,                              # 3
     UInt8, Void,                               # 5
     UInt16, Void,                              # 7
-    UInt16, UInt16, Void,                      # 9  x, y, color
-    UInt16, UInt16, UInt16, UInt, UInt8, Void, # 12 x, y, dir|color, orgId, infoBits
-    Float64, Void                              # 18
+    UInt16, UInt16, UInt16, Void,              # 9  x, y, color
+    UInt16, UInt16, UInt16, UInt, UInt8, Void, # 13 x, y, dir|color, orgId, infoBits
+    Float64, Void                              # 19
   ]
 end

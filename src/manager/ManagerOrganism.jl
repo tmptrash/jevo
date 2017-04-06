@@ -722,7 +722,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
   id = Manager._getPosId(man, newPos)
   #
   # If other organism at the position of the check,
-  # then grab energy from it
+  # then grab energy from him
   #
   if haskey(man.positions, id)
     org = man.positions[id]
@@ -750,7 +750,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     Event.fire(man.obs, "eatorganism", man, retObj.ret)
   else
     #
-    # Organism wants to give an energy, but no other organisms around
+    # Organism wants to get an energy, but no other organisms around
     #
     retObj.ret = amount > 0 ? World.grabEnergy(man.world, newPos, UInt16(amount)) : 0
   end

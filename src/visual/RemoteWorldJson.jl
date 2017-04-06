@@ -38,6 +38,8 @@ module RemoteWorldJson
     #
     cmdCon::Client.ClientConnection
     poolingCon::Client.ClientConnection
+    width::UInt16
+    height::UInt16
     fileIndex::Int
     diffs::Array{Any,1}
     #
@@ -53,9 +55,11 @@ module RemoteWorldJson
     RemoteDataRT(
       cmdCon::Client.ClientConnection,
       poolingCon::Client.ClientConnection,
+      width::UInt16,
+      height::UInt16,
       fileIndex::Int,
       diffs::Array{Any, 1}
-    ) = new(cmdCon, poolingCon, fileIndex, diffs)
+    ) = new(cmdCon, poolingCon, width, height, fileIndex, diffs)
   end
   #
   # Creates connection with remote host for display pixels from remote world.
@@ -71,6 +75,8 @@ module RemoteWorldJson
     RemoteDataRT(
       Client.create(host, cmdPort),
       Client.create(host, poolingPort, true),
+      UInt16(cfg.worldWidth),
+      UInt16(cfg.worldHeight),
       0,
       Any[]
     )
@@ -123,7 +129,7 @@ module RemoteWorldJson
     rd.poolingRequests += 1
     # TODO: it's better to check type of request by FastApi.API_XXX constants
     if paramAmount === 5 _onOrganismDot(rd, data)
-    elseif paramAmount === 2 _onEnergyDot(rd, data)
+    elseif paramAmount === 3 _onEnergyDot(rd, data)
     end
   end
   #
@@ -149,7 +155,7 @@ module RemoteWorldJson
     if color === Dots.INDEX_EMPTY
       pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "remove")
       push!(rd.diffs, pixelDiff)
-    elseif color !== Dots.INDEX_EMPTY && dir === Dots.DIRECTION_NO
+    elseif dir === Dots.DIRECTION_NO
       pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "add")
       push!(rd.diffs, pixelDiff)
     # TODO: this scenario is not valid at the moment
@@ -157,12 +163,10 @@ module RemoteWorldJson
     #  pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "color")
     #  push!(rd.diffs, pixelDiff)
     else
-      # TODO: here outOfBorder flag should be also used, because organisms
-      # TODO: move outside of the border from time to time
-      if     dir === Dots.DIRECTION_UP    sourceY = y + UInt16(1)
-      elseif dir === Dots.DIRECTION_RIGHT sourceX = x - UInt16(1)
-      elseif dir === Dots.DIRECTION_DOWN  sourceY = y - UInt16(1)
-      else                                sourceX = x + UInt16(1)
+      if     dir === Dots.DIRECTION_UP    sourceY = y + 0x0001
+      elseif dir === Dots.DIRECTION_RIGHT sourceX = x - 0x0001
+      elseif dir === Dots.DIRECTION_DOWN  sourceY = y - 0x0001
+      elseif dir === Dots.DIRECTION_LEFT  sourceX = x + 0x0001
       end
 
       pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "a" => "move", "c" => color)
@@ -186,8 +190,9 @@ module RemoteWorldJson
 
     local x::UInt16       = UInt16(data[1])
     local y::UInt16       = UInt16(data[2])
+    local color::UInt16   = UInt16(data[3])
 
-    local pixelDiff = Dict("id" => 0, "sx" => x, "sy" => y, "dx" => x, "dy" => y, "c" => Dots.INDEX_ENERGY, "a" => "add")
+    local pixelDiff = Dict("id" => 0, "sx" => x, "sy" => y, "dx" => x, "dy" => y, "c" => color, "a" => "add")
     push!(rd.diffs, pixelDiff)
 
     if length(rd.diffs) > AMOUNT_OF_RECORDS
