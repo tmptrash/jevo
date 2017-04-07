@@ -47,7 +47,7 @@ module Status
     eatr::Int         # organism eats right
     eatu::Int         # organism eats up
     eatd::Int         # organism eats down
-    eatorg::Int        # amount of energy obtained by eating other organisms
+    eatorg::Int       # amount of energy obtained by eating other organisms
     eated::Int        # total amount of eating for organisms
     stepl::Int        # organism moves left
     stepr::Int        # organism moves right
@@ -56,6 +56,8 @@ module Status
     steps::Int        # total amount of moving in population
     grabbed::Int      # amount of energy grabbed by the system from population
     orgs::Int         # average amount of organisms
+    fit::UInt         # Fitness level (energy * mutationsFromStart)
+    fitAmount::Int    # Fitness measurements amount
   end
   #
   # Module initializer
@@ -64,7 +66,7 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,UInt(0), 0)
     #
     # All event handlers should be binded here
     #
@@ -120,7 +122,7 @@ module Status
       _showParam(:green,  "org:",  div(st.orgs, st.iterations), 8)
       _showParam(:normal, "ips:",  (@sprintf "%.3f" st.ips / st.iterations), 13)
       _showParam(:green,  "nrg:",  st.energy, 16, true)
-      _showParam(:red,    "eat:",  st.eated, 15, true)
+      _showParam(:red,    "eat:",  st.eated - st.eatorg, 15, true)
       _showParam(:red,    "eato:", st.eatorg, 16, true)
       _showParam(:red,    "grab:", st.grabbed, 15, true)
       _showParam(:cyan,   "step:", st.steps, 13, true)
@@ -132,6 +134,7 @@ module Status
       #_showParam(:yellow, "eval:", cfg.orgEvals - st.evals, 10)
       _showParam(:orange, "err:",  man.cfg.orgErrors, 11)
       _showParam(:orange, "code:", (@sprintf "%.2f" st.code / st.codeAmount), 12)
+      _showParam(:red,    "fit:",  div(st.fit, UInt(st.fitAmount)), 12)
       print("\n")
 
       # if cfg.modeStatusFull
@@ -198,6 +201,8 @@ module Status
       st.steps     = 0
       st.energy    = 0
       st.orgs      = 0
+      st.fit       = UInt(0)
+      st.fitAmount = 0
     end
   end
   #
@@ -322,6 +327,11 @@ module Status
     sd.energy += org.energy
     sd.code   += org.codeSize
     sd.codeAmount += 1
+    #
+    # Fitness level
+    #
+    sd.fit += UInt(org.energy) * UInt(org.mutationsFromStart)
+    sd.fitAmount += 1
     #
     # Finds min/max energetic organisms in population
     #
