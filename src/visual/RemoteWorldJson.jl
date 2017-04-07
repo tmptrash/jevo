@@ -151,12 +151,13 @@ module RemoteWorldJson
 
     local sourceX::UInt16 = x;
     local sourceY::UInt16 = y;
+    local updateNumber::UInt32 = rd.fileIndex * AMOUNT_OF_RECORDS + length(rd.diffs);
 
     if color === Dots.INDEX_EMPTY
-      pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "remove")
+      pixelDiff = Dict("n" => updateNumber, "id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "remove")
       push!(rd.diffs, pixelDiff)
     elseif dir === Dots.DIRECTION_NO
-      pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "add")
+      pixelDiff = Dict("n" => updateNumber, "id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "add")
       push!(rd.diffs, pixelDiff)
     # TODO: this scenario is not valid at the moment
     #elseif dir === Dots.DIRECTION_NO
@@ -169,7 +170,7 @@ module RemoteWorldJson
       elseif dir === Dots.DIRECTION_LEFT  sourceX = x + 0x0001
       end
 
-      pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "a" => "move", "c" => color)
+      pixelDiff = Dict("n" => updateNumber, "id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "a" => "move", "c" => color)
       push!(rd.diffs, pixelDiff)
     end
 
@@ -191,9 +192,16 @@ module RemoteWorldJson
     local x::UInt16       = UInt16(data[1])
     local y::UInt16       = UInt16(data[2])
     local color::UInt16   = UInt16(data[3])
+    local updateNumber::UInt32 = rd.fileIndex * AMOUNT_OF_RECORDS + length(rd.diffs);
+    local pixelDiff::Dict
 
-    local pixelDiff = Dict("id" => 0, "sx" => x, "sy" => y, "dx" => x, "dy" => y, "c" => color, "a" => "add")
+    if color === Dots.INDEX_EMPTY
+      pixelDiff = Dict("n" => updateNumber, "id" => 0, "sx" => x, "sy" => y, "dx" => x, "dy" => y, "c" => color, "a" => "remove")
+    else
+      pixelDiff = Dict("n" => updateNumber, "id" => 0, "sx" => x, "sy" => y, "dx" => x, "dy" => y, "c" => color, "a" => "add")
+    end
     push!(rd.diffs, pixelDiff)
+
 
     if length(rd.diffs) > AMOUNT_OF_RECORDS
       local file::String = string(JSON_FOLDER, "/", lpad(rd.fileIndex, 4, "0"), ".json")
