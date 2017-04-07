@@ -163,10 +163,22 @@ module RemoteWorldJson
     #  pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "c" => color, "a" => "color")
     #  push!(rd.diffs, pixelDiff)
     else
-      if     dir === Dots.DIRECTION_UP    sourceY = y + 0x0001
-      elseif dir === Dots.DIRECTION_RIGHT sourceX = x - 0x0001
-      elseif dir === Dots.DIRECTION_DOWN  sourceY = y - 0x0001
-      elseif dir === Dots.DIRECTION_LEFT  sourceX = x + 0x0001
+      if     dir === Dots.DIRECTION_UP
+        if outOfBorder sourceY = rd.height
+        else sourceY = y + 0x0001
+        end
+      elseif dir === Dots.DIRECTION_RIGHT
+        if outOfBorder sourceX = 0x0001
+        else sourceX = x - 0x0001
+        end
+      elseif dir === Dots.DIRECTION_DOWN
+        if outOfBorder sourceY = 0x0001
+        else sourceY = y - 0x0001
+        end
+      elseif dir === Dots.DIRECTION_LEFT
+        if outOfBorder sourceX = rd.width
+        else sourceX = x + 0x0001
+        end
       end
 
       pixelDiff = Dict("id" => orgId, "sx" => sourceX, "sy" => sourceY, "dx" => x, "dy" => y, "a" => "move", "c" => color)
