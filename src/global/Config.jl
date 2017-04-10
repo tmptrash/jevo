@@ -463,7 +463,7 @@ module Config
       [#="Phylogen",=# "Status"],                  # plugIncluded
       [],                                      # plugExcluded
 
-      true,                                    # modeDebug
+      false,                                   # modeDebug
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod
