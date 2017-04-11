@@ -134,7 +134,7 @@ module Status
       #_showParam(:yellow, "eval:", cfg.orgEvals - st.evals, 10)
       _showParam(:orange, "err:",  man.cfg.orgErrors, 11)
       _showParam(:orange, "code:", (@sprintf "%.2f" st.code / st.codeAmount), 12)
-      _showParam(:red,    "fit:",  div(st.fit, UInt(st.fitAmount)), 12)
+      _showParam(:red,    "fit:",  Int(div(st.fit, UInt(st.fitAmount))), 16, true)
       print("\n")
 
       # if cfg.modeStatusFull
