@@ -22,33 +22,27 @@ module TestCodeMath
 
     Manager.destroy(d.man)
   end
-  # facts("Testing CodeMath.plus() without variables") do
-  #   local conf = Config.create()
-  #   local org  = Creature.create(conf)
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,6), Code.CodePart(Code.plus, false))
-  #
-  #   @fact length(Helper.getLines(org.code, [2])) --> 1
-  #   @fact eval(org.code)(conf, org) --> true
-  # end
-  # facts("Testing CodeMath.plus() with Int8 variable") do
-  #   local conf = Config.create()
-  #   local org  = Creature.create(conf)
-  #
-  #   types = changeTypes([Int8])
-  #   addVar(org, [2], Helper.CodePos(1,1,1), Int8)
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.plus, false))
-  #   var = Helper.getArg(org.code, [2,1,1,1,1])
-  #
-  #   @fact Helper.getArg(org.code, [2,2,1]) --> var
-  #   @fact Helper.getArg(org.code, [2,2,2,1]) --> :(+)
-  #   @fact Helper.getArg(org.code, [2,2,2,2]) --> var
-  #   @fact Helper.getArg(org.code, [2,2,2,3]) --> var
-  #   @fact eval(org.code)(conf, org) --> true
-  #   #
-  #   # revert supported types
-  #   #
-  #   resetTypes(types)
-  # end
+  facts("Testing CodeMath.plus() with Int8 variable") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+    local org = d.orgs[1]
+    local types = changeTypes([Int8])
+
+    code(d, :plus, org)
+    # addVar(org, [2], Helper.CodePos(1,1,1), Int8)
+    # Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.plus, false))
+    var = Helper.getArg(org.code, [2,1,1,1,1])
+    println(Helper.getArg(org.code, [2,31]))
+    #@fact Helper.getArg(org.code, [2,32,1]) --> var
+    # @fact Helper.getArg(org.code, [2,2,2,1]) --> :(+)
+    # @fact Helper.getArg(org.code, [2,2,2,2]) --> var
+    # @fact Helper.getArg(org.code, [2,2,2,3]) --> var
+    # @fact eval(org.code)(conf, org) --> true
+    #
+    # revert supported types
+    #
+    resetTypes(types)
+    Manager.destroy(d.man)
+  end
   # facts("Testing CodeMath.plus() with Int16 variable") do
   #   local conf  = Config.create()
   #   local org   = Creature.create(conf)
