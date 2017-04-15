@@ -28,59 +28,42 @@ module TestCodeMath
     local types = changeTypes([Int8])
 
     code(d, :plus, org)
-    # addVar(org, [2], Helper.CodePos(1,1,1), Int8)
-    # Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.plus, false))
-    var = Helper.getArg(org.code, [2,1,1,1,1])
-    println(Helper.getArg(org.code, [2,31]))
-    #@fact Helper.getArg(org.code, [2,32,1]) --> var
-    # @fact Helper.getArg(org.code, [2,2,2,1]) --> :(+)
-    # @fact Helper.getArg(org.code, [2,2,2,2]) --> var
-    # @fact Helper.getArg(org.code, [2,2,2,3]) --> var
-    # @fact eval(org.code)(conf, org) --> true
+    @fact Helper.getArg(org.code, [2,31,2,1]) --> :(+)
+    @fact eval(org.code)(d.cfg, org) --> true
     #
     # revert supported types
     #
     resetTypes(types)
     Manager.destroy(d.man)
   end
-  # facts("Testing CodeMath.plus() with Int16 variable") do
-  #   local conf  = Config.create()
-  #   local org   = Creature.create(conf)
-  #   local types = changeTypes([Int16])
-  #
-  #   addVar(org, [2], Helper.CodePos(1,1,1), Int16)
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.plus, false))
-  #   var = Helper.getArg(org.code, [2,1,1,1,1])
-  #
-  #   @fact Helper.getArg(org.code, [2,2,1]) --> var
-  #   @fact Helper.getArg(org.code, [2,2,2,1]) --> :(+)
-  #   @fact Helper.getArg(org.code, [2,2,2,2]) --> var
-  #   @fact Helper.getArg(org.code, [2,2,2,3]) --> var
-  #   @fact eval(org.code)(conf, org) --> true
-  #   #
-  #   # revert supported types
-  #   #
-  #   resetTypes(types)
-  # end
-  # facts("Testing CodeMath.plus() with Int variable") do
-  #   local conf  = Config.create()
-  #   local org   = Creature.create(conf)
-  #   local types = changeTypes([Int])
-  #
-  #   addVar(org, [2], Helper.CodePos(1,1,1), Int)
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.plus, false))
-  #   var = Helper.getArg(org.code, [2,1,1,1,1])
-  #
-  #   @fact Helper.getArg(org.code, [2,2,1]) --> var
-  #   @fact Helper.getArg(org.code, [2,2,2,1]) --> :(+)
-  #   @fact Helper.getArg(org.code, [2,2,2,2]) --> var
-  #   @fact Helper.getArg(org.code, [2,2,2,3]) --> var
-  #   @fact eval(org.code)(conf, org) --> true
-  #   #
-  #   # revert supported types
-  #   #
-  #   resetTypes(types)
-  # end
+  facts("Testing CodeMath.plus() with Int16 variable") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+    local org = d.orgs[1]
+    local types = changeTypes([Int16])
+
+    code(d, :plus, org)
+    @fact Helper.getArg(org.code, [2,31,2,1]) --> :(+)
+    @fact eval(org.code)(d.cfg, org) --> true
+    #
+    # revert supported types
+    #
+    resetTypes(types)
+    Manager.destroy(d.man)
+  end
+  facts("Testing CodeMath.plus() with Int variable") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+    local org = d.orgs[1]
+    local types = changeTypes([Int64])
+
+    code(d, :plus, org)
+    @fact Helper.getArg(org.code, [2,31,2,1]) --> :(+)
+    @fact eval(org.code)(d.cfg, org) --> true
+    #
+    # revert supported types
+    #
+    resetTypes(types)
+    Manager.destroy(d.man)
+  end
   # facts("Testing CodeMath.plus() with String variable") do
   #   local conf  = Config.create()
   #   local org   = Creature.create(conf)
