@@ -12,17 +12,19 @@ module FastApi
   export API_UINT8
   export API_UINT16
   export API_DOT_COLOR
+  export API_ORG_COLOR
   export API_FLOAT64
   #
   # Indexes in _api field, which are used in request() method in
   # fast mode.
   #
-  const API_UINT64        = 1
-  const API_ASCIISTRING   = 3
-  const API_UINT8         = 5
-  const API_UINT16        = 7
-  const API_DOT_COLOR     = 9
-  const API_FLOAT64       = 13
+  const API_UINT64        = UInt8(1)
+  const API_ASCIISTRING   = UInt8(3)
+  const API_UINT8         = UInt8(5)
+  const API_UINT16        = UInt8(7)
+  const API_DOT_COLOR     = UInt8(9)
+  const API_ORG_COLOR     = UInt8(13)
+  const API_FLOAT64       = UInt8(19)
   #
   # Just returns all available types API
   # @return {Array{DataType, 1}}
@@ -34,11 +36,12 @@ module FastApi
   # Available data types with indexes in comments
   #
   const _api = DataType[
-    UInt64, Void,                           # 1
-    String, Void,                           # 3
-    UInt8, Void,                            # 5
-    UInt16, Void,                           # 7
-    UInt16, UInt16, UInt32, Void,           # 9 pos::Helper.Point, color::UInt32, ips::UInt16
-    Float64, Void                           # 13
+    UInt64, Void,                              # 1
+    String, Void,                              # 3
+    UInt8, Void,                               # 5
+    UInt16, Void,                              # 7
+    UInt16, UInt16, UInt16, Void,              # 9  x, y, color
+    UInt16, UInt16, UInt16, UInt, UInt8, Void, # 13 x, y, dir|color, orgId, infoBits
+    Float64, Void                              # 19
   ]
 end

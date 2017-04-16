@@ -40,6 +40,7 @@ module Creature
   import Config
 
   export VAR_AMOUNT
+  export VARS_AMOUNT
   export Organism
 
   export create
@@ -61,6 +62,10 @@ module Creature
   # Amount of embedded variables for one type
   #
   const VAR_AMOUNT = 5
+  #
+  # All variables amount
+  #
+  const VARS_AMOUNT = length(Helper.SUPPORTED_TYPES) * VAR_AMOUNT
   #
   # Enumeration for direction: up, down, left, right
   #
@@ -207,7 +212,7 @@ module Creature
     # Color index of organism. Similar colors means relative organisms.
     # Example: 1, 345, 1200. Should be less then Dots.INDEX_MAX_ORG_COLOR
     #
-    color::Int
+    color::UInt16
     #
     # @inharitable
     # Organism's personal memory. Is used in any possible way.

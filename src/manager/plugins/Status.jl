@@ -7,6 +7,7 @@
 module Status
   import ManagerTypes.ManagerData
   import ManagerTypes.Plugin
+  import ManagerTypes.OrganismTask
   import Creature
   import Config
   import Event
@@ -23,7 +24,8 @@ module Status
   type StatusData <: Plugin
     stamp::Float64    # current UNIX time stamp
     ips::Float64      # average IPS
-    iterations::Int   # amount of IPS checks. Is used for average IPS calculation
+    ipsAmount::Int    # amount of IPS calculations per status period
+    iterations::Int   # amount of iteration per status period
     rps::Int          # all requests per second
     eups::Int         # energy updates per second
     kops::Int         # killed organisms per second
@@ -35,8 +37,6 @@ module Status
     mps::Int          # mutations per second
     cmps::Int         # amount of mutations on clone
     energy::Int       # energy of organisms
-    allEnergy::Int    # energy of populations
-    allEnergyAmount::Int # amount of population energy measurements
     eMin::Int         # minimum organism energy
     eMax::Int         # maximum organism energy
     evals::Int        # amount of eval() calls till previous status
@@ -48,7 +48,7 @@ module Status
     eatr::Int         # organism eats right
     eatu::Int         # organism eats up
     eatd::Int         # organism eats down
-    eatorg::Int        # amount of energy obtained by eating other organisms
+    eatorg::Int       # amount of energy obtained by eating other organisms
     eated::Int        # total amount of eating for organisms
     stepl::Int        # organism moves left
     stepr::Int        # organism moves right
@@ -57,6 +57,8 @@ module Status
     steps::Int        # total amount of moving in population
     grabbed::Int      # amount of energy grabbed by the system from population
     orgs::Int         # average amount of organisms
+    fit::UInt         # Fitness level (energy * mutationsFromStart)
+    fitAmount::Int    # Fitness measurements amount
   end
   #
   # Module initializer
@@ -65,7 +67,7 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,UInt(0), 0)
     #
     # All event handlers should be binded here
     #
@@ -95,112 +97,125 @@ module Status
     Event.on(man.obs, "stepdown", _onStepDown)
   end
   #
+  # Is called at the beginning of _onIps
+  #
+  function _onBeforeIps(man::ManagerData, sd::StatusData)
+    sd.ipsAmount += 1
+    #
+    # Condition for the first run
+    #
+    if man.cfg.orgEvals < 1 sd.evals = man.cfg.orgEvals end
+    #
+    # Energy should be calculated here in IPS method, because it's slow
+    #
+    _iterateOrganisms(man, sd)
+  end
+  #
   # Shows real time status obtained from StatusData type
   # @param man Manager data type object
   # @param stamp Current time stamp
   #
   function _onIps(man::ManagerData, stamp::Float64, codeRuns::Int)
-    local st::StatusData  = man.plugins[MODULE_NAME]
+    local sd::StatusData  = man.plugins[MODULE_NAME]
     local cfg::Config.ConfigData = man.cfg
-    local period::Float64 = cfg.modeStatusPeriod
-    local iterations::Int
-    #
-    # Condition for the first run
-    #
-    if cfg.orgEvals < 1 st.evals = cfg.orgEvals end
-    #
-    # Calculates average IPS for period "period"
-    #
-    st.iterations += 1
-    st.ips  += man.ips
-    st.orgs += length(man.tasks)
+    local iterations::Int = sd.iterations
 
-    if stamp - st.stamp >= period
-      print(string(Dates.format(now(), "HH:MM:SS"), " "))
-      _showParam(:green,  "orgs:", div(st.orgs, st.iterations), 9)
-      _showParam(:normal, "ips:",  (@sprintf "%.3f" st.ips / st.iterations), 13)
-      _showParam(:green,  "nrg:",  div(st.allEnergy, st.allEnergyAmount), 16, true)
-      _showParam(:red,    "eat:",  st.eated, 15, true)
-      _showParam(:red,    "eatorg:",  st.eatorg, 18, true)
-      _showParam(:red,    "grab:", st.grabbed, 15, true)
-      _showParam(:red,    "step:", st.steps, 12, true)
-      _showParam(:orange, "cmut:", st.cmps, 11)
-      _showParam(:orange, "mut:",  st.mps, 10)
-      _showParam(:red,    "kil:",  st.kops, 10)
-      _showParam(:yellow, "clon:", st.cps, 11)
-      _showParam(:yellow, "req:",  st.rps, 9)
-      _showParam(:yellow, "eval:", cfg.orgEvals - st.evals, 10)
-      _showParam(:orange, "err:",  man.cfg.orgErrors, 11)
-      _showParam(:orange, "code:", (@sprintf "%.2f" st.code / st.codeAmount), 12)
-      print("\n")
+    _onBeforeIps(man, sd)
+    if stamp - sd.stamp < cfg.modeStatusPeriod return nothing end
 
-      # if cfg.modeStatusFull
-      #   print_with_color(:red,   rpad(string("eat:",    st.eatl),                        11))
-      #   print_with_color(:red,   rpad(string(st.eatr),                                    8))
-      #   print_with_color(:red,   rpad(string(st.eatu),                                    8))
-      #   print_with_color(:red,   rpad(string(st.eatd),                                    8))
-      #   print_with_color(:red,   rpad(string(format(st.eated, commas=true)),             10))
-      # end
-      # if cfg.modeStatusFull
-      #   print_with_color(:red, rpad(string("step:", st.stepl),                           11))
-      #   print_with_color(:red, rpad(string(st.stepr),                                     6))
-      #   print_with_color(:red, rpad(string(st.stepu),                                     6))
-      #   print_with_color(:red, rpad(string(st.stepd),                                     6))
-      #   print_with_color(:red, rpad(string(format(st.steps, commas=true)),               10))
-      # end
-      # if cfg.modeStatusFull
-      #   print_with_color(:yellow,  rpad(string("sreq:",   div(st.srps, ips)),                       9))
-      #   print_with_color(:yellow,  rpad(string("enup:",   div(st.eups, ips)),                       8))
-      # end
-      # if cfg.modeStatusFull
-      #   print_with_color(:orange,    rpad(string("code:",   st.csMin),                   12))
-      #   print_with_color(:orange,    rpad(string(st.csMax),                               7))
-      # end
-      # if cfg.modeStatusFull
-      #   print_with_color(:orange,    rpad(string("nrg:",    st.eMin),                    11))
-      #   print_with_color(:orange,    rpad(string(format(st.eMax, commas=true)),            7), "\n")
-      # end
-      #print_with_color(:red,    rpad(string("ytps:",   st.ytps)), 11))
-      #print_with_color(:red,    rpad(string("yps:",    st.yps)),  9))
-      #print_with_color(:red,    rpad(string("syps:",   st.syps)),  9))
+    print(string(Dates.format(now(), "HH:MM:SS"), " "))
+    _showParam(:green,  "org:",  div(sd.orgs, iterations), 8)
+    _showParam(:normal, "ips:",  (@sprintf "%.3f" sd.ips / iterations), 12)
+    _showParam(:green,  "nrg:",  div(sd.energy, sd.ipsAmount * iterations), 16, true)
+    _showParam(:red,    "eat:",  div(sd.eated - sd.eatorg, iterations), 12, true)
+    _showParam(:red,    "eato:", div(sd.eatorg, iterations), 12, true)
+    _showParam(:red,    "grab:", div(sd.grabbed, iterations), 10, true)
+    _showParam(:cyan,   "step:", div(sd.steps, iterations), 12, true)
+    _showParam(:orange, "cmut:", (@sprintf "%.2f" sd.cmps / iterations), 11)
+    _showParam(:orange, "mut:",  (@sprintf "%.2f" sd.mps / iterations), 10)
+    _showParam(:yellow, "kil:",  (@sprintf "%.2f" sd.kops / iterations), 10)
+    _showParam(:yellow, "clon:", (@sprintf "%.2f" sd.cps / iterations), 11)
+    #_showParam(:yellow, "req.",  sd.rps, 9)
+    #_showParam(:yellow, "eval.", cfg.orgEvals - sd.evals, 10)
+    _showParam(:orange, "err:",  div(cfg.orgErrors, iterations), 8)
+    _showParam(:orange, "cod:", (@sprintf "%.2f" sd.code / sd.codeAmount), 12)
+    _showParam(:red,    "fit:",  Int(div(sd.fit, UInt(sd.fitAmount))), 16, true)
+    print("\n")
 
-      st.stamp     = stamp
-      st.iterations = 0
-      st.ips       = 0.0
-      st.ytps      = 0
-      st.yps       = 0
-      st.cps       = 0
-      st.eups      = 0
-      st.kops      = 0
-      st.rps       = 0
-      st.syps      = 0
-      st.srps      = 0
-      st.mps       = 0
-      st.cmps      = 0
-      st.eMin      = typemax(Int)
-      st.eMax      = 0
-      st.csMin     = typemax(Int)
-      st.csMax     = 0
-      st.code      = 0
-      st.codeAmount = 0
-      st.evals     = cfg.orgEvals
-      st.eatl      = 0
-      st.eatr      = 0
-      st.eatu      = 0
-      st.eatd      = 0
-      st.eatorg    = 0
-      st.eated     = 0
-      st.grabbed   = 0
-      st.stepl     = 0
-      st.stepr     = 0
-      st.stepu     = 0
-      st.stepd     = 0
-      st.steps     = 0
-      st.energy    = 0
-      st.allEnergy = 0
-      st.allEnergyAmount = 0
-      st.orgs      = 0
+    _onAfterIps(man, stamp, sd)
+  end
+  #
+  # Is called at the end of _onIps() function
+  #
+  function _onAfterIps(man::ManagerData, stamp::Float64, sd::StatusData)
+    sd.stamp      = stamp
+    sd.iterations = 0
+    sd.ips        = 0.0
+    sd.ipsAmount  = 0
+    sd.ytps       = 0
+    sd.yps        = 0
+    sd.cps        = 0
+    sd.eups       = 0
+    sd.kops       = 0
+    sd.rps        = 0
+    sd.syps       = 0
+    sd.srps       = 0
+    sd.mps        = 0
+    sd.cmps       = 0
+    sd.eMin       = typemax(Int)
+    sd.eMax       = 0
+    sd.csMin      = typemax(Int)
+    sd.csMax      = 0
+    sd.code       = 0
+    sd.codeAmount = 0
+    sd.evals      = man.cfg.orgEvals
+    sd.eatl       = 0
+    sd.eatr       = 0
+    sd.eatu       = 0
+    sd.eatd       = 0
+    sd.eatorg     = 0
+    sd.eated      = 0
+    sd.grabbed    = 0
+    sd.stepl      = 0
+    sd.stepr      = 0
+    sd.stepu      = 0
+    sd.stepd      = 0
+    sd.steps      = 0
+    sd.energy     = 0
+    sd.orgs       = 0
+    sd.fit        = UInt(0)
+    sd.fitAmount  = 0
+  end
+  #
+  # Calls for every iteration, after all organisms were run
+  # @param man Manager data type object
+  # @param stamp Current time stamp
+  #
+  function _onIteration(man::ManagerData, stamp::Float64)
+    local sd::StatusData = man.plugins[MODULE_NAME]
+
+    sd.ips        += man.ips
+    sd.orgs       += length(man.tasks)
+    sd.iterations += 1
+  end
+  #
+  # Calculates total energy of population
+  # @param man Manager data type
+  # @param sd Structure of status line
+  #
+  function _iterateOrganisms(man::ManagerData, sd::StatusData)
+    local task::OrganismTask
+    local org::Creature.Organism
+
+    @inbounds for task in man.tasks
+      org = task.organism
+      sd.energy += org.energy
+      #
+      # Fitness level
+      #
+      sd.fit += UInt(org.energy) * UInt(org.mutationsFromStart)
     end
+    sd.fitAmount += length(man.tasks)
   end
   #
   # Handler of "eatorganism" event
@@ -209,18 +224,6 @@ module Status
   #
   function _onEatOrganism(man::ManagerData, eated::Int)
     man.plugins[MODULE_NAME].eatorg += eated
-  end
-  #
-  # Calls for every iteration, after all organisms were run
-  # @param man Manager data type object
-  # @param stamp Current time stamp
-  #
-  function _onIteration(man::ManagerData, stamp::Float64)
-    local st::StatusData = man.plugins[MODULE_NAME]
-
-    st.allEnergyAmount += 1
-    st.allEnergy += st.energy
-    st.energy = 0
   end
   #
   # Shows one parameter in status line accordint to settings
@@ -443,3 +446,35 @@ module Status
     end
   end
 end
+
+
+
+# if cfg.modeStatusFull
+#   print_with_color(:red,   rpad(string("eat:",    sd.eatl),                        11))
+#   print_with_color(:red,   rpad(string(sd.eatr),                                    8))
+#   print_with_color(:red,   rpad(string(sd.eatu),                                    8))
+#   print_with_color(:red,   rpad(string(sd.eatd),                                    8))
+#   print_with_color(:red,   rpad(string(format(sd.eated, commas=true)),             10))
+# end
+# if cfg.modeStatusFull
+#   print_with_color(:red, rpad(string("step:", sd.stepl),                           11))
+#   print_with_color(:red, rpad(string(sd.stepr),                                     6))
+#   print_with_color(:red, rpad(string(sd.stepu),                                     6))
+#   print_with_color(:red, rpad(string(sd.stepd),                                     6))
+#   print_with_color(:red, rpad(string(format(sd.steps, commas=true)),               10))
+# end
+# if cfg.modeStatusFull
+#   print_with_color(:yellow,  rpad(string("sreq:",   div(sd.srps, ips)),                       9))
+#   print_with_color(:yellow,  rpad(string("enup:",   div(sd.eups, ips)),                       8))
+# end
+# if cfg.modeStatusFull
+#   print_with_color(:orange,    rpad(string("code:",   sd.csMin),                   12))
+#   print_with_color(:orange,    rpad(string(sd.csMax),                               7))
+# end
+# if cfg.modeStatusFull
+#   print_with_color(:orange,    rpad(string("nrg:",    sd.eMin),                    11))
+#   print_with_color(:orange,    rpad(string(format(sd.eMax, commas=true)),            7), "\n")
+# end
+#print_with_color(:red,    rpad(string("ytps:",   sd.ytps)), 11))
+#print_with_color(:red,    rpad(string("yps:",    sd.yps)),  9))
+#print_with_color(:red,    rpad(string("syps:",   sd.syps)),  9))

@@ -1,10 +1,9 @@
 #
-# This is a part of Manager module.
-# TODO: Description
-# TODO: Dependencies
-# TODO: describe annotations: @rpc (RPC function)
-# TODO: add console message for all commands
-# TODO: describe returning nothing in @rpc functions
+# This is a part of Manager module. It represents Manager's Remote API, which
+# may be called from remote client or other manager. For this @rpc annotation
+# is used for functions. The value, which is returned by these functions will
+# be transferred to remote client (caller) as an answer. If @rpc function
+# returns nothing, then response to the remove caller will not be transferred.
 #
 # @author DeadbraiN
 #
@@ -12,7 +11,6 @@ import RpcApi
 import Config
 import Mutator
 import World
-import CommandLine
 import Event
 import FastApi
 import Server
@@ -30,7 +28,21 @@ const _SIDE_UP    = "UP"
 const _SIDE_DOWN  = "DOWN"
 #
 # @rpc
-# Grabs world's rectangle region and returns it
+# Grabs world's rectangle region and returns it. This function is optimized
+# for fast transferring through network by obtaining small "Region" type
+# instance. It works in a little complicated way:
+# - first it normalizes coordinates. It means, that thay should be in a range 1:width
+#   and 1:height of world (see Config.worldWidth/worldHright configs).
+# - second, it splits obtained region into small 16x16 squares (see _calcBlocksAmount).
+#   If the region isn't multiple to 16, then additional squares will be at the
+#   right and at the bottom.
+# - Every dot within one square may be described as 1 byte index (0..255, see
+#   Region.Block.energy). This is how we store all energy dots (see RpcApi.Block.energy)
+#   and organism dots (see RpcApi.Org types) within squares by index
+# - empty (black) dots are skipped
+# - In one RpcApi.Org type we may transfer any organism related info. It's possible
+#   to add more fields to this type in future.
+#
 # @param man Manager data type
 # @param x Start X coordinate of region
 # @param y Start Y coordinate of region
@@ -38,27 +50,48 @@ const _SIDE_DOWN  = "DOWN"
 # @param y1 End y. 0 means all height
 #
 function getRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
-  local data::Array{UInt32, 2}
+  x, y, x1, y1 = _normalizeRegion(man, x, y, x1, y1)
+
+  local data::Array{UInt16, 2} = _cutRegion(man, x, y, x1, y1)
+  local xBlocks::Int = _calcBlocksAmount(x, x1)
+  local yBlocks::Int = _calcBlocksAmount(y, y1)
+  local region::RpcApi.Region = RpcApi.Region(
+    UInt8(xBlocks),
+    UInt8(yBlocks),
+    UInt16(x1-x+1),
+    UInt16(y1-y+1),
+    RpcApi.Block[],
+    man.ips
+  )
+  local i::Int
+  local xOffs::Int = 1
+  local yOffs::Int = 1
+  local xBlock::Int
+  local yBlock::Int
+  local curX::UInt16
+  local curY::UInt16
+  local block::RpcApi.Block
+  local org::Creature.Organism
+  local offs::UInt8
   local pos::Helper.Point = Helper.Point(0, 0)
-
-  maxWidth  = size(man.world.data)[2]
-  maxHeight = size(man.world.data)[1]
-
-  if (x1 < 1 || x1 > maxWidth)  x1 = maxWidth  end
-  if (y1 < 1 || y1 > maxHeight) y1 = maxHeight end
-  if (x  < 1 || x  > maxWidth)  x  = 1 end
-  if (y  < 1 || y  > maxHeight) y  = 1 end
-
-  data = deepcopy(man.world.data[y:y1, x:x1])
-  for x in 1:size(data)[2]
-    for y in 1:size(data)[1]
-      pos.x = x
-      pos.y = y
-      data[y, x] = _getColorIndex(man, pos, data[y, x])
+  #
+  # Creates all blocks
+  #
+  for i = 1:(xBlocks * yBlocks) push!(region.blocks, RpcApi.Block(UInt8[], RpcApi.Org[])) end
+  #
+  # Walks through all dots in a world and stores only energy and organisms
+  #
+  for curY = UInt16(y):UInt16(y1)
+    pos.y = curY
+    for curX = UInt16(x):UInt16(x1)
+      pos.x = curX
+      if _isOrganism(man, Int(curX), Int(curY)) _addOrg(man, region, curX, curY)
+      elseif World.getEnergy(man.world, pos) > Dots.INDEX_EMPTY _addEnergy(man, region, curX, curY)
+      end
     end
   end
 
-  RpcApi.Region(data, man.ips)
+  region
 end
 #
 # @rpc
@@ -197,10 +230,10 @@ end
 # @param y Y coordinate
 # @param energy Amount of energy
 #
-function setEnergy(man::ManagerTypes.ManagerData, x::Int, y::Int, energy::UInt32)
+function setEnergy(man::ManagerTypes.ManagerData, x::Int, y::Int, energy::UInt16)
   local pos::Helper.Point = Helper.Point(x, y)
 
-  if World.getEnergy(man.world, pos) === UInt32(0)
+  if World.getEnergy(man.world, pos) === Dots.INDEX_EMPTY
     World.setEnergy(man.world, pos, energy)
   end
 
@@ -213,7 +246,7 @@ end
 # @param amount Amount of energy points
 # @param energy Amount of energy within one point
 #
-function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int, energy::UInt32)
+function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int, energy::UInt16)
   local width::Int = div(man.world.width, Helper.fastRand(5) + 1)
   local height::Int = div(man.world.height, Helper.fastRand(9))
   local xOffset::Int = div(man.world.width, Helper.fastRand(9) + 1)
@@ -353,7 +386,7 @@ end
 function markOrganism(man::ManagerTypes.ManagerData, orgId::UInt32, colorIndex::Int)
   if !haskey(man.organisms, orgId) return "Invalid organism id: 0x$(hex(orgId))" end
   local org::Creature.Organism = man.organisms[orgId]
-  local prevColorIndex::Int = org.color
+  local prevColorIndex::UInt16 = org.color
   #
   # Organism should be alive and color index should be in valid range
   #
@@ -367,6 +400,53 @@ function markOrganism(man::ManagerTypes.ManagerData, orgId::UInt32, colorIndex::
 end
 
 #
+# Creates Org type instance according to specified coordinates and organism
+# in these coordinates.
+# @param man Manager data type
+# @param region Region of a world we are working with
+# @param x X coordinate
+# @param y Y coordinate
+#
+function _addOrg(man::ManagerTypes.ManagerData, region::RpcApi.Region, x::UInt16, y::UInt16)
+  local org::Creature.Organism = man.positions[Manager._getPosId(man, Helper.Point(x, y))]
+  local block::RpcApi.Block
+  local offs::UInt8
+
+  block, offs = _findBlock(man, region, x, y)
+  push!(block.orgs, RpcApi.Org(offs, org.id, org.color, org.age))
+end
+#
+# Creates energy offset in found block for specified coordinates
+# @param man Manager data type
+# @param region Region of a world we are working with
+# @param x X coordinate
+# @param y Y coordinate
+#
+function _addEnergy(man::ManagerTypes.ManagerData, region::RpcApi.Region, x::UInt16, y::UInt16)
+  local block::RpcApi.Block
+  local offs::UInt8
+
+  block, offs = _findBlock(man, region, x, y)
+  push!(block.energy, offs)
+end
+#
+# Creates Org type instance according to specified coordinates and organism
+# in these coordinates.
+# @param man Manager data type
+# @param region Region of a world we are working with
+# @param x X coordinate
+# @param y Y coordinate
+# @return {Tuple{RpcApi.Region, Int, Int}}
+#
+function _findBlock(man::ManagerTypes.ManagerData, region::RpcApi.Region, x::UInt16, y::UInt16)
+  local xBlock::Int = div(x - 1, RpcApi.BLOCK_SIZE) + 1
+  local yBlock::Int = div(y - 1, RpcApi.BLOCK_SIZE) + 1
+  local xOffs::Int  = xBlock * RpcApi.BLOCK_SIZE - RpcApi.BLOCK_SIZE
+  local yOffs::Int  = yBlock * RpcApi.BLOCK_SIZE - RpcApi.BLOCK_SIZE
+
+  (region.blocks[(yBlock - 1) * region.xBlocks + xBlock], UInt8((y - yOffs - 1) * RpcApi.BLOCK_SIZE + x - xOffs - 1))
+end
+#
 # Handler of EVENT_BEFORE_RESPONSE for "fast" pooling mode. Turns
 # on "fast" streaming (pooling).
 # @param man Manager data type
@@ -374,16 +454,13 @@ end
 #
 function _onFastStreaming(man::ManagerTypes.ManagerData, sock::Base.TCPSocket, data::Array{Any, 1}, ans::Connection.Answer)
   man.cons.streamInit = false
-  man.dotCallback     = (pos::Helper.Point, color::UInt32)->_onDot(man, pos, color)
-  man.moveCallback    = (pos::Helper.Point, dir::Int, color::UInt32)->_onDot(man, pos, color, dir)
+  man.dotCallback     = (pos::Helper.Point, color::UInt16)->_onDrawEnergy(man, pos, color)
+  man.moveCallback    = (pos::Helper.Point, dir::Int, color::UInt16, orgId::UInt, outOfBorder::Bool)->_onDrawOrganism(man, pos, color, dir, orgId, outOfBorder)
+
   Event.off(man.world.obs, World.EVENT_DOT, man.dotCallback)
-  if !Event.has(man.world.obs, World.EVENT_DOT, man.dotCallback)
-    Event.on(man.world.obs, World.EVENT_DOT, man.dotCallback)
-  end
   Event.off(man.world.obs, World.EVENT_MOVE, man.moveCallback)
-  if !Event.has(man.world.obs, World.EVENT_MOVE, man.moveCallback)
-    Event.on(man.world.obs, World.EVENT_MOVE, man.moveCallback)
-  end
+  Event.on(man.world.obs, World.EVENT_DOT, man.dotCallback)
+  Event.on(man.world.obs, World.EVENT_MOVE, man.moveCallback)
 end
 #
 # This is a handler on world dot change. It notify remote clients
@@ -392,26 +469,50 @@ end
 # @param pos Dot coordinates
 # @param color Dot color
 #
-function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32, dir::Int = Dots.DIRECTION_NO)
+function _onDrawEnergy(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16)
   local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
-  local x::UInt16 = UInt16(pos.x)
-  local y::UInt16 = UInt16(pos.y)
-  local dataIndex::UInt8 = UInt8(FastApi.API_DOT_COLOR)
   local off::Bool = true
-  #
-  # This is how we get color index of a dot
-  #
-  color = _getColorIndex(man, pos, color)
-  #
-  # Encodes direction to the first(unused) byte of color
-  #
-  if dir !== Dots.DIRECTION_NO
-    color |= (UInt32(dir) << 24)
-  end
+
   for i::Int = 1:length(socks)
     if Helper.isopen(socks[i])
       off = false
-      Server.request(socks[i], dataIndex, x, y, color)
+      Server.request(socks[i], FastApi.API_DOT_COLOR, UInt16(pos.x), UInt16(pos.y), color < UInt16(1) ? Dots.INDEX_EMPTY : Dots.INDEX_ENERGY)
+      Event.fire(man.obs, "dotrequest", man)
+    end
+  end
+  #
+  # This is how we push all active messages to the network
+  # TODO: change to yieldto() do we need this?
+  yield()
+  Event.fire(man.obs, "yield", man)
+  #
+  # All "fast" clients were disconnected
+  #
+  if off Event.off(man.world.obs, World.EVENT_DOT, man.dotCallback) end
+  if off Event.off(man.world.obs, World.EVENT_MOVE, man.moveCallback) end
+end
+#
+# This is a handler on world dot change. It notify remote clients
+# about these changes.
+# @param man Manager data type
+# @param pos Dot coordinates
+# @param color Dot color
+#
+function _onDrawOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt16, dir::Int, orgId::UInt, outOfBorder::Bool)
+  local socks::Array{Base.TCPSocket, 1} = man.cons.fastServer.socks
+  local dataIndex::UInt8
+  local off::Bool = true
+  local hasDirection::Bool = dir !== Dots.DIRECTION_NO
+  local infoBits::UInt8 = UInt8(outOfBorder)
+  #
+  # Encodes direction of organism to the first(unused) half byte of color.
+  # e.g.: 0x000F -> 0xF000
+  #
+  color |= (UInt16(dir) << 12)
+  for i::Int = 1:length(socks)
+    if Helper.isopen(socks[i])
+      off = false
+      Server.request(socks[i], FastApi.API_ORG_COLOR, UInt16(pos.x), UInt16(pos.y), color, orgId, infoBits)
       Event.fire(man.obs, "dotrequest", man)
     end
   end
@@ -427,22 +528,14 @@ function _onDot(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32,
   if off Event.off(man.world.obs, World.EVENT_MOVE, man.moveCallback) end
 end
 #
-# Converts color to it's index. This index is used for Visualizer
-# to draw colored dot
+# Checks if in specified X and Y is an organism
 # @param man Manager data type
-# @param pos Dot coordinates
-# @param color  Dot color
-# @return {UInt32} Color index
+# @param x X coordinate
+# @param y Y coordinate
+# @return {Bool}
 #
-function _getColorIndex(man::ManagerTypes.ManagerData, pos::Helper.Point, color::UInt32)
-  local posId::Int = Manager._getPosId(man, pos)
-  local isOrganism::Bool = haskey(man.positions, posId)
-
-  if color !== UInt32(Dots.INDEX_EMPTY)
-    color = UInt32(isOrganism ? man.positions[posId].color : Dots.INDEX_ENERGY)
-  end
-
-  color
+function _isOrganism(man::ManagerTypes.ManagerData, x::Int, y::Int)
+  haskey(man.positions, Manager._getPosId(man, Helper.Point(x, y)))
 end
 #
 # Assembles RpcApi.SimpleOrganism type from wider Creature.Organism
@@ -530,7 +623,7 @@ function _onAfterResponse(man::ManagerTypes.ManagerData, side::String, ans::Conn
 
   delete!(man.cons.frozen, ans.data)
   if ans.id !== RpcApi.RPC_ORG_STEP_OK
-    if World.getEnergy(man.world, org.pos) > UInt32(0)
+    if World.getEnergy(man.world, org.pos) > Dots.INDEX_EMPTY
       pos = World.getNearFreePos(man.world, org.pos)
       #
       # If there is no free space, we have to kill this frozen organism
@@ -626,6 +719,51 @@ function _createServer(man::ManagerTypes.ManagerData, fast::Bool = false)
   Event.on(con.observer, Connection.EVENT_BEFORE_RESPONSE, fn)
 
   con
+end
+#
+# Cuts specified region and return 2D array of it
+# @param man Manager data type
+# @param x Start X coordinate of region
+# @param y Start Y coordinate of region
+# @param x1 End x. 0 means all width
+# @param y1 End y. 0 means all height
+#
+function _cutRegion(man::ManagerTypes.ManagerData, x::Int, y::Int, x1::Int, y1::Int)
+  copy(man.world.data[y:y1, x:x1])
+end
+#
+# Returns amount of blocks depending on amount of pixels. For example, if
+# we have 17x17 pixels block (for block size of 16x16) we have to have 2x2
+# blocks for storing this.
+# @param x Start coordinate (may be X or Y)
+# @param x1 End coordinate (may be X or Y)
+# @return {Int} Blocks amount
+#
+function _calcBlocksAmount(x::Int, x1::Int)
+  local blocks::Int = x1 - x + 1
+  div(blocks, RpcApi.BLOCK_SIZE) + (blocks % RpcApi.BLOCK_SIZE > 0 ? 1 : 0)
+end
+#
+# Checks if specified coordinates are out of world. If so, then world
+# coordinates will be returned. Otherwise the same coordinates will be
+# returned
+# @param man Manager data type
+# @param x Start X coordinate of region
+# @param y Start Y coordinate of region
+# @param x1 End x. 0 means all width
+# @param y1 End y. 0 means all height
+# @return {Tuple}
+#
+function _normalizeRegion(man::ManagerTypes.ManagerData, x::Int = 1, y::Int = 1, x1::Int = 0, y1::Int = 0)
+  local maxWidth::Int  = size(man.world.data)[2]
+  local maxHeight::Int = size(man.world.data)[1]
+
+  if (x1 < 1 || x1 > maxWidth)  x1 = maxWidth  end
+  if (y1 < 1 || y1 > maxHeight) y1 = maxHeight end
+  if (x  < 1 || x  > maxWidth)  x  = 1 end
+  if (y  < 1 || y  > maxHeight) y  = 1 end
+
+  (x, y, x1, y1)
 end
 #
 # An API for remove clients. This manager will be a server for them.

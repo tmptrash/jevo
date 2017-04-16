@@ -62,9 +62,9 @@ module Config
   const ORGANISM_MAX_MUTATION_PERIOD = 1000
   #
   # Maximum amount of energy, which one organism may contains. Should be
-  # less then typemax(UInt32).
+  # less then typemax(UInt16).
   #
-  const ORGANISM_MAX_ENERGY = Int(typemax(UInt32))
+  const ORGANISM_MAX_ENERGY = Int(typemax(UInt16))
   #
   # Data type for storing configuration data. Is used in pair with GData
   # type. For accessing use Gonfig.val(man.cfg, :SYMBOL[, value]) function
@@ -175,6 +175,15 @@ module Config
     #
     codeRuns::Int
     #
+    # This coefficiend is used for calculating of amount of energy,
+    # which grabbed from each organism depending on his codeSize.
+    # This coefficient affects entire code size of population and
+    # entire system speed. It depends on CPU speed also. So, for
+    # different PC's it may be different.
+    # Formula is the following: grabEnergy = cfg.codeSizeCoef * org.codeSize
+    #
+    codeSizeCoef::Float64
+    #
     # World width
     #
     worldWidth::Int
@@ -210,7 +219,7 @@ module Config
     # Amount of energy in every block. See worldStartEnergyDots
     # config for details.
     #
-    worldStartEnergyInDot::UInt32
+    worldStartEnergyInDot::UInt16
     #
     # Minimum percent of energy in current world. Under percent i mean
     # percent from entire world area (100%). If the energy will be less
@@ -430,6 +439,7 @@ module Config
       2,                                       # codeFuncParamAmount
       Int8(16),                                # codeLoopDiv
       0,                                       # codeRuns
+      1.2,                                     # codeSizeCoef
 
       1900,                                    # worldWidth
       940,                                     # worldHeight
@@ -437,7 +447,7 @@ module Config
       500,                                     # worldMaxOrgs
       0,                                       # worldMinOrgs
       1000,                                    # worldStartEnergyDots
-      UInt32(0x0001F4),                        # worldStartEnergyInDot
+      UInt16(0x0001F4),                        # worldStartEnergyInDot
       0.5,                                     # worldEnergyCheckPercent
       1000,                                    # worldEnergyCheckPeriod
       1,                                       # worldZoom
@@ -460,7 +470,7 @@ module Config
       0,                                       # conDownServerPort
       ip"127.0.0.1",                           # conDownServerIp
 
-      ["Phylogen", "Status"],                  # plugIncluded
+      [#="Phylogen",=# "Status"],                  # plugIncluded
       [],                                      # plugExcluded
 
       false,                                   # modeDebug

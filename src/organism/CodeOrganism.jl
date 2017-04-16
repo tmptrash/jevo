@@ -369,7 +369,7 @@ end
 function myColor(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local var::Symbol = @randVar(org, pos, Int16)
   if var === :nothing return Expr(:nothing) end
-  :($var=Int16(o.color))
+  :($var=o.color)
 end
 #
 # @cmd

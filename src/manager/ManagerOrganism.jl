@@ -235,6 +235,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   local minOrgs::Int = man.cfg.worldMinOrgs
   local dontKill::Bool = (i < minOrgs)
   local codeSize::Int
+  local codeSizeCoef::Float64 = man.cfg.codeSizeCoef
 
   if dontKill return false end
   #
@@ -250,7 +251,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     # Energy shouldn't be less then 1
     #
     if !dontKill
-      codeSize = org.codeSize < 1 ? 1 : org.codeSize
+      codeSize = org.codeSize < 1 ? 1 : Int(round(org.codeSize * codeSizeCoef))
       Event.fire(man.obs, "grabenergy", man, org.energy < codeSize ? org.energy : codeSize)
       if !_decreaseOrganismEnergy(man, org, codeSize, i)
         dontKill = (length(tasks) <= minOrgs)
@@ -285,7 +286,7 @@ end
 # @param man Manager data type
 # TODO: this method is very slow!!! should be optimized!
 function _updateWorldEnergy(man::ManagerTypes.ManagerData)
-  local plane::Array{UInt32, 2} = man.world.data
+  local plane::Array{UInt16, 2} = man.world.data
   local total::Int = man.world.width * man.world.height
   local energy::Int = 0
   local positions::Dict{Int, Creature.Organism} = man.positions
@@ -317,9 +318,9 @@ end
 function _freezeOrganism(man::ManagerTypes.ManagerData, i::Int)
   local id::UInt = man.tasks[i].id
   local org::Creature.Organism = man.tasks[i].organism
-  local oldColor::UInt32 = org.color
+  local oldColor::UInt16 = org.color
 
-  org.color = UInt32(Dots.INDEX_EMPTY)
+  org.color = UInt16(Dots.INDEX_EMPTY)
   Event.clear(org.observer)
   _moveOrganism(man, org.pos, org)
   org.color = oldColor
@@ -347,7 +348,7 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   local id::UInt = org.id
 
   org.energy = 0
-  org.color  = UInt32(Dots.INDEX_EMPTY)
+  org.color  = UInt16(Dots.INDEX_EMPTY)
   Event.clear(org.observer)
   _moveOrganism(man, org.pos, org)
   delete!(man.positions, Manager._getPosId(man, org.pos))
@@ -435,25 +436,21 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   # organism.pos - old organism position
   #
   if idOld !== idNew
-    delete!(man.positions, Manager._getPosId(man, organism.pos))
+    delete!(man.positions, idOld)
     man.positions[idNew] = organism
     #
     # Using this command, we optimize amount of transferred data
     # through network and remove blinks in visualizer, because we
     # transfet only new coordinates, color and direction
     #
-    if cyclicMove
-      World.setEnergy(man.world, organism.pos, UInt32(Dots.INDEX_EMPTY))
-      World.setEnergy(man.world, newPos, UInt32(organism.color))
-    else
-     World.moveEnergy(man.world, organism.pos, newPos, UInt32(organism.color))
-    end
+    if cyclicMove World.moveEnergy(man.world, organism.pos, newPos, organism, true)
+    else World.moveEnergy(man.world, organism.pos, newPos, organism) end
     organism.pos = newPos
   #
   # The position didn't change, so only color should be updated
   #
   else
-    World.setEnergy(man.world, newPos, UInt32(organism.color))
+    World.moveEnergy(man.world, newPos, newPos, organism)
   end
 
   true
@@ -726,7 +723,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
   id = Manager._getPosId(man, newPos)
   #
   # If other organism at the position of the check,
-  # then grab energy from it
+  # then grab energy from him
   #
   if haskey(man.positions, id)
     org = man.positions[id]
@@ -754,9 +751,9 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     Event.fire(man.obs, "eatorganism", man, retObj.ret)
   else
     #
-    # Organism wants to give an energy, but no other organisms around
+    # Organism wants to get an energy, but no other organisms around
     #
-    retObj.ret = amount > 0 ? World.grabEnergy(man.world, newPos, UInt32(amount)) : 0
+    retObj.ret = amount > 0 ? World.grabEnergy(man.world, newPos, UInt16(amount)) : 0
   end
 
   retObj.ret = Int(retObj.ret)

@@ -118,8 +118,11 @@ end
 # Manager and evolution of digital organisms
 #
 function _onRun()
+  local man::ManagerTypes.ManagerData
   local exitCode::Int
+  local cfg::Config.ConfigData = Config.create(false)
 
+  man = Manager.create(cfg)
   if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info("Starting jevo...") end
   if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info("Running from scratch...") end
   exitCode = Int(!Manager.run(Manager.create())) # 1 - error, 0 - okay

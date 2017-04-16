@@ -98,8 +98,8 @@ module Mutator
     local colIndex::Int = org.mutationsFromStart - (org.mutationsFromStart % cfg.orgColorPeriod)
 
     if org.mutationsFromStart > cfg.orgColorPeriod && colIndex >= org.mutationsFromStart - amount && colIndex <= org.mutationsFromStart
-      org.color += 1
-      if org.color > Dots.INDEX_MAX_ORG_COLOR org.color = 1 end
+      org.color += UInt16(1)
+      if org.color > Dots.INDEX_MAX_ORG_COLOR org.color = Dots.INDEX_FIRST_COLOR end
     end
   end
   #
@@ -120,6 +120,10 @@ module Mutator
     # We may add a code only after variables/functions declaration
     #
     if pos.lineIdx < block.defIndex return false end
+    #
+    # This is how new line is added at the end of the current block
+    #
+    if pos.lineIdx === 0 pos.lineIdx = block.defIndex + 1 end
     local exp::Expr = cmd.fn(cfg, org, pos)
     #
     # Incorrect position for adding or it's impossible to
@@ -160,7 +164,8 @@ module Mutator
     # It's impossible to get a command or no lines to change
     #
     if len < 1 ||
-       pos.lineIdx >= len ||
+       pos.lineIdx > len ||
+       pos.lineIdx === len && pos.blockIdx > 1 ||
        lines[pos.lineIdx].head === :return ||
        pos.lineIdx <= block.defIndex ||   # we can't remove predefined vars
        #
@@ -192,8 +197,9 @@ module Mutator
     local len::Int = length(lines)
 
     if len < 1 ||
-       pos.lineIdx >= len ||
-       pos.lineIdx <= org.funcs[pos.fnIdx].blocks[pos.blockIdx].defIndex || # we can't remove predefined vars
+       pos.lineIdx > len ||
+       pos.lineIdx === len && pos.blockIdx > 1 ||
+       pos.lineIdx <= Creature.VARS_AMOUNT || #org.funcs[pos.fnIdx].blocks[pos.blockIdx].defIndex || # we can't remove predefined vars
        lines[pos.lineIdx].head === :return
       return false
     end

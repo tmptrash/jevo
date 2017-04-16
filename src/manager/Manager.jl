@@ -56,6 +56,7 @@ module Manager
   import FastApi
   import Config
   import ManagerTypes
+  import Dots
 
   export create
   export run
@@ -268,7 +269,7 @@ module Manager
   # @return {Bool} true - free point, false - filled point
   # TODO: this method is very slow!!!
   function _isFree(man::ManagerTypes.ManagerData, pos::Helper.Point)
-    !haskey(man.positions, _getPosId(man, pos)) && World.getEnergy(man.world, pos) === UInt32(0)
+    !haskey(man.positions, _getPosId(man, pos)) && World.getEnergy(man.world, pos) === Dots.INDEX_EMPTY
   end
   #
   # Updates IPS (Iterations Per second) counter and stores it in config
@@ -281,15 +282,13 @@ module Manager
     local ts::Float64 = stamp - istamp
     if ts < man.cfg.worldIpsPeriod return istamp end
     local sock::Base.TCPSocket
-    local dataIndex::UInt8
 
     man.ips = man.cfg.codeRuns / length(man.tasks) / ts
     Event.fire(man.obs, "ips", man, stamp, man.cfg.codeRuns)
     man.cfg.codeRuns = 0
-    dataIndex = UInt8(FastApi.API_FLOAT64)
     @inbounds for sock in man.cons.fastServer.socks
       if Helper.isopen(sock)
-        Server.request(sock, dataIndex, man.ips)
+        Server.request(sock, UInt8(FastApi.API_FLOAT64), man.ips)
         Event.fire(man.obs, "request", man)
       end
     end
