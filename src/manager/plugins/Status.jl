@@ -137,7 +137,7 @@ module Status
     _showParam(:yellow, "clon:", (@sprintf "%.2f" sd.cps / iterations), 11)
     #_showParam(:yellow, "req.",  sd.rps, 9)
     #_showParam(:yellow, "eval.", cfg.orgEvals - sd.evals, 10)
-    _showParam(:orange, "err:",  div(cfg.orgErrors, iterations), 8)
+    _showParam(:orange, "err:",  div(cfg.orgErrors, iterations), 10)
     _showParam(:orange, "cod:", (@sprintf "%.2f" sd.code / sd.codeAmount), 12)
     _showParam(:red,    "fit:",  Int(div(sd.fit, UInt(sd.fitAmount))), 16, true)
     print("\n")
