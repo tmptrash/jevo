@@ -235,6 +235,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   local minOrgs::Int = man.cfg.worldMinOrgs
   local dontKill::Bool = (i < minOrgs)
   local codeSize::Int
+  local codeSizeCoef::Float64 = man.cfg.codeSizeCoef
 
   if dontKill return false end
   #
@@ -250,7 +251,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     # Energy shouldn't be less then 1
     #
     if !dontKill
-      codeSize = org.codeSize < 1 ? 1 : org.codeSize
+      codeSize = org.codeSize < 1 ? 1 : Int(round(org.codeSize * codeSizeCoef))
       Event.fire(man.obs, "grabenergy", man, org.energy < codeSize ? org.energy : codeSize)
       if !_decreaseOrganismEnergy(man, org, codeSize, i)
         dontKill = (length(tasks) <= minOrgs)

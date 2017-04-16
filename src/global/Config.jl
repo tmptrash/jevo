@@ -175,6 +175,15 @@ module Config
     #
     codeRuns::Int
     #
+    # This coefficiend is used for calculating of amount of energy,
+    # which grabbed from each organism depending on his codeSize.
+    # This coefficient affects entire code size of population and
+    # entire system speed. It depends on CPU speed also. So, for
+    # different PC's it may be different.
+    # Formula is the following: grabEnergy = cfg.codeSizeCoef * org.codeSize
+    #
+    codeSizeCoef::Float64
+    #
     # World width
     #
     worldWidth::Int
@@ -430,6 +439,7 @@ module Config
       2,                                       # codeFuncParamAmount
       Int8(16),                                # codeLoopDiv
       0,                                       # codeRuns
+      1.2,                                     # codeSizeCoef
 
       1900,                                    # worldWidth
       940,                                     # worldHeight
