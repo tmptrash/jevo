@@ -217,7 +217,7 @@ module Creature
     # @inharitable
     # Organism's personal memory. Is used in any possible way.
     #
-    mem::Dict{Int16, Int16}
+    mem::Dict{Float64, Float64}
     #
     # Organism's position in a 2D world. Starts from (1,1)
     # ends with (worldWidth, worldHeight) configurations.
@@ -258,45 +258,13 @@ module Creature
     local code::Expr = Expr(:function, Expr(:tuple,                         # function paraments
         Expr(:(::), :c, Expr(:., :Config,   Expr(:quote, :ConfigData))),    # c::Config.ConfigData
         Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),     # o::Creature.Organism
-        # TODO: this lines should be added dynamically with VAR_AMOUNT constant
           Expr(:block,
-            Expr(:local, Expr(:(=), Expr(:(::), :var_1, :String), randstring())),     # String variables
-            Expr(:local, Expr(:(=), Expr(:(::), :var_2, :String), randstring())),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_3, :String), randstring())),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_4, :String), randstring())),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_5, :String), randstring())),
-
-            Expr(:local, Expr(:(=), Expr(:(::), :var_6, :Bool),   rand(Bool))),  # Bool variables
-            Expr(:local, Expr(:(=), Expr(:(::), :var_7, :Bool),   rand(Bool))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_8, :Bool),   rand(Bool))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_9, :Bool),   rand(Bool))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_10, :Bool),  rand(Bool))),
-
-            Expr(:local, Expr(:(=), Expr(:(::), :var_11, :Int8),   rand(Int8))),     # Int8 variables
-            Expr(:local, Expr(:(=), Expr(:(::), :var_12, :Int8),   rand(Int8))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_13, :Int8),   rand(Int8))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_14, :Int8),   rand(Int8))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_15, :Int8),   rand(Int8))),
-
-            Expr(:local, Expr(:(=), Expr(:(::), :var_16, :Int16),  rand(Int16))),     # Int16 variables
-            Expr(:local, Expr(:(=), Expr(:(::), :var_17, :Int16),  rand(Int16))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_18, :Int16),  rand(Int16))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_19, :Int16),  rand(Int16))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_20, :Int16),  rand(Int16))),
-
-            Expr(:local, Expr(:(=), Expr(:(::), :var_21, :Int),    rand(Int))),     # Int64 variables
-            Expr(:local, Expr(:(=), Expr(:(::), :var_22, :Int),    rand(Int))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_23, :Int),    rand(Int))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_24, :Int),    rand(Int))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_25, :Int),    rand(Int))),
-
-            Expr(:local, Expr(:(=), Expr(:(::), :var_26, :Float64),rand(Float64))),   # Float64 variables
-            Expr(:local, Expr(:(=), Expr(:(::), :var_27, :Float64),rand(Float64))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_28, :Float64),rand(Float64))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_29, :Float64),rand(Float64))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_30, :Float64),rand(Float64))),
-
-            Expr(:return, true)                                             # return true
+            Expr(:local, Expr(:(=), Expr(:(::), :var_1, :Float64),rand(Float64))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_2, :Float64),rand(Float64))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_3, :Float64),rand(Float64))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_4, :Float64),rand(Float64))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_5, :Float64),rand(Float64))),
+            Expr(:return, true)
         )
     )
     #
@@ -417,8 +385,8 @@ module Creature
       try
         org.codeFn(cfg, org)
       catch e
-        #showerror(STDOUT, e, catch_backtrace())
-        #println("\n", org.code, "\n\n")
+        showerror(STDOUT, e, catch_backtrace())
+        println("\n", org.code, "\n\n")
         #
         # Organisms with errors in a code should be less successful
         #

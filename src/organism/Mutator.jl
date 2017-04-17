@@ -119,7 +119,7 @@ module Mutator
     #
     # We may add a code only after variables/functions declaration
     #
-    if pos.lineIdx < block.defIndex return false end
+    if pos.lineIdx <= block.defIndex return false end
     #
     # This is how new line is added at the end of the current block
     #
@@ -156,7 +156,7 @@ module Mutator
     #
     # We may add a code only after variables/functions declaration
     #
-    if pos.lineIdx < block.defIndex return false end
+    if pos.lineIdx <= block.defIndex return false end
     local lines::Array{Any, 1} = block.expr.args
     local len::Int = length(lines)
     local exp::Expr

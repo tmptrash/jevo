@@ -40,131 +40,105 @@ export codeSizeDown
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
-# @return {Expr} New expression or Expr(:nothing) if skipped
+# @return {Expr|Expr(:nothing)} New expression or Expr(:nothing) if skipped
 #
 function lookAt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local varSym::Symbol = @randVar(org, pos, Int)
-  local xSym::Symbol   = @randVar(org, pos, Int16)
-  local ySym::Symbol   = @randVar(org, pos, Int16)
-
+  local varSym::Symbol = @randVar(org, pos, Float64)
+  local xSym::Symbol   = @randVar(org, pos, Float64)
+  local ySym::Symbol   = @randVar(org, pos, Float64)
   if (varSym === :nothing || xSym === :nothing) return Expr(:nothing) end
-  :($varSym=Int(Creature.getEnergy(o, Int($xSym), Int($ySym))))
+
+  :($(varSym) = Float64(Creature.getEnergy(o, Int(round($(xSym))), Int(round($(ySym))))))
 end
 #
 # @cmd
 # @line
-# Is called when organism bites on the left. Format: var = eatLeft(amount::Int8):Int8
+# Is called when organism bites on the left. Format: var_xx = eatLeft(cfg.orgEatSize):Float64
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
-# @return {Expr|Expr(:nothing)}
+# @return {Expr}
 #
 function eatLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local amount::Symbol = @randVar(org, pos, Int8)
-  if amount === :nothing return Expr(:nothing) end
-  #
-  # If we pass previous line, then at least one Int8 var exists.
-  # Amount of eated and current energy in sum may be bigger then
-  # typemax(Int8). So we have to use Int16 for return value.
-  #
-  local var::Symbol = @randVar(org, pos, Int16)
-  if var === :nothing return :(Creature.eatLeft(c, o, Int($(amount)))) end
+  local var::Symbol = @randVar(org, pos, Float64)
+  if var === :nothing return :(Creature.eatLeft(c, o, $(cfg.orgEatSize))) end
 
-  :($var = Int16(Creature.eatLeft(c, o, Int($(amount)))))
+  :($(var) = Float64(Creature.eatLeft(c, o, $(cfg.orgEatSize))))
 end
 #
 # @cmd
 # @line
-# Is called when organism bites on the right. Format: var = eatRight(amount::Int8):Int8
+# Is called when organism bites on the right. Format: var_xx = eatRight(cfg.orgEatSize):Float64
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
-# @return {Expr|Expr(:nothing)}
+# @return {Expr}
 #
 function eatRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local amount::Symbol = @randVar(org, pos, Int8)
-  if amount === :nothing return Expr(:nothing) end
-  #
-  # If we pass previous line, then at least one Int8 var exists.
-  # Amount of eated and current energy in sum may be bigger then
-  # typemax(Int8). So we have to use Int16 for return value.
-  #
-  local var::Symbol = @randVar(org, pos, Int16)
-  if var === :nothing return :(Creature.eatRight(c, o, Int($(amount)))) end
+  local var::Symbol = @randVar(org, pos, Float64)
+  if var === :nothing return :(Creature.eatRight(c, o, $(cfg.orgEatSize))) end
 
-  :($var = Int16(Creature.eatRight(c, o, Int($(amount)))))
+  :($(var) = Float64(Creature.eatRight(c, o, $(cfg.orgEatSize))))
 end
 #
 # @cmd
 # @line
-# Is called when organism bites up. Format: var = eatUp(amount::Int8):Int8
+# Is called when organism bites up. Format: var_xx = eatUp(cfg.orgEatSize):Float64
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
-# @return {Expr|Expr(:nothing)}
+# @return {Expr}
 #
 function eatUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local amount::Symbol = @randVar(org, pos, Int8)
-  if amount === :nothing return Expr(:nothing) end
-  #
-  # If we pass previous line, then at least one Int8 var exists.
-  # Amount of eated and current energy in sum may be bigger then
-  # typemax(Int8). So we have to use Int16 for return value.
-  #
-  local var::Symbol = @randVar(org, pos, Int16)
-  if var === :nothing return :(Creature.eatUp(c, o, Int($(amount)))) end
+  local var::Symbol = @randVar(org, pos, Float64)
+  if var === :nothing return :(Creature.eatUp(c, o, $(cfg.orgEatSize))) end
 
-  :($var = Int16(Creature.eatUp(c, o, Int($(amount)))))
+  :($(var) = Float64(Creature.eatUp(c, o, $(cfg.orgEatSize))))
 end
 #
 # @cmd
 # @line
-# Is called when organism bites down. Format: var = eatDown(amount::Int8):Int8
+# Is called when organism bites down. Format: var_xx = eatDown(cfg.orgEatSize):Float64
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
-# @return {Expr|Expr(:nothing)}
+# @return {Expr}
 #
 function eatDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local amount::Symbol = @randVar(org, pos, Int8)
-  if amount === :nothing return Expr(:nothing) end
-  #
-  # If we pass previous line, then at least one Int8 var exists.
-  # Amount of eated and current energy in sum may be bigger then
-  # typemax(Int8). So we have to use Int16 for return value.
-  #
-  local var::Symbol = @randVar(org, pos, Int16)
-  if var === :nothing return :(Creature.eatDown(c, o, Int($(amount)))) end
+  local var::Symbol = @randVar(org, pos, Float64)
+  if var === :nothing return :(Creature.eatDown(c, o, $(cfg.orgEatSize))) end
 
-  :($var = Int16(Creature.eatDown(c, o, Int($(amount)))))
+  :($(var) = Float64(Creature.eatDown(c, o, $(cfg.orgEatSize))))
 end
 #
 # @cmd
 # @line
-# Is called when organism make step left
+# Is called when organism makes step left
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
-# @return {Expr|Expr(:nothing)}
+# @return {Expr}
 #
 function stepLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Bool)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return :(Creature.stepLeft(o)) end
-  :($var = Creature.stepLeft(o))
+
+  :($(var) = Float64(Creature.stepLeft(o)))
 end
 #
 # @cmd
 # @line
-# Is called when organism make step right
+# Is called when organism makes step right
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
 function stepRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Bool)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return :(Creature.stepRight(o)) end
-  :($var = Creature.stepRight(o))
+
+  :($(var) = Float64(Creature.stepRight(o)))
 end
 #
 # @cmd
@@ -176,9 +150,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function stepUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Bool)
+  local var::Symbol = @randVar(org, pos, Float64)
+
   if var === :nothing return :(Creature.stepUp(o)) end
-  :($var = Creature.stepUp(o))
+  :($(var) = Float64(Creature.stepUp(o)))
 end
 #
 # @cmd
@@ -190,9 +165,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function stepDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Bool)
+  local var::Symbol = @randVar(org, pos, Float64)
+
   if var === :nothing return :(Creature.stepDown(o)) end
-  :($var = Creature.stepDown(o))
+  :($(var) = Float64(Creature.stepDown(o)))
 end
 #
 # @cmd
@@ -204,13 +180,12 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function toMem(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randType()
-  local key::Symbol   = @randVar(org, pos, Int16)
-  local val::Symbol   = @randVar(org, pos, Int16)
+  local key::Symbol = @randVar(org, pos, Float64)
+  local val::Symbol = @randVar(org, pos, Float64)
 
   if key === :nothing return Expr(:nothing) end
 
-  :(o.mem[$key]=$val)
+  :(o.mem[$(key)] = $(val))
 end
 #
 # @cmd
@@ -222,16 +197,15 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function fromMem(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randType()
-  local key::Symbol   = @randVar(org, pos, Int16)
-  local val::Symbol   = @randVar(org, pos, Int16)
+  local key::Symbol = @randVar(org, pos, Float64)
+  local val::Symbol = @randVar(org, pos, Float64)
 
   if key === :nothing return Expr(:nothing) end
   #
   # We don't need to create separate block here, because
   # this is one code line.
   #
-  :($val=haskey(o.mem, $key) ? o.mem[$key] : $val)
+  :($(val) = haskey(o.mem, $(key)) ? o.mem[$(key)] : $(val))
 end
 #
 # @cmd
@@ -245,9 +219,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function idLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Int(Creature.idLeft(o)))
+
+  :($(var) = Float64(Creature.idLeft(o)))
 end
 #
 # @cmd
@@ -261,9 +236,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function idRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Int(Creature.idRight(o)))
+
+  :($(var) = Float64(Creature.idRight(o)))
 end
 #
 # @cmd
@@ -277,9 +253,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function idUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Int(Creature.idUp(o)))
+
+  :($(var) = Float64(Creature.idUp(o)))
 end
 #
 # @cmd
@@ -293,9 +270,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function idDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Int(Creature.idDown(o)))
+
+  :($(var) = Float64(Creature.idDown(o)))
 end
 #
 # @cmd
@@ -308,9 +286,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Creature.energyLeft(o))
+
+  :($(var) = Float64(Creature.energyLeft(o)))
 end
 #
 # @cmd
@@ -323,9 +302,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Creature.energyRight(o))
+
+  :($(var) = Float64(Creature.energyRight(o)))
 end
 #
 # @cmd
@@ -338,9 +318,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Creature.energyUp(o))
+
+  :($(var) = Float64(Creature.energyUp(o)))
 end
 #
 # @cmd
@@ -353,9 +334,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Creature.energyDown(o))
+
+  :($(var) = Float64(Creature.energyDown(o)))
 end
 #
 # @cmd
@@ -367,9 +349,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function myColor(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int16)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=o.color)
+
+  :($(var) = Float64(o.color))
 end
 #
 # @cmd
@@ -381,9 +364,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function myX(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int16)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Int16(o.pos.x))
+
+  :($(var) = Float64(o.pos.x))
 end
 #
 # @cmd
@@ -395,9 +379,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function myY(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int16)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Int16(o.pos.y))
+
+  :($(var) = Float64(o.pos.y))
 end
 #
 # @cmd
@@ -409,9 +394,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function codeSizeLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int16)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Int16(Creature.codeSizeLeft(o)))
+
+  :($(var) = Float64(Creature.codeSizeLeft(o)))
 end
 #
 # @cmd
@@ -423,9 +409,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function codeSizeRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int16)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Int16(Creature.codeSizeRight(o)))
+
+  :($(var) = Float64(Creature.codeSizeRight(o)))
 end
 #
 # @cmd
@@ -437,9 +424,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function codeSizeUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int16)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Int16(Creature.codeSizeUp(o)))
+
+  :($(var) = Float64(Creature.codeSizeUp(o)))
 end
 #
 # @cmd
@@ -451,9 +439,10 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function codeSizeDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local var::Symbol = @randVar(org, pos, Int16)
+  local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Int16(Creature.codeSizeDown(o)))
+
+  :($(var) = Float64(Creature.codeSizeDown(o)))
 end
 #
 # @cmd
@@ -467,7 +456,8 @@ end
 function cloneEnergyPercentLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Creature.cloneEnergyPercentLeft(o))
+
+  :($(var) = Creature.cloneEnergyPercentLeft(o))
 end
 #
 # @cmd
@@ -481,7 +471,8 @@ end
 function cloneEnergyPercentRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Creature.cloneEnergyPercentRight(o))
+
+  :($(var) = Creature.cloneEnergyPercentRight(o))
 end
 #
 # @cmd
@@ -495,7 +486,8 @@ end
 function cloneEnergyPercentUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Creature.cloneEnergyPercentUp(o))
+
+  :($(var) = Creature.cloneEnergyPercentUp(o))
 end
 #
 # @cmd
@@ -509,5 +501,6 @@ end
 function cloneEnergyPercentDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local var::Symbol = @randVar(org, pos, Float64)
   if var === :nothing return Expr(:nothing) end
-  :($var=Creature.cloneEnergyPercentDown(o))
+
+  :($(var) = Creature.cloneEnergyPercentDown(o))
 end

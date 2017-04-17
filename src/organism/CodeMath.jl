@@ -30,21 +30,13 @@ export pi
 # for these types. We don't need to export this constant.
 #
 const PLUS_OPERATORS = Dict{DataType, Symbol}(
-  String  => :(*),
-  Bool    => :(&),
-  Int8    => :(+),
-  Int16   => :(+),
-  Int     => :(+),
   Float64 => :(+)
 )
 #
 # @cmd
 # @line
 # + operator implementation. Sums two variables. Supports all
-# types: String, Int8, Bool,... In case of string uses
-# concatination, for boolean - & operator. If code is empty
-# this function will skip the execution. We don't check the
-# position, because of performance issues.
+# types: Float64. Format: var_xx = var_xx + var_xx
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -57,15 +49,13 @@ function plus(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePo
   local v2::Symbol    = @randVar(org, pos, typ)
   local v3::Symbol    = @randVar(org, pos, typ)
 
-  return :($v1 = $(PLUS_OPERATORS[typ])($v2, $v3))
+  return :($(v1) = $(PLUS_OPERATORS[typ])($(v2), $(v3)))
 end
 #
 # @cmd
 # @line
 # - operator implementation. Minus two variables. Supports all
-# types: String, Int8, Bool,... In case of string uses
-# concatination, for boolean - & operator. If code is empty
-# this function will skip the execution.
+# types: Floa64. Format: var_xx = var_xx - var_xx
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -77,31 +67,14 @@ function minus(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodeP
   if v1 === :nothing return Expr(:nothing) end
   local v2::Symbol    = @randVar(org, pos, typ)
   local v3::Symbol    = @randVar(org, pos, typ)
-  local l::Int
-  #
-  # "1234"   - "85"  = "12" (just cut v1 by length of v2)
-  # "qwerty" - "111" = "qwe"
-  # "123" - "12345"  = ""  # "123"[1:0] === ""
-  #
-  if typ === String return :($v1 = $(v2)[1:(length($v3) > length($v2) ? 0 : length($v2) - length($v3))])
-  #
-  # true  - true  = false, true  - false = true,
-  # false - false = false, false - true  = true
-  #
-  elseif typ === Bool return :($v1 = Bool(abs($v2 - $v3)))
-  end
-  #
-  # Numeric types are here
-  #
-  :($v1 = $v2 - $v3)
+
+  :($(v1) = $(v2) - $(v3))
 end
 #
 # @cmd
 # @line
 # * operator implementation. Multiply two variables. Supports all
-# types: String, Int8, Bool,... In case of string uses
-# concatination, for boolean - & operator. If code is empty
-# this function will skip the execution.
+# types: Float64. Format: var_xx = var_xx * var_xx
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -114,15 +87,14 @@ function multiply(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Co
   local v2::Symbol    = @randVar(org, pos, typ)
   local v3::Symbol    = @randVar(org, pos, typ)
 
-  :($v1 = $v2 * $v3)
+  :($(v1) = $(v2) * $(v3))
 end
 #
 # @cmd
 # @line
 # / operator implementation. Divides two variables. Supports all
-# types: String, Int8, Bool,... In case of string uses
-# concatination, for boolean - | operator. If code is empty
-# this function will skip the execution.
+# types: Float64. Adds special check for 0. In case of zero it
+# divides to 1.0. Format: var_xx = var_xx / var_xx
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -134,162 +106,130 @@ function divide(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Code
   if v1 === :nothing return Expr(:nothing) end
   local v2::Symbol    = @randVar(org, pos, typ)
   local v3::Symbol    = @randVar(org, pos, typ)
-  #
-  # "1234"   / "854" = "1"   (just cut v1 by length of v1 / v2)
-  # "qwerty" / "111" = "qw"
-  #
-  if typ === String return Expr(:nothing)
-  elseif typ === Bool return :($(v1) = $(v2) | $(v3))
-  end
 
-  :($(v1) = div($(v2), $(v3) === $typ(0) ? $typ(1) : $(v3)))
+  :($(v1) = div($(v2), $(v3) === 0.0 ? 1.0 : $(v3)))
 end
 #
 # @cmd
 # @line
-# ! operator implementation. Returns Bool result. Supports all
-# types: String, Int8, Bool,... In case of string: true if "",
-# false if !"". For numbers true if >0, false if <0. Representation
-# is the following: var::Bool = !(var|val)
+# ! operator implementation. Returns Float64 result. Supports all
+# types: Float64. For Float64 inverts the sign. Format:
+# var_xx::Float64 = var_xx|val * -1.0
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
 function not(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local v1::Symbol    = @randVar(org, pos, Bool)
+  local v1::Symbol    = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
   local typ::DataType = @randType()
   local v2::Any       = @randVarOrValue(org, pos, typ)
   #
-  # "" -> true, "..." -> false
+  # For Float64 type
   #
-  if typ === String
-    return :($v1 = isempty($(v2)))
-  elseif typ === Bool
-    return :($(v1) = !($(v2)))
-  end
-  #
-  # Works for Int8, Int16, Int64 types
-  #
-  :($(v1) = ($(v2) < $typ(1)))
+  :($(v1) = $(v1) * -1.0)
 end
 #
 # @cmd
 # @line
-# Bitwise & operator implementation. Supports only numeric types
-# IntX and Bool. If there is no bool variable in current scope,
-# it returns :nothing symbol. Final line format:
-# var = (var|val) & (var|val)
+# Bitwise & operator implementation. Supports only numeric types.
+# Format: var_xx = Float64(Int(round(var_xx|val)) & Int(round(var_xx|val)))
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
 function and(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randBoolAndNumType()
-  if typ === Float64 return Expr(:nothing) end
+  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
   local v3::Any       = @randVarOrValue(org, pos, typ)
 
-  :($v1 = $typ($(v2)) & $typ($(v3)))
+  :($(v1) = Float64(Int(round($(v2))) & Int(round($(v3)))))
 end
 #
 # @cmd
 # @line
-# Bitwise | operator implementation. Supports only numeric types
-# IntX and Bool. If there is no bool variable in current scope,
-# it returns :nothing symbol. Final line format:
-# var = (var|val) | (var|val)
+# Bitwise | operator implementation. Supports only numeric types.
+# Format: var_xx = Float64(Int(round(var_xx|val)) | Int(round(var_xx|val)))
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
 function or(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randBoolAndNumType()
-  if typ === Float64 return Expr(:nothing) end
+  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
   local v3::Any       = @randVarOrValue(org, pos, typ)
 
-  :($v1 = $typ($(v2)) | $typ($(v3)))
+  :($(v1) = Float64(Int(round($(v2))) | Int(round($(v3)))))
 end
 #
 # @cmd
 # @line
-# Bitwise & operator implementation. Supports only numeric types
-# IntX and Bool. If there is no bool variable in current scope,
-# it returns :nothing symbol. Final line format:
-# var = (var|val) & (var|val)
+# Bitwise & operator implementation. Supports only numeric types.
+# Format: var_xx = Float64(Int(round(var_xx|val)) $ Int(round(var_xx|val)))
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
 function xor(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randBoolAndNumType()
-  if typ === Float64 return Expr(:nothing) end
+  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
   local v3::Any       = @randVarOrValue(org, pos, typ)
 
-  :($v1 = $typ($(v2)) $ $typ($(v3)))
+  :($(v1) = Float64(Int(round($(v2))) $ Int(round($(v3)))))
 end
 #
 # @cmd
 # @line
-# Arithmetic shift right. Supports only numeric types IntX.
-# If there is no bool variable in current scope, it returns
-# :nothing symbol. Final line format:
-# var = (var|val) & (var|val)
+# Arithmetic shift right. Supports only numeric types.
+# Format: var_xx = Float64(Int(round(var_xx|val)) >> Int(round(var_xx|val)))
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
 function rshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randNumType()
-  if typ === Float64 return Expr(:nothing) end
+  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
   local v3::Any       = @randVarOrValue(org, pos, typ)
 
-  :($v1 = $typ($(v2)) >> $typ($(v3)))
+  :($(v1) = Float64(Int(round($(v2))) >> Int(round($(v3)))))
 end
 #
 # @cmd
 # @line
-# Arithmetic shift left. Supports only numeric types IntX.
-# If there is no bool variable in current scope, it returns
-# :nothing symbol. Final line format:
-# var = (var|val) & (var|val)
+# Arithmetic shift left. Supports only numeric types.
+# Format: var_xx = Float64(Int(round(var_xx|val)) << Int(round(var_xx|val)))
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
 # @return {Expr|Expr(:nothing)}
 #
 function lshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  local typ::DataType = @randNumType()
-  if typ === Float64 return Expr(:nothing) end
+  local typ::DataType = @randType()
   local v1::Symbol    = @randVar(org, pos, typ)
   if v1 === :nothing return Expr(:nothing) end
   local v2::Any       = @randVarOrValue(org, pos, typ)
   local v3::Any       = @randVarOrValue(org, pos, typ)
 
-  :($v1 = $typ($(v2)) << $typ($(v3)))
+  :($(v1) = Float64(Int(round($(v2))) << Int(round($(v3)))))
 end
 #
 # @cmd
 # @line
-# Calculates reminder of division of two numbers. For String
-# calculates reminder of cutting: "12345" % "23" = "345". It uses
-# length of second string for cut. For Bool uses | operator.
+# Calculates reminder of division of two numbers. Format:
+# var_xx = Float64(Int(round(var_xx|val)) % Int(round(var_xx|val)))
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -301,14 +241,8 @@ function reminder(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Co
   if v1 === :nothing return Expr(:nothing) end
   local v2::Symbol    = @randVar(org, pos, typ)
   local v3::Symbol    = @randVar(org, pos, typ)
-  #
-  # String reminder isn't supported
-  #
-  if typ === String return Expr(:nothing)
-  elseif typ === Bool return :($v1 = $v2 | $v3)
-  end
 
-  :($v1 = $(v2) % ($(v3) === $typ(0) ? $typ(1) : $(v3)))
+  :($(v1) = Float64(Int(round($(v2))) % (Int(round($(v3))) === 0 ? 1 : Int(round($(v3))))))
 end
 #
 # @cmd
@@ -322,15 +256,15 @@ end
 function sqrt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
-  local typ::DataType = @randNumType()
+  local typ::DataType = @randType()
   local v2::Symbol = @randVar(org, pos, typ)
   if v2 === :nothing return Expr(:nothing) end
 
-  :($v1 = sqrt(abs(Float64($(v2)))))
+  :($(v1) = sqrt(abs($(v2))))
 end
 # @cmd
 # @line
-# Calculates natural logarithm of number. Format: var = log(var)
+# Calculates natural logarithm of number. Format: var_xx = log(var_xx)
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -339,15 +273,15 @@ end
 function log(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
-  local typ::DataType = @randNumType()
+  local typ::DataType = @randType()
   local v2::Symbol = @randVar(org, pos, typ)
   if v2 === :nothing return Expr(:nothing) end
 
-  :($v1 = log($v2 > $typ(0) ? $v2 : abs(Float64($(v1)) !== 0.0 ? $(v1) : 1.0)))
+  :($(v1) = log($(v2) > 0.0 ? $(v2) : abs($(v1) !== 0.0 ? $(v1) : 1.0)))
 end
 # @cmd
 # @line
-# Calculates sinus of number. Format: var = sin(var)
+# Calculates sinus of number. Format: var_xx = sin(var_xx|val)
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -356,14 +290,14 @@ end
 function sin(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
-  local typ::DataType = @randNumType()
+  local typ::DataType = @randType()
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = sin($(v2)))
+  :($(v1) = sin($(v2)))
 end
 # @cmd
 # @line
-# Calculates cosinus of number. Format: var = cos(var)
+# Calculates cosinus of number. Format: var_xx = cos(var_xx|val)
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -372,14 +306,14 @@ end
 function cos(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
-  local typ::DataType = @randNumType()
+  local typ::DataType = @randType()
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = cos($(v2)))
+  :($(v1) = cos($(v2)))
 end
 # @cmd
 # @line
-# Calculates tangens of number. Format: var = tan(var)
+# Calculates tangens of number. Format: var_xx = tan(var_xx|val)
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -388,14 +322,14 @@ end
 function tan(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
-  local typ::DataType = @randNumType()
+  local typ::DataType = @randType()
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = tan($(v2)))
+  :($(v1) = tan($(v2)))
 end
 # @cmd
 # @line
-# Calculates cotangens of number. Format: var = cot(var)
+# Calculates cotangens of number. Format: var_xx = cot(var_xx|val)
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -404,14 +338,14 @@ end
 function cot(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
-  local typ::DataType = @randNumType()
+  local typ::DataType = @randType()
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = cot($(v2) === $typ(0) ? $typ(1) : $(v2)))
+  :($(v1) = cot($(v2) === 0.0 ? 1.0 : $(v2)))
 end
 # @cmd
 # @line
-# Calculates secans of number. Format: var = sec(var)
+# Calculates secans of number. Format: var_xx = sec(var_xx|val)
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -420,14 +354,14 @@ end
 function sec(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
-  local typ::DataType = @randNumType()
+  local typ::DataType = @randType()
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = sec($(v2)))
+  :($(v1) = sec($(v2)))
 end
 # @cmd
 # @line
-# Calculates cosecans of number. Format: var = csc(var)
+# Calculates cosecans of number. Format: var_xx = csc(var_xx|val)
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code
@@ -436,14 +370,14 @@ end
 function csc(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
-  local typ::DataType = @randNumType()
+  local typ::DataType = @randType()
   local v2::Any = @randVarOrValue(org, pos, typ)
 
-  :($v1 = csc($(v2) === $typ(0) ? $typ(1) : $(v2)))
+  :($v1 = csc($(v2) === 0.0 ? 1.0 : $(v2)))
 end
 # @cmd
 # @line
-# Sets Pi to variable. Format: var = 3.1415...
+# Sets Pi to variable. Format: var_xx = 3.1415926535...
 # @param cfg Global configuration type
 # @param org Organism we have to mutate
 # @param pos Position in code

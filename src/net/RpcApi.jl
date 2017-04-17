@@ -137,7 +137,7 @@ module RpcApi
     #
     # Organism's personal memory. Is used in any possible way.
     #
-    mem::Dict{Int16, Int16}
+    mem::Dict{Float64, Float64}
     #
     # Organism's position in a 2D world. Starts from (1,1)
     # ends with (worldWidth, worldHeight) configurations.

@@ -329,8 +329,7 @@ module Helper
   function emptyFn() end
 
   #
-  # Supported types of code inside organism. At the end must be numeric types!!
-  # See @randBoolAndNumType() macro for details.
+  # Supported types of code inside organism
   #
-  const SUPPORTED_TYPES = [String, Bool, Int8, Int16, Int, Float64]
+  const SUPPORTED_TYPES = [Float64]
 end

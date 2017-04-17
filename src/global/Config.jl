@@ -153,6 +153,10 @@ module Config
     #
     orgAlivePeriod::Int
     #
+    # Size of one bite durint eating for each organisms
+    #
+    orgEatSize::Int
+    #
     # Amount of errors in organisms codes in current population
     #
     orgErrors::Int
@@ -165,15 +169,21 @@ module Config
     #
     codeFuncParamAmount::Int
     #
-    # This value will be used in Code.loop() function as a divider. Maximum
-    # amount of loop steps depends on this value. See loop() function
-    # for details.
+    # Amount of iterations in a loop (for operator)
     #
-    codeLoopDiv::Int8
+    codeLoopAmount::Int
     #
     # Amount of organisms entire code runs per some period of time
     #
     codeRuns::Int
+    #
+    # If organism reach this limit of amount of code lines, then codeSizeCoef
+    # will be used during it's energy grabbing by system. We use this approach,
+    # because our CPU's are slow and organisms with big codes are very slow. But
+    # it's possible for organisms to go outside the limit by inventing new
+    # effective mechanisms of energy obtaining.
+    #
+    codeMaxSize::Int
     #
     # This coefficiend is used for calculating of amount of energy,
     # which grabbed from each organism depending on his codeSize.
@@ -181,6 +191,8 @@ module Config
     # entire system speed. It depends on CPU speed also. So, for
     # different PC's it may be different.
     # Formula is the following: grabEnergy = cfg.codeSizeCoef * org.codeSize
+    # See Config.codeMaxSize for details. This config will be turn on only if
+    # organism reaches code size limit Config.codeMaxSize
     #
     codeSizeCoef::Float64
     #
@@ -433,13 +445,15 @@ module Config
       200,                                     # orgEnergySpendPeriod
       1000,                                    # orgEnergySpendOnError
       10000,                                   # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
+      100,                                     # orgEatSize
       0,                                       # orgErrors
       0,                                       # orgEvals
 
       2,                                       # codeFuncParamAmount
-      Int8(16),                                # codeLoopDiv
+      8,                                       # codeLoopAmount
       0,                                       # codeRuns
-      1.2,                                     # codeSizeCoef
+      20,                                      # codeMaxSize
+      2.0,                                     # codeSizeCoef
 
       1900,                                    # worldWidth
       940,                                     # worldHeight
@@ -473,7 +487,7 @@ module Config
       [#="Phylogen",=# "Status"],                  # plugIncluded
       [],                                      # plugExcluded
 
-      false,                                   # modeDebug
+      true,                                    # modeDebug
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod

@@ -22,7 +22,6 @@ module Code
   include("CodeMacros.jl")
   include("CodeOrganism.jl")
   include("CodeMath.jl")
-  include("CodeType.jl")
 
   export CodePart
   export CODE_PARTS
@@ -53,8 +52,8 @@ module Code
   #
   # @cmd
   # @line
-  # Returns AST expression for variable declaration. Format:
-  # local name::Type = value
+  # Returns AST expression for assigning Float64 constant to variable. Format:
+  # var_xx::Float64 = value
   # @param cfg Global configuration type
   # @param org Organism we have to mutate
   # @param pos Position for current mutation
@@ -71,12 +70,12 @@ module Code
   # @cmd
   # @block
   # Creates custom function with unique name, random arguments with
-  # default values. By default it returns first parameter as local
-  # variable
+  # default values. By default it returns first argument as local
+  # variable. Format: function func_xx(var_xx::Float64,...) return var_xx end
   # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Code position
-  # @return {Expr|Expr(:nothing)}
+  # @return {Expr}
   #
   function fn(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
     local typ::DataType
@@ -140,7 +139,7 @@ module Code
   # Calls custom function or do nothing if no available functions.
   # It choose custom function from org.funcs array, fills parameters
   # and call it. It also creates new variable with appropriate type.
-  # Example: var_x = func_x(<args>)
+  # Example: var_xx = func_xx(var_xx::Float64,...)
   # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Code position
@@ -178,7 +177,8 @@ module Code
   # @cmd
   # @block
   # if operator implementation. It contains block inside, so it can't be inside
-  # other block. For example, it can't be inside body of "for" operator.
+  # other block. For example, it can't be inside body of "for" operator. Format:
+  # if var_xx compare_op var_xx end
   # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Code position
@@ -205,17 +205,14 @@ module Code
   # @cmd
   # @block
   # Creates a for loop. We have to create small loops, because they
-  # affect entire speed. This is why we divide amount into 8. So max
-  # loop iterations < 8
-  # @param cfg Global configuration type
+  # affect entire speed. See Config.codeLoopAmount for details
+  # @param cfg Global configuration type. Format: for i::Int = 1:8 end
   # @param org Organism we are working with
   # @param pos Position in a code
-  # @return {Expr|Expr(:nothing)}
+  # @return {Expr}
   #
   function loop(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-    local v::Symbol = @randVar(org, pos, Int8)
-    if v === :nothing return Expr(:nothing) end
-    local loopEx    = :(for i::Int8 = 1:div($v, $(cfg.codeLoopDiv)) end)
+    local loopEx = :(for i::Int = 1:$(cfg.codeLoopAmount) end)
     #
     # This line fixes Julia small issue with additional comment line,
     # which is added during new loop creation. We have to remove
@@ -226,7 +223,6 @@ module Code
     push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), loopEx.args[2]))
     loopEx
   end
-
   #
   # This method is called before one code line is removed or changed.
   # It checks if removed/changed line is a local variable declaration
@@ -349,12 +345,6 @@ module Code
     CodePart(tan,                     false), CodePart(cot,                     false),
     CodePart(sec,                     false), CodePart(csc,                     false),
     CodePart(not,                     false), CodePart(pi,                      false),
-    #
-    # CodeType
-    #
-    CodePart(toString,                false), CodePart(toFloat64,               false),
-    CodePart(toBool,                  false), CodePart(toInt,                   false),
-    CodePart(toInt8,                  false), CodePart(toInt16,                 false),
     #
     # CodeOrganism
     #
