@@ -38,6 +38,8 @@ module Creature
   import Event
   import Helper
   import Config
+  import Config.@if_not_test
+  import Config.@if_test
 
   export VAR_AMOUNT
   export VARS_AMOUNT
@@ -61,7 +63,8 @@ module Creature
   #
   # Amount of embedded variables for one type
   #
-  const VAR_AMOUNT = 5
+  @if_not_test const VAR_AMOUNT = 5
+  @if_test     const VAR_AMOUNT = 1
   #
   # All variables amount
   #
@@ -252,10 +255,15 @@ module Creature
   #
   function create(cfg::Config.ConfigData, id::UInt = UInt(0), pos::Helper.Point = Helper.Point(1, 1))
     #
+    # This macro section is used for testing of organism code. Because we can't access
+    # his code after mutation, it's impossible to test if it works correctly. We have
+    # to know what functions return, what variables are and so on... Returning variable
+    # outside the main function we may check it valus in tests.
+    #
     # This is main function of current organism. Expression
     # below means: function (o) return true end
     #
-    local code::Expr = Expr(:function, Expr(:tuple,                         # function paraments
+    @if_not_test local code::Expr = Expr(:function, Expr(:tuple,            # function parameters
         Expr(:(::), :c, Expr(:., :Config,   Expr(:quote, :ConfigData))),    # c::Config.ConfigData
         Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),     # o::Creature.Organism
           Expr(:block,
@@ -265,6 +273,14 @@ module Creature
             Expr(:local, Expr(:(=), Expr(:(::), :var_4, :Float64),rand(Float64))),
             Expr(:local, Expr(:(=), Expr(:(::), :var_5, :Float64),rand(Float64))),
             Expr(:return, true)
+        )
+    )
+    @if_test local code::Expr = Expr(:function, Expr(:tuple,                # function parameters
+        Expr(:(::), :c, Expr(:., :Config,   Expr(:quote, :ConfigData))),    # c::Config.ConfigData
+        Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),     # o::Creature.Organism
+          Expr(:block,
+            Expr(:local, Expr(:(=), Expr(:(::), :var_1, :Float64),5.0)),
+            Expr(:return, :var_1)
         )
     )
     #

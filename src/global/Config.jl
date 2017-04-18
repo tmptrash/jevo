@@ -29,6 +29,7 @@ module Config
 
   export if_debug
   export if_test
+  export if_not_test
   export if_profile
   export if_not_profile
 
@@ -508,6 +509,10 @@ module Config
   # In this mode we may run Manager for special amount of iterations like a task.
   #
   macro if_test(ex) @static if _setting(create(), :modeTest) esc(ex) end end
+  #
+  # This macro turns on if special test mode is off.
+  #
+  macro if_not_test(ex) @static if !_setting(create(), :modeTest) esc(ex) end end
   #
   # This macro turns on specified code in profiling mode. You may use
   # run-profiling.sh for this

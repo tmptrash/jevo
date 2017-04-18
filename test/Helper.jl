@@ -79,6 +79,14 @@ function code(data::TestManagerData, codePart::Symbol, org::Creature.Organism, p
   updateCode(org)
 end
 #
+# Returns initial value of first Float64 variable in main function
+# @param org Organism to check
+# @return {Float64} Value
+#
+function val(org::Creature.Organism)
+  Helper.getArg(org.code, [2,1,1,2])
+end
+#
 # compiles code of organism according to org.code expression
 # @param org Organism we are working with
 #

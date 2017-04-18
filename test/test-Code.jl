@@ -17,144 +17,144 @@ module TestCode
     local org = d.orgs[1]
 
     code(d, :fn, org)
-    @fact Helper.getArg(org.code, [2,31,1,1]) --> :func_32
-    @fact Code.eval(org.code)(d.cfg, org) --> true
+    @fact Helper.getArg(org.code, [2,2,1,1]) --> :func_3
+    @fact Code.eval(org.code)(d.cfg, org) --> val(org)
 
     Manager.destroy(d.man)
   end
-  facts("Testing Code.fn() arguments") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
-    local org = d.orgs[1]
-
-    code(d, :fn, org)
-    @fact Helper.getArg(org.code, [2,31,1,2,1,1]) --> :var_31
-    @fact Code.eval(org.code)(d.cfg, org) --> true
-
-    Manager.destroy(d.man)
-  end
-  facts("Testing Code.fn() outside main function") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
-    local org = d.orgs[1]
-
-    code(d, :fn, org)
-    code(d, :fn, org)
-    @fact length(org.funcs) --> 3
-    @fact length(Helper.getLines(org.code, [2,31,2])) --> 31
-    @fact Code.eval(org.code)(d.cfg, org) --> true
-
-    Manager.destroy(d.man)
-  end
-  facts("Testing Code.fn() + Code.fn()") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
-    local org = d.orgs[1]
-
-    code(d, :fn, org)
-    code(d, :fn, org)
-
-    @fact length(org.funcs) --> 3
-    @fact length(Helper.getLines(org.code, [2])) --> 33
-    @fact Helper.getHead(org.code, [2,31]) --> :function
-    @fact Helper.getHead(org.code, [2,32]) --> :function
-    @fact Code.eval(org.code)(d.cfg, org) --> true
-
-    Manager.destroy(d.man)
-  end
-  facts("Testing Code.fn() should return the value") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
-    local org = d.orgs[1]
-
-    code(d, :fn, org)
-    code(d, :fn, org)
-
-    @fact Helper.getHead(org.code, [2,33]) --> :return
-    @fact Helper.getHead(org.code, [2,31,2,31]) --> :return
-    @fact Helper.getHead(org.code, [2,32,2,31]) --> :return
-    @fact Code.eval(org.code)(d.cfg, org) --> true
-
-    Manager.destroy(d.man)
-  end
+  # facts("Testing Code.fn() arguments") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+  #   local org = d.orgs[1]
   #
-  # fnCall
+  #   code(d, :fn, org)
+  #   @fact Helper.getArg(org.code, [2,31,1,2,1,1]) --> :var_31
+  #   @fact Code.eval(org.code)(d.cfg, org) --> true
   #
-  facts("Testing Code.fnCall(), but without a function") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
-    local org = d.orgs[1]
-
-    code(d, :fnCall, org)
-
-    @fact length(Helper.getLines(org.code, [2])) --> 31
-    @fact Helper.getHead(org.code, [2,31]) --> :return
-    @fact Code.eval(org.code)(d.cfg, org) --> true
-
-    Manager.destroy(d.man)
-  end
-  facts("Testing Code.fnCall() for one Code.fn(), but without variables") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
-    local org = d.orgs[1]
-
-    code(d, :fn, org)
-    code(d, :fnCall, org)
-
-    @fact length(Helper.getLines(org.code, [2])) --> 33
-    @fact Helper.getHead(org.code, [2,31]) --> :function
-    @fact Helper.getHead(org.code, [2,33]) --> :return
-    @fact Code.eval(org.code)(d.cfg, org) --> true
-
-    Manager.destroy(d.man)
-  end
-  facts("Testing Code.fnCall() of one Code.fn()") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
-    local org = d.orgs[1]
-    local index = Creature.VARS_AMOUNT + 2
-
-    code(d, :fn, org)
-    code(d, :fnCall, org)
-
-    @fact Helper.getHead(org.code, [2,index]) --> :(=)
-    @fact Helper.getArg(org.code, [2,index,2,1]) --> :func_32
-    @fact Code.eval(org.code)(d.cfg, org) --> true
-
-    Manager.destroy(d.man)
-  end
-  facts("Testing Code.fnCall() after removing Code.fn()") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
-    local org = d.orgs[1]
-
-    code(d, :fn, org)
-    Mutator._onDel(d.cfg, org, Helper.CodePos(1,1,Creature.VARS_AMOUNT + 1), Code.CodePart(Code.fn, true))
-    code(d, :fnCall, org)
-    @fact length(Helper.getLines(org.code, [2])) --> Creature.VARS_AMOUNT + 1
-    @fact length(org.funcs) --> 1
-    @fact Code.eval(org.code)(d.cfg, org) --> true
-    #
-    # Adding another function and t's call
-    #
-    code(d, :fn, org)
-    code(d, :fnCall, org)
-    @fact length(org.funcs) --> 2
-    Mutator._onDel(d.cfg, org, Helper.CodePos(1,1,Creature.VARS_AMOUNT + 2), Code.CodePart(Code.fn, true))
-    code(d, :fnCall, org)
-    @fact length(org.funcs) --> 2
-    @fact length(Helper.getLines(org.code, [2])) --> Creature.VARS_AMOUNT + 3 # fn, fnCall, return true
-    @fact Code.eval(org.code)(d.cfg, org) --> true
-
-    Manager.destroy(d.man)
-  end
-  facts("Testing two Code.fnCall() for one Code.fn()") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
-    local org = d.orgs[1]
-    local index = Creature.VARS_AMOUNT + 3
-
-    code(d, :fn, org)
-    code(d, :fnCall, org)
-    code(d, :fnCall, org)
-
-    @fact Helper.getHead(org.code, [2,index]) --> :(=)
-    @fact Helper.getArg(org.code, [2,index,2,1]) --> :func_32
-    @fact Code.eval(org.code)(d.cfg, org) --> true
-
-    Manager.destroy(d.man)
-  end
+  #   Manager.destroy(d.man)
+  # end
+  # facts("Testing Code.fn() outside main function") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+  #   local org = d.orgs[1]
+  #
+  #   code(d, :fn, org)
+  #   code(d, :fn, org)
+  #   @fact length(org.funcs) --> 3
+  #   @fact length(Helper.getLines(org.code, [2,31,2])) --> 31
+  #   @fact Code.eval(org.code)(d.cfg, org) --> true
+  #
+  #   Manager.destroy(d.man)
+  # end
+  # facts("Testing Code.fn() + Code.fn()") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+  #   local org = d.orgs[1]
+  #
+  #   code(d, :fn, org)
+  #   code(d, :fn, org)
+  #
+  #   @fact length(org.funcs) --> 3
+  #   @fact length(Helper.getLines(org.code, [2])) --> 33
+  #   @fact Helper.getHead(org.code, [2,31]) --> :function
+  #   @fact Helper.getHead(org.code, [2,32]) --> :function
+  #   @fact Code.eval(org.code)(d.cfg, org) --> true
+  #
+  #   Manager.destroy(d.man)
+  # end
+  # facts("Testing Code.fn() should return the value") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+  #   local org = d.orgs[1]
+  #
+  #   code(d, :fn, org)
+  #   code(d, :fn, org)
+  #
+  #   @fact Helper.getHead(org.code, [2,33]) --> :return
+  #   @fact Helper.getHead(org.code, [2,31,2,31]) --> :return
+  #   @fact Helper.getHead(org.code, [2,32,2,31]) --> :return
+  #   @fact Code.eval(org.code)(d.cfg, org) --> true
+  #
+  #   Manager.destroy(d.man)
+  # end
+  # #
+  # # fnCall
+  # #
+  # facts("Testing Code.fnCall(), but without a function") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+  #   local org = d.orgs[1]
+  #
+  #   code(d, :fnCall, org)
+  #
+  #   @fact length(Helper.getLines(org.code, [2])) --> 31
+  #   @fact Helper.getHead(org.code, [2,31]) --> :return
+  #   @fact Code.eval(org.code)(d.cfg, org) --> true
+  #
+  #   Manager.destroy(d.man)
+  # end
+  # facts("Testing Code.fnCall() for one Code.fn(), but without variables") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+  #   local org = d.orgs[1]
+  #
+  #   code(d, :fn, org)
+  #   code(d, :fnCall, org)
+  #
+  #   @fact length(Helper.getLines(org.code, [2])) --> 33
+  #   @fact Helper.getHead(org.code, [2,31]) --> :function
+  #   @fact Helper.getHead(org.code, [2,33]) --> :return
+  #   @fact Code.eval(org.code)(d.cfg, org) --> true
+  #
+  #   Manager.destroy(d.man)
+  # end
+  # facts("Testing Code.fnCall() of one Code.fn()") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+  #   local org = d.orgs[1]
+  #   local index = Creature.VARS_AMOUNT + 2
+  #
+  #   code(d, :fn, org)
+  #   code(d, :fnCall, org)
+  #
+  #   @fact Helper.getHead(org.code, [2,index]) --> :(=)
+  #   @fact Helper.getArg(org.code, [2,index,2,1]) --> :func_32
+  #   @fact Code.eval(org.code)(d.cfg, org) --> true
+  #
+  #   Manager.destroy(d.man)
+  # end
+  # facts("Testing Code.fnCall() after removing Code.fn()") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+  #   local org = d.orgs[1]
+  #
+  #   code(d, :fn, org)
+  #   Mutator._onDel(d.cfg, org, Helper.CodePos(1,1,Creature.VARS_AMOUNT + 1), Code.CodePart(Code.fn, true))
+  #   code(d, :fnCall, org)
+  #   @fact length(Helper.getLines(org.code, [2])) --> Creature.VARS_AMOUNT + 1
+  #   @fact length(org.funcs) --> 1
+  #   @fact Code.eval(org.code)(d.cfg, org) --> true
+  #   #
+  #   # Adding another function and t's call
+  #   #
+  #   code(d, :fn, org)
+  #   code(d, :fnCall, org)
+  #   @fact length(org.funcs) --> 2
+  #   Mutator._onDel(d.cfg, org, Helper.CodePos(1,1,Creature.VARS_AMOUNT + 2), Code.CodePart(Code.fn, true))
+  #   code(d, :fnCall, org)
+  #   @fact length(org.funcs) --> 2
+  #   @fact length(Helper.getLines(org.code, [2])) --> Creature.VARS_AMOUNT + 3 # fn, fnCall, return true
+  #   @fact Code.eval(org.code)(d.cfg, org) --> true
+  #
+  #   Manager.destroy(d.man)
+  # end
+  # facts("Testing two Code.fnCall() for one Code.fn()") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+  #   local org = d.orgs[1]
+  #   local index = Creature.VARS_AMOUNT + 3
+  #
+  #   code(d, :fn, org)
+  #   code(d, :fnCall, org)
+  #   code(d, :fnCall, org)
+  #
+  #   @fact Helper.getHead(org.code, [2,index]) --> :(=)
+  #   @fact Helper.getArg(org.code, [2,index,2,1]) --> :func_32
+  #   @fact Code.eval(org.code)(d.cfg, org) --> true
+  #
+  #   Manager.destroy(d.man)
+  # end
   # #
   # # if
   # #
