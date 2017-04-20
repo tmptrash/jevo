@@ -821,7 +821,7 @@ module Creature
       org.energy = min(org.energy + retObj.ret, Config.ORGANISM_MAX_ENERGY)
       return retObj.ret
     end
-
+    
     0
   end
 end

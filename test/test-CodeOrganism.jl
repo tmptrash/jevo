@@ -20,65 +20,35 @@ module TestCodeOrganism
     code(d, :lookAt, org)
     @fact Code.eval(org.code)(d.cfg, org) --> 0.0
 
+    Helper.getArg(org.code, [2,1,1]).args[2] = 100.0
+    @fact Code.eval(org.code)(d.cfg, org) --> 0.0
+
+    Helper.getArg(org.code, [2,1,1]).args[2] = 0.0
+    @fact Code.eval(org.code)(d.cfg, org) --> 0.0
+
+    Helper.getArg(org.code, [2,1,1]).args[2] = 5.0
     World.setEnergy(d.man.world, Helper.Point(5,5), UInt16(10))
     @fact Code.eval(org.code)(d.cfg, org) --> 10.0
-    
+
     Manager.destroy(d.man)
   end
-  # facts("Testing if lookAt() works") do
-  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:worldWidth=>2, :worldHeight=>2))
-  #   local org = d.orgs[1]
-  #   #
-  #   # Sets some energy to the cell and checks it
-  #   #
-  #   World.setEnergy(d.man.world, Helper.Point(2,2), UInt32(123))
-  #   @fact World.getEnergy(d.man.world, Helper.Point(2,2)) --> UInt32(123)
-  #   @fact Creature.getEnergy(org, 2, 2) --> UInt32(123)
   #
-  #   World.setEnergy(d.man.world, Helper.Point(2,2), UInt32(0))
-  #   @fact World.getEnergy(d.man.world, Helper.Point(2,2)) --> UInt32(0)
-  #   @fact Creature.getEnergy(org, 2, 2) --> UInt32(0)
+  # Eating
   #
-  #   @fact Code.eval(org.code)(d.cfg, org) --> true
-  #
-  #   Manager.destroy(d.man)
-  # end
-  # facts("Testing if lookAt() with wrong coordinates works") do
-  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:worldWidth=>2, :worldHeight=>2))
-  #   local org = d.orgs[1]
-  #
-  #   @fact World.getEnergy(d.man.world, Helper.Point(0,0)) --> UInt32(0)
-  #   @fact World.getEnergy(d.man.world, Helper.Point(0,1)) --> UInt32(0)
-  #   @fact World.getEnergy(d.man.world, Helper.Point(1,0)) --> UInt32(0)
-  #   @fact World.getEnergy(d.man.world, Helper.Point(3,3)) --> UInt32(0)
-  #   @fact World.getEnergy(d.man.world, Helper.Point(3,2)) --> UInt32(0)
-  #   @fact World.getEnergy(d.man.world, Helper.Point(2,3)) --> UInt32(0)
-  #   @fact World.getEnergy(d.man.world, Helper.Point(0,3)) --> UInt32(0)
-  #   @fact World.getEnergy(d.man.world, Helper.Point(3,0)) --> UInt32(0)
-  #   @fact Code.eval(org.code)(d.cfg, org) --> true
-  #
-  #   Manager.destroy(d.man)
-  # end
-  # #
-  # # Eating
-  # #
-  # facts("Checking if left organism can eat right one") do
-  #   local d = create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
-  #   local left = d.orgs[1]
-  #   local right = d.orgs[2]
-  #
-  #   code(d, :eatRight, left)
-  #   for i = 1:5 Helper.getArg(left.code, [2,10 + i,1]).args[2] = 10 end # sets all Int8 vars to 10
-  #   updateCode(left)
-  #
-  #   @fact left.energy === right.energy === 100 --> true
-  #   consume(d.task)
-  #   consume(d.task)
-  #   @fact left.energy --> 110
-  #   @fact right.energy --> 90
-  #
-  #   Manager.destroy(d.man)
-  # end
+  facts("Checking if left organism can eat right one") do
+    local d     = create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local left  = d.orgs[1]
+    local right = d.orgs[2]
+
+    code(d, :eatRight, left)
+    @fact left.energy === right.energy === 100 --> true
+    consume(d.task)
+    consume(d.task)
+    @fact left.energy  --> 200
+    @fact right.energy --> 0
+
+    Manager.destroy(d.man)
+  end
   # facts("Checking if left organism can donate right one") do
   #   local d = create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
   #   local left = d.orgs[1]

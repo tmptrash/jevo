@@ -68,6 +68,7 @@ end
 function code(data::TestManagerData, codePart::Symbol, org::Creature.Organism, pos::Array{Int,1} = [0,0,0])
   local cp::Code.CodePart
   local codePos::Helper.CodePos = Helper.CodePos(pos[1], pos[2], pos[3])
+  local ret::Bool
   #
   # This is how we find real CodePart() type
   #
@@ -76,8 +77,10 @@ function code(data::TestManagerData, codePart::Symbol, org::Creature.Organism, p
   # Position is not set, we have to add to the end of code to the main function
   #
   if pos[1] < 1 codePos = Helper.CodePos(1,1,length(org.code.args[2].args)) end
-  Mutator._onAdd(data.cfg, org, codePos, cp)
+  ret = Mutator._onAdd(data.cfg, org, codePos, cp)
   updateCode(org)
+
+  ret
 end
 #
 # Returns initial value of first Float64 variable in main function

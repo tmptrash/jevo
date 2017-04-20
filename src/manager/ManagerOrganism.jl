@@ -750,10 +750,10 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       org.energy -= amount
       retObj.ret  = amount
     elseif org.energy <= amount
+      retObj.ret = org.energy
       # TODO: possibly, slow code. To fix this we have to
       # TODO: use map instead array for tasks (man.tasks)
       _killOrganism(man, findfirst((t) -> t.organism === org, man.tasks))
-      retObj.ret = org.energy
     end
     Event.fire(man.obs, "eatorganism", man, retObj.ret)
   else
