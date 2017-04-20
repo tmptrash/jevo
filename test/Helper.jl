@@ -65,8 +65,9 @@ end
 # @param org Organism we are adding to
 # @param pos Poition in organism code (optional)
 #
-function code(data::TestManagerData, codePart::Symbol, org::Creature.Organism, pos::Helper.CodePos = Helper.CodePos(0,0,0))
+function code(data::TestManagerData, codePart::Symbol, org::Creature.Organism, pos::Array{Int,1} = [0,0,0])
   local cp::Code.CodePart
+  local codePos::Helper.CodePos = Helper.CodePos(pos[1], pos[2], pos[3])
   #
   # This is how we find real CodePart() type
   #
@@ -74,8 +75,8 @@ function code(data::TestManagerData, codePart::Symbol, org::Creature.Organism, p
   #
   # Position is not set, we have to add to the end of code to the main function
   #
-  if pos.fnIdx < 1 pos = Helper.CodePos(1,1,length(org.code.args[2].args)) end
-  Mutator._onAdd(data.cfg, org, pos, cp)
+  if pos[1] < 1 codePos = Helper.CodePos(1,1,length(org.code.args[2].args)) end
+  Mutator._onAdd(data.cfg, org, codePos, cp)
   updateCode(org)
 end
 #

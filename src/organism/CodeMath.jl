@@ -387,5 +387,5 @@ function pi(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   local v1::Symbol = @randVar(org, pos, Float64)
   if v1 === :nothing return Expr(:nothing) end
 
-  :($v1 = pi)
+  :($v1 = Base.pi)
 end

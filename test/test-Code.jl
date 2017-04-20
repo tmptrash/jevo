@@ -9,70 +9,56 @@ module TestCode
   import Mutator
   import Config
   include("Helper.jl")
-  #
-  # fn
-  #
-  facts("Testing if Code.fn() is added into empty script") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
-    local org = d.orgs[1]
-
-    code(d, :fn, org)
-    @fact Helper.getArg(org.code, [2,2,1,1]) --> :func_3
-    @fact Code.eval(org.code)(d.cfg, org) --> val(org)
-
-    Manager.destroy(d.man)
-  end
-  facts("Testing two Code.fn()") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
-    local org = d.orgs[1]
-
-    code(d, :fn, org)
-    code(d, :fn, org)
-    @fact length(org.funcs) --> 3
-    @fact length(Helper.getLines(org.code, [2])) --> 4
-    @fact Code.eval(org.code)(d.cfg, org) --> val(org)
-
-    Manager.destroy(d.man)
-  end
-  #
-  # fnCall
-  #
-  facts("Testing Code.fnCall(), but without a function") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
-    local org = d.orgs[1]
-
-    code(d, :fnCall, org)
-
-    @fact length(Helper.getLines(org.code, [2])) --> 2
-    @fact Code.eval(org.code)(d.cfg, org) --> val(org)
-
-    Manager.destroy(d.man)
-  end
-  facts("Testing Code.fnCall() for one Code.fn(), but without variables") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
-    local org = d.orgs[1]
-
-    code(d, :fn, org)
-    code(d, :fnCall, org)
-
-    @fact length(Helper.getLines(org.code, [2])) --> 4
-    @fact Helper.getHead(org.code, [2,2]) --> :function
-    @fact Helper.getHead(org.code, [2,4]) --> :return
-    @fact Code.eval(org.code)(d.cfg, org) --> val(org)
-
-    Manager.destroy(d.man)
-  end
-  # facts("Testing Code.fnCall() of one Code.fn()") do
+  # #
+  # # fn
+  # #
+  # facts("Testing if Code.fn() is added into empty script") do
   #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
   #   local org = d.orgs[1]
-  #   local index = Creature.VARS_AMOUNT + 2
+  #
+  #   code(d, :fn, org)
+  #   @fact Helper.getArg(org.code, [2,2,1,1]) --> :func_3
+  #   @fact Code.eval(org.code)(d.cfg, org) --> val(org)
+  #
+  #   Manager.destroy(d.man)
+  # end
+  # facts("Testing two Code.fn()") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+  #   local org = d.orgs[1]
+  #
+  #   code(d, :fn, org)
+  #   code(d, :fn, org)
+  #   @fact length(org.funcs) --> 3
+  #   @fact length(Helper.getLines(org.code, [2])) --> 4
+  #   @fact Code.eval(org.code)(d.cfg, org) --> val(org)
+  #
+  #   Manager.destroy(d.man)
+  # end
+  # #
+  # # fnCall
+  # #
+  # facts("Testing Code.fnCall(), but without a function") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+  #   local org = d.orgs[1]
+  #
+  #   code(d, :fnCall, org)
+  #
+  #   @fact length(Helper.getLines(org.code, [2])) --> 2
+  #   @fact Code.eval(org.code)(d.cfg, org) --> val(org)
+  #
+  #   Manager.destroy(d.man)
+  # end
+  # facts("Testing Code.fnCall() for one Code.fn()") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+  #   local org = d.orgs[1]
   #
   #   code(d, :fn, org)
   #   code(d, :fnCall, org)
   #
-  #   @fact Helper.getHead(org.code, [2,index]) --> :(=)
-  #   @fact Helper.getArg(org.code, [2,index,2,1]) --> :func_32
-  #   @fact Code.eval(org.code)(d.cfg, org) --> true
+  #   @fact length(Helper.getLines(org.code, [2])) --> 4
+  #   @fact Helper.getHead(org.code, [2,2]) --> :function
+  #   @fact Helper.getHead(org.code, [2,4]) --> :return
+  #   @fact Code.eval(org.code)(d.cfg, org) --> val(org)
   #
   #   Manager.destroy(d.man)
   # end
@@ -85,7 +71,7 @@ module TestCode
   #   code(d, :fnCall, org)
   #   @fact length(Helper.getLines(org.code, [2])) --> Creature.VARS_AMOUNT + 1
   #   @fact length(org.funcs) --> 1
-  #   @fact Code.eval(org.code)(d.cfg, org) --> true
+  #   @fact Code.eval(org.code)(d.cfg, org) --> val(org)
   #   #
   #   # Adding another function and t's call
   #   #
@@ -95,8 +81,8 @@ module TestCode
   #   Mutator._onDel(d.cfg, org, Helper.CodePos(1,1,Creature.VARS_AMOUNT + 2), Code.CodePart(Code.fn, true))
   #   code(d, :fnCall, org)
   #   @fact length(org.funcs) --> 2
-  #   @fact length(Helper.getLines(org.code, [2])) --> Creature.VARS_AMOUNT + 3 # fn, fnCall, return true
-  #   @fact Code.eval(org.code)(d.cfg, org) --> true
+  #   @fact length(Helper.getLines(org.code, [2])) --> Creature.VARS_AMOUNT + 3
+  #   @fact Code.eval(org.code)(d.cfg, org) --> val(org)
   #
   #   Manager.destroy(d.man)
   # end
@@ -110,122 +96,106 @@ module TestCode
   #   code(d, :fnCall, org)
   #
   #   @fact Helper.getHead(org.code, [2,index]) --> :(=)
-  #   @fact Helper.getArg(org.code, [2,index,2,1]) --> :func_32
-  #   @fact Code.eval(org.code)(d.cfg, org) --> true
+  #   @fact Helper.getArg(org.code, [2,index,2,1]) --> :func_3
+  #   @fact Code.eval(org.code)(d.cfg, org) --> val(org)
   #
   #   Manager.destroy(d.man)
   # end
-  # #
-  # # if
-  # #
-  # facts("Testing Code.condition() with all variables") do
-  #   local conf = Config.create()
-  #   local org  = Creature.create(conf)
-  #   local amount = length(Helper.SUPPORTED_TYPES) + 2
   #
-  #   addVars(org, [2], Helper.CodePos(1,1,1))
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,amount - 1), Code.CodePart(Code.condition, true))
-  #   @fact length(Helper.getLines(org.code, [2])) --> amount
-  #   @fact Helper.getHead(org.code, [2,amount - 1]) --> :if
+  # if
+  #
+  # facts("Testing Code.condition() with body") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+  #   local org = d.orgs[1]
+  #
+  #   code(d, :condition, org)
+  #   #
+  #   # Updates compare operator to "===" to make condition true all the time
+  #   #
+  #   Helper.getArg(org.code, [2,2,1]).args[1] = :(===)
+  #   Mutator._onAdd(d.cfg, org, Helper.CodePos(1,2,1), Code.CodePart(Code.pi, false))
+  #   updateCode(org)
   #   @fact length(org.funcs[1].blocks) --> 2
-  #   @fact Code.eval(org.code)(conf, org) --> true
-  # end
-  # facts("Testing Code.condition() without variables") do
-  #   local conf = Config.create()
-  #   local org  = Creature.create(conf)
+  #   @fact Code.eval(org.code)(d.cfg, org) --> Float64(Base.pi)
   #
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.condition, true))
-  #
-  #   @fact length(Helper.getLines(org.code, [2])) --> 1
-  #   @fact Code.eval(org.code)(conf, org) --> true
+  #   Manager.destroy(d.man)
   # end
   # facts("Testing Code.condition() inside function") do
-  #   local conf = Config.create()
-  #   local org  = Creature.create(conf)
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+  #   local org = d.orgs[1]
   #
-  #   conf.codeFuncParamAmount = 1
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
-  #   @fact Helper.getArg(org.code, [2,1,1,1]) --> :func_2
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.condition, true))
-  #   @fact length(Helper.getLines(org.code, [2,1,2])) --> 1
-  #   @fact Code.eval(org.code)(conf, org) --> true
+  #   code(d, :fn, org)
+  #   Mutator._onAdd(d.cfg, org, Helper.CodePos(2,1,2), Code.CodePart(Code.condition, true))
+  #   @fact Helper.getHead(org.code, [2,2,2,2]) --> :if
+  #   @fact Code.eval(org.code)(d.cfg, org) --> val(org)
+  #
+  #   Manager.destroy(d.man)
   # end
-  # facts("Testing Code.condition() inside function, with variables") do
-  #   local conf = Config.create()
-  #   local org  = Creature.create(conf)
+  facts("Testing Code.condition() inside other Code.condition()") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+    local org = d.orgs[1]
+    #
+    # condition inside other function
+    #
+    code(d, :fn, org)
+    @fact Mutator._onAdd(d.cfg, org, Helper.CodePos(2,1,2), Code.CodePart(Code.condition, true)) --> true
+    @fact Mutator._onAdd(d.cfg, org, Helper.CodePos(2,2,1), Code.CodePart(Code.condition, true)) --> false
+    #
+    # conditions inside main function
+    #
+    code(d, :condition, org)
+    @fact Mutator._onAdd(d.cfg, org, Helper.CodePos(1,2,1), Code.CodePart(Code.condition, true)) --> false
+    @fact Code.eval(org.code)(d.cfg, org) --> val(org)
+
+    Manager.destroy(d.man)
+  end
   #
-  #   conf.codeFuncParamAmount = 1
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
-  #   @fact Helper.getArg(org.code, [2,1,1,1]) --> :func_2
+  # for
   #
-  #   addVars(org, [2,1,2], Helper.CodePos(2,1,1))
-  #   Mutator._onAdd(conf, org, Helper.CodePos(2,1,6), Code.CodePart(Code.condition, true))
-  #   @fact Helper.getHead(org.code, [2,1,2,6]) --> :if
-  #   @fact Code.eval(org.code)(conf, org) --> true
-  # end
-  # facts("Testing Code.condition() inside other Code.condition()") do
-  #   local conf = Config.create()
-  #   local org  = Creature.create(conf)
-  #
-  #   conf.codeFuncParamAmount = 1
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.fn, true))
-  #   @fact Helper.getArg(org.code, [2,1,1,1]) --> :func_2
-  #   addVars(org, [2,1,2], Helper.CodePos(2,1,1))
-  #   @fact Mutator._onAdd(conf, org, Helper.CodePos(2,1,7), Code.CodePart(Code.condition, true)) --> true
-  #   @fact Mutator._onAdd(conf, org, Helper.CodePos(2,2,1), Code.CodePart(Code.condition, true)) --> false
-  #   @fact length(Helper.getLines(org.code, [2,1,2,7,2])) --> 0
-  #   @fact Code.eval(org.code)(conf, org) --> true
-  # end
-  # facts("Testing Code.condition() inside other Code.condition() with variables") do
-  #   local conf = Config.create()
-  #   local org  = Creature.create(conf)
-  #   local amount = length(Helper.SUPPORTED_TYPES)
-  #
-  #   addVars(org, [2], Helper.CodePos(1,1,1))
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,amount + 1), Code.CodePart(Code.condition, true))
-  #   addVars(org, [2,amount + 1,2], Helper.CodePos(1,2,1))
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,2,amount + 1), Code.CodePart(Code.condition, true))
-  #   @fact length(Helper.getLines(org.code, [2,amount+1,2])) --> amount
-  #   @fact Code.eval(org.code)(conf, org) --> true
-  # end
-  # #
-  # # for
-  # #
-  # facts("Testing Code.loop() and empty code") do
-  #   local conf = Config.create()
-  #   local org  = Creature.create(conf)
-  #
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,1), Code.CodePart(Code.loop, true))
-  #
-  #   @fact length(Helper.getLines(org.code, [2])) --> 1
-  #   @fact Code.eval(org.code)(conf, org) --> true
-  # end
-  # facts("Testing Code.loop() and one variable") do
-  #   local conf  = Config.create()
-  #   local org   = Creature.create(conf)
-  #   local var   = Symbol("var_", org.symbolId += 1)
-  #   local lines = org.code.args[2].args
-  #
-  #   push!(org.funcs[1].blocks[1].vars[Int8], var)
-  #   insert!(lines, 1, :(local $(var)::Int8=12))
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.loop, true))
-  #
-  #   @fact Helper.getHead(org.code, [2,2]) --> :for
-  #   @fact Code.eval(org.code)(conf, org) --> true
-  # end
-  # facts("Testing Code.loop() near other Code.loop()") do
-  #   local conf = Config.create()
-  #   local org  = Creature.create(conf)
-  #
-  #   addVar(org, [2], Helper.CodePos(1,1,1), Int8)
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,2), Code.CodePart(Code.loop, true))
-  #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,3), Code.CodePart(Code.loop, true))
-  #
-  #   @fact Helper.getHead(org.code, [2,2]) --> :for
-  #   @fact Helper.getHead(org.code, [2,3]) --> :for
-  #   @fact length(Helper.getLines(org.code, [2])) --> 4
-  #   @fact Code.eval(org.code)(conf, org) --> true
-  # end
+  facts("Testing Code.loop() and empty code") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+    local org = d.orgs[1]
+
+    code(d, :loop, org)
+
+    @fact length(Helper.getLines(org.code, [2])) --> 3
+    @fact Helper.getHead(org.code, [2,2]) --> :for
+    @fact Code.eval(org.code)(d.cfg, org) --> val(org)
+
+    Manager.destroy(d.man)
+  end
+  facts("Testing Code.loop() with body") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+    local org = d.orgs[1]
+
+    code(d, :loop, org)
+    Mutator._onAdd(d.cfg, org, Helper.CodePos(1,2,2), Code.CodePart(Code.pi, false))
+    @fact Code.eval(org.code)(d.cfg, org) --> val(org)
+
+    Manager.destroy(d.man)
+  end
+  facts("Testing Code.loop() near other Code.loop()") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+    local org = d.orgs[1]
+
+    code(d, :loop, org)
+    code(d, :loop, org)
+    @fact Helper.getHead(org.code, [2,2]) --> :for
+    @fact Helper.getHead(org.code, [2,3]) --> :for
+    @fact Code.eval(org.code)(d.cfg, org) --> val(org)
+
+    Manager.destroy(d.man)
+  end
+  facts("Testing Code.loop() inside other Code.loop()") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+    local org = d.orgs[1]
+
+    code(d, :loop, org)
+    @fact code(d, org, :loop, [1,2,2]) --> false
+    @fact Code.eval(org.code)(d.cfg, org) --> val(org)
+
+    Manager.destroy(d.man)
+  end
   # #
   # # commands mix
   # #

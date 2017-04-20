@@ -116,18 +116,7 @@ module Code
     # calculation.
     #
     _removeCommentLine(block.expr.args)
-    #
-    # Fills default variables meta data. Adds embedded vars at the
-    # beginning of new function
-    #
-    i = 1
-    map(function(typ::DataType)
-      for j in 1:Creature.VAR_AMOUNT
-        push!(block.vars[typ], Symbol("var_", i))
-        push!(block.expr.args, :(local $(Symbol("var_", i))::$(Symbol(typ))=$(@randValue(typ))))
-        i += 1
-      end
-    end, Helper.SUPPORTED_TYPES)
+    _addDefaultVars(block)
     push!(block.expr.args, :(return $(params[1].args[1].args[1])))
     push!(org.funcs, Creature.Func(fnEx, blocks))
 
@@ -198,7 +187,12 @@ module Code
     # calculation.
     #
     _removeCommentLine(ifEx.args[2].args)
-    push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), ifEx.args[2]))
+    #
+    # According to julia specification variable inside if block
+    # can't be local and should be used from outside block. In our
+    # case it's a block of parent function.
+    #
+    push!(@getBlocks(org, pos), Creature.Block(org.funcs[pos.fnIdx].blocks[1].vars, ifEx.args[2]))
     ifEx
   end
   #
@@ -213,6 +207,7 @@ module Code
   #
   function loop(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
     local loopEx = :(for i::Int = 1:$(cfg.codeLoopAmount) end)
+    local block::Creature.Block
     #
     # This line fixes Julia small issue with additional comment line,
     # which is added during new loop creation. We have to remove
@@ -220,7 +215,12 @@ module Code
     # calculation.
     #
     _removeCommentLine(loopEx.args[2].args)
-    push!(@getBlocks(org, pos), Creature.Block(Helper.getTypesMap(), loopEx.args[2]))
+    block = Creature.Block(Helper.getTypesMap(), loopEx.args[2])
+    #
+    # for block should have it's own variables inside
+    #
+    _addDefaultVars(block)
+    push!(@getBlocks(org, pos), block)
     loopEx
   end
   #
@@ -300,6 +300,20 @@ module Code
       blockIdx,
       Helper.fastRand(lines) + (isFunc ? Creature.VARS_AMOUNT : 0)
     )
+  end
+  #
+  # Fills default variables meta data. Adds embedded vars at the
+  # beginning of new function
+  # @param block Block, where we have to insert default variables
+  #
+  function _addDefaultVars(block::Creature.Block, startIndex = 1)
+    map(function(typ::DataType)
+      for j::Int in 1:Creature.VAR_AMOUNT
+        push!(block.vars[typ], Symbol("var_", startIndex))
+        push!(block.expr.args, :(local $(Symbol("var_", startIndex))::$(Symbol(typ))=$(@randValue(typ))))
+        startIndex += 1
+      end
+    end, Helper.SUPPORTED_TYPES)
   end
   #
   # Removes comment line from code expression. Comment line is created

@@ -119,7 +119,7 @@ module Mutator
     #
     # We may add a code only after variables/functions declaration
     #
-    if pos.lineIdx <= block.defIndex return false end
+    if pos.lineIdx <= block.defIndex && block.defIndex > 1 return false end
     #
     # This is how new line is added at the end of the current block
     #
