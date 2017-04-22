@@ -83,6 +83,14 @@ function code(data::TestManagerData, codePart::Symbol, org::Creature.Organism, p
   ret
 end
 #
+# Updates initial value of first variable in organism's code
+# @param org Organism, which code will be changed
+# @param val Initial value to change
+#
+function val(org::Creature.Organism, val::Float64)
+  Helper.getArg(org.code, [2,1,1]).args[2] = val
+end
+#
 # Returns initial value of first Float64 variable in main function
 # @param org Organism to check
 # @return {Float64} Value

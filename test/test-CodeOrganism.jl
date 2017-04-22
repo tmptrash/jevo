@@ -31,6 +31,7 @@ module TestCodeOrganism
     @fact Code.eval(org.code)(d.cfg, org) --> 10.0
 
     Manager.destroy(d.man)
+    for i=1:100 yield() end
   end
   #
   # Eating
@@ -41,6 +42,8 @@ module TestCodeOrganism
     local right = d.orgs[2]
 
     code(d, :eatRight, left)
+    Helper.getArg(left.code, [2,1,1]).args[2] = realmax(Float64) # means 100 of energy
+    updateCode(left)
     @fact left.energy === right.energy === 100 --> true
     consume(d.task)
     consume(d.task)
@@ -49,63 +52,61 @@ module TestCodeOrganism
 
     Manager.destroy(d.man)
   end
-  # facts("Checking if left organism can donate right one") do
-  #   local d = create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
-  #   local left = d.orgs[1]
-  #   local right = d.orgs[2]
-  #
-  #   code(d, :eatRight, left)
-  #   for i = 1:5 Helper.getArg(left.code, [2,10 + i,1]).args[2] = -10 end # sets all Int8 vars to 10
-  #   updateCode(left)
-  #
-  #   @fact left.energy === right.energy === 100 --> true
-  #   consume(d.task)
-  #   consume(d.task)
-  #   @fact left.energy --> 90
-  #   @fact right.energy --> 110
-  #
-  #   Manager.destroy(d.man)
-  # end
-  # facts("Checking if left organism can eat zero energy from right one") do
-  #   local d = create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
-  #   local left = d.orgs[1]
-  #   local right = d.orgs[2]
-  #
-  #   code(d, :eatRight, left)
-  #   for i = 1:5 Helper.getArg(left.code, [2,10 + i,1]).args[2] = 0 end # sets all Int8 vars to 10
-  #   updateCode(left)
-  #
-  #   @fact left.energy === right.energy === 100 --> true
-  #   consume(d.task)
-  #   consume(d.task)
-  #   @fact left.energy --> 100
-  #   @fact right.energy --> 100
-  #
-  #   Manager.destroy(d.man)
-  # end
-  # facts("Checking if left organism eats right and right eats left") do
-  #   local d = create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
-  #   local left = d.orgs[1]
-  #   local right = d.orgs[2]
-  #
-  #   code(d, :eatRight, left)
-  #   code(d, :eatLeft, right)
-  #   for i = 1:5
-  #     Helper.getArg(left.code, [2,10 + i,1]).args[2] = 10  # sets all Int8 vars to 10
-  #     Helper.getArg(right.code, [2,10 + i,1]).args[2] = 10 # sets all Int8 vars to 10
-  #   end
-  #   updateCode(left)
-  #   updateCode(right)
-  #
-  #   @fact left.energy === right.energy === 100 --> true
-  #   consume(d.task)
-  #   consume(d.task)
-  #   consume(d.task)
-  #   @fact left.energy --> 100
-  #   @fact right.energy --> 100
-  #
-  #   Manager.destroy(d.man)
-  # end
+  facts("Checking if left organism can donate right one") do
+    local d     = create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local left  = d.orgs[1]
+    local right = d.orgs[2]
+
+    code(d, :eatRight, left)
+    Helper.getArg(left.code, [2,1,1]).args[2] = realmax(Float64) * -1.0 # means -100 of energy
+    updateCode(left)
+
+    @fact left.energy === right.energy === 100 --> true
+    consume(d.task)
+    consume(d.task)
+    @fact left.energy --> 0
+    @fact right.energy --> 200
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if left organism can eat zero energy from right one") do
+    local d = create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local left = d.orgs[1]
+    local right = d.orgs[2]
+
+    code(d, :eatRight, left)
+    val(left, 0.0) # means 0 of energy
+    updateCode(left)
+
+    @fact left.energy === right.energy === 100 --> true
+    consume(d.task)
+    consume(d.task)
+    @fact left.energy --> 100
+    @fact right.energy --> 100
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if left organism eats right and right eats left") do
+    local d = create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local left = d.orgs[1]
+    local right = d.orgs[2]
+
+    code(d, :eatRight, left)
+    code(d, :eatLeft, right)
+    val(left, realmax(Float64) / 2.0)  # means 50 of energy
+    val(right, realmax(Float64) / 2.0) # means 50 of energy
+    updateCode(left)
+    updateCode(right)
+
+    @fact left.energy === right.energy === 100 --> true
+    consume(d.task)
+    consume(d.task)
+    consume(d.task)
+    @fact left.energy --> 100
+    @fact right.energy --> 100
+
+    Manager.destroy(d.man)
+  end
   #
   # facts("Checking if up organism can eat down one") do
   #   local d = create([Helper.Point(1,1), Helper.Point(1,2)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))

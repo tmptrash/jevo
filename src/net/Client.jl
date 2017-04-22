@@ -145,10 +145,11 @@ module Client
     try
       close(con.sock)
       Helper.info("Client has stopped")
-      yield()
     catch e
       Helper.warn("Client.stop(): $e")
       @if_debug showerror(STDOUT, e, catch_backtrace())
+    finally
+      yield()
     end
   end
   #

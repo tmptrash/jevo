@@ -154,10 +154,6 @@ module Config
     #
     orgAlivePeriod::Int
     #
-    # Size of one bite durint eating for each organisms
-    #
-    orgEatSize::Int
-    #
     # Amount of errors in organisms codes in current population
     #
     orgErrors::Int
@@ -446,7 +442,6 @@ module Config
       200,                                     # orgEnergySpendPeriod
       1000,                                    # orgEnergySpendOnError
       10000,                                   # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
-      100,                                     # orgEatSize
       0,                                       # orgErrors
       0,                                       # orgEvals
 
@@ -488,7 +483,7 @@ module Config
       [#="Phylogen",=# "Status"],                  # plugIncluded
       [],                                      # plugExcluded
 
-      true,                                    # modeDebug
+      false,                                   # modeDebug
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod

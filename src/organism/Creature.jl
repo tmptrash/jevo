@@ -40,6 +40,7 @@ module Creature
   import Config
   import Config.@if_not_test
   import Config.@if_test
+  import Config.@if_debug
 
   export VAR_AMOUNT
   export VARS_AMOUNT
@@ -69,6 +70,10 @@ module Creature
   # All variables amount
   #
   const VARS_AMOUNT = length(Helper.SUPPORTED_TYPES) * VAR_AMOUNT
+  #
+  # Divider for "for" operator
+  #
+  const FOR_DIVIDER = 1.7976931348623156e306::Float64
   #
   # Enumeration for direction: up, down, left, right
   #
@@ -401,8 +406,8 @@ module Creature
       try
         org.codeFn(cfg, org)
       catch e
-        showerror(STDOUT, e, catch_backtrace())
-        println("\n", org.code, "\n\n")
+        @if_debug showerror(STDOUT, e, catch_backtrace())
+        @if_debug println("\n", org.code, "\n\n")
         #
         # Organisms with errors in a code should be less successful
         #
@@ -821,7 +826,7 @@ module Creature
       org.energy = min(org.energy + retObj.ret, Config.ORGANISM_MAX_ENERGY)
       return retObj.ret
     end
-    
+
     0
   end
 end

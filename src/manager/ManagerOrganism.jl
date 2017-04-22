@@ -100,7 +100,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # Current organism could die during running it's code, for
     # example during giving it's energy to another organism (altruism)
     #
-    if org.energy < 1 && i <= length(tasks) _killOrganism(man, i); i -=1; continue end
+    if org.energy < 1 && i === len _killOrganism(man, i); i -=1; continue end
     #
     # This is how we mutate organisms during their life.
     # Mutations occures according to organisms settings.
@@ -739,13 +739,15 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     #
     if amount < 1
       if organism.energy <= abs(amount)
+        amount = -organism.energy
         # TODO: possibly slow code!
         # TODO: move all findfirst() calls inside _killOrganism()
         _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks))
-        amount = -organism.energy
+        retObj.ret  = 0
+      else
+        retObj.ret  = amount
       end
-      org.energy  = min(org.energy - amount, Config.ORGANISM_MAX_ENERGY)
-      retObj.ret  = amount
+      org.energy = min(org.energy - amount, Config.ORGANISM_MAX_ENERGY)
     elseif org.energy > amount
       org.energy -= amount
       retObj.ret  = amount
@@ -763,7 +765,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     retObj.ret = amount > 0 ? World.grabEnergy(man.world, newPos, UInt16(amount)) : 0
   end
 
-  retObj.ret = Int(retObj.ret)
+  retObj.ret = round(Int, retObj.ret)
 end
 #
 # Checks if specified position ("pos") has no energy and we may
