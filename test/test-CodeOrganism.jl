@@ -374,7 +374,6 @@ module TestCodeOrganism
     local org = d.orgs[1]
 
     code(d, :stepLeft, org)
-    updateCode(org)
     #
     # Sets energy on the right side of the world
     #
@@ -401,7 +400,6 @@ module TestCodeOrganism
     local org = d.orgs[1]
 
     code(d, :stepLeft, org)
-    updateCode(org)
 
     consume(d.task)
     @fact World.getEnergy(d.man.world, Helper.Point(1,1)) --> UInt16(100)
@@ -410,6 +408,48 @@ module TestCodeOrganism
     consume(d.task)
     @fact World.getEnergy(d.man.world, Helper.Point(1,1)) --> UInt16(100)
     @fact World.getEnergy(d.man.world, Helper.Point(10,1)) --> UInt16(0)
+
+    Manager.destroy(d.man)
+  end
+  #
+  # Memory
+  #
+  facts("Checking if organism can save something to internal memory") do
+    local d   = create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local org = d.orgs[1]
+
+    code(d, :toMem, org)
+    consume(d.task)
+    @fact haskey(org.mem, val(org)) --> false
+    consume(d.task)
+    @fact haskey(org.mem, val(org)) --> true
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if organism can load something from internal memory") do
+    local d   = create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local org = d.orgs[1]
+
+    code(d, :fromMem, org)
+    org.mem[val(org)] = 12.0
+    consume(d.task)
+    consume(d.task)
+    @fact Code.eval(org.code)(d.cfg, org) --> 12.0
+
+    Manager.destroy(d.man)
+  end
+  #
+  # id
+  #
+  facts("Checking if organism can check id of other organism") do
+    local d     = create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local left  = d.orgs[1]
+    local right = d.orgs[2]
+
+    code(d, :idLeft, right)
+    consume(d.task)
+    consume(d.task)
+    @fact Code.eval(right.code)(d.cfg, right) --> 1.0
 
     Manager.destroy(d.man)
   end
