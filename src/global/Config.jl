@@ -191,7 +191,7 @@ module Config
     # See Config.codeMaxSize for details. This config will be turn on only if
     # organism reaches code size limit Config.codeMaxSize
     #
-    codeSizeCoef::Float64
+    codeSizeCoef::Int
     #
     # World width
     #
@@ -448,8 +448,8 @@ module Config
       2,                                       # codeFuncParamAmount
       8,                                       # codeLoopAmount
       0,                                       # codeRuns
-      20,                                      # codeMaxSize
-      2.0,                                     # codeSizeCoef
+      10,                                      # codeMaxSize
+      10,                                      # codeSizeCoef
 
       1900,                                    # worldWidth
       940,                                     # worldHeight
@@ -483,7 +483,7 @@ module Config
       [#="Phylogen",=# "Status"],                  # plugIncluded
       [],                                      # plugExcluded
 
-      false,                                   # modeDebug
+      true,                                    # modeDebug
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod

@@ -42,7 +42,7 @@ module TestCodeOrganism
     local right = d.orgs[2]
 
     code(d, :eatRight, left)
-    Helper.getArg(left.code, [2,1,1]).args[2] = realmax(Float64) # means 100 of energy
+    Helper.getArg(left.code, [2,1,1]).args[2] = realmax(Float16) # means 100 of energy
     updateCode(left)
     @fact left.energy === right.energy === 100 --> true
     consume(d.task)
@@ -58,7 +58,7 @@ module TestCodeOrganism
     local right = d.orgs[2]
 
     code(d, :eatRight, left)
-    Helper.getArg(left.code, [2,1,1]).args[2] = realmax(Float64) * -1.0 # means -100 of energy
+    Helper.getArg(left.code, [2,1,1]).args[2] = realmax(Float16) * -1.0 # means -100 of energy
     updateCode(left)
 
     @fact left.energy === right.energy === 100 --> true
@@ -75,7 +75,7 @@ module TestCodeOrganism
     local right = d.orgs[2]
 
     code(d, :eatRight, left)
-    val(left, 0.0) # means 0 of energy
+    val(left, Float16(0.0)) # means 0 of energy
     updateCode(left)
 
     @fact left.energy === right.energy === 100 --> true
@@ -93,8 +93,8 @@ module TestCodeOrganism
 
     code(d, :eatRight, left)
     code(d, :eatLeft, right)
-    val(left, realmax(Float64) / 2.0)  # means 50 of energy
-    val(right, realmax(Float64) / 2.0) # means 50 of energy
+    val(left, realmax(Float16) / Float16(2.0))  # means 50 of energy
+    val(right, realmax(Float16) / Float16(2.0)) # means 50 of energy
     updateCode(left)
     updateCode(right)
 
@@ -114,7 +114,7 @@ module TestCodeOrganism
     local down = d.orgs[2]
 
     code(d, :eatDown, up)
-    val(up, realmax(Float64) / 2.0) # means 50 of energy
+    val(up, realmax(Float16) / Float16(2.0)) # means 50 of energy
     updateCode(up)
 
     @fact up.energy === down.energy === 100 --> true
@@ -131,7 +131,7 @@ module TestCodeOrganism
     local down = d.orgs[2]
 
     code(d, :eatDown, up)
-    val(up, realmax(Float64) / -2.0) # means -50 of energy
+    val(up, realmax(Float16) / Float16(-2.0)) # means -50 of energy
     updateCode(up)
 
     @fact up.energy === down.energy === 100 --> true
@@ -148,7 +148,7 @@ module TestCodeOrganism
     local down = d.orgs[2]
 
     code(d, :eatDown, up)
-    val(up, 0.0) # means 0 of energy
+    val(up, Float16(0.0)) # means 0 of energy
     updateCode(up)
 
     @fact up.energy === up.energy === 100 --> true
@@ -166,8 +166,8 @@ module TestCodeOrganism
 
     code(d, :eatDown, up)
     code(d, :eatUp, down)
-    val(up, realmax(Float64) / 2.0) # means 50 of energy
-    val(down, realmax(Float64) / 2.0) # means 50 of energy
+    val(up, realmax(Float16) / Float16(2.0)) # means 50 of energy
+    val(down, realmax(Float16) / Float16(2.0)) # means 50 of energy
     updateCode(up)
     updateCode(down)
 
@@ -186,7 +186,7 @@ module TestCodeOrganism
     local up = d.orgs[1]
 
     code(d, :eatDown, up)
-    val(up, realmax(Float64)) # means 100 of energy
+    val(up, realmax(Float16)) # means 100 of energy
     updateCode(up)
 
     @fact up.energy === 100 --> true
@@ -201,7 +201,7 @@ module TestCodeOrganism
     local up = d.orgs[1]
 
     code(d, :eatUp, up)
-    val(up, realmax(Float64)) # means 100 of energy
+    val(up, realmax(Float16)) # means 100 of energy
     updateCode(up)
 
     @fact up.energy === 100 --> true
@@ -216,7 +216,7 @@ module TestCodeOrganism
     local up = d.orgs[1]
 
     code(d, :eatRight, up)
-    val(up, realmax(Float64) / 10.0) # means 10 of energy
+    val(up, realmax(Float16) / Float16(10.0)) # means 10 of energy
     updateCode(up)
     World.setEnergy(d.man.world, Helper.Point(2,1), UInt16(30))
 
@@ -450,6 +450,89 @@ module TestCodeOrganism
     consume(d.task)
     consume(d.task)
     @fact Code.eval(right.code)(d.cfg, right) --> 1.0
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if organism can check id of nothing") do
+    local d   = create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local org = d.orgs[1]
+
+    code(d, :idRight, org)
+    consume(d.task)
+    consume(d.task)
+    @fact Code.eval(org.code)(d.cfg, org) --> 0.0
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if organism can check id out of borders") do
+    local d   = create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local org = d.orgs[1]
+
+    code(d, :idLeft, org)
+    consume(d.task)
+    consume(d.task)
+    @fact Code.eval(org.code)(d.cfg, org) --> 0.0
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if organism can check id of energy block") do
+    local d   = create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local org = d.orgs[1]
+
+    World.setEnergy(d.man.world, Helper.Point(2,1), UInt16(10))
+    code(d, :idRight, org)
+    consume(d.task)
+    consume(d.task)
+    @fact Code.eval(org.code)(d.cfg, org) --> 0.0
+
+    Manager.destroy(d.man)
+  end
+  #
+  # Check energy
+  #
+  facts("Checking if organism can get energy of other organism") do
+    local d     = create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local left  = d.orgs[1]
+    local right = d.orgs[2]
+
+    code(d, :energyLeft, right)
+    consume(d.task)
+    consume(d.task)
+    @fact Code.eval(right.code)(d.cfg, right) --> 100.0
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if organism can get energy of nothing") do
+    local d   = create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local org = d.orgs[1]
+
+    code(d, :energyRight, org)
+    consume(d.task)
+    consume(d.task)
+    @fact Code.eval(org.code)(d.cfg, org) --> 0.0
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if organism can get energy out of borders") do
+    local d   = create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local org = d.orgs[1]
+
+    code(d, :energyLeft, org)
+    consume(d.task)
+    consume(d.task)
+    @fact Code.eval(org.code)(d.cfg, org) --> 0.0
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if organism can get energy from real energy block") do
+    local d   = create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100))
+    local org = d.orgs[1]
+
+    World.setEnergy(d.man.world, Helper.Point(2,1), UInt16(10))
+    code(d, :energyRight, org)
+    consume(d.task)
+    consume(d.task)
+    @fact Code.eval(org.code)(d.cfg, org) --> 0.0
 
     Manager.destroy(d.man)
   end

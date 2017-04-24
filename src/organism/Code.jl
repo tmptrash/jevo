@@ -52,26 +52,22 @@ module Code
   #
   # @cmd
   # @line
-  # Returns AST expression for assigning Float64 constant to variable. Format:
-  # var_xx::Float64 = value
+  # Returns AST expression for assigning Float16 constant to variable. Format:
+  # var_xx::Float16 = value
   # @param cfg Global configuration type
   # @param org Organism we have to mutate
   # @param pos Position for current mutation
   # @return {Expr|Expr(:nothing)}
   #
   function var(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-    local typ::DataType = @randType()
-    local var::Symbol   = @randVar(org, pos, typ)
-    if var === :nothing return Expr(:nothing) end
-
-    :($(var)=$(@randValue(typ)))
+    :($(@randVar())=$(Helper.fRand()))
   end
   #
   # @cmd
   # @block
   # Creates custom function with unique name, random arguments with
   # default values. By default it returns first argument as local
-  # variable. Format: function func_xx(var_xx::Float64,...) return var_xx end
+  # variable. Format: function func_xx(var_xx::Float16,...) return var_xx end
   # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Code position
@@ -84,7 +80,7 @@ module Code
     local j::Int
     local exp::Expr
     local paramLen::Int = Helper.fastRand(cfg.codeFuncParamAmount)
-    local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing), Creature.VAR_AMOUNT * length(Helper.SUPPORTED_TYPES))
+    local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing), Creature.VAR_AMOUNT)
     local blocks::Array{Creature.Block, 1} = [block]
     #
     # New function parameters in format: [name::Type=val,...].
@@ -95,7 +91,7 @@ module Code
     # without this...
     #
     local params::Array{Expr, 1} = [
-      (exp = :($(typ=@randType();sym=@newVar(org);push!(block.vars[typ], sym);sym)::$(typ)=$(@randValue(typ)));exp.head=:kw;exp) for i=1:paramLen
+      (exp = :($(sym=@newVar(org);push!(block.vars[Float16], sym);sym)::$(Float16)=$(Helper.fRand()));exp.head=:kw;exp) for i=1:paramLen
     ]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
@@ -128,7 +124,7 @@ module Code
   # Calls custom function or do nothing if no available functions.
   # It choose custom function from org.funcs array, fills parameters
   # and call it. It also creates new variable with appropriate type.
-  # Example: var_xx = func_xx(var_xx::Float64,...)
+  # Example: var_xx = func_xx(var_xx::Float16,...)
   # @param cfg Global configuration type
   # @param org Organism we are working with
   # @param pos Code position
@@ -139,8 +135,7 @@ module Code
     local funcsLen::Int             = length(org.funcs)
     if funcsLen < 2 return nothingEx end
     local fnEx::Expr                = org.funcs[Helper.fastRand(funcsLen-1)+1].code # only custom function may be called
-    local typ::DataType             = fnEx.args[1].args[2].args[1].args[2]          # return DataType of Custom function
-    local var::Symbol               = @randVar(org, pos, typ)                       # var = <fn-name>(...)
+    local var::Symbol               = @randVar()                                    # var = <fn-name>(...)
     if var === :nothing return nothingEx end
     local args::Array{Any, 1}       = fnEx.args[1].args                             # shortcut to func args
     local types::Array{DataType, 1} = Array{DataType, 1}()                          # func types only
@@ -153,13 +148,13 @@ module Code
       #
       for i = 2:(Helper.fastRand(argsLen-1)+1) push!(types, args[i].args[1].args[2]) end
     end
-    fnEx = :($var=$(fnEx.args[1].args[1])($([(ex = @randVar(org, pos, i); if ex === :nothing badParams = true end;ex) for i in types]...)))
+    fnEx = :($var=$(fnEx.args[1].args[1])($([(ex = @randVar(); if ex === :nothing badParams = true end;ex) for i in types]...)))
     if badParams return nothingEx end
     #
     # Pushing of new variable should be after function call to prevent
     # error of calling function with argument of just created variable
     #
-    push!(@getVars(org, pos)[typ], var)
+    push!(@getVars(org, pos)[Float16], var)
     fnEx
   end
   #
@@ -174,10 +169,9 @@ module Code
   # @return {Expr|Expr(:nothing)}
   #
   function condition(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-    local typ::DataType = @randType()
-    local v1::Symbol    = @randVar(org, pos, typ)
+    local v1::Symbol    = @randVar()
     if v1 === :nothing return Expr(:nothing) end
-    local v2::Symbol    = @randVar(org, pos, typ)
+    local v2::Symbol    = @randVar()
     local op::Symbol    = _COMPARE_OPERATORS[Helper.fastRand(length(_COMPARE_OPERATORS))]
     local ifEx          = :(if $(op)($(v1),$(v2)) end) # if v1 comparison v2 end
     #
@@ -215,7 +209,7 @@ module Code
     # calculation.
     #
     _removeCommentLine(loopEx.args[2].args)
-    block = Creature.Block(Helper.getTypesMap(), loopEx.args[2])
+    block = Creature.Block(Helper.getTypesMap(), loopEx.args[2], Creature.VAR_AMOUNT)
     #
     # for block should have it's own variables inside
     #
@@ -238,8 +232,6 @@ module Code
     local idx::Int
     local i::Int
     local bLen::Int
-    local var::Symbol
-    local vars::Array{Symbol, 1}
     #
     # This is function element. We have to sum amount of code
     # lines inside function + amount of code lines inside all
@@ -263,15 +255,6 @@ module Code
       idx = findfirst((b::Creature.Block) -> b.expr.args === lines, blocks)
       org.codeSize -= length(lines)
       deleteat!(blocks, idx)
-    #
-    # For simple line element we do nothing. But do for
-    # variable declaration.
-    #
-    elseif exp.head === :local
-      var = exp.args[1].args[1].args[1]
-      vars = blocks[pos.blockIdx].vars[exp.args[1].args[1].args[2]]
-      blocks[pos.blockIdx].defIndex -= 1
-      deleteat!(vars, findfirst((s::Symbol) -> s === var, vars))
     end
   end
   #
@@ -294,11 +277,11 @@ module Code
     # In this line we skip "return" operator and lines with variables
     # and functions declaration.
     #
-    local lines   ::Int = length(block.expr.args) - (isFunc ? Creature.VARS_AMOUNT + 1 : 0)
+    local lines   ::Int = length(block.expr.args) - (isFunc ? Creature.VAR_AMOUNT + 1 : 0)
     Helper.CodePos(
       fnIdx,
       blockIdx,
-      Helper.fastRand(lines) + (isFunc ? Creature.VARS_AMOUNT : 0)
+      Helper.fastRand(lines) + (isFunc ? Creature.VAR_AMOUNT : 0)
     )
   end
   #
@@ -307,13 +290,11 @@ module Code
   # @param block Block, where we have to insert default variables
   #
   function _addDefaultVars(block::Creature.Block, startIndex = 1)
-    map(function(typ::DataType)
       for j::Int in 1:Creature.VAR_AMOUNT
-        push!(block.vars[typ], Symbol("var_", startIndex))
-        push!(block.expr.args, :(local $(Symbol("var_", startIndex))::$(Symbol(typ))=$(@randValue(typ))))
+        push!(block.vars[Float16], Symbol("var_", startIndex))
+        push!(block.expr.args, :(local $(Symbol("var_", startIndex))::Float16=$(Helper.fRand())))
         startIndex += 1
       end
-    end, Helper.SUPPORTED_TYPES)
   end
   #
   # Removes comment line from code expression. Comment line is created

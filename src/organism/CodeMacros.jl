@@ -5,6 +5,7 @@
 # @author DeadbraiN
 #
 import Helper
+import Creature
 #
 # Creates new unique variable name and returns it's symbol
 # @param {Creature.Organism} org Owner of new variable
@@ -19,69 +20,21 @@ end
 # @return {String}
 #
 macro newFunc(org)
-  :(string("func_", $org.symbolId += 1))
+  :(Symbol("func_", $org.symbolId += 1))
 end
 #
-# Returns one of supported types. Is used randomizer for choosing type.
-# @return {DataType}
-#
-macro randType()
-  :($Helper.SUPPORTED_TYPES[Helper.fastRand(length($Helper.SUPPORTED_TYPES))])
-end
-#
-# Returns a variable from existing in a code
-# @param {Creature.Organism} org Organism we are mutating
-# @param {Helper.CodePos} pos Code position
-# @param {DataType} typ Type of variable we want to take
+# Returns random variable symbol
 # @return {Symbol}
 #
-macro randVar(org, pos, typ)
-  :(
-    length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]) < 1 ?
-    :nothing : # TODO: should be just nothing, not :nothing
-    $org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ][Helper.fastRand(length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]))]
-  )
+macro randVar()
+  :(Symbol("var_", rand(1:Creature.VAR_AMOUNT)))
 end
 #
-# Returns random value by data type. e.g.: 123 for Int8
-# @param {DataType} typ Data type
-# @return {Any}
+# Returns random variable symbol converted to Int
+# @return {Symbol}
 #
-macro randValue(typ)
-  :(rand($(typ)))
-end
-#
-# Returns a variable from existing in a code or a value of
-# specified type.
-# @param {Creature.Organism} org Organism we are mutating
-# @param {Helper.CodePos} pos Code position
-# @param {DataType} typ Type of variable we want to take
-# @return {Symbol} It doesn't return :nothing symbol
-#
-macro randVarOrValue(org, pos, typ)
-  :(
-    length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]) < 1 ?
-    ($typ === String ? randstring() : rand($typ)) :
-    $org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ][Helper.fastRand(length($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].vars[$typ]))]
-  )
-end
-#
-# Returns chosen line in specified function and block
-# @param {Creature.Organism} org
-# @param {Helper.CodePos} pos
-# @return {Array{Expr, 1}}
-#
-macro getLine(org, pos)
-  :($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx].expr.args[$pos.lineIdx])
-end
-#
-# Returns chosen block of specified function
-# @param {Creature.Organism} org
-# @param {Helper.CodePos} pos
-# @return {Organism.Creature.Block}
-#
-macro getBlock(org, pos)
-  :($org.funcs[$pos.fnIdx].blocks[$pos.blockIdx])
+macro randIntVar()
+  :(:(round(Int, $(Symbol("var_", rand(1:Creature.VAR_AMOUNT))))))
 end
 #
 # Returns blocks array

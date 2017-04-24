@@ -100,7 +100,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # Current organism could die during running it's code, for
     # example during giving it's energy to another organism (altruism)
     #
-    if org.energy < 1 && i === len _killOrganism(man, i); i -=1; continue end
+    if org.energy < 1 && i <= length(tasks) && i === len _killOrganism(man, i); i -=1; continue end
     #
     # This is how we mutate organisms during their life.
     # Mutations occures according to organisms settings.
@@ -235,7 +235,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   local minOrgs::Int = man.cfg.worldMinOrgs
   local dontKill::Bool = (i < minOrgs)
   local codeSize::Int
-  local codeSizeCoef::Float64 = man.cfg.codeSizeCoef
+  local codeSizeCoef::Int = man.cfg.codeSizeCoef
   local codeMaxSize::Int = man.cfg.codeMaxSize
 
   if dontKill return false end
@@ -256,7 +256,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
       # This check is used for limiting organisms code size to codeMaxSize
       # because our CPU's are slow
       #
-      if org.codeSize > codeMaxSize codeSize = org.codeSize < 1 ? 1 : Int(round(org.codeSize * codeSizeCoef))
+      if org.codeSize > codeMaxSize codeSize = min(org.codeSize, org.codeSize * codeSizeCoef)
       else codeSize = org.codeSize < 1 ? 1 : org.codeSize
       end
       Event.fire(man.obs, "grabenergy", man, org.energy < codeSize ? org.energy : codeSize)
@@ -745,7 +745,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
         _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks))
         retObj.ret  = 0
       else
-        retObj.ret  = amount
+        retObj.ret = amount
       end
       org.energy = min(org.energy - amount, Config.ORGANISM_MAX_ENERGY)
     elseif org.energy > amount

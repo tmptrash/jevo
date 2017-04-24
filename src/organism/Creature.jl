@@ -43,7 +43,6 @@ module Creature
   import Config.@if_debug
 
   export VAR_AMOUNT
-  export VARS_AMOUNT
   export Organism
 
   export create
@@ -67,13 +66,9 @@ module Creature
   @if_not_test const VAR_AMOUNT = 5
   @if_test     const VAR_AMOUNT = 1
   #
-  # All variables amount
-  #
-  const VARS_AMOUNT = length(Helper.SUPPORTED_TYPES) * VAR_AMOUNT
-  #
   # Divider for "for" operator
   #
-  const FOR_DIVIDER = 1.7976931348623156e306::Float64
+  const FOR_DIVIDER = Float16(655.0)
   #
   # Enumeration for direction: up, down, left, right
   #
@@ -225,7 +220,7 @@ module Creature
     # @inharitable
     # Organism's personal memory. Is used in any possible way.
     #
-    mem::Dict{Float64, Float64}
+    mem::Dict{Float16, Float16}
     #
     # Organism's position in a 2D world. Starts from (1,1)
     # ends with (worldWidth, worldHeight) configurations.
@@ -272,11 +267,11 @@ module Creature
         Expr(:(::), :c, Expr(:., :Config,   Expr(:quote, :ConfigData))),    # c::Config.ConfigData
         Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),     # o::Creature.Organism
           Expr(:block,
-            Expr(:local, Expr(:(=), Expr(:(::), :var_1, :Float64),rand(Float64))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_2, :Float64),rand(Float64))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_3, :Float64),rand(Float64))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_4, :Float64),rand(Float64))),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_5, :Float64),rand(Float64))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_1, :Float16),Helper.fRand())),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_2, :Float16),Helper.fRand())),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_3, :Float16),Helper.fRand())),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_4, :Float16),Helper.fRand())),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_5, :Float16),Helper.fRand())),
             Expr(:return, true)
         )
     )
@@ -284,14 +279,14 @@ module Creature
         Expr(:(::), :c, Expr(:., :Config,   Expr(:quote, :ConfigData))),    # c::Config.ConfigData
         Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),     # o::Creature.Organism
           Expr(:block,
-            Expr(:local, Expr(:(=), Expr(:(::), :var_1, :Float64),5.0)),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_1, :Float16), Float16(5.0))),
             Expr(:return, :var_1)
         )
     )
     #
     # Blocks of main function. In this case only one - main block.
     #
-    local blocks::Array{Block, 1} = [Block(Helper.getTypesMap(), code.args[2], VAR_AMOUNT * length(Helper.SUPPORTED_TYPES))]
+    local blocks::Array{Block, 1} = [Block(Helper.getTypesMap(), code.args[2], VAR_AMOUNT)]
     #
     # This block below, creates variables of main function, which we created
     # in code above (local code::Expr  = ...). It also creates one block,
@@ -304,14 +299,14 @@ module Creature
     #
     # Fills variables meta data
     #
-    map((typ::DataType) -> for j in 1:VAR_AMOUNT push!(block.vars[typ], Symbol("var_", i += 1)) end, Helper.SUPPORTED_TYPES)
+    for j in 1:VAR_AMOUNT push!(block.vars[Float16], Symbol("var_", i += 1)) end
 
     Organism(
       id,                                                                   # id
       code,                                                                 # code
       eval(code),                                                           # codeFn
       0,                                                                    # codeSize
-      VAR_AMOUNT * length(Helper.SUPPORTED_TYPES),                          # symbolId
+      VAR_AMOUNT,                                                           # symbolId
       funcs,                                                                # funcs
       copy(cfg.orgMutationProbs),                                           # mutationProbabilities
       cfg.orgCloneMutation,                                                 # mutationsOnClonePercent
@@ -436,11 +431,16 @@ module Creature
     # some outside object. "ret" will be contained amount of energy.
     #
     retObj = Helper.RetObj()
-    #
-    # Listener of "getenergy" should set amount of energy in retObj.ret
-    # Possible values [0...typemax(Int)]
-    #
-    Event.fire(org.observer, "getenergy", org, Helper.Point(x, y), retObj)
+    if x < typemax(Int) && y < typemax(Int)
+      #
+      # Listener of "getenergy" should set amount of energy in retObj.ret
+      # Possible values [0...typemax(Int)]
+      #
+      Event.fire(org.observer, "getenergy", org, Helper.Point(x, y), retObj)
+      if retObj.ret === nothing retObj.ret = UInt16(0) end
+    else
+      retObj.ret = UInt16(0)
+    end
     #
     # Return value
     #
@@ -454,7 +454,7 @@ module Creature
   # @param cfg Global configuration type
   # @param org Current organism
   # @param amount Amount of energy organism wants to grab
-  # @return {UInt} Amount of grabbed energy
+  # @return {Int} Amount of grabbed energy
   #
   function eatLeft(cfg::Config.ConfigData, org::Organism, amount::Int) _grabEnergy(cfg, org, left, amount) end
   #
@@ -464,7 +464,7 @@ module Creature
   # @param cfg Global configuration type
   # @param org Current organism
   # @param amount Amount of energy organism wants to grab
-  # @return {UInt} Amount of grabbed energy
+  # @return {Int} Amount of grabbed energy
   #
   function eatRight(cfg::Config.ConfigData, org::Organism, amount::Int) _grabEnergy(cfg, org, right, amount) end
   #
@@ -474,7 +474,7 @@ module Creature
   # @param cfg Global configuration type
   # @param org Current organism
   # @param amount Amount of energy organism wants to grab
-  # @return {UInt} Amount of grabbed energy
+  # @return {Int} Amount of grabbed energy
   #
   function eatUp(cfg::Config.ConfigData, org::Organism, amount::Int) _grabEnergy(cfg, org, up, amount) end
   #
@@ -495,6 +495,8 @@ module Creature
   function stepLeft(org::Organism)
     local retObj::Helper.RetObj = Helper.RetObj()
     Event.fire(org.observer, "stepleft", org, retObj)
+    if retObj.ret === nothing retObj.ret = false end
+
     retObj.ret::Bool
   end
   #
@@ -505,6 +507,7 @@ module Creature
   function stepRight(org::Organism)
     local retObj::Helper.RetObj = Helper.RetObj()
     Event.fire(org.observer, "stepright", org, retObj)
+    if retObj.ret === nothing retObj.ret = false end
     retObj.ret::Bool
   end
   #
@@ -515,6 +518,7 @@ module Creature
   function stepUp(org::Organism)
     local retObj::Helper.RetObj = Helper.RetObj()
     Event.fire(org.observer, "stepup", org, retObj)
+    if retObj.ret === nothing retObj.ret = false end
     retObj.ret::Bool
   end
   #
@@ -525,6 +529,7 @@ module Creature
   function stepDown(org::Organism)
     local retObj::Helper.RetObj = Helper.RetObj()
     Event.fire(org.observer, "stepdown", org, retObj)
+    if retObj.ret === nothing retObj.ret = false end
     retObj.ret::Bool
   end
   #
@@ -639,6 +644,51 @@ module Creature
   # @param org Current organism
   #
   function cloneEnergyPercentDown(org::Organism) _getFloatProperty(org, down, :cloneEnergyPercent) end
+  #
+  # Checks if specified value is not overflowed for Float16.
+  # It also checks infinity values like Inf and -Inf
+  # @param val Float16 Value to check
+  # @return {Float16} Fixed value
+  #
+  function fix(val::Float16) isfinite(val) ? val : Float16(0) end
+  #
+  # Checks if specified Int value is not overflowed for Int type.
+  # It also checks infinity values like Inf and -Inf
+  # @param val Float16 Value to check
+  # @return {Float16} Fixed value
+  #
+  function fix(val::Int)
+    local max::Int = round(Int, realmax(Float16))
+
+    if val >= max return Float16(max) end
+    if val <= -max return -Float16(max) end
+
+    Float16(val)
+  end
+  #
+  # Checks if specified Int value is not overflowed for UInt16.
+  # It also checks infinity values like Inf and -Inf
+  # @param val Float16 Value to check
+  # @return {Float16} Fixed value
+  #
+  function fix(val::UInt16)
+    local max::UInt16 = round(UInt16, realmax(Float16))
+
+    if val >= max return Float16(max) end
+    if val <= -max return -Float16(max) end
+
+    Float16(val)
+  end
+  #
+  # Checks if value converted to Int is zero. If so, then returns 1.0.
+  # Otherwise returns value.
+  # @param val Value to check
+  # @return {Float16}
+  #
+  function ifz(val::Float16)
+    local intVal::Int = round(Int, val)
+    intVal === 0 ? 1 : intVal
+  end
   #
   # Returns some Int value by specified organism property.
   # @param org Organism with properties
@@ -795,6 +845,11 @@ module Creature
     # Possible values 0|id
     #
     Event.fire(org.observer, string("prop", dir), org, retObj)
+    #
+    # It's possible, that organism has no event listeners. In this
+    # case retObj.ret will be a Symbol and may corrupt application
+    #
+    if retObj.ret === sym retObj.ret = Float16(0.0) end
 
     retObj.ret
   end

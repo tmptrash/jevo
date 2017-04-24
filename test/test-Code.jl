@@ -67,9 +67,9 @@ module TestCode
     local org = d.orgs[1]
 
     code(d, :fn, org)
-    Mutator._onDel(d.cfg, org, Helper.CodePos(1,1,Creature.VARS_AMOUNT + 1), Code.CodePart(Code.fn, true))
+    Mutator._onDel(d.cfg, org, Helper.CodePos(1,1,Creature.VAR_AMOUNT + 1), Code.CodePart(Code.fn, true))
     code(d, :fnCall, org)
-    @fact length(Helper.getLines(org.code, [2])) --> Creature.VARS_AMOUNT + 1
+    @fact length(Helper.getLines(org.code, [2])) --> Creature.VAR_AMOUNT + 1
     @fact length(org.funcs) --> 1
     @fact Code.eval(org.code)(d.cfg, org) --> val(org)
     #
@@ -78,10 +78,10 @@ module TestCode
     code(d, :fn, org)
     code(d, :fnCall, org)
     @fact length(org.funcs) --> 2
-    Mutator._onDel(d.cfg, org, Helper.CodePos(1,1,Creature.VARS_AMOUNT + 2), Code.CodePart(Code.fn, true))
+    Mutator._onDel(d.cfg, org, Helper.CodePos(1,1,Creature.VAR_AMOUNT + 2), Code.CodePart(Code.fn, true))
     code(d, :fnCall, org)
     @fact length(org.funcs) --> 2
-    @fact length(Helper.getLines(org.code, [2])) --> Creature.VARS_AMOUNT + 3
+    @fact length(Helper.getLines(org.code, [2])) --> Creature.VAR_AMOUNT + 3
     @fact Code.eval(org.code)(d.cfg, org) --> val(org)
 
     Manager.destroy(d.man)
@@ -89,7 +89,7 @@ module TestCode
   facts("Testing two Code.fnCall() for one Code.fn()") do
     local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
     local org = d.orgs[1]
-    local index = Creature.VARS_AMOUNT + 3
+    local index = Creature.VAR_AMOUNT + 3
 
     code(d, :fn, org)
     code(d, :fnCall, org)
@@ -116,7 +116,7 @@ module TestCode
     Mutator._onAdd(d.cfg, org, Helper.CodePos(1,2,1), Code.CodePart(Code.pi, false))
     updateCode(org)
     @fact length(org.funcs[1].blocks) --> 2
-    @fact Code.eval(org.code)(d.cfg, org) --> Float64(Base.pi)
+    @fact Code.eval(org.code)(d.cfg, org) --> Float16(Base.pi)
 
     Manager.destroy(d.man)
   end
@@ -207,7 +207,7 @@ module TestCode
   #   Mutator._onAdd(conf, org, Helper.CodePos(1,1,6), Code.CodePart(Code.loop, true))
   #   Mutator._onAdd(conf, org, Helper.CodePos(1,2,1), Code.CodePart(Code.fn, true))
   #
-  #   @fact length(Helper.getLines(org.code, [2])) --> length(Helper.SUPPORTED_TYPES) + 2
+  #   @fact length(Helper.getLines(org.code, [2])) --> 3
   #   @fact length(Helper.getLines(org.code, [2,6,2])) --> 0
   #   @fact Code.eval(org.code)(conf, org) --> true
   # end

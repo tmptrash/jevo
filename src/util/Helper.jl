@@ -7,18 +7,16 @@ module Helper
   export RetObj
 
   export toBytes
+  export fRand
   export fastRand
   export fastZRand
   export getProbIndex
-  export getSupportedTypes
   export isopen
   export done
   export info
   export warn
   export error
   export emptyFn
-
-  export SUPPORTED_TYPES
   #
   # These constants were gotten from julia/base/stream.jl file. They
   # are used for optimization of isopen() function.
@@ -161,12 +159,10 @@ module Helper
     args[indexes[len]]
   end
   #
-  # This function is not presented in Julis Gtk package
+  # Generates random Float16 number in all available range -XX.XX...XX.XX
+  # @return {Float16}
   #
-  #function gtkMarkup(label::Gtk.GtkLabel,str)
-  #  ccall((:gtk_label_set_markup,Gtk.libgtk),Void,(Ptr{Gtk.GObject},Ptr{UInt8}),label,str)
-  #  return label
-  #end
+  function fRand() Float16((rand() * 2.0 - 1.0) * 6.55e4) end
   #
   # Fast version of rand(n::Range) function. Generates random Int number in
   # range 1:n
@@ -247,21 +243,11 @@ module Helper
     i
   end
   #
-  # Returns default empty map with supported Julia types. All supported
-  # types should be stored in getSupportedTypes() function.
+  # Returns default empty map with supported Julia types
   # @return {Dict{DataType, Array{Symbol, 1}}}
   #
   function getTypesMap()
-    Dict{DataType, Array{Symbol, 1}}(getSupportedTypes((typ) -> typ => [])...)
-  end
-  #
-  # Returns supported types array for organism language
-  # @param fn Callback function, which is called for
-  # every array element
-  # @return {Array{DataType, 1}}
-  #
-  function getSupportedTypes(fn::Function = (t) -> t)
-    map(fn, SUPPORTED_TYPES)
+    Dict{DataType, Array{Symbol, 1}}(Float16 => Symbol[])
   end
   #
   # Checks if position is empty. x == y == 0 - this is empty
@@ -327,9 +313,4 @@ module Helper
   # Just stub function, which is used as a placeholder for saving a backup
   #
   function emptyFn() end
-
-  #
-  # Supported types of code inside organism
-  #
-  const SUPPORTED_TYPES = [Float64]
 end

@@ -44,7 +44,7 @@ module TestMutator
   # #
   # function isVarAdded(org)
   #   local hasType = false
-  #   for i in Helper.SUPPORTED_TYPES if length(org.funcs[1].blocks[1].vars[i]) > 0 hasType = true end end
+  #   for i in [Float16] if length(org.funcs[1].blocks[1].vars[i]) > 0 hasType = true end end
   #   hasType
   # end
 

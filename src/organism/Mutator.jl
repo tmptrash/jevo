@@ -199,7 +199,7 @@ module Mutator
     if len < 1 ||
        pos.lineIdx > len ||
        pos.lineIdx === len && pos.blockIdx > 1 ||
-       pos.lineIdx <= Creature.VARS_AMOUNT || #org.funcs[pos.fnIdx].blocks[pos.blockIdx].defIndex || # we can't remove predefined vars
+       pos.lineIdx <= Creature.VAR_AMOUNT || #org.funcs[pos.fnIdx].blocks[pos.blockIdx].defIndex || # we can't remove predefined vars
        lines[pos.lineIdx].head === :return
       return false
     end

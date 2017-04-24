@@ -87,13 +87,13 @@ end
 # @param org Organism, which code will be changed
 # @param val Initial value to change
 #
-function val(org::Creature.Organism, val::Float64)
+function val(org::Creature.Organism, val::Float16)
   Helper.getArg(org.code, [2,1,1]).args[2] = val
 end
 #
-# Returns initial value of first Float64 variable in main function
+# Returns initial value of first Float16 variable in main function
 # @param org Organism to check
-# @return {Float64} Value
+# @return {Float16} Value
 #
 function val(org::Creature.Organism)
   Helper.getArg(org.code, [2,1,1,2])
@@ -104,26 +104,6 @@ end
 #
 function updateCode(org::Creature.Organism)
   org.codeFn = Creature.eval(org.code)
-end
-#
-# Erases current types and set them to newTypes
-# @param newTypes New types array
-# @return Types array before changing
-#
-function changeTypes(newTypes = DataType[])
-  local types = deepcopy(Helper.SUPPORTED_TYPES)
-  empty!(Helper.SUPPORTED_TYPES)
-  for i=1:length(newTypes) push!(Helper.SUPPORTED_TYPES, newTypes[i]) end
-  types
-end
-#
-# Resets types to oldTypes array. oldTypes should be obtained
-# by calling changeTypes() function
-# @param oldTypes Values returned by changeTypes()
-#
-function resetTypes(oldTypes)
-  empty!(Helper.SUPPORTED_TYPES)
-  for i=1:length(oldTypes) push!(Helper.SUPPORTED_TYPES, oldTypes[i]) end
 end
 #
 # Waits for timeout or function fn() to return true. Between
@@ -138,17 +118,15 @@ end
 # Adds all available variables into specified position
 #
 function addVars(org::Creature.Organism, lines::Array{Int, 1}, pos::Helper.CodePos)
-  Helper.getSupportedTypes(function (t)
-    var = Symbol("var_", org.symbolId += 1)
-    push!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].vars[t], var)
-    insert!(Helper.getLines(org.code, lines), 1, :(local $(var)::$t=$(t !== String ? rand(t) : randstring())))
-  end)
+  local var::Symbol = Symbol("var_", org.symbolId += 1)
+  push!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].vars[Float16], var)
+  insert!(Helper.getLines(org.code, lines), 1, :(local $(var)::$t=$(fRand())))
 end
 #
 # Adds one variable by type
 #
 function addVar(org::Creature.Organism, lines::Array{Int, 1}, pos::Helper.CodePos, typ::DataType)
-  var = Symbol("var_", org.symbolId += 1)
+  local var::Symbol = Symbol("var_", org.symbolId += 1)
   push!(org.funcs[pos.fnIdx].blocks[pos.blockIdx].vars[typ], var)
-  insert!(Helper.getLines(org.code, lines), pos.lineIdx, :(local $(var)::$(typ)=$(typ !== String ? rand(typ) : randstring())))
+  insert!(Helper.getLines(org.code, lines), pos.lineIdx, :(local $(var)::$(typ)=$(Helper.fRand())))
 end
