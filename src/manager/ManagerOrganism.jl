@@ -77,7 +77,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     #
     if i > length(tasks) i = length(tasks) end
     @inbounds task = tasks[i]
-    org  = task.organism
+    org = task.organism
     #
     # Because this loop affects porformance, we have call yield()
     # here and not in main Manager while loop.
