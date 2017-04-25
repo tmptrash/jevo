@@ -93,8 +93,6 @@ module TestCodeOrganism
 
     code(d, :eatRight, left)
     code(d, :eatLeft, right)
-    val(left, realmax(Float16) / Float16(2.0))  # means 50 of energy
-    val(right, realmax(Float16) / Float16(2.0)) # means 50 of energy
     updateCode(left)
     updateCode(right)
 

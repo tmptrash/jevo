@@ -47,7 +47,7 @@ const FOR_DIVIDER = Float16(655.0)
 # @return {Expr|Expr(:nothing)} New expression or Expr(:nothing) if skipped
 #
 function lookAt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.getEnergy(o, $(@randIntVar()), $(@randIntVar()))))
+  :($(@randVar()) = Float16(min(Creature.MAX_INT_VALUE, Creature.getEnergy(o, $(@randIntVar()), $(@randIntVar())))))
 end
 #
 # @cmd
@@ -59,7 +59,7 @@ end
 # @return {Expr}
 #
 function eatLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.eatLeft(c, o, round(Int, $(@randVar()) / FOR_DIVIDER))))
+  :($(@randVar()) = Float16(Creature.eatLeft(c, o, $(@randIntVar()))))
 end
 #
 # @cmd
@@ -71,7 +71,7 @@ end
 # @return {Expr}
 #
 function eatRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.eatRight(c, o, round(Int, $(@randVar()) / FOR_DIVIDER))))
+  :($(@randVar()) = Float16(Creature.eatRight(c, o, $(@randIntVar()))))
 end
 #
 # @cmd
@@ -83,7 +83,7 @@ end
 # @return {Expr}
 #
 function eatUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.eatUp(c, o, round(Int, $(@randVar()) / FOR_DIVIDER))))
+  :($(@randVar()) = Float16(Creature.eatUp(c, o, $(@randIntVar()))))
 end
 #
 # @cmd
@@ -95,7 +95,7 @@ end
 # @return {Expr}
 #
 function eatDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.eatDown(c, o, round(Int, $(@randVar()) / FOR_DIVIDER))))
+  :($(@randVar()) = Float16(Creature.eatDown(c, o, $(@randIntVar()))))
 end
 #
 # @cmd
@@ -174,62 +174,62 @@ function fromMem(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.Cod
   #
   :($(@randVar()) = haskey(o.mem, $(var)) ? o.mem[$(var)] : $(var))
 end
-#
-# @cmd
-# @line
-# Obtains unique id of organism from the left. UInt id will
-# be converted to Int type. If there is no organism on the left,
-# it will obtain 0.
-# @param cfg Global configuration type
-# @param org Organism we are working with
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function idLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.idLeft(o)))
-end
-#
-# @cmd
-# @line
-# Obtains unique id of organism from the right. UInt id will
-# be converted to Int type. If there is no organism on the right,
-# it will obtain 0.
-# @param cfg Global configuration type
-# @param org Organism we are working with
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function idRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.idRight(o)))
-end
-#
-# @cmd
-# @line
-# Obtains unique id of organism from the above. UInt id will
-# be converted to Int type. If there is no organism on the above,
-# it will obtain 0.
-# @param cfg Global configuration type
-# @param org Organism we are working with
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function idUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.idUp(o)))
-end
-#
-# @cmd
-# @line
-# Obtains unique id of organism from the right. UInt id will
-# be converted to Int type. If there is no organism on the right,
-# it will obtain 0.
-# @param cfg Global configuration type
-# @param org Organism we are working with
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function idDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.idDown(o)))
-end
+# #
+# # @cmd
+# # @line
+# # Obtains unique id of organism from the left. UInt id will
+# # be converted to Int type. If there is no organism on the left,
+# # it will obtain 0.
+# # @param cfg Global configuration type
+# # @param org Organism we are working with
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function idLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = Creature.idLeft(o))
+# end
+# #
+# # @cmd
+# # @line
+# # Obtains unique id of organism from the right. UInt id will
+# # be converted to Int type. If there is no organism on the right,
+# # it will obtain 0.
+# # @param cfg Global configuration type
+# # @param org Organism we are working with
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function idRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = Creature.idRight(o))
+# end
+# #
+# # @cmd
+# # @line
+# # Obtains unique id of organism from the above. UInt id will
+# # be converted to Int type. If there is no organism on the above,
+# # it will obtain 0.
+# # @param cfg Global configuration type
+# # @param org Organism we are working with
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function idUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = Creature.idUp(o))
+# end
+# #
+# # @cmd
+# # @line
+# # Obtains unique id of organism from the right. UInt id will
+# # be converted to Int type. If there is no organism on the right,
+# # it will obtain 0.
+# # @param cfg Global configuration type
+# # @param org Organism we are working with
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function idDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = Creature.idDown(o))
+# end
 #
 # @cmd
 # @line
@@ -241,7 +241,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.energyLeft(o)))
+  :($(@randVar()) = Float16(min(Creature.MAX_INT_VALUE, Creature.energyLeft(o))))
 end
 #
 # @cmd
@@ -254,7 +254,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.energyRight(o)))
+  :($(@randVar()) = Float16(min(Creature.MAX_INT_VALUE, Creature.energyRight(o))))
 end
 #
 # @cmd
@@ -267,7 +267,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.energyUp(o)))
+  :($(@randVar()) = Float16(min(Creature.MAX_INT_VALUE, Creature.energyUp(o))))
 end
 #
 # @cmd
@@ -280,7 +280,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.energyDown(o)))
+  :($(@randVar()) = Float16(min(Creature.MAX_INT_VALUE, Creature.energyDown(o))))
 end
 #
 # @cmd
@@ -292,7 +292,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function myColor(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(o.color))
+  :($(@randVar()) = Float16(o.color))
 end
 #
 # @cmd
@@ -304,7 +304,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function myX(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(o.pos.x))
+  :($(@randVar()) = Float16(o.pos.x))
 end
 #
 # @cmd
@@ -316,7 +316,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function myY(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(o.pos.y))
+  :($(@randVar()) = Float16(o.pos.y))
 end
 #
 # @cmd
@@ -328,7 +328,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function codeSizeLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.codeSizeLeft(o)))
+  :($(@randVar()) = Float16(Creature.codeSizeLeft(o)))
 end
 #
 # @cmd
@@ -340,7 +340,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function codeSizeRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.codeSizeRight(o)))
+  :($(@randVar()) = Float16(Creature.codeSizeRight(o)))
 end
 #
 # @cmd
@@ -352,7 +352,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function codeSizeUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.codeSizeUp(o)))
+  :($(@randVar()) = Float16(Creature.codeSizeUp(o)))
 end
 #
 # @cmd
@@ -364,7 +364,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function codeSizeDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(Creature.codeSizeDown(o)))
+  :($(@randVar()) = Float16(Creature.codeSizeDown(o)))
 end
 #
 # @cmd

@@ -49,7 +49,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function minus(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix($(@randVar()) - $(@randVar())))
+  :($(@randVar()) = $(@randVar()) - $(@randVar()))
 end
 #
 # @cmd
@@ -62,7 +62,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function multiply(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix($(@randVar()) * $(@randVar())))
+  :($(@randVar()) = $(@randVar()) * $(@randVar()))
 end
 #
 # @cmd
@@ -76,7 +76,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function divide(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix($(@randVar()) / $(@randVar())))
+  :($(@randVar()) = $(@randVar()) / $(@randVar()))
 end
 #
 # @cmd
@@ -142,7 +142,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function rshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix($(@randIntVar()) >> $(@randIntVar())))
+  :($(@randVar()) = $(@randIntVar()) >> $(@randIntVar()))
 end
 #
 # @cmd
@@ -155,7 +155,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function lshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix($(@randIntVar()) << $(@randIntVar())))
+  :($(@randVar()) = $(@randIntVar()) << $(@randIntVar()))
 end
 #
 # @cmd
@@ -191,7 +191,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function log(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(log(abs($(@randVar())))))
+  :($(@randVar()) = log(abs($(@randVar()))))
 end
 # @cmd
 # @line
@@ -235,7 +235,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function cot(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(cot($(@randVar()))))
+  :($(@randVar()) = cot($(@randVar())))
 end
 # @cmd
 # @line
@@ -257,7 +257,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function csc(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = fix(csc($(@randVar()))))
+  :($(@randVar()) = csc($(@randVar())))
 end
 # @cmd
 # @line

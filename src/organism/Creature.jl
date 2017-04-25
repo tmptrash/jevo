@@ -70,6 +70,10 @@ module Creature
   #
   const FOR_DIVIDER = Float16(655.0)
   #
+  # Maximum Float16 to Int value available for organisms
+  #
+  const MAX_INT_VALUE = round(Int, realmax(Float16))
+  #
   # Enumeration for direction: up, down, left, right
   #
   @enum DIRECTION up=1 down=2 left=3 right=4
@@ -401,8 +405,8 @@ module Creature
       try
         org.codeFn(cfg, org)
       catch e
-        @if_debug showerror(STDOUT, e, catch_backtrace())
-        @if_debug println("\n", org.code, "\n\n")
+        #showerror(STDOUT, e, catch_backtrace())
+        #println("\n", org.code, "\n\n")
         #
         # Organisms with errors in a code should be less successful
         #
@@ -645,51 +649,6 @@ module Creature
   #
   function cloneEnergyPercentDown(org::Organism) _getFloatProperty(org, down, :cloneEnergyPercent) end
   #
-  # Checks if specified value is not overflowed for Float16.
-  # It also checks infinity values like Inf and -Inf
-  # @param val Float16 Value to check
-  # @return {Float16} Fixed value
-  #
-  function fix(val::Float16) isfinite(val) ? val : Float16(0) end
-  #
-  # Checks if specified Int value is not overflowed for Int type.
-  # It also checks infinity values like Inf and -Inf
-  # @param val Float16 Value to check
-  # @return {Float16} Fixed value
-  #
-  function fix(val::Int)
-    local max::Int = round(Int, realmax(Float16))
-
-    if val >= max return Float16(max) end
-    if val <= -max return -Float16(max) end
-
-    Float16(val)
-  end
-  #
-  # Checks if specified Int value is not overflowed for UInt16.
-  # It also checks infinity values like Inf and -Inf
-  # @param val Float16 Value to check
-  # @return {Float16} Fixed value
-  #
-  function fix(val::UInt16)
-    local max::UInt16 = round(UInt16, realmax(Float16))
-
-    if val >= max return Float16(max) end
-    if val <= -max return -Float16(max) end
-
-    Float16(val)
-  end
-  #
-  # Checks if value converted to Int is zero. If so, then returns 1.0.
-  # Otherwise returns value.
-  # @param val Value to check
-  # @return {Float16}
-  #
-  function ifz(val::Float16)
-    local intVal::Int = round(Int, val)
-    intVal === 0 ? 1 : intVal
-  end
-  #
   # Returns some Int value by specified organism property.
   # @param org Organism with properties
   # @param dir Direction of searching (left, right,...)
@@ -735,7 +694,7 @@ module Creature
     local b::Block
     local mf::MetaFunc
     local h::Int = Int(pointer_from_objref(e))
-    local mCode::MetaCode = MetaCode(h, Dict{Int, MetaFunc}(h => MetaFunc(e, Dict{Int, Expr}(Int(pointer_from_objref(e.args[2])) => e.args[2]))))
+    @inbounds local mCode::MetaCode = MetaCode(h, Dict{Int, MetaFunc}(h => MetaFunc(e, Dict{Int, Expr}(Int(pointer_from_objref(e.args[2])) => e.args[2]))))
     local ex::Expr = _copy(e, mCode) # Expr tree copy
     #
     # This code updates links between meta tree and copy of Expr tree

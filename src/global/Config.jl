@@ -448,7 +448,7 @@ module Config
       2,                                       # codeFuncParamAmount
       8,                                       # codeLoopAmount
       0,                                       # codeRuns
-      10,                                      # codeMaxSize
+      15,                                      # codeMaxSize
       10,                                      # codeSizeCoef
 
       1900,                                    # worldWidth
@@ -483,7 +483,7 @@ module Config
       [#="Phylogen",=# "Status"],                  # plugIncluded
       [],                                      # plugExcluded
 
-      true,                                    # modeDebug
+      false,                                   # modeDebug
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod

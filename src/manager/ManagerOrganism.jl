@@ -76,7 +76,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # will be killed. So we have to update i index!
     #
     if i > length(tasks) i = length(tasks) end
-    task = tasks[i]
+    @inbounds task = tasks[i]
     org  = task.organism
     #
     # Because this loop affects porformance, we have call yield()
@@ -210,7 +210,7 @@ function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerType
   #
   if orgAmount >= man.cfg.worldMaxOrgs
     probIndex = Helper.fastRand(orgAmount)
-    if probIndex < 1 || Helper.fastRand(man.maxEnergy) < man.maxEnergy - tasks[probIndex].organism.energy return false end
+    @inbounds if probIndex < 1 || Helper.fastRand(man.maxEnergy) < man.maxEnergy - tasks[probIndex].organism.energy return false end
     _killOrganism(man, probIndex)
   end
   #
@@ -218,7 +218,7 @@ function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerType
   #
   @inbounds for task in tasks push!(probs, UInt(task.organism.energy) * UInt(task.organism.mutationsFromStart)) end
   probIndex = Helper.getProbIndex(probs)
-  if probIndex > 0 _onClone(man, tasks[probIndex].organism) end
+  @inbounds if probIndex > 0 _onClone(man, tasks[probIndex].organism) end
 
   true
 end
@@ -247,7 +247,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     #
     # if the organism is marked as "removed", we have to delete it
     #
-    org = tasks[i].organism
+    @inbounds org = tasks[i].organism
     #
     # Energy shouldn't be less then 1
     #
@@ -280,7 +280,7 @@ end
 function _decreaseOrganismEnergy(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int, orgIndex::Int = 0)
   org.energy -= amount
   if org.energy < 1
-    _killOrganism(man, (orgIndex < 1 ? findfirst((t) -> t.organism === org, man.tasks) : orgIndex))
+    _killOrganism(man, (orgIndex < 1 ? (@inbounds findfirst((t) -> t.organism === org, man.tasks)) : orgIndex))
     return false
   end
 
@@ -323,8 +323,8 @@ end
 # @param i Index of organism's task
 #
 function _freezeOrganism(man::ManagerTypes.ManagerData, i::Int)
-  local id::UInt = man.tasks[i].id
-  local org::Creature.Organism = man.tasks[i].organism
+  @inbounds local id::UInt = man.tasks[i].id
+  @inbounds local org::Creature.Organism = man.tasks[i].organism
   local oldColor::UInt16 = org.color
 
   org.color = UInt16(Dots.INDEX_EMPTY)
@@ -333,7 +333,7 @@ function _freezeOrganism(man::ManagerTypes.ManagerData, i::Int)
   org.color = oldColor
   delete!(man.positions, Manager._getPosId(man, org.pos))
   delete!(man.organisms, id)
-  Manager.stopTask(man.tasks[i].task)
+  @inbounds Manager.stopTask(man.tasks[i].task)
   man.cons.frozen[org.id] = org
   msg(man, id, "frozen")
 end
@@ -351,7 +351,7 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   if i < 1 return false end
 
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
-  local org::Creature.Organism = tasks[i].organism
+  @inbounds local org::Creature.Organism = tasks[i].organism
   local id::UInt = org.id
 
   org.energy = 0
@@ -360,7 +360,7 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   _moveOrganism(man, org.pos, org)
   delete!(man.positions, Manager._getPosId(man, org.pos))
   delete!(man.organisms, id)
-  Manager.stopTask(tasks[i].task)
+  @inbounds Manager.stopTask(tasks[i].task)
   splice!(tasks, i)
   msg(man, id, "die")
   Event.fire(man.obs, "killorganism", man, org)
@@ -428,7 +428,7 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
     #
     if freeze
       # TODO: possibly slow code!
-      _freezeOrganism(man, findfirst((t) -> t.organism === organism, man.tasks))
+      _freezeOrganism(man, @inbounds findfirst((t) -> t.organism === organism, man.tasks))
       error("Organism is interrupted, because of freeze")
     end
   end
@@ -742,7 +742,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
         amount = -organism.energy
         # TODO: possibly slow code!
         # TODO: move all findfirst() calls inside _killOrganism()
-        _killOrganism(man, findfirst((t) -> t.organism === organism, man.tasks))
+        _killOrganism(man, @inbounds findfirst((t) -> t.organism === organism, man.tasks))
         retObj.ret  = 0
       else
         retObj.ret = amount
@@ -755,7 +755,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       retObj.ret = org.energy
       # TODO: possibly, slow code. To fix this we have to
       # TODO: use map instead array for tasks (man.tasks)
-      _killOrganism(man, findfirst((t) -> t.organism === org, man.tasks))
+      _killOrganism(man, @inbounds findfirst((t) -> t.organism === org, man.tasks))
     end
     Event.fire(man.obs, "eatorganism", man, retObj.ret)
   else
