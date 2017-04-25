@@ -242,7 +242,7 @@ module Code
       idx = findfirst((f::Creature.Func) -> f.code === exp, org.funcs)
       blocks = org.funcs[idx].blocks
       for i = 1:length(blocks)
-        org.codeSize -= length(blocks[i].expr.args)
+        org.codeSize -= (length(blocks[i].expr.args) - Creature.VAR_AMOUNT)
       end
       org.codeSize += 1 # skip "return"
       org.funcs[1].blocks[1].defIndex -= 1
@@ -253,7 +253,7 @@ module Code
     elseif haskey(_CODE_PARTS_MAP, exp.head)
       lines = Helper.getLines(exp, _CODE_PARTS_MAP[exp.head])
       idx = findfirst((b::Creature.Block) -> b.expr.args === lines, blocks)
-      org.codeSize -= length(lines)
+      org.codeSize -= (length(lines) - (exp.head === :if ? 0 : Creature.VAR_AMOUNT))
       deleteat!(blocks, idx)
     end
   end

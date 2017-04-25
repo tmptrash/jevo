@@ -432,7 +432,7 @@ module Config
       empty ? [] : [50,100,1,0,1,1,1,1,1],     # orgMutationProbs (add,change,del,small-change,clone,period,amount,probs,cloneEnergy)
       100,                                     # orgMutationProbsMaxValue
       0.02,                                    # orgCloneMutation
-      10,                                      # orgClonePeriod
+      20,                                      # orgClonePeriod
       0,                                       # orgRainMutationPeriod
       0.01,                                    # orgRainMutationPercent
       100,                                     # orgStartAmount
