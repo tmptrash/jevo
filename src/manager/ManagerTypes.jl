@@ -138,6 +138,10 @@ module ManagerTypes
     #
     ips::Float64
     #
+    # Stack of killed organism id's
+    #
+    killed::Array{Int, 1}
+    #
     # All available(compiled) Manager's plugins. Key is a plugin string
     # name (filename). Value - plugin related data type.
     #
@@ -168,6 +172,7 @@ module ManagerTypes
       task::Task,
       maxEnergy::Int,
       ips::Float64,
+      killed::Array{Int, 1},
       plugins::Dict{String, Plugin},
       obs::Event.Observer
     ) = new(
@@ -185,6 +190,7 @@ module ManagerTypes
       task,
       maxEnergy,
       ips,
+      killed,
       plugins,
       obs
     )

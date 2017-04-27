@@ -59,6 +59,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   local needClone ::Bool = cloneAfter === 0 ? false : counter % cloneAfter === 0
   local tasks     ::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   local len       ::Int = length(tasks)
+  local curLen    ::Int = len
   local task      ::ManagerTypes.OrganismTask
   local org       ::Creature.Organism
   local probIndex ::Int
@@ -71,11 +72,6 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # run peace of it's script - code between two produce() calls.
   #
   while i > 0
-    #
-    # During one iteration it's possible that two or more organisms
-    # will be killed. So we have to update i index!
-    #
-    if i > length(tasks) i = length(tasks) end
     @inbounds task = tasks[i]
     org = task.organism
     #
@@ -90,17 +86,34 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # main loop for details.
     #
     if man.cons.streamInit::Bool return counter + 1 end
-    yieldto(task.task)
-    Event.fire(man.obs, "yieldto", man)
+    #
+    # Switches to task of current organism
+    #
+    if org.alive
+      yieldto(task.task)
+      Event.fire(man.obs, "yieldto", man)
+    else
+      i-=1
+      continue
+    end
     #
     # Age of organism is increasing all the time
     #
     org.age += 1
     #
+    # This is how organisms die if their age is bigger then some
+    # predefined config value (orgAlivePeriod)
+    #
+    if cfg.orgAlivePeriod > 0 && org.age >= cfg.orgAlivePeriod && len - length(man.killed) > cfg.worldMinOrgs
+      _killOrganism(man, i)
+      i-=1
+      continue
+    end
+    #
     # Current organism could die during running it's code, for
     # example during giving it's energy to another organism (altruism)
     #
-    if org.energy < 1 && i <= length(tasks) && i === len _killOrganism(man, i); i -=1; continue end
+    if org.energy < 1 && org.alive _killOrganism(man, i); i-=1; continue end
     #
     # This is how we mutate organisms during their life.
     # Mutations occures according to organisms settings.
@@ -111,11 +124,6 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # last in organisms loop.
     #
     if cfg.orgRainMutationPeriod > 0 && org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationPercent, false) end
-    #
-    # This is how organisms die if their age is bigger then some
-    # predefined config value (orgAlivePeriod)
-    #
-    if cfg.orgAlivePeriod > 0 && org.age >= cfg.orgAlivePeriod && length(tasks) > cfg.worldMinOrgs _killOrganism(man, i) end
     #
     # Updates min/max values
     #
@@ -130,11 +138,11 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     #
     i -= 1
   end
-  len = length(tasks)
+  curLen = len - length(man.killed)
   #
   # After all organisms die, we have to create next, new population
   #
-  if len < 1 createOrganisms(man) end
+  if curLen < 1 createOrganisms(man) end
   #
   # Cloning procedure. The meaning of this is in ability to
   # produce children as fast as much energy has an organism.
@@ -145,7 +153,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # TODO: optimize this array. It should be created only once
   # TODO: outside the loop.
   #
-  if needClone && len > 0 _updateClonning(man, tasks) end
+  if needClone && curLen > 0 _updateClonning(man, tasks) end
   #
   # This block decreases energy from organisms, because they
   # spend it while leaving.
@@ -204,21 +212,29 @@ function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerType
   local probs::Array{UInt, 1} = UInt[]
   local probIndex::Int
   local orgAmount::Int = length(tasks)
-  #
-  # Checks if random selected organism may be removed and clonning
-  # will be available, because we already limit the maximum (cfg.worldMaxOrgs)
-  #
-  if orgAmount >= man.cfg.worldMaxOrgs
-    probIndex = Helper.fastRand(orgAmount)
-    @inbounds if probIndex < 1 || Helper.fastRand(man.maxEnergy) < man.maxEnergy - tasks[probIndex].organism.energy return false end
-    _killOrganism(man, probIndex)
-  end
+  local i::Int
   #
   # This code will be run if total amount of organisms is less then cfg.worldMaxOrgs
   #
-  @inbounds for task in tasks push!(probs, UInt(task.organism.energy) * UInt(task.organism.mutationsFromStart)) end
+  @inbounds for i = 1:orgAmount
+    push!(probs, UInt(tasks[i].organism.energy) * UInt(tasks[i].organism.mutationsFromStart))
+  end
+
   probIndex = Helper.getProbIndex(probs)
-  @inbounds if probIndex > 0 _onClone(man, tasks[probIndex].organism) end
+  @inbounds if tasks[probIndex].organism.alive
+    _onClone(man, tasks[probIndex].organism)
+    #
+    # Checks if random selected organism may be removed and clonning
+    # will be available, because we already limit the maximum (cfg.worldMaxOrgs)
+    #
+    if orgAmount >= man.cfg.worldMaxOrgs
+      probIndex = Helper.fastRand(orgAmount)
+      if tasks[probIndex].organism.alive
+        if probIndex < 1 || Helper.fastRand(man.maxEnergy) < man.maxEnergy - tasks[probIndex].organism.energy return false end
+        _killOrganism(man, probIndex)
+      end
+    end
+  end
 
   true
 end
@@ -232,6 +248,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   local org::Creature.Organism
   local i::Int = length(tasks)
+  local len::Int = i
   local minOrgs::Int = man.cfg.worldMinOrgs
   local dontKill::Bool = (i < minOrgs)
   local codeSize::Int
@@ -244,6 +261,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   # remove some elements inside while loop.
   #
   while i > 0
+    @inbounds if !tasks[i].organism.alive i-=1; continue end
     #
     # if the organism is marked as "removed", we have to delete it
     #
@@ -260,8 +278,8 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
       else codeSize = org.codeSize < 1 ? 1 : org.codeSize
       end
       Event.fire(man.obs, "grabenergy", man, org.energy < codeSize ? org.energy : codeSize)
-      if !_decreaseOrganismEnergy(man, org, codeSize, i)
-        dontKill = (length(tasks) <= minOrgs)
+      if !_decreaseOrganismEnergy(man, org, codeSize)
+        dontKill = (len - length(man.killed) <= minOrgs)
       end
     end
 
@@ -277,10 +295,10 @@ end
 # @param org Organism
 # @param amount Amount of energy we have to decrease
 #
-function _decreaseOrganismEnergy(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int, orgIndex::Int = 0)
+function _decreaseOrganismEnergy(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int)
   org.energy -= amount
   if org.energy < 1
-    _killOrganism(man, (orgIndex < 1 ? (@inbounds findfirst((t) -> t.organism === org, man.tasks)) : orgIndex))
+    _killOrganism(man, org.index)
     return false
   end
 
@@ -342,27 +360,22 @@ end
 # _updateOrganismsEnergy() function.
 # @param man Manager data type
 # @param i Index of organism's task
-# TODO: this method should kill organism at the moment. right now
-# TODO: it kills it later (see splice() call)
+#
 function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
-  #
-  # 0 means, that organism index wasn't found
-  #
-  if i < 1 return false end
-
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   @inbounds local org::Creature.Organism = tasks[i].organism
-  local id::UInt = org.id
 
   org.energy = 0
   org.color  = UInt16(Dots.INDEX_EMPTY)
+  if !org.alive return false end
+  org.alive  = false
+  push!(man.killed, i)
   Event.clear(org.observer)
   _moveOrganism(man, org.pos, org)
   delete!(man.positions, Manager._getPosId(man, org.pos))
-  delete!(man.organisms, id)
-  @inbounds Manager.stopTask(tasks[i].task)
-  splice!(tasks, i)
-  msg(man, id, "die")
+  delete!(man.organisms, org.id)
+  @inbounds Manager.stopTask(man, tasks[i].task)
+  msg(man, org.id, "die")
   Event.fire(man.obs, "killorganism", man, org)
 
   true
@@ -428,7 +441,7 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
     #
     if freeze
       # TODO: possibly slow code!
-      _freezeOrganism(man, @inbounds findfirst((t) -> t.organism === organism, man.tasks))
+      _freezeOrganism(man, organism.index)
       error("Organism is interrupted, because of freeze")
     end
   end
@@ -508,7 +521,7 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   # Clonning means additional energy waste
   #
   local minimum::Bool = length(man.tasks) <= man.cfg.worldMinOrgs
-  local energy::Int = minimum ? 1 : Int(round(organism.energy * organism.cloneEnergyPercent))
+  local energy::Int = minimum ? 1 : round(Int, organism.energy * organism.cloneEnergyPercent)
 
   if !minimum
     _decreaseOrganismEnergy(man, organism, energy)
@@ -740,9 +753,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     if amount < 1
       if organism.energy <= abs(amount)
         amount = -organism.energy
-        # TODO: possibly slow code!
-        # TODO: move all findfirst() calls inside _killOrganism()
-        _killOrganism(man, @inbounds findfirst((t) -> t.organism === organism, man.tasks))
+        _killOrganism(man, organism.index)
         retObj.ret  = 0
       else
         retObj.ret = amount
@@ -753,9 +764,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       retObj.ret  = amount
     elseif org.energy <= amount
       retObj.ret = org.energy
-      # TODO: possibly, slow code. To fix this we have to
-      # TODO: use map instead array for tasks (man.tasks)
-      _killOrganism(man, @inbounds findfirst((t) -> t.organism === org, man.tasks))
+      _killOrganism(man, org.index)
     end
     Event.fire(man.obs, "eatorganism", man, retObj.ret)
   else
@@ -778,7 +787,7 @@ end
 function _onStep(man::ManagerTypes.ManagerData, organism::Creature.Organism, pos::Helper.Point)
   local stepDone::Bool = false
 
-  if !haskey(man.cons.frozen, organism.id)
+  if organism.alive && !haskey(man.cons.frozen, organism.id)
     stepDone = _moveOrganism(man, pos, organism)
     #
     # We have to explain this a little bit. This yieldto() switches current
@@ -805,8 +814,13 @@ end
 function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos::Helper.Point = Helper.Point(0,0), add::Bool = false)
   pos = organism !== nothing && Helper.empty(pos) ? World.getNearFreePos(man.world, organism.pos) : (Helper.empty(pos) ? World.getFreePos(man.world) : pos)
   if pos === false return false end
+  #
+  # No place for new organisms yet
+  #
+  if length(man.killed) < 1 return false end
+  local index::Int = last(man.killed)
   local id::UInt = man.organismId
-  local org::Creature.Organism = organism === nothing ? Creature.create(man.cfg, id, pos) : add ? organism : Creature.create(organism, man.cfg, id, pos)
+  local org::Creature.Organism = organism === nothing ? Creature.create(man.cfg, index, id, pos) : add ? organism : Creature.create(organism, man.cfg, index, id, pos)
   local oTask::ManagerTypes.OrganismTask = ManagerTypes.OrganismTask(id, man.task, org)
   Manager._updateOrgTask(man, oTask)
 
@@ -828,7 +842,8 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   man.totalOrganisms += 1
   man.organisms[id] = org
   man.positions[_getPosId(man, org.pos)] = org
-  push!(man.tasks, oTask)
+  man.tasks[index] = oTask
+  pop!(man.killed)
   msg(man, id, "born")
   Event.fire(man.obs, "bornorganism", man, org)
 

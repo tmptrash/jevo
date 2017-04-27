@@ -154,6 +154,11 @@ module Creature
     #
     id::UInt
     #
+    # Unique index of organism in tasks array. It's not changed
+    # untill organism died.
+    #
+    index::Int
+    #
     # @inheritable
     # Code in AST format
     #
@@ -246,6 +251,10 @@ module Creature
     #
     mutationsFromStart::Int
     #
+    # false means that organism is dead
+    #
+    alive::Bool
+    #
     # Adds events listening/firing logic to the organism.
     #
     observer::Event.Observer
@@ -253,11 +262,12 @@ module Creature
   #
   # Creates new organism with default settings and empty code.
   # @param cfg Global configuration type
+  # @param index Unique index of organism in tasks array
   # @param id Organism unique id
   # @param pos Position of organism
   # @return {Organism}
   #
-  function create(cfg::Config.ConfigData, id::UInt = UInt(0), pos::Helper.Point = Helper.Point(1, 1))
+  function create(cfg::Config.ConfigData, index::Int, id::UInt = UInt(0), pos::Helper.Point = Helper.Point(1, 1))
     #
     # This macro section is used for testing of organism code. Because we can't access
     # his code after mutation, it's impossible to test if it works correctly. We have
@@ -307,6 +317,7 @@ module Creature
 
     Organism(
       id,                                                                   # id
+      index,                                                                # index
       code,                                                                 # code
       eval(code),                                                           # codeFn
       0,                                                                    # codeSize
@@ -323,6 +334,7 @@ module Creature
       0,                                                                    # age
       0.5,                                                                  # cloneEnergyPercent
       1,                                                                    # mutationsFromStart
+      true,                                                                 # alive
       Event.create()                                                        # observer
     )
   end
@@ -336,9 +348,10 @@ module Creature
   # updated using this dictionary (MetaCode).
   # @param org Organism we have to copy
   # @param cfg Application configuration
+  # @param index Unique index of organism in tasks array
   # @return {Organism} Copy of organism
   #
-  function create(org::Creature.Organism, cfg::Config.ConfigData, id::UInt, pos::Helper.Point)
+  function create(org::Creature.Organism, cfg::Config.ConfigData, index::Int, id::UInt, pos::Helper.Point)
     local funcs::Array{Func, 1} = []
     local f::Func
     local b::Block
@@ -364,6 +377,7 @@ module Creature
     #
     Organism(
       id,                                                                   # id
+      index,                                                                # index
       _clone(org.code, funcs),                                              # code
       function (cfg::Config.ConfigData, org::Organism) end,                 # codeFn
       org.codeSize,                                                         # codeSize
@@ -380,6 +394,7 @@ module Creature
       0,                                                                    # age
       0.5,                                                                  # cloneEnergyPercent
       org.mutationsFromStart,                                               # mutationsFromStart
+      org.alive,                                                            # alive
       Event.create()                                                        # observer
     )
   end
@@ -410,7 +425,10 @@ module Creature
         #
         # Organisms with errors in a code should be less successful
         #
-        if org.energy > cfg.orgEnergySpendOnError org.energy -= cfg.orgEnergySpendOnError end
+        if org.energy > cfg.orgEnergySpendOnError
+          if org.energy < 0 println("code: ", org.energy) end
+          org.energy -= cfg.orgEnergySpendOnError
+        end
         #
         # Amount of errors of current population
         #

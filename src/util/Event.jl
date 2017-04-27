@@ -94,14 +94,9 @@ module Event
   #
   function fire(obs::Observer, event::String, args...)
     if !haskey(obs.events, event) return nothing end
-    local fns::Array{Function, 1} = obs.events[event]
-    local len::Int = length(fns)
-    local i::Int
+    local fn::Function
 
-    for i=1:length(fns)
-      if i > length(fns) continue end
-      fns[i](args...)
-    end
+    for fn in obs.events[event] fn(args...) end
   end
   #
   # Removes all event handlers from observer

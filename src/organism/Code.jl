@@ -353,11 +353,11 @@ module Code
     # CodePart(idUp,                    false), CodePart(idDown,                  false),
     CodePart(myX,                     false), CodePart(myY,                     false),
     CodePart(energyLeft,              false), CodePart(energyRight,             false),
-    CodePart(energyUp,                false), CodePart(energyDown,              false),
-    CodePart(codeSizeLeft,            false), CodePart(codeSizeRight,           false),
-    CodePart(codeSizeUp,              false), CodePart(codeSizeDown,            false),
-    CodePart(cloneEnergyPercentLeft,  false), CodePart(cloneEnergyPercentRight, false),
-    CodePart(cloneEnergyPercentUp,    false), CodePart(cloneEnergyPercentDown,  false)
+    CodePart(energyUp,                false), CodePart(energyDown,              false)
+    # CodePart(codeSizeLeft,            false), CodePart(codeSizeRight,           false),
+    # CodePart(codeSizeUp,              false), CodePart(codeSizeDown,            false),
+    # CodePart(cloneEnergyPercentLeft,  false), CodePart(cloneEnergyPercentRight, false),
+    # CodePart(cloneEnergyPercentUp,    false), CodePart(cloneEnergyPercentDown,  false)
   ]
   #
   # Available comparison operators. May be used with "if" operator

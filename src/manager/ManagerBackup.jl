@@ -27,8 +27,7 @@ export backup
 function recover(man::ManagerTypes.ManagerData)
   if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info(string("Recovering from backup: ", Backup.lastFile())) end
   local data = Backup.load()
-  local t::ManagerTypes.OrganismTask
-  local curTask::Task = current_task()
+  local task::ManagerTypes.OrganismTask
   #
   # In case if we haven't recovered from backup file,
   # we have to remove it, because it's broken
@@ -41,21 +40,21 @@ function recover(man::ManagerTypes.ManagerData)
   # Main task reference should be set before the loop, because
   # it may be used inside organism tasks
   #
-  man.task = curTask
-  for t in data.tasks
-    t.organism.codeFn = Creature.eval(t.organism.code)
+  man.task = current_task()
+  for task in man.tasks
+    task.organism.codeFn = Creature.eval(task.organism.code)
     #
     # This line prevents observers to be shared between organisms
     # Every organism should have it's own observer's instance
     #
-    t.organism.observer = Event.create()
-    bindEvents(man, t.organism)
+    task.organism.observer = Event.create()
+    bindEvents(man, task.organism)
     #
     # We must call yieldto(), because born() function parameters
     # will not be passed into the task and only last organism will
     # be run.
     #
-    Manager._updateOrgTask(man, t)
+    Manager._updateOrgTask(man, task)
   end
   #
   # We don't need to load\create servers and clients every

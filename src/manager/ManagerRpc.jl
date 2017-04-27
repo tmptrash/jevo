@@ -121,9 +121,8 @@ end
 # @return {Int} Organism id or false if organisms limit is riched
 #
 function createOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point = Helper.Point(0, 0))
-  if length(man.tasks) > man.cfg.worldMaxOrgs return nothing end
-  orgTask = Manager._createOrganism(man, nothing, pos)
-  orgTask === false ? false : orgTask.id
+  if length(man.tasks) - length(man.killed) > man.cfg.worldMaxOrgs return nothing end
+  Manager._createOrganism(man, nothing, pos)
 
   nothing
 end
@@ -275,7 +274,10 @@ end
 # @param man Manager data type
 #
 function getStatistics(man::ManagerTypes.ManagerData)
-  local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
+  #
+  # Only array should be copied, not organisms
+  #
+  local tasks::Array{ManagerTypes.OrganismTask, 1} = copy(man.tasks)
   local moreThenOne::Bool = length(tasks) > 1
   local minOrg::Creature.Organism
   local maxOrg::Creature.Organism
@@ -308,7 +310,10 @@ function getBest(man::ManagerTypes.ManagerData, amount::Int)
   local best::Array{RpcApi.SimpleOrganism, 1} = []
   local i::Int
   local len::Int = getAmount(man)
-  local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
+  #
+  # Only array should be copied, not organisms
+  #
+  local tasks::Array{ManagerTypes.OrganismTask, 1} = copy(man.tasks)
 
   amount = len > amount ? amount : len
   if amount > 0

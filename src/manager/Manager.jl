@@ -77,13 +77,26 @@ module Manager
   function create(cfg::Config.ConfigData = Config.create())
     local man::ManagerTypes.ManagerData
     local obs::Event.Observer = Event.create()
+    local tasks::Array{ManagerTypes.OrganismTask, 1} = Array{ManagerTypes.OrganismTask, 1}(cfg.worldMaxOrgs)
+    local i::Int
+    local task::Task = current_task()
+    local org::Creature.Organism
+    #
+    # We create temporary organisms to prevent keep empty slots in array. All
+    # these organisms will be removed later, during application working.
+    #
+    for i = 1:cfg.worldMaxOrgs
+      org       = Creature.create(cfg, i)
+      org.alive = false
+      tasks[i]  = ManagerTypes.OrganismTask(UInt(0), task, org)
+    end
 
     man = ManagerTypes.ManagerData(
       cfg,                                                                      # cfg
       World.create(cfg.worldWidth, cfg.worldHeight),                            # world
       Dict{Int, Creature.Organism}(),                                           # positions
       Dict{UInt, Creature.Organism}(),                                          # organisms
-      ManagerTypes.OrganismTask[],                                              # tasks
+      tasks,                                                                    # tasks
       CommandLine.create(),                                                     # params
       UInt(1),                                                                  # organismId
       UInt(0),                                                                  # totalOrganisms
@@ -93,6 +106,7 @@ module Manager
       current_task(),                                                           # task
       0,                                                                        # maxEnergy
       0.0,                                                                      # ips
+      Int[1:cfg.worldMaxOrgs...],                                               # killed
       Dict{String, ManagerTypes.Plugin}(),                                      # plugins
       obs                                                                       # obs
     )
@@ -243,15 +257,15 @@ module Manager
     man.cons.frozen  = Dict{UInt, Creature.Organism}()
   end
   #
-  # This is how we stop the task. Stop means run last yieldto()
-  # inside the task, but not more. Otherwise it will stuck inside
-  # the task forever. This method only marks the task as
-  # "deleted". Real deletion will be provided in _updateOrganismsEnergy().
-  # @param task Task
-  # TODO: do we need this?
-  function stopTask(task::Task)
-    #try Base.throwto(task, InterruptException()) end
-    #task.state = :failed
+  # Exit means go to main task and never back in current task again. but
+  # we have to check if stopped task is current one or not. Only current
+  # task requires stopping, because it running right now.
+  # @param man Manager data type
+  # @param task Task we have to stop
+  #
+  function stopTask(man::ManagerTypes.ManagerData, task::Task)
+    local curTask::Task = current_task()
+    if curTask !== man.task && curTask === task yieldto(man.task) end
   end
 
   #

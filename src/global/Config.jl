@@ -459,7 +459,7 @@ module Config
       1000,                                    # worldStartEnergyDots
       UInt16(0x0001F4),                        # worldStartEnergyInDot
       0.5,                                     # worldEnergyCheckPercent
-      1000,                                    # worldEnergyCheckPeriod
+      3000,                                    # worldEnergyCheckPeriod
       1,                                       # worldZoom
       1.0,                                     # worldIpsPeriod
 
@@ -480,10 +480,10 @@ module Config
       0,                                       # conDownServerPort
       ip"127.0.0.1",                           # conDownServerIp
 
-      [#="Phylogen",=# "Status"],                  # plugIncluded
+      [#="Phylogen", "Status"=#],                  # plugIncluded
       [],                                      # plugExcluded
 
-      false,                                   # modeDebug
+      true,                                    # modeDebug
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod

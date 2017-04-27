@@ -318,99 +318,99 @@ end
 function myY(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   :($(@randVar()) = Float16(o.pos.y))
 end
-#
-# @cmd
-# @line
-# Obtains code size of organism on the left
-# @param cfg Global configuration type
-# @param org Organism we are working with
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function codeSizeLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.codeSizeLeft(o)))
-end
-#
-# @cmd
-# @line
-# Obtains code size of organism on the right
-# @param cfg Global configuration type
-# @param org Organism we are working with
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function codeSizeRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.codeSizeRight(o)))
-end
-#
-# @cmd
-# @line
-# Obtains code size of organism on the up
-# @param cfg Global configuration type
-# @param org Organism we are working with
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function codeSizeUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.codeSizeUp(o)))
-end
-#
-# @cmd
-# @line
-# Obtains code size of organism on the down
-# @param cfg Global configuration type
-# @param org Organism we are working with
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function codeSizeDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.codeSizeDown(o)))
-end
-#
-# @cmd
-# @line
-# Obtains clone energy percent of organism on the left
-# @param cfg Global configuration type
-# @param org Organism we are working with
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function cloneEnergyPercentLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.cloneEnergyPercentLeft(o)))
-end
-#
-# @cmd
-# @line
-# Obtains clone energy percent of organism on the right
-# @param cfg Global configuration type
-# @param org Organism we are working with
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function cloneEnergyPercentRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.cloneEnergyPercentRight(o)))
-end
-#
-# @cmd
-# @line
-# Obtains clone energy percent of organism on the above
-# @param cfg Global configuration type
-# @param org Organism we are working with
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function cloneEnergyPercentUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.cloneEnergyPercentUp(o)))
-end
-#
-# @cmd
-# @line
-# Obtains clone energy percent of organism on the bottom
-# @param cfg Global configuration type
-# @param org Organism we are working with
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function cloneEnergyPercentDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.cloneEnergyPercentDown(o)))
-end
+# #
+# # @cmd
+# # @line
+# # Obtains code size of organism on the left
+# # @param cfg Global configuration type
+# # @param org Organism we are working with
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function codeSizeLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = Float16(Creature.codeSizeLeft(o)))
+# end
+# #
+# # @cmd
+# # @line
+# # Obtains code size of organism on the right
+# # @param cfg Global configuration type
+# # @param org Organism we are working with
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function codeSizeRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = Float16(Creature.codeSizeRight(o)))
+# end
+# #
+# # @cmd
+# # @line
+# # Obtains code size of organism on the up
+# # @param cfg Global configuration type
+# # @param org Organism we are working with
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function codeSizeUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = Float16(Creature.codeSizeUp(o)))
+# end
+# #
+# # @cmd
+# # @line
+# # Obtains code size of organism on the down
+# # @param cfg Global configuration type
+# # @param org Organism we are working with
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function codeSizeDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = Float16(Creature.codeSizeDown(o)))
+# end
+# #
+# # @cmd
+# # @line
+# # Obtains clone energy percent of organism on the left
+# # @param cfg Global configuration type
+# # @param org Organism we are working with
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function cloneEnergyPercentLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = Float16(Creature.cloneEnergyPercentLeft(o)))
+# end
+# #
+# # @cmd
+# # @line
+# # Obtains clone energy percent of organism on the right
+# # @param cfg Global configuration type
+# # @param org Organism we are working with
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function cloneEnergyPercentRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = Float16(Creature.cloneEnergyPercentRight(o)))
+# end
+# #
+# # @cmd
+# # @line
+# # Obtains clone energy percent of organism on the above
+# # @param cfg Global configuration type
+# # @param org Organism we are working with
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function cloneEnergyPercentUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = Float16(Creature.cloneEnergyPercentUp(o)))
+# end
+# #
+# # @cmd
+# # @line
+# # Obtains clone energy percent of organism on the bottom
+# # @param cfg Global configuration type
+# # @param org Organism we are working with
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function cloneEnergyPercentDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = Float16(Creature.cloneEnergyPercentDown(o)))
+# end

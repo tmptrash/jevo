@@ -195,7 +195,7 @@ module Status
     local sd::StatusData = man.plugins[MODULE_NAME]
 
     sd.ips        += man.ips
-    sd.orgs       += length(man.tasks)
+    sd.orgs       += (length(man.tasks) - length(man.killed))
     sd.iterations += 1
   end
   #
@@ -206,16 +206,17 @@ module Status
   function _iterateOrganisms(man::ManagerData, sd::StatusData)
     local task::OrganismTask
     local org::Creature.Organism
+    local i::Int
 
-    @inbounds for task in man.tasks
-      org = task.organism
+    @inbounds for i = 1:length(man.tasks)
+      org = man.tasks[i].organism
       sd.energy += org.energy
       #
       # Fitness level
       #
-      sd.fit += UInt(org.energy) * UInt(org.mutationsFromStart)
+      if org.alive && org.energy > 0 sd.fit += UInt(org.energy) * UInt(org.mutationsFromStart) end
     end
-    sd.fitAmount += length(man.tasks)
+    sd.fitAmount += (length(man.tasks) - length(man.killed))
   end
   #
   # Handler of "eatorganism" event

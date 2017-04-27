@@ -177,6 +177,7 @@ module RemoteWorldRT
       else OpenGlWindow.dot(rd.win, x + 0x0001, y, Dots.INDEX_EMPTY)
       end
     elseif dir === Dots.DIRECTION_NO
+      #println("x: ", x, ", y: ", y, ", id: ", UInt(data[4]), ", c: ", color)
       OpenGlWindow.dot(rd.win, x, y, Dots.INDEX_EMPTY)
     end
     OpenGlWindow.dot(rd.win, x, y, color)
