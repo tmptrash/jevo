@@ -480,7 +480,7 @@ module Config
       0,                                       # conDownServerPort
       ip"127.0.0.1",                           # conDownServerIp
 
-      [#="Phylogen", "Status"=#],                  # plugIncluded
+      [#="Phylogen", =#"Status"],                  # plugIncluded
       [],                                      # plugExcluded
 
       true,                                    # modeDebug

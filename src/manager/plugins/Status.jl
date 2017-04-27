@@ -100,6 +100,7 @@ module Status
   # Is called at the beginning of _onIps
   #
   function _onBeforeIps(man::ManagerData, sd::StatusData)
+    sd.ips       += man.ips
     sd.ipsAmount += 1
     #
     # Condition for the first run
@@ -125,7 +126,7 @@ module Status
 
     print(string(Dates.format(now(), "HH:MM:SS"), " "))
     _showParam(:green,  "org:",  div(sd.orgs, iterations), 8)
-    _showParam(:normal, "ips:",  (@sprintf "%.3f" sd.ips / iterations), 12)
+    _showParam(:normal, "ips:",  (@sprintf "%.3f" sd.ips / sd.ipsAmount), 12)
     _showParam(:green,  "nrg:",  div(sd.energy, sd.ipsAmount * iterations), 16, true)
     _showParam(:red,    "eat:",  div(sd.eated - sd.eatorg, iterations), 12, true)
     _showParam(:red,    "eato:", div(sd.eatorg, iterations), 12, true)
@@ -194,7 +195,6 @@ module Status
   function _onIteration(man::ManagerData, stamp::Float64)
     local sd::StatusData = man.plugins[MODULE_NAME]
 
-    sd.ips        += man.ips
     sd.orgs       += (length(man.tasks) - length(man.killed))
     sd.iterations += 1
   end

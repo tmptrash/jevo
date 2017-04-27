@@ -274,7 +274,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
       # This check is used for limiting organisms code size to codeMaxSize
       # because our CPU's are slow
       #
-      if org.codeSize > codeMaxSize codeSize = min(org.codeSize, org.codeSize * codeSizeCoef)
+      if org.codeSize > codeMaxSize codeSize = org.codeSize * codeSizeCoef
       else codeSize = org.codeSize < 1 ? 1 : org.codeSize
       end
       Event.fire(man.obs, "grabenergy", man, org.energy < codeSize ? org.energy : codeSize)

@@ -72,6 +72,7 @@ function recover(man::ManagerTypes.ManagerData)
   man.totalOrganisms = data.totalOrganisms
   man.maxEnergy      = data.maxEnergy
   man.plugins        = data.plugins
+  man.killed         = data.killed
   #
   # We don't need to store amount of eval() calls
   # between app runs
