@@ -8,6 +8,7 @@ module Status
   import ManagerTypes.ManagerData
   import ManagerTypes.Plugin
   import ManagerTypes.OrganismTask
+  import ManagerTypes
   import Creature
   import Config
   import Event
@@ -127,7 +128,7 @@ module Status
     print(string(Dates.format(now(), "HH:MM:SS"), " "))
     _showParam(:green,  "org:",  div(sd.orgs, iterations), 8)
     _showParam(:normal, "ips:",  (@sprintf "%.3f" sd.ips / sd.ipsAmount), 12)
-    _showParam(:green,  "nrg:",  div(sd.energy, sd.ipsAmount * iterations), 16, true)
+    _showParam(:green,  "nrg:",  div(sd.energy, sd.ipsAmount * ManagerTypes.orgAmount(man)), 12, true)
     _showParam(:red,    "eat:",  div(sd.eated - sd.eatorg, iterations), 12, true)
     _showParam(:red,    "eato:", div(sd.eatorg, iterations), 12, true)
     _showParam(:red,    "grab:", div(sd.grabbed, iterations), 10, true)
@@ -139,7 +140,7 @@ module Status
     #_showParam(:yellow, "req.",  sd.rps, 9)
     #_showParam(:yellow, "eval.", cfg.orgEvals - sd.evals, 10)
     _showParam(:orange, "err:",  div(cfg.orgErrors, iterations), 10)
-    _showParam(:orange, "cod:", (@sprintf "%.2f" sd.code / sd.codeAmount), 12)
+    _showParam(:orange, "cod:", (@sprintf "%.2f" sd.code / sd.codeAmount), 11)
     _showParam(:red,    "fit:",  Int(div(sd.fit, UInt(sd.fitAmount))), 16, true)
     print("\n")
 
@@ -195,7 +196,7 @@ module Status
   function _onIteration(man::ManagerData, stamp::Float64)
     local sd::StatusData = man.plugins[MODULE_NAME]
 
-    sd.orgs       += (length(man.tasks) - length(man.killed))
+    sd.orgs       += ManagerTypes.orgAmount(man)
     sd.iterations += 1
   end
   #
@@ -210,13 +211,14 @@ module Status
 
     @inbounds for i = 1:length(man.tasks)
       org = man.tasks[i].organism
+      if !org.alive continue end
       sd.energy += org.energy
       #
       # Fitness level
       #
-      if org.alive && org.energy > 0 sd.fit += UInt(org.energy) * UInt(org.mutationsFromStart) end
+      sd.fit += UInt(org.energy) * UInt(org.mutationsFromStart)
     end
-    sd.fitAmount += (length(man.tasks) - length(man.killed))
+    sd.fitAmount += ManagerTypes.orgAmount(man)
   end
   #
   # Handler of "eatorganism" event
@@ -316,7 +318,6 @@ module Status
   function _onOrganism(man::ManagerData, org::Creature.Organism)
     local sd::StatusData = man.plugins[MODULE_NAME]
 
-    sd.energy += org.energy
     sd.code   += org.codeSize
     sd.codeAmount += 1
     #

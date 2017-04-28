@@ -121,7 +121,7 @@ end
 # @return {Int} Organism id or false if organisms limit is riched
 #
 function createOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point = Helper.Point(0, 0))
-  if length(man.tasks) - length(man.killed) > man.cfg.worldMaxOrgs return nothing end
+  if ManagerTypes.orgAmount(man) > man.cfg.worldMaxOrgs return nothing end
   Manager._createOrganism(man, nothing, pos)
 
   nothing

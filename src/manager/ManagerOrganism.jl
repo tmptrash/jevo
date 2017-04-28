@@ -104,7 +104,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # This is how organisms die if their age is bigger then some
     # predefined config value (orgAlivePeriod)
     #
-    if cfg.orgAlivePeriod > 0 && org.age >= cfg.orgAlivePeriod && len - length(man.killed) > cfg.worldMinOrgs
+    if cfg.orgAlivePeriod > 0 && org.age >= cfg.orgAlivePeriod && ManagerTypes.orgAmount(man) > cfg.worldMinOrgs
       _killOrganism(man, i)
       i-=1
       continue
@@ -138,7 +138,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     #
     i -= 1
   end
-  curLen = len - length(man.killed)
+  curLen = ManagerTypes.orgAmount(man)
   #
   # After all organisms die, we have to create next, new population
   #
@@ -272,7 +272,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
       end
       Event.fire(man.obs, "grabenergy", man, org.energy < codeSize ? org.energy : codeSize)
       if !_decreaseOrganismEnergy(man, org, codeSize)
-        dontKill = (len - length(man.killed) <= minOrgs)
+        dontKill = ManagerTypes.orgAmount(man) <= minOrgs
       end
     end
 

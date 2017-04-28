@@ -18,6 +18,8 @@ module ManagerTypes
   export ManagerData
   export OrganismTask
   export Connections
+
+  export orgAmount
   #
   # Abstraction for plugin type. All plugins should be inherited
   # from this type like this:
@@ -194,5 +196,17 @@ module ManagerTypes
       plugins,
       obs
     )
+  end
+
+  #
+  # Returns amount of alive organisms at the moment. This function is Here
+  # and not in Manager module, because it's used in different other modules.
+  # In case if you need some function, which work with manager's data and is
+  # called only within Manager module and it's sub modules you have to add
+  # it there.
+  # @return {Int}
+  #
+  function orgAmount(man::ManagerTypes.ManagerData)
+    length(man.tasks) - length(man.killed)
   end
 end

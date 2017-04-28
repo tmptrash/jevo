@@ -82,7 +82,7 @@ module Manager
     local task::Task = current_task()
     local org::Creature.Organism
     #
-    # We create temporary organisms to prevent keep empty slots in array. All
+    # We create temporary organisms to prevent keeping empty slots in array. All
     # these organisms will be removed later, during application working.
     #
     for i = 1:cfg.worldMaxOrgs
@@ -258,6 +258,7 @@ module Manager
     man.positions    = Dict{Int, Creature.Organism}()
     man.organisms    = Dict{UInt, Creature.Organism}()
     man.tasks        = []
+    man.killed       = []
     man.params       = Dict{String, String}()
     man.dotCallback  = Helper.emptyFn
     man.moveCallback = Helper.emptyFn
@@ -333,7 +334,7 @@ module Manager
     if ts < man.cfg.worldIpsPeriod return istamp end
     local sock::Base.TCPSocket
 
-    man.ips = man.cfg.codeRuns / length(man.tasks) / ts
+    man.ips = man.cfg.codeRuns / ManagerTypes.orgAmount(man) / ts
     Event.fire(man.obs, "ips", man, stamp, man.cfg.codeRuns)
     man.cfg.codeRuns = 0
     @inbounds for sock in man.cons.fastServer.socks
@@ -356,7 +357,7 @@ module Manager
   #
   function _updateBackup(man::ManagerTypes.ManagerData, stamp::Float64, bstamp::Float64, backups::Int)
     if stamp - bstamp >= man.cfg.backupPeriod
-      if length(man.tasks) > 0
+      if ManagerTypes.orgAmount(man) > 0
         backups += 1
         backup(man)
       end
