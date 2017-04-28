@@ -181,6 +181,13 @@ module Manager
         #
         counter = _updateOrganisms(man, counter, needYield)
         #
+        # Checks if total amount of energy in a world is less then
+        # minimum, according to the configuration.
+        #
+        if counter % cfg.worldEnergyCheckPeriod === 0 && cfg.worldEnergyCheckPeriod > 0
+          _updateWorldEnergy(man)
+        end
+        #
         # We have to update IPS (Iterations Per Second) every second
         #
         istamp = _updateIps(man, stamp, istamp)
@@ -268,6 +275,35 @@ module Manager
     if curTask !== man.task && curTask === task yieldto(man.task) end
   end
 
+  #
+  # Updates total world's energy. It shouldn't be less then minimum
+  # got from config: worldEnergyCheckPercent. We calculate this percent
+  # as a ration between whole world (100%) and all energy points together.
+  # @param man Manager data type
+  # TODO: this method is very slow!!! should be optimized!
+  function _updateWorldEnergy(man::ManagerTypes.ManagerData)
+    local plane::Array{UInt16, 2} = man.world.data
+    local total::Int = man.world.width * man.world.height
+    local energy::Int = 0
+    local positions::Dict{Int, Creature.Organism} = man.positions
+    local pos::Helper.Point = Helper.Point(0, 0)
+    local x::Int
+    local y::Int
+
+    for x in 1:size(plane)[2]
+      for y in 1:size(plane)[1]
+        pos.x = x
+        pos.y = y
+        if !Manager._isFree(man, pos) energy += 1 end
+      end
+    end
+    #
+    # Total amount of energy is less then in config
+    #
+    if div(Float64(energy * 100), total) <= man.cfg.worldEnergyCheckPercent
+      setRandomEnergy(man, man.cfg.worldStartEnergyDots, man.cfg.worldStartEnergyInDot)
+    end
+  end
   #
   # Generates unique id by world position. This macro is
   # private insode Manager module
