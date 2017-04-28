@@ -36,11 +36,11 @@
 #
 module Creature
   import Event
-  import Helper
   import Config
   import Config.@if_not_test
   import Config.@if_test
   import Config.@if_debug
+  import Helper
 
   export VAR_AMOUNT
   export Organism
