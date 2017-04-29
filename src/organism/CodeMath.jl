@@ -36,7 +36,7 @@ export pi
 # @return {Expr|Expr(:nothing)}
 #
 function plus(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  return :($(@randVar()) = fix($(@randVar()) + $(@randVar())))
+  return :($(@randVar()) = $(@randVar()) + $(@randVar()))
 end
 #
 # @cmd

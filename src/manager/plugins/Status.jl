@@ -127,7 +127,7 @@ module Status
 
     print(string(Dates.format(now(), "HH:MM:SS"), " "))
     _showParam(:green,  "org:",  div(sd.orgs, iterations), 8)
-    _showParam(:normal, "ips:",  (@sprintf "%.3f" sd.ips / sd.ipsAmount), 12)
+    _showParam(:normal, "ips:",  (@sprintf "%.2f" sd.ips / sd.ipsAmount), 12)
     _showParam(:green,  "nrg:",  div(sd.energy, sd.ipsAmount * ManagerTypes.orgAmount(man)), 12, true)
     _showParam(:red,    "eat:",  div(sd.eated - sd.eatorg, iterations), 12, true)
     _showParam(:red,    "eato:", div(sd.eatorg, iterations), 12, true)

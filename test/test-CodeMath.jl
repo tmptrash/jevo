@@ -10,42 +10,47 @@ module TestCodeMath
   #
   # Tests operator plus() with specified type
   #
-  function testOperatorWithType(typ::DataType, opSym::Symbol, op::Symbol = :plus)
+  function testOperator(opSym::Symbol, opFn::Symbol, result::Float16)
     local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
     local org = d.orgs[1]
-    local types = changeTypes([typ])
 
-    code(d, op, org)
-    @fact Helper.getArg(org.code, [2,31,2,1]) --> opSym
-    @fact eval(org.code)(d.cfg, org) --> true
-    #
-    # revert supported types
-    #
-    resetTypes(types)
+    code(d, opFn, org)
+    @fact Helper.getArg(org.code, [2,Creature.VAR_AMOUNT + 1,2,1]) --> opSym
+    @fact eval(org.code)(d.cfg, org) --> result
+
     Manager.destroy(d.man)
   end
   #
   # plus
   #
-  facts("Testing CodeMath.plus() with different variable types") do
+  facts("Testing CodeMath.plus()") do
+    testOperator(:(+), :plus, Float16(10.0))
+  end
+  facts("Testing CodeMath.plus() two times") do
     local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
     local org = d.orgs[1]
 
     code(d, :plus, org)
-    op = Helper.getArg(org.code, [2,31,2,1]) # operator
-    @fact (op === :(+) || op === :(*) || op === :(&)) --> true
-    @fact length(Helper.getLines(org.code, [2])) --> 32
-    @fact eval(org.code)(d.cfg, org) --> true
+    code(d, :plus, org)
+    @fact Helper.getArg(org.code, [2,Creature.VAR_AMOUNT + 1,2,1]) --> :(+)
+    @fact Helper.getArg(org.code, [2,Creature.VAR_AMOUNT + 2,2,1]) --> :(+)
+    @fact eval(org.code)(d.cfg, org) --> Float16(20.0)
 
     Manager.destroy(d.man)
   end
-  facts("Testing CodeMath.plus() with different types") do
-    testOperatorWithType(Int8, :(+))
-    testOperatorWithType(Int16, :(+))
-    testOperatorWithType(Int, :(+))
-    testOperatorWithType(String, :(*))
-    testOperatorWithType(Bool, :(&))
-    testOperatorWithType(Float64, :(+))
+  facts("Testing CodeMath.plus() inside if operator") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+    local org = d.orgs[1]
+
+    code(d, :condition, org)
+    code(d, :plus, org, [1, 2, 1])
+    #
+    # Updates compare operator to "===" to make condition true all the time
+    #
+    Helper.getArg(org.code, [2,2,1]).args[1] = :(===)
+    @fact eval(org.code)(d.cfg, org) --> Float16(10.0)
+
+    Manager.destroy(d.man)
   end
   # facts("Testing CodeMath.plus() with String and Bool variables") do
   #   local conf  = Config.create()
@@ -107,29 +112,29 @@ module TestCodeMath
   #   #
   #   resetTypes(types)
   # end
+  # #
+  # # minus
+  # #
+  # facts("Testing CodeMath.minus() with different types") do
+  #   testOperatorWithType(Int8, :(-), :minus)
+  #   testOperatorWithType(Int16, :(-), :minus)
+  #   testOperatorWithType(Int, :(-), :minus)
+  #   testOperatorWithType(Float64, :(-), :minus)
+  # end
+  # facts("Testing CodeMath.minus() with String variable") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+  #   local org = d.orgs[1]
+  #   local types = changeTypes([String])
   #
-  # minus
-  #
-  facts("Testing CodeMath.minus() with different types") do
-    testOperatorWithType(Int8, :(-), :minus)
-    testOperatorWithType(Int16, :(-), :minus)
-    testOperatorWithType(Int, :(-), :minus)
-    testOperatorWithType(Float64, :(-), :minus)
-  end
-  facts("Testing CodeMath.minus() with String variable") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
-    local org = d.orgs[1]
-    local types = changeTypes([String])
-
-    code(d, :minus, org)
-    @fact length(Helper.getLines(org.code, [2])) --> 32
-    @fact eval(org.code)(d.cfg, org) --> true
-    #
-    # revert supported types
-    #
-    resetTypes(types)
-    Manager.destroy(d.man)
-  end
+  #   code(d, :minus, org)
+  #   @fact length(Helper.getLines(org.code, [2])) --> 32
+  #   @fact eval(org.code)(d.cfg, org) --> true
+  #   #
+  #   # revert supported types
+  #   #
+  #   resetTypes(types)
+  #   Manager.destroy(d.man)
+  # end
   # facts("Testing CodeMath.minus() with Bool variable") do
   #   local conf  = Config.create()
   #   local org   = Creature.create(conf)
