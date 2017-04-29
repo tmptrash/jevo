@@ -328,6 +328,7 @@ end
 function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   @inbounds local org::Creature.Organism = tasks[i].organism
+  local energyAfterDeath::UInt16 = UInt16(min(typemax(UInt16), org.energy > -1 ? org.energy : 1))
 
   org.energy = 0
   org.color  = UInt16(Dots.INDEX_EMPTY)
@@ -341,6 +342,11 @@ function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
   @inbounds Manager.stopTask(man, tasks[i].task)
   msg(man, org.id, "die")
   Event.fire(man.obs, "killorganism", man, org)
+  #
+  # At the position of died organism an energy block
+  # should appear
+  #
+  World.setEnergy(man.world, org.pos, energyAfterDeath)
 
   true
 end
