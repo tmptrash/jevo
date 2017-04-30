@@ -209,11 +209,7 @@ module Code
     # calculation.
     #
     _removeCommentLine(loopEx.args[2].args)
-    block = Creature.Block(Helper.getTypesMap(), loopEx.args[2], Creature.VAR_AMOUNT)
-    #
-    # for block should have it's own variables inside
-    #
-    _addDefaultVars(block)
+    block = Creature.Block(org.funcs[pos.fnIdx].blocks[1].vars, loopEx.args[2])
     push!(@getBlocks(org, pos), block)
     loopEx
   end

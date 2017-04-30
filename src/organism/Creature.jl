@@ -41,6 +41,7 @@ module Creature
   import Config.@if_test
   import Config.@if_debug
   import Helper
+  import CodeMathOverrides.*
 
   export VAR_AMOUNT
   export Organism

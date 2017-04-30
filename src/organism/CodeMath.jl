@@ -103,7 +103,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function and(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16($(@randIntVar()) & $(@randIntVar())))
+  :($(@randVar()) = $(@randVar()) & $(@randVar()))
 end
 #
 # @cmd
@@ -116,7 +116,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function or(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16($(@randIntVar()) | $(@randIntVar())))
+  :($(@randVar()) = $(@randVar()) | $(@randVar()))
 end
 #
 # @cmd
@@ -129,7 +129,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function xor(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16($(@randIntVar()) $ $(@randIntVar())))
+  :($(@randVar()) = $(@randVar()) $ $(@randVar()))
 end
 #
 # @cmd
@@ -142,7 +142,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function rshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = $(@randIntVar()) >> $(@randIntVar()))
+  :($(@randVar()) = $(@randVar()) >> $(@randVar()))
 end
 #
 # @cmd
@@ -155,7 +155,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function lshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = $(@randIntVar()) << $(@randIntVar()))
+  :($(@randVar()) = $(@randVar()) << $(@randVar()))
 end
 #
 # @cmd
@@ -168,7 +168,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function reminder(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16($(@randIntVar()) % ifz($(@randVar()))))
+  :($(@randVar()) = $(@randVar()) % $(@randVar()))
 end
 #
 # @cmd
