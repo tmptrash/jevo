@@ -289,7 +289,7 @@ end
 # @param amount Amount of energy we have to decrease
 #
 function _decreaseOrganismEnergy(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int)
-  org.energy -= amount
+  org.energy -= min(org.energy, amount)
   if org.energy < 1
     _killOrganism(man, org.index)
     return false
@@ -728,7 +728,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       else
         retObj.ret = amount
       end
-      org.energy = min(org.energy - amount, Config.ORGANISM_MAX_ENERGY)
+      org.energy = org.energy - amount
     elseif org.energy > amount
       org.energy -= amount
       retObj.ret  = amount

@@ -25,7 +25,6 @@ module Config
   import CommandLine
 
   export ORGANISM_MAX_MUTATION_PERIOD
-  export ORGANISM_MAX_ENERGY
 
   export if_debug
   export if_test
@@ -61,11 +60,6 @@ module Config
   # Maximum period for mutations. Related to orgRainMutationPeriod config
   #
   const ORGANISM_MAX_MUTATION_PERIOD = 1000
-  #
-  # Maximum amount of energy, which one organism may contains. Should be
-  # less then typemax(UInt16).
-  #
-  const ORGANISM_MAX_ENERGY = Int(typemax(UInt16))
   #
   # Data type for storing configuration data. Is used in pair with GData
   # type. For accessing use Gonfig.val(man.cfg, :SYMBOL[, value]) function
@@ -449,7 +443,7 @@ module Config
       8,                                       # codeLoopAmount
       0,                                       # codeRuns
       15,                                      # codeMaxSize
-      10,                                      # codeSizeCoef
+      100,                                     # codeSizeCoef
 
       1900,                                    # worldWidth
       940,                                     # worldHeight

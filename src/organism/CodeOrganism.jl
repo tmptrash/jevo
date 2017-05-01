@@ -59,7 +59,7 @@ end
 # @return {Expr}
 #
 function eatLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.eatLeft(c, o, $(@randIntVar()))))
+  :($(@randVar()) = Creature.eatLeft(c, o, $(@randVar())))
 end
 #
 # @cmd
@@ -71,7 +71,7 @@ end
 # @return {Expr}
 #
 function eatRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.eatRight(c, o, $(@randIntVar()))))
+  :($(@randVar()) = Creature.eatRight(c, o, $(@randVar())))
 end
 #
 # @cmd
@@ -83,7 +83,7 @@ end
 # @return {Expr}
 #
 function eatUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.eatUp(c, o, $(@randIntVar()))))
+  :($(@randVar()) = Creature.eatUp(c, o, $(@randVar())))
 end
 #
 # @cmd
@@ -95,7 +95,7 @@ end
 # @return {Expr}
 #
 function eatDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.eatDown(c, o, $(@randIntVar()))))
+  :($(@randVar()) = Creature.eatDown(c, o, $(@randVar())))
 end
 #
 # @cmd

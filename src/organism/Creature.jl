@@ -45,6 +45,7 @@ module Creature
 
   export VAR_AMOUNT
   export Organism
+  export ORGANISM_MAX_ENERGY
 
   export create
   export born
@@ -66,6 +67,11 @@ module Creature
   #
   @if_not_test const VAR_AMOUNT = 5
   @if_test     const VAR_AMOUNT = 1
+  #
+  # Maximum amount of energy, which one organism may contains. Should be
+  # less then typemax(UInt16).
+  #
+  const ORGANISM_MAX_ENERGY = Int(typemax(UInt16))
   #
   # Divider for "for" operator
   #
@@ -217,7 +223,6 @@ module Creature
     mutationPercent::Float64
     #
     # Organism's energy. If it's zero, then organism is die.
-    # It can't be more then ORGANISM_MAX_ENERGY configuration.
     #
     energy::Int
     #
@@ -477,9 +482,9 @@ module Creature
   # @param cfg Global configuration type
   # @param org Current organism
   # @param amount Amount of energy organism wants to grab
-  # @return {Int} Amount of grabbed energy
+  # @return {Float16} Amount of grabbed energy
   #
-  function eatLeft(cfg::Config.ConfigData, org::Organism, amount::Int) _grabEnergy(cfg, org, left, amount) end
+  function eatLeft(cfg::Config.ConfigData, org::Organism, amount::Float16) _eatEnergy(cfg, org, left, round(Int, amount)) end
   #
   # @oapi
   # er - means get Energy Right. Short name to help organism find this name faster.
@@ -487,9 +492,9 @@ module Creature
   # @param cfg Global configuration type
   # @param org Current organism
   # @param amount Amount of energy organism wants to grab
-  # @return {Int} Amount of grabbed energy
+  # @return {Float16} Amount of grabbed energy
   #
-  function eatRight(cfg::Config.ConfigData, org::Organism, amount::Int) _grabEnergy(cfg, org, right, amount) end
+  function eatRight(cfg::Config.ConfigData, org::Organism, amount::Float16) _eatEnergy(cfg, org, right, round(Int, amount)) end
   #
   # @oapi
   # eu - means get Energy Up. Short name to help organism find this name faster.
@@ -497,9 +502,9 @@ module Creature
   # @param cfg Global configuration type
   # @param org Current organism
   # @param amount Amount of energy organism wants to grab
-  # @return {Int} Amount of grabbed energy
+  # @return {Float16} Amount of grabbed energy
   #
-  function eatUp(cfg::Config.ConfigData, org::Organism, amount::Int) _grabEnergy(cfg, org, up, amount) end
+  function eatUp(cfg::Config.ConfigData, org::Organism, amount::Float16) _eatEnergy(cfg, org, up, round(Int, amount)) end
   #
   # @oapi
   # ed - means get Energy Down. Short name to help organism find this name faster.
@@ -507,9 +512,9 @@ module Creature
   # @param cfg Global configuration type
   # @param org Current organism
   # @param amount Amount of energy organism wants to grab
-  # @return {Int} Amount of grabbed energy
+  # @return {Float16} Amount of grabbed energy
   #
-  function eatDown(cfg::Config.ConfigData, org::Organism, amount::Int) _grabEnergy(cfg, org, down, amount) end
+  function eatDown(cfg::Config.ConfigData, org::Organism, amount::Float16) _eatEnergy(cfg, org, down, round(Int, amount)) end
   #
   # @oapi
   # Makes one step left. It decreases organism's x coodinate by 1.
@@ -839,9 +844,9 @@ module Creature
   # @param dir      Direction Enum(left, right, up, down)
   # @param amount   Amount of grabbed energy
   # @param amount   Amount of energy to grab
-  # @return {Int} Amount of eated energy
-  # TODO: rename it to eatEnergy and rename an event to eatXXX
-  function _grabEnergy(cfg::Config.ConfigData, org::Organism, dir::DIRECTION, amount::Int)
+  # @return {Float16} Amount of eated energy
+  #
+  function _eatEnergy(cfg::Config.ConfigData, org::Organism, dir::DIRECTION, amount::Int)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" key will be contained amount of grabbed energy.
@@ -856,10 +861,10 @@ module Creature
     # We can't exceed max amount of energy
     #
     if typeof(retObj.ret) == Int
-      org.energy = min(org.energy + retObj.ret, Config.ORGANISM_MAX_ENERGY)
-      return retObj.ret
+      org.energy = org.energy + retObj.ret
+      return Float16(retObj.ret)
     end
 
-    0
+    Float16(0)
   end
 end

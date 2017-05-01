@@ -117,7 +117,7 @@ module World
   function moveEnergy(plane::Plane, oldPos::Helper.Point, newPos::Helper.Point, org::Creature.Organism, outOfBorder::Bool = false)
     if newPos.x < 1 || newPos.x > plane.width || newPos.y < 1 || newPos.y > plane.height return false end
     local dir::Int
-    local energy::UInt16 = org.energy
+    local energy::UInt16 = UInt16(min(org.energy, Creature.ORGANISM_MAX_ENERGY))  
 
     if     newPos.x > oldPos.x dir = Dots.DIRECTION_RIGHT
     elseif newPos.x < oldPos.x dir = Dots.DIRECTION_LEFT

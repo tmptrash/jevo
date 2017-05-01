@@ -121,7 +121,6 @@ module RpcApi
     mutationPercent::Float64
     #
     # Organism's energy. If it's zero, then organism is die.
-    # It can't be more then ORGANISM_MAX_ENERGY configuration.
     #
     energy::Int
     #

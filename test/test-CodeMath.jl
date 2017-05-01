@@ -142,4 +142,26 @@ module TestCodeMath
   facts("Testing CodeMath.reminder() two times") do; testOperatorTwo(:(%), :reminder, Float16(0.0)) end
   facts("Testing CodeMath.reminder() inside if operator") do; testOperatorInIf(:reminder, Float16(0.0)) end
   facts("Testing CodeMath.reminder() inside for operator") do; testOperatorInFor(:reminder, Float16(0.0)) end
+  #
+  # sqrt
+  #
+  facts("Testing CodeMath.sqrt()") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+    local org = d.orgs[1]
+
+    code(d, :sqrt, org)
+    @fact eval(org.code)(d.cfg, org) --> Float16(2.236)
+
+    Manager.destroy(d.man)
+  end
+  facts("Testing CodeMath.sqrt() with negative value") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+    local org = d.orgs[1]
+
+    code(d, :sqrt, org)
+    val(org, Float16(-5.0))
+    @fact eval(org.code)(d.cfg, org) --> Float16(2.236)
+
+    Manager.destroy(d.man)
+  end
 end
