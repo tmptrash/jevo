@@ -74,7 +74,7 @@ module Status
     #
     Event.on(man.obs, "iteration", _onIteration)
     Event.on(man.obs, "ips", _onIps)
-    Event.on(man.obs, "eatorganism", _onEatOrganism)
+
     #Event.on(man.obs, "yield", _onYield)
     #Event.on(man.obs, "yieldto", _onYieldTo)
     #Event.on(man.obs, "stepyield", _onStepYield)
@@ -87,6 +87,7 @@ module Status
     Event.on(man.obs, "organism", _onOrganism)
     Event.on(man.obs, "grabenergy", _onGrabEnergy)
 
+    Event.on(man.obs, "eatorganism", _onEatOrganism)
     Event.on(man.obs, "eatleft", _onEatLeft)
     Event.on(man.obs, "eatright", _onEatRight)
     Event.on(man.obs, "eatup", _onEatUp)
@@ -102,6 +103,7 @@ module Status
   #
   function _onBeforeIps(man::ManagerData, sd::StatusData)
     sd.ips       += man.ips
+    sd.orgs      += ManagerTypes.orgAmount(man)
     sd.ipsAmount += 1
     #
     # Condition for the first run
@@ -121,27 +123,29 @@ module Status
     local sd::StatusData  = man.plugins[MODULE_NAME]
     local cfg::Config.ConfigData = man.cfg
     local iterations::Int = sd.iterations
+    local orgs::Int
+    local orgsPerIter::Int
 
     _onBeforeIps(man, sd)
+    orgs = div(sd.orgs, sd.ipsAmount)
+    orgsPerIter = orgs * iterations
     if stamp - sd.stamp < cfg.modeStatusPeriod return nothing end
 
     print(string(Dates.format(now(), "HH:MM:SS"), " "))
-    _showParam(:green,  "org:",  div(sd.orgs, iterations), 8)
+    _showParam(:green,  "org:",  orgs, 8)
     _showParam(:normal, "ips:",  (@sprintf "%.2f" sd.ips / sd.ipsAmount), 12)
-    _showParam(:green,  "nrg:",  div(sd.energy, sd.ipsAmount * ManagerTypes.orgAmount(man)), 12, true)
-    _showParam(:red,    "eat:",  div(sd.eated - sd.eatorg, iterations), 12, true)
-    _showParam(:red,    "eato:", div(sd.eatorg, iterations), 12, true)
-    _showParam(:red,    "grab:", div(sd.grabbed, iterations), 10, true)
-    _showParam(:cyan,   "step:", div(sd.steps, iterations), 12, true)
-    _showParam(:orange, "cmut:", (@sprintf "%.2f" sd.cmps / iterations), 11)
-    _showParam(:orange, "mut:",  (@sprintf "%.2f" sd.mps / iterations), 10)
-    _showParam(:yellow, "kil:",  (@sprintf "%.2f" sd.kops / iterations), 10)
-    _showParam(:yellow, "clon:", (@sprintf "%.2f" sd.cps / iterations), 11)
-    #_showParam(:yellow, "req.",  sd.rps, 9)
-    #_showParam(:yellow, "eval.", cfg.orgEvals - sd.evals, 10)
-    _showParam(:orange, "err:",  div(cfg.orgErrors, iterations), 10)
+    _showParam(:green,  "nrg:",  div(sd.energy,  (sd.ipsAmount * orgsPerIter)), 14, true)
+    _showParam(:red,    "eat:",  div(sd.eated - sd.eatorg, orgsPerIter), 14, true)
+    _showParam(:red,    "eato:", div(sd.eatorg, orgsPerIter), 14, true)
+    _showParam(:red,    "grab:", div(sd.grabbed, orgsPerIter), 10, true)
+    _showParam(:cyan,   "step:", div(sd.steps, orgsPerIter), 12, true)
+    _showParam(:orange, "cmut:", (@sprintf "%.2f" sd.cmps / orgsPerIter), 11)
+    _showParam(:orange, "mut:",  (@sprintf "%.2f" sd.mps  / orgsPerIter), 10)
+    _showParam(:yellow, "kil:",  (@sprintf "%.2f" sd.kops / orgsPerIter), 10)
+    _showParam(:yellow, "clon:", (@sprintf "%.2f" sd.cps  / orgsPerIter), 11)
+    _showParam(:orange, "err:",  div(cfg.orgErrors, orgsPerIter), 10)
     _showParam(:orange, "cod:", (@sprintf "%.2f" sd.code / sd.codeAmount), 11)
-    _showParam(:red,    "fit:",  Int(div(sd.fit, UInt(sd.fitAmount))), 16, true)
+    _showParam(:red,    "fit:",  Int(div(sd.fit, UInt(sd.fitAmount * orgsPerIter))), 16, true)
     print("\n")
 
     _onAfterIps(man, stamp, sd)
@@ -194,10 +198,7 @@ module Status
   # @param stamp Current time stamp
   #
   function _onIteration(man::ManagerData, stamp::Float64)
-    local sd::StatusData = man.plugins[MODULE_NAME]
-
-    sd.orgs       += ManagerTypes.orgAmount(man)
-    sd.iterations += 1
+    man.plugins[MODULE_NAME].iterations += 1
   end
   #
   # Calculates total energy of population
@@ -219,14 +220,6 @@ module Status
       sd.fit += UInt(org.energy) * UInt(org.mutationsFromStart)
     end
     sd.fitAmount += ManagerTypes.orgAmount(man)
-  end
-  #
-  # Handler of "eatorganism" event
-  # @param man Manager data type
-  # @param eated Amount of energy obteined by eating of other organism
-  #
-  function _onEatOrganism(man::ManagerData, eated::Int)
-    man.plugins[MODULE_NAME].eatorg += eated
   end
   #
   # Shows one parameter in status line accordint to settings
@@ -338,6 +331,14 @@ module Status
   #
   function _onGrabEnergy(man::ManagerData, amount::Int)
     man.plugins[MODULE_NAME].grabbed += amount
+  end
+  #
+  # Handler of "eatorganism" event
+  # @param man Manager data type
+  # @param eated Amount of energy obteined by eating of other organism
+  #
+  function _onEatOrganism(man::ManagerData, eated::Int)
+    man.plugins[MODULE_NAME].eatorg += eated
   end
   #
   # Is called every time if some organism calls eatLeft() function

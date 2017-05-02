@@ -105,7 +105,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # predefined config value (orgAlivePeriod)
     #
     if cfg.orgAlivePeriod > 0 && org.age >= cfg.orgAlivePeriod && ManagerTypes.orgAmount(man) > cfg.worldMinOrgs
-      _killOrganism(man, i)
+      _killOrganism(man, i, true)
       i-=1
       continue
     end
@@ -268,9 +268,9 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
       # because our CPU's are slow
       #
       if org.codeSize > codeMaxSize codeSize = org.codeSize * codeSizeCoef
-      else codeSize = org.codeSize < 1 ? 1 : org.codeSize
-      end
-      Event.fire(man.obs, "grabenergy", man, org.energy < codeSize ? org.energy : codeSize)
+      else codeSize = org.codeSize < 1 ? 1 : org.codeSize end
+      codeSize = min(org.energy, codeSize)
+      Event.fire(man.obs, "grabenergy", man, codeSize)
       if !_decreaseOrganismEnergy(man, org, codeSize)
         dontKill = ManagerTypes.orgAmount(man) <= minOrgs
       end
@@ -323,30 +323,30 @@ end
 # Marks one organism as "removed". Deletion will be done in
 # _updateOrganismsEnergy() function.
 # @param man Manager data type
-# @param i Index of organism's task
+# @param index Index of organism's task
 #
-function _killOrganism(man::ManagerTypes.ManagerData, i::Int)
+function _killOrganism(man::ManagerTypes.ManagerData, index::Int, leaveEnergy::Bool = false)
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
-  @inbounds local org::Creature.Organism = tasks[i].organism
-  local energyAfterDeath::UInt16 = UInt16(min(typemax(UInt16), org.energy > -1 ? org.energy : 1))
+  @inbounds local org::Creature.Organism = tasks[index].organism
+  local energyAfterDeath::UInt16 = UInt16(min(typemax(UInt16), org.energy))
 
   org.energy = 0
   org.color  = UInt16(Dots.INDEX_EMPTY)
   if !org.alive return false end
   org.alive  = false
-  push!(man.killed, i)
+  push!(man.killed, index)
   Event.clear(org.observer)
   _moveOrganism(man, org.pos, org)
   delete!(man.positions, Manager._getPosId(man, org.pos))
   delete!(man.organisms, org.id)
-  @inbounds Manager.stopTask(man, tasks[i].task)
+  @inbounds Manager.stopTask(man, tasks[index].task)
   msg(man, org.id, "die")
   Event.fire(man.obs, "killorganism", man, org)
   #
   # At the position of died organism an energy block
   # should appear
   #
-  World.setEnergy(man.world, org.pos, energyAfterDeath)
+  if leaveEnergy World.setEnergy(man.world, org.pos, energyAfterDeath) end
 
   true
 end
@@ -688,17 +688,16 @@ end
 # checks if other organism was at that position. If so, then
 # it decrease an energy of this other organism.
 # @param man Manager data type
-# @param organism Organism, who grabs
+# @param organism Organism, who grabs an energy
 # @param amount Amount of energy he wants to grab
 # @param pos Point where we should check the energy
 # @param retObj Special object for return value
 #
 function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amount::Int, pos::Helper.Point, retObj::Helper.RetObj)
+  if haskey(man.cons.frozen, organism.id) || ManagerTypes.orgAmount(man) <= man.cfg.worldMinOrgs return retObj.ret = 0 end
   local newPos::Helper.Point = Helper.Point(pos.x, pos.y)
-  local id::Int
-  local org::Creature.Organism
-
-  if haskey(man.cons.frozen, organism.id) || organism.energy < 1 || length(man.tasks) <= man.cfg.worldMinOrgs return retObj.ret = 0 end
+  local nearId::Int
+  local nearOrg::Creature.Organism
   #
   # In case if cyclical mode is on, organism may grab energy
   # outside the world's borders
@@ -710,17 +709,17 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     elseif newPos.y > man.world.height newPos.y = 1
     end
   end
-  id = Manager._getPosId(man, newPos)
+  nearId = Manager._getPosId(man, newPos)
   #
   # If other organism at the position of the check,
   # then grab energy from him
   #
-  if haskey(man.positions, id)
-    org = man.positions[id]
+  if haskey(man.positions, nearId)
+    nearOrg = man.positions[nearId]
     #
     # Current organism wants give an energy
     #
-    if amount < 1
+    if amount < 0
       if organism.energy <= abs(amount)
         amount = -organism.energy
         _killOrganism(man, organism.index)
@@ -728,15 +727,15 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       else
         retObj.ret = amount
       end
-      org.energy = org.energy - amount
-    elseif org.energy > amount
-      org.energy -= amount
+      nearOrg.energy -= amount
+    elseif nearOrg.energy > amount
+      nearOrg.energy -= amount
       retObj.ret  = amount
-    elseif org.energy <= amount
-      retObj.ret = org.energy
-      _killOrganism(man, org.index)
+    elseif nearOrg.energy <= amount
+      amount = retObj.ret = nearOrg.energy
+      _killOrganism(man, nearOrg.index)
     end
-    Event.fire(man.obs, "eatorganism", man, retObj.ret)
+    Event.fire(man.obs, "eatorganism", man, amount)
   else
     #
     # Organism wants to get an energy, but no other organisms around

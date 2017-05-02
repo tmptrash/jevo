@@ -117,7 +117,7 @@ module World
   function moveEnergy(plane::Plane, oldPos::Helper.Point, newPos::Helper.Point, org::Creature.Organism, outOfBorder::Bool = false)
     if newPos.x < 1 || newPos.x > plane.width || newPos.y < 1 || newPos.y > plane.height return false end
     local dir::Int
-    local energy::UInt16 = UInt16(min(org.energy, Creature.ORGANISM_MAX_ENERGY))  
+    local energy::UInt16 = UInt16(min(org.energy, Creature.ORGANISM_MAX_ENERGY))
 
     if     newPos.x > oldPos.x dir = Dots.DIRECTION_RIGHT
     elseif newPos.x < oldPos.x dir = Dots.DIRECTION_LEFT
@@ -175,12 +175,12 @@ module World
   # @return {UInt} amount of grabbed energy
   #
   function grabEnergy(plane::Plane, pos::Helper.Point, amount::UInt16)
-    local energy::UInt16 = getEnergy(plane, pos)
+    local energy::UInt16 = min(getEnergy(plane, pos), amount)
 
-    energy = energy > amount ? amount : energy
-    if energy > 0
+    if energy > UInt16(0)
       Event.fire(plane.obs, EVENT_DOT, pos, (plane.data[pos.y, pos.x] -= energy))
     end
+
     energy
   end
   #

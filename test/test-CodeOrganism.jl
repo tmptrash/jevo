@@ -10,28 +10,28 @@ module TestCodeOrganism
   import Config
   import World
   include("Helper.jl")
+  # #
+  # # lookAt
+  # #
+  # facts("Testing lookAt()") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+  #   local org = d.orgs[1]
   #
-  # lookAt
+  #   code(d, :lookAt, org)
+  #   @fact Code.eval(org.code)(d.cfg, org) --> 0.0
   #
-  facts("Testing lookAt()") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
-    local org = d.orgs[1]
-
-    code(d, :lookAt, org)
-    @fact Code.eval(org.code)(d.cfg, org) --> 0.0
-
-    val(org, Float16(100.0))
-    @fact Code.eval(org.code)(d.cfg, org) --> 0.0
-
-    val(org, Float16(0.0))
-    @fact Code.eval(org.code)(d.cfg, org) --> 0.0
-
-    val(org, Float16(5.0))
-    World.setEnergy(d.man.world, Helper.Point(5,5), UInt16(10))
-    @fact Code.eval(org.code)(d.cfg, org) --> 10.0
-
-    Manager.destroy(d.man)
-  end
+  #   val(org, Float16(100.0))
+  #   @fact Code.eval(org.code)(d.cfg, org) --> 0.0
+  #
+  #   val(org, Float16(0.0))
+  #   @fact Code.eval(org.code)(d.cfg, org) --> 0.0
+  #
+  #   val(org, Float16(5.0))
+  #   World.setEnergy(d.man.world, Helper.Point(5,5), UInt16(10))
+  #   @fact Code.eval(org.code)(d.cfg, org) --> 10.0
+  #
+  #   Manager.destroy(d.man)
+  # end
   #
   # Eating
   #
@@ -42,6 +42,22 @@ module TestCodeOrganism
 
     code(d, :eatRight, left)
     updateCode(left)
+    @fact left.energy === right.energy === 5 --> true
+    consume(d.task)
+    consume(d.task)
+    @fact left.energy  --> 10
+    @fact right.energy --> 0
+
+    Manager.destroy(d.man)
+  end
+  facts("Checking if left organism can eat right one until death") do
+    local d     = create([Helper.Point(1,1), Helper.Point(2,1)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>100,:orgStartEnergy=>5))
+    local left  = d.orgs[1]
+    local right = d.orgs[2]
+
+    code(d, :eatRight, left)
+    code(d, :eatRight, left)
+    code(d, :eatRight, left)
     @fact left.energy === right.energy === 5 --> true
     consume(d.task)
     consume(d.task)
@@ -74,7 +90,6 @@ module TestCodeOrganism
 
     code(d, :eatRight, left)
     val(left, Float16(0.0))
-    updateCode(left)
 
     @fact left.energy === right.energy === 100 --> true
     consume(d.task)
@@ -91,8 +106,6 @@ module TestCodeOrganism
 
     code(d, :eatRight, left)
     code(d, :eatLeft, right)
-    updateCode(left)
-    updateCode(right)
 
     @fact left.energy === right.energy === 100 --> true
     consume(d.task)
@@ -110,7 +123,6 @@ module TestCodeOrganism
     local down = d.orgs[2]
 
     code(d, :eatDown, up)
-    updateCode(up)
 
     @fact up.energy === down.energy === 100 --> true
     consume(d.task)
@@ -127,7 +139,6 @@ module TestCodeOrganism
 
     code(d, :eatDown, up)
     val(up, Float16(-5.0))
-    updateCode(up)
 
     @fact up.energy === down.energy === 100 --> true
     consume(d.task)
@@ -144,7 +155,6 @@ module TestCodeOrganism
 
     code(d, :eatDown, up)
     val(up, Float16(0.0))
-    updateCode(up)
 
     @fact up.energy === up.energy === 100 --> true
     consume(d.task)
@@ -161,8 +171,6 @@ module TestCodeOrganism
 
     code(d, :eatDown, up)
     code(d, :eatUp, down)
-    updateCode(up)
-    updateCode(down)
 
     @fact up.energy === down.energy === 100 --> true
     consume(d.task)
@@ -179,7 +187,6 @@ module TestCodeOrganism
     local up = d.orgs[1]
 
     code(d, :eatDown, up)
-    updateCode(up)
 
     @fact up.energy === 100 --> true
     consume(d.task)
@@ -207,7 +214,6 @@ module TestCodeOrganism
     local up = d.orgs[1]
 
     code(d, :eatRight, up)
-    updateCode(up)
     World.setEnergy(d.man.world, Helper.Point(2,1), UInt16(30))
 
     @fact up.energy === 100 --> true
@@ -242,7 +248,6 @@ module TestCodeOrganism
     @fact World.getEnergy(d.man.world, Helper.Point(2,3)) --> UInt16(100)
 
     code(d, :stepLeft, org)
-    updateCode(org)
     @fact World.getEnergy(d.man.world, Helper.Point(2,3)) --> UInt16(100)
     @fact World.getEnergy(d.man.world, Helper.Point(3,3)) --> UInt16(0)
     consume(d.task)
@@ -282,7 +287,6 @@ module TestCodeOrganism
     local org = d.orgs[1]
 
     code(d, :stepUp, org)
-    updateCode(org)
     consume(d.task)
     @fact World.getEnergy(d.man.world, Helper.Point(3,3)) --> UInt16(100)
     @fact World.getEnergy(d.man.world, Helper.Point(3,2)) --> UInt16(0)
@@ -307,7 +311,6 @@ module TestCodeOrganism
     local org = d.orgs[1]
 
     code(d, :stepDown, org)
-    updateCode(org)
     consume(d.task)
     @fact World.getEnergy(d.man.world, Helper.Point(3,3)) --> UInt16(100)
     @fact World.getEnergy(d.man.world, Helper.Point(3,4)) --> UInt16(0)
@@ -316,7 +319,6 @@ module TestCodeOrganism
     @fact World.getEnergy(d.man.world, Helper.Point(3,4)) --> UInt16(100)
 
     code(d, :stepDown, org)
-    updateCode(org)
     @fact World.getEnergy(d.man.world, Helper.Point(3,4)) --> UInt16(100)
     @fact World.getEnergy(d.man.world, Helper.Point(3,3)) --> UInt16(0)
     consume(d.task)
@@ -333,7 +335,6 @@ module TestCodeOrganism
     local org = d.orgs[1]
 
     code(d, :stepLeft, org)
-    updateCode(org)
     consume(d.task)
     @fact World.getEnergy(d.man.world, Helper.Point(1,1)) --> UInt16(100)
     @fact World.getEnergy(d.man.world, Helper.Point(10,1)) --> UInt16(0)
@@ -348,7 +349,6 @@ module TestCodeOrganism
     local org = d.orgs[1]
 
     code(d, :stepLeft, org)
-    updateCode(org)
     World.setEnergy(d.man.world, Helper.Point(1,1), UInt16(123))
     consume(d.task)
     @fact World.getEnergy(d.man.world, Helper.Point(2,1)) --> UInt16(100)

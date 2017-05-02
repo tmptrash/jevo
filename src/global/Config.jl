@@ -443,7 +443,7 @@ module Config
       8,                                       # codeLoopAmount
       0,                                       # codeRuns
       15,                                      # codeMaxSize
-      100,                                     # codeSizeCoef
+      1000,                                    # codeSizeCoef
 
       1900,                                    # worldWidth
       940,                                     # worldHeight

@@ -861,7 +861,7 @@ module Creature
     # We can't exceed max amount of energy
     #
     if typeof(retObj.ret) == Int
-      org.energy = org.energy + retObj.ret
+      org.energy += retObj.ret
       return Float16(retObj.ret)
     end
 
