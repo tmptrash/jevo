@@ -105,7 +105,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # predefined config value (orgAlivePeriod)
     #
     if cfg.orgAlivePeriod > 0 && org.age >= cfg.orgAlivePeriod && ManagerTypes.orgAmount(man) > cfg.worldMinOrgs
-      _killOrganism(man, i, true)
+      _killOrganism(man, i)
       i-=1
       continue
     end
@@ -278,6 +278,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
 
     i -= 1
   end
+
   Event.fire(man.obs, "updateenergy", man)
 
   true
@@ -289,7 +290,7 @@ end
 # @param amount Amount of energy we have to decrease
 #
 function _decreaseOrganismEnergy(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int)
-  org.energy -= min(org.energy, amount)
+  org.energy -= amount
   if org.energy < 1
     _killOrganism(man, org.index)
     return false
@@ -325,7 +326,7 @@ end
 # @param man Manager data type
 # @param index Index of organism's task
 #
-function _killOrganism(man::ManagerTypes.ManagerData, index::Int, leaveEnergy::Bool = false)
+function _killOrganism(man::ManagerTypes.ManagerData, index::Int)
   local tasks::Array{ManagerTypes.OrganismTask, 1} = man.tasks
   @inbounds local org::Creature.Organism = tasks[index].organism
   local energyAfterDeath::UInt16 = UInt16(min(typemax(UInt16), org.energy))
@@ -342,11 +343,6 @@ function _killOrganism(man::ManagerTypes.ManagerData, index::Int, leaveEnergy::B
   @inbounds Manager.stopTask(man, tasks[index].task)
   msg(man, org.id, "die")
   Event.fire(man.obs, "killorganism", man, org)
-  #
-  # At the position of died organism an energy block
-  # should appear
-  #
-  if leaveEnergy World.setEnergy(man.world, org.pos, energyAfterDeath) end
 
   true
 end
@@ -490,12 +486,16 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   #
   # Clonning means additional energy waste
   #
-  local minimum::Bool = length(man.tasks) <= man.cfg.worldMinOrgs
+  local minimum::Bool = ManagerTypes.orgAmount(man) <= man.cfg.worldMinOrgs
   local energy::Int = minimum ? 1 : round(Int, organism.energy * organism.cloneEnergyPercent)
+  local before::Int = organism.energy
 
   if !minimum
     _decreaseOrganismEnergy(man, organism, energy)
-    _decreaseOrganismEnergy(man, crTask.organism, energy)
+    _decreaseOrganismEnergy(man, crTask.organism, crTask.organism.energy - energy)
+  end
+  if before < (organism.energy + crTask.organism.energy)
+    println("before: ", before, " org: ", organism.energy, " cr: ", crTask.organism.energy, " e: ", energy)
   end
   if energy > 0 && crTask.organism.energy > 0
     _mutate(man, crTask, crTask.organism.mutationsOnClonePercent)
@@ -730,7 +730,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       nearOrg.energy -= amount
     elseif nearOrg.energy > amount
       nearOrg.energy -= amount
-      retObj.ret  = amount
+      retObj.ret = amount
     elseif nearOrg.energy <= amount
       amount = retObj.ret = nearOrg.energy
       _killOrganism(man, nearOrg.index)
@@ -740,10 +740,11 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     #
     # Organism wants to get an energy, but no other organisms around
     #
-    retObj.ret = amount > 0 ? World.grabEnergy(man.world, newPos, UInt16(amount)) : 0
+    retObj.ret = Int(amount > 0 ? World.grabEnergy(man.world, newPos, UInt16(amount)) : 0)
+    if retObj.ret > 0 Event.fire(man.obs, "eatenergy", man, retObj.ret) end
   end
 
-  retObj.ret = round(Int, retObj.ret)
+  retObj.ret
 end
 #
 # Checks if specified position ("pos") has no energy and we may

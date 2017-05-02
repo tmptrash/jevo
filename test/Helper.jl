@@ -89,6 +89,7 @@ end
 #
 function val(org::Creature.Organism, val::Float16)
   Helper.getArg(org.code, [2,1,1]).args[2] = val
+  updateCode(org)
 end
 #
 # Returns initial value of first Float16 variable in main function

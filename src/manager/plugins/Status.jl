@@ -44,12 +44,12 @@ module Status
     csMin::Int        # minimum organism code size
     csMax::Int        # maximum organism code size
     code::Int         # average code size
-    codeAmount::Int   # is used to calculate average organisms code size
     eatl::Int         # organism eats left
     eatr::Int         # organism eats right
     eatu::Int         # organism eats up
     eatd::Int         # organism eats down
     eatorg::Int       # amount of energy obtained by eating other organisms
+    eate::Int         # amount of energy eated by organisms
     eated::Int        # total amount of eating for organisms
     stepl::Int        # organism moves left
     stepr::Int        # organism moves right
@@ -75,9 +75,6 @@ module Status
     Event.on(man.obs, "iteration", _onIteration)
     Event.on(man.obs, "ips", _onIps)
 
-    #Event.on(man.obs, "yield", _onYield)
-    #Event.on(man.obs, "yieldto", _onYieldTo)
-    #Event.on(man.obs, "stepyield", _onStepYield)
     Event.on(man.obs, "request", _onRequest)
     Event.on(man.obs, "updateenergy", _onUpdateEnergy)
     Event.on(man.obs, "killorganism", _onKillOrganism)
@@ -88,6 +85,7 @@ module Status
     Event.on(man.obs, "grabenergy", _onGrabEnergy)
 
     Event.on(man.obs, "eatorganism", _onEatOrganism)
+    Event.on(man.obs, "eatenergy", _onEatEnergy)
     Event.on(man.obs, "eatleft", _onEatLeft)
     Event.on(man.obs, "eatright", _onEatRight)
     Event.on(man.obs, "eatup", _onEatUp)
@@ -128,23 +126,25 @@ module Status
 
     _onBeforeIps(man, sd)
     orgs = div(sd.orgs, sd.ipsAmount)
+    # TODO:!!!
     orgsPerIter = orgs * iterations
+    #orgsPerIter = 1
     if stamp - sd.stamp < cfg.modeStatusPeriod return nothing end
 
     print(string(Dates.format(now(), "HH:MM:SS"), " "))
     _showParam(:green,  "org:",  orgs, 8)
-    _showParam(:normal, "ips:",  (@sprintf "%.2f" sd.ips / sd.ipsAmount), 12)
+    _showParam(:normal, "ips:",  (@sprintf "%.2f" sd.ips / sd.ipsAmount), 10)
     _showParam(:green,  "nrg:",  div(sd.energy,  (sd.ipsAmount * orgsPerIter)), 14, true)
-    _showParam(:red,    "eat:",  div(sd.eated - sd.eatorg, orgsPerIter), 14, true)
+    _showParam(:red,    "eat:",  div(sd.eate, orgsPerIter), 12, true)
     _showParam(:red,    "eato:", div(sd.eatorg, orgsPerIter), 14, true)
     _showParam(:red,    "grab:", div(sd.grabbed, orgsPerIter), 10, true)
-    _showParam(:cyan,   "step:", div(sd.steps, orgsPerIter), 12, true)
+    _showParam(:cyan,   "step:", (@sprintf "%.2f" sd.steps / orgsPerIter), 12)
     _showParam(:orange, "cmut:", (@sprintf "%.2f" sd.cmps / orgsPerIter), 11)
     _showParam(:orange, "mut:",  (@sprintf "%.2f" sd.mps  / orgsPerIter), 10)
     _showParam(:yellow, "kil:",  (@sprintf "%.2f" sd.kops / orgsPerIter), 10)
     _showParam(:yellow, "clon:", (@sprintf "%.2f" sd.cps  / orgsPerIter), 11)
     _showParam(:orange, "err:",  div(cfg.orgErrors, orgsPerIter), 10)
-    _showParam(:orange, "cod:", (@sprintf "%.2f" sd.code / sd.codeAmount), 11)
+    _showParam(:orange, "cod:",  div(sd.code, orgs * sd.ipsAmount), 8)
     _showParam(:red,    "fit:",  Int(div(sd.fit, UInt(sd.fitAmount * orgsPerIter))), 16, true)
     print("\n")
 
@@ -173,13 +173,13 @@ module Status
     sd.csMin      = typemax(Int)
     sd.csMax      = 0
     sd.code       = 0
-    sd.codeAmount = 0
     sd.evals      = man.cfg.orgEvals
     sd.eatl       = 0
     sd.eatr       = 0
     sd.eatu       = 0
     sd.eatd       = 0
     sd.eatorg     = 0
+    sd.eate       = 0
     sd.eated      = 0
     sd.grabbed    = 0
     sd.stepl      = 0
@@ -214,6 +214,7 @@ module Status
       org = man.tasks[i].organism
       if !org.alive continue end
       sd.energy += org.energy
+      sd.code   += org.codeSize
       #
       # Fitness level
       #
@@ -310,9 +311,6 @@ module Status
   #
   function _onOrganism(man::ManagerData, org::Creature.Organism)
     local sd::StatusData = man.plugins[MODULE_NAME]
-
-    sd.code   += org.codeSize
-    sd.codeAmount += 1
     #
     # Finds min/max energetic organisms in population
     #
@@ -321,8 +319,8 @@ module Status
     #
     # Updates min/max code sizes
     #
-    if org.codeSize >  sd.csMax sd.csMax = org.codeSize end
-    if org.codeSize <= sd.csMin sd.csMin = org.codeSize end
+    #if org.codeSize >  sd.csMax sd.csMax = org.codeSize end
+    #if org.codeSize <= sd.csMin sd.csMin = org.codeSize end
   end
   #
   # Is called on enery grab of energy from organism
@@ -339,6 +337,14 @@ module Status
   #
   function _onEatOrganism(man::ManagerData, eated::Int)
     man.plugins[MODULE_NAME].eatorg += eated
+  end
+  #
+  # Handler of "eatenergy" event
+  # @param man Manager data type
+  # @param eated Amount of energy obteined by eating of energy
+  #
+  function _onEatEnergy(man::ManagerData, eated::Int)
+    man.plugins[MODULE_NAME].eate += eated
   end
   #
   # Is called every time if some organism calls eatLeft() function
