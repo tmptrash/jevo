@@ -122,28 +122,26 @@ module Status
     local cfg::Config.ConfigData = man.cfg
     local iterations::Int = sd.iterations
     local orgs::Int
-    local orgsPerIter::Float64
 
     _onBeforeIps(man, sd)
     if stamp - sd.stamp < cfg.modeStatusPeriod return nothing end
 
     orgs = div(sd.orgs, sd.ipsAmount)
-    orgsPerIter = orgs * iterations / typemax(Int32) * 1000.0
     print(string(Dates.format(now(), "HH:MM:SS"), " "))
     _showParam(:green,  "org:",  orgs, 8)
     _showParam(:normal, "ips:",  (@sprintf "%.2f" sd.ips / sd.ipsAmount), 11)
-    _showParam(:green,  "nrg:",  div(sd.energy,  (sd.ipsAmount * orgsPerIter)), 14, true)
-    _showParam(:red,    "eat:",  div(sd.eate, orgsPerIter), 12, true)
-    _showParam(:red,    "eato:", div(sd.eatorg, orgsPerIter), 14, true)
-    _showParam(:red,    "grab:", div(sd.grabbed, orgsPerIter), 14, true)
-    _showParam(:cyan,   "step:", div(sd.steps, orgsPerIter), 14, true)
-    _showParam(:orange, "cmut:", div(sd.cmps, orgsPerIter), 11, true)
-    _showParam(:orange, "mut:",  div(sd.mps, orgsPerIter), 10, true)
-    _showParam(:yellow, "kil:",  div(sd.kops, orgsPerIter), 10, true)
-    _showParam(:yellow, "clon:", div(sd.cps, orgsPerIter), 11, true)
-    _showParam(:orange, "err:",  div(cfg.orgErrors, orgsPerIter), 14, true)
-    _showParam(:orange, "cod:",  div(sd.code, orgs * sd.ipsAmount), 8)
-    _showParam(:red,    "fit:",  round(Int, sd.fit / (sd.fitAmount * orgsPerIter)), 16, true)
+    _showParam(:green,  "nrg:",  div(sd.energy,  (sd.ipsAmount * orgs)), 14, true)
+    _showParam(:red,    "eat:",  div(sd.eate, orgs), 12, true)
+    _showParam(:red,    "eato:", div(sd.eatorg, orgs), 14, true)
+    _showParam(:red,    "grab:", div(sd.grabbed, orgs), 14, true)
+    _showParam(:cyan,   "step:", div(sd.steps, orgs), 14, true)
+    _showParam(:orange, "cmut:", (@sprintf "%.2f" sd.cmps / orgs), 11)
+    _showParam(:orange, "mut:",  (@sprintf "%.2f" sd.mps  / orgs), 10)
+    _showParam(:yellow, "kil:",  (@sprintf "%.2f" sd.kops / orgs), 10)
+    _showParam(:yellow, "clon:", (@sprintf "%.2f" sd.cps  / orgs), 11)
+    _showParam(:orange, "err:",  div(cfg.orgErrors, orgs), 14, true)
+    _showParam(:orange, "cod:",  div(sd.code, sd.ipsAmount * orgs), 8)
+    _showParam(:red,    "fit:",  round(Int, sd.fit / (sd.fitAmount * orgs)), 16, true)
     print("\n")
 
     _onAfterIps(man, stamp, sd)
