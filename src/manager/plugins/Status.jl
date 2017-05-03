@@ -26,7 +26,6 @@ module Status
     stamp::Float64    # current UNIX time stamp
     ips::Float64      # average IPS
     ipsAmount::Int    # amount of IPS calculations per status period
-    iterations::Int   # amount of iteration per status period
     rps::Int          # all requests per second
     eups::Int         # energy updates per second
     kops::Int         # killed organisms per second
@@ -59,7 +58,6 @@ module Status
     grabbed::Int      # amount of energy grabbed by the system from population
     orgs::Int         # average amount of organisms
     fit::UInt         # Fitness level (energy * mutationsFromStart)
-    fitAmount::Int    # Fitness measurements amount
   end
   #
   # Module initializer
@@ -68,11 +66,10 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,UInt(0), 0)
+    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,UInt(0), 0)
     #
     # All event handlers should be binded here
     #
-    Event.on(man.obs, "iteration", _onIteration)
     Event.on(man.obs, "ips", _onIps)
 
     Event.on(man.obs, "request", _onRequest)
@@ -120,16 +117,21 @@ module Status
   function _onIps(man::ManagerData, stamp::Float64, codeRuns::Int)
     local sd::StatusData  = man.plugins[MODULE_NAME]
     local cfg::Config.ConfigData = man.cfg
-    local iterations::Int = sd.iterations
     local orgs::Int
+    local realOrgs::Int
+    local ips::Float64
 
     _onBeforeIps(man, sd)
     if stamp - sd.stamp < cfg.modeStatusPeriod return nothing end
 
-    orgs = div(sd.orgs, sd.ipsAmount)
+    ips      = sd.ips / sd.ipsAmount
+    realOrgs = div(sd.orgs, sd.ipsAmount)
+    orgs     = div(sd.orgs, sd.ipsAmount * ips)
+
+    if orgs < 1 orgs = 1 end
     print(string(Dates.format(now(), "HH:MM:SS"), " "))
-    _showParam(:green,  "org:",  orgs, 8)
-    _showParam(:normal, "ips:",  (@sprintf "%.2f" sd.ips / sd.ipsAmount), 11)
+    _showParam(:green,  "org:",  realOrgs, 8)
+    _showParam(:normal, "ips:",  (@sprintf "%.2f" ips), 11)
     _showParam(:green,  "nrg:",  div(sd.energy,  (sd.ipsAmount * orgs)), 14, true)
     _showParam(:red,    "eat:",  div(sd.eate, orgs), 12, true)
     _showParam(:red,    "eato:", div(sd.eatorg, orgs), 14, true)
@@ -140,8 +142,8 @@ module Status
     _showParam(:yellow, "kil:",  (@sprintf "%.2f" sd.kops / orgs), 10)
     _showParam(:yellow, "clon:", (@sprintf "%.2f" sd.cps  / orgs), 11)
     _showParam(:orange, "err:",  div(cfg.orgErrors, orgs), 14, true)
-    _showParam(:orange, "cod:",  div(sd.code, sd.ipsAmount * orgs), 8)
-    _showParam(:red,    "fit:",  round(Int, sd.fit / (sd.fitAmount * orgs)), 16, true)
+    _showParam(:orange, "cod:",  div(sd.code, sd.ipsAmount * realOrgs), 8)
+    _showParam(:red,    "fit:",  round(Int, sd.fit / (sd.ipsAmount * realOrgs)), 16, true)
     print("\n")
 
     _onAfterIps(man, stamp, sd)
@@ -151,7 +153,6 @@ module Status
   #
   function _onAfterIps(man::ManagerData, stamp::Float64, sd::StatusData)
     sd.stamp      = stamp
-    sd.iterations = 0
     sd.ips        = 0.0
     sd.ipsAmount  = 0
     sd.ytps       = 0
@@ -186,15 +187,6 @@ module Status
     sd.energy     = 0
     sd.orgs       = 0
     sd.fit        = UInt(0)
-    sd.fitAmount  = 0
-  end
-  #
-  # Calls for every iteration, after all organisms were run
-  # @param man Manager data type object
-  # @param stamp Current time stamp
-  #
-  function _onIteration(man::ManagerData, stamp::Float64)
-    man.plugins[MODULE_NAME].iterations += 1
   end
   #
   # Calculates total energy of population
@@ -216,7 +208,6 @@ module Status
       #
       sd.fit += UInt(org.energy) * UInt(org.mutationsFromStart)
     end
-    sd.fitAmount += ManagerTypes.orgAmount(man)
   end
   #
   # Shows one parameter in status line accordint to settings

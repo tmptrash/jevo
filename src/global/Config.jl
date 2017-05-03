@@ -442,8 +442,8 @@ module Config
       2,                                       # codeFuncParamAmount
       8,                                       # codeLoopAmount
       0,                                       # codeRuns
-      15,                                      # codeMaxSize
-      1000,                                    # codeSizeCoef
+      20,                                      # codeMaxSize
+      20,                                      # codeSizeCoef
 
       1900,                                    # worldWidth
       940,                                     # worldHeight
@@ -452,8 +452,8 @@ module Config
       0,                                       # worldMinOrgs
       1000,                                    # worldStartEnergyDots
       UInt16(0x0001F4),                        # worldStartEnergyInDot
-      0.5,                                     # worldEnergyCheckPercent
-      3000,                                    # worldEnergyCheckPeriod
+      0.3,                                     # worldEnergyCheckPercent
+      5000,                                    # worldEnergyCheckPeriod
       1,                                       # worldZoom
       1.0,                                     # worldIpsPeriod
 
