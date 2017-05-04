@@ -118,21 +118,21 @@ module Status
     local sd::StatusData  = man.plugins[MODULE_NAME]
     local cfg::Config.ConfigData = man.cfg
     local orgs::Int
-    local realOrgs::Int
+    local orgsIps::Int
     local ips::Float64
 
     _onBeforeIps(man, sd)
     if stamp - sd.stamp < cfg.modeStatusPeriod return nothing end
 
     ips      = sd.ips / sd.ipsAmount
-    realOrgs = div(sd.orgs, sd.ipsAmount)
-    orgs     = div(sd.orgs, sd.ipsAmount * ips)
+    orgs     = div(sd.orgs, sd.ipsAmount)
+    orgsIps  = div(orgs, ips)
 
     if orgs < 1 orgs = 1 end
     print(string(Dates.format(now(), "HH:MM:SS"), " "))
-    _showParam(:green,  "org:",  realOrgs, 8)
+    _showParam(:green,  "org:",  orgs, 8)
     _showParam(:normal, "ips:",  (@sprintf "%.2f" ips), 11)
-    _showParam(:green,  "nrg:",  div(sd.energy,  (sd.ipsAmount * orgs)), 14, true)
+    _showParam(:green,  "nrg:",  div(sd.energy,  sd.ipsAmount * orgsIps), 14, true)
     _showParam(:red,    "eat:",  div(sd.eate, orgs), 12, true)
     _showParam(:red,    "eato:", div(sd.eatorg, orgs), 14, true)
     _showParam(:red,    "grab:", div(sd.grabbed, orgs), 14, true)
@@ -142,8 +142,8 @@ module Status
     _showParam(:yellow, "kil:",  (@sprintf "%.2f" sd.kops / orgs), 10)
     _showParam(:yellow, "clon:", (@sprintf "%.2f" sd.cps  / orgs), 11)
     _showParam(:orange, "err:",  div(cfg.orgErrors, orgs), 14, true)
-    _showParam(:orange, "cod:",  div(sd.code, sd.ipsAmount * realOrgs), 8)
-    _showParam(:red,    "fit:",  round(Int, sd.fit / (sd.ipsAmount * realOrgs)), 16, true)
+    _showParam(:orange, "cod:",  div(sd.code, sd.ipsAmount * orgs), 8)
+    _showParam(:red,    "fit:",  round(Int, sd.fit / (sd.ipsAmount * orgs)), 16, true)
     print("\n")
 
     _onAfterIps(man, stamp, sd)
