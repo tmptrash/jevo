@@ -448,12 +448,12 @@ module Config
       1900,                                    # worldWidth
       940,                                     # worldHeight
       true,                                    # worldCyclical
-      500,                                     # worldMaxOrgs
+      1000,                                    # worldMaxOrgs
       0,                                       # worldMinOrgs
       1000,                                    # worldStartEnergyDots
       UInt16(0x0001F4),                        # worldStartEnergyInDot
       0.3,                                     # worldEnergyCheckPercent
-      5000,                                    # worldEnergyCheckPeriod
+      20000,                                   # worldEnergyCheckPeriod
       1,                                       # worldZoom
       1.0,                                     # worldIpsPeriod
 
