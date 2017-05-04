@@ -113,7 +113,7 @@ module Code
     #
     _removeCommentLine(block.expr.args)
     _addDefaultVars(block)
-    push!(block.expr.args, :(return $(params[1].args[1].args[1])))
+    push!(block.expr.args, :(return $(@randVar())))
     push!(org.funcs, Creature.Func(fnEx, blocks))
 
     fnEx
