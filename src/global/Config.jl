@@ -156,7 +156,8 @@ module Config
     #
     orgEvals::Int
     #
-    # Maximum amount of arguments in custom functions. Minimum 1.
+    # Maximum amount of arguments in custom functions. Minimum 1. Maximum
+    # <= amount of default variables.
     #
     codeFuncParamAmount::Int
     #

@@ -75,7 +75,6 @@ module Code
   #
   function fn(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
     local typ::DataType
-    local sym::Symbol
     local i::Int
     local j::Int
     local exp::Expr
@@ -84,14 +83,13 @@ module Code
     local blocks::Array{Creature.Block, 1} = [block]
     #
     # New function parameters in format: [name::Type=val,...].
-    # At least one parameter should exist. We choose amount of
-    # parameters randomly. At the same time we set "vars" field
-    # of current function block. Here a small hack. :(=) symbol
+    # At least one parameter should exist. We use codeFuncParamAmount
+    # config for amount of parameters. Here a small hack. :(=) symbol
     # switched by :kw. I don't know why, but it doesn't work
     # without this...
     #
     local params::Array{Expr, 1} = [
-      (exp = :($(sym=@newVar(org);push!(block.vars[Float16], sym);sym)::$(Float16)=$(Helper.fRand()));exp.head=:kw;exp) for i=1:paramLen
+      (exp = :($(@randVar())::$(Float16)=$(Helper.fRand()));exp.head=:kw;exp) for i=1:paramLen
     ]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
