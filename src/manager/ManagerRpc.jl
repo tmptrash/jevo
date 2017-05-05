@@ -310,6 +310,7 @@ function getBest(man::ManagerTypes.ManagerData, amount::Int)
   local best::Array{RpcApi.SimpleOrganism, 1} = []
   local i::Int
   local len::Int = getAmount(man)
+  local org::Creature.Organism
   #
   # Only array should be copied, not organisms
   #
@@ -318,7 +319,15 @@ function getBest(man::ManagerTypes.ManagerData, amount::Int)
   amount = len > amount ? amount : len
   if amount > 0
     sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
-    for i = 1:amount push!(best, _createSimpleOrganism(tasks[len - i + 1].id, tasks[len - i + 1].organism)) end
+    i = 1
+    while amount > 0 && i <= len
+      org = tasks[len - i + 1].organism
+      if org.alive
+        amount -= 1
+        push!(best, _createSimpleOrganism(org.id, org))
+      end
+      i += 1
+    end
   end
 
   best
