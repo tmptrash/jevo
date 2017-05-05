@@ -434,7 +434,7 @@ module Config
       10000,                                   # orgStartEnergy
       100,                                     # orgStartColor
       50,                                      # orgColorPeriod
-      200,                                     # orgEnergySpendPeriod
+      500,                                     # orgEnergySpendPeriod
       1000,                                    # orgEnergySpendOnError
       10000,                                   # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
       0,                                       # orgErrors
@@ -478,7 +478,7 @@ module Config
       [#="Phylogen", =#"Status"],                  # plugIncluded
       [],                                      # plugExcluded
 
-      true,                                    # modeDebug
+      false,                                   # modeDebug
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod
