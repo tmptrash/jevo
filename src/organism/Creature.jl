@@ -446,6 +446,7 @@ module Creature
         cfg.orgErrors += 1
       end
       cfg.codeRuns += 1
+      org.age += 1
     end
   end
   #

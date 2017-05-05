@@ -430,7 +430,7 @@ module Config
       10,                                      # orgClonePeriod
       0,                                       # orgRainMutationPeriod
       0.01,                                    # orgRainMutationPercent
-      100,                                     # orgStartAmount
+      300,                                     # orgStartAmount
       10000,                                   # orgStartEnergy
       100,                                     # orgStartColor
       50,                                      # orgColorPeriod
@@ -478,7 +478,7 @@ module Config
       [#="Phylogen", =#"Status"],                  # plugIncluded
       [],                                      # plugExcluded
 
-      false,                                   # modeDebug
+      true,                                    # modeDebug
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod

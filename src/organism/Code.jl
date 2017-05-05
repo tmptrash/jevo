@@ -266,20 +266,22 @@ module Code
   # @param org Organism we are working with
   # @return {CodePos} Position in a code
   #
-  function getRandPos(org::Creature.Organism)
+  function getRandPos(org::Creature.Organism, cfg::Config.ConfigData)
     local fnIdx   ::Int = Helper.fastRand(length(org.funcs))
     local blockIdx::Int = Helper.fastRand(length(org.funcs[fnIdx].blocks))
     local block   ::Creature.Block = org.funcs[fnIdx].blocks[blockIdx]
     local isFunc  ::Bool = blockIdx === 1
+    local isMainFn::Bool = fnIdx === 1
+    local args    ::Int  = cfg.codeFuncParamAmount
     #
     # In this line we skip "return" operator and lines with variables
     # and functions declaration.
     #
-    local lines   ::Int = length(block.expr.args) - (isFunc ? Creature.VAR_AMOUNT + 1 : 0)
+    local lines   ::Int = length(block.expr.args) - (isFunc ? (isMainFn ? Creature.VAR_AMOUNT : Creature.VAR_AMOUNT - args) + 1 : 0)
     Helper.CodePos(
       fnIdx,
       blockIdx,
-      Helper.fastRand(lines) + (isFunc ? Creature.VAR_AMOUNT : 0)
+      Helper.fastRand(lines) + (isFunc ? (isMainFn ? Creature.VAR_AMOUNT : Creature.VAR_AMOUNT - args) : 0)
     )
   end
   #

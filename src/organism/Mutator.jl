@@ -58,7 +58,7 @@ module Mutator
     for i = 1:amount
       pIndex     = org.codeSize < 1 ? 1 : Helper.getProbIndex(org.mutationProbabilities)
       codeChange = pIndex < 5
-      pos        = codeChange ? Code.getRandPos(org) : _posStub
+      pos        = codeChange ? Code.getRandPos(org, cfg) : _posStub
       cmd        = codeChange ? Code.CODE_PARTS[Helper.fastRand(length(Code.CODE_PARTS))] : _cmdStub
       #
       # If there is no code, we can't mutate it. We may only add code line

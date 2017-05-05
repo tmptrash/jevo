@@ -97,10 +97,6 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
       continue
     end
     #
-    # Age of organism is increasing all the time
-    #
-    org.age += 1
-    #
     # This is how organisms die if their age is bigger then some
     # predefined config value (orgAlivePeriod)
     #
