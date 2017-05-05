@@ -2,6 +2,7 @@ module TestCodeMath
   using FactCheck
   import Code
   import Creature
+  import Creature.f16
   import Helper
   import Mutator
   import Config

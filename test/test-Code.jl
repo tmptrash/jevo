@@ -5,11 +5,12 @@ module TestCode
   using FactCheck
   import Code
   import Creature
+  import Creature.f16
   import Helper
   import Mutator
   import Config
   include("Helper.jl")
-  #
+
   # fn
   #
   facts("Testing if Code.fn() is added into empty script") do
@@ -17,7 +18,7 @@ module TestCode
     local org = d.orgs[1]
 
     code(d, :fn, org)
-    @fact Helper.getArg(org.code, [2,2,1,1]) --> :func_3
+    @fact Helper.getArg(org.code, [2,2,1,1]) --> :func_2
     @fact Code.eval(org.code)(d.cfg, org) --> val(org)
 
     Manager.destroy(d.man)
@@ -96,7 +97,7 @@ module TestCode
     code(d, :fnCall, org)
 
     @fact Helper.getHead(org.code, [2,index]) --> :(=)
-    @fact Helper.getArg(org.code, [2,index,2,1]) --> :func_3
+    @fact Helper.getArg(org.code, [2,index,2,1]) --> :func_2
     @fact Code.eval(org.code)(d.cfg, org) --> val(org)
 
     Manager.destroy(d.man)
@@ -169,8 +170,8 @@ module TestCode
     local org = d.orgs[1]
 
     code(d, :loop, org)
-    Mutator._onAdd(d.cfg, org, Helper.CodePos(1,2,2), Code.CodePart(Code.pi, false))
-    @fact Code.eval(org.code)(d.cfg, org) --> val(org)
+    Mutator._onAdd(d.cfg, org, Helper.CodePos(1,2,1), Code.CodePart(Code.pi, false))
+    @fact Code.eval(org.code)(d.cfg, org) --> f16(pi)
 
     Manager.destroy(d.man)
   end

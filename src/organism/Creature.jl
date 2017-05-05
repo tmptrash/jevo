@@ -43,6 +43,7 @@ module Creature
   import Helper
   import CodeMathOverrides.*
 
+  export f16
   export VAR_AMOUNT
   export Organism
   export ORGANISM_MAX_ENERGY
@@ -68,6 +69,10 @@ module Creature
   @if_not_test const VAR_AMOUNT = 5
   @if_test     const VAR_AMOUNT = 1
   #
+  # Shorthand for Float16 type
+  #
+  const f16 = Float16::DataType
+  #
   # Maximum amount of energy, which one organism may contains. Should be
   # less then typemax(UInt16).
   #
@@ -75,11 +80,11 @@ module Creature
   #
   # Divider for "for" operator
   #
-  const FOR_DIVIDER = Float16(655.0)
+  const FOR_DIVIDER = f16(655.0)
   #
   # Maximum Float16 to Int value available for organisms
   #
-  const MAX_INT_VALUE = round(Int, realmax(Float16))
+  const MAX_INT_VALUE = round(Int, realmax(f16))
   #
   # Enumeration for direction: up, down, left, right
   #
@@ -235,7 +240,7 @@ module Creature
     # @inharitable
     # Organism's personal memory. Is used in any possible way.
     #
-    mem::Dict{Float16, Float16}
+    mem::Dict{f16, f16}
     #
     # Organism's position in a 2D world. Starts from (1,1)
     # ends with (worldWidth, worldHeight) configurations.
@@ -287,11 +292,11 @@ module Creature
         Expr(:(::), :c, Expr(:., :Config,   Expr(:quote, :ConfigData))),    # c::Config.ConfigData
         Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),     # o::Creature.Organism
           Expr(:block,
-            Expr(:local, Expr(:(=), Expr(:(::), :var_1, :Float16),Helper.fRand())),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_2, :Float16),Helper.fRand())),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_3, :Float16),Helper.fRand())),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_4, :Float16),Helper.fRand())),
-            Expr(:local, Expr(:(=), Expr(:(::), :var_5, :Float16),Helper.fRand())),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_1, :f16),Helper.fRand())),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_2, :f16),Helper.fRand())),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_3, :f16),Helper.fRand())),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_4, :f16),Helper.fRand())),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_5, :f16),Helper.fRand())),
             Expr(:return, true)
         )
     )
@@ -299,7 +304,7 @@ module Creature
         Expr(:(::), :c, Expr(:., :Config,   Expr(:quote, :ConfigData))),    # c::Config.ConfigData
         Expr(:(::), :o, Expr(:., :Creature, Expr(:quote, :Organism)))),     # o::Creature.Organism
           Expr(:block,
-            Expr(:local, Expr(:(=), Expr(:(::), :var_1, :Float16), Float16(5.0))),
+            Expr(:local, Expr(:(=), Expr(:(::), :var_1, :f16), f16(5.0))),
             Expr(:return, :var_1)
         )
     )
@@ -319,7 +324,7 @@ module Creature
     #
     # Fills variables meta data
     #
-    for j in 1:VAR_AMOUNT push!(block.vars[Float16], Symbol("var_", i += 1)) end
+    for j in 1:VAR_AMOUNT push!(block.vars[f16], Symbol("var_", i += 1)) end
 
     Organism(
       id,                                                                   # id
@@ -484,7 +489,7 @@ module Creature
   # @param amount Amount of energy organism wants to grab
   # @return {Float16} Amount of grabbed energy
   #
-  function eatLeft(cfg::Config.ConfigData, org::Organism, amount::Float16) _eatEnergy(cfg, org, left, round(Int, amount)) end
+  function eatLeft(cfg::Config.ConfigData, org::Organism, amount::f16) _eatEnergy(cfg, org, left, round(Int, amount)) end
   #
   # @oapi
   # er - means get Energy Right. Short name to help organism find this name faster.
@@ -494,7 +499,7 @@ module Creature
   # @param amount Amount of energy organism wants to grab
   # @return {Float16} Amount of grabbed energy
   #
-  function eatRight(cfg::Config.ConfigData, org::Organism, amount::Float16) _eatEnergy(cfg, org, right, round(Int, amount)) end
+  function eatRight(cfg::Config.ConfigData, org::Organism, amount::f16) _eatEnergy(cfg, org, right, round(Int, amount)) end
   #
   # @oapi
   # eu - means get Energy Up. Short name to help organism find this name faster.
@@ -504,7 +509,7 @@ module Creature
   # @param amount Amount of energy organism wants to grab
   # @return {Float16} Amount of grabbed energy
   #
-  function eatUp(cfg::Config.ConfigData, org::Organism, amount::Float16) _eatEnergy(cfg, org, up, round(Int, amount)) end
+  function eatUp(cfg::Config.ConfigData, org::Organism, amount::f16) _eatEnergy(cfg, org, up, round(Int, amount)) end
   #
   # @oapi
   # ed - means get Energy Down. Short name to help organism find this name faster.
@@ -514,7 +519,7 @@ module Creature
   # @param amount Amount of energy organism wants to grab
   # @return {Float16} Amount of grabbed energy
   #
-  function eatDown(cfg::Config.ConfigData, org::Organism, amount::Float16) _eatEnergy(cfg, org, down, round(Int, amount)) end
+  function eatDown(cfg::Config.ConfigData, org::Organism, amount::f16) _eatEnergy(cfg, org, down, round(Int, amount)) end
   #
   # @oapi
   # Makes one step left. It decreases organism's x coodinate by 1.
@@ -832,7 +837,7 @@ module Creature
     # It's possible, that organism has no event listeners. In this
     # case retObj.ret will be a Symbol and may corrupt application
     #
-    if retObj.ret === sym retObj.ret = Float16(0.0) end
+    if retObj.ret === sym retObj.ret = f16(0.0) end
 
     retObj.ret
   end
@@ -862,9 +867,9 @@ module Creature
     #
     if typeof(retObj.ret) == Int
       org.energy += retObj.ret
-      return Float16(retObj.ret)
+      return f16(retObj.ret)
     end
 
-    Float16(0)
+    f16(0)
   end
 end

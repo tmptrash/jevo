@@ -90,7 +90,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function not(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = $(@randVar()) * Float16(-1.0))
+  :($(@randVar()) = $(@randVar()) * f16(-1.0))
 end
 #
 # @cmd
@@ -268,5 +268,5 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function pi(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Base.pi))
+  :($(@randVar()) = f16(Base.pi))
 end

@@ -129,10 +129,11 @@ module Status
     orgsIps  = div(orgs, ips)
 
     if orgs < 1 orgs = 1 end
+    if orgsIps < 1 orgsIps = 1 end
     print(string(Dates.format(now(), "HH:MM:SS"), " "))
     _showParam(:green,  "org:",  orgs, 8)
     _showParam(:normal, "ips:",  (@sprintf "%.2f" ips), 11)
-    _showParam(:green,  "nrg:",  div(sd.energy,  sd.ipsAmount * orgsIps), 14, true)
+    _showParam(:green,  "nrg:",  div(sd.energy, sd.ipsAmount * orgsIps), 14, true)
     _showParam(:red,    "eat:",  div(sd.eate, orgs), 12, true)
     _showParam(:red,    "eato:", div(sd.eatorg, orgs), 14, true)
     _showParam(:red,    "grab:", div(sd.grabbed, orgs), 14, true)

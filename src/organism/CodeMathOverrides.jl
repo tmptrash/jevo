@@ -24,13 +24,17 @@ module CodeMathOverrides
   export <<
   export %
   #
+  # Shorthand for Float16 type
+  #
+  const f16 = Float16::DataType
+  #
   # Max positive Float16 value
   #
-  const F16_MAX = Float16(65504.0)
+  const F16_MAX = f16(65504.0)
   #
   # Max negative Float16 value
   #
-  const F16_MIN = Float16(-65504.0)
+  const F16_MIN = f16(-65504.0)
   #
   # Max positive Float64 value
   #
@@ -54,7 +58,7 @@ module CodeMathOverrides
   # @param right Right operand
   # @return {Float16}
   #
-  function +(left::Float16, right::Float16)
+  function +(left::f16, right::f16)
     local res::Float64 = Float64(left) + Float64(right)
 
     if res > F16_MAX_FLOAT return F16_MAX
@@ -64,7 +68,7 @@ module CodeMathOverrides
     # + for Float16 we have already overridden. This is
     # how we prevent StackOverflow error
     #
-    Float16(res)
+    f16(res)
   end
   #
   # Override for - operator for Float16 type. Checks type
@@ -73,7 +77,7 @@ module CodeMathOverrides
   # @param right Right operand
   # @return {Float16}
   #
-  function -(left::Float16, right::Float16)
+  function -(left::f16, right::f16)
     local res::Float64 = Float64(left) - Float64(right)
 
     if res > F16_MAX_FLOAT return F16_MAX
@@ -83,7 +87,7 @@ module CodeMathOverrides
     # - for Float16 we have already overridden. This is
     # how we prevent StackOverflow error
     #
-    Float16(res)
+    f16(res)
   end
   #
   # Override for * operator for Float16 type. Checks type
@@ -92,7 +96,7 @@ module CodeMathOverrides
   # @param right Right operand
   # @return {Float16}
   #
-  function *(left::Float16, right::Float16)
+  function *(left::f16, right::f16)
     local res::Float64 = Float64(left) * Float64(right)
 
     if res > F16_MAX_FLOAT return F16_MAX
@@ -102,7 +106,7 @@ module CodeMathOverrides
     # * for Float16 we have already overridden. This is
     # how we prevent StackOverflow error
     #
-    Float16(res)
+    f16(res)
   end
   #
   # Override for / operator for Float16 type. Checks type
@@ -111,7 +115,7 @@ module CodeMathOverrides
   # @param right Right operand
   # @return {Float16}
   #
-  function /(left::Float16, right::Float16)
+  function /(left::f16, right::f16)
     local res::Float64 = Float64(left) / Float64(right)
 
     if res > F16_MAX_FLOAT return F16_MAX
@@ -121,7 +125,7 @@ module CodeMathOverrides
     # / for Float16 we have already overridden. This is
     # how we prevent StackOverflow error
     #
-    Float16(res)
+    f16(res)
   end
   #
   # Override for & operator for Float16 type. We have to
@@ -131,8 +135,8 @@ module CodeMathOverrides
   # @param right Right operand
   # @return {Float16}
   #
-  function (&)(left::Float16, right::Float16)
-    Float16(round(Int, left) & round(Int, right))
+  function (&)(left::f16, right::f16)
+    f16(round(Int, left) & round(Int, right))
   end
   #
   # Override for | operator for Float16 type. We have to
@@ -142,8 +146,8 @@ module CodeMathOverrides
   # @param right Right operand
   # @return {Float16}
   #
-  function (|)(left::Float16, right::Float16)
-    Float16(round(Int, left) | round(Int, right))
+  function (|)(left::f16, right::f16)
+    f16(round(Int, left) | round(Int, right))
   end
   #
   # Override for $ operator for Float16 type. We have to
@@ -153,8 +157,8 @@ module CodeMathOverrides
   # @param right Right operand
   # @return {Float16}
   #
-  function ($)(left::Float16, right::Float16)
-    Float16(round(Int, left) $ round(Int, right))
+  function ($)(left::f16, right::f16)
+    f16(round(Int, left) $ round(Int, right))
   end
   #
   # Override for >> operator for Float16 type. Checks type
@@ -163,13 +167,13 @@ module CodeMathOverrides
   # @param right Right operand
   # @return {Float16}
   #
-  function (>>)(left::Float16, right::Float16)
+  function (>>)(left::f16, right::f16)
     local res::Int = round(Int, left) >> round(Int, right)
 
     if res > F16_MAX_INT return F16_MAX
     elseif res < F16_MIN_INT return F16_MIN end
 
-    Float16(res)
+    f16(res)
   end
   #
   # Override for << operator for Float16 type. Checks type
@@ -178,13 +182,13 @@ module CodeMathOverrides
   # @param right Right operand
   # @return {Float16}
   #
-  function (<<)(left::Float16, right::Float16)
+  function (<<)(left::f16, right::f16)
     local res::Int = round(Int, left) << round(Int, right)
 
     if res > F16_MAX_INT return F16_MAX
     elseif res < F16_MIN_INT return F16_MIN end
 
-    Float16(res)
+    f16(res)
   end
   #
   # Override for << operator for Float16 type. Checks type
@@ -193,8 +197,8 @@ module CodeMathOverrides
   # @param right Right operand
   # @return {Float16}
   #
-  function (%)(left::Float16, right::Float16)
+  function (%)(left::f16, right::f16)
     local r::Int = round(Int, right)
-    Float16(round(Int, left) % (r === 0 ? 1 : r))
+    f16(round(Int, left) % (r === 0 ? 1 : r))
   end
 end

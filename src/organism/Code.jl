@@ -16,7 +16,10 @@
 #
 module Code
   import Creature
+  import Creature.f16
   import Config
+  import Config.@if_test
+  import Config.@if_not_test
   import Helper
 
   include("CodeMacros.jl")
@@ -78,8 +81,9 @@ module Code
     local i::Int
     local j::Int
     local exp::Expr
-    local paramLen::Int = Helper.fastRand(cfg.codeFuncParamAmount)
-    local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing), Creature.VAR_AMOUNT)
+    @if_test     local paramLen::Int = Helper.fastRand(1)
+    @if_not_test local paramLen::Int = Helper.fastRand(cfg.codeFuncParamAmount)
+    local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing), Creature.VAR_AMOUNT - paramLen)
     local blocks::Array{Creature.Block, 1} = [block]
     #
     # New function parameters in format: [name::Type=val,...].
@@ -89,7 +93,7 @@ module Code
     # without this...
     #
     local params::Array{Expr, 1} = [
-      (exp = :($(@randVar())::$(Float16)=$(Helper.fRand()));exp.head=:kw;exp) for i=1:paramLen
+      (exp = :($(@randVar())::$(f16)=$(Helper.fRand()));exp.head=:kw;exp) for i=1:paramLen
     ]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
@@ -110,7 +114,7 @@ module Code
     # calculation.
     #
     _removeCommentLine(block.expr.args)
-    _addDefaultVars(block)
+    _addDefaultVars(block, paramLen + 1)
     push!(block.expr.args, :(return $(@randVar())))
     push!(org.funcs, Creature.Func(fnEx, blocks))
 
@@ -152,7 +156,7 @@ module Code
     # Pushing of new variable should be after function call to prevent
     # error of calling function with argument of just created variable
     #
-    push!(@getVars(org, pos)[Float16], var)
+    push!(@getVars(org, pos)[f16], var)
     fnEx
   end
   #
@@ -284,9 +288,9 @@ module Code
   # @param block Block, where we have to insert default variables
   #
   function _addDefaultVars(block::Creature.Block, startIndex = 1)
-      for j::Int in 1:Creature.VAR_AMOUNT
-        push!(block.vars[Float16], Symbol("var_", startIndex))
-        push!(block.expr.args, :(local $(Symbol("var_", startIndex))::Float16=$(Helper.fRand())))
+      for j::Int in 1:(Creature.VAR_AMOUNT - startIndex + 1)
+        push!(block.vars[f16], Symbol("var_", startIndex))
+        push!(block.expr.args, :(local $(Symbol("var_", startIndex))::f16=$(Helper.fRand())))
         startIndex += 1
       end
   end

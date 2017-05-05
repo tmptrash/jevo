@@ -36,7 +36,7 @@ export codeSizeDown
 #
 # Divider for "for" operator
 #
-const FOR_DIVIDER = Float16(655.0)
+const FOR_DIVIDER = f16(655.0)
 #
 # @cmd
 # @line
@@ -47,7 +47,7 @@ const FOR_DIVIDER = Float16(655.0)
 # @return {Expr|Expr(:nothing)} New expression or Expr(:nothing) if skipped
 #
 function lookAt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(min(Creature.MAX_INT_VALUE, Creature.getEnergy(o, $(@randIntVar()), $(@randIntVar())))))
+  :($(@randVar()) = f16(min(Creature.MAX_INT_VALUE, Creature.getEnergy(o, $(@randIntVar()), $(@randIntVar())))))
 end
 #
 # @cmd
@@ -107,7 +107,7 @@ end
 # @return {Expr}
 #
 function stepLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.stepLeft(o)))
+  :($(@randVar()) = f16(Creature.stepLeft(o)))
 end
 #
 # @cmd
@@ -119,7 +119,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function stepRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.stepRight(o)))
+  :($(@randVar()) = f16(Creature.stepRight(o)))
 end
 #
 # @cmd
@@ -131,7 +131,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function stepUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.stepUp(o)))
+  :($(@randVar()) = f16(Creature.stepUp(o)))
 end
 #
 # @cmd
@@ -143,7 +143,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function stepDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(Creature.stepDown(o)))
+  :($(@randVar()) = f16(Creature.stepDown(o)))
 end
 #
 # @cmd
@@ -241,7 +241,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(min(Creature.MAX_INT_VALUE, Creature.energyLeft(o))))
+  :($(@randVar()) = f16(min(Creature.MAX_INT_VALUE, Creature.energyLeft(o))))
 end
 #
 # @cmd
@@ -254,7 +254,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(min(Creature.MAX_INT_VALUE, Creature.energyRight(o))))
+  :($(@randVar()) = f16(min(Creature.MAX_INT_VALUE, Creature.energyRight(o))))
 end
 #
 # @cmd
@@ -267,7 +267,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(min(Creature.MAX_INT_VALUE, Creature.energyUp(o))))
+  :($(@randVar()) = f16(min(Creature.MAX_INT_VALUE, Creature.energyUp(o))))
 end
 #
 # @cmd
@@ -280,7 +280,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(min(Creature.MAX_INT_VALUE, Creature.energyDown(o))))
+  :($(@randVar()) = f16(min(Creature.MAX_INT_VALUE, Creature.energyDown(o))))
 end
 #
 # @cmd
@@ -292,7 +292,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function myColor(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(o.color))
+  :($(@randVar()) = f16(o.color))
 end
 #
 # @cmd
@@ -304,7 +304,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function myX(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(o.pos.x))
+  :($(@randVar()) = f16(o.pos.x))
 end
 #
 # @cmd
@@ -316,7 +316,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function myY(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = Float16(o.pos.y))
+  :($(@randVar()) = f16(o.pos.y))
 end
 # #
 # # @cmd
@@ -328,7 +328,7 @@ end
 # # @return {Expr|Expr(:nothing)}
 # #
 # function codeSizeLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-#   :($(@randVar()) = Float16(Creature.codeSizeLeft(o)))
+#   :($(@randVar()) = f16(Creature.codeSizeLeft(o)))
 # end
 # #
 # # @cmd
@@ -340,7 +340,7 @@ end
 # # @return {Expr|Expr(:nothing)}
 # #
 # function codeSizeRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-#   :($(@randVar()) = Float16(Creature.codeSizeRight(o)))
+#   :($(@randVar()) = f16(Creature.codeSizeRight(o)))
 # end
 # #
 # # @cmd
@@ -352,7 +352,7 @@ end
 # # @return {Expr|Expr(:nothing)}
 # #
 # function codeSizeUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-#   :($(@randVar()) = Float16(Creature.codeSizeUp(o)))
+#   :($(@randVar()) = f16(Creature.codeSizeUp(o)))
 # end
 # #
 # # @cmd
@@ -364,7 +364,7 @@ end
 # # @return {Expr|Expr(:nothing)}
 # #
 # function codeSizeDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-#   :($(@randVar()) = Float16(Creature.codeSizeDown(o)))
+#   :($(@randVar()) = f16(Creature.codeSizeDown(o)))
 # end
 # #
 # # @cmd
@@ -376,7 +376,7 @@ end
 # # @return {Expr|Expr(:nothing)}
 # #
 # function cloneEnergyPercentLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-#   :($(@randVar()) = Float16(Creature.cloneEnergyPercentLeft(o)))
+#   :($(@randVar()) = f16(Creature.cloneEnergyPercentLeft(o)))
 # end
 # #
 # # @cmd
@@ -388,7 +388,7 @@ end
 # # @return {Expr|Expr(:nothing)}
 # #
 # function cloneEnergyPercentRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-#   :($(@randVar()) = Float16(Creature.cloneEnergyPercentRight(o)))
+#   :($(@randVar()) = f16(Creature.cloneEnergyPercentRight(o)))
 # end
 # #
 # # @cmd
@@ -400,7 +400,7 @@ end
 # # @return {Expr|Expr(:nothing)}
 # #
 # function cloneEnergyPercentUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-#   :($(@randVar()) = Float16(Creature.cloneEnergyPercentUp(o)))
+#   :($(@randVar()) = f16(Creature.cloneEnergyPercentUp(o)))
 # end
 # #
 # # @cmd
@@ -412,5 +412,5 @@ end
 # # @return {Expr|Expr(:nothing)}
 # #
 # function cloneEnergyPercentDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-#   :($(@randVar()) = Float16(Creature.cloneEnergyPercentDown(o)))
+#   :($(@randVar()) = f16(Creature.cloneEnergyPercentDown(o)))
 # end

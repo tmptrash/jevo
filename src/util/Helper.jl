@@ -18,6 +18,10 @@ module Helper
   export error
   export emptyFn
   #
+  # Shorthand for Float16 type
+  #
+  const f16 = Float16::DataType
+  #
   # These constants were gotten from julia/base/stream.jl file. They
   # are used for optimization of isopen() function.
   #
@@ -162,7 +166,7 @@ module Helper
   # Generates random Float16 number in all available range -XX.XX...XX.XX
   # @return {Float16}
   #
-  function fRand() Float16((rand() * 2.0 - 1.0) * 6.55e4) end
+  function fRand() f16((rand() * 2.0 - 1.0) * 6.55e4) end
   #
   # Fast version of rand(n::Range) function. Generates random Int number in
   # range 1:n
@@ -247,7 +251,7 @@ module Helper
   # @return {Dict{DataType, Array{Symbol, 1}}}
   #
   function getTypesMap()
-    Dict{DataType, Array{Symbol, 1}}(Float16 => Symbol[])
+    Dict{DataType, Array{Symbol, 1}}(f16 => Symbol[])
   end
   #
   # Checks if position is empty. x == y == 0 - this is empty
