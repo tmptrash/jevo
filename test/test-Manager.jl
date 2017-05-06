@@ -116,7 +116,7 @@ module TestManager
   end
   # orgStartEnergy, orgAlivePeriod, worldMinOrgs
   facts("Checking if organisms dying, because of age works") do
-    local d = create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgStartEnergy=>2, :orgAlivePeriod=>3, :worldMinOrgs=>0))
+    local d = create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgStartEnergy=>10, :orgAlivePeriod=>2, :worldMinOrgs=>0))
     local org = d.orgs[1]
 
     code(d, :plus, org)
@@ -126,10 +126,11 @@ module TestManager
     @fact length(d.man.organisms) --> 1
     consume(d.task)
     @fact length(d.man.organisms) --> 0
+    @fact org.age                 --> 2
 
     Manager.destroy(d.man)
   end
-  # orgClonePeriod, orgCloneMutation
+  #orgClonePeriod, orgCloneMutation
   facts("Checking organisms mutations on clone") do
     local d         = create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>2, :orgCloneMutation=>1.0))
     local org       = d.orgs[1]
@@ -145,6 +146,7 @@ module TestManager
     @fact length(d.man.organisms)       --> 1
     @fact org.mutationsFromStart        --> 1
 
+    consume(d.task)
     consume(d.task)
     @fact length(d.man.organisms)       --> 2
     @fact org.mutationsFromStart        --> 1

@@ -6,7 +6,7 @@ module TestConfig
   using FactCheck
 
   facts("Read default value") do
-    @fact Config.create().worldIps --> 0
+    @fact Config.create().worldIpsPeriod --> 1.0
   end
 
   facts("Save configuration into the file") do
@@ -23,11 +23,11 @@ module TestConfig
     local cfgFile::String = "config.data"
 
     try rm(cfgFile) end
-    cfg.worldIps = 666
+    cfg.worldWidth = 666
     @fact Config.save(cfg, cfgFile)   --> true
-    cfg.worldIps = 777
+    cfg.worldWidth = 777
     cfg = Config.load(cfgFile)
-    @fact cfg.worldIps --> 666
+    @fact cfg.worldWidth --> 666
     rm(cfgFile)
   end
   facts("Load configuration from incorrect file") do
@@ -55,30 +55,30 @@ module TestConfig
 
     try rm(cfgFile1) end
     try rm(cfgFile2) end
-    cfg.worldIps = 666
+    cfg.worldWidth = 666
     @fact Config.save(cfg, cfgFile1)       --> true # IPS === 666
-    @fact cfg.worldIps --> 666
-    cfg.worldIps = 777
-    @fact cfg.worldIps                    --> 777
+    @fact cfg.worldWidth --> 666
+    cfg.worldWidth = 777
+    @fact cfg.worldWidth                    --> 777
     cfg = Config.load(cfgFile1)
     @fact Config.isEmpty(cfg)              --> false
-    @fact cfg.worldIps                    --> 666
-    cfg.worldIps = 777
-    @fact cfg.worldIps                    --> 777
+    @fact cfg.worldWidth                    --> 666
+    cfg.worldWidth = 777
+    @fact cfg.worldWidth                    --> 777
 
     @fact Config.save(cfg, cfgFile2)       --> true      # IPS === 777
-    cfg.worldIps = 666
-    @fact cfg.worldIps                    --> 666
+    cfg.worldWidth = 666
+    @fact cfg.worldWidth                    --> 666
     cfg = Config.load(cfgFile2)
     @fact Config.isEmpty(cfg)              --> false
-    @fact cfg.worldIps                    --> 777
+    @fact cfg.worldWidth                    --> 777
 
     cfg = Config.load(cfgFile1)
     @fact Config.isEmpty(cfg)              --> false     # IPS === 666
-    @fact cfg.worldIps                    --> 666
+    @fact cfg.worldWidth                    --> 666
     cfg = Config.load(cfgFile2)
     @fact Config.isEmpty(cfg)              --> false     # IPS === 777
-    @fact cfg.worldIps                    --> 777
+    @fact cfg.worldWidth                    --> 777
 
     rm(cfgFile1)
     rm(cfgFile2)

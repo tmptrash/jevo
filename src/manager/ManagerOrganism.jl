@@ -202,11 +202,13 @@ function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerType
   local probIndex::Int
   local orgAmount::Int = length(tasks)
   local i::Int
+  local org::Creature.Organism
   #
   # This code will be run if total amount of organisms is less then cfg.worldMaxOrgs
   #
   @inbounds for i = 1:orgAmount
-    push!(probs, UInt(tasks[i].organism.energy) * UInt(tasks[i].organism.mutationsFromStart))
+    org = tasks[i].organism
+    push!(probs, org.alive ? UInt(org.energy) * UInt(org.mutationsFromStart) : 0)
   end
 
   probIndex = Helper.getProbIndex(probs)

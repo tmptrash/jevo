@@ -253,7 +253,7 @@ function setRandomEnergy(man::ManagerTypes.ManagerData, amount::Int, energy::UIn
 
   if man.cfg.modeQuiet <= Config.MODE_QUIET_IMPORTANT Helper.info("Creating random energy...") end
   for i::Int = 1:amount
-    setEnergy(man, Helper.fastRand(width) + xOffset, Helper.fastRand(height) + yOffset, energy)
+    setEnergy(man, Helper.fastRand(width) + div(xOffset, 3), Helper.fastRand(height) + div(yOffset, 3), energy)
   end
 
   nothing
