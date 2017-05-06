@@ -148,6 +148,15 @@ module Config
     #
     orgAlivePeriod::Int
     #
+    # Amount of garbage, which is stored in organism code. This garbage
+    # is not affect on organism energy spending. It means that if organism
+    # has energy = 10, orgGarbagePercent = 0.5 and codeSize = 4, then system
+    # grabs only 2 energy units (org.energy -= (codeSize * orgGarbagePercent)).
+    # This garbage is used for creating new complex code (behavior). Available
+    # range: 0..1
+    #
+    orgGarbagePercent::Float64
+    #
     # Amount of errors in organisms codes in current population
     #
     orgErrors::Int
@@ -437,6 +446,7 @@ module Config
       500,                                     # orgEnergySpendPeriod
       1000,                                    # orgEnergySpendOnError
       10000,                                   # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
+      0.5,                                     # orgGarbagePercent
       0,                                       # orgErrors
       0,                                       # orgEvals
 
