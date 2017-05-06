@@ -197,7 +197,7 @@ end
 # @return {Int}
 #
 function getAmount(man::ManagerTypes.ManagerData)
-  length(man.tasks)
+  ManagerTypes.orgAmount(man)
 end
 #
 # @rpc

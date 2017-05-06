@@ -15,6 +15,15 @@ macro newVar(org)
   :(Symbol("var_", $org.symbolId += 1))
 end
 #
+# Returns variable with specified index. e.g.: var_2
+# @param index
+# @return {Symbol}
+#
+#
+macro var(index)
+  :(Symbol("var_", $index))
+end
+#
 # Creates new unique custom function name.
 # @param {Creature.Organism} org Organism we are working with
 # @return {String}

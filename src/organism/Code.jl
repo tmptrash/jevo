@@ -93,7 +93,7 @@ module Code
     # without this...
     #
     local params::Array{Expr, 1} = [
-      (exp = :($(@randVar())::$(f16)=$(Helper.fRand()));exp.head=:kw;exp) for i=1:paramLen
+      (exp = :($(@var(i))::$(f16)=$(Helper.fRand()));exp.head=:kw;exp) for i=1:paramLen
     ]
     #
     # New function in format: function func_x(var_x::Type=val,...) return var_x end
