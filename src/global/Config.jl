@@ -148,14 +148,15 @@ module Config
     #
     orgAlivePeriod::Int
     #
-    # Amount of garbage, which is stored in organism code. This garbage
-    # is not affect on organism energy spending. It means that if organism
-    # has energy = 10, orgGarbagePercent = 0.5 and codeSize = 4, then system
-    # grabs only 2 energy units (org.energy -= (codeSize * orgGarbagePercent)).
-    # This garbage is used for creating new complex code (behavior). Available
-    # range: 0..1
+    # This value means the period between organism codeSizes, which
+    # affects energy grabbing by the system. For example: we have two
+    # organisms: org1.energy = 10, org2.energy = 10, org1.codeSize = 6,
+    # org2.codeSize = 9, Config.orgGarbagePeriod = 5. It means that
+    # during energy grabbing by the system org1 and org2 will spend the
+    # same amount of energy - 2 units. This is because the period goes
+    # from 1..5, 6..10,... and both organisms are in the same period.
     #
-    orgGarbagePercent::Float64
+    orgGarbagePeriod::Int
     #
     # Amount of errors in organisms codes in current population
     #
@@ -436,24 +437,24 @@ module Config
       empty ? [] : [50,100,1,0,1,1,1,1,1],     # orgMutationProbs (add,change,del,small-change,clone,period,amount,probs,cloneEnergy)
       100,                                     # orgMutationProbsMaxValue
       0.02,                                    # orgCloneMutation
-      10,                                      # orgClonePeriod
+      20,                                      # orgClonePeriod
       0,                                       # orgRainMutationPeriod
       0.01,                                    # orgRainMutationPercent
-      300,                                     # orgStartAmount
+      500,                                     # orgStartAmount
       10000,                                   # orgStartEnergy
       100,                                     # orgStartColor
       50,                                      # orgColorPeriod
       500,                                     # orgEnergySpendPeriod
       1000,                                    # orgEnergySpendOnError
       10000,                                   # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
-      0.5,                                     # orgGarbagePercent
+      7,                                       # orgGarbagePeriod
       0,                                       # orgErrors
       0,                                       # orgEvals
 
       2,                                       # codeFuncParamAmount
       8,                                       # codeLoopAmount
       0,                                       # codeRuns
-      20,                                      # codeMaxSize
+      21,                                      # codeMaxSize
       20,                                      # codeSizeCoef
 
       1900,                                    # worldWidth

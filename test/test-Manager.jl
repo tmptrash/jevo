@@ -58,7 +58,7 @@ module TestManager
   end
   # orgEnergySpendPeriod
   facts("Checking amount of energy grabbing from organisms per period") do
-    local d = create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>2))
+    local d = create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>2, :orgGarbagePeriod=>1))
 
     code(d, :plus, d.orgs[1])
     code(d, :minus, d.orgs[2])

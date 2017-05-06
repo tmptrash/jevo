@@ -245,7 +245,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
   local codeSize::Int
   local codeSizeCoef::Int = man.cfg.codeSizeCoef
   local codeMaxSize::Int = man.cfg.codeMaxSize
-  local orgGarbagePercent::Float64 = man.cfg.orgGarbagePercent
+  local orgGarbagePeriod::Int = man.cfg.orgGarbagePeriod
   local orgCodeSize::Int
 
   if dontKill return false end
@@ -266,14 +266,14 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
       #
       # Orgabism's garbage is not affect on amount of grabbed energy
       #
-      orgCodeSize = round(Int, org.codeSize * orgGarbagePercent)
+      orgCodeSize = div(org.codeSize, orgGarbagePeriod)
       if orgCodeSize < 1 orgCodeSize = 1 end
       #
       # This check is used for limiting organisms code size to codeMaxSize
       # because our CPU's are slow
       #
       if org.codeSize > codeMaxSize codeSize = orgCodeSize * codeSizeCoef
-      else codeSize = orgCodeSize < 1 ? 1 : orgCodeSize end
+      else codeSize = orgCodeSize end
       codeSize = min(org.energy, codeSize)
       Event.fire(man.obs, "grabenergy", man, codeSize)
       if !_decreaseOrganismEnergy(man, org, codeSize)
