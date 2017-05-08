@@ -47,7 +47,7 @@ const FOR_DIVIDER = f16(655.0)
 # @return {Expr|Expr(:nothing)} New expression or Expr(:nothing) if skipped
 #
 function lookAt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = f16(min(Creature.MAX_INT_VALUE, Creature.getEnergy(o, $(@randIntVar()), $(@randIntVar())))))
+  :($(@randVar()) = Creature.getEnergy(o, $(@randVar()), $(@randVar())))
 end
 #
 # @cmd
@@ -107,7 +107,7 @@ end
 # @return {Expr}
 #
 function stepLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = f16(Creature.stepLeft(o)))
+  :($(@randVar()) = Creature.stepLeft(o))
 end
 #
 # @cmd
@@ -119,7 +119,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function stepRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = f16(Creature.stepRight(o)))
+  :($(@randVar()) = Creature.stepRight(o))
 end
 #
 # @cmd
@@ -131,7 +131,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function stepUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = f16(Creature.stepUp(o)))
+  :($(@randVar()) = Creature.stepUp(o))
 end
 #
 # @cmd
@@ -143,7 +143,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function stepDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = f16(Creature.stepDown(o)))
+  :($(@randVar()) = Creature.stepDown(o))
 end
 #
 # @cmd
@@ -241,7 +241,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyLeft(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = f16(min(Creature.MAX_INT_VALUE, Creature.energyLeft(o))))
+  :($(@randVar()) = Creature.energyLeft(o))
 end
 #
 # @cmd
@@ -254,7 +254,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyRight(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = f16(min(Creature.MAX_INT_VALUE, Creature.energyRight(o))))
+  :($(@randVar()) = Creature.energyRight(o))
 end
 #
 # @cmd
@@ -267,7 +267,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyUp(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = f16(min(Creature.MAX_INT_VALUE, Creature.energyUp(o))))
+  :($(@randVar()) = Creature.energyUp(o))
 end
 #
 # @cmd
@@ -280,7 +280,7 @@ end
 # @return {Expr|Expr(:nothing)}
 #
 function energyDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = f16(min(Creature.MAX_INT_VALUE, Creature.energyDown(o))))
+  :($(@randVar()) = Creature.energyDown(o))
 end
 #
 # @cmd

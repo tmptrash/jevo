@@ -84,7 +84,7 @@ module Creature
   #
   # Maximum Float16 to Int value available for organisms
   #
-  const MAX_INT_VALUE = round(Int, realmax(f16))
+  const MAX_INT_VALUE = round(Int, realmax(f16))::Int
   #
   # Enumeration for direction: up, down, left, right
   #
@@ -455,11 +455,13 @@ module Creature
   # Checks if specified point with (x,y) coordinates has an energy value.
   # Possible values [0:typemax(Int)]. 0 means no energy.
   # @param org Current organism
-  # @param x X coordinate
-  # @param y Y coordinate
+  # @param xf X coordinate
+  # @param yf Y coordinate
   # @return {UInt} Energy value
   #
-  function getEnergy(org::Organism, x::Int, y::Int)
+  function getEnergy(org::Organism, xf::f16, yf::f16)
+    local x::Int = Int(xf)
+    local y::Int = Int(yf)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" will be contained amount of energy.
@@ -471,14 +473,14 @@ module Creature
       # Possible values [0...typemax(Int)]
       #
       Event.fire(org.observer, "getenergy", org, Helper.Point(x, y), retObj)
-      if retObj.ret === nothing retObj.ret = UInt16(0) end
+      if retObj.ret === nothing retObj.ret = 0 end
     else
-      retObj.ret = UInt16(0)
+      retObj.ret = 0
     end
     #
     # Return value
     #
-    retObj.ret
+    f16(min(MAX_INT_VALUE, retObj.ret))
   end
   #
   # @oapi
@@ -531,7 +533,7 @@ module Creature
     Event.fire(org.observer, "stepleft", org, retObj)
     if retObj.ret === nothing retObj.ret = false end
 
-    retObj.ret::Bool
+    f16(retObj.ret)
   end
   #
   # @oapi
@@ -542,7 +544,8 @@ module Creature
     local retObj::Helper.RetObj = Helper.RetObj()
     Event.fire(org.observer, "stepright", org, retObj)
     if retObj.ret === nothing retObj.ret = false end
-    retObj.ret::Bool
+
+    f16(retObj.ret)
   end
   #
   # @oapi
@@ -553,7 +556,8 @@ module Creature
     local retObj::Helper.RetObj = Helper.RetObj()
     Event.fire(org.observer, "stepup", org, retObj)
     if retObj.ret === nothing retObj.ret = false end
-    retObj.ret::Bool
+
+    f16(retObj.ret)
   end
   #
   # @oapi
@@ -564,120 +568,121 @@ module Creature
     local retObj::Helper.RetObj = Helper.RetObj()
     Event.fire(org.observer, "stepdown", org, retObj)
     if retObj.ret === nothing retObj.ret = false end
-    retObj.ret::Bool
+
+    f16(retObj.ret)
   end
-  #
-  # @oapi
-  # Obtains unique id of organism on the left. If there is not organism on
-  # the left, 0 will be obtained.
-  # @param org Current organism
-  #
-  function idLeft(org::Organism) _getIntProperty(org, left, :id) end
-  #
-  # @oapi
-  # Obtains unique id of organism on the right. If there is not organism on
-  # the right, 0 will be obtained.
-  # @param org Current organism
-  #
-  function idRight(org::Organism) _getIntProperty(org, right, :id) end
-  #
-  # @oapi
-  # Obtains unique id of organism on the above. If there is not organism on
-  # the above, 0 will be obtained.
-  # @param org Current organism
-  #
-  function idUp(org::Organism) _getIntProperty(org, up, :id) end
-  #
-  # @oapi
-  # Obtains unique id of organism on the below. If there is not organism on
-  # the below, 0 will be obtained.
-  # @param org Current organism
-  #
-  function idDown(org::Organism) _getIntProperty(org, down, :id) end
+  # #
+  # # @oapi
+  # # Obtains unique id of organism on the left. If there is not organism on
+  # # the left, 0 will be obtained.
+  # # @param org Current organism
+  # #
+  # function idLeft(org::Organism) _getIntProperty(org, left, :id) end
+  # #
+  # # @oapi
+  # # Obtains unique id of organism on the right. If there is not organism on
+  # # the right, 0 will be obtained.
+  # # @param org Current organism
+  # #
+  # function idRight(org::Organism) _getIntProperty(org, right, :id) end
+  # #
+  # # @oapi
+  # # Obtains unique id of organism on the above. If there is not organism on
+  # # the above, 0 will be obtained.
+  # # @param org Current organism
+  # #
+  # function idUp(org::Organism) _getIntProperty(org, up, :id) end
+  # #
+  # # @oapi
+  # # Obtains unique id of organism on the below. If there is not organism on
+  # # the below, 0 will be obtained.
+  # # @param org Current organism
+  # #
+  # function idDown(org::Organism) _getIntProperty(org, down, :id) end
   #
   # @oapi
   # Obtains amount of energy of organism on the left. If there is not organism on
   # the left, 0 will be obtained.
   # @param org Current organism
   #
-  function energyLeft(org::Organism) _getIntProperty(org, left, :energy) end
+  function energyLeft(org::Organism) f16(min(MAX_INT_VALUE, _getIntProperty(org, left, :energy))) end
   #
   # @oapi
   # Obtains amount of energy of organism on the right. If there is not organism on
   # the right, 0 will be obtained.
   # @param org Current organism
   #
-  function energyRight(org::Organism) _getIntProperty(org, right, :energy) end
+  function energyRight(org::Organism) f16(min(MAX_INT_VALUE, _getIntProperty(org, right, :energy))) end
   #
   # @oapi
   # Obtains amount of energy of organism on the above. If there is not organism on
   # the above, 0 will be obtained.
   # @param org Current organism
   #
-  function energyUp(org::Organism) _getIntProperty(org, up, :energy) end
+  function energyUp(org::Organism) f16(min(MAX_INT_VALUE, _getIntProperty(org, up, :energy))) end
   #
   # @oapi
   # Obtains amount of energy of organism on below. If there is not organism on
   # below, 0 will be obtained.
   # @param org Current organism
   #
-  function energyDown(org::Organism) _getIntProperty(org, down, :energy) end
-  #
-  # @oapi
-  # Obtains code size of organism on the left. If there is not organism on
-  # the left, 0 will be obtained.
-  # @param org Current organism
-  #
-  function codeSizeLeft(org::Organism) _getIntProperty(org, left, :codeSize) end
-  #
-  # @oapi
-  # Obtains code size of organism on the right. If there is not organism on
-  # the right, 0 will be obtained.
-  # @param org Current organism
-  #
-  function codeSizeRight(org::Organism) _getIntProperty(org, right, :codeSize) end
-  #
-  # @oapi
-  # Obtains code size of organism on the above. If there is not organism on
-  # the above, 0 will be obtained.
-  # @param org Current organism
-  #
-  function codeSizeUp(org::Organism) _getIntProperty(org, up, :codeSize) end
-  #
-  # @oapi
-  # Obtains code size of organism on the below. If there is not organism on
-  # the below, 0 will be obtained.
-  # @param org Current organism
-  #
-  function codeSizeDown(org::Organism) _getIntProperty(org, down, :codeSize) end
-  #
-  # @oapi
-  # Obtains clone energy percent of organism on the left. If there is not organism on
-  # the left, 0.0 will be obtained.
-  # @param org Current organism
-  #
-  function cloneEnergyPercentLeft(org::Organism) _getFloatProperty(org, left, :cloneEnergyPercent) end
-  #
-  # @oapi
-  # Obtains clone energy percent of organism on the right. If there is not organism on
-  # the left, 0.0 will be obtained.
-  # @param org Current organism
-  #
-  function cloneEnergyPercentRight(org::Organism) _getFloatProperty(org, right, :cloneEnergyPercent) end
-  #
-  # @oapi
-  # Obtains clone energy percent of organism on the up. If there is not organism on
-  # the left, 0.0 will be obtained.
-  # @param org Current organism
-  #
-  function cloneEnergyPercentUp(org::Organism) _getFloatProperty(org, up, :cloneEnergyPercent) end
-  #
-  # @oapi
-  # Obtains clone energy percent of organism on the bottom. If there is not organism on
-  # the left, 0.0 will be obtained.
-  # @param org Current organism
-  #
-  function cloneEnergyPercentDown(org::Organism) _getFloatProperty(org, down, :cloneEnergyPercent) end
+  function energyDown(org::Organism) f16(min(MAX_INT_VALUE, _getIntProperty(org, down, :energy))) end
+  # #
+  # # @oapi
+  # # Obtains code size of organism on the left. If there is not organism on
+  # # the left, 0 will be obtained.
+  # # @param org Current organism
+  # #
+  # function codeSizeLeft(org::Organism) _getIntProperty(org, left, :codeSize) end
+  # #
+  # # @oapi
+  # # Obtains code size of organism on the right. If there is not organism on
+  # # the right, 0 will be obtained.
+  # # @param org Current organism
+  # #
+  # function codeSizeRight(org::Organism) _getIntProperty(org, right, :codeSize) end
+  # #
+  # # @oapi
+  # # Obtains code size of organism on the above. If there is not organism on
+  # # the above, 0 will be obtained.
+  # # @param org Current organism
+  # #
+  # function codeSizeUp(org::Organism) _getIntProperty(org, up, :codeSize) end
+  # #
+  # # @oapi
+  # # Obtains code size of organism on the below. If there is not organism on
+  # # the below, 0 will be obtained.
+  # # @param org Current organism
+  # #
+  # function codeSizeDown(org::Organism) _getIntProperty(org, down, :codeSize) end
+  # #
+  # # @oapi
+  # # Obtains clone energy percent of organism on the left. If there is not organism on
+  # # the left, 0.0 will be obtained.
+  # # @param org Current organism
+  # #
+  # function cloneEnergyPercentLeft(org::Organism) _getFloatProperty(org, left, :cloneEnergyPercent) end
+  # #
+  # # @oapi
+  # # Obtains clone energy percent of organism on the right. If there is not organism on
+  # # the left, 0.0 will be obtained.
+  # # @param org Current organism
+  # #
+  # function cloneEnergyPercentRight(org::Organism) _getFloatProperty(org, right, :cloneEnergyPercent) end
+  # #
+  # # @oapi
+  # # Obtains clone energy percent of organism on the up. If there is not organism on
+  # # the left, 0.0 will be obtained.
+  # # @param org Current organism
+  # #
+  # function cloneEnergyPercentUp(org::Organism) _getFloatProperty(org, up, :cloneEnergyPercent) end
+  # #
+  # # @oapi
+  # # Obtains clone energy percent of organism on the bottom. If there is not organism on
+  # # the left, 0.0 will be obtained.
+  # # @param org Current organism
+  # #
+  # function cloneEnergyPercentDown(org::Organism) _getFloatProperty(org, down, :cloneEnergyPercent) end
   #
   # Returns some Int value by specified organism property.
   # @param org Organism with properties

@@ -12,7 +12,7 @@ module TestManager
   include("Helper.jl")
 
   facts("Checking if mutations mechanism works") do
-    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgRainMutationPeriod=>2, :orgRainMutationPercent=>0.1))
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgRainMutationPeriod=>2, :orgRainMutationPercent=>0.1, :plugIncluded=>["Status"]))
     local mutations = d.man.plugins["Status"].mps
 
     consume(d.task)
@@ -23,7 +23,7 @@ module TestManager
     Manager.destroy(d.man)
   end
   facts("Checking if mutations mechanism works with specified amount") do
-    local d = create([Helper.Point(1,1)], Dict(:orgRainMutationPeriod=>2, :orgRainMutationPercent=>1.0))
+    local d = create([Helper.Point(1,1)], Dict(:orgRainMutationPeriod=>2, :orgRainMutationPercent=>1.0, :plugIncluded=>["Status"]))
     local mutations = d.man.plugins["Status"].mps
 
     code(d, :plus, d.orgs[1])
@@ -58,7 +58,7 @@ module TestManager
   end
   # orgEnergySpendPeriod
   facts("Checking amount of energy grabbing from organisms per period") do
-    local d = create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>2, :orgGarbagePeriod=>1))
+    local d = create([Helper.Point(1,1), Helper.Point(2,2), Helper.Point(3,3)], Dict{Symbol, Any}(:orgEnergySpendPeriod=>2, :orgGarbagePeriod=>1, :plugIncluded=>["Status"]))
 
     code(d, :plus, d.orgs[1])
     code(d, :minus, d.orgs[2])
@@ -132,7 +132,7 @@ module TestManager
   end
   #orgClonePeriod, orgCloneMutation
   facts("Checking organisms mutations on clone") do
-    local d         = create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>2, :orgCloneMutation=>1.0))
+    local d         = create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>2, :orgCloneMutation=>1.0, :plugIncluded=>["Status"]))
     local org       = d.orgs[1]
     local mutations = d.man.plugins["Status"].mps
 
