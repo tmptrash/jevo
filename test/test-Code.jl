@@ -89,7 +89,7 @@ module TestCode
     @fact length(org.funcs) --> 1
     @fact Code.eval(org.code)(d.cfg, org) --> val(org)
     #
-    # Adding another function and t's call
+    # Adding another function and it's call
     #
     code(d, :fn, org)
     code(d, :fnCall, org)
