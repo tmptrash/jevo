@@ -440,27 +440,27 @@ module Config
       20,                                      # orgClonePeriod
       0,                                       # orgRainMutationPeriod
       0.01,                                    # orgRainMutationPercent
-      500,                                     # orgStartAmount
+      200,                                     # orgStartAmount
       10000,                                   # orgStartEnergy
       100,                                     # orgStartColor
       50,                                      # orgColorPeriod
       500,                                     # orgEnergySpendPeriod
       1000,                                    # orgEnergySpendOnError
       10000,                                   # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
-      7,                                       # orgGarbagePeriod
+      10,                                      # orgGarbagePeriod
       0,                                       # orgErrors
       0,                                       # orgEvals
 
       2,                                       # codeFuncParamAmount
       8,                                       # codeLoopAmount
       0,                                       # codeRuns
-      21,                                      # codeMaxSize
+      20,                                      # codeMaxSize
       20,                                      # codeSizeCoef
 
       1900,                                    # worldWidth
       940,                                     # worldHeight
       true,                                    # worldCyclical
-      1000,                                    # worldMaxOrgs
+      300,                                     # worldMaxOrgs
       0,                                       # worldMinOrgs
       1000,                                    # worldStartEnergyDots
       UInt16(0x0001F4),                        # worldStartEnergyInDot
@@ -486,7 +486,7 @@ module Config
       0,                                       # conDownServerPort
       ip"127.0.0.1",                           # conDownServerIp
 
-      [#="Phylogen", "Status"=#],              # plugIncluded
+      [#="Phylogen", =#"Status"],              # plugIncluded
       [],                                      # plugExcluded
 
       false,                                   # modeDebug

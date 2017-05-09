@@ -149,7 +149,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # TODO: optimize this array. It should be created only once
   # TODO: outside the loop.
   #
-  if needClone && curLen > 0 _updateClonning(man, tasks) end
+  if needClone && curLen > 0 && curLen < cfg.worldMaxOrgs _updateClonning(man, tasks) end
   #
   # This block decreases energy from organisms, because they
   # spend it while leaving.

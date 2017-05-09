@@ -233,16 +233,18 @@ module Code
     #
     # This is function element. We have to sum amount of code
     # lines inside function + amount of code lines inside all
-    # function blocks. This is how we calc codeSize of this.
+    # function blocks. This is how we calc codeSize of this
     # function.
     #
     if exp.head === :function
       idx = findfirst((f::Creature.Func) -> f.code === exp, org.funcs)
       blocks = org.funcs[idx].blocks
-      for i = 1:length(blocks)
-        org.codeSize -= (length(blocks[i].expr.args) - Creature.VAR_AMOUNT)
-      end
+      #
+      # Variables of removable function + arguments
+      #
+      org.codeSize += (Creature.VAR_AMOUNT - (length(org.funcs[idx].code.args[1].args) - 1)) # -1 is a function name
       org.codeSize += 1 # skip "return"
+      for i = 1:length(blocks) org.codeSize -= length(blocks[i].expr.args) end
       org.funcs[1].blocks[1].defIndex -= 1
       deleteat!(org.funcs, idx)
     #
@@ -251,7 +253,7 @@ module Code
     elseif haskey(_CODE_PARTS_MAP, exp.head)
       lines = Helper.getLines(exp, _CODE_PARTS_MAP[exp.head])
       idx = findfirst((b::Creature.Block) -> b.expr.args === lines, blocks)
-      org.codeSize -= (length(lines) - (exp.head === :if ? 0 : Creature.VAR_AMOUNT))
+      org.codeSize -= length(lines)
       deleteat!(blocks, idx)
     end
   end
@@ -272,7 +274,7 @@ module Code
     local block   ::Creature.Block = org.funcs[fnIdx].blocks[blockIdx]
     local isFunc  ::Bool = blockIdx === 1
     local isMainFn::Bool = fnIdx === 1
-    local args    ::Int  = cfg.codeFuncParamAmount
+    local args    ::Int  = length(org.funcs[fnIdx].code.args[1].args)
     #
     # In this line we skip "return" operator and lines with variables
     # and functions declaration.

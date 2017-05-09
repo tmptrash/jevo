@@ -205,7 +205,7 @@ module Mutator
     end
     Code.onRemoveLine(org, pos)
     deleteat!(lines, pos.lineIdx)
-    org.codeSize -= 1
+    if (org.codeSize -= 1) < 1 org.codeSize = 0 end
 
     true
   end
