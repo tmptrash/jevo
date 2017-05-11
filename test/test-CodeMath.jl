@@ -94,13 +94,13 @@ module TestCodeMath
   facts("Testing CodeMath.divide() two times") do; testOperatorTwo(:(/), :divide, Float16(1.0)) end
   facts("Testing CodeMath.divide() inside if operator") do; testOperatorInIf(:divide, Float16(1.0)) end
   facts("Testing CodeMath.divide() inside for operator") do; testOperatorInFor(:divide, Float16(1.0)) end
-  #
-  # not
-  #
-  facts("Testing CodeMath.not()") do; testOperator(:(*), :not, Float16(-5.0)) end
-  facts("Testing CodeMath.not() two times") do; testOperatorTwo(:(*), :not, Float16(5.0)) end
-  facts("Testing CodeMath.not() inside if operator") do; testOperatorInIf(:not, Float16(-5.0)) end
-  facts("Testing CodeMath.not() inside for operator") do; testOperatorInFor(:not, Float16(5.0)) end
+  # #
+  # # not
+  # #
+  # facts("Testing CodeMath.not()") do; testOperator(:(*), :not, Float16(-5.0)) end
+  # facts("Testing CodeMath.not() two times") do; testOperatorTwo(:(*), :not, Float16(5.0)) end
+  # facts("Testing CodeMath.not() inside if operator") do; testOperatorInIf(:not, Float16(-5.0)) end
+  # facts("Testing CodeMath.not() inside for operator") do; testOperatorInFor(:not, Float16(5.0)) end
   #
   # and
   #
@@ -122,20 +122,20 @@ module TestCodeMath
   facts("Testing CodeMath.xor() two times") do; testOperatorTwo(:($), :xor, Float16(0.0)) end
   facts("Testing CodeMath.xor() inside if operator") do; testOperatorInIf(:xor, Float16(0.0)) end
   facts("Testing CodeMath.xor() inside for operator") do; testOperatorInFor(:xor, Float16(0.0)) end
-  #
-  # rshift
-  #
-  facts("Testing CodeMath.rshift()") do; testOperator(:(>>), :rshift, Float16(0.0)) end
-  facts("Testing CodeMath.rshift() two times") do; testOperatorTwo(:(>>), :rshift, Float16(0.0)) end
-  facts("Testing CodeMath.rshift() inside if operator") do; testOperatorInIf(:rshift, Float16(0.0)) end
-  facts("Testing CodeMath.rshift() inside for operator") do; testOperatorInFor(:rshift, Float16(0.0)) end
-  #
-  # lshift
-  #
-  facts("Testing CodeMath.lshift()") do; testOperator(:(<<), :lshift, Float16(160.0)) end
-  facts("Testing CodeMath.lshift() two times") do; testOperatorTwo(:(<<), :lshift, Float16(0.0)) end
-  facts("Testing CodeMath.lshift() inside if operator") do; testOperatorInIf(:lshift, Float16(160.0)) end
-  facts("Testing CodeMath.lshift() inside for operator") do; testOperatorInFor(:lshift, Float16(0.0)) end
+  # #
+  # # rshift
+  # #
+  # facts("Testing CodeMath.rshift()") do; testOperator(:(>>), :rshift, Float16(0.0)) end
+  # facts("Testing CodeMath.rshift() two times") do; testOperatorTwo(:(>>), :rshift, Float16(0.0)) end
+  # facts("Testing CodeMath.rshift() inside if operator") do; testOperatorInIf(:rshift, Float16(0.0)) end
+  # facts("Testing CodeMath.rshift() inside for operator") do; testOperatorInFor(:rshift, Float16(0.0)) end
+  # #
+  # # lshift
+  # #
+  # facts("Testing CodeMath.lshift()") do; testOperator(:(<<), :lshift, Float16(160.0)) end
+  # facts("Testing CodeMath.lshift() two times") do; testOperatorTwo(:(<<), :lshift, Float16(0.0)) end
+  # facts("Testing CodeMath.lshift() inside if operator") do; testOperatorInIf(:lshift, Float16(160.0)) end
+  # facts("Testing CodeMath.lshift() inside for operator") do; testOperatorInFor(:lshift, Float16(0.0)) end
   #
   # reminder
   #
@@ -143,25 +143,91 @@ module TestCodeMath
   facts("Testing CodeMath.reminder() two times") do; testOperatorTwo(:(%), :reminder, Float16(0.0)) end
   facts("Testing CodeMath.reminder() inside if operator") do; testOperatorInIf(:reminder, Float16(0.0)) end
   facts("Testing CodeMath.reminder() inside for operator") do; testOperatorInFor(:reminder, Float16(0.0)) end
+  # #
+  # # sqrt
+  # #
+  # facts("Testing CodeMath.sqrt()") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+  #   local org = d.orgs[1]
   #
-  # sqrt
+  #   code(d, :sqrt, org)
+  #   @fact eval(org.code)(d.cfg, org) --> Float16(2.236)
   #
-  facts("Testing CodeMath.sqrt()") do
+  #   Manager.destroy(d.man)
+  # end
+  # facts("Testing CodeMath.sqrt() with negative value") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+  #   local org = d.orgs[1]
+  #
+  #   code(d, :sqrt, org)
+  #   val(org, Float16(-5.0))
+  #   @fact eval(org.code)(d.cfg, org) --> Float16(2.236)
+  #
+  #   Manager.destroy(d.man)
+  # end
+  # #
+  # # log
+  # #
+  # facts("Testing CodeMath.log()") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+  #   local org = d.orgs[1]
+  #
+  #   code(d, :log, org)
+  #   @fact eval(org.code)(d.cfg, org) --> Float16(1.609)
+  #
+  #   Manager.destroy(d.man)
+  # end
+  # facts("Testing CodeMath.log() with negative value") do
+  #   local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+  #   local org = d.orgs[1]
+  #
+  #   code(d, :log, org)
+  #   val(org, f16(-5))
+  #   @fact eval(org.code)(d.cfg, org) --> Float16(1.609)
+  #
+  #   Manager.destroy(d.man)
+  # end
+  #
+  # sin
+  #
+  facts("Testing CodeMath.sin()") do
     local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
     local org = d.orgs[1]
 
-    code(d, :sqrt, org)
-    @fact eval(org.code)(d.cfg, org) --> Float16(2.236)
+    code(d, :sin, org)
+    @fact eval(org.code)(d.cfg, org) --> Float16(-0.959)
 
     Manager.destroy(d.man)
   end
-  facts("Testing CodeMath.sqrt() with negative value") do
+  facts("Testing two CodeMath.sin()") do
     local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
     local org = d.orgs[1]
 
-    code(d, :sqrt, org)
-    val(org, Float16(-5.0))
-    @fact eval(org.code)(d.cfg, org) --> Float16(2.236)
+    code(d, :sin, org)
+    code(d, :sin, org)
+    @fact eval(org.code)(d.cfg, org) --> Float16(-.819)
+
+    Manager.destroy(d.man)
+  end
+  #
+  # cos
+  #
+  facts("Testing CodeMath.cos()") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+    local org = d.orgs[1]
+
+    code(d, :cos, org)
+    @fact eval(org.code)(d.cfg, org) --> Float16(0.2837)
+
+    Manager.destroy(d.man)
+  end
+  facts("Testing two CodeMath.cos()") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}())
+    local org = d.orgs[1]
+
+    code(d, :cos, org)
+    code(d, :cos, org)
+    @fact eval(org.code)(d.cfg, org) --> Float16(.96)
 
     Manager.destroy(d.man)
   end

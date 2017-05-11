@@ -9,21 +9,21 @@ export plus
 export minus
 export multiply
 export divide
-export not
+#export not
 export and
 export or
 export xor
-export rshift
-export lshift
+#export rshift
+#export lshift
 export reminder
-export sqrt
-export log
+#export sqrt
+#export log
 export sin
 export cos
 export tan
 export cot
-export sec
-export csc
+#export sec
+#export csc
 export pi
 #
 # @cmd
@@ -78,20 +78,20 @@ end
 function divide(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   :($(@randVar()) = $(@randVar()) / $(@randVar()))
 end
-#
-# @cmd
-# @line
-# ! operator implementation. Returns Float16 result. Supports all
-# types: Float16. For Float16 inverts the sign. Format:
-# var_xx::Float16 = var_xx|val * -1.0
-# @param cfg Global configuration type
-# @param org Organism we have to mutate
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function not(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = $(@randVar()) * f16(-1.0))
-end
+# #
+# # @cmd
+# # @line
+# # ! operator implementation. Returns Float16 result. Supports all
+# # types: Float16. For Float16 inverts the sign. Format:
+# # var_xx::Float16 = var_xx|val * -1.0
+# # @param cfg Global configuration type
+# # @param org Organism we have to mutate
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function not(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = $(@randVar()) * f16(-1.0))
+# end
 #
 # @cmd
 # @line
@@ -131,32 +131,32 @@ end
 function xor(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   :($(@randVar()) = $(@randVar()) $ $(@randVar()))
 end
-#
-# @cmd
-# @line
-# Arithmetic shift right. Supports only numeric types.
-# Format: var_xx = Float16(Int(var_xx) >> Int(var_xx))
-# @param cfg Global configuration type
-# @param org Organism we have to mutate
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function rshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = $(@randVar()) >> $(@randVar()))
-end
-#
-# @cmd
-# @line
-# Arithmetic shift left. Supports only numeric types.
-# Format: var_xx = Float16(Int(var_xx) << Int(var_xx))
-# @param cfg Global configuration type
-# @param org Organism we have to mutate
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function lshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = $(@randVar()) << $(@randVar()))
-end
+# #
+# # @cmd
+# # @line
+# # Arithmetic shift right. Supports only numeric types.
+# # Format: var_xx = Float16(Int(var_xx) >> Int(var_xx))
+# # @param cfg Global configuration type
+# # @param org Organism we have to mutate
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function rshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = $(@randVar()) >> $(@randVar()))
+# end
+# #
+# # @cmd
+# # @line
+# # Arithmetic shift left. Supports only numeric types.
+# # Format: var_xx = Float16(Int(var_xx) << Int(var_xx))
+# # @param cfg Global configuration type
+# # @param org Organism we have to mutate
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function lshift(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = $(@randVar()) << $(@randVar()))
+# end
 #
 # @cmd
 # @line
@@ -170,29 +170,29 @@ end
 function reminder(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   :($(@randVar()) = $(@randVar()) % $(@randVar()))
 end
-#
-# @cmd
-# @line
-# Calculates square root of number. Format: var = sqrt(var)
-# @param cfg Global configuration type
-# @param org Organism we have to mutate
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function sqrt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = sqrt(abs($(@randVar()))))
-end
-# @cmd
-# @line
-# Calculates natural logarithm of number. Format: var_xx = log(var_xx)
-# @param cfg Global configuration type
-# @param org Organism we have to mutate
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function log(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = log(abs($(@randVar()))))
-end
+# #
+# # @cmd
+# # @line
+# # Calculates square root of number. Format: var = sqrt(var)
+# # @param cfg Global configuration type
+# # @param org Organism we have to mutate
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function sqrt(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = sqrt(abs($(@randVar()))))
+# end
+# # @cmd
+# # @line
+# # Calculates natural logarithm of number. Format: var_xx = log(var_xx)
+# # @param cfg Global configuration type
+# # @param org Organism we have to mutate
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function log(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = log(abs($(@randVar()))))
+# end
 # @cmd
 # @line
 # Calculates sinus of number. Format: var_xx = sin(var_xx|val)
@@ -237,28 +237,28 @@ end
 function cot(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   :($(@randVar()) = cot($(@randVar())))
 end
-# @cmd
-# @line
-# Calculates secans of number. Format: var_xx = sec(var_xx|val)
-# @param cfg Global configuration type
-# @param org Organism we have to mutate
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function sec(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = sec($(@randVar())))
-end
-# @cmd
-# @line
-# Calculates cosecans of number. Format: var_xx = csc(var_xx|val)
-# @param cfg Global configuration type
-# @param org Organism we have to mutate
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function csc(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = csc($(@randVar())))
-end
+# # @cmd
+# # @line
+# # Calculates secans of number. Format: var_xx = sec(var_xx|val)
+# # @param cfg Global configuration type
+# # @param org Organism we have to mutate
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function sec(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = sec($(@randVar())))
+# end
+# # @cmd
+# # @line
+# # Calculates cosecans of number. Format: var_xx = csc(var_xx|val)
+# # @param cfg Global configuration type
+# # @param org Organism we have to mutate
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function csc(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = csc($(@randVar())))
+# end
 # @cmd
 # @line
 # Sets Pi to variable. Format: var_xx = 3.1415926535...

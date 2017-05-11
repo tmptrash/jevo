@@ -27,6 +27,7 @@ export energyRight
 export energyUp
 export energyDown
 export myColor
+export myId
 export myX
 export myY
 export codeSizeLeft
@@ -282,17 +283,29 @@ end
 function energyDown(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   :($(@randVar()) = Creature.energyDown(o))
 end
+# #
+# # @cmd
+# # @line
+# # Obtains it's own color.
+# # @param cfg Global configuration type
+# # @param org Organism we are working with
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function myColor(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = f16(o.color))
+# end
 #
 # @cmd
 # @line
-# Obtains it's own color.
+# Returns converted to f16 unique organism id
 # @param cfg Global configuration type
 # @param org Organism we are working with
 # @param pos Position in code
-# @return {Expr|Expr(:nothing)}
+# @return {f16} Converted to f16 id
 #
-function myColor(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = f16(o.color))
+function myId(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+  :($(@randVar()) = Creature.getId(o))
 end
 #
 # @cmd

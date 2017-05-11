@@ -336,12 +336,13 @@ module Code
     CodePart(multiply,                false), CodePart(divide,                  false),
     CodePart(reminder,                false), CodePart(and,                     false),
     CodePart(or,                      false), CodePart(xor,                     false),
-    CodePart(rshift,                  false), CodePart(lshift,                  false),
-    CodePart(sqrt,                    false), CodePart(log,                     false),
+    #CodePart(rshift,                  false), CodePart(lshift,                  false),
+    #CodePart(sqrt,                    false), CodePart(log,                     false),
     CodePart(sin,                     false), CodePart(cos,                     false),
     CodePart(tan,                     false), CodePart(cot,                     false),
-    CodePart(sec,                     false), CodePart(csc,                     false),
-    CodePart(not,                     false), CodePart(pi,                      false),
+    #CodePart(sec,                     false), CodePart(csc,                     false),
+    #CodePart(not,                     false),
+    CodePart(pi,                      false),
     #
     # CodeOrganism
     #
@@ -350,7 +351,8 @@ module Code
     CodePart(eatDown,                 false), CodePart(stepLeft,                false),
     CodePart(stepRight,               false), CodePart(stepUp,                  false),
     CodePart(stepDown,                false), CodePart(toMem,                   false),
-    CodePart(fromMem,                 false), CodePart(myColor,                 false),
+    CodePart(fromMem,                 false), CodePart(myId,                    false),
+    # CodePart(myColor,                 false),
     # CodePart(idLeft,                  false), CodePart(idRight,                 false),
     # CodePart(idUp,                    false), CodePart(idDown,                  false),
     CodePart(myX,                     false), CodePart(myY,                     false),

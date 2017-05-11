@@ -59,10 +59,15 @@ module Creature
   export stepRight
   export stepUp
   export stepDown
-  export idLeft
-  export idRight
-  export idUp
-  export idDown
+  export energyLeft
+  export energyRight
+  export energyUp
+  export energyDown
+  export getId
+  #export idLeft
+  #export idRight
+  #export idUp
+  #export idDown
   #
   # Amount of embedded variables for one type
   #
@@ -77,6 +82,11 @@ module Creature
   # less then typemax(UInt16).
   #
   const ORGANISM_MAX_ENERGY = Int(typemax(UInt16))
+  #
+  # Coefficient, which is used for mapping organism's Int typed
+  # id's to f16 type
+  #
+  const ORGANISM_ID_COEF = 140806241402888
   #
   # Divider for "for" operator
   #
@@ -627,6 +637,15 @@ module Creature
   # @param org Current organism
   #
   function energyDown(org::Organism) f16(min(MAX_INT_VALUE, _getIntProperty(org, down, :energy))) end
+  #
+  # @oapi
+  # Returns organism unique id mapped to f16 type
+  # @param org Organism
+  # @return {f16} unique id
+  #
+  function getId(org::Organism)
+    f16(hash(org.id) >> 48)
+  end
   # #
   # # @oapi
   # # Obtains code size of organism on the left. If there is not organism on
