@@ -1,4 +1,4 @@
-#
+MODULE_ID#
 # Creates phylogenetic tree of organisms data sets. These data sets will
 # be stored in JSON files on HDD. One data set is stored after application
 # reloaded. This approach will create small and separate JSON files for
@@ -38,9 +38,9 @@ module Phylogen
   #
   const PHYLO_FOLDER_NAME = "phylogen"
   #
-  # Name of the current module
+  # Unique id of current module
   #
-  const MODULE_NAME = string(Phylogen)
+  const MODULE_ID = hash(string(Phylogen))::UInt64
   #
   # Describes one mutation of organism. Mutated organism - it's
   # original (clonned) organism + mutations.
@@ -107,7 +107,7 @@ module Phylogen
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = PhylogenData(Dict{UInt, PhylogenOrganism}(), [], Set{UInt}(), Dict{UInt, PhylogenOrganism}())
+    man.plugins[MODULE_ID] = PhylogenData(Dict{UInt, PhylogenOrganism}(), [], Set{UInt}(), Dict{UInt, PhylogenOrganism}())
     #
     # All event handlers should be binded here
     #
@@ -132,10 +132,10 @@ module Phylogen
   function _addOrganism(man::ManagerData, org::Creature.Organism)
     local orgCopy::Creature.Organism = _copyOrganism(man, org)
 
-    if haskey(man.plugins[MODULE_NAME].organisms, org.id)
+    if haskey(man.plugins[MODULE_ID].organisms, org.id)
       Helper.error(string("Phylogen: Dublicate organism id: ", org.id))
     end
-    man.plugins[MODULE_NAME].organisms[org.id] = PhylogenOrganism(orgCopy, [])
+    man.plugins[MODULE_ID].organisms[org.id] = PhylogenOrganism(orgCopy, [])
   end
   #
   # Opposite to addOrganism() function. Removes one organism
@@ -149,10 +149,10 @@ module Phylogen
     # We have unsaved relation for this organism, so we have to
     # store it in separate dictionary
     #
-    if in(org.id, man.plugins[MODULE_NAME].killedIds)
-      man.plugins[MODULE_NAME].killedOrganisms[org.id] = man.plugins[MODULE_NAME].organisms[org.id]
+    if in(org.id, man.plugins[MODULE_ID].killedIds)
+      man.plugins[MODULE_ID].killedOrganisms[org.id] = man.plugins[MODULE_ID].organisms[org.id]
     end
-    delete!(man.plugins[MODULE_NAME].organisms, org.id)
+    delete!(man.plugins[MODULE_ID].organisms, org.id)
   end
   #
   # Adds specified amount of mutations to organism. org parameter
@@ -165,7 +165,7 @@ module Phylogen
   # @param onClone true if current mutations were applied on clone
   #
   function _addMutations(man::ManagerData, org::Creature.Organism, amount::Int, onClone::Bool)
-    local orgs::Dict{UInt, PhylogenOrganism} = man.plugins[MODULE_NAME].organisms
+    local orgs::Dict{UInt, PhylogenOrganism} = man.plugins[MODULE_ID].organisms
     if !haskey(orgs, org.id)
       Helper.error(string("Phylogen: Unknown organism id: ", org.id))
       return nothing
@@ -182,7 +182,7 @@ module Phylogen
   # @param childId Unique id of child organism
   #
   function _addRelation(man::ManagerData, parentId::UInt, childId::UInt)
-    local data::PhylogenData = man.plugins[MODULE_NAME]
+    local data::PhylogenData = man.plugins[MODULE_ID]
 
     push!(data.relations, parentId)
     push!(data.relations, childId)
@@ -196,9 +196,9 @@ module Phylogen
   # @param man Manager related data object
   #
   function _clear(man::ManagerData)
-    man.plugins[MODULE_NAME].relations = [];
-    man.plugins[MODULE_NAME].killedIds = Set{UInt}();
-    man.plugins[MODULE_NAME].killedOrganisms = Dict{UInt, PhylogenOrganism}()
+    man.plugins[MODULE_ID].relations = [];
+    man.plugins[MODULE_ID].killedIds = Set{UInt}();
+    man.plugins[MODULE_ID].killedOrganisms = Dict{UInt, PhylogenOrganism}()
   end
   #
   # Saves JSON data to the file on HDD.
@@ -216,13 +216,13 @@ module Phylogen
     local i::Int
     local id::UInt
     local json::String
-    local relations::Array{UInt, 1} = man.plugins[MODULE_NAME].relations
+    local relations::Array{UInt, 1} = man.plugins[MODULE_ID].relations
     local nodes::Array{String, 1} = []
     local edges::Array{String, 1} = []
 
     json = "{\"nodes\":["
-    _fillBy(man.plugins[MODULE_NAME].organisms, nodes)
-    _fillBy(man.plugins[MODULE_NAME].killedOrganisms, nodes)
+    _fillBy(man.plugins[MODULE_ID].organisms, nodes)
+    _fillBy(man.plugins[MODULE_ID].killedOrganisms, nodes)
     json *= join(nodes, ",")
     json *= "]"
 

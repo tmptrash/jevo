@@ -147,7 +147,7 @@ module ManagerTypes
     # All available(compiled) Manager's plugins. Key is a plugin string
     # name (filename). Value - plugin related data type.
     #
-    plugins::Dict{String, Plugin}
+    plugins::Dict{UInt64, Plugin}
     #
     # Manager observer
     #

@@ -222,7 +222,7 @@ module Manager
         # This code is used for profiling of jevo. returning true means,
         # that the process will be stopped and second run will not occures.
         #
-        @if_profile if (i += 1) > cfg.modeProfilePeriod return true end
+        @if_profile if (i += 1) > cfg.modeProfilePeriod println("done");return true end
         #
         # This line is for special testing mode, which is called "iterational".
         # In this mode we may run Manager iteration by iteration and measure

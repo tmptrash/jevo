@@ -16,9 +16,9 @@ module Status
 
   export init
   #
-  # Name of the current module
+  # Unique id of the current module
   #
-  const MODULE_NAME = string(Status)
+  const MODULE_ID = hash(string(Status))::UInt64
   #
   # Contains real time status data like IPS, RPS,...
   #
@@ -66,7 +66,7 @@ module Status
     #
     # We havr to add ourself to plugins map
     #
-    man.plugins[MODULE_NAME] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,UInt(0), 0)
+    man.plugins[MODULE_ID] = StatusData(0.0,0.0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,UInt(0), 0)
     #
     # All event handlers should be binded here
     #
@@ -78,7 +78,7 @@ module Status
     Event.on(man.obs, "mutations", _onMutations)
     Event.on(man.obs, "clone", _onClone)
     Event.on(man.obs, "dotrequest", _onDotRequest)
-    Event.on(man.obs, "organism", _onOrganism)
+    #Event.on(man.obs, "organism", _onOrganism)
     Event.on(man.obs, "grabenergy", _onGrabEnergy)
 
     Event.on(man.obs, "eatorganism", _onEatOrganism)
@@ -115,7 +115,7 @@ module Status
   # @param stamp Current time stamp
   #
   function _onIps(man::ManagerData, stamp::Float64, codeRuns::Int)
-    local sd::StatusData  = man.plugins[MODULE_NAME]
+    local sd::StatusData  = man.plugins[MODULE_ID]
     local cfg::Config.ConfigData = man.cfg
     local orgs::Int
     local orgsIps::Int
@@ -223,28 +223,28 @@ module Status
   # @param man Manager data type object
   #
   function _onYield(man::ManagerData)
-    man.plugins[MODULE_NAME].yps += 1
+    man.plugins[MODULE_ID].yps += 1
   end
   #
   # Calls if yieldto() in Manager is called
   # @param man Manager data type object
   #
   function _onYieldTo(man::ManagerData)
-    man.plugins[MODULE_NAME].ytps += 1
+    man.plugins[MODULE_ID].ytps += 1
   end
   #
   # Calls if request in Manager has sent
   # @param man Manager data type object
   #
   function _onRequest(man::ManagerData)
-    man.plugins[MODULE_NAME].rps += 1
+    man.plugins[MODULE_ID].rps += 1
   end
   #
   # Calls if organisms energy was updated
   # @param man Manager data type object
   #
   function _onUpdateEnergy(man::ManagerData)
-    man.plugins[MODULE_NAME].eups += 1
+    man.plugins[MODULE_ID].eups += 1
   end
   #
   # Calls if one organism was killed
@@ -252,7 +252,7 @@ module Status
   # @param org Killed organism
   #
   function _onKillOrganism(man::ManagerData, org::Creature.Organism)
-    man.plugins[MODULE_NAME].kops += 1
+    man.plugins[MODULE_ID].kops += 1
   end
   #
   # Calculates amount of mutations for specified organism
@@ -263,8 +263,8 @@ module Status
   # of organism and not as a rain mutations
   #
   function _onMutations(man::ManagerData, org::Creature.Organism, amount::Int, onClone::Bool)
-    man.plugins[MODULE_NAME].mps += amount
-    if onClone man.plugins[MODULE_NAME].cmps += amount end
+    man.plugins[MODULE_ID].mps += amount
+    if onClone man.plugins[MODULE_ID].cmps += amount end
   end
   #
   # Handles organism clonning
@@ -273,15 +273,15 @@ module Status
   # @param childId Unique id of child organism
   #
   function _onClone(man::ManagerData, parentId::UInt, childId::UInt)
-    man.plugins[MODULE_NAME].cps += 1
+    man.plugins[MODULE_ID].cps += 1
   end
   #
   # Handles one dot request
   # @param man Manager related data object
   #
   function _onDotRequest(man::ManagerData)
-    man.plugins[MODULE_NAME].rps  += 1
-    man.plugins[MODULE_NAME].srps += 1
+    man.plugins[MODULE_ID].rps  += 1
+    man.plugins[MODULE_ID].srps += 1
   end
   #
   # Handles one "stepyield" event. It means, that yield() was called
@@ -289,8 +289,8 @@ module Status
   # @param man Manager related data object
   #
   function _onStepYield(man::ManagerData)
-    man.plugins[MODULE_NAME].yps  += 1
-    man.plugins[MODULE_NAME].syps += 1
+    man.plugins[MODULE_ID].yps  += 1
+    man.plugins[MODULE_ID].syps += 1
   end
   #
   # Handles "organism" event. Means, that one organism has processed (runned)
@@ -298,7 +298,7 @@ module Status
   # @param org Organism
   #
   function _onOrganism(man::ManagerData, org::Creature.Organism)
-    local sd::StatusData = man.plugins[MODULE_NAME]
+    local sd::StatusData = man.plugins[MODULE_ID]
     #
     # Finds min/max energetic organisms in population
     #
@@ -316,7 +316,7 @@ module Status
   # @param amount Amount of grabbed energy
   #
   function _onGrabEnergy(man::ManagerData, amount::Int)
-    man.plugins[MODULE_NAME].grabbed += amount
+    man.plugins[MODULE_ID].grabbed += amount
   end
   #
   # Handler of "eatorganism" event
@@ -324,7 +324,7 @@ module Status
   # @param eated Amount of energy obteined by eating of other organism
   #
   function _onEatOrganism(man::ManagerData, eated::Int)
-    man.plugins[MODULE_NAME].eatorg += eated
+    man.plugins[MODULE_ID].eatorg += eated
   end
   #
   # Handler of "eatenergy" event
@@ -332,7 +332,7 @@ module Status
   # @param eated Amount of energy obteined by eating of energy
   #
   function _onEatEnergy(man::ManagerData, eated::Int)
-    man.plugins[MODULE_NAME].eate += eated
+    man.plugins[MODULE_ID].eate += eated
   end
   #
   # Is called every time if some organism calls eatLeft() function
@@ -342,7 +342,7 @@ module Status
   # @param eated Amount of eated energy
   #
   function _onEatLeft(man::ManagerData, org::Creature.Organism, amount::Int, eated::Int)
-    local sd::StatusData = man.plugins[MODULE_NAME]
+    local sd::StatusData = man.plugins[MODULE_ID]
 
     sd.eatl  += eated
     sd.eated += eated
@@ -355,7 +355,7 @@ module Status
   # @param eated Amount of eated energy
   #
   function _onEatRight(man::ManagerData, org::Creature.Organism, amount::Int, eated::Int)
-    local sd::StatusData = man.plugins[MODULE_NAME]
+    local sd::StatusData = man.plugins[MODULE_ID]
 
     sd.eatr  += eated
     sd.eated += eated
@@ -368,7 +368,7 @@ module Status
   # @param eated Amount of eated energy
   #
   function _onEatUp(man::ManagerData, org::Creature.Organism, amount::Int, eated::Int)
-    local sd::StatusData = man.plugins[MODULE_NAME]
+    local sd::StatusData = man.plugins[MODULE_ID]
 
     sd.eatu  += eated
     sd.eated += eated
@@ -381,7 +381,7 @@ module Status
   # @param eated Amount of eated energy
   #
   function _onEatDown(man::ManagerData, org::Creature.Organism, amount::Int, eated::Int)
-    local sd::StatusData = man.plugins[MODULE_NAME]
+    local sd::StatusData = man.plugins[MODULE_ID]
 
     sd.eatd  += eated
     sd.eated += eated
@@ -393,7 +393,7 @@ module Status
   # @param stepDone Is step was successful or not
   #
   function _onStepLeft(man::ManagerData, org::Creature.Organism, stepDone::Bool)
-    local sd::StatusData = man.plugins[MODULE_NAME]
+    local sd::StatusData = man.plugins[MODULE_ID]
 
     if stepDone
       sd.stepl += 1
@@ -407,7 +407,7 @@ module Status
   # @param stepDone Is step was successful or not
   #
   function _onStepRight(man::ManagerData, org::Creature.Organism, stepDone::Bool)
-    local sd::StatusData = man.plugins[MODULE_NAME]
+    local sd::StatusData = man.plugins[MODULE_ID]
 
     if stepDone
       sd.stepr += 1
@@ -421,7 +421,7 @@ module Status
   # @param stepDone Is step was successful or not
   #
   function _onStepUp(man::ManagerData, org::Creature.Organism, stepDone::Bool)
-    local sd::StatusData = man.plugins[MODULE_NAME]
+    local sd::StatusData = man.plugins[MODULE_ID]
 
     if stepDone
       sd.stepu += 1
@@ -435,7 +435,7 @@ module Status
   # @param stepDone Is step was successful or not
   #
   function _onStepDown(man::ManagerData, org::Creature.Organism, stepDone::Bool)
-    local sd::StatusData = man.plugins[MODULE_NAME]
+    local sd::StatusData = man.plugins[MODULE_ID]
 
     if stepDone
       sd.stepd += 1
