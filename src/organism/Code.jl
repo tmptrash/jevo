@@ -83,7 +83,7 @@ module Code
     local exp::Expr
     @if_test     local paramLen::Int = Helper.fastRand(1)
     @if_not_test local paramLen::Int = Helper.fastRand(cfg.codeFuncParamAmount)
-    local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing), Creature.VAR_AMOUNT - paramLen)
+    local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing), Creature.VAR_AMOUNT - paramLen + 1)
     local blocks::Array{Creature.Block, 1} = [block]
     #
     # New function parameters in format: [name::Type=val,...].

@@ -35,6 +35,17 @@ module TestCode
 
     Manager.destroy(d.man)
   end
+  facts("Testing of Code.fn() with a body") do
+    local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:codeFuncParamAmount=>1))
+    local org = d.orgs[1]
+
+    code(d, :fn, org)
+    code(d, :plus, org, [2,1,1])
+    @fact length(Helper.getLines(org.code, [2,2,2])) --> 2
+    @fact Code.eval(org.code)(d.cfg, org) --> val(org)
+
+    Manager.destroy(d.man)
+  end
   #
   # fnCall
   #
