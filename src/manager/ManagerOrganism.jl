@@ -499,9 +499,6 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
     _decreaseOrganismEnergy(man, organism, energy)
     _decreaseOrganismEnergy(man, crTask.organism, crTask.organism.energy - energy)
   end
-  if before < (organism.energy + crTask.organism.energy)
-    println("before: ", before, " org: ", organism.energy, " cr: ", crTask.organism.energy, " e: ", energy)
-  end
   if energy > 0 && crTask.organism.energy > 0
     _mutate(man, crTask, crTask.organism.mutationsOnClonePercent)
   end

@@ -83,7 +83,7 @@ module Code
     local exp::Expr
     @if_test     local paramLen::Int = Helper.fastRand(1)
     @if_not_test local paramLen::Int = Helper.fastRand(cfg.codeFuncParamAmount)
-    local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing), Creature.VAR_AMOUNT - paramLen + 1)
+    local block::Creature.Block = Creature.Block(Helper.getTypesMap(), Expr(:nothing), Creature.VAR_AMOUNT - paramLen)
     local blocks::Array{Creature.Block, 1} = [block]
     #
     # New function parameters in format: [name::Type=val,...].
@@ -279,11 +279,11 @@ module Code
     # In this line we skip "return" operator and lines with variables
     # and functions declaration.
     #
-    local lines   ::Int = length(block.expr.args) - (isFunc ? (isMainFn ? Creature.VAR_AMOUNT : Creature.VAR_AMOUNT - args) + 1 : 0)
+    local lines   ::Int = length(block.expr.args) - (isFunc ? (isMainFn ? Creature.VAR_AMOUNT : Creature.VAR_AMOUNT - args + 1) : 0)
     Helper.CodePos(
       fnIdx,
       blockIdx,
-      Helper.fastRand(lines) + (isFunc ? (isMainFn ? Creature.VAR_AMOUNT : Creature.VAR_AMOUNT - args) : 0)
+      Helper.fastRand(lines) + (isFunc ? (isMainFn ? Creature.VAR_AMOUNT : Creature.VAR_AMOUNT - args + 1) : 0)
     )
   end
   #
