@@ -43,6 +43,8 @@ module Creature
   import Helper
   import CodeMathOverrides.*
 
+  include("../util/EventIds.jl")
+
   export f16
   export VAR_AMOUNT
   export Organism
@@ -482,7 +484,7 @@ module Creature
       # Listener of "getenergy" should set amount of energy in retObj.ret
       # Possible values [0...typemax(Int)]
       #
-      Event.fire(org.observer, "getenergy", org, Helper.Point(x, y), retObj)
+      Event.fire(org.observer, EVENT_GET_ENERGY, org, Helper.Point(x, y), retObj)
       if retObj.ret === nothing retObj.ret = 0 end
     else
       retObj.ret = 0
@@ -540,7 +542,7 @@ module Creature
   #
   function stepLeft(org::Organism)
     local retObj::Helper.RetObj = Helper.RetObj()
-    Event.fire(org.observer, "stepleft", org, retObj)
+    Event.fire(org.observer, EVENT_STEP_LEFT, org, retObj)
     if retObj.ret === nothing retObj.ret = false end
 
     f16(retObj.ret)
@@ -552,7 +554,7 @@ module Creature
   #
   function stepRight(org::Organism)
     local retObj::Helper.RetObj = Helper.RetObj()
-    Event.fire(org.observer, "stepright", org, retObj)
+    Event.fire(org.observer, EVENT_STEP_RIGHT, org, retObj)
     if retObj.ret === nothing retObj.ret = false end
 
     f16(retObj.ret)
@@ -564,7 +566,7 @@ module Creature
   #
   function stepUp(org::Organism)
     local retObj::Helper.RetObj = Helper.RetObj()
-    Event.fire(org.observer, "stepup", org, retObj)
+    Event.fire(org.observer, EVENT_STEP_UP, org, retObj)
     if retObj.ret === nothing retObj.ret = false end
 
     f16(retObj.ret)
@@ -576,7 +578,7 @@ module Creature
   #
   function stepDown(org::Organism)
     local retObj::Helper.RetObj = Helper.RetObj()
-    Event.fire(org.observer, "stepdown", org, retObj)
+    Event.fire(org.observer, EVENT_STEP_DOWN, org, retObj)
     if retObj.ret === nothing retObj.ret = false end
 
     f16(retObj.ret)
@@ -733,7 +735,7 @@ module Creature
   # function should find "free" place for new organism around it.
   # If there is no "free" place, then cloning will be declined.
   # TODO: this function is under question
-  #function clone(org::Organism) Event.fire(org.observer, "clone", org) end
+  #function clone(org::Organism) Event.fire(org.observer, EVENT_CLONE, org) end
 
   #
   # Makes Expr tree and meta info copy. Meta info (functions, blocks and
@@ -857,7 +859,7 @@ module Creature
     # Listener of "prop"$dir" should obtain unique organism id in retObj.ret
     # Possible values 0|id
     #
-    Event.fire(org.observer, string("prop", dir), org, retObj)
+    Event.fire(org.observer, getfield(Creature, Symbol("EVENT_PROP_", uppercase(string(dir)))), org, retObj)
     #
     # It's possible, that organism has no event listeners. In this
     # case retObj.ret will be a Symbol and may corrupt application
@@ -886,7 +888,7 @@ module Creature
     # Listener of "grab$dir" should set amount of energy in retObj.ret
     # Possible values [0...amount]
     #
-    Event.fire(org.observer, string("grab", dir), org, amount, retObj)
+    Event.fire(org.observer, getfield(Creature, Symbol("EVENT_GRAB_", uppercase(string(dir)))), org, amount, retObj)
     #
     # We can't exceed max amount of energy
     #

@@ -40,6 +40,8 @@ module Manager
   import Config.@if_debug
   import Config.@if_test
   import Config.@if_profile
+
+  include("../util/EventIds.jl")
   #
   # Dependencies
   #
@@ -171,7 +173,7 @@ module Manager
         # is because the error in serializer. See issue for details:
         # https://github.com/JuliaLang/julia/issues/16746
         #
-        if cons.streamInit yield(); Event.fire(man.obs, "yield", man); continue end
+        if cons.streamInit yield(); Event.fire(man.obs, EVENT_YIELD, man); continue end
         #
         # This is global time stamp in seconds
         #
@@ -217,7 +219,7 @@ module Manager
         #
         # Means that one iteration in a system has occured
         #
-        Event.fire(man.obs, "iteration", man, stamp)
+        Event.fire(man.obs, EVENT_ITERATION, man, stamp)
         #
         # This code is used for profiling of jevo. returning true means,
         # that the process will be stopped and second run will not occures.
@@ -335,12 +337,12 @@ module Manager
     local sock::Base.TCPSocket
 
     man.ips = man.cfg.codeRuns / ManagerTypes.orgAmount(man) / ts
-    Event.fire(man.obs, "ips", man, stamp, man.cfg.codeRuns)
+    Event.fire(man.obs, EVENT_IPS, man, stamp, man.cfg.codeRuns)
     man.cfg.codeRuns = 0
     @inbounds for sock in man.cons.fastServer.socks
       if Helper.isopen(sock)
         Server.request(sock, UInt8(FastApi.API_FLOAT64), man.ips)
-        Event.fire(man.obs, "request", man)
+        Event.fire(man.obs, EVENT_REQUEST, man)
       end
     end
 
@@ -379,7 +381,7 @@ module Manager
   function _updateTasks(man::ManagerTypes.ManagerData, stamp::Float64, ystamp::Float64, needYield::Bool)
     if stamp - ystamp >= man.cfg.conYieldPeriod
       yield()
-      Event.fire(man.obs, "yield", man)
+      Event.fire(man.obs, EVENT_YIELD, man)
       # TODO: potential problem here. this list of sockets may be expanded
       # TODO: for example in many managers mode
       return stamp, (length(man.cons.server.socks) > 0 || man.cons.streamInit)

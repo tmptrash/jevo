@@ -491,14 +491,14 @@ function _onDrawEnergy(man::ManagerTypes.ManagerData, pos::Helper.Point, color::
     if Helper.isopen(socks[i])
       off = false
       Server.request(socks[i], FastApi.API_DOT_COLOR, UInt16(pos.x), UInt16(pos.y), color < UInt16(1) ? Dots.INDEX_EMPTY : Dots.INDEX_ENERGY)
-      Event.fire(man.obs, "dotrequest", man)
+      Event.fire(man.obs, EVENT_DOT_REQUEST, man)
     end
   end
   #
   # This is how we push all active messages to the network
   # TODO: change to yieldto() do we need this?
   yield()
-  Event.fire(man.obs, "yield", man)
+  Event.fire(man.obs, EVENT_YIELD, man)
   #
   # All "fast" clients were disconnected
   #
@@ -527,14 +527,14 @@ function _onDrawOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, color
     if Helper.isopen(socks[i])
       off = false
       Server.request(socks[i], FastApi.API_ORG_COLOR, UInt16(pos.x), UInt16(pos.y), color, orgId, infoBits)
-      Event.fire(man.obs, "dotrequest", man)
+      Event.fire(man.obs, EVENT_DOT_REQUEST, man)
     end
   end
   #
   # This is how we push all active messages to the network
   # TODO: change to yieldto() do we need this?
   yield()
-  Event.fire(man.obs, "stepyield", man)
+  Event.fire(man.obs, EVENT_STEP_YIELD, man)
   #
   # All "fast" clients were disconnected
   #

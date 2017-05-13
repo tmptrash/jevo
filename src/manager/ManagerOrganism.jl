@@ -31,19 +31,19 @@ end
 #
 function bindEvents(man::ManagerTypes.ManagerData, org::Creature.Organism)
   Event.clear(org.observer)
-  Event.on(org.observer, "getenergy", (org::Creature.Organism, pos::Helper.Point, retObj::Helper.RetObj)->_onGetEnergy(man, org, pos, retObj))
-  Event.on(org.observer, "grableft",  (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabLeft(man, org, amount, retObj))
-  Event.on(org.observer, "grabright", (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabRight(man, org, amount, retObj))
-  Event.on(org.observer, "grabup",    (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabUp(man, org, amount, retObj))
-  Event.on(org.observer, "grabdown",  (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabDown(man, org, amount, retObj))
-  Event.on(org.observer, "stepleft",  (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepLeft(man, org))
-  Event.on(org.observer, "stepright", (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepRight(man, org))
-  Event.on(org.observer, "stepup",    (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepUp(man, org))
-  Event.on(org.observer, "stepdown",  (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepDown(man, org))
-  Event.on(org.observer, "propleft",  (org::Creature.Organism, retObj::Helper.RetObj)->_onPropLeft(man, org, retObj))
-  Event.on(org.observer, "propright", (org::Creature.Organism, retObj::Helper.RetObj)->_onPropRight(man, org, retObj))
-  Event.on(org.observer, "propup",    (org::Creature.Organism, retObj::Helper.RetObj)->_onPropUp(man, org, retObj))
-  Event.on(org.observer, "propdown",  (org::Creature.Organism, retObj::Helper.RetObj)->_onPropDown(man, org, retObj))
+  Event.on(org.observer, EVENT_GET_ENERGY, (org::Creature.Organism, pos::Helper.Point, retObj::Helper.RetObj)->_onGetEnergy(man, org, pos, retObj))
+  Event.on(org.observer, EVENT_GRAB_LEFT,  (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabLeft(man, org, amount, retObj))
+  Event.on(org.observer, EVENT_GRAB_RIGHT, (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabRight(man, org, amount, retObj))
+  Event.on(org.observer, EVENT_GRAB_UP,    (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabUp(man, org, amount, retObj))
+  Event.on(org.observer, EVENT_GRAB_DOWN,  (org::Creature.Organism, amount::Int, retObj::Helper.RetObj)->_onGrabDown(man, org, amount, retObj))
+  Event.on(org.observer, EVENT_STEP_LEFT,  (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepLeft(man, org))
+  Event.on(org.observer, EVENT_STEP_RIGHT, (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepRight(man, org))
+  Event.on(org.observer, EVENT_STEP_UP,    (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepUp(man, org))
+  Event.on(org.observer, EVENT_STEP_DOWN,  (org::Creature.Organism, retObj::Helper.RetObj)->retObj.ret = _onStepDown(man, org))
+  Event.on(org.observer, EVENT_PROP_LEFT,  (org::Creature.Organism, retObj::Helper.RetObj)->_onPropLeft(man, org, retObj))
+  Event.on(org.observer, EVENT_PROP_RIGHT, (org::Creature.Organism, retObj::Helper.RetObj)->_onPropRight(man, org, retObj))
+  Event.on(org.observer, EVENT_PROP_UP,    (org::Creature.Organism, retObj::Helper.RetObj)->_onPropUp(man, org, retObj))
+  Event.on(org.observer, EVENT_PROP_DOWN,  (org::Creature.Organism, retObj::Helper.RetObj)->_onPropDown(man, org, retObj))
 end
 #
 # Updates organisms existances. We have to call this function to
@@ -78,7 +78,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # Because this loop affects porformance, we have call yield()
     # here and not in main Manager while loop.
     #
-    if needYield yield(); Event.fire(man.obs, "yield", man) end
+    if needYield yield(); Event.fire(man.obs, EVENT_YIELD, man) end
     #
     # We have to wait while all clients are ready for streaming. This
     # is because the error in serializer. See issue for details:
@@ -91,7 +91,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     #
     if org.alive
       yieldto(task.task)
-      Event.fire(man.obs, "yieldto", man)
+      Event.fire(man.obs, EVENT_YIELDTO, man)
     else
       i-=1
       continue
@@ -127,7 +127,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     #
     # Event about one organism has processed (runned)
     #
-    Event.fire(man.obs, "organism", man, org)
+    Event.fire(man.obs, EVENT_ORGANISM, man, org)
     #
     # Here shouldn't be a code, after mutations, because current
     # task may be updated with new one.
@@ -275,7 +275,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
       if org.codeSize > codeMaxSize codeSize = orgCodeSize * codeSizeCoef
       else codeSize = orgCodeSize end
       codeSize = min(org.energy, codeSize)
-      Event.fire(man.obs, "grabenergy", man, codeSize)
+      Event.fire(man.obs, EVENT_GRAB_ENERGY, man, codeSize)
       if !_decreaseOrganismEnergy(man, org, codeSize)
         dontKill = ManagerTypes.orgAmount(man) <= minOrgs
       end
@@ -284,7 +284,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
     i -= 1
   end
 
-  Event.fire(man.obs, "updateenergy", man)
+  Event.fire(man.obs, EVENT_UPDATE_ENERGY, man)
 
   true
 end
@@ -347,7 +347,7 @@ function _killOrganism(man::ManagerTypes.ManagerData, index::Int)
   delete!(man.organisms, org.id)
   @inbounds Manager.stopTask(man, tasks[index].task)
   msg(man, org.id, "die")
-  Event.fire(man.obs, "killorganism", man, org)
+  Event.fire(man.obs, EVENT_KILL_ORGANISM, man, org)
 
   true
 end
@@ -394,16 +394,16 @@ function _moveOrganism(man::ManagerTypes.ManagerData, pos::Helper.Point, organis
   #
   else
     if newPos.x < 1
-      if !Client.isOk(man.cons.left)  || !Client.request(man.cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism) Event.fire(man.obs, "request", man); return false end
+      if !Client.isOk(man.cons.left)  || !Client.request(man.cons.left, RpcApi.RPC_ORG_STEP_LEFT, organism) Event.fire(man.obs, EVENT_REQUEST, man); return false end
       freeze = true
     elseif newPos.x > man.world.width
-      if !Client.isOk(man.cons.right) || !Client.request(man.cons.right, RpcApi.RPC_ORG_STEP_RIGHT, organism) Event.fire(man.obs, "request", man); return false end
+      if !Client.isOk(man.cons.right) || !Client.request(man.cons.right, RpcApi.RPC_ORG_STEP_RIGHT, organism) Event.fire(man.obs, EVENT_REQUEST, man); return false end
       freeze = true
     elseif newPos.y < 1
-      if !Client.isOk(man.cons.up)    || !Client.request(man.cons.up, RpcApi.RPC_ORG_STEP_UP, organism) Event.fire(man.obs, "request", man); return false end
+      if !Client.isOk(man.cons.up)    || !Client.request(man.cons.up, RpcApi.RPC_ORG_STEP_UP, organism) Event.fire(man.obs, EVENT_REQUEST, man); return false end
       freeze = true
     elseif newPos.y > man.world.height
-      if !Client.isOk(man.cons.down)  || !Client.request(man.cons.down, RpcApi.RPC_ORG_STEP_DOWN, organism) Event.fire(man.obs, "request", man); return false end
+      if !Client.isOk(man.cons.down)  || !Client.request(man.cons.down, RpcApi.RPC_ORG_STEP_DOWN, organism) Event.fire(man.obs, EVENT_REQUEST, man); return false end
       freeze = true
     end
     #
@@ -464,7 +464,7 @@ function _mutate(man::ManagerTypes.ManagerData, task::ManagerTypes.OrganismTask,
     # runned, before new code will be running.
     #
     Manager._updateOrgTask(man, task)
-    Event.fire(man.obs, "mutations", man, task.organism, mutations, onClone)
+    Event.fire(man.obs, EVENT_MUTATIONS, man, task.organism, mutations, onClone)
   end
 end
 #
@@ -503,7 +503,7 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
     _mutate(man, crTask, crTask.organism.mutationsOnClonePercent)
   end
 
-  Event.fire(man.obs, "clone", man, organism.id, crTask.organism.id)
+  Event.fire(man.obs, EVENT_CLONE, man, organism.id, crTask.organism.id)
 
   true
 end
@@ -536,7 +536,7 @@ end
 #
 function _onGrabLeft(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int, retObj::Helper.RetObj)
   local eated::Int = _onGrab(man, org, amount, Helper.Point(org.pos.x - 1, org.pos.y), retObj)
-  Event.fire(man.obs, "eatleft", man, org, amount, eated)
+  Event.fire(man.obs, EVENT_EAT_LEFT, man, org, amount, eated)
 
   eated
 end
@@ -549,7 +549,7 @@ end
 #
 function _onGrabRight(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int, retObj::Helper.RetObj)
   local eated::Int = _onGrab(man, org, amount, Helper.Point(org.pos.x + 1, org.pos.y), retObj)
-  Event.fire(man.obs, "eatright", man, org, amount, eated)
+  Event.fire(man.obs, EVENT_EAT_RIGHT, man, org, amount, eated)
 
   eated
 end
@@ -562,7 +562,7 @@ end
 #
 function _onGrabUp(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int, retObj::Helper.RetObj)
   local eated::Int = _onGrab(man, org, amount, Helper.Point(org.pos.x, org.pos.y - 1), retObj)
-  Event.fire(man.obs, "eatup", man, org, amount, eated)
+  Event.fire(man.obs, EVENT_EAT_UP, man, org, amount, eated)
 
   eated
 end
@@ -575,7 +575,7 @@ end
 #
 function _onGrabDown(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int, retObj::Helper.RetObj)
   local eated::Int = _onGrab(man, org, amount, Helper.Point(org.pos.x, org.pos.y + 1), retObj)
-  Event.fire(man.obs, "eatdown", man, org, amount, eated)
+  Event.fire(man.obs, EVENT_EAT_DOWN, man, org, amount, eated)
 
   eated
 end
@@ -587,7 +587,7 @@ end
 #
 function _onStepLeft(man::ManagerTypes.ManagerData, org::Creature.Organism)
   local stepDone::Bool = _onStep(man, org, Helper.Point(org.pos.x - 1, org.pos.y))
-  Event.fire(man.obs, "stepleft", man, org, stepDone)
+  Event.fire(man.obs, EVENT_STEP_LEFT, man, org, stepDone)
 
   stepDone
 end
@@ -599,7 +599,7 @@ end
 #
 function _onStepRight(man::ManagerTypes.ManagerData, org::Creature.Organism)
   local stepDone::Bool = _onStep(man, org, Helper.Point(org.pos.x + 1, org.pos.y))
-  Event.fire(man.obs, "stepright", man, org, stepDone)
+  Event.fire(man.obs, EVENT_STEP_RIGHT, man, org, stepDone)
 
   stepDone
 end
@@ -611,7 +611,7 @@ end
 #
 function _onStepUp(man::ManagerTypes.ManagerData, org::Creature.Organism)
   local stepDone::Bool = _onStep(man, org, Helper.Point(org.pos.x, org.pos.y - 1))
-  Event.fire(man.obs, "stepup", man, org, stepDone)
+  Event.fire(man.obs, EVENT_STEP_UP, man, org, stepDone)
 
   stepDone
 end
@@ -622,7 +622,7 @@ end
 #
 function _onStepDown(man::ManagerTypes.ManagerData, org::Creature.Organism)
   local stepDone::Bool = _onStep(man, org, Helper.Point(org.pos.x, org.pos.y + 1))
-  Event.fire(man.obs, "stepdown", man, org, stepDone)
+  Event.fire(man.obs, EVENT_STEP_DOWN, man, org, stepDone)
 
   stepDone
 end
@@ -737,13 +737,13 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       amount = retObj.ret = nearOrg.energy
       _killOrganism(man, nearOrg.index)
     end
-    Event.fire(man.obs, "eatorganism", man, amount)
+    Event.fire(man.obs, EVENT_EAT_ORGANISM, man, amount)
   else
     #
     # Organism wants to get an energy, but no other organisms around
     #
     retObj.ret = Int(amount > 0 ? World.grabEnergy(man.world, newPos, UInt16(amount)) : 0)
-    if retObj.ret > 0 Event.fire(man.obs, "eatenergy", man, retObj.ret) end
+    if retObj.ret > 0 Event.fire(man.obs, EVENT_EAT_ENERGY, man, retObj.ret) end
   end
 
   retObj.ret
@@ -802,7 +802,7 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   #
   bindEvents(man, org)
   # TODO: clonning is under question now...
-  #Event.on(org.observer, "clone",     _onClone    )
+  #Event.on(org.observer, EVENT_CLONE,     _onClone    )
   #
   # Shows organism
   #
@@ -817,7 +817,7 @@ function _createOrganism(man::ManagerTypes.ManagerData, organism = nothing, pos:
   man.tasks[index] = oTask
   pop!(man.killed)
   msg(man, id, "born")
-  Event.fire(man.obs, "bornorganism", man, org)
+  Event.fire(man.obs, EVENT_BORN_ORGANISM, man, org)
 
   oTask
 end

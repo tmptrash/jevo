@@ -2,6 +2,8 @@ module TestEvent
   using Event
   using FactCheck
 
+  const EVENT = 0
+
   facts("Observer creation should work") do
     @fact length(Event.create().events) --> 0
   end
@@ -11,8 +13,8 @@ module TestEvent
     obs  = Event.create()
     function handler() flag = true end
 
-    Event.on(obs, "event", handler)
-    Event.fire(obs, "event")
+    Event.on(obs, EVENT, handler)
+    Event.fire(obs, EVENT)
 
     @fact flag --> true
   end
@@ -24,9 +26,9 @@ module TestEvent
     function handler1() flag1 = true end
     function handler2() flag2 = true end
 
-    Event.on(obs, "event", handler1)
-    Event.on(obs, "event", handler2)
-    Event.fire(obs, "event")
+    Event.on(obs, EVENT, handler1)
+    Event.on(obs, EVENT, handler2)
+    Event.fire(obs, EVENT)
 
     @fact flag1 --> true
     @fact flag2 --> true
@@ -39,11 +41,11 @@ module TestEvent
     function handler1() flag1 = true end
     function handler2() flag2 = true end
 
-    Event.on(obs, "event", handler1)
-    Event.on(obs, "event", handler2)
-    Event.off(obs, "event", handler1)
-    Event.off(obs, "event", handler2)
-    Event.fire(obs, "event")
+    Event.on(obs, EVENT, handler1)
+    Event.on(obs, EVENT, handler2)
+    Event.off(obs, EVENT, handler1)
+    Event.off(obs, EVENT, handler2)
+    Event.fire(obs, EVENT)
 
     @fact flag1 --> false
     @fact flag2 --> false
@@ -56,10 +58,10 @@ module TestEvent
     function handler1() flag1 = true end
     function handler2() flag2 = true end
 
-    Event.on(obs, "event", handler1)
-    Event.on(obs, "event", handler2)
+    Event.on(obs, EVENT, handler1)
+    Event.on(obs, EVENT, handler2)
     Event.clear(obs)
-    Event.fire(obs, "event")
+    Event.fire(obs, EVENT)
 
     @fact flag1 --> false
     @fact flag2 --> false

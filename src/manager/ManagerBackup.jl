@@ -108,7 +108,7 @@ function backup(man::ManagerTypes.ManagerData)
   # TODO: move this yieldto() and fire() in separate function
   # TODO: reuse this approach in every file...
   yield()
-  Event.fire(man.obs, "yield", man)
+  Event.fire(man.obs, EVENT_YIELD, man)
   consume(tmpTask)
   #
   # This is a small trick. We have to set all tasks in "done"
@@ -150,7 +150,7 @@ function backup(man::ManagerTypes.ManagerData)
     _removeOld(man)
     if man.cfg.modeQuiet < Config.MODE_QUIET_NO Helper.info(string("Backup has created: ", Backup.lastFile())) end
   end
-  Event.fire(man.obs, "backup", man)
+  Event.fire(man.obs, EVENT_BACKUP, man)
 
   ret
 end

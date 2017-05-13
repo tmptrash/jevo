@@ -27,10 +27,9 @@ module World
   import Dots
   import Creature
 
-  export Plane
+  include("../util/EventIds.jl")
 
-  export EVENT_DOT
-  export EVENT_MOVE
+  export Plane
 
   export create
   export destroy
@@ -61,15 +60,6 @@ module World
     #
     obs::Event.Observer
   end
-  #
-  # Event, which is fired if new dot was painted in a world
-  #
-  const EVENT_DOT  = "dot"
-  #
-  # Event, which is fired if some dot was moved from one
-  # location to another.
-  #
-  const EVENT_MOVE = "move"
   #
   # Creates the world
   # @param width World width

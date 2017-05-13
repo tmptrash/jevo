@@ -11,11 +11,10 @@ module Connection
   import Event
   import FastApi
 
+  include("../util/EventIds.jl")
+
   export REQUEST_BIT
   export RESPONSE_BIT
-
-  export EVENT_BEFORE_RESPONSE
-  export EVENT_AFTER_REQUEST
 
   export Answer
   export Command
@@ -32,17 +31,6 @@ module Connection
   #
   const REQUEST_BIT       = UInt8(0b10000000)
   const RESPONSE_BIT      = UInt8(0b01111111)
-  #
-  # Name of the event, which is fired if answer from client's
-  # request is obtained.
-  #
-  const EVENT_AFTER_REQUEST  = "after-response"
-  #
-  # Name of the event, which is fired if client sent us a command. If
-  # this event fires, then specified command should be runned here - on
-  # server side.
-  #
-  const EVENT_BEFORE_RESPONSE = "before-response"
   #
   # Stub if Command.fn is not set
   #

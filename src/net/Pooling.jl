@@ -37,6 +37,8 @@ module Pooling
   import Client
   import Event
 
+  include("../util/EventIds.jl")
+
   export create
   export start
   export stop

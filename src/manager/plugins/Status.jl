@@ -14,6 +14,8 @@ module Status
   import Event
   import Formatting.format
 
+  include("../../util/EventIds.jl")
+
   export init
   #
   # Unique id of the current module
@@ -70,28 +72,28 @@ module Status
     #
     # All event handlers should be binded here
     #
-    Event.on(man.obs, "ips", _onIps)
+    Event.on(man.obs, EVENT_IPS, _onIps)
 
-    Event.on(man.obs, "request", _onRequest)
-    Event.on(man.obs, "updateenergy", _onUpdateEnergy)
-    Event.on(man.obs, "killorganism", _onKillOrganism)
-    Event.on(man.obs, "mutations", _onMutations)
-    Event.on(man.obs, "clone", _onClone)
-    Event.on(man.obs, "dotrequest", _onDotRequest)
-    #Event.on(man.obs, "organism", _onOrganism)
-    Event.on(man.obs, "grabenergy", _onGrabEnergy)
+    Event.on(man.obs, EVENT_REQUEST, _onRequest)
+    Event.on(man.obs, EVENT_UPDATE_ENERGY, _onUpdateEnergy)
+    Event.on(man.obs, EVENT_KILL_ORGANISM, _onKillOrganism)
+    Event.on(man.obs, EVENT_MUTATIONS, _onMutations)
+    Event.on(man.obs, EVENT_CLONE, _onClone)
+    Event.on(man.obs, EVENT_DOT_REQUEST, _onDotRequest)
+    #Event.on(man.obs, EVENT_ORGANISM, _onOrganism)
+    Event.on(man.obs, EVENT_GRAB_ENERGY, _onGrabEnergy)
 
-    Event.on(man.obs, "eatorganism", _onEatOrganism)
-    Event.on(man.obs, "eatenergy", _onEatEnergy)
-    Event.on(man.obs, "eatleft", _onEatLeft)
-    Event.on(man.obs, "eatright", _onEatRight)
-    Event.on(man.obs, "eatup", _onEatUp)
-    Event.on(man.obs, "eatdown", _onEatDown)
+    Event.on(man.obs, EVENT_EAT_ORGANISM, _onEatOrganism)
+    Event.on(man.obs, EVENT_EAT_ENERGY, _onEatEnergy)
+    Event.on(man.obs, EVENT_EAT_LEFT, _onEatLeft)
+    Event.on(man.obs, EVENT_EAT_RIGHT, _onEatRight)
+    Event.on(man.obs, EVENT_EAT_UP, _onEatUp)
+    Event.on(man.obs, EVENT_EAT_DOWN, _onEatDown)
 
-    Event.on(man.obs, "stepleft", _onStepLeft)
-    Event.on(man.obs, "stepright", _onStepRight)
-    Event.on(man.obs, "stepup", _onStepUp)
-    Event.on(man.obs, "stepdown", _onStepDown)
+    Event.on(man.obs, EVENT_STEP_LEFT, _onStepLeft)
+    Event.on(man.obs, EVENT_STEP_RIGHT, _onStepRight)
+    Event.on(man.obs, EVENT_STEP_UP, _onStepUp)
+    Event.on(man.obs, EVENT_STEP_DOWN, _onStepDown)
   end
   #
   # Is called at the beginning of _onIps
