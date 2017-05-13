@@ -318,10 +318,10 @@ function getBest(man::ManagerTypes.ManagerData, amount::Int)
 
   amount = len > amount ? amount : len
   if amount > 0
-    sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy < t2.organism.energy)
+    sort!(tasks, alg = QuickSort, lt = (t1, t2) -> t1.organism.energy > t2.organism.energy)
     i = 1
     while amount > 0 && i <= len
-      org = tasks[len - i + 1].organism
+      org = tasks[i].organism
       if org.alive
         amount -= 1
         push!(best, _createSimpleOrganism(org.id, org))

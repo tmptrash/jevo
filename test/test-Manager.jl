@@ -13,26 +13,26 @@ module TestManager
 
   facts("Checking if mutations mechanism works") do
     local d = create([Helper.Point(1,1)], Dict{Symbol, Any}(:orgRainMutationPeriod=>2, :orgRainMutationPercent=>0.1, :plugIncluded=>["Status"]))
-    local mutations = d.man.plugins["Status"].mps
+    local mutations = d.man.plugins[hash("Status")].mps
 
     consume(d.task)
-    @fact d.man.plugins["Status"].mps - mutations --> 0
+    @fact d.man.plugins[hash("Status")].mps - mutations --> 0
     consume(d.task)
-    @fact d.man.plugins["Status"].mps - mutations --> 1
+    @fact d.man.plugins[hash("Status")].mps - mutations --> 1
 
     Manager.destroy(d.man)
   end
   facts("Checking if mutations mechanism works with specified amount") do
     local d = create([Helper.Point(1,1)], Dict(:orgRainMutationPeriod=>2, :orgRainMutationPercent=>1.0, :plugIncluded=>["Status"]))
-    local mutations = d.man.plugins["Status"].mps
+    local mutations = d.man.plugins[hash("Status")].mps
 
     code(d, :plus, d.orgs[1])
     code(d, :plus, d.orgs[1])
 
     consume(d.task)
-    @fact d.man.plugins["Status"].mps - mutations --> 0
+    @fact d.man.plugins[hash("Status")].mps - mutations --> 0
     consume(d.task)
-    @fact d.man.plugins["Status"].mps - mutations --> 2
+    @fact d.man.plugins[hash("Status")].mps - mutations --> 2
 
     Manager.destroy(d.man)
   end
@@ -134,7 +134,7 @@ module TestManager
   facts("Checking organisms mutations on clone") do
     local d         = create([Helper.Point(5,5)], Dict{Symbol, Any}(:orgClonePeriod=>2, :orgCloneMutation=>1.0, :plugIncluded=>["Status"]))
     local org       = d.orgs[1]
-    local mutations = d.man.plugins["Status"].mps
+    local mutations = d.man.plugins[hash("Status")].mps
 
     code(d, :plus, org)
     code(d, :plus, org)
