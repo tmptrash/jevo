@@ -63,11 +63,7 @@ module CodeMathOverrides
 
     if res > F16_MAX_FLOAT return F16_MAX
     elseif res < F16_MIN_FLOAT return F16_MIN end
-    #
-    # We have to use + operator for Float64, because
-    # + for Float16 we have already overridden. This is
-    # how we prevent StackOverflow error
-    #
+
     f16(res)
   end
   #
@@ -82,11 +78,7 @@ module CodeMathOverrides
 
     if res > F16_MAX_FLOAT return F16_MAX
     elseif res < F16_MIN_FLOAT return F16_MIN end
-    #
-    # We have to use - operator for Float64, because
-    # - for Float16 we have already overridden. This is
-    # how we prevent StackOverflow error
-    #
+
     f16(res)
   end
   #
@@ -101,11 +93,7 @@ module CodeMathOverrides
 
     if res > F16_MAX_FLOAT return F16_MAX
     elseif res < F16_MIN_FLOAT return F16_MIN end
-    #
-    # We have to use * operator for Float64, because
-    # * for Float16 we have already overridden. This is
-    # how we prevent StackOverflow error
-    #
+
     f16(res)
   end
   #
@@ -119,12 +107,9 @@ module CodeMathOverrides
     local res::Float64 = Float64(left) / Float64(right)
 
     if res > F16_MAX_FLOAT return F16_MAX
-    elseif res < F16_MIN_FLOAT return F16_MIN end
-    #
-    # We have to use / operator for Float64, because
-    # / for Float16 we have already overridden. This is
-    # how we prevent StackOverflow error
-    #
+    elseif res < F16_MIN_FLOAT return F16_MIN
+    elseif isnan(res) res = f16(0.0) end
+
     f16(res)
   end
   #
@@ -136,7 +121,12 @@ module CodeMathOverrides
   # @return {Float16}
   #
   function (&)(left::f16, right::f16)
-    f16(round(Int, left) & round(Int, right))
+    local res = f16(round(Int, left) & round(Int, right))
+
+    if res > F16_MAX_FLOAT return F16_MAX
+    elseif res < F16_MIN_FLOAT return F16_MIN end
+
+    res
   end
   #
   # Override for | operator for Float16 type. We have to
@@ -199,6 +189,7 @@ module CodeMathOverrides
   #
   function (%)(left::f16, right::f16)
     local r::Int = round(Int, right)
+    
     f16(round(Int, left) % (r === 0 ? 1 : r))
   end
 end

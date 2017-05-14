@@ -459,7 +459,7 @@ module Config
 
       1900,                                    # worldWidth
       940,                                     # worldHeight
-      true,                                    # worldCyclical
+      false,                                   # worldCyclical
       300,                                     # worldMaxOrgs
       0,                                       # worldMinOrgs
       1000,                                    # worldStartEnergyDots

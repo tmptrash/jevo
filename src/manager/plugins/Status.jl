@@ -144,7 +144,7 @@ module Status
     _showParam(:orange, "mut:",  (@sprintf "%.2f" sd.mps  / orgs), 10)
     _showParam(:yellow, "kil:",  (@sprintf "%.2f" sd.kops / orgs), 10)
     _showParam(:yellow, "clon:", (@sprintf "%.2f" sd.cps  / orgs), 11)
-    _showParam(:orange, "err:",  div(cfg.orgErrors, orgs), 10, true)
+    _showParam(:orange, "err:",  div(cfg.orgErrors, orgs), 8, true)
     _showParam(:orange, "cod:",  div(sd.code, sd.ipsAmount * orgs), 7)
     _showParam(:red,    "fit:",  round(Int, sd.fit / (sd.ipsAmount * orgs)), 16, true)
     print("\n")
@@ -190,6 +190,7 @@ module Status
     sd.energy     = 0
     sd.orgs       = 0
     sd.fit        = UInt(0)
+    man.cfg.orgErrors = 0
   end
   #
   # Calculates total energy of population

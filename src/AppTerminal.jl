@@ -12,6 +12,8 @@ import Creature
 import Connection
 import Config
 importall Terminal
+
+include("util/EventIds.jl")
 #
 # Answer function. It's called every time on request from server
 # @param ans Server answer
@@ -31,7 +33,7 @@ function main()
   local con = Client.create(ip"127.0.0.1", cfg.conServerPort)
 
   if !Client.isOk(con) || Config.isEmpty(cfg) quit() end
-  Event.on(con.observer, Client.EVENT_AFTER_REQUEST, onAnswer)
+  Event.on(con.observer, EVENT_AFTER_REQUEST, onAnswer)
   Terminal.init(con)
 end
 #

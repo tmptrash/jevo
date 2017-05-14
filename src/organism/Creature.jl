@@ -472,8 +472,8 @@ module Creature
   # @return {UInt} Energy value
   #
   function getEnergy(org::Organism, xf::f16, yf::f16)
-    local x::Int = Int(xf)
-    local y::Int = Int(yf)
+    local x::Int = round(Int, xf)
+    local y::Int = round(Int, yf)
     #
     # This map will be used for communication between this organism and
     # some outside object. "ret" will be contained amount of energy.
