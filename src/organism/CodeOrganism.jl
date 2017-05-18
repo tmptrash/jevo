@@ -18,22 +18,22 @@ export stepUp
 export stepDown
 export toMem
 export fromMem
-export idLeft
-export idRight
-export idUp
-export idDown
+#export idLeft
+#export idRight
+#export idUp
+#export idDown
 export energyLeft
 export energyRight
 export energyUp
 export energyDown
-export myColor
+#export myColor
 export myId
 export myX
 export myY
-export codeSizeLeft
-export codeSizeRight
-export codeSizeUp
-export codeSizeDown
+#export codeSizeLeft
+#export codeSizeRight
+#export codeSizeUp
+#export codeSizeDown
 #
 # Divider for "for" operator
 #

@@ -153,7 +153,7 @@ module Config
     # organisms: org1.energy = 10, org2.energy = 10, org1.codeSize = 6,
     # org2.codeSize = 9, Config.orgGarbagePeriod = 5. It means that
     # during energy grabbing by the system org1 and org2 will spend the
-    # same amount of energy - 2 units. This is because the period goes
+    # same amount of energy - 1 unit. This is because the period goes
     # from 1..5, 6..10,... and both organisms are in the same period.
     #
     orgGarbagePeriod::Int
@@ -440,14 +440,14 @@ module Config
       20,                                      # orgClonePeriod
       0,                                       # orgRainMutationPeriod
       0.01,                                    # orgRainMutationPercent
-      200,                                     # orgStartAmount
+      500,                                     # orgStartAmount
       10000,                                   # orgStartEnergy
       100,                                     # orgStartColor
       50,                                      # orgColorPeriod
       500,                                     # orgEnergySpendPeriod
       1000,                                    # orgEnergySpendOnError
       10000,                                   # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
-      10,                                      # orgGarbagePeriod
+      20,                                      # orgGarbagePeriod
       0,                                       # orgErrors
       0,                                       # orgEvals
 
@@ -455,12 +455,12 @@ module Config
       8,                                       # codeLoopAmount
       0,                                       # codeRuns
       20,                                      # codeMaxSize
-      20,                                      # codeSizeCoef
+      40,                                      # codeSizeCoef
 
       1900,                                    # worldWidth
       940,                                     # worldHeight
       false,                                   # worldCyclical
-      300,                                     # worldMaxOrgs
+      900,                                     # worldMaxOrgs
       0,                                       # worldMinOrgs
       1000,                                    # worldStartEnergyDots
       UInt16(0x0001F4),                        # worldStartEnergyInDot

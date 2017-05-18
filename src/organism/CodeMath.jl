@@ -20,8 +20,8 @@ export reminder
 #export log
 export sin
 export cos
-export tan
-export cot
+#export tan
+#export cot
 #export sec
 #export csc
 export pi
@@ -215,28 +215,28 @@ end
 function cos(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
   :($(@randVar()) = cos($(@randVar())))
 end
-# @cmd
-# @line
-# Calculates tangens of number. Format: var_xx = tan(var_xx|val)
-# @param cfg Global configuration type
-# @param org Organism we have to mutate
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function tan(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = tan($(@randVar())))
-end
-# @cmd
-# @line
-# Calculates cotangens of number. Format: var_xx = cot(var_xx|val)
-# @param cfg Global configuration type
-# @param org Organism we have to mutate
-# @param pos Position in code
-# @return {Expr|Expr(:nothing)}
-#
-function cot(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
-  :($(@randVar()) = cot($(@randVar())))
-end
+# # @cmd
+# # @line
+# # Calculates tangens of number. Format: var_xx = tan(var_xx|val)
+# # @param cfg Global configuration type
+# # @param org Organism we have to mutate
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function tan(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = tan($(@randVar())))
+# end
+# # @cmd
+# # @line
+# # Calculates cotangens of number. Format: var_xx = cot(var_xx|val)
+# # @param cfg Global configuration type
+# # @param org Organism we have to mutate
+# # @param pos Position in code
+# # @return {Expr|Expr(:nothing)}
+# #
+# function cot(cfg::Config.ConfigData, org::Creature.Organism, pos::Helper.CodePos)
+#   :($(@randVar()) = cot($(@randVar())))
+# end
 # # @cmd
 # # @line
 # # Calculates secans of number. Format: var_xx = sec(var_xx|val)

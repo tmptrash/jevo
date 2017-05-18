@@ -339,7 +339,7 @@ module Code
     #CodePart(rshift,                  false), CodePart(lshift,                  false),
     #CodePart(sqrt,                    false), CodePart(log,                     false),
     CodePart(sin,                     false), CodePart(cos,                     false),
-    CodePart(tan,                     false), CodePart(cot,                     false),
+    #CodePart(tan,                     false), CodePart(cot,                     false),
     #CodePart(sec,                     false), CodePart(csc,                     false),
     #CodePart(not,                     false),
     CodePart(pi,                      false),
