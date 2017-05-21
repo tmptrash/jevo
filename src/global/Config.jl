@@ -446,7 +446,7 @@ module Config
       50,                                      # orgColorPeriod
       500,                                     # orgEnergySpendPeriod
       1000,                                    # orgEnergySpendOnError
-      10000,                                   # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
+      10000000,                                # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
       20,                                      # orgGarbagePeriod
       0,                                       # orgErrors
       0,                                       # orgEvals
@@ -458,7 +458,7 @@ module Config
       40,                                      # codeSizeCoef
 
       1900,                                    # worldWidth
-      940,                                     # worldHeight
+      930,                                     # worldHeight
       false,                                   # worldCyclical
       900,                                     # worldMaxOrgs
       0,                                       # worldMinOrgs
@@ -489,7 +489,7 @@ module Config
       [#="Phylogen", =#"Status"],              # plugIncluded
       [],                                      # plugExcluded
 
-      false,                                   # modeDebug
+      true,                                    # modeDebug
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod

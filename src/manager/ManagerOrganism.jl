@@ -66,6 +66,10 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   local probs     ::Array{UInt, 1}
   local cfg       ::Config.ConfigData = man.cfg
   local i         ::Int = len
+  local checkAge  ::Bool = cfg.orgAlivePeriod > 0
+  local maxAge    ::Float64 = Float64(cfg.orgAlivePeriod)
+  local checkRainMutationPeriod::Bool = cfg.orgRainMutationPeriod > 0
+  local checkEnergySpendPeriod::Bool = cfg.orgEnergySpendPeriod > 0
   #
   # This block runs one iteration for all available organisms.
   # By one iteration i mean that every organism from a list
@@ -100,7 +104,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # This is how organisms die if their age is bigger then some
     # predefined config value (orgAlivePeriod)
     #
-    if cfg.orgAlivePeriod > 0 && org.age >= cfg.orgAlivePeriod && ManagerTypes.orgAmount(man) > cfg.worldMinOrgs
+    if checkAge && man.maxFit > UInt(0) && org.age >= (maxAge * (man.maxFit / Float64(UInt(org.energy) * UInt(org.mutationsFromStart)))) && ManagerTypes.orgAmount(man) > cfg.worldMinOrgs
       _killOrganism(man, i)
       i-=1
       continue
@@ -119,7 +123,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # doesn't contain any code line. This line must be
     # last in organisms loop.
     #
-    if cfg.orgRainMutationPeriod > 0 && org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationPercent, false) end
+    if checkRainMutationPeriod && org.mutationPeriod > 0 && counter % org.mutationPeriod === 0 _mutate(man, task, org.mutationPercent, false) end
     #
     # Updates min/max values
     #
@@ -154,7 +158,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # This block decreases energy from organisms, because they
   # spend it while leaving.
   #
-  if cfg.orgEnergySpendPeriod > 0 && counter % cfg.orgEnergySpendPeriod === 0
+  if checkEnergySpendPeriod && counter % cfg.orgEnergySpendPeriod === 0
     _updateOrganismsEnergy(man)
   end
   #
@@ -174,10 +178,12 @@ end
 # @param org Organism
 #
 function _updateMinMax(man::ManagerTypes.ManagerData, org::Creature.Organism)
+  local fit::UInt = UInt(org.energy) * UInt(org.mutationsFromStart)
   #
   # This is how we find maximum energetic organism
   #
-  if org.energy > man.maxEnergy man.maxEnergy = org.energy end
+  if fit > man.maxFit man.maxFit = fit end
+  #if org.energy > man.maxEnergy man.maxEnergy = org.energy end
 end
 #
 # This method should be called at the end of every iteration, because
@@ -185,7 +191,7 @@ end
 # @param man Manager data type
 #
 function _resetMinMax(man::ManagerTypes.ManagerData)
-  man.maxEnergy = 0
+  man.maxFit = UInt(0)
 end
 #
 # Updates clonning of organisms. Chooses organism for clonning according
@@ -198,32 +204,32 @@ end
 # @return {Bool} Clonning was successful or not
 #
 function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerTypes.OrganismTask, 1})
-  local probs::Array{UInt, 1} = UInt[]
+  #local probs::Array{UInt, 1} = UInt[]
   local probIndex::Int
   local orgAmount::Int = length(tasks)
-  local i::Int
+  #local i::Int
   local org::Creature.Organism
   #
   # This code will be run if total amount of organisms is less then cfg.worldMaxOrgs
   #
-  @inbounds for i = 1:orgAmount
-    org = tasks[i].organism
-    push!(probs, org.alive ? UInt(org.energy) * UInt(org.mutationsFromStart) : 0)
-  end
+  # @inbounds for i = 1:orgAmount
+  #   org = tasks[i].organism
+  #   push!(probs, org.alive ? UInt(org.energy) * UInt(org.mutationsFromStart) : 0)
+  # end
 
-  probIndex = Helper.getProbIndex(probs)
-  @inbounds if tasks[probIndex].organism.alive
-    _onClone(man, tasks[probIndex].organism)
-    #
-    # Checks if random selected organism may be removed and clonning
-    # will be available, because we already limit the maximum (cfg.worldMaxOrgs)
-    #
-    if orgAmount >= man.cfg.worldMaxOrgs
-      probIndex = Helper.fastRand(orgAmount)
-      if tasks[probIndex].organism.alive
-        if probIndex < 1 || Helper.fastRand(man.maxEnergy) < man.maxEnergy - tasks[probIndex].organism.energy return false end
-        _killOrganism(man, probIndex)
-      end
+
+  #probIndex = Helper.getProbIndex(probs)
+  @inbounds org = tasks[Helper.fastRand(orgAmount)].organism
+  if !org.alive || !_onClone(man, org) return false end
+  #
+  # Checks if random selected organism may be removed and clonning
+  # will be available, because we already limit the maximum (cfg.worldMaxOrgs)
+  #
+  if ManagerTypes.orgAmount(man) >= man.cfg.worldMaxOrgs
+    probIndex = Helper.fastRand(orgAmount)
+    @inbounds if tasks[probIndex].organism.alive
+      #if probIndex < 1 || Helper.fastRand(man.maxEnergy) < man.maxEnergy - tasks[probIndex].organism.energy return false end
+      _killOrganism(man, probIndex)
     end
   end
 
@@ -267,13 +273,20 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
       # Orgabism's garbage is not affect on amount of grabbed energy
       #
       orgCodeSize = div(org.codeSize, orgGarbagePeriod)
-      if orgCodeSize < 1 orgCodeSize = 1 end
       #
       # This check is used for limiting organisms code size to codeMaxSize
       # because our CPU's are slow
       #
       if org.codeSize > codeMaxSize codeSize = orgCodeSize * codeSizeCoef
       else codeSize = orgCodeSize end
+      #
+      # As more fittest an organism as less energy system grabs from him.
+      # For most fittest grab formula : grab = codeSize
+      # For least fittest grab formula: grab = codeSize + codeSize
+      # For all in the middle         : grab = codeSize + coef, coef = [0..codeSize]
+      #
+      codeSize = codeSize + round(Int, codeSize * (1. - 1. / (man.maxFit / (UInt(org.energy) * UInt(org.mutationsFromStart)))))
+      if codeSize < 1 codeSize = 1 end
       codeSize = min(org.energy, codeSize)
       Event.fire(man.obs, EVENT_GRAB_ENERGY, man, codeSize)
       if !_decreaseOrganismEnergy(man, org, codeSize)

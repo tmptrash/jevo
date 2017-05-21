@@ -106,7 +106,7 @@ module Manager
       function() end,                                                           # dotCallback
       function() end,                                                           # moveCallback
       current_task(),                                                           # task
-      0,                                                                        # maxEnergy
+      UInt(0),                                                                  # maxFit
       0.0,                                                                      # ips
       Int[1:cfg.worldMaxOrgs...],                                               # killed
       Dict{String, ManagerTypes.Plugin}(),                                      # plugins

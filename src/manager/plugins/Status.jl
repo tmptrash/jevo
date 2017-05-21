@@ -128,7 +128,7 @@ module Status
 
     ips      = sd.ips / sd.ipsAmount
     orgs     = div(sd.orgs, sd.ipsAmount)
-    orgsIps  = div(orgs, ips)
+    orgsIps  = div(orgs, ips === 0. ? 1. : ips)
 
     if orgs < 1 orgs = 1 end
     if orgsIps < 1 orgsIps = 1 end
