@@ -459,7 +459,7 @@ module Config
 
       1900,                                    # worldWidth
       930,                                     # worldHeight
-      false,                                   # worldCyclical
+      true,                                    # worldCyclical
       900,                                     # worldMaxOrgs
       0,                                       # worldMinOrgs
       1000,                                    # worldStartEnergyDots
@@ -489,7 +489,7 @@ module Config
       [#="Phylogen", =#"Status"],              # plugIncluded
       [],                                      # plugExcluded
 
-      true,                                    # modeDebug
+      false,                                   # modeDebug
       false,                                   # modeTest
       false,                                   # modeProfile
       2000,                                    # modeProfilePeriod

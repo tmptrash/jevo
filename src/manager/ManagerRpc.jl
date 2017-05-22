@@ -427,7 +427,7 @@ function _addOrg(man::ManagerTypes.ManagerData, region::RpcApi.Region, x::UInt16
   local offs::UInt8
 
   block, offs = _findBlock(man, region, x, y)
-  push!(block.orgs, RpcApi.Org(offs, org.id, org.color, org.age))
+  push!(block.orgs, RpcApi.Org(offs, UInt32(org.id), org.color, min(typemax(UInt16), org.age)))
 end
 #
 # Creates energy offset in found block for specified coordinates

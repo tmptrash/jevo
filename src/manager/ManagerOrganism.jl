@@ -104,7 +104,9 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # This is how organisms die if their age is bigger then some
     # predefined config value (orgAlivePeriod)
     #
-    if checkAge && man.maxFit > UInt(0) && org.age >= (maxAge * (man.maxFit / Float64(UInt(org.energy) * UInt(org.mutationsFromStart)))) && ManagerTypes.orgAmount(man) > cfg.worldMinOrgs
+    if checkAge && man.maxFit > UInt(0) &&
+       org.age >= (maxAge * (man.maxFit / Float64(UInt(org.energy) * UInt(org.mutationsFromStart)))) &&
+       ManagerTypes.orgAmount(man) > cfg.worldMinOrgs
       _killOrganism(man, i)
       i-=1
       continue
@@ -217,7 +219,6 @@ function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerType
   #   push!(probs, org.alive ? UInt(org.energy) * UInt(org.mutationsFromStart) : 0)
   # end
 
-
   #probIndex = Helper.getProbIndex(probs)
   @inbounds org = tasks[Helper.fastRand(orgAmount)].organism
   if !org.alive || !_onClone(man, org) return false end
@@ -285,7 +286,7 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
       # For least fittest grab formula: grab = codeSize + codeSize
       # For all in the middle         : grab = codeSize + coef, coef = [0..codeSize]
       #
-      codeSize = codeSize + round(Int, codeSize * (1. - 1. / (man.maxFit / (UInt(org.energy) * UInt(org.mutationsFromStart)))))
+      #codeSize = codeSize + round(Int, codeSize * (1. - 1. / (man.maxFit / (UInt(org.energy) * UInt(org.mutationsFromStart)))))
       if codeSize < 1 codeSize = 1 end
       codeSize = min(org.energy, codeSize)
       Event.fire(man.obs, EVENT_GRAB_ENERGY, man, codeSize)
