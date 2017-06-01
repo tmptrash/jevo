@@ -446,7 +446,7 @@ module Config
       50,                                      # orgColorPeriod
       500,                                     # orgEnergySpendPeriod
       1000,                                    # orgEnergySpendOnError
-      10000000,                                # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
+      100000,                                  # orgAlivePeriod (amountOfSeconds * averageIPSperSecond)
       20,                                      # orgGarbagePeriod
       0,                                       # orgErrors
       0,                                       # orgEvals
