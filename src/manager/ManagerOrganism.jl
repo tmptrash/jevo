@@ -217,7 +217,9 @@ function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerType
   # will be a father of a new child
   #
   if !org1.alive && !org2.alive return false end
-  if (org2.alive && !org1.alive) || (org2.energy > org1.energy) org1, org2 = (org2, org1) end
+  if (org2.alive && !org1.alive) || (UInt(org2.energy) * UInt(org2.mutationsFromStart) > UInt(org1.energy) * UInt(org1.mutationsFromStart))
+    org1, org2 = (org2, org1)
+  end
   if org2.alive && ManagerTypes.orgAmount(man) >= man.cfg.worldMaxOrgs _killOrganism(man, org2.index) end
 
   _onClone(man, org1)
