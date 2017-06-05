@@ -139,18 +139,18 @@ module TestManager
     code(d, :plus, org)
     code(d, :plus, org)
 
-    @fact org.mutationsFromStart        --> 1
+    @fact org.mutations                 --> 1
     @fact length(d.man.organisms)       --> 1
 
     consume(d.task)
     @fact length(d.man.organisms)       --> 1
-    @fact org.mutationsFromStart        --> 1
+    @fact org.mutations                 --> 1
 
     consume(d.task)
     consume(d.task)
     @fact length(d.man.organisms)       --> 2
-    @fact org.mutationsFromStart        --> 1
-    @fact d.man.organisms[org.id+1].mutationsFromStart  --> 3
+    @fact org.mutations                 --> 1
+    @fact d.man.organisms[org.id+1].mutations  --> 3
 
     Manager.destroy(d.man)
   end

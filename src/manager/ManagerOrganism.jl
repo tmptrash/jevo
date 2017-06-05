@@ -104,11 +104,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # This is how organisms die if their age is bigger then some
     # predefined config value (orgAlivePeriod)
     #
-    if checkAge &&
-       #man.maxFit > UInt(0) &&
-       #org.age >= (maxAge * (man.maxFit / Float64(UInt(org.energy) * UInt(org.mutationsFromStart)))) &&
-       org.age >= maxAge &&
-       ManagerTypes.orgAmount(man) > cfg.worldMinOrgs
+    if checkAge && org.age >= maxAge && ManagerTypes.orgAmount(man) > cfg.worldMinOrgs
       _killOrganism(man, i)
       i-=1
       continue
@@ -182,12 +178,11 @@ end
 # @param org Organism
 #
 function _updateMinMax(man::ManagerTypes.ManagerData, org::Creature.Organism)
-  local fit::UInt = UInt(org.energy) * UInt(org.mutationsFromStart)
+  #local fit::Int = org.energy * org.mutations
   #
   # This is how we find maximum energetic organism
   #
-  if fit > man.maxFit man.maxFit = fit end
-  #if org.energy > man.maxEnergy man.maxEnergy = org.energy end
+  #if fit > man.maxFit man.maxFit = fit end
 end
 #
 # This method should be called at the end of every iteration, because
@@ -195,7 +190,7 @@ end
 # @param man Manager data type
 #
 function _resetMinMax(man::ManagerTypes.ManagerData)
-  man.maxFit = UInt(0)
+  #man.maxFit = UInt(0)
 end
 #
 # Updates clonning of organisms. Chooses organism for clonning according
@@ -208,6 +203,7 @@ end
 # @return {Bool} Clonning was successful or not
 #
 function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerTypes.OrganismTask, 1})
+  #println("0, ", length(tasks))
   local probIndex::Int
   local orgAmount::Int = length(tasks)
   @inbounds local org1::Creature.Organism = tasks[Helper.fastRand(orgAmount)].organism
@@ -217,8 +213,10 @@ function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerType
   # will be a father of a new child
   #
   if !org1.alive && !org2.alive return false end
-  if (org2.alive && !org1.alive) || (UInt(org2.energy) * UInt(org2.mutationsFromStart) > UInt(org1.energy) * UInt(org1.mutationsFromStart))
+  #println("1")
+  if (org2.alive && !org1.alive) || (org2.energy * org2.mutations > org1.energy * org1.mutations)
     org1, org2 = (org2, org1)
+    #println("1-1")
   end
   if org2.alive && ManagerTypes.orgAmount(man) >= man.cfg.worldMaxOrgs _killOrganism(man, org2.index) end
 
@@ -268,15 +266,9 @@ function _updateOrganismsEnergy(man::ManagerTypes.ManagerData)
       #
       if org.codeSize > codeMaxSize codeSize = orgCodeSize * codeSizeCoef
       else codeSize = orgCodeSize end
-      #
-      # As more fittest an organism as less energy system grabs from him.
-      # For most fittest grab formula : grab = codeSize
-      # For least fittest grab formula: grab = codeSize + codeSize
-      # For all in the middle         : grab = codeSize + coef, coef = [0..codeSize]
-      #
-      codeSize = codeSize + round(Int, codeSize * (1. - 1. / (man.maxFit / (UInt(org.energy) * UInt(org.mutationsFromStart)))))
       if codeSize < 1 codeSize = 1 end
       codeSize = min(org.energy, codeSize)
+
       Event.fire(man.obs, EVENT_GRAB_ENERGY, man, codeSize)
       if !_decreaseOrganismEnergy(man, org, codeSize)
         dontKill = ManagerTypes.orgAmount(man) <= minOrgs
@@ -479,17 +471,20 @@ end
 #
 function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   if organism.energy < 1 return false end
+  #println("3")
   #
   # First, we have to find free point near the organism to put
   # clone in. It's possible, that all places are filled.
   #
   pos = World.getNearFreePos(man.world, organism.pos)
   if pos === false return false end
+  #println("4")
   #s
   # Creates new organism and apply mutations to him.
   #
   crTask = Manager._createOrganism(man, organism, pos)
   if crTask === false return false end
+  #println("5")
   #
   # Clonning means additional energy waste
   #
@@ -498,14 +493,17 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   local before::Int = organism.energy
 
   if !minimum
+    #println("6")
     _decreaseOrganismEnergy(man, organism, energy)
     _decreaseOrganismEnergy(man, crTask.organism, crTask.organism.energy - energy)
   end
   if energy > 0 && crTask.organism.energy > 0
     _mutate(man, crTask, crTask.organism.mutationsOnClonePercent)
+    #println("7")
   end
 
   Event.fire(man.obs, EVENT_CLONE, man, organism.id, crTask.organism.id)
+  #println("8!")
 
   true
 end

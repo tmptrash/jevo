@@ -66,11 +66,11 @@ module Mutator
       res        = org.codeSize < 1 ? _onAdd(cfg, org, pos, cmd) : _MUTATION_TYPES[pIndex](cfg, org, pos, cmd)
       if res realAmount += 1 end
     end
+    org.mutations += amount
     #
     # It's very important to call eval() as few as possible. This is why
     # we moved it outside the "for" loop.
     #
-    org.mutationsFromStart += amount
     if realAmount > 0
       _changeColor(cfg, org, realAmount)
       try
@@ -95,9 +95,9 @@ module Mutator
   # TODO: black color from the palette
   #
   function _changeColor(cfg::Config.ConfigData, org::Creature.Organism, amount::Int)
-    local colIndex::Int = org.mutationsFromStart - (org.mutationsFromStart % cfg.orgColorPeriod)
+    local colIndex::Int = org.mutations - (org.mutations % cfg.orgColorPeriod)
 
-    if org.mutationsFromStart > cfg.orgColorPeriod && colIndex >= org.mutationsFromStart - amount && colIndex <= org.mutationsFromStart
+    if org.mutations > cfg.orgColorPeriod && colIndex >= org.mutations - amount && colIndex <= org.mutations
       org.color += UInt16(1)
       if org.color > Dots.INDEX_MAX_ORG_COLOR org.color = Dots.INDEX_FIRST_COLOR end
     end

@@ -132,10 +132,6 @@ module ManagerTypes
     #
     task::Task
     #
-    # Energy of maximum energetic organism
-    #
-    maxFit::UInt
-    #
     # Amount of iterations per second
     #
     ips::Float64
@@ -172,7 +168,6 @@ module ManagerTypes
       dotCallback::Function,
       moveCallback::Function,
       task::Task,
-      maxFit::UInt,
       ips::Float64,
       killed::Array{Int, 1},
       plugins::Dict{String, Plugin},
@@ -190,7 +185,6 @@ module ManagerTypes
       dotCallback,
       moveCallback,
       task,
-      maxFit,
       ips,
       killed,
       plugins,

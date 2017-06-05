@@ -70,7 +70,6 @@ function recover(man::ManagerTypes.ManagerData)
   man.params         = data.params
   man.organismId     = data.organismId
   man.totalOrganisms = data.totalOrganisms
-  man.maxFit         = data.maxFit
   man.plugins        = data.plugins
   man.killed         = data.killed
   #

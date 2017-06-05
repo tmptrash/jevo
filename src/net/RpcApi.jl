@@ -124,9 +124,9 @@ module RpcApi
     #
     energy::Int
     #
-    # Amount of mutations starting from first ancestor
+    # Amount of mutations starting from born
     #
-    mutationsFromStart::Int
+    mutations::Int
     #
     # @inheritable
     # Color of organism. Similar colors means relative organisms.

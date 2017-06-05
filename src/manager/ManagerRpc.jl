@@ -564,7 +564,7 @@ function _createSimpleOrganism(id::UInt, org::Creature.Organism)
     org.mutationPeriod,
     org.mutationPercent,
     org.energy,
-    org.mutationsFromStart,
+    org.mutations,
     org.color,
     org.mem,
     [org.pos.x, org.pos.y],

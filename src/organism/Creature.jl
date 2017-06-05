@@ -239,6 +239,10 @@ module Creature
     #
     mutationPercent::Float64
     #
+    # Amount of mutations obtained during lifetime
+    #
+    mutations::Int
+    #
     # Organism's energy. If it's zero, then organism is die.
     #
     energy::Int
@@ -268,11 +272,6 @@ module Creature
     # Percent of energy, which is given to clonned organism.
     #
     cloneEnergyPercent::Float64
-    #
-    # Amount obtained mutations, which since organism borning. Should be
-    # started from 1, because we obtain zero adaptivness.
-    #
-    mutationsFromStart::Int
     #
     # false means that organism is dead
     #
@@ -350,13 +349,13 @@ module Creature
       cfg.orgCloneMutation,                                                 # mutationsOnClonePercent
       min(cfg.orgRainMutationPeriod, Config.ORGANISM_MAX_MUTATION_PERIOD),  # mutationPeriod
       min(cfg.orgRainMutationPercent, 1.0),                                 # mutationPercent
+      1,                                                                    # mutations
       cfg.orgStartEnergy,                                                   # energy
       cfg.orgStartColor,                                                    # color
       Dict{Int16, Int16}(),                                                 # mem
       pos,                                                                  # pos
       0,                                                                    # age
       0.5,                                                                  # cloneEnergyPercent
-      1,                                                                    # mutationsFromStart
       true,                                                                 # alive
       Event.create()                                                        # observer
     )
@@ -410,13 +409,13 @@ module Creature
       org.mutationsOnClonePercent,                                          # mutationsOnClonePercent
       org.mutationPeriod,                                                   # mutationPeriod
       org.mutationPercent,                                                  # mutationPercent
+      1,                                                                    # mutations
       org.energy,                                                           # energy
       org.color,                                                            # color
       copy(org.mem),                                                        # mem
       pos,                                                                  # pos
       0,                                                                    # age
       0.5,                                                                  # cloneEnergyPercent
-      org.mutationsFromStart,                                               # mutationsFromStart
       org.alive,                                                            # alive
       Event.create()                                                        # observer
     )

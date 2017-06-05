@@ -59,7 +59,7 @@ module Status
     steps::Int        # total amount of moving in population
     grabbed::Int      # amount of energy grabbed by the system from population
     orgs::Int         # average amount of organisms
-    fit::UInt         # Fitness level (energy * mutationsFromStart)
+    fit::UInt         # Fitness level (energy * mutations)
   end
   #
   # Module initializer
@@ -210,7 +210,7 @@ module Status
       #
       # Fitness level
       #
-      sd.fit += UInt(org.energy) * UInt(org.mutationsFromStart)
+      sd.fit += (org.energy * org.mutations)
     end
   end
   #
