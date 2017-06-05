@@ -75,7 +75,9 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # By one iteration i mean that every organism from a list
   # run peace of it's script - code between two produce() calls.
   #
+  #print("i: ")
   while i > 0
+    #print(i, ",")
     @inbounds task = tasks[i]
     org = task.organism
     #
@@ -89,7 +91,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # https://github.com/JuliaLang/julia/issues/16746. See Manager
     # main loop for details.
     #
-    if man.cons.streamInit::Bool return counter + 1 end
+    if man.cons.streamInit::Bool return true end
     #
     # Switches to task of current organism
     #
@@ -165,12 +167,8 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # Resets min/max values
   #
   _resetMinMax(man)
-  #
-  # This counter should be infinite, but not zero!
-  #
-  if counter === typemax(Int) counter = 1 end
-
-  counter + 1
+  #println("end")
+  true
 end
 #
 # Updates minimum and maximum values for organisms (like energy, codeSize,...)

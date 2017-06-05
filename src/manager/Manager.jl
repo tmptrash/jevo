@@ -180,7 +180,7 @@ module Manager
         #
         # This call runs all organism related tasks one by one
         #
-        counter = _updateOrganisms(man, counter, needYield)
+        _updateOrganisms(man, counter, needYield)
         #
         # Checks if total amount of energy in a world is less then
         # minimum, according to the configuration.
@@ -231,6 +231,10 @@ module Manager
         # easier to write unit tests with such mode...
         #
         @if_test produce(counter)
+        #
+        # This counter should be infinite, but not zero!
+        #
+        if (counter += 1) === typemax(Int) counter = 1 end
       end
     catch e
       Helper.error("Manager.run(): $e")
