@@ -107,6 +107,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # predefined config value (orgAlivePeriod)
     #
     if checkAge && org.age >= maxAge && ManagerTypes.orgAmount(man) > cfg.worldMinOrgs
+      #println(org.id, " killed, because of age")
       _killOrganism(man, i)
       i-=1
       continue
@@ -115,7 +116,7 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
     # Current organism could die during running it's code, for
     # example during giving it's energy to another organism (altruism)
     #
-    if org.energy < 1 && org.alive _killOrganism(man, i); i-=1; continue end
+    if org.energy < 1 && org.alive #=println(org.id, " killed, because of energy");=# _killOrganism(man, i); i-=1; continue end
     #
     # This is how we mutate organisms during their life.
     # Mutations occures according to organisms settings.
@@ -216,7 +217,7 @@ function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerType
     org1, org2 = (org2, org1)
     #println("1-1")
   end
-  if org2.alive && ManagerTypes.orgAmount(man) >= man.cfg.worldMaxOrgs _killOrganism(man, org2.index) end
+  if org2.alive && ManagerTypes.orgAmount(man) >= man.cfg.worldMaxOrgs #=println(org.id, " killed, because of clone");=# _killOrganism(man, org2.index) end
 
   _onClone(man, org1)
 end
@@ -289,6 +290,7 @@ end
 function _decreaseOrganismEnergy(man::ManagerTypes.ManagerData, org::Creature.Organism, amount::Int)
   org.energy -= amount
   if org.energy < 1
+    #println(org.id, " killed, because of energy decrease")
     _killOrganism(man, org.index)
     return false
   end
@@ -722,6 +724,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
     if amount < 0
       if organism.energy <= abs(amount)
         amount = -organism.energy
+        #println(org.id, " killed, because of grab energy")
         _killOrganism(man, organism.index)
         retObj.ret  = 0
       else
@@ -733,6 +736,7 @@ function _onGrab(man::ManagerTypes.ManagerData, organism::Creature.Organism, amo
       retObj.ret = amount
     elseif nearOrg.energy <= amount
       amount = retObj.ret = nearOrg.energy
+      #println(org.id, " killed, because of grab energy 2")
       _killOrganism(man, nearOrg.index)
     end
     Event.fire(man.obs, EVENT_EAT_ORGANISM, man, amount)

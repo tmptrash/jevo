@@ -120,33 +120,32 @@ module Status
     local sd::StatusData  = man.plugins[MODULE_ID]
     local cfg::Config.ConfigData = man.cfg
     local orgs::Int
-    local orgsIps::Int
     local ips::Float64
+    local ipsOrgs::Int
 
     _onBeforeIps(man, sd)
     if stamp - sd.stamp < cfg.modeStatusPeriod return nothing end
 
-    ips      = sd.ips / sd.ipsAmount
-    orgs     = div(sd.orgs, sd.ipsAmount)
-    orgsIps  = div(orgs, ips === 0. ? 1. : ips)
+    ips  = sd.ips / sd.ipsAmount
+    orgs = div(sd.orgs, sd.ipsAmount)
+    ipsOrgs = sd.ipsAmount * orgs
 
     if orgs < 1 orgs = 1 end
-    if orgsIps < 1 orgsIps = 1 end
     print(string(Dates.format(now(), "HH:MM:SS"), " "))
     _showParam(:green,  "org:",  orgs, 8)
     _showParam(:normal, "ips:",  (@sprintf "%.2f" ips), 11)
-    _showParam(:green,  "nrg:",  div(sd.energy, sd.ipsAmount * orgsIps), 14, true)
-    _showParam(:red,    "eat:",  div(sd.eate, orgs), 12, true)
-    _showParam(:red,    "eato:", div(sd.eatorg, orgs), 14, true)
-    _showParam(:red,    "grab:", div(sd.grabbed, orgs), 10, true)
-    _showParam(:cyan,   "step:", div(sd.steps, orgs), 12, true)
-    _showParam(:orange, "cmut:", (@sprintf "%.2f" sd.cmps / orgs), 11)
-    _showParam(:orange, "mut:",  (@sprintf "%.2f" sd.mps  / orgs), 10)
-    _showParam(:yellow, "kil:",  (@sprintf "%.2f" sd.kops / orgs), 10)
-    _showParam(:yellow, "clon:", (@sprintf "%.2f" sd.cps  / orgs), 11)
-    _showParam(:orange, "err:",  div(cfg.orgErrors, orgs), 8, true)
-    _showParam(:orange, "cod:",  div(sd.code, sd.ipsAmount * orgs), 7)
-    _showParam(:red,    "fit:",  round(Int, sd.fit / (sd.ipsAmount * orgs)), 16, true)
+    _showParam(:green,  "nrg:",  div(sd.energy, ipsOrgs), 16, true)
+    _showParam(:red,    "eat:",  div(sd.eate, ipsOrgs), 12, true)
+    _showParam(:red,    "eato:", div(sd.eatorg, ipsOrgs), 14, true)
+    _showParam(:red,    "grab:", div(sd.grabbed, ipsOrgs), 10, true)
+    _showParam(:cyan,   "step:", div(sd.steps, ipsOrgs), 12, true)
+    _showParam(:orange, "cmut:", (@sprintf "%.2f" sd.cmps / ipsOrgs), 11)
+    _showParam(:orange, "mut:",  (@sprintf "%.2f" sd.mps  / ipsOrgs), 10)
+    _showParam(:yellow, "kil:",  (@sprintf "%.2f" sd.kops / ipsOrgs), 10)
+    _showParam(:yellow, "clon:", (@sprintf "%.2f" sd.cps  / ipsOrgs), 11)
+    _showParam(:orange, "err:",  div(cfg.orgErrors, ipsOrgs), 8, true)
+    _showParam(:orange, "cod:",  div(sd.code, ipsOrgs), 7)
+    _showParam(:red,    "fit:",  round(Int, sd.fit / ipsOrgs), 16, true)
     print("\n")
 
     _onAfterIps(man, stamp, sd)
