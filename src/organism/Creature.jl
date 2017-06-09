@@ -416,7 +416,7 @@ module Creature
       pos,                                                                  # pos
       0,                                                                    # age
       0.5,                                                                  # cloneEnergyPercent
-      org.alive,                                                            # alive
+      true,                                                                 # alive
       Event.create()                                                        # observer
     )
   end
@@ -448,7 +448,7 @@ module Creature
         # Organisms with errors in a code should be less successful
         #
         if org.energy > cfg.orgEnergySpendOnError
-          if org.energy < 0 println("code: ", org.energy) end
+          #if org.energy < 0 println("code: ", org.energy) end
           org.energy -= cfg.orgEnergySpendOnError
         end
         #

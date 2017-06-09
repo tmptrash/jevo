@@ -131,18 +131,19 @@ module Status
     ipsOrgs = sd.ipsAmount * orgs
 
     if orgs < 1 orgs = 1 end
+    if ipsOrgs < 1 ipsOrgs = 1 end
     print(string(Dates.format(now(), "HH:MM:SS"), " "))
     _showParam(:green,  "org:",  orgs, 8)
     _showParam(:normal, "ips:",  (@sprintf "%.2f" ips), 11)
     _showParam(:green,  "nrg:",  div(sd.energy, ipsOrgs), 16, true)
-    _showParam(:red,    "eat:",  div(sd.eate, ipsOrgs), 12, true)
+    _showParam(:red,    "eat:",  (@sprintf "%.2f" sd.eate / ipsOrgs), 12)
     _showParam(:red,    "eato:", div(sd.eatorg, ipsOrgs), 14, true)
     _showParam(:red,    "grab:", div(sd.grabbed, ipsOrgs), 10, true)
-    _showParam(:cyan,   "step:", div(sd.steps, ipsOrgs), 12, true)
+    _showParam(:cyan,   "step:", div(sd.steps, ipsOrgs), 10, true)
     _showParam(:orange, "cmut:", (@sprintf "%.2f" sd.cmps / ipsOrgs), 11)
     _showParam(:orange, "mut:",  (@sprintf "%.2f" sd.mps  / ipsOrgs), 10)
-    _showParam(:yellow, "kil:",  (@sprintf "%.2f" sd.kops / ipsOrgs), 10)
-    _showParam(:yellow, "clon:", (@sprintf "%.2f" sd.cps  / ipsOrgs), 11)
+    _showParam(:yellow, "kil:",  (@sprintf "%.3f" sd.kops / ipsOrgs), 11)
+    _showParam(:yellow, "clon:", (@sprintf "%.3f" sd.cps  / ipsOrgs), 11)
     _showParam(:orange, "err:",  div(cfg.orgErrors, ipsOrgs), 8, true)
     _showParam(:orange, "cod:",  div(sd.code, ipsOrgs), 7)
     _showParam(:red,    "fit:",  round(Int, sd.fit / ipsOrgs), 16, true)

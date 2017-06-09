@@ -168,7 +168,6 @@ function _updateOrganisms(man::ManagerTypes.ManagerData, counter::Int, needYield
   # Resets min/max values
   #
   _resetMinMax(man)
-  #println("end")
   true
 end
 #
@@ -217,7 +216,7 @@ function _updateClonning(man::ManagerTypes.ManagerData, tasks::Array{ManagerType
     org1, org2 = (org2, org1)
     #println("1-1")
   end
-  if org2.alive && ManagerTypes.orgAmount(man) >= man.cfg.worldMaxOrgs #=println(org.id, " killed, because of clone");=# _killOrganism(man, org2.index) end
+  if org2.alive && ManagerTypes.orgAmount(man) >= man.cfg.worldMaxOrgs #=println(org2.id, " killed, because of clone");=# _killOrganism(man, org2.index) end
 
   _onClone(man, org1)
 end
@@ -331,8 +330,8 @@ function _killOrganism(man::ManagerTypes.ManagerData, index::Int)
   local energyAfterDeath::UInt16 = UInt16(min(typemax(UInt16), org.energy))
 
   org.energy = 0
-  org.color  = UInt16(Dots.INDEX_EMPTY)
   if !org.alive return false end
+  org.color  = UInt16(Dots.INDEX_EMPTY)
   org.alive  = false
   push!(man.killed, index)
   Event.clear(org.observer)
@@ -479,7 +478,7 @@ function _onClone(man::ManagerTypes.ManagerData, organism::Creature.Organism)
   pos = World.getNearFreePos(man.world, organism.pos)
   if pos === false return false end
   #println("4")
-  #s
+  #
   # Creates new organism and apply mutations to him.
   #
   crTask = Manager._createOrganism(man, organism, pos)
